@@ -1,0 +1,58 @@
+:root {
+  /* Deep Jungle Palette */
+  --color-primary: #1B4332;
+  --color-primary-dark: #0B2B1E;
+  --color-primary-light: #52B788;
+  --color-accent: #52B788;
+  --color-accent-warm: #D4A373;
+
+  --color-black: #1a1a1a;
+  --color-dark: #1B4332;
+  --color-mid: #4A5546;
+  --color-gray: #7A8B6F;
+  --color-light: #C8D0C0;
+  --color-lighter: #E8ECE3;
+  --color-bg: #F5F7F2;
+  --color-white: #ffffff;
+
+  /* Semantic Colors */
+  --color-danger: #C1121F;
+  --color-trust-high: #1B4332;
+  --color-trust-mid: #D4A373;
+  --color-trust-low: #BC4749;
+
+  /* Typography */
+  --font-heading: "Playfair Display", Georgia, serif;
+  --font-primary: "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Fira Code", "Courier New", monospace;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 2rem;
+  --font-size-3xl: 2.5rem;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(27, 67, 50, 0.06);
+  --shadow: 0 2px 8px rgba(27, 67, 50, 0.1);
+  --shadow-lg: 0 8px 24px rgba(27, 67, 50, 0.15);
+
+  /* Transitions */
+  --transition: 0.2s ease;
+}

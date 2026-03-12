@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plants Story - Design Proposals</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Noto Sans JP", sans-serif; background: #f5f5f5; color: #1a1a1a; padding: 40px 20px; }
+    h1 { text-align: center; font-size: 1.8rem; margin-bottom: 8px; }
+    .subtitle { text-align: center; color: #666; margin-bottom: 40px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
+    .card {
+      background: #fff; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s;
+      text-decoration: none; color: inherit; display: block;
+    }
+    .card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.15); transform: translateY(-4px); }
+    .card__preview {
+      height: 200px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; font-weight: 700; letter-spacing: 0.05em;
+    }
+    .card__body { padding: 20px; }
+    .card__title { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+    .card__desc { font-size: 0.875rem; color: #666; line-height: 1.6; }
+    .card__colors { display: flex; gap: 6px; margin-top: 12px; }
+    .card__color { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+
+    .card--a .card__preview { background: linear-gradient(135deg, #0B2B1E, #1B4332); color: #fff; }
+    .card--b .card__preview { background: linear-gradient(135deg, #40916C, #F2CC8F); color: #fff; }
+    .card--c .card__preview { background: linear-gradient(180deg, rgba(27,67,50,0.9), rgba(116,198,157,0.3)); color: #fff; }
+    .card--d .card__preview { background: linear-gradient(135deg, #2D4739, #5A7D5C); color: #F5EDE0; }
+    .card--e .card__preview { background: linear-gradient(135deg, #0A1F14, #0F3D26); color: #00E676; }
+  </style>
+</head>
+<body>
+  <h1>Plants Story - Design Proposals</h1>
+  <p class="subtitle">5 design options for the tropical rainforest theme. Click to view each.</p>
+
+  <div class="grid">
+    <a href="a-deep-jungle.html" class="card card--a">
+      <div class="card__preview">Deep Jungle</div>
+      <div class="card__body">
+        <div class="card__title">A: Deep Jungle</div>
+        <div class="card__desc">Dense, dark tropical forest. Premium feel with deep greens and strong contrast.</div>
+        <div class="card__colors">
+          <div class="card__color" style="background:#0B2B1E"></div>
+          <div class="card__color" style="background:#1B4332"></div>
+          <div class="card__color" style="background:#52B788"></div>
+          <div class="card__color" style="background:#F5F7F2"></div>
+        </div>
+      </div>
+    </a>
+
+    <a href="b-tropical-bright.html" class="card card--b">
+      <div class="card__preview">Tropical Bright</div>
+      <div class="card__body">
+        <div class="card__title">B: Tropical Bright</div>
+        <div class="card__desc">Sun-drenched jungle. Vibrant greens with warm tropical yellow accents.</div>
+        <div class="card__colors">
+          <div class="card__color" style="background:#2D6A4F"></div>
+          <div class="card__color" style="background:#40916C"></div>
+          <div class="card__color" style="background:#F2CC8F"></div>
+          <div class="card__color" style="background:#FEFCF3"></div>
+        </div>
+      </div>
+    </a>
+
+    <a href="c-emerald-mist.html" class="card card--c">
+      <div class="card__preview">Emerald Mist</div>
+      <div class="card__body">
+        <div class="card__title">C: Emerald Mist</div>
+        <div class="card__desc">Misty cloud forest. Ethereal, calm, with frosted glass effects.</div>
+        <div class="card__colors">
+          <div class="card__color" style="background:#1B4332"></div>
+          <div class="card__color" style="background:#2D6A4F"></div>
+          <div class="card__color" style="background:#74C69D"></div>
+          <div class="card__color" style="background:#F0F4F1"></div>
+        </div>
+      </div>
+    </a>
+
+    <a href="d-botanical-earth.html" class="card card--d">
+      <div class="card__preview">Botanical Earth</div>
+      <div class="card__body">
+        <div class="card__title">D: Botanical Earth</div>
+        <div class="card__desc">Earth tones. Green + terracotta + brown. Warm, museum-like aesthetic.</div>
+        <div class="card__colors">
+          <div class="card__color" style="background:#2D4739"></div>
+          <div class="card__color" style="background:#3A7D5C"></div>
+          <div class="card__color" style="background:#C67D4A"></div>
+          <div class="card__color" style="background:#FAF6F0"></div>
+        </div>
+      </div>
+    </a>
+
+    <a href="e-neon-jungle.html" class="card card--e">
+      <div class="card__preview">Neon Jungle</div>
+      <div class="card__body">
+        <div class="card__title">E: Neon Jungle</div>
+        <div class="card__desc">Night jungle. Dark mode with glowing neon green accents. Modern & tech.</div>
+        <div class="card__colors">
+          <div class="card__color" style="background:#0A1F14"></div>
+          <div class="card__color" style="background:#0F3D26"></div>
+          <div class="card__color" style="background:#00E676"></div>
+          <div class="card__color" style="background:#0D1B14"></div>
+        </div>
+      </div>
+    </a>
+  </div>
+</body>
+</html>

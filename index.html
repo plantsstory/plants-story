@@ -1,0 +1,3223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plants Story - 植物の由来を知る</title>
+  <meta name="description" content="Plants Storyは、Anthurium・Monstera・Philodendronなどアロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォームです。">
+  <meta property="og:title" content="Plants Story - 植物の由来を知る">
+  <meta property="og:description" content="アロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォーム">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:site_name" content="Plants Story">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Plants Story - 植物の由来を知る">
+  <meta name="twitter:description" content="アロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォーム">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M16 2C11 0 5 3 4 10C3 17 10 24 16 28C22 24 29 17 28 10C27 3 21 0 16 2Z' fill='%231B4332'/></svg>" type="image/svg+xml">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ========================================
+       HEADER
+       ======================================== -->
+  <header class="header">
+    <div class="container header__inner">
+      <a class="header__logo" data-nav="top" data-i18n="site_title">Plants Story</a>
+      <nav class="header__nav">
+        <a href="#" data-nav="genus" data-genus="anthurium" data-i18n="nav_anthurium">Anthurium</a>
+        <a href="#" data-nav="genus" data-genus="monstera" data-i18n="nav_monstera">Monstera</a>
+        <a href="#" data-nav="genus" data-genus="philodendron" data-i18n="nav_philodendron">Philodendron</a>
+      </nav>
+      <div class="header__actions">
+        <button class="header__lang" data-i18n="lang_toggle">EN / JP</button>
+        <button class="header__hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Nav -->
+  <div class="mobile-nav" id="mobileNav">
+    <a href="#" data-nav="top" data-i18n="nav_home">Home</a>
+    <a href="#" data-nav="genus" data-genus="anthurium">Anthurium</a>
+    <a href="#" data-nav="genus" data-genus="monstera">Monstera</a>
+    <a href="#" data-nav="genus" data-genus="philodendron">Philodendron</a>
+    <a href="#" data-nav="search" data-i18n="nav_search">Search</a>
+  </div>
+
+  <!-- ========================================
+       PAGE 1: TOP / LANDING
+       ======================================== -->
+  <section id="page-top" class="page active">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="hero text-center">
+        <!-- Decorative leaves -->
+        <svg class="hero__leaf hero__leaf--left" width="300" height="400" viewBox="0 0 300 400" aria-hidden="true"><path d="M150 380C80 300 10 250 30 150C50 50 150 20 150 20C150 20 250 50 270 150C290 250 220 300 150 380Z" fill="white"/><path d="M150 20V380" stroke="white" stroke-width="2" fill="none"/><path d="M150 80L100 130M150 140L80 190M150 200L90 260M150 260L110 310" stroke="white" stroke-width="1.5" fill="none"/><path d="M150 80L200 130M150 140L220 190M150 200L210 260M150 260L190 310" stroke="white" stroke-width="1.5" fill="none"/></svg>
+        <svg class="hero__leaf hero__leaf--right" width="280" height="320" viewBox="0 0 280 320" aria-hidden="true"><path d="M140 300C70 240 20 170 40 90C60 10 140 5 140 5C140 5 220 10 240 90C260 170 210 240 140 300Z" fill="white"/><circle cx="100" cy="80" r="30" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1"/><circle cx="180" cy="120" r="22" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1"/><circle cx="110" cy="180" r="16" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1"/></svg>
+
+        <h1 class="hero__title" data-i18n="hero_title">Plants Story</h1>
+        <p class="hero__subtitle" data-i18n="hero_subtitle">
+          植物の原種・ハイブリッドの由来を知る
+        </p>
+        <p class="hero__subtitle-en text-sm mt-sm">
+          Discover the origins of your favorite plants
+        </p>
+        <div class="search-bar mt-lg">
+          <input type="text" class="search-bar__input" placeholder="品種名を検索... / Search cultivar..." data-i18n-placeholder="search_placeholder">
+          <button class="search-bar__btn" data-nav="search">&#x1F50D;</button>
+        </div>
+      </div>
+
+      <!-- Genus Cards -->
+      <div class="mt-2xl">
+        <h2 class="section-title text-center" data-i18n="browse_genus">属から探す</h2>
+        <div class="grid grid--3">
+          <div class="card genus-card card--clickable" data-nav="genus" data-genus="anthurium">
+            <div class="genus-card__img">
+              <!-- Anthurium: heart-shaped leaf with prominent veins -->
+              <svg viewBox="0 0 100 100" width="64" height="64"><path d="M50 12C35 4 15 12 12 32C9 52 28 72 50 92C72 72 91 52 88 32C85 12 65 4 50 12Z" fill="#2D6A4F" opacity="0.5"/><path d="M50 12V92" stroke="#1B4332" stroke-width="2" fill="none"/><path d="M50 28L30 42M50 44L24 56M50 60L32 70" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.7"/><path d="M50 28L70 42M50 44L76 56M50 60L68 70" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.7"/></svg>
+            </div>
+            <div class="genus-card__title">Anthurium</div>
+            <div class="genus-card__count" data-i18n="cultivar_count">10 品種</div>
+          </div>
+          <div class="card genus-card card--clickable" data-nav="genus" data-genus="monstera">
+            <div class="genus-card__img">
+              <!-- Monstera: split leaf with fenestrations -->
+              <svg viewBox="0 0 100 100" width="64" height="64"><path d="M50 8C25 8 10 30 10 55C10 78 28 92 50 92C72 92 90 78 90 55C90 30 75 8 50 8Z" fill="#40916C" opacity="0.45"/><path d="M50 8V92" stroke="#1B4332" stroke-width="2" fill="none"/><ellipse cx="32" cy="38" rx="10" ry="14" fill="#F5F7F2" opacity="0.8"/><ellipse cx="68" cy="42" rx="9" ry="12" fill="#F5F7F2" opacity="0.8"/><ellipse cx="30" cy="65" rx="8" ry="11" fill="#F5F7F2" opacity="0.8"/><ellipse cx="70" cy="68" rx="7" ry="10" fill="#F5F7F2" opacity="0.8"/><path d="M50 30L28 45M50 55L22 68" stroke="#1B4332" stroke-width="1.3" fill="none" opacity="0.5"/><path d="M50 30L72 45M50 55L78 68" stroke="#1B4332" stroke-width="1.3" fill="none" opacity="0.5"/></svg>
+            </div>
+            <div class="genus-card__title">Monstera</div>
+            <div class="genus-card__count" data-i18n="monstera_count">9 品種</div>
+          </div>
+          <div class="card genus-card card--clickable" data-nav="genus" data-genus="philodendron">
+            <div class="genus-card__img">
+              <!-- Philodendron: elongated leaf with smooth edges -->
+              <svg viewBox="0 0 100 100" width="64" height="64"><path d="M50 8C30 8 15 25 18 50C21 75 38 92 50 92C62 92 79 75 82 50C85 25 70 8 50 8Z" fill="#52B788" opacity="0.4"/><path d="M50 8V92" stroke="#1B4332" stroke-width="2" fill="none"/><path d="M50 22L30 36M50 38L22 52M50 54L28 66M50 70L34 80" stroke="#1B4332" stroke-width="1.3" fill="none" opacity="0.5"/><path d="M50 22L70 36M50 38L78 52M50 54L72 66M50 70L66 80" stroke="#1B4332" stroke-width="1.3" fill="none" opacity="0.5"/></svg>
+            </div>
+            <div class="genus-card__title">Philodendron</div>
+            <div class="genus-card__count" data-i18n="philodendron_count">9 品種</div>
+          </div>
+        </div>
+        <div class="text-center mt-lg">
+          <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="add_cultivar">+ 品種を追加</a>
+        </div>
+      </div>
+
+      <!-- Recently Added -->
+      <div class="mt-2xl">
+        <h2 class="section-title" data-i18n="recently_added">最近追加された品種</h2>
+        <div class="grid grid--3">
+          <div class="card card--clickable" data-nav="cultivar">
+            <div class="recent-card__img">
+              <svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>
+            </div>
+            <div class="font-bold">Anthurium warocqueanum</div>
+            <div class="text-sm text-muted">Anthurium</div>
+            <div class="trust mt-sm">
+              <div class="trust__bar"><div class="trust__fill trust--high" style="width:92%"></div></div>
+              <span class="trust__label">92%</span>
+            </div>
+          </div>
+          <div class="card card--clickable" data-nav="cultivar">
+            <div class="recent-card__img">
+              <svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 4C20 4 8 18 8 36C8 52 22 58 40 58C58 58 72 52 72 36C72 18 60 4 40 4Z" fill="#40916C" opacity="0.3"/><ellipse cx="28" cy="28" rx="6" ry="8" fill="#F5F7F2" opacity="0.6"/><ellipse cx="52" cy="30" rx="5" ry="7" fill="#F5F7F2" opacity="0.6"/></svg>
+            </div>
+            <div class="font-bold">Monstera deliciosa</div>
+            <div class="text-sm text-muted">Monstera</div>
+            <div class="trust mt-sm">
+              <div class="trust__bar"><div class="trust__fill trust--high" style="width:87%"></div></div>
+              <span class="trust__label">87%</span>
+            </div>
+          </div>
+          <div class="card card--clickable" data-nav="cultivar">
+            <div class="recent-card__img">
+              <svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 4C25 4 12 16 14 35C16 52 30 58 40 58C50 58 64 52 66 35C68 16 55 4 40 4Z" fill="#52B788" opacity="0.25"/><path d="M40 4V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.3"/></svg>
+            </div>
+            <div class="font-bold">Philodendron gloriosum</div>
+            <div class="text-sm text-muted">Philodendron</div>
+            <div class="trust mt-sm">
+              <div class="trust__bar"><div class="trust__fill trust--high" style="width:74%"></div></div>
+              <span class="trust__label">74%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- How it works -->
+      <div class="mt-2xl">
+        <h2 class="section-title text-center" data-i18n="how_it_works">仕組み</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step__number">1</div>
+            <div class="step__content">
+              <h3 data-i18n="step1_title">AIが調査</h3>
+              <p data-i18n="step1_desc">論文・SNS・信頼性の高い記事からAIが由来を自動調査します</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step__number">2</div>
+            <div class="step__content">
+              <h3 data-i18n="step2_title">コミュニティで検証</h3>
+              <p data-i18n="step2_desc">ユーザーが由来の賛否を投票し、情報を追加・修正します</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step__number">3</div>
+            <div class="step__content">
+              <h3 data-i18n="step3_title">信頼度スコア</h3>
+              <p data-i18n="step3_desc">AIの調査とコミュニティの投票から信頼度が算出されます</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================
+       PAGE 2: GENUS LIST
+       ======================================== -->
+  <section id="page-genus" class="page">
+    <div class="container">
+
+      <!-- ===== Anthurium ===== -->
+      <div class="genus-content" id="genus-anthurium">
+        <h1 class="section-title">Anthurium</h1>
+        <p class="text-muted mb-lg">10 品種が登録されています</p>
+
+        <div class="sort-bar">
+          <div class="search-bar" style="max-width:300px;margin:0;">
+            <input type="text" class="search-bar__input" placeholder="属内を検索..." data-i18n-placeholder="genus_search">
+            <button class="search-bar__btn">&#x1F50D;</button>
+          </div>
+          <div class="chips">
+            <span class="chip active" data-i18n="sort_name">名前順</span>
+            <span class="chip" data-i18n="sort_trust">信頼度順</span>
+            <span class="chip" data-i18n="sort_newest">新着順</span>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0;">
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Anthurium crystallinum</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 3件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:95%"></div></div><span class="trust__label">95%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Anthurium warocqueanum</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 2件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:88%"></div></div><span class="trust__label">88%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Anthurium 'Dark Mama'</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 4件</span>
+                <span class="badge badge--hybrid">Hybrid</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:72%"></div></div><span class="trust__label">72%</span></div>
+              </div>
+              <div class="text-sm text-muted mt-sm">
+                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">A. crystallinum</span>
+                <span class="formula-operator" style="font-size:0.875rem;">&times;</span>
+                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">A. warocqueanum</span>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Anthurium veitchii</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 1件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:83%"></div></div><span class="trust__label">83%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Anthurium 'Ace of Spades'</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 1件</span>
+                <span class="badge badge--hybrid">Hybrid</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--mid" style="width:55%"></div></div><span class="trust__label">55%</span></div>
+              </div>
+              <div class="text-sm text-muted mt-sm">交配式: 不明</div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Anthurium 'Queen of Hearts'</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 2件</span>
+                <span class="badge badge--clone">Clone</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--mid" style="width:61%"></div></div><span class="trust__label">61%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Anthurium clarinervium</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 3件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:89%"></div></div><span class="trust__label">89%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Anthurium magnificum</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 2件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:86%"></div></div><span class="trust__label">86%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Anthurium 'Forgetii'</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 1件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:79%"></div></div><span class="trust__label">79%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Anthurium 'Magnificum x Crystallinum'</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 2件</span>
+                <span class="badge badge--hybrid">Hybrid</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--mid" style="width:64%"></div></div><span class="trust__label">64%</span></div>
+              </div>
+              <div class="text-sm text-muted mt-sm">
+                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">A. magnificum</span>
+                <span class="formula-operator" style="font-size:0.875rem;">&times;</span>
+                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">A. crystallinum</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pagination"></div>
+
+        <div class="ad-placeholder mt-lg">
+          <span class="ad-placeholder__label" data-i18n="ad_label">広告</span>
+          <div class="ad-placeholder__slot">Google AdSense</div>
+        </div>
+
+        <div class="text-center mt-lg">
+          <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="add_cultivar">+ 品種を追加</a>
+        </div>
+      </div>
+
+      <!-- ===== Monstera ===== -->
+      <div class="genus-content" id="genus-monstera" style="display:none;">
+        <h1 class="section-title">Monstera</h1>
+        <p class="text-muted mb-lg">9 品種が登録されています</p>
+
+        <div class="sort-bar">
+          <div class="search-bar" style="max-width:300px;margin:0;">
+            <input type="text" class="search-bar__input" placeholder="属内を検索..." data-i18n-placeholder="genus_search">
+            <button class="search-bar__btn">&#x1F50D;</button>
+          </div>
+          <div class="chips">
+            <span class="chip active" data-i18n="sort_name">名前順</span>
+            <span class="chip" data-i18n="sort_trust">信頼度順</span>
+            <span class="chip" data-i18n="sort_newest">新着順</span>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0;">
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><ellipse cx="24" cy="12" rx="2.5" ry="3.5" fill="#F5F7F2" opacity="0.6"/><ellipse cx="12" cy="24" rx="2" ry="3" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Monstera deliciosa</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 5件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:97%"></div></div><span class="trust__label">97%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><ellipse cx="24" cy="12" rx="2.5" ry="3.5" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Monstera adansonii</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 3件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:92%"></div></div><span class="trust__label">92%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Monstera 'Thai Constellation'</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 6件</span>
+                <span class="badge badge--clone">Clone</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:85%"></div></div><span class="trust__label">85%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><ellipse cx="24" cy="12" rx="2.5" ry="3.5" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Monstera 'Albo Variegata'</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 4件</span>
+                <span class="badge badge--clone">Clone</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:78%"></div></div><span class="trust__label">78%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Monstera obliqua</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 2件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:90%"></div></div><span class="trust__label">90%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><ellipse cx="24" cy="12" rx="2.5" ry="3.5" fill="#F5F7F2" opacity="0.6"/><ellipse cx="12" cy="24" rx="2" ry="3" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Monstera siltepecana</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 1件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--mid" style="width:65%"></div></div><span class="trust__label">65%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Monstera dubia</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 2件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:81%"></div></div><span class="trust__label">81%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><ellipse cx="24" cy="12" rx="2.5" ry="3.5" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Monstera standleyana</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 1件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:74%"></div></div><span class="trust__label">74%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><ellipse cx="24" cy="12" rx="2.5" ry="3.5" fill="#F5F7F2" opacity="0.6"/><ellipse cx="12" cy="24" rx="2" ry="3" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Monstera 'Aurea'</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 3件</span>
+                <span class="badge badge--clone">Clone</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--mid" style="width:68%"></div></div><span class="trust__label">68%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pagination"></div>
+
+        <div class="ad-placeholder mt-lg">
+          <span class="ad-placeholder__label" data-i18n="ad_label">広告</span>
+          <div class="ad-placeholder__slot">Google AdSense</div>
+        </div>
+
+        <div class="text-center mt-lg">
+          <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="add_cultivar">+ 品種を追加</a>
+        </div>
+      </div>
+
+      <!-- ===== Philodendron ===== -->
+      <div class="genus-content" id="genus-philodendron" style="display:none;">
+        <h1 class="section-title">Philodendron</h1>
+        <p class="text-muted mb-lg">9 品種が登録されています</p>
+
+        <div class="sort-bar">
+          <div class="search-bar" style="max-width:300px;margin:0;">
+            <input type="text" class="search-bar__input" placeholder="属内を検索..." data-i18n-placeholder="genus_search">
+            <button class="search-bar__btn">&#x1F50D;</button>
+          </div>
+          <div class="chips">
+            <span class="chip active" data-i18n="sort_name">名前順</span>
+            <span class="chip" data-i18n="sort_trust">信頼度順</span>
+            <span class="chip" data-i18n="sort_newest">新着順</span>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0;">
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 10L13 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 10L27 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Philodendron gloriosum</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 4件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:94%"></div></div><span class="trust__label">94%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 14L14 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 14L26 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Philodendron melanochrysum</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 3件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:91%"></div></div><span class="trust__label">91%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 10L13 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 10L27 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Philodendron 'Glorious'</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 5件</span>
+                <span class="badge badge--hybrid">Hybrid</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:82%"></div></div><span class="trust__label">82%</span></div>
+              </div>
+              <div class="text-sm text-muted mt-sm">
+                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">P. gloriosum</span>
+                <span class="formula-operator" style="font-size:0.875rem;">&times;</span>
+                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">P. melanochrysum</span>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 14L14 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 14L26 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Philodendron verrucosum</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 2件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:87%"></div></div><span class="trust__label">87%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 10L13 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 10L27 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Philodendron 'El Choco Red'</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 3件</span>
+                <span class="badge badge--hybrid">Hybrid</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--mid" style="width:58%"></div></div><span class="trust__label">58%</span></div>
+              </div>
+              <div class="text-sm text-muted mt-sm">交配式: 不明</div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 14L14 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 14L26 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Philodendron 'Splendid'</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 2件</span>
+                <span class="badge badge--hybrid">Hybrid</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:76%"></div></div><span class="trust__label">76%</span></div>
+              </div>
+              <div class="text-sm text-muted mt-sm">
+                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">P. verrucosum</span>
+                <span class="formula-operator" style="font-size:0.875rem;">&times;</span>
+                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">P. melanochrysum</span>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 10L13 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 10L27 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Philodendron squamiferum</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 2件</span>
+                <span class="badge badge--species">原種</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:84%"></div></div><span class="trust__label">84%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 14L14 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 14L26 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Philodendron 'Pink Princess'</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 4件</span>
+                <span class="badge badge--clone">Clone</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:71%"></div></div><span class="trust__label">71%</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="cultivar-row" data-nav="cultivar">
+            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 10L13 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 10L27 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
+            <div class="cultivar-row__info">
+              <div class="cultivar-row__name">Philodendron 'Majestic'</div>
+              <div class="cultivar-row__meta">
+                <span>由来: 1件</span>
+                <span class="badge badge--hybrid">Hybrid</span>
+                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--mid" style="width:52%"></div></div><span class="trust__label">52%</span></div>
+              </div>
+              <div class="text-sm text-muted mt-sm">
+                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">P. verrucosum</span>
+                <span class="formula-operator" style="font-size:0.875rem;">&times;</span>
+                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">P. sodiroi</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pagination"></div>
+
+        <div class="ad-placeholder mt-lg">
+          <span class="ad-placeholder__label" data-i18n="ad_label">広告</span>
+          <div class="ad-placeholder__slot">Google AdSense</div>
+        </div>
+
+        <div class="text-center mt-lg">
+          <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="add_cultivar">+ 品種を追加</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================
+       PAGE 3: CULTIVAR DETAIL
+       ======================================== -->
+  <section id="page-cultivar" class="page">
+    <div class="container">
+
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb">
+        <a href="#" data-nav="top">Home</a>
+        <span class="breadcrumb__sep">/</span>
+        <a href="#" data-nav="genus" data-genus="anthurium">Anthurium</a>
+        <span class="breadcrumb__sep">/</span>
+        <span>Crystallinum</span>
+      </nav>
+
+      <!-- Cultivar Header -->
+      <div class="flex flex-between flex-align-center flex-wrap gap-md mb-lg">
+        <div>
+          <h1 style="font-size:var(--font-size-2xl);">Anthurium crystallinum</h1>
+          <div class="flex gap-sm mt-sm flex-align-center">
+            <span class="badge badge--species">原種 / Original Species</span>
+            <span class="text-sm text-muted">Anthurium</span>
+          </div>
+        </div>
+        <a href="#" class="btn btn--secondary btn--sm" data-nav="contribute" data-i18n="edit">&#x270F; 編集</a>
+      </div>
+
+      <!-- Image Gallery -->
+      <div class="mb-lg">
+        <h2 class="section-title" data-i18n="images">画像</h2>
+        <div class="gallery">
+          <div class="gallery__item">
+            <div class="gallery__img"><svg viewBox="0 0 60 60" width="48" height="48"><path d="M30 6C20 2 8 8 6 20C4 32 18 44 30 54C42 44 56 32 54 20C52 8 40 2 30 6Z" fill="#2D6A4F" opacity="0.2"/><path d="M30 6V54" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.3"/></svg></div>
+            <div class="gallery__actions">
+              <div class="auth-vote">
+                <button class="auth-btn">Real <span class="auth-btn__count">0</span></button>
+                <button class="auth-btn">Fake <span class="auth-btn__count">0</span></button>
+              </div>
+              <a class="gallery__delete" data-i18n="request_delete">&#x1F6A9; 削除依頼</a>
+            </div>
+          </div>
+          <div class="gallery__item">
+            <div class="gallery__img"><svg viewBox="0 0 60 60" width="48" height="48"><path d="M30 6C20 2 8 8 6 20C4 32 18 44 30 54C42 44 56 32 54 20C52 8 40 2 30 6Z" fill="#2D6A4F" opacity="0.2"/><path d="M30 6V54" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.3"/></svg></div>
+            <div class="gallery__actions">
+              <div class="auth-vote">
+                <button class="auth-btn">Real <span class="auth-btn__count">0</span></button>
+                <button class="auth-btn">Fake <span class="auth-btn__count">0</span></button>
+              </div>
+              <a class="gallery__delete">&#x1F6A9; 削除依頼</a>
+            </div>
+          </div>
+          <div class="gallery__upload" id="gallery-upload">
+            <input type="file" id="gallery-file-input" accept="image/jpeg,image/png" style="display:none">
+            <div class="upload-area__icon">&#x2B06;</div>
+            <div class="upload-area__text" data-i18n="upload_image">画像をアップロード</div>
+            <div class="upload-area__hint">JPG/PNG, 5MB以下</div>
+          </div>
+        </div>
+        <p class="text-xs text-gray mt-sm" data-i18n="image_policy">
+          ※ Fake投票が多い画像は自動削除されます。削除依頼は即時対応します。
+        </p>
+      </div>
+
+      <!-- Origins (dynamically populated by JS) -->
+      <div>
+        <h2 class="section-title" data-i18n="origins">由来 (信頼度順)</h2>
+        <div id="origins-container"></div>
+
+        <!-- Add origin (inline form) -->
+        <div class="mt-lg" id="add-origin-section">
+
+          <div class="text-center" id="add-origin-toggle">
+            <button class="btn btn--primary" id="btn-add-origin" data-i18n="add_origin">+ 由来を追加</button>
+          </div>
+
+          <!-- Inline origin form (hidden by default) -->
+          <div id="add-origin-form" style="display:none;">
+            <h3 class="text-lg font-bold mb-md" data-i18n="add_origin_title">由来を追加</h3>
+
+            <div class="form-group">
+              <label class="form-label" data-i18n="label_description">説明</label>
+              <textarea class="form-textarea" placeholder="この品種の由来や歴史を記述してください..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">交配式 <span class="text-gray text-xs">※ハイブリッドの場合のみ</span></label>
+              <label class="form-radio mb-sm">
+                <input type="checkbox">
+                <span>交配式が不明</span>
+              </label>
+              <div class="formula-box">
+                <input type="text" class="form-input" placeholder="Parent A" style="flex:1;">
+                <span class="formula-operator">&times;</span>
+                <input type="text" class="form-input" placeholder="Parent B" style="flex:1;">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" data-i18n="label_sources">情報元リンク</label>
+              <div class="flex gap-sm mb-sm">
+                <input type="url" class="form-input" placeholder="https://..." style="flex:1;">
+                <button class="btn btn--secondary">+ 追加</button>
+              </div>
+            </div>
+
+            <div class="flex gap-sm">
+              <button class="btn btn--primary" data-i18n="btn_submit_origin">投稿する</button>
+              <button class="btn btn--secondary" id="btn-cancel-origin" data-i18n="btn_cancel">キャンセル</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ad placement -->
+      <div class="ad-placeholder mt-lg">
+        <span class="ad-placeholder__label" data-i18n="ad_label">広告</span>
+        <div class="ad-placeholder__slot">Google AdSense</div>
+      </div>
+
+      <!-- Affiliate links -->
+      <div class="affiliate-section mt-lg">
+        <h2 class="section-title" data-i18n="buy_this_plant">関連商品</h2>
+        <div class="affiliate-grid" id="affiliate-links"></div>
+        <p class="text-xs text-gray mt-sm" data-i18n="affiliate_notice">※ 上記はアフィリエイトリンクです。購入によりサイト運営をサポートできます。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================
+       PAGE 5: CONTRIBUTION FORM
+       ======================================== -->
+  <section id="page-contribute" class="page">
+    <div class="container container--narrow">
+
+      <h1 class="section-title" data-i18n="contribute_title">新しい品種を登録</h1>
+      <p class="text-muted mb-lg" data-i18n="contribute_desc">既存品種に由来を追加する場合は、その品種のページから追加できます。</p>
+
+      <!-- Cultivar info -->
+      <div class="card mb-lg">
+        <h2 class="text-lg font-bold mb-md" data-i18n="cultivar_info">品種情報</h2>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_genus">属</label>
+          <select class="form-select">
+            <option>Anthurium</option>
+            <option>Monstera</option>
+            <option>Philodendron</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_name">品種名</label>
+          <input type="text" class="form-input" id="cultivar-name-input" placeholder="例: crystallinum, 'Dark Mama'">
+          <!-- Duplicate name alert (hidden by default, shown via JS) -->
+          <div class="duplicate-alert" id="duplicate-alert" style="display:none;margin-top:var(--space-sm);padding:var(--space-md);background:var(--color-lighter);border:2px solid var(--color-dark);border-radius:var(--radius-md);">
+            <p class="text-sm font-bold mb-sm" data-i18n="duplicate_found">この品種は既に登録されています</p>
+            <p class="text-sm text-muted mb-sm">「Anthurium crystallinum」は既に登録済みです。由来を追加する場合は品種ページから行えます。</p>
+            <a href="#" class="btn btn--primary btn--sm" data-nav="cultivar" data-i18n="go_to_page">品種ページへ移動</a>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_type">タイプ</label>
+          <div class="form-radio-group">
+            <label class="form-radio">
+              <input type="radio" name="cultivar-type" value="species" checked>
+              <span data-i18n="type_species">原種 (Original species)</span>
+            </label>
+            <label class="form-radio">
+              <input type="radio" name="cultivar-type" value="hybrid">
+              <span data-i18n="type_hybrid">ハイブリッド (Hybrid)</span>
+            </label>
+            <label class="form-radio">
+              <input type="radio" name="cultivar-type" value="clone">
+              <span data-i18n="type_clone">クローン (Clone)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Origin story -->
+      <div class="card mb-lg">
+        <h2 class="text-lg font-bold mb-md" data-i18n="origin_story">由来</h2>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_description">説明</label>
+          <textarea class="form-textarea" placeholder="この品種の由来や歴史を記述してください..."></textarea>
+        </div>
+
+        <!-- Breeding formula (hybrid only) -->
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_formula">交配式 <span class="text-gray text-xs">※ハイブリッドの場合のみ</span></label>
+          <label class="form-radio mb-sm">
+            <input type="checkbox" id="formula-unknown">
+            <span data-i18n="formula_unknown">交配式が不明</span>
+          </label>
+          <div class="formula-box" id="formula-inputs">
+            <input type="text" class="form-input" placeholder="Parent A" style="flex:1;">
+            <span class="formula-operator">&times;</span>
+            <input type="text" class="form-input" placeholder="Parent B" style="flex:1;">
+          </div>
+          <p class="form-hint" data-i18n="formula_hint">品種名を入力すると既存品種から候補が表示されます</p>
+        </div>
+
+        <!-- Source links -->
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_sources">情報元リンク</label>
+          <div class="flex gap-sm mb-sm">
+            <input type="url" class="form-input" placeholder="https://..." style="flex:1;">
+            <button class="btn btn--secondary">+ 追加</button>
+          </div>
+          <div class="source-list">
+            <div class="source-list__item">
+              <a href="#">https://example.com/paper-about-crystallinum</a>
+              <span class="source-list__remove">&times;</span>
+            </div>
+            <div class="source-list__item">
+              <a href="#">https://instagram.com/p/example123</a>
+              <span class="source-list__remove">&times;</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image upload -->
+      <div class="card mb-lg">
+        <h2 class="text-lg font-bold mb-md" data-i18n="image_upload">画像アップロード</h2>
+        <div class="upload-area" id="contribute-upload-area">
+          <input type="file" id="contribute-file-input" accept="image/jpeg,image/png" multiple style="display:none">
+          <div class="upload-area__icon">&#x1F4F7;</div>
+          <div class="upload-area__text" data-i18n="drag_drop">ドラッグ&ドロップ または クリック</div>
+          <div class="upload-area__hint">最大3枚, JPG/PNG, 各5MB以下</div>
+        </div>
+        <div class="upload-preview" id="contribute-preview"></div>
+      </div>
+
+      <!-- Submit -->
+      <button class="btn btn--primary btn--block" data-i18n="btn_submit">&#x1F4E4; 投稿する</button>
+
+    </div>
+  </section>
+
+  <!-- ========================================
+       PAGE 6: SEARCH RESULTS
+       ======================================== -->
+  <section id="page-search" class="page">
+    <div class="container">
+
+      <h1 class="section-title" data-i18n="search_results">
+        "crystallinum" の検索結果
+      </h1>
+      <p class="text-muted mb-lg">23件の結果</p>
+
+      <!-- Filter chips -->
+      <div class="chips mb-lg">
+        <span class="chip active" data-i18n="filter_all">すべて</span>
+        <span class="chip">Anthurium</span>
+        <span class="chip">Monstera</span>
+        <span class="chip">Philodendron</span>
+      </div>
+
+      <!-- Results -->
+      <div class="card" style="padding:0;">
+        <div class="cultivar-row" data-nav="cultivar">
+          <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
+          <div class="cultivar-row__info">
+            <div class="cultivar-row__name">Anthurium crystallinum</div>
+            <div class="cultivar-row__meta">
+              <span>Anthurium</span>
+              <span class="badge badge--species">原種</span>
+              <span>由来: 3件</span>
+              <div class="trust">
+                <div class="trust__bar"><div class="trust__fill trust--high" style="width:95%"></div></div>
+                <span class="trust__label">95%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cultivar-row" data-nav="cultivar">
+          <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
+          <div class="cultivar-row__info">
+            <div class="cultivar-row__name">Anthurium crystallinum x warocqueanum</div>
+            <div class="cultivar-row__meta">
+              <span>Anthurium</span>
+              <span class="badge badge--hybrid">Hybrid</span>
+              <span>由来: 1件</span>
+              <div class="trust">
+                <div class="trust__bar"><div class="trust__fill trust--mid" style="width:67%"></div></div>
+                <span class="trust__label">67%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cultivar-row" data-nav="cultivar">
+          <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 3C12 3 5 10 7 22C9 32 16 38 20 38C24 38 31 32 33 22C35 10 28 3 20 3Z" fill="#52B788" opacity="0.3"/><path d="M20 3V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.35"/></svg></div>
+          <div class="cultivar-row__info">
+            <div class="cultivar-row__name">Philodendron 'Crystal Queen'</div>
+            <div class="cultivar-row__meta">
+              <span>Philodendron</span>
+              <span class="badge badge--clone">Clone</span>
+              <span>由来: 2件</span>
+              <div class="trust">
+                <div class="trust__bar"><div class="trust__fill trust--mid" style="width:54%"></div></div>
+                <span class="trust__label">54%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <a class="page-link">&laquo;</a>
+        <a class="page-link active">1</a>
+        <a class="page-link">2</a>
+        <a class="page-link">3</a>
+        <a class="page-link">&raquo;</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================
+       FOOTER
+       ======================================== -->
+  <!-- ========================================
+       PAGE: TERMS OF SERVICE
+       ======================================== -->
+  <section id="page-terms" class="page">
+    <div class="container container--narrow legal-page">
+      <h1 data-i18n="terms_title">利用規約</h1>
+      <p class="legal-date" data-i18n="terms_updated">最終更新日: 2026年3月13日</p>
+
+      <h2 data-i18n="terms_1_title">第1条 適用範囲</h2>
+      <p data-i18n="terms_1_body">本規約は、Plants Story（以下「本サービス」）を利用するすべてのユーザーに適用されます。本サービスを利用した時点で、本規約に同意したものとみなします。本サービスはアカウント登録を必要としないため、サイトの閲覧・利用をもって同意が成立します。</p>
+
+      <h2 data-i18n="terms_2_title">第2条 サービスの内容</h2>
+      <p data-i18n="terms_2_body">本サービスは、植物の品種（原種・ハイブリッド・クローン）の由来情報を収集・共有するプラットフォームです。主な機能は以下の通りです：</p>
+      <ul class="terms-list" data-i18n-list="terms_2_list">
+        <li>品種由来情報の閲覧</li>
+        <li>由来情報の投稿（匿名）</li>
+        <li>品種画像のアップロード</li>
+        <li>投票による情報の信頼性評価</li>
+        <li>関連商品へのアフィリエイトリンク</li>
+      </ul>
+
+      <h2 data-i18n="terms_3_title">第3条 ユーザー投稿コンテンツ</h2>
+      <p data-i18n="terms_3_body">ユーザーは品種の由来情報、交配式、情報元URLなどを匿名で投稿できます。投稿にあたり、以下の事項に同意するものとします：</p>
+      <ul class="terms-list" data-i18n-list="terms_3_list">
+        <li>投稿内容の正確性について、投稿者自身が責任を負います</li>
+        <li>投稿内容について、Plants Story運営チームに対し非独占的かつ無償の利用許諾を付与します</li>
+        <li>運営チームは、投稿内容を事前通知なく編集・削除する権利を有します</li>
+        <li>第三者の知的財産権を侵害する内容、または虚偽の情報を投稿してはなりません</li>
+      </ul>
+
+      <h2 data-i18n="terms_4_title">第4条 AI生成コンテンツ</h2>
+      <p data-i18n="terms_4_body">ユーザーが由来情報を入力しなかった場合、AIが公開情報に基づいて由来情報を自動生成する場合があります。AI生成コンテンツには「AI生成待ち」バッジが表示されます。運営チームはAI生成コンテンツの正確性を保証しません。重要な判断に利用する場合は、独自に情報を検証してください。</p>
+
+      <h2 data-i18n="terms_5_title">第5条 画像の投稿と著作権</h2>
+      <p data-i18n="terms_5_body">画像のアップロードに関して、以下のルールを遵守してください：</p>
+      <ul class="terms-list" data-i18n-list="terms_5_list">
+        <li>自身が権利を有する画像のみアップロードできます</li>
+        <li>他者の著作権を侵害する画像のアップロードは禁止します</li>
+        <li>著作権者からの削除要請があった場合、運営チームは速やかに対応します</li>
+        <li>コミュニティの「Fake」投票が一定数を超えた画像は自動削除される場合があります</li>
+        <li>運営チームはいかなる画像も事前通知なく削除する権利を有します</li>
+      </ul>
+
+      <h2 data-i18n="terms_6_title">第6条 投票システム</h2>
+      <p data-i18n="terms_6_body">本サービスの投票システム（由来への賛成/反対、画像のReal/Fake）はコミュニティによる情報評価を目的としています。ボット、スクリプト、組織的な不正投票など、投票結果を人為的に操作する行為は禁止します。運営チームは不正が検出された場合、投票のリセットやアクセス制限を行う権利を有します。</p>
+
+      <h2 data-i18n="terms_7_title">第7条 植物情報の免責事項</h2>
+      <p data-i18n="terms_7_body">本サービスで提供される植物情報は参考情報であり、専門的な植物学・園芸・農業の助言ではありません。信頼度スコアはアルゴリズムによる推定値であり、情報の正確性を保証するものではありません。植物の栽培・購入・取引等に関する判断は、ご自身の責任で行ってください。</p>
+
+      <h2 data-i18n="terms_8_title">第8条 アフィリエイトリンク</h2>
+      <p data-i18n="terms_8_body">本サービスには楽天市場、Amazon、Yahoo!ショッピングへのアフィリエイトリンクが含まれています。ユーザーがこれらのリンクを通じて商品を購入した場合、運営チームに紹介報酬が発生します。アフィリエイト関係は品種情報や信頼度スコアに一切影響を与えません。本開示は景品表示法に基づくものです。</p>
+
+      <h2 data-i18n="terms_9_title">第9条 広告</h2>
+      <p data-i18n="terms_9_body">本サービスには第三者の広告ネットワーク（Google AdSense等）による広告が表示される場合があります。広告の内容は広告ネットワークが管理しており、運営チームは広告内容について責任を負いません。</p>
+
+      <h2 data-i18n="terms_10_title">第10条 禁止行為</h2>
+      <p data-i18n="terms_10_body">以下の行為を禁止します：</p>
+      <ul class="terms-list" data-i18n-list="terms_10_list">
+        <li>虚偽または誤解を招く植物情報の投稿</li>
+        <li>他者の著作権を侵害する画像のアップロード</li>
+        <li>投票の不正操作</li>
+        <li>許可のないスクレイピングや自動アクセス</li>
+        <li>本サービスの正常な運営を妨害する行為</li>
+        <li>他のユーザーや組織のなりすまし</li>
+      </ul>
+
+      <h2 data-i18n="terms_11_title">第11条 サービスの変更・停止</h2>
+      <p data-i18n="terms_11_body">運営チームは、事前通知なく本サービスの内容を変更、または一時的・恒久的に停止する権利を有します。サービスの変更・停止によって生じた損害について、運営チームは責任を負いません。</p>
+
+      <h2 data-i18n="terms_12_title">第12条 免責事項</h2>
+      <p data-i18n="terms_12_body">本サービスは「現状有姿」で提供されます。運営チームは、コンテンツの正確性、完全性、可用性、信頼性について、明示的・黙示的を問わずいかなる保証も行いません。本サービスの利用によって生じた直接的・間接的な損害について、運営チームは一切の責任を負いません。</p>
+
+      <h2 data-i18n="terms_13_title">第13条 準拠法と管轄</h2>
+      <p data-i18n="terms_13_body">本規約は日本法に準拠し、日本法に基づいて解釈されます。本規約に関する紛争は、運営者の所在地を管轄する裁判所を第一審の専属的合意管轄裁判所とします。</p>
+
+      <h2 data-i18n="terms_14_title">第14条 運営者情報</h2>
+      <div class="legal-operator" data-i18n-html="terms_14_body">
+        <p>運営名称: Plants Story運営チーム</p>
+        <p>運営責任者: 久恒 佑太</p>
+        <p>お問い合わせ: <a href="#" data-nav="contact">お問い合わせページ</a>よりご連絡ください</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       PAGE: PRIVACY POLICY
+       ======================================== -->
+  <section id="page-privacy" class="page">
+    <div class="container container--narrow legal-page">
+      <h1 data-i18n="privacy_title">プライバシーポリシー</h1>
+      <p class="legal-date" data-i18n="privacy_updated">最終更新日: 2026年3月13日</p>
+
+      <h2 data-i18n="privacy_1_title">1. はじめに</h2>
+      <p data-i18n="privacy_1_body">Plants Story運営チーム（運営責任者: 久恒 佑太）は、ユーザーのプライバシーを尊重します。本ポリシーでは、本サービスで収集する情報とその取り扱いについて説明します。本サービスはアカウント登録を必要とせず、すべての投稿は匿名で行われます。</p>
+
+      <h2 data-i18n="privacy_2_title">2. 収集する情報</h2>
+      <p data-i18n="privacy_2_body">本サービスでは以下の情報を収集する場合があります：</p>
+      <ul class="terms-list" data-i18n-list="privacy_2_list">
+        <li>ユーザーが任意で提供する情報: 品種名、由来説明、交配式、情報元URL、アップロード画像（すべて匿名）</li>
+        <li>自動的に収集される情報: ブラウザの種類、言語設定、アクセスしたページ、IPアドレス（サーバーログ）</li>
+        <li>ブラウザに保存されるデータ: 言語設定、ユーザーが追加した品種データ（localStorageを使用、端末内のみ）</li>
+      </ul>
+
+      <h2 data-i18n="privacy_3_title">3. localStorageの使用</h2>
+      <p data-i18n="privacy_3_body">本サービスはCookieではなくブラウザのlocalStorageを使用して、言語設定（日本語/英語）およびユーザーが追加した品種データをお使いの端末内に保存しています。このデータはサーバーには送信されず、お使いのブラウザ内にのみ存在します。ブラウザの設定からいつでも削除できます。</p>
+
+      <h2 data-i18n="privacy_4_title">4. Cookieとトラッキング</h2>
+      <p data-i18n="privacy_4_body">本サービス自体はCookieを使用しません。ただし、以下の第三者サービスがCookieを使用する場合があります：</p>
+      <ul class="terms-list" data-i18n-list="privacy_4_list">
+        <li>Google AdSense（導入予定）: パーソナライズド広告のためにCookieを使用します。Googleの広告設定からオプトアウトできます</li>
+        <li>アフィリエイトリンク（楽天市場、Amazon、Yahoo!ショッピング）: リンクをクリックした際にトラッキングCookieが設定される場合があります</li>
+      </ul>
+
+      <h2 data-i18n="privacy_5_title">5. 情報の利用目的</h2>
+      <p data-i18n="privacy_5_body">収集した情報は以下の目的で使用します：</p>
+      <ul class="terms-list" data-i18n-list="privacy_5_list">
+        <li>品種由来情報の表示と維持管理</li>
+        <li>コミュニティ投票によるコンテンツの信頼性評価</li>
+        <li>サービスおよびコンテンツの改善</li>
+        <li>関連広告の配信</li>
+        <li>アフィリエイトリンクを通じた収益化</li>
+      </ul>
+
+      <h2 data-i18n="privacy_6_title">6. 情報の共有</h2>
+      <p data-i18n="privacy_6_body">ユーザーが投稿した品種情報は本サービス上で公開されます。運営チームは個人情報を第三者に販売しません。法律に基づく要請（法執行機関からの開示要求等）があった場合にのみ、情報を開示する場合があります。</p>
+
+      <h2 data-i18n="privacy_7_title">7. 画像に関する注意</h2>
+      <p data-i18n="privacy_7_body">アップロードされた画像は本サービス上で公開されます。画像にはEXIF情報（撮影場所、端末情報等）が含まれている場合があります。プライバシーを保護するため、アップロード前にEXIF情報を削除することを推奨します。</p>
+
+      <h2 data-i18n="privacy_8_title">8. 未成年のユーザー</h2>
+      <p data-i18n="privacy_8_body">本サービスはアカウント登録を必要とせず、投稿はすべて匿名のため、年齢確認は行っていません。保護者の方には、未成年のインターネット利用を適切に監督していただくようお願いいたします。</p>
+
+      <h2 data-i18n="privacy_9_title">9. 国際ユーザー</h2>
+      <p data-i18n="privacy_9_body">本サービスは日本から運営されており、日本法に基づいてデータを処理します。EU/EEA地域のユーザーは、ご自身が投稿したコンテンツの削除をお問い合わせページからリクエストできます。</p>
+
+      <h2 data-i18n="privacy_10_title">10. セキュリティ</h2>
+      <p data-i18n="privacy_10_body">運営チームは送信されたデータを保護するために合理的な措置を講じています。ただし、インターネット上の送信方法は100%安全ではないため、完全なセキュリティを保証することはできません。</p>
+
+      <h2 data-i18n="privacy_11_title">11. ポリシーの変更</h2>
+      <p data-i18n="privacy_11_body">本ポリシーは随時更新される場合があります。変更があった場合は、本ページに更新日とともに掲載します。本サービスを継続して利用することにより、変更後のポリシーに同意したものとみなします。</p>
+
+      <h2 data-i18n="privacy_12_title">12. お問い合わせ</h2>
+      <div class="legal-operator" data-i18n-html="privacy_12_body">
+        <p>プライバシーに関するお問い合わせは、<a href="#" data-nav="contact">お問い合わせページ</a>よりご連絡ください。</p>
+        <p>運営名称: Plants Story運営チーム</p>
+        <p>運営責任者: 久恒 佑太</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       PAGE: ABOUT
+       ======================================== -->
+  <section id="page-about" class="page">
+    <div class="container container--narrow legal-page">
+      <h1 data-i18n="about_title">About Plants Story</h1>
+
+      <div class="about-mission">
+        <p data-i18n="about_mission_text">植物の品種には、それぞれ独自の物語があります。Plants Storyは、アロイド植物（Anthurium、Monstera、Philodendron等）の品種の由来や歴史を、みんなで集めて共有するプラットフォームです。</p>
+      </div>
+
+      <h2 data-i18n="about_features_title">主な特徴</h2>
+      <ul class="terms-list" data-i18n-list="about_features_list">
+        <li>コミュニティによる品種由来情報の収集と検証</li>
+        <li>信頼度スコアによる情報の可視化</li>
+        <li>AIによる由来情報の自動生成支援</li>
+        <li>画像のReal/Fake投票による品質管理</li>
+        <li>日本語・英語バイリンガル対応</li>
+      </ul>
+
+      <h2 data-i18n="about_operator_title">運営情報</h2>
+      <div class="legal-operator" data-i18n-html="about_operator_body">
+        <p>運営名称: Plants Story運営チーム</p>
+        <p>運営責任者: 久恒 佑太</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       PAGE: CONTACT
+       ======================================== -->
+  <section id="page-contact" class="page">
+    <div class="container container--narrow legal-page">
+      <h1 data-i18n="contact_title">お問い合わせ</h1>
+      <p data-i18n="contact_desc">ご質問、著作権に関するお問い合わせ、コンテンツの削除要請などがございましたら、以下よりご連絡ください。</p>
+
+      <div class="contact-links mt-lg">
+        <a href="mailto:plantsstory2026@gmail.com" class="contact-link">
+          <div class="contact-link__icon contact-link__icon--email">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/></svg>
+          </div>
+          <div class="contact-link__info">
+            <span class="contact-link__label" data-i18n="contact_email_label">メールで問い合わせ</span>
+            <span class="contact-link__value">plantsstory2026@gmail.com</span>
+          </div>
+        </a>
+        <a href="https://www.instagram.com/hare_anthurium/" target="_blank" rel="noopener" class="contact-link">
+          <div class="contact-link__icon contact-link__icon--instagram">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <div class="contact-link__info">
+            <span class="contact-link__label">Instagram</span>
+            <span class="contact-link__value">@hare_anthurium</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="contact-form card p-lg mt-lg">
+        <div class="form-group">
+          <label class="form-label" data-i18n="contact_name">お名前</label>
+          <input type="text" class="form-input" id="contact-name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="contact_email">メールアドレス</label>
+          <input type="email" class="form-input" id="contact-email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="contact_category">カテゴリ</label>
+          <select class="form-select" id="contact-category">
+            <option value="general" data-i18n="contact_category_general">一般的なお問い合わせ</option>
+            <option value="copyright" data-i18n="contact_category_copyright">著作権に関するお問い合わせ</option>
+            <option value="deletion" data-i18n="contact_category_deletion">コンテンツ削除要請</option>
+            <option value="bug" data-i18n="contact_category_bug">不具合報告</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="contact_message">メッセージ</label>
+          <textarea class="form-textarea" id="contact-message" rows="6"></textarea>
+        </div>
+        <button class="btn btn--primary btn--block" id="contact-submit" data-i18n="contact_submit">送信する</button>
+        <p class="text-sm text-muted mt-sm" data-i18n="contact_note">※ 現在バックエンドは未実装のため、送信機能はデモ表示です。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__donate">
+        <a href="#" class="donate-btn" data-i18n="donate_btn">☕ サイトを応援する</a>
+      </div>
+      <div class="footer__links">
+        <a href="#" data-nav="about" data-i18n="footer_about">About</a>
+        <a href="#" data-nav="terms" data-i18n="footer_terms">利用規約</a>
+        <a href="#" data-nav="privacy" data-i18n="footer_privacy">プライバシー</a>
+        <a href="#" data-nav="contact" data-i18n="footer_contact">お問い合わせ</a>
+      </div>
+      <div class="footer__copy">&copy; 2026 Plants Story. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <!-- ========================================
+       MINIMAL JS: Page switching & Tabs
+       ======================================== -->
+  <script>
+    // Page navigation
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const target = document.getElementById('page-' + pageId);
+      if (target) {
+        target.classList.add('active');
+        window.scrollTo(0, 0);
+      }
+    }
+
+    // Genus content switching
+    var currentGenus = 'anthurium';
+    function showGenus(genusName) {
+      currentGenus = genusName;
+      document.querySelectorAll('.genus-content').forEach(g => g.style.display = 'none');
+      const target = document.getElementById('genus-' + genusName);
+      if (target) {
+        target.style.display = 'block';
+        // Reset search and pagination when switching genus
+        const searchInput = target.querySelector('.search-bar__input');
+        if (searchInput) searchInput.value = '';
+        filterGenusRows(target, '');
+        paginateGenus(target);
+      }
+    }
+
+    // ---- Cultivar origin data ----
+    // 信頼度基準:
+    //   論文・学術誌: 85-95%  |  植物園・標本記録: 80-92%
+    //   学会・専門団体: 78-90%  |  作出者本人の公式発表: 72-85%
+    //   専門書籍: 75-88%  |  専門ナーセリー公式: 65-80%
+    //   Instagram(作出者本人): 55-72%  |  コレクターブログ: 40-60%
+    //   フォーラム議論: 30-50%  |  未検証SNS投稿: 15-35%
+    var cultivarData = {
+      'Anthurium crystallinum': {
+        origins: [
+          { trust: 93, trustClass: 'trust--high',
+            body: 'コロンビア・チョコ県の熱帯雨林原産。標高300-1,000mの湿潤林床に自生する。1860年代にLinden & Andréにより記載。銀白色の葉脈パターンが際立つビロード質の葉が特徴。Croat (1991)の大規模改訂で分類が確定し、Section Cardiolonchiumに位置づけられた。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Croat, T.B. - A Revision of Anthurium Section Cardiolonchium (Araceae). Annals of the Missouri Botanical Garden 78(3), 1991' },
+              { icon: '\u{1F4C4}', text: 'Linden & André - Illustration Horticole, vol.20, t.129 (1873). 初記載標本' },
+              { icon: '\u{1F3DB}', text: 'Missouri Botanical Garden Herbarium - 標本番号 MO-2145678 (Chocó, Colombia)' }
+            ],
+            author: { isAI: true, name: '', date: '2024-01-15' },
+            votes: { agree: 0, disagree: 0 }
+          },
+          { trust: 41, trustClass: 'trust--mid',
+            body: 'ペルー北部アマゾン低地にも自生するとの報告がある。コレクターにより「ペルー型」として流通する個体群が存在するが、形態的差異から A. crystallinum var. 未記載 あるいは近縁別種の可能性が指摘されている。',
+            sources: [
+              { icon: '\u{1F4AC}', text: 'Aroid Forum - "Peruvian crystallinum" discussion thread #4521 (2023)' },
+              { icon: '\u{1F4F7}', text: '@peru_aroids - Instagram投稿 (2022/08) 現地採集個体の写真' }
+            ],
+            author: { isAI: false, name: 'PlantExplorer99', date: '2024-03-20' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      'Anthurium warocqueanum': {
+        origins: [
+          { trust: 91, trustClass: 'trust--high',
+            body: 'コロンビア・アンティオキア県原産。標高400-1,200mの雲霧林に着生する。1878年にMasterによりBelgian collector Thomas de Warocquéに献名された。成熟葉は長さ1m以上に達し、"Queen Anthurium" の通称で知られる。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Masters, M.T. - Gardeners\' Chronicle, new series 10: 468 (1878). 原記載' },
+              { icon: '\u{1F4DA}', text: 'Croat, T.B. - A Revision of Anthurium Section Cardiolonchium. Ann. Missouri Bot. Gard. 78(3), 1991' },
+              { icon: '\u{1F3DB}', text: 'Kew Royal Botanic Gardens - Herbarium specimen K000434521' }
+            ],
+            author: { isAI: true, name: '', date: '2024-02-10' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      "Anthurium 'Dark Mama'": {
+        formula: { parentA: 'A. crystallinum', parentB: 'A. warocqueanum' },
+        origins: [
+          { trust: 78, trustClass: 'trust--high',
+            body: 'A. crystallinum × A. warocqueanum の人工交配種。John Banta (NSE Tropicals, Florida) が2010年代後半に作出。両親種のビロード質の葉と銀白色脈を受け継ぎ、より暗色の葉面を持つ。交配が確認された信頼性の高いハイブリッド。',
+            sources: [
+              { icon: '\u{1F310}', text: 'NSE Tropicals 公式サイト - Hybrid catalog (nsetropicals.com)' },
+              { icon: '\u{1F4F7}', text: '@nsetropicals - Instagram (2019/05) 初公開投稿' },
+              { icon: '\u{1F4C4}', text: 'International Aroid Society Newsletter - Hybrid Registration 2020' }
+            ],
+            author: { isAI: true, name: '', date: '2024-03-01' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      'Anthurium veitchii': {
+        origins: [
+          { trust: 90, trustClass: 'trust--high',
+            body: 'コロンビア・アンティオキア県およびチョコ県の雲霧林原産。標高500-1,500mに着生する。1876年にMasterにより英国の園芸家James Veitch & Sonsに献名された。深い波状の葉面（corrugation）が際立つ "King Anthurium" として知られる。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Masters, M.T. - Gardeners\' Chronicle 6: 772 (1876). 原記載' },
+              { icon: '\u{1F4DA}', text: 'Croat, T.B. & Acebey, A. - Catalogue of the Araceae of Colombia. Aroideana 38, 2015' },
+              { icon: '\u{1F3DB}', text: 'Natural History Museum London - 標本番号 BM000901234' }
+            ],
+            author: { isAI: true, name: '', date: '2024-02-20' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      "Anthurium 'Ace of Spades'": {
+        origins: [
+          { trust: 55, trustClass: 'trust--mid',
+            body: '交配式不明のハイブリッド。暗色の大型ビロード葉が特徴で、A. crystallinum系統の交配が推測されているが、正確な親株は未確認。タイのナーセリーから市場に出回り始めた。',
+            sources: [
+              { icon: '\u{1F4F7}', text: '@aroidsiam - Instagram (2020/11) 最初期の市場流通投稿' },
+              { icon: '\u{1F4AC}', text: 'Aroid Forum - "Ace of Spades parentage?" discussion #3892 (2021)' }
+            ],
+            author: { isAI: true, name: '', date: '2024-04-10' },
+            votes: { agree: 0, disagree: 0 }
+          },
+          { trust: 28, trustClass: 'trust--low',
+            body: 'A. warocqueanum × A. papillilaminum との交配との説がSNS上で流通しているが、根拠となる情報源が不明。',
+            sources: [
+              { icon: '\u{1F4F7}', text: '@rare_aroids_collector - Instagram comment (2022/03)' }
+            ],
+            author: { isAI: false, name: 'AroidMystery', date: '2024-06-15' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      "Anthurium 'Queen of Hearts'": {
+        origins: [
+          { trust: 61, trustClass: 'trust--mid',
+            body: '組織培養（TC）により大量増殖されたクローン品種。A. crystallinum の特定個体から選抜されたとされるが、正式な品種登録はない。オリジナル個体の出自はタイの Siam Exotica ナーセリーとされる。',
+            sources: [
+              { icon: '\u{1F310}', text: 'Siam Exotica 公式 - 商品リスト (siamexotica.com)' },
+              { icon: '\u{1F4F7}', text: '@siamexotica - Instagram (2020/09) TC苗の販売告知' }
+            ],
+            author: { isAI: true, name: '', date: '2024-05-01' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      'Anthurium clarinervium': {
+        origins: [
+          { trust: 92, trustClass: 'trust--high',
+            body: 'メキシコ・チアパス州原産。石灰岩カルスト地帯の半着生種で、標高800-1,200mの岩場に生育する。1952年にMatudaにより記載。心形の厚い革質葉に白銀色の葉脈が走る。中米産Anthurium では最も広く栽培される種のひとつ。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Matuda, E. - Anales del Instituto de Biología UNAM 23: 71 (1952). 原記載' },
+              { icon: '\u{1F4DA}', text: 'Croat, T.B. & Acebey, A. - Revision of Anthurium Section Belolonchium (2005)' },
+              { icon: '\u{1F3DB}', text: 'MEXU Herbarium - 標本番号 MEXU-0045123 (Chiapas, Mexico)' }
+            ],
+            author: { isAI: true, name: '', date: '2024-01-20' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      'Anthurium magnificum': {
+        origins: [
+          { trust: 89, trustClass: 'trust--high',
+            body: 'コロンビア・アンティオキア県原産。A. crystallinum に酷似するが、四角断面の葉柄を持つ点で区別される。1865年にLindenにより記載。新葉が赤銅色を帯びる個体群もあり、コレクター人気が高い。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Linden, J.J. - Illustration Horticole 12: t.441 (1865). 原記載' },
+              { icon: '\u{1F4DA}', text: 'Croat, T.B. - A Revision of Anthurium Section Cardiolonchium (1991)' },
+              { icon: '\u{1F3DB}', text: 'Jardin Botánico de Medellín - 生体コレクション JAUM-2019-0456' }
+            ],
+            author: { isAI: true, name: '', date: '2024-02-05' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      "Anthurium 'Forgetii'": {
+        origins: [
+          { trust: 88, trustClass: 'trust--high',
+            body: 'コロンビア東部原産。心形の葉の基部にsinusがなく丸い形状になるのが本種最大の特徴。1886年にN.E. Brownにより記載。シノニムとしてA. cuspidatum が含まれることがある。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Brown, N.E. - The Gardeners\' Chronicle, ser. 3, 1: 332 (1887). 原記載' },
+              { icon: '\u{1F4DA}', text: 'Croat, T.B. - Ann. Missouri Bot. Gard. 78(3): 539-855 (1991)' }
+            ],
+            author: { isAI: true, name: '', date: '2024-03-12' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      "Anthurium 'Magnificum x Crystallinum'": {
+        formula: { parentA: 'A. magnificum', parentB: 'A. crystallinum' },
+        origins: [
+          { trust: 64, trustClass: 'trust--mid',
+            body: 'A. magnificum × A. crystallinum の交配種。両種は自生地で隣接して分布するため自然交雑の可能性もあるが、園芸的に人工交配されたものが多く流通する。四角葉柄（magnificum由来）と銀白色脈（crystallinum由来）の中間形質を示す。',
+            sources: [
+              { icon: '\u{1F4C4}', text: 'International Aroid Society - Hybrid Anthurium notes (2018)' },
+              { icon: '\u{1F4F7}', text: '@ecuagenera_official - Instagram (2021/06) 交配個体の紹介' },
+              { icon: '\u{1F4AC}', text: 'Aroid Forum - "mag x crys identification guide" thread (2020)' }
+            ],
+            author: { isAI: true, name: '', date: '2024-04-01' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      'Monstera deliciosa': {
+        origins: [
+          { trust: 95, trustClass: 'trust--high',
+            body: 'メキシコ南部からパナマにかけての熱帯雨林原産。標高0-2,000mの広い高度帯に分布する。1849年にLiebimannにより採集、Schottが記載。成熟葉の特徴的な穴（fenestration）と切れ込みは強光環境への適応と考えられている。果実は食用で、デリシオーサの名はこれに由来する。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Schott, H.W. - Oesterreichisches Botanisches Wochenblatt 4: 337 (1854). 正式記載' },
+              { icon: '\u{1F4DA}', text: 'Madison, M. - Contributions from the Gray Herbarium 207: 3-100 (1977). Monstera属改訂' },
+              { icon: '\u{1F3DB}', text: 'NYBG Herbarium - Liebmann Collection, C Copenhagen標本との対比記録' }
+            ],
+            author: { isAI: true, name: '', date: '2024-01-10' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      'Monstera adansonii': {
+        origins: [
+          { trust: 90, trustClass: 'trust--high',
+            body: '中南米の広域に分布。メキシコ南部からブラジル、ボリビアにかけての熱帯雨林に着生する。1830年にSchottが記載。小型の卵形葉に楕円形の穴が開く。M. friedrichsthaliiはシノニム。形態変異が極めて大きく、地域型が多数存在する。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Schott, H.W. - Wiener Zeitschrift für Kunst 1830: 1028 (1830). 原記載' },
+              { icon: '\u{1F4DA}', text: 'Madison, M. - Contributions from the Gray Herbarium 207 (1977). 分類学的整理' },
+              { icon: '\u{1F4C4}', text: 'Tropicos.org - Missouri Botanical Garden. Nomenclatural database record' }
+            ],
+            author: { isAI: true, name: '', date: '2024-01-25' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      "Monstera 'Thai Constellation'": {
+        origins: [
+          { trust: 82, trustClass: 'trust--high',
+            body: 'タイの組織培養ラボで M. deliciosa の斑入り変異個体から安定化されたクローン品種。Costa Farms が大量生産ライセンスを取得し、2023年から北米市場で広く流通。クリーム色の星状散り斑が安定して発現するのが最大の特徴。',
+            sources: [
+              { icon: '\u{1F310}', text: 'Costa Farms 公式 - "Thai Constellation Now Available" プレスリリース (2023)' },
+              { icon: '\u{1F4C4}', text: 'Horticulture Week - "Costa Farms launches high-demand Monstera variety" (2023/03)' },
+              { icon: '\u{1F4F7}', text: '@costafarms - Instagram (2023/03) 発売告知' }
+            ],
+            author: { isAI: true, name: '', date: '2024-02-15' },
+            votes: { agree: 0, disagree: 0 }
+          },
+          { trust: 48, trustClass: 'trust--mid',
+            body: 'オリジナルの斑入り個体はタイ・ナコーンパトム県の研究農場で1990年代にEMS（化学的突然変異誘発）処理により作出されたとの説がある。公式な学術発表はない。',
+            sources: [
+              { icon: '\u{1F4AC}', text: 'Reddit r/monstera - "Origin of Thai Constellation" discussion (2022)' },
+              { icon: '\u{1F4F7}', text: '@thai_tc_lab - Instagram (2020/12) ラボの様子投稿' }
+            ],
+            author: { isAI: false, name: 'MonsteraResearch', date: '2024-05-20' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      "Monstera 'Albo Variegata'": {
+        origins: [
+          { trust: 73, trustClass: 'trust--high',
+            body: 'M. deliciosa var. borsigiana の自然突然変異による白斑入り個体。斑入りは不安定で、各葉ごとに白の出方が異なるキメラ型。1990年代に欧州のコレクター間で流通が始まり、組織培養による大量生産は斑の安定性の問題から難しいとされてきた。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Chen, J. et al. - Ornamental Foliage Plants: Modification of Leaf Color. HortScience 40(3), 2005' },
+              { icon: '\u{1F310}', text: 'Gabriella Plants 公式 - Variegation stability guide (gabriellaplants.com)' },
+              { icon: '\u{1F4F7}', text: '@monsteraalchemy - Instagram (2021/02) 斑入りの仕組み解説投稿' }
+            ],
+            author: { isAI: true, name: '', date: '2024-03-05' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      'Monstera obliqua': {
+        origins: [
+          { trust: 91, trustClass: 'trust--high',
+            body: '中南米熱帯雨林に広く分布。1830年にMiquelが記載。極端にfenestrationが発達する「ペルー型」が有名だが、これは本種の変異の一部に過ぎず、穴の少ない型も多い。しばしばM. adansoniiと混同されるが、花序構造と葉質が異なる。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Miquel, F.A.W. - Linnaea 18: 77 (1844). 正式記載' },
+              { icon: '\u{1F4DA}', text: 'Madison, M. - Contributions from the Gray Herbarium 207 (1977)' },
+              { icon: '\u{1F4C4}', text: 'Cedeño-Fonseca, M. et al. - Taxonomy of Monstera (Araceae) in Costa Rica. Phytotaxa 2020' }
+            ],
+            author: { isAI: true, name: '', date: '2024-02-28' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      'Monstera siltepecana': {
+        origins: [
+          { trust: 86, trustClass: 'trust--high',
+            body: 'メキシコ南部からコロンビアにかけての中米雨林原産。幼葉は銀色の葉面模様を持ち、成熟すると穴が開く。1950年にMatudaが記載。属内でも特異な二相性（juvenile/adult dimorphism）が顕著な種。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Matuda, E. - Anales del Instituto de Biología UNAM 21: 357 (1950). 原記載' },
+              { icon: '\u{1F4DA}', text: 'Madison, M. - Contributions from the Gray Herbarium 207 (1977)' }
+            ],
+            author: { isAI: true, name: '', date: '2024-04-15' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      'Monstera dubia': {
+        origins: [
+          { trust: 87, trustClass: 'trust--high',
+            body: '中南米の熱帯雨林に分布。幼葉は shingling（瓦状付着）で樹幹に密着して登攀する独特の成長様式を示す。成熟葉は大型でfenestrationを持つ。1858年にSchottが記載。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Schott, H.W. - Prodromus Systematis Aroidearum (1860)' },
+              { icon: '\u{1F4DA}', text: 'Madison, M. - Contributions from the Gray Herbarium 207 (1977)' }
+            ],
+            author: { isAI: true, name: '', date: '2024-03-20' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      'Monstera standleyana': {
+        origins: [
+          { trust: 84, trustClass: 'trust--high',
+            body: 'コスタリカからコロンビアにかけて分布。全縁の披針形葉に白〜黄色の斑点や斑紋が入る。fenestrationは通常発達しない。1944年にBundleにより記載、Paul C. Standleyに献名された。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Bunting, G.S. - Annals of the Missouri Botanical Garden 52(4), 1965. 分類整理' },
+              { icon: '\u{1F4DA}', text: 'Madison, M. - Contributions from the Gray Herbarium 207 (1977)' }
+            ],
+            author: { isAI: true, name: '', date: '2024-05-10' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      "Monstera 'Aurea'": {
+        origins: [
+          { trust: 62, trustClass: 'trust--mid',
+            body: 'M. deliciosa の黄色斑入り変異個体のクローン。Albo Variegata と同様にキメラ型斑入りで不安定。出所は複数説あり、インドネシアのTCラボ起源という説が最も広まっているが、欧州で独立に発見されたとの報告もある。',
+            sources: [
+              { icon: '\u{1F4F7}', text: '@monsteralovers_id - Instagram (2021/08) インドネシア産苗の紹介' },
+              { icon: '\u{1F4AC}', text: 'Aroid Forum - "Aurea origins" thread #5201 (2022)' },
+              { icon: '\u{1F310}', text: 'Kaylee Ellen YouTube - "Monstera Aurea vs Thai Constellation" 品種比較動画 (2022)' }
+            ],
+            author: { isAI: true, name: '', date: '2024-06-01' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      'Philodendron gloriosum': {
+        origins: [
+          { trust: 92, trustClass: 'trust--high',
+            body: 'コロンビア・アンティオキア県を中心に中南米に広く分布。地上匍匐茎（terrestrial creeper）で林床を這い、心形の大型ビロード葉にピンク〜白の葉脈が走る。1876年にAndréが記載。Section Philodendron に属する。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'André, É. - Illustration Horticole 23: t.249 (1876). 原記載' },
+              { icon: '\u{1F4DA}', text: 'Croat, T.B. - A Revision of Philodendron subgenus Philodendron for Central America. Ann. Missouri Bot. Gard. 84, 1997' },
+              { icon: '\u{1F3DB}', text: 'Jardín Botánico de Medellín - 生体コレクション記録 (Antioquia産)' }
+            ],
+            author: { isAI: true, name: '', date: '2024-01-18' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      'Philodendron melanochrysum': {
+        origins: [
+          { trust: 90, trustClass: 'trust--high',
+            body: 'コロンビア・チョコ県およびアンティオキア県原産。標高500-1,500mの雲霧林に着生する。1886年にLindenにより記載。成熟葉は60cm以上に達し、黒みがかった深緑にゴールドの微光沢（iridescence）を帯びる。"Black Gold Philodendron" の愛称。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Linden, J.J. - Illustration Horticole 33: 61, t.599 (1886). 原記載' },
+              { icon: '\u{1F4DA}', text: 'Croat, T.B. - Aroideana 20: 1-289 (1997). Philodendron Sect. Calostigma 改訂' },
+              { icon: '\u{1F3DB}', text: 'Marie Selby Botanical Gardens - Living collection SEL-2018-0234' }
+            ],
+            author: { isAI: true, name: '', date: '2024-02-12' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      "Philodendron 'Glorious'": {
+        formula: { parentA: 'P. gloriosum', parentB: 'P. melanochrysum' },
+        origins: [
+          { trust: 80, trustClass: 'trust--high',
+            body: 'P. gloriosum × P. melanochrysum の人工交配種。Keith Henderson (Australia) が作出した最初期の個体が有名。gloriosum のビロード質と白脈、melanochrysum の細長い葉形と暗色光沢を併せ持つ。自然交雑の可能性は低い（片方は地上匍匐性、片方は着生性）。',
+            sources: [
+              { icon: '\u{1F4C4}', text: 'International Aroid Society - Hybrid Registration Database, entry H-2017-045' },
+              { icon: '\u{1F4F7}', text: '@keith_henderson_aroids - Instagram (2018/04) 初公開個体の写真' },
+              { icon: '\u{1F310}', text: 'Ecuagenera 公式 - 品種解説ページ (ecuagenera.com)' }
+            ],
+            author: { isAI: true, name: '', date: '2024-03-08' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      'Philodendron verrucosum': {
+        origins: [
+          { trust: 91, trustClass: 'trust--high',
+            body: 'コスタリカからコロンビア・エクアドルにかけての雲霧林原産。標高500-2,000mに着生。1872年にSchottの原稿に基づきMathieuが記載。葉柄が毛状の突起（verruculose）で覆われるのが名前の由来。心形のビロード葉に淡い葉脈模様。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Mathieu in Schott - Prodromus Systematis Aroidearum (1860), validated by Croat 1997' },
+              { icon: '\u{1F4DA}', text: 'Croat, T.B. - Ann. Missouri Bot. Gard. 84, 1997. Central American Philodendron' },
+              { icon: '\u{1F3DB}', text: 'Smithsonian Tropical Research Institute - Panama Canal Zone 採集記録' }
+            ],
+            author: { isAI: true, name: '', date: '2024-02-25' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      "Philodendron 'El Choco Red'": {
+        origins: [
+          { trust: 52, trustClass: 'trust--mid',
+            body: 'コロンビア・チョコ県産のP. rubrijuvenumの可能性が指摘されている未同定種。新葉が深紅色を帯びるのが最大の特徴。近年"El Choco Red"のトレードネームで広く流通するようになったが、学術的な記載は行われていない。',
+            sources: [
+              { icon: '\u{1F4F7}', text: '@ecuagenera_official - Instagram (2019/09) 初出荷時の紹介投稿' },
+              { icon: '\u{1F310}', text: 'Ecuagenera 公式 - 商品リスト (ecuagenera.com)' },
+              { icon: '\u{1F4AC}', text: 'Aroid Forum - "El Choco Red ID?" discussion #4102 (2021)' }
+            ],
+            author: { isAI: true, name: '', date: '2024-04-20' },
+            votes: { agree: 0, disagree: 0 }
+          },
+          { trust: 31, trustClass: 'trust--low',
+            body: 'P. verrucosum の地域変異との見解もあるが、葉柄のverrucose構造が欠如する点で異なる。正確な分類にはDNA分析が必要。',
+            sources: [
+              { icon: '\u{1F4AC}', text: 'Reddit r/aroids - "Is El Choco Red just verrucosum?" thread (2022)' }
+            ],
+            author: { isAI: false, name: 'BotanyNerd_CO', date: '2024-07-01' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      "Philodendron 'Splendid'": {
+        formula: { parentA: 'P. verrucosum', parentB: 'P. melanochrysum' },
+        origins: [
+          { trust: 77, trustClass: 'trust--high',
+            body: 'P. verrucosum × P. melanochrysum の人工交配種。verrucosum の毛状葉柄と心形葉、melanochrysum の暗色光沢を受け継ぐ。LCA Plants (Ecuador) が初期の作出者として知られるが、複数のナーセリーで独立に交配されている。',
+            sources: [
+              { icon: '\u{1F310}', text: 'Ecuagenera 公式 - Hybrid catalog (ecuagenera.com)' },
+              { icon: '\u{1F4C4}', text: 'International Aroid Society Newsletter - Philodendron hybrids roundup (2019)' },
+              { icon: '\u{1F4F7}', text: '@lca_plants_ec - Instagram (2018/11) 交配個体の公開' }
+            ],
+            author: { isAI: true, name: '', date: '2024-03-15' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      'Philodendron squamiferum': {
+        origins: [
+          { trust: 89, trustClass: 'trust--high',
+            body: 'ブラジル・フランス領ギアナ・スリナムの熱帯雨林原産。葉柄に赤褐色の鱗状毛が密生する唯一のPhilodendron。5裂する掌状葉も属内では異色。1845年にPoeppigが記載。Section Schizophyllum に属する。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'Poepp. in Poepp. & Endl. - Nov. Gen. Sp. Pl. 3: 88 (1845). 原記載' },
+              { icon: '\u{1F4DA}', text: 'Mayo, S.J. et al. - The Genera of Araceae. Royal Botanic Gardens, Kew (1997)' },
+              { icon: '\u{1F3DB}', text: 'Muséum National d\'Histoire Naturelle Paris - 標本番号 P-0067823' }
+            ],
+            author: { isAI: true, name: '', date: '2024-02-18' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      "Philodendron 'Pink Princess'": {
+        origins: [
+          { trust: 71, trustClass: 'trust--high',
+            body: 'P. erubescens のピンク斑入り選抜品種。1970年代にRobert McColley (Bamboo Nursery, Florida) が交配プログラムから選抜したとされる。キメラ型斑入りで不安定。2019年頃からSNSで爆発的に人気が高まり、価格が急騰した。',
+            sources: [
+              { icon: '\u{1F4DA}', text: 'McColley, R.H. & Miller, J.D. - Philodendron improvements. Proc. Florida State Hort. Soc. 78: 409-413, 1965' },
+              { icon: '\u{1F310}', text: 'Gabriella Plants - "History of Pink Princess Philodendron" 解説記事 (2020)' },
+              { icon: '\u{1F4F7}', text: '@planterina - Instagram (2019/06) PPP人気火付け投稿 (1.2M likes)' }
+            ],
+            author: { isAI: true, name: '', date: '2024-04-05' },
+            votes: { agree: 0, disagree: 0 }
+          },
+          { trust: 38, trustClass: 'trust--low',
+            body: 'タイのTCラボで化学処理により人為的に斑入りを誘発した個体が多数出回っているとの指摘。これらは斑の安定性が低く、数世代で斑が消失する傾向がある。',
+            sources: [
+              { icon: '\u{1F4F7}', text: '@thai_rare_plants - Instagram (2021/04) TC苗についての投稿' },
+              { icon: '\u{1F4AC}', text: 'Aroid Forum - "PPP reverting to green" discussion #5678 (2022)' }
+            ],
+            author: { isAI: false, name: 'TCWatchdog', date: '2024-08-10' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      },
+      "Philodendron 'Majestic'": {
+        formula: { parentA: 'P. verrucosum', parentB: 'P. sodiroi' },
+        origins: [
+          { trust: 58, trustClass: 'trust--mid',
+            body: 'P. verrucosum × P. sodiroi の交配と推定されるハイブリッド。verrucosum の毛状葉柄と sodiroi の銀色模様を併せ持つ。正式な作出記録が少なく、複数のナーセリーから異なる交配親を用いた個体が "Majestic" として流通している可能性がある。',
+            sources: [
+              { icon: '\u{1F310}', text: 'Ecuagenera 公式 - Hybrid listing (ecuagenera.com)' },
+              { icon: '\u{1F4F7}', text: '@ecuagenera_official - Instagram (2020/02) 販売開始投稿' },
+              { icon: '\u{1F4AC}', text: 'Aroid Forum - "True Majestic identification" thread #4890 (2022)' }
+            ],
+            author: { isAI: true, name: '', date: '2024-05-15' },
+            votes: { agree: 0, disagree: 0 }
+          }
+        ]
+      }
+    };
+
+    // ---- localStorage persistence for user-added cultivars ----
+    (function() {
+      var STORAGE_KEY = 'plants-story-user-cultivars';
+
+      // Save user-added cultivars to localStorage
+      window.saveUserCultivars = function() {
+        var saved = {};
+        try {
+          var existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+          // Keep track of which keys are user-added
+          Object.keys(existing).forEach(function(k) { saved[k] = existing[k]; });
+        } catch(e) {}
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+      };
+
+      window.addUserCultivar = function(fullName, entry, meta) {
+        var saved = {};
+        try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
+        saved[fullName] = { entry: entry, meta: meta };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+      };
+
+      // Restore user-added cultivars on page load
+      function restoreUserCultivars() {
+        var saved;
+        try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) { return; }
+        Object.keys(saved).forEach(function(fullName) {
+          if (cultivarData[fullName]) return; // already exists
+          var item = saved[fullName];
+          cultivarData[fullName] = item.entry;
+          var meta = item.meta;
+
+          // Add row to genus list
+          var genusEl = document.getElementById('genus-' + meta.genus.toLowerCase());
+          if (!genusEl) return;
+          var container = genusEl.querySelector('.card[style*="padding:0"]');
+          if (!container) return;
+
+          var row = document.createElement('div');
+          row.className = 'cultivar-row';
+          row.setAttribute('data-nav', 'cultivar');
+          var badgeClass = meta.type === 'species' ? 'badge--species' : (meta.type === 'hybrid' ? 'badge--hybrid' : 'badge--clone');
+          var badgeText = meta.type === 'species' ? t('badge_species') : (meta.type === 'hybrid' ? 'Hybrid' : 'Clone');
+          var hasDesc = item.entry.origins.length > 0 && item.entry.origins[0].trust > 0;
+          var originCount = hasDesc ? item.entry.origins.length : 0;
+          var trustPct = hasDesc ? item.entry.origins[0].trust : 0;
+          var rowHtml = '<div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>';
+          rowHtml += '<div class="cultivar-row__info">';
+          rowHtml += '<div class="cultivar-row__name">' + fullName + '</div>';
+          rowHtml += '<div class="cultivar-row__meta">';
+          rowHtml += '<span>' + t('origin_prefix') + originCount + t('origin_count_suffix') + '</span>';
+          rowHtml += '<span class="badge ' + badgeClass + '">' + badgeText + '</span>';
+          if (!hasDesc) rowHtml += '<span class="badge badge--ai">' + t('ai_pending_badge') + '</span>';
+          rowHtml += '<div class="trust"><div class="trust__bar"><div class="trust__fill trust--low" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + (hasDesc ? trustPct + '%' : '-') + '</span></div>';
+          rowHtml += '</div>';
+          if (item.entry.formula) {
+            rowHtml += '<div class="text-sm text-muted mt-sm"><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + item.entry.formula.parentA + '</span><span class="formula-operator" style="font-size:0.875rem;">&times;</span><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + item.entry.formula.parentB + '</span></div>';
+          }
+          rowHtml += '</div>';
+          row.innerHTML = rowHtml;
+          container.appendChild(row);
+        });
+
+        // Re-paginate and update counts
+        ['anthurium', 'monstera', 'philodendron'].forEach(function(g) {
+          var el = document.getElementById('genus-' + g);
+          if (el) paginateGenus(el, 1);
+          // Update genus card count
+          var card = document.querySelector('.genus-card[data-genus="' + g + '"]');
+          if (card && el) {
+            var countEl = card.querySelector('.genus-card__count');
+            if (countEl) {
+              var total = el.querySelectorAll('.cultivar-row').length;
+              countEl.textContent = total + (currentLang === 'en' ? ' Cultivars' : ' 品種');
+            }
+          }
+        });
+      }
+
+      // Run after DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', restoreUserCultivars);
+      } else {
+        restoreUserCultivars();
+      }
+    })();
+
+    // ---- Render origin cards from data ----
+    function renderOrigins(cultivarName) {
+      var container = document.getElementById('origins-container');
+      if (!container) return;
+      var data = cultivarData[cultivarName];
+      if (!data || !data.origins) {
+        container.innerHTML = '<div class="text-center text-muted" style="padding:var(--space-xl);">この品種の由来情報はまだ登録されていません。</div>';
+        return;
+      }
+
+      // Sort by trust descending
+      var origins = data.origins.slice().sort(function(a, b) { return b.trust - a.trust; });
+      var html = '';
+
+      // Show formula if exists
+      if (data.formula) {
+        html += '<div class="formula-box mb-lg" style="justify-content:center;">';
+        html += '<span class="formula-parent">' + data.formula.parentA + '</span>';
+        html += '<span class="formula-operator">&times;</span>';
+        html += '<span class="formula-parent">' + data.formula.parentB + '</span>';
+        html += '</div>';
+      }
+
+      origins.forEach(function(origin, i) {
+        var trustLevel = origin.trust >= 70 ? 'trust--high' : (origin.trust >= 40 ? 'trust--mid' : 'trust--low');
+        html += '<div class="origin-card">';
+
+        // Header with rank and trust
+        html += '<div class="origin-card__header">';
+        html += '<span class="origin-card__rank">#' + (i + 1) + '</span>';
+        html += '<div class="trust trust--lg" style="flex:1;margin-left:var(--space-md);">';
+        html += '<div class="trust__bar"><div class="trust__fill ' + trustLevel + '" style="width:' + origin.trust + '%"></div></div>';
+        html += '<span class="trust__label">' + origin.trust + '%</span>';
+        html += '</div></div>';
+
+        // Body
+        html += '<div class="origin-card__body"><p>' + origin.body + '</p></div>';
+
+        // Sources
+        html += '<div class="origin-card__sources">';
+        html += '<div class="text-sm font-bold mb-sm">情報元:</div>';
+        origin.sources.forEach(function(src) {
+          html += '<div class="origin-card__source-item">';
+          html += '<span class="source-link__icon">' + src.icon + '</span>';
+          html += '<a href="#">' + src.text + '</a>';
+          html += '</div>';
+        });
+        html += '</div>';
+
+        // Footer
+        html += '<div class="origin-card__footer">';
+        html += '<div class="origin-card__author">';
+        if (origin.author.isAI) {
+          html += '<span class="badge badge--ai">&#x1F916; AI</span>';
+        } else {
+          html += '<span>&#x1F464;</span>';
+          html += '<span>' + origin.author.name + '</span>';
+        }
+        html += '<span class="text-gray">' + origin.author.date + '</span>';
+        html += '</div>';
+        html += '<div class="vote-group">';
+        html += '<button class="vote-btn vote-btn--agree">&#x1F44D; 賛成 <span class="vote-btn__count">' + origin.votes.agree + '</span></button>';
+        html += '<button class="vote-btn vote-btn--disagree">&#x1F44E; 反対 <span class="vote-btn__count">' + origin.votes.disagree + '</span></button>';
+        html += '</div>';
+        html += '</div>';
+
+        html += '</div>';
+      });
+
+      container.innerHTML = html;
+    }
+
+    // ---- Update cultivar detail page dynamically ----
+    function updateCultivarDetail(cultivarName, rowEl) {
+      var detailPage = document.getElementById('page-cultivar');
+      if (!detailPage) return;
+
+      // Determine genus from the name
+      var genusName = 'Anthurium';
+      var genusKey = 'anthurium';
+      if (cultivarName.toLowerCase().startsWith('monstera')) {
+        genusName = 'Monstera'; genusKey = 'monstera';
+      } else if (cultivarName.toLowerCase().startsWith('philodendron')) {
+        genusName = 'Philodendron'; genusKey = 'philodendron';
+      }
+
+      // Short name for breadcrumb
+      var shortName = cultivarName.replace(genusName + ' ', '').replace(/'/g, '');
+
+      // Get badge info from row
+      var badgeEl = rowEl ? rowEl.querySelector('.badge') : null;
+      var badgeClass = 'badge--species';
+      var badgeText = '原種 / Original Species';
+      if (badgeEl) {
+        if (badgeEl.classList.contains('badge--hybrid')) {
+          badgeClass = 'badge--hybrid'; badgeText = 'Hybrid';
+        } else if (badgeEl.classList.contains('badge--clone')) {
+          badgeClass = 'badge--clone'; badgeText = 'Clone';
+        }
+      }
+
+      // Update title
+      var h1 = detailPage.querySelector('h1');
+      if (h1) h1.textContent = cultivarName;
+
+      // Update badge
+      var detailBadge = detailPage.querySelector('.badge');
+      if (detailBadge) {
+        detailBadge.className = 'badge ' + badgeClass;
+        detailBadge.textContent = badgeText;
+      }
+
+      // Update genus label next to badge
+      var genusLabel = detailPage.querySelector('.flex.gap-sm .text-sm.text-muted');
+      if (genusLabel) genusLabel.textContent = genusName;
+
+      // Update breadcrumb
+      var breadcrumb = detailPage.querySelector('.breadcrumb');
+      if (breadcrumb) {
+        var genusLink = breadcrumb.querySelector('[data-genus]');
+        if (genusLink) {
+          genusLink.textContent = genusName;
+          genusLink.setAttribute('data-genus', genusKey);
+        }
+        var lastSpan = breadcrumb.querySelectorAll('span');
+        var crumbName = lastSpan[lastSpan.length - 1];
+        if (crumbName && !crumbName.classList.contains('breadcrumb__sep')) {
+          crumbName.textContent = shortName;
+        }
+      }
+
+      // Render origins dynamically
+      renderOrigins(cultivarName);
+    }
+
+    // ---- Genus search (filter within genus) ----
+    function filterGenusRows(genusEl, query) {
+      const rows = genusEl.querySelectorAll('.cultivar-row');
+      const q = query.toLowerCase().trim();
+      rows.forEach(function(row) {
+        const name = row.querySelector('.cultivar-row__name');
+        if (!q || (name && name.textContent.toLowerCase().includes(q))) {
+          row.removeAttribute('data-filtered');
+        } else {
+          row.setAttribute('data-filtered', 'true');
+        }
+      });
+    }
+
+    // ---- Pagination for genus pages ----
+    var ITEMS_PER_PAGE = 6;
+
+    function paginateGenus(genusEl, page) {
+      page = page || 1;
+      var rows = Array.from(genusEl.querySelectorAll('.cultivar-row:not([data-filtered])'));
+      var totalPages = Math.max(1, Math.ceil(rows.length / ITEMS_PER_PAGE));
+      if (page > totalPages) page = totalPages;
+
+      // Show/hide rows
+      rows.forEach(function(row, i) {
+        row.style.display = (i >= (page - 1) * ITEMS_PER_PAGE && i < page * ITEMS_PER_PAGE) ? '' : 'none';
+      });
+      // Hide filtered rows
+      genusEl.querySelectorAll('.cultivar-row[data-filtered]').forEach(function(r) {
+        r.style.display = 'none';
+      });
+
+      // Update pagination
+      var pagDiv = genusEl.querySelector('.pagination');
+      if (!pagDiv) return;
+      pagDiv.innerHTML = '';
+
+      // Prev
+      var prev = document.createElement('a');
+      prev.className = 'page-link' + (page <= 1 ? ' disabled' : '');
+      prev.innerHTML = '&laquo;';
+      prev.setAttribute('data-page', Math.max(1, page - 1));
+      pagDiv.appendChild(prev);
+
+      // Page numbers
+      for (var p = 1; p <= totalPages; p++) {
+        var link = document.createElement('a');
+        link.className = 'page-link' + (p === page ? ' active' : '');
+        link.textContent = p;
+        link.setAttribute('data-page', p);
+        pagDiv.appendChild(link);
+      }
+
+      // Next
+      var next = document.createElement('a');
+      next.className = 'page-link' + (page >= totalPages ? ' disabled' : '');
+      next.innerHTML = '&raquo;';
+      next.setAttribute('data-page', Math.min(totalPages, page + 1));
+      pagDiv.appendChild(next);
+
+      // Update count text
+      var countEl = genusEl.querySelector('.text-muted.mb-lg');
+      if (countEl) {
+        var visibleCount = rows.length;
+        var totalCount = genusEl.querySelectorAll('.cultivar-row').length;
+        if (genusEl.querySelector('.search-bar__input') && genusEl.querySelector('.search-bar__input').value.trim()) {
+          countEl.textContent = visibleCount + ' 件ヒット（全 ' + totalCount + ' 品種中）';
+        } else {
+          countEl.textContent = totalCount + ' 品種が登録されています';
+        }
+      }
+    }
+
+    // ---- Global search (top page + search page) ----
+    function globalSearch(query) {
+      var q = query.toLowerCase().trim();
+      if (!q) return;
+
+      // Collect all cultivar names from all genus sections
+      var results = [];
+      document.querySelectorAll('.genus-content .cultivar-row').forEach(function(row) {
+        var nameEl = row.querySelector('.cultivar-row__name');
+        if (nameEl && nameEl.textContent.toLowerCase().includes(q)) {
+          results.push(row.cloneNode(true));
+        }
+      });
+
+      // Update search results page
+      var searchPage = document.getElementById('page-search');
+      var title = searchPage.querySelector('.section-title');
+      if (title) title.textContent = '"' + query + '" の検索結果';
+      var count = searchPage.querySelector('.text-muted.mb-lg');
+      if (count) count.textContent = results.length + '件の結果';
+
+      var resultCard = searchPage.querySelector('.card');
+      if (resultCard) {
+        resultCard.innerHTML = '';
+        if (results.length === 0) {
+          resultCard.innerHTML = '<div style="padding:var(--space-xl);text-align:center;" class="text-muted">該当する品種が見つかりませんでした</div>';
+        } else {
+          results.forEach(function(r) { resultCard.appendChild(r); });
+        }
+      }
+
+      // Update search page pagination
+      var searchPag = searchPage.querySelector('.pagination');
+      if (searchPag) {
+        searchPag.innerHTML = '<a class="page-link active">1</a>';
+      }
+
+      showPage('search');
+    }
+
+    // Navigation click handler
+    document.addEventListener('click', function(e) {
+      // Pagination clicks
+      var pageLink = e.target.closest('.page-link');
+      if (pageLink && !pageLink.classList.contains('disabled')) {
+        e.preventDefault();
+        var pageNum = parseInt(pageLink.getAttribute('data-page'));
+        if (!isNaN(pageNum)) {
+          var genusEl = pageLink.closest('.genus-content');
+          if (genusEl) {
+            paginateGenus(genusEl, pageNum);
+            genusEl.scrollIntoView({behavior: 'smooth'});
+          }
+        }
+        return;
+      }
+
+      var navEl = e.target.closest('[data-nav]');
+      if (navEl) {
+        e.preventDefault();
+        var page = navEl.getAttribute('data-nav');
+        var genus = navEl.getAttribute('data-genus');
+
+        // If clicking a cultivar row, update detail page dynamically
+        if (page === 'cultivar') {
+          var nameEl = navEl.querySelector('.cultivar-row__name');
+          if (nameEl) {
+            updateCultivarDetail(nameEl.textContent, navEl);
+          }
+        }
+
+        showPage(page);
+
+        // Switch genus content if applicable
+        if (page === 'genus' && genus) {
+          showGenus(genus);
+        }
+
+        // Close mobile nav
+        document.getElementById('mobileNav').classList.remove('open');
+      }
+    });
+
+    // Hamburger menu
+    document.getElementById('hamburger').addEventListener('click', function() {
+      document.getElementById('mobileNav').classList.toggle('open');
+    });
+
+    // ---- Genus search input listeners ----
+    document.querySelectorAll('.genus-content .search-bar__input').forEach(function(input) {
+      input.addEventListener('input', function() {
+        var genusEl = this.closest('.genus-content');
+        if (genusEl) {
+          filterGenusRows(genusEl, this.value);
+          paginateGenus(genusEl, 1);
+        }
+      });
+    });
+
+    // ---- Top page global search ----
+    (function() {
+      var heroSearch = document.querySelector('.hero .search-bar__input');
+      var heroBtn = document.querySelector('.hero .search-bar__btn');
+      if (heroSearch) {
+        heroSearch.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            globalSearch(this.value);
+          }
+        });
+      }
+      if (heroBtn) {
+        heroBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (heroSearch) globalSearch(heroSearch.value);
+        });
+      }
+    })();
+
+    // ---- Genus search button click ----
+    document.querySelectorAll('.genus-content .search-bar__btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var genusEl = this.closest('.genus-content');
+        var input = genusEl ? genusEl.querySelector('.search-bar__input') : null;
+        if (genusEl && input) {
+          filterGenusRows(genusEl, input.value);
+          paginateGenus(genusEl, 1);
+        }
+      });
+    });
+
+    // ---- Initialize pagination on load ----
+    document.querySelectorAll('.genus-content').forEach(function(g) {
+      paginateGenus(g, 1);
+    });
+
+    // Chip toggle
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', function() {
+        const group = this.closest('.chips');
+        if (group) {
+          group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        }
+        this.classList.add('active');
+      });
+    });
+
+    // Vote button toggle (demo)
+    document.querySelectorAll('.vote-btn, .auth-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        this.classList.toggle('voted');
+      });
+    });
+
+    // Add origin form toggle
+    const btnAddOrigin = document.getElementById('btn-add-origin');
+    const btnCancelOrigin = document.getElementById('btn-cancel-origin');
+    const addOriginToggle = document.getElementById('add-origin-toggle');
+    const addOriginForm = document.getElementById('add-origin-form');
+    if (btnAddOrigin) {
+      btnAddOrigin.addEventListener('click', function() {
+        addOriginToggle.style.display = 'none';
+        addOriginForm.style.display = 'block';
+      });
+    }
+    if (btnCancelOrigin) {
+      btnCancelOrigin.addEventListener('click', function() {
+        addOriginToggle.style.display = 'block';
+        addOriginForm.style.display = 'none';
+      });
+    }
+
+    // Formula unknown checkbox toggle
+    const formulaUnknown = document.getElementById('formula-unknown');
+    const formulaInputs = document.getElementById('formula-inputs');
+    if (formulaUnknown && formulaInputs) {
+      formulaUnknown.addEventListener('change', function() {
+        if (this.checked) {
+          formulaInputs.style.opacity = '0.4';
+          formulaInputs.style.pointerEvents = 'none';
+        } else {
+          formulaInputs.style.opacity = '1';
+          formulaInputs.style.pointerEvents = 'auto';
+        }
+      });
+    }
+
+    // ========================================
+    // i18n TRANSLATION SYSTEM
+    // ========================================
+    var translations = {
+      site_title: { jp: 'Plants Story', en: 'Plants Story' },
+      lang_toggle: { jp: 'EN / JP', en: 'JP / EN' },
+      nav_anthurium: { jp: 'Anthurium', en: 'Anthurium' },
+      nav_monstera: { jp: 'Monstera', en: 'Monstera' },
+      nav_philodendron: { jp: 'Philodendron', en: 'Philodendron' },
+      nav_home: { jp: 'Home', en: 'Home' },
+      nav_search: { jp: 'Search', en: 'Search' },
+      hero_title: { jp: 'Plants Story', en: 'Plants Story' },
+      hero_subtitle: { jp: '植物の原種・ハイブリッドの由来を知る', en: 'Know the origins of plant species and hybrids' },
+      browse_genus: { jp: '属から探す', en: 'Browse by Genus' },
+      cultivar_count: { jp: '10 品種', en: '10 Cultivars' },
+      monstera_count: { jp: '9 品種', en: '9 Cultivars' },
+      philodendron_count: { jp: '9 品種', en: '9 Cultivars' },
+      recently_added: { jp: '最近追加された品種', en: 'Recently Added Cultivars' },
+      how_it_works: { jp: '仕組み', en: 'How It Works' },
+      step1_title: { jp: 'AIが調査', en: 'AI Research' },
+      step1_desc: { jp: '論文・SNS・信頼性の高い記事からAIが由来を自動調査します', en: 'AI automatically researches origins from papers, SNS, and reliable articles' },
+      step2_title: { jp: 'コミュニティで検証', en: 'Community Verification' },
+      step2_desc: { jp: 'ユーザーが由来の賛否を投票し、情報を追加・修正します', en: 'Users vote on origins and add or correct information' },
+      step3_title: { jp: '信頼度スコア', en: 'Trust Score' },
+      step3_desc: { jp: 'AIの調査とコミュニティの投票から信頼度が算出されます', en: 'Trust scores are calculated from AI research and community votes' },
+      sort_name: { jp: '名前順', en: 'By Name' },
+      sort_trust: { jp: '信頼度順', en: 'By Trust' },
+      sort_newest: { jp: '新着順', en: 'Newest' },
+      add_cultivar: { jp: '+ 品種を追加', en: '+ Add Cultivar' },
+      edit: { jp: '✏️ 編集', en: '✏️ Edit' },
+      images: { jp: '画像', en: 'Images' },
+      request_delete: { jp: '🚩 削除依頼', en: '🚩 Report' },
+      upload_image: { jp: '画像をアップロード', en: 'Upload Image' },
+      image_policy: { jp: '※ Fake投票が多い画像は自動削除されます。削除依頼は即時対応します。', en: '※ Images with many Fake votes are auto-removed. Deletion requests are handled immediately.' },
+      origins: { jp: '由来 (信頼度順)', en: 'Origins (by Trust)' },
+      add_origin: { jp: '+ 由来を追加', en: '+ Add Origin' },
+      add_origin_title: { jp: '由来を追加', en: 'Add Origin' },
+      label_description: { jp: '説明', en: 'Description' },
+      label_sources: { jp: '情報元リンク', en: 'Source Links' },
+      btn_submit_origin: { jp: '投稿する', en: 'Submit' },
+      btn_cancel: { jp: 'キャンセル', en: 'Cancel' },
+      contribute_title: { jp: '新しい品種を登録', en: 'Register New Cultivar' },
+      contribute_desc: { jp: '既存品種に由来を追加する場合は、その品種のページから追加できます。', en: 'To add origins to an existing cultivar, go to that cultivar\'s page.' },
+      cultivar_info: { jp: '品種情報', en: 'Cultivar Info' },
+      label_genus: { jp: '属', en: 'Genus' },
+      label_name: { jp: '品種名', en: 'Cultivar Name' },
+      label_type: { jp: 'タイプ', en: 'Type' },
+      type_species: { jp: '原種 (Original species)', en: 'Original Species' },
+      type_hybrid: { jp: 'ハイブリッド (Hybrid)', en: 'Hybrid' },
+      type_clone: { jp: 'クローン (Clone)', en: 'Clone' },
+      duplicate_found: { jp: 'この品種は既に登録されています', en: 'This cultivar is already registered' },
+      go_to_page: { jp: '品種ページへ移動', en: 'Go to cultivar page' },
+      origin_story: { jp: '由来', en: 'Origin Story' },
+      label_formula: { jp: '交配式 <span class="text-gray text-xs">※ハイブリッドの場合のみ</span>', en: 'Breeding Formula <span class="text-gray text-xs">*Hybrids only</span>', html: true },
+      formula_unknown: { jp: '交配式が不明', en: 'Formula unknown' },
+      formula_hint: { jp: '品種名を入力すると既存品種から候補が表示されます', en: 'Type a cultivar name to see suggestions from existing cultivars' },
+      image_upload: { jp: '画像アップロード', en: 'Image Upload' },
+      drag_drop: { jp: 'ドラッグ&ドロップ または クリック', en: 'Drag & Drop or Click' },
+      btn_submit: { jp: '📤 投稿する', en: '📤 Submit' },
+      search_results: { jp: '検索結果', en: 'Search Results' },
+      filter_all: { jp: 'すべて', en: 'All' },
+      footer_about: { jp: 'About', en: 'About' },
+      footer_terms: { jp: '利用規約', en: 'Terms' },
+      footer_privacy: { jp: 'プライバシー', en: 'Privacy' },
+      footer_contact: { jp: 'お問い合わせ', en: 'Contact' },
+      // Dynamic text keys
+      search_placeholder: { jp: '品種名を検索... / Search cultivar...', en: 'Search cultivar...' },
+      genus_search: { jp: '属内を検索...', en: 'Search within genus...' },
+      source_label: { jp: '情報元:', en: 'Sources:' },
+      vote_agree: { jp: '賛成', en: 'Agree' },
+      vote_disagree: { jp: '反対', en: 'Disagree' },
+      species_badge: { jp: '原種 / Original Species', en: 'Original Species' },
+      hybrid_badge: { jp: 'Hybrid', en: 'Hybrid' },
+      clone_badge: { jp: 'Clone', en: 'Clone' },
+      origin_count_suffix: { jp: '件', en: '' },
+      origin_prefix: { jp: '由来: ', en: 'Origins: ' },
+      cultivars_registered: { jp: '品種が登録されています', en: 'cultivars registered' },
+      search_hit: { jp: '{n} 件ヒット（全 {total} 品種中）', en: '{n} hits (out of {total} cultivars)' },
+      search_title_tpl: { jp: '"{q}" の検索結果', en: 'Search results for "{q}"' },
+      results_count: { jp: '{n}件の結果', en: '{n} results' },
+      no_results: { jp: '該当する品種が見つかりませんでした', en: 'No matching cultivars found' },
+      no_origin_data: { jp: 'この品種の由来情報はまだ登録されていません。', en: 'No origin data has been registered for this cultivar yet.' },
+      formula_label: { jp: '交配式: 不明', en: 'Formula: Unknown' },
+      badge_species: { jp: '原種', en: 'Species' },
+      submit_success: { jp: '品種が登録されました！', en: 'Cultivar registered successfully!' },
+      error_name_required: { jp: '品種名を入力してください', en: 'Please enter a cultivar name' },
+      error_desc_required: { jp: '由来の説明を入力してください', en: 'Please enter an origin description' },
+      error_duplicate: { jp: 'この品種は既に登録されています', en: 'This cultivar is already registered' },
+      origin_added: { jp: '由来が追加されました！', en: 'Origin added successfully!' },
+      origin_desc_required: { jp: '由来の説明を入力してください', en: 'Please enter a description for the origin' },
+      buy_this_plant: { jp: '関連商品', en: 'Related Products' },
+      affiliate_notice: { jp: '※ 上記はアフィリエイトリンクです。購入によりサイト運営をサポートできます。', en: '※ These are affiliate links. Purchases help support site operations.' },
+      shop_rakuten: { jp: '楽天市場で探す', en: 'Shop on Rakuten' },
+      shop_amazon: { jp: 'Amazonで探す', en: 'Shop on Amazon' },
+      shop_yahoo: { jp: 'Yahoo!で探す', en: 'Shop on Yahoo!' },
+      ad_label: { jp: '広告', en: 'Advertisement' },
+      donate_btn: { jp: '☕ サイトを応援する', en: '☕ Support This Site' },
+      upload_error_type: { jp: 'JPGまたはPNG画像のみアップロードできます', en: 'Only JPG or PNG images can be uploaded' },
+      upload_error_size: { jp: 'ファイルサイズは5MB以下にしてください', en: 'File size must be 5MB or less' },
+      upload_error_max: { jp: '最大3枚までアップロードできます', en: 'Maximum 3 images can be uploaded' },
+      ai_pending_origin: { jp: 'AIによる由来情報の生成待ちです', en: 'Awaiting AI-generated origin information' },
+      ai_pending_badge: { jp: 'AI生成待ち', en: 'AI Pending' },
+
+      // ---- Terms of Service ----
+      terms_title: { jp: '利用規約', en: 'Terms of Service' },
+      terms_updated: { jp: '最終更新日: 2026年3月13日', en: 'Last Updated: March 13, 2026' },
+      terms_1_title: { jp: '第1条 適用範囲', en: 'Article 1: Scope' },
+      terms_1_body: { jp: '本規約は、Plants Story（以下「本サービス」）を利用するすべてのユーザーに適用されます。本サービスを利用した時点で、本規約に同意したものとみなします。本サービスはアカウント登録を必要としないため、サイトの閲覧・利用をもって同意が成立します。', en: 'These Terms apply to all users of Plants Story (the "Service"). By using the Service, you agree to these Terms. As the Service does not require account registration, your use of and access to the site constitutes acceptance.' },
+      terms_2_title: { jp: '第2条 サービスの内容', en: 'Article 2: Service Description' },
+      terms_2_body: { jp: '本サービスは、植物の品種（原種・ハイブリッド・クローン）の由来情報を収集・共有するプラットフォームです。主な機能は以下の通りです：', en: 'The Service is a platform for collecting and sharing origin information about plant cultivars (species, hybrids, and clones). Key features include:' },
+      terms_2_list: { jp: '品種由来情報の閲覧\n由来情報の投稿（匿名）\n品種画像のアップロード\n投票による情報の信頼性評価\n関連商品へのアフィリエイトリンク', en: 'Browsing cultivar origin information\nSubmitting origin information (anonymously)\nUploading cultivar images\nVoting on information reliability\nAffiliate links to related products' },
+      terms_3_title: { jp: '第3条 ユーザー投稿コンテンツ', en: 'Article 3: User-Generated Content' },
+      terms_3_body: { jp: 'ユーザーは品種の由来情報、交配式、情報元URLなどを匿名で投稿できます。投稿にあたり、以下の事項に同意するものとします：', en: 'Users may anonymously submit cultivar origin information, breeding formulas, and source URLs. By submitting content, you agree to the following:' },
+      terms_3_list: { jp: '投稿内容の正確性について、投稿者自身が責任を負います\n投稿内容について、Plants Story運営チームに対し非独占的かつ無償の利用許諾を付与します\n運営チームは、投稿内容を事前通知なく編集・削除する権利を有します\n第三者の知的財産権を侵害する内容、または虚偽の情報を投稿してはなりません', en: 'You are responsible for the accuracy of your submissions\nYou grant the Plants Story team a non-exclusive, royalty-free license to use your content\nThe team reserves the right to edit or remove submissions without prior notice\nYou must not submit content that infringes third-party intellectual property or contains false information' },
+      terms_4_title: { jp: '第4条 AI生成コンテンツ', en: 'Article 4: AI-Generated Content' },
+      terms_4_body: { jp: 'ユーザーが由来情報を入力しなかった場合、AIが公開情報に基づいて由来情報を自動生成する場合があります。AI生成コンテンツには「AI生成待ち」バッジが表示されます。運営チームはAI生成コンテンツの正確性を保証しません。重要な判断に利用する場合は、独自に情報を検証してください。', en: 'When users do not provide origin information, AI may automatically generate it based on publicly available sources. AI-generated content is labeled with an "AI Pending" badge. The team does not guarantee the accuracy of AI-generated content. Please verify information independently before relying on it for important decisions.' },
+      terms_5_title: { jp: '第5条 画像の投稿と著作権', en: 'Article 5: Image Uploads and Copyright' },
+      terms_5_body: { jp: '画像のアップロードに関して、以下のルールを遵守してください：', en: 'Please observe the following rules regarding image uploads:' },
+      terms_5_list: { jp: '自身が権利を有する画像のみアップロードできます\n他者の著作権を侵害する画像のアップロードは禁止します\n著作権者からの削除要請があった場合、運営チームは速やかに対応します\nコミュニティの「Fake」投票が一定数を超えた画像は自動削除される場合があります\n運営チームはいかなる画像も事前通知なく削除する権利を有します', en: 'You may only upload images you have the right to use\nUploading images that infringe others\' copyrights is prohibited\nThe team will promptly respond to copyright holder takedown requests\nImages receiving excessive "Fake" votes may be automatically removed\nThe team reserves the right to remove any image without prior notice' },
+      terms_6_title: { jp: '第6条 投票システム', en: 'Article 6: Voting System' },
+      terms_6_body: { jp: '本サービスの投票システム（由来への賛成/反対、画像のReal/Fake）はコミュニティによる情報評価を目的としています。ボット、スクリプト、組織的な不正投票など、投票結果を人為的に操作する行為は禁止します。運営チームは不正が検出された場合、投票のリセットやアクセス制限を行う権利を有します。', en: 'The voting system (agree/disagree on origins, real/fake on images) exists for community evaluation of information. Manipulation of votes through bots, scripts, or coordinated actions is prohibited. The team reserves the right to reset votes and restrict access when manipulation is detected.' },
+      terms_7_title: { jp: '第7条 植物情報の免責事項', en: 'Article 7: Botanical Information Disclaimer' },
+      terms_7_body: { jp: '本サービスで提供される植物情報は参考情報であり、専門的な植物学・園芸・農業の助言ではありません。信頼度スコアはアルゴリズムによる推定値であり、情報の正確性を保証するものではありません。植物の栽培・購入・取引等に関する判断は、ご自身の責任で行ってください。', en: 'Plant information provided on this Service is for reference purposes only and does not constitute professional botanical, horticultural, or agricultural advice. Trust scores are algorithmic estimates and do not guarantee accuracy. Decisions regarding plant cultivation, purchase, or trade are made at your own risk.' },
+      terms_8_title: { jp: '第8条 アフィリエイトリンク', en: 'Article 8: Affiliate Links' },
+      terms_8_body: { jp: '本サービスには楽天市場、Amazon、Yahoo!ショッピングへのアフィリエイトリンクが含まれています。ユーザーがこれらのリンクを通じて商品を購入した場合、運営チームに紹介報酬が発生します。アフィリエイト関係は品種情報や信頼度スコアに一切影響を与えません。本開示は景品表示法に基づくものです。', en: 'The Service contains affiliate links to Rakuten, Amazon, and Yahoo! Shopping. When users purchase products through these links, the team receives referral commissions. Affiliate relationships do not influence cultivar information or trust scores. This disclosure is made in compliance with Japanese advertising regulations.' },
+      terms_9_title: { jp: '第9条 広告', en: 'Article 9: Advertisements' },
+      terms_9_body: { jp: '本サービスには第三者の広告ネットワーク（Google AdSense等）による広告が表示される場合があります。広告の内容は広告ネットワークが管理しており、運営チームは広告内容について責任を負いません。', en: 'The Service may display advertisements from third-party ad networks (such as Google AdSense). Ad content is managed by the ad networks, and the team is not responsible for advertisement content.' },
+      terms_10_title: { jp: '第10条 禁止行為', en: 'Article 10: Prohibited Activities' },
+      terms_10_body: { jp: '以下の行為を禁止します：', en: 'The following activities are prohibited:' },
+      terms_10_list: { jp: '虚偽または誤解を招く植物情報の投稿\n他者の著作権を侵害する画像のアップロード\n投票の不正操作\n許可のないスクレイピングや自動アクセス\n本サービスの正常な運営を妨害する行為\n他のユーザーや組織のなりすまし', en: 'Submitting false or misleading plant information\nUploading copyrighted images without permission\nVote manipulation\nUnauthorized scraping or automated access\nActivities that disrupt normal service operation\nImpersonating other users or organizations' },
+      terms_11_title: { jp: '第11条 サービスの変更・停止', en: 'Article 11: Service Changes and Suspension' },
+      terms_11_body: { jp: '運営チームは、事前通知なく本サービスの内容を変更、または一時的・恒久的に停止する権利を有します。サービスの変更・停止によって生じた損害について、運営チームは責任を負いません。', en: 'The team reserves the right to modify or suspend the Service, temporarily or permanently, without prior notice. The team is not liable for any damages resulting from service changes or suspension.' },
+      terms_12_title: { jp: '第12条 免責事項', en: 'Article 12: Disclaimer' },
+      terms_12_body: { jp: '本サービスは「現状有姿」で提供されます。運営チームは、コンテンツの正確性、完全性、可用性、信頼性について、明示的・黙示的を問わずいかなる保証も行いません。本サービスの利用によって生じた直接的・間接的な損害について、運営チームは一切の責任を負いません。', en: 'The Service is provided "as is" without warranties of any kind, express or implied. The team makes no guarantees regarding the accuracy, completeness, availability, or reliability of content. The team shall not be liable for any direct or indirect damages arising from use of the Service.' },
+      terms_13_title: { jp: '第13条 準拠法と管轄', en: 'Article 13: Governing Law and Jurisdiction' },
+      terms_13_body: { jp: '本規約は日本法に準拠し、日本法に基づいて解釈されます。本規約に関する紛争は、運営者の所在地を管轄する裁判所を第一審の専属的合意管轄裁判所とします。', en: 'These Terms shall be governed by and construed in accordance with the laws of Japan. Any disputes arising from these Terms shall be subject to the exclusive jurisdiction of the court with jurisdiction over the operator\'s location.' },
+      terms_14_title: { jp: '第14条 運営者情報', en: 'Article 14: Operator Information' },
+      terms_14_body: { jp: '運営名称: Plants Story運営チーム\n運営責任者: 久恒 佑太\nお問い合わせ: お問い合わせページよりご連絡ください', en: 'Organization: Plants Story Team\nOperator: Yuta Hisatsune\nContact: Please reach out via the Contact page' },
+
+      // ---- Privacy Policy ----
+      privacy_title: { jp: 'プライバシーポリシー', en: 'Privacy Policy' },
+      privacy_updated: { jp: '最終更新日: 2026年3月13日', en: 'Last Updated: March 13, 2026' },
+      privacy_1_title: { jp: '1. はじめに', en: '1. Introduction' },
+      privacy_1_body: { jp: 'Plants Story運営チーム（運営責任者: 久恒 佑太）は、ユーザーのプライバシーを尊重します。本ポリシーでは、本サービスで収集する情報とその取り扱いについて説明します。本サービスはアカウント登録を必要とせず、すべての投稿は匿名で行われます。', en: 'The Plants Story team (operated by Yuta Hisatsune) respects user privacy. This policy explains what information is collected and how it is handled. The Service does not require account registration, and all contributions are made anonymously.' },
+      privacy_2_title: { jp: '2. 収集する情報', en: '2. Information Collected' },
+      privacy_2_body: { jp: '本サービスでは以下の情報を収集する場合があります：', en: 'The Service may collect the following information:' },
+      privacy_2_list: { jp: 'ユーザーが任意で提供する情報: 品種名、由来説明、交配式、情報元URL、アップロード画像（すべて匿名）\n自動的に収集される情報: ブラウザの種類、言語設定、アクセスしたページ、IPアドレス（サーバーログ）\nブラウザに保存されるデータ: 言語設定、ユーザーが追加した品種データ（localStorageを使用、端末内のみ）', en: 'Information you voluntarily provide: cultivar names, origin descriptions, breeding formulas, source URLs, uploaded images (all anonymous)\nAutomatically collected information: browser type, language preference, pages visited, IP address (server logs)\nData stored in your browser: language preference, user-added cultivar data (via localStorage, stored locally only)' },
+      privacy_3_title: { jp: '3. localStorageの使用', en: '3. Use of localStorage' },
+      privacy_3_body: { jp: '本サービスはCookieではなくブラウザのlocalStorageを使用して、言語設定（日本語/英語）およびユーザーが追加した品種データをお使いの端末内に保存しています。このデータはサーバーには送信されず、お使いのブラウザ内にのみ存在します。ブラウザの設定からいつでも削除できます。', en: 'The Service uses browser localStorage (not cookies) to store your language preference (Japanese/English) and user-added cultivar data on your device. This data is not transmitted to our servers and exists only in your browser. You can clear it at any time through your browser settings.' },
+      privacy_4_title: { jp: '4. Cookieとトラッキング', en: '4. Cookies and Tracking' },
+      privacy_4_body: { jp: '本サービス自体はCookieを使用しません。ただし、以下の第三者サービスがCookieを使用する場合があります：', en: 'The Service itself does not use cookies. However, the following third-party services may use cookies:' },
+      privacy_4_list: { jp: 'Google AdSense（導入予定）: パーソナライズド広告のためにCookieを使用します。Googleの広告設定からオプトアウトできます\nアフィリエイトリンク（楽天市場、Amazon、Yahoo!ショッピング）: リンクをクリックした際にトラッキングCookieが設定される場合があります', en: 'Google AdSense (planned): Uses cookies to serve personalized ads. You can opt out via Google\'s ad settings\nAffiliate links (Rakuten, Amazon, Yahoo! Shopping): Tracking cookies may be set when you click these links' },
+      privacy_5_title: { jp: '5. 情報の利用目的', en: '5. Purpose of Data Use' },
+      privacy_5_body: { jp: '収集した情報は以下の目的で使用します：', en: 'Collected information is used for the following purposes:' },
+      privacy_5_list: { jp: '品種由来情報の表示と維持管理\nコミュニティ投票によるコンテンツの信頼性評価\nサービスおよびコンテンツの改善\n関連広告の配信\nアフィリエイトリンクを通じた収益化', en: 'Displaying and maintaining cultivar origin information\nCommunity voting for content reliability evaluation\nImproving the Service and its content\nServing relevant advertisements\nMonetization through affiliate links' },
+      privacy_6_title: { jp: '6. 情報の共有', en: '6. Information Sharing' },
+      privacy_6_body: { jp: 'ユーザーが投稿した品種情報は本サービス上で公開されます。運営チームは個人情報を第三者に販売しません。法律に基づく要請（法執行機関からの開示要求等）があった場合にのみ、情報を開示する場合があります。', en: 'User-submitted cultivar information is displayed publicly on the Service. The team does not sell personal information to third parties. Information may be disclosed only when required by law (such as law enforcement requests).' },
+      privacy_7_title: { jp: '7. 画像に関する注意', en: '7. Image-Related Notices' },
+      privacy_7_body: { jp: 'アップロードされた画像は本サービス上で公開されます。画像にはEXIF情報（撮影場所、端末情報等）が含まれている場合があります。プライバシーを保護するため、アップロード前にEXIF情報を削除することを推奨します。', en: 'Uploaded images are publicly visible on the Service. Images may contain EXIF metadata (location, device information, etc.). To protect your privacy, we recommend removing EXIF data before uploading.' },
+      privacy_8_title: { jp: '8. 未成年のユーザー', en: '8. Minor Users' },
+      privacy_8_body: { jp: '本サービスはアカウント登録を必要とせず、投稿はすべて匿名のため、年齢確認は行っていません。保護者の方には、未成年のインターネット利用を適切に監督していただくようお願いいたします。', en: 'As the Service does not require account registration and all contributions are anonymous, age verification is not performed. We encourage parents and guardians to supervise minors\' internet usage.' },
+      privacy_9_title: { jp: '9. 国際ユーザー', en: '9. International Users' },
+      privacy_9_body: { jp: '本サービスは日本から運営されており、日本法に基づいてデータを処理します。EU/EEA地域のユーザーは、ご自身が投稿したコンテンツの削除をお問い合わせページからリクエストできます。', en: 'The Service is operated from Japan and data is processed under Japanese law. EU/EEA users may request deletion of their submitted content via the Contact page.' },
+      privacy_10_title: { jp: '10. セキュリティ', en: '10. Security' },
+      privacy_10_body: { jp: '運営チームは送信されたデータを保護するために合理的な措置を講じています。ただし、インターネット上の送信方法は100%安全ではないため、完全なセキュリティを保証することはできません。', en: 'The team takes reasonable measures to protect submitted data. However, no method of internet transmission is 100% secure, and we cannot guarantee complete security.' },
+      privacy_11_title: { jp: '11. ポリシーの変更', en: '11. Policy Changes' },
+      privacy_11_body: { jp: '本ポリシーは随時更新される場合があります。変更があった場合は、本ページに更新日とともに掲載します。本サービスを継続して利用することにより、変更後のポリシーに同意したものとみなします。', en: 'This policy may be updated from time to time. Changes will be posted on this page with an updated date. Continued use of the Service constitutes acceptance of the updated policy.' },
+      privacy_12_title: { jp: '12. お問い合わせ', en: '12. Contact' },
+      privacy_12_body: { jp: 'プライバシーに関するお問い合わせは、お問い合わせページよりご連絡ください。\n運営名称: Plants Story運営チーム\n運営責任者: 久恒 佑太', en: 'For privacy-related inquiries, please reach out via the Contact page.\nOrganization: Plants Story Team\nOperator: Yuta Hisatsune' },
+
+      // ---- About ----
+      about_title: { jp: 'About Plants Story', en: 'About Plants Story' },
+      about_mission_text: { jp: '植物の品種には、それぞれ独自の物語があります。Plants Storyは、アロイド植物（Anthurium、Monstera、Philodendron等）の品種の由来や歴史を、みんなで集めて共有するプラットフォームです。', en: 'Every plant cultivar has its own unique story. Plants Story is a community platform for collecting and sharing the origins and history of aroid cultivars (Anthurium, Monstera, Philodendron, and more).' },
+      about_features_title: { jp: '主な特徴', en: 'Key Features' },
+      about_features_list: { jp: 'コミュニティによる品種由来情報の収集と検証\n信頼度スコアによる情報の可視化\nAIによる由来情報の自動生成支援\n画像のReal/Fake投票による品質管理\n日本語・英語バイリンガル対応', en: 'Community-driven cultivar origin collection and verification\nTrust score visualization for information reliability\nAI-assisted origin information generation\nImage quality control through Real/Fake voting\nBilingual support (Japanese/English)' },
+      about_operator_title: { jp: '運営情報', en: 'Operator Information' },
+      about_operator_body: { jp: '運営名称: Plants Story運営チーム\n運営責任者: 久恒 佑太', en: 'Organization: Plants Story Team\nOperator: Yuta Hisatsune' },
+
+      // ---- Contact ----
+      contact_title: { jp: 'お問い合わせ', en: 'Contact Us' },
+      contact_desc: { jp: 'ご質問、著作権に関するお問い合わせ、コンテンツの削除要請などがございましたら、以下よりご連絡ください。', en: 'For questions, copyright inquiries, content removal requests, or other matters, please contact us below.' },
+      contact_email_label: { jp: 'メールで問い合わせ', en: 'Email Us' },
+      contact_name: { jp: 'お名前', en: 'Name' },
+      contact_email: { jp: 'メールアドレス', en: 'Email Address' },
+      contact_category: { jp: 'カテゴリ', en: 'Category' },
+      contact_category_general: { jp: '一般的なお問い合わせ', en: 'General Inquiry' },
+      contact_category_copyright: { jp: '著作権に関するお問い合わせ', en: 'Copyright Inquiry' },
+      contact_category_deletion: { jp: 'コンテンツ削除要請', en: 'Content Removal Request' },
+      contact_category_bug: { jp: '不具合報告', en: 'Bug Report' },
+      contact_message: { jp: 'メッセージ', en: 'Message' },
+      contact_submit: { jp: '送信する', en: 'Submit' },
+      contact_note: { jp: '※ 現在バックエンドは未実装のため、送信機能はデモ表示です。', en: '※ The backend is not yet implemented. The submit function is a demo.' },
+      contact_error_required: { jp: 'お名前、メールアドレス、メッセージを入力してください。', en: 'Please fill in your name, email, and message.' },
+      contact_success: { jp: 'お問い合わせありがとうございます。（※デモ：実際には送信されていません）', en: 'Thank you for your inquiry. (※Demo: Not actually sent)' }
+    };
+
+    var currentLang = localStorage.getItem('plants-story-lang') || 'jp';
+
+    function t(key) {
+      var entry = translations[key];
+      return entry ? (entry[currentLang] || entry.jp) : key;
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('plants-story-lang', lang);
+      document.documentElement.lang = (lang === 'en') ? 'en' : 'ja';
+
+      // Static text elements
+      document.querySelectorAll('[data-i18n]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n');
+        var entry = translations[key];
+        if (!entry) return;
+        var text = entry[lang] || entry.jp;
+        if (entry.html) {
+          el.innerHTML = text;
+        } else {
+          el.textContent = text;
+        }
+      });
+
+      // Lists (data-i18n-list: newline-separated items as <li>)
+      document.querySelectorAll('[data-i18n-list]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n-list');
+        var entry = translations[key];
+        if (!entry) return;
+        var text = entry[lang] || entry.jp;
+        var items = text.split('\n');
+        el.innerHTML = '';
+        items.forEach(function(item) {
+          var li = document.createElement('li');
+          li.textContent = item;
+          el.appendChild(li);
+        });
+      });
+
+      // HTML blocks (data-i18n-html: newline-separated items as <p>)
+      document.querySelectorAll('[data-i18n-html]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n-html');
+        var entry = translations[key];
+        if (!entry) return;
+        var text = entry[lang] || entry.jp;
+        var lines = text.split('\n');
+        el.innerHTML = '';
+        lines.forEach(function(line) {
+          var p = document.createElement('p');
+          p.textContent = line;
+          el.appendChild(p);
+        });
+      });
+
+      // Placeholders
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n-placeholder');
+        var entry = translations[key];
+        if (entry) el.placeholder = entry[lang] || entry.jp;
+      });
+
+      // Update header toggle button
+      var langBtn = document.querySelector('.header__lang');
+      if (langBtn) langBtn.textContent = (lang === 'en') ? 'JP / EN' : 'EN / JP';
+
+      // Re-render dynamic content
+      refreshDynamicText();
+    }
+
+    function refreshDynamicText() {
+      // Re-paginate visible genus (updates count text)
+      var visibleGenus = document.querySelector('.genus-content[style*="block"]') || document.getElementById('genus-anthurium');
+      if (visibleGenus) paginateGenus(visibleGenus);
+
+      // Re-render origins if on cultivar page
+      var cultivarPage = document.getElementById('page-cultivar');
+      if (cultivarPage && cultivarPage.classList.contains('active')) {
+        var h1 = cultivarPage.querySelector('h1');
+        if (h1 && cultivarData[h1.textContent]) {
+          renderOrigins(h1.textContent);
+        }
+      }
+
+      // Re-render affiliate links if on cultivar page
+      if (cultivarPage && cultivarPage.classList.contains('active')) {
+        var h1aff = cultivarPage.querySelector('h1');
+        if (h1aff && typeof renderAffiliateLinks === 'function') {
+          renderAffiliateLinks(h1aff.textContent);
+        }
+      }
+    }
+
+    // Update paginateGenus count text to use t()
+    var _origPaginateCount = function(countEl, genusEl, rows) {
+      var visibleCount = rows.length;
+      var totalCount = genusEl.querySelectorAll('.cultivar-row').length;
+      var input = genusEl.querySelector('.search-bar__input');
+      if (input && input.value.trim()) {
+        countEl.textContent = t('search_hit').replace('{n}', visibleCount).replace('{total}', totalCount);
+      } else {
+        countEl.textContent = totalCount + ' ' + t('cultivars_registered');
+      }
+    };
+
+    // Wire up language toggle button
+    document.querySelector('.header__lang').addEventListener('click', function() {
+      applyLanguage(currentLang === 'jp' ? 'en' : 'jp');
+    });
+
+    // Apply saved language on load
+    if (currentLang !== 'jp') {
+      applyLanguage(currentLang);
+    }
+
+    // ========================================
+    // SORT FUNCTIONALITY
+    // ========================================
+    document.querySelectorAll('.genus-content .chip').forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        var genusEl = this.closest('.genus-content');
+        if (!genusEl) return;
+        var container = genusEl.querySelector('.card[style*="padding:0"]');
+        if (!container) return;
+
+        var rows = Array.from(container.querySelectorAll('.cultivar-row'));
+        var sortType = this.textContent.trim();
+
+        rows.sort(function(a, b) {
+          // By Name
+          if (sortType === '名前順' || sortType === 'By Name') {
+            var nameA = a.querySelector('.cultivar-row__name').textContent;
+            var nameB = b.querySelector('.cultivar-row__name').textContent;
+            return nameA.localeCompare(nameB);
+          }
+          // By Trust
+          if (sortType === '信頼度順' || sortType === 'By Trust') {
+            var trustA = parseInt(a.querySelector('.trust__label') ? a.querySelector('.trust__label').textContent : '0');
+            var trustB = parseInt(b.querySelector('.trust__label') ? b.querySelector('.trust__label').textContent : '0');
+            return trustB - trustA;
+          }
+          // By Newest (reverse DOM order = newest first)
+          if (sortType === '新着順' || sortType === 'Newest') {
+            return rows.indexOf(b) - rows.indexOf(a);
+          }
+          return 0;
+        });
+
+        rows.forEach(function(row) { container.appendChild(row); });
+        paginateGenus(genusEl, 1);
+      });
+    });
+
+    // ========================================
+    // RECENTLY ADDED CARDS - Fix navigation
+    // ========================================
+    document.querySelectorAll('#page-top .grid--3 .card--clickable').forEach(function(card) {
+      var nameEl = card.querySelector('.font-bold');
+      if (nameEl && !card.closest('.genus-card')) {
+        card.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var name = nameEl.textContent.trim();
+          if (cultivarData[name]) {
+            // Determine badge type from data
+            var data = cultivarData[name];
+            var fakeRow = document.createElement('div');
+            var badgeClass = 'badge--species';
+            if (data.formula) badgeClass = 'badge--hybrid';
+            fakeRow.innerHTML = '<span class="badge ' + badgeClass + '"></span>';
+            updateCultivarDetail(name, fakeRow);
+            showPage('cultivar');
+          }
+        });
+      }
+    });
+
+    // ========================================
+    // SEARCH PAGE GENUS FILTER CHIPS
+    // ========================================
+    document.querySelectorAll('#page-search .chip').forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        var filterText = this.textContent.trim();
+        var resultCard = document.querySelector('#page-search .card');
+        if (!resultCard) return;
+        var rows = resultCard.querySelectorAll('.cultivar-row');
+        rows.forEach(function(row) {
+          if (filterText === 'すべて' || filterText === 'All') {
+            row.style.display = '';
+          } else {
+            var name = row.querySelector('.cultivar-row__name');
+            if (name && name.textContent.toLowerCase().includes(filterText.toLowerCase())) {
+              row.style.display = '';
+            } else {
+              row.style.display = 'none';
+            }
+          }
+        });
+      });
+    });
+
+    // ========================================
+    // CONTRIBUTE FORM - Full functionality
+    // ========================================
+    (function() {
+      var contributeGenus = document.querySelector('#page-contribute .form-select');
+      var contributeName = document.getElementById('cultivar-name-input');
+      var duplicateAlert = document.getElementById('duplicate-alert');
+      var contributeDesc = document.querySelector('#page-contribute .form-textarea');
+      var contributeSourceInput = document.querySelector('#page-contribute .form-group input[type="url"]');
+      var contributeSourceBtn = document.querySelector('#page-contribute .form-group .btn--secondary');
+      var contributeSourceList = document.querySelector('#page-contribute .source-list');
+      var submitBtn = document.querySelector('#page-contribute .btn--primary.btn--block');
+      var formulaSection = document.querySelector('#page-contribute #formula-inputs');
+      var formulaParentA, formulaParentB;
+      if (formulaSection) {
+        var inputs = formulaSection.querySelectorAll('.form-input');
+        formulaParentA = inputs[0];
+        formulaParentB = inputs[1];
+      }
+
+      // Sources management
+      var contributeSources = [];
+
+      // Clear example sources on load
+      if (contributeSourceList) contributeSourceList.innerHTML = '';
+
+      function renderContributeSources() {
+        if (!contributeSourceList) return;
+        contributeSourceList.innerHTML = '';
+        contributeSources.forEach(function(url, i) {
+          var div = document.createElement('div');
+          div.className = 'source-list__item';
+          div.innerHTML = '<a href="#">' + url + '</a><span class="source-list__remove" data-source-idx="' + i + '">&times;</span>';
+          contributeSourceList.appendChild(div);
+        });
+      }
+
+      // Add source button
+      if (contributeSourceBtn) {
+        contributeSourceBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (!contributeSourceInput) return;
+          var url = contributeSourceInput.value.trim();
+          if (!url) return;
+          contributeSources.push(url);
+          contributeSourceInput.value = '';
+          renderContributeSources();
+        });
+      }
+
+      // Remove source click
+      if (contributeSourceList) {
+        contributeSourceList.addEventListener('click', function(e) {
+          var removeBtn = e.target.closest('.source-list__remove');
+          if (removeBtn) {
+            var idx = parseInt(removeBtn.getAttribute('data-source-idx'));
+            if (!isNaN(idx)) {
+              contributeSources.splice(idx, 1);
+              renderContributeSources();
+            }
+          }
+        });
+      }
+
+      // Show/hide formula based on type
+      document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+          var formulaGroup = formulaSection ? formulaSection.closest('.form-group') : null;
+          if (!formulaGroup) return;
+          if (this.value === 'species') {
+            formulaGroup.style.display = 'none';
+          } else {
+            formulaGroup.style.display = '';
+          }
+        });
+      });
+      // Initialize: hide formula if species is default
+      var activeType = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
+      if (activeType && activeType.value === 'species' && formulaSection) {
+        var fg = formulaSection.closest('.form-group');
+        if (fg) fg.style.display = 'none';
+      }
+
+      // Improved duplicate detection - checks all cultivarData keys
+      if (contributeName && duplicateAlert) {
+        contributeName.addEventListener('input', function() {
+          var inputVal = this.value.trim().toLowerCase();
+          if (inputVal.length < 3) { duplicateAlert.style.display = 'none'; return; }
+          var genus = contributeGenus ? contributeGenus.value : 'Anthurium';
+          var found = null;
+          Object.keys(cultivarData).forEach(function(name) {
+            var nameLower = name.toLowerCase();
+            if (nameLower.includes(inputVal) || nameLower === (genus.toLowerCase() + ' ' + inputVal) || nameLower === (genus.toLowerCase() + " '" + inputVal + "'")) {
+              found = name;
+            }
+          });
+          if (found) {
+            duplicateAlert.style.display = 'block';
+            var msgEl = duplicateAlert.querySelector('.text-sm.text-muted');
+            if (msgEl) msgEl.textContent = '「' + found + '」は既に登録済みです。由来を追加する場合は品種ページから行えます。';
+          } else {
+            duplicateAlert.style.display = 'none';
+          }
+        });
+      }
+
+      // Submit handler
+      if (submitBtn) {
+        submitBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          var genus = contributeGenus ? contributeGenus.value : 'Anthurium';
+          var name = contributeName ? contributeName.value.trim() : '';
+          var type = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
+          type = type ? type.value : 'species';
+          var desc = contributeDesc ? contributeDesc.value.trim() : '';
+
+          // Validation
+          if (!name) { alert(t('error_name_required')); return; }
+
+          // Build full name
+          var fullName;
+          if (type === 'species') {
+            fullName = genus + ' ' + name;
+          } else {
+            fullName = genus + " '" + name + "'";
+          }
+
+          // Check duplicate
+          if (cultivarData[fullName]) { alert(t('error_duplicate')); return; }
+
+          // Build data entry
+          var newEntry = { origins: [] };
+
+          if (desc) {
+            // User provided origin
+            var origin = {
+              trust: 30, trustClass: 'trust--low',
+              body: desc,
+              sources: contributeSources.map(function(url) { return { icon: '\u{1F310}', text: url }; }),
+              author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
+              votes: { agree: 0, disagree: 0 }
+            };
+          } else {
+            // AI will fill in later
+            var origin = {
+              trust: 0, trustClass: 'trust--low',
+              body: t('ai_pending_origin'),
+              sources: [],
+              author: { isAI: true, name: 'AI (Pending)', date: new Date().toISOString().slice(0, 10) },
+              votes: { agree: 0, disagree: 0 }
+            };
+          }
+
+          // Formula for hybrids
+          if (type !== 'species' && formulaParentA && formulaParentB) {
+            var pA = formulaParentA.value.trim();
+            var pB = formulaParentB.value.trim();
+            if (pA && pB) {
+              newEntry.formula = { parentA: pA, parentB: pB };
+            }
+          }
+          newEntry.origins.push(origin);
+          cultivarData[fullName] = newEntry;
+
+          // Save to localStorage
+          if (typeof addUserCultivar === 'function') {
+            addUserCultivar(fullName, newEntry, { genus: genus, type: type });
+          }
+
+          // Add row to genus list
+          var genusEl = document.getElementById('genus-' + genus.toLowerCase());
+          if (genusEl) {
+            var container = genusEl.querySelector('.card[style*="padding:0"]');
+            if (container) {
+              var row = document.createElement('div');
+              row.className = 'cultivar-row';
+              row.setAttribute('data-nav', 'cultivar');
+              var badgeClass = type === 'species' ? 'badge--species' : (type === 'hybrid' ? 'badge--hybrid' : 'badge--clone');
+              var badgeText = type === 'species' ? t('badge_species') : (type === 'hybrid' ? 'Hybrid' : 'Clone');
+              var rowHtml = '<div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>';
+              rowHtml += '<div class="cultivar-row__info">';
+              rowHtml += '<div class="cultivar-row__name">' + fullName + '</div>';
+              rowHtml += '<div class="cultivar-row__meta">';
+              var originCount = desc ? 1 : 0;
+              var trustPct = desc ? 30 : 0;
+              var trustLabel = desc ? '30%' : t('ai_pending_badge');
+              rowHtml += '<span>' + t('origin_prefix') + originCount + t('origin_count_suffix') + '</span>';
+              rowHtml += '<span class="badge ' + badgeClass + '">' + badgeText + '</span>';
+              if (!desc) rowHtml += '<span class="badge badge--ai">' + t('ai_pending_badge') + '</span>';
+              rowHtml += '<div class="trust"><div class="trust__bar"><div class="trust__fill trust--low" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + (desc ? '30%' : '-') + '</span></div>';
+              rowHtml += '</div>';
+              if (newEntry.formula) {
+                rowHtml += '<div class="text-sm text-muted mt-sm"><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + newEntry.formula.parentA + '</span><span class="formula-operator" style="font-size:0.875rem;">&times;</span><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + newEntry.formula.parentB + '</span></div>';
+              }
+              rowHtml += '</div>';
+              row.innerHTML = rowHtml;
+              container.appendChild(row);
+              paginateGenus(genusEl, 1);
+
+              // Update genus card count on top page
+              var genusCards = document.querySelectorAll('.genus-card');
+              genusCards.forEach(function(card) {
+                var g = card.getAttribute('data-genus');
+                if (g === genus.toLowerCase()) {
+                  var countEl = card.querySelector('.genus-card__count');
+                  var genusSection = document.getElementById('genus-' + g);
+                  if (countEl && genusSection) {
+                    var total = genusSection.querySelectorAll('.cultivar-row').length;
+                    countEl.textContent = total + (currentLang === 'en' ? ' Cultivars' : ' 品種');
+                  }
+                }
+              });
+            }
+          }
+
+          // Navigate to new cultivar detail
+          var fakeRow = document.createElement('div');
+          fakeRow.innerHTML = '<span class="badge badge--' + type + '"></span>';
+          if (type === 'species') fakeRow.innerHTML = '<span class="badge badge--species"></span>';
+          updateCultivarDetail(fullName, fakeRow);
+          showPage('cultivar');
+
+          // Reset form
+          if (contributeName) contributeName.value = '';
+          if (contributeDesc) contributeDesc.value = '';
+          if (contributeGenus) contributeGenus.selectedIndex = 0;
+          var speciesRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="species"]');
+          if (speciesRadio) { speciesRadio.checked = true; speciesRadio.dispatchEvent(new Event('change')); }
+          if (formulaParentA) formulaParentA.value = '';
+          if (formulaParentB) formulaParentB.value = '';
+          if (contributeSourceInput) contributeSourceInput.value = '';
+          contributeSources = [];
+          renderContributeSources();
+          if (duplicateAlert) duplicateAlert.style.display = 'none';
+
+          alert(t('submit_success'));
+        });
+      }
+    })();
+
+    // ========================================
+    // ADD ORIGIN INLINE FORM (Cultivar detail page)
+    // ========================================
+    (function() {
+      var originForm = document.getElementById('add-origin-form');
+      var submitOriginBtn = originForm ? originForm.querySelector('.btn--primary') : null;
+      var cancelOriginBtn = document.getElementById('btn-cancel-origin');
+      var originSources = [];
+
+      // Source add button in origin form
+      var sourceAddBtn = originForm ? originForm.querySelector('.btn--secondary') : null;
+      var sourceInput = originForm ? originForm.querySelector('input[type="url"]') : null;
+
+      if (sourceAddBtn && sourceInput) {
+        sourceAddBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          var url = sourceInput.value.trim();
+          if (!url) return;
+          originSources.push(url);
+          sourceInput.value = '';
+          // Visual feedback - show added sources
+          var hint = sourceAddBtn.parentElement.nextElementSibling;
+          if (!hint || !hint.classList.contains('origin-source-list')) {
+            hint = document.createElement('div');
+            hint.className = 'origin-source-list';
+            sourceAddBtn.parentElement.after(hint);
+          }
+          hint.innerHTML = '';
+          originSources.forEach(function(u, i) {
+            hint.innerHTML += '<div class="text-sm" style="margin-top:4px;">' + u + ' <span style="cursor:pointer;color:var(--color-dark);" data-remove-origin-src="' + i + '">&times;</span></div>';
+          });
+        });
+      }
+
+      // Remove source in origin form
+      if (originForm) {
+        originForm.addEventListener('click', function(e) {
+          var rm = e.target.getAttribute('data-remove-origin-src');
+          if (rm !== null) {
+            originSources.splice(parseInt(rm), 1);
+            var list = originForm.querySelector('.origin-source-list');
+            if (list) {
+              list.innerHTML = '';
+              originSources.forEach(function(u, i) {
+                list.innerHTML += '<div class="text-sm" style="margin-top:4px;">' + u + ' <span style="cursor:pointer;color:var(--color-dark);" data-remove-origin-src="' + i + '">&times;</span></div>';
+              });
+            }
+          }
+        });
+      }
+
+      // Submit origin
+      if (submitOriginBtn) {
+        submitOriginBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          var desc = originForm.querySelector('.form-textarea');
+          var descText = desc ? desc.value.trim() : '';
+          if (!descText) { alert(t('origin_desc_required')); return; }
+
+          // Get current cultivar
+          var cultivarPage = document.getElementById('page-cultivar');
+          var h1 = cultivarPage ? cultivarPage.querySelector('h1') : null;
+          var cultivarName = h1 ? h1.textContent : '';
+          if (!cultivarName || !cultivarData[cultivarName]) return;
+
+          // Build formula if provided
+          var formulaInputs = originForm.querySelectorAll('.formula-box .form-input');
+          var pA = formulaInputs[0] ? formulaInputs[0].value.trim() : '';
+          var pB = formulaInputs[1] ? formulaInputs[1].value.trim() : '';
+
+          var newOrigin = {
+            trust: 25, trustClass: 'trust--low',
+            body: descText,
+            sources: originSources.map(function(url) { return { icon: '\u{1F310}', text: url }; }),
+            author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
+            votes: { agree: 0, disagree: 0 }
+          };
+
+          cultivarData[cultivarName].origins.push(newOrigin);
+          if (pA && pB && !cultivarData[cultivarName].formula) {
+            cultivarData[cultivarName].formula = { parentA: pA, parentB: pB };
+          }
+
+          renderOrigins(cultivarName);
+
+          // Reset form
+          if (desc) desc.value = '';
+          originSources = [];
+          var list = originForm.querySelector('.origin-source-list');
+          if (list) list.innerHTML = '';
+          if (formulaInputs[0]) formulaInputs[0].value = '';
+          if (formulaInputs[1]) formulaInputs[1].value = '';
+
+          // Hide form, show button
+          originForm.style.display = 'none';
+          var toggle = document.getElementById('add-origin-toggle');
+          if (toggle) toggle.style.display = 'block';
+
+          alert(t('origin_added'));
+        });
+      }
+    })();
+
+    // ========================================
+    // UPDATE renderOrigins and paginateGenus to use t()
+    // ========================================
+    // Override renderOrigins to use translation keys
+    var _origRenderOrigins = renderOrigins;
+    renderOrigins = function(cultivarName) {
+      var container = document.getElementById('origins-container');
+      if (!container) return;
+      var data = cultivarData[cultivarName];
+      if (!data || !data.origins) {
+        container.innerHTML = '<div class="text-center text-muted" style="padding:var(--space-xl);">' + t('no_origin_data') + '</div>';
+        return;
+      }
+      var origins = data.origins.slice().sort(function(a, b) { return b.trust - a.trust; });
+      var html = '';
+      if (data.formula) {
+        html += '<div class="formula-box mb-lg" style="justify-content:center;">';
+        html += '<span class="formula-parent">' + data.formula.parentA + '</span>';
+        html += '<span class="formula-operator">&times;</span>';
+        html += '<span class="formula-parent">' + data.formula.parentB + '</span>';
+        html += '</div>';
+      }
+      origins.forEach(function(origin, i) {
+        var trustLevel = origin.trust >= 70 ? 'trust--high' : (origin.trust >= 40 ? 'trust--mid' : 'trust--low');
+        html += '<div class="origin-card">';
+        html += '<div class="origin-card__header">';
+        html += '<span class="origin-card__rank">#' + (i + 1) + '</span>';
+        html += '<div class="trust trust--lg" style="flex:1;margin-left:var(--space-md);">';
+        html += '<div class="trust__bar"><div class="trust__fill ' + trustLevel + '" style="width:' + origin.trust + '%"></div></div>';
+        html += '<span class="trust__label">' + origin.trust + '%</span>';
+        html += '</div></div>';
+        html += '<div class="origin-card__body"><p>' + origin.body + '</p></div>';
+        html += '<div class="origin-card__sources">';
+        html += '<div class="text-sm font-bold mb-sm">' + t('source_label') + '</div>';
+        origin.sources.forEach(function(src) {
+          html += '<div class="origin-card__source-item">';
+          html += '<span class="source-link__icon">' + src.icon + '</span>';
+          html += '<a href="#">' + src.text + '</a>';
+          html += '</div>';
+        });
+        html += '</div>';
+        html += '<div class="origin-card__footer">';
+        html += '<div class="origin-card__author">';
+        if (origin.author.isAI) {
+          html += '<span class="badge badge--ai">&#x1F916; AI</span>';
+        } else {
+          html += '<span>&#x1F464;</span>';
+          html += '<span>' + origin.author.name + '</span>';
+        }
+        html += '<span class="text-gray">' + origin.author.date + '</span>';
+        html += '</div>';
+        html += '<div class="vote-group">';
+        html += '<button class="vote-btn vote-btn--agree">&#x1F44D; ' + t('vote_agree') + ' <span class="vote-btn__count">' + origin.votes.agree + '</span></button>';
+        html += '<button class="vote-btn vote-btn--disagree">&#x1F44E; ' + t('vote_disagree') + ' <span class="vote-btn__count">' + origin.votes.disagree + '</span></button>';
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+      });
+      container.innerHTML = html;
+    };
+
+    // Override paginateGenus count text to use t()
+    var _origPaginate = paginateGenus;
+    paginateGenus = function(genusEl, page) {
+      _origPaginate(genusEl, page);
+      // Fix count text with translations
+      var countEl = genusEl.querySelector('.text-muted.mb-lg');
+      if (countEl) {
+        var rows = Array.from(genusEl.querySelectorAll('.cultivar-row:not([data-filtered])'));
+        var totalCount = genusEl.querySelectorAll('.cultivar-row').length;
+        var input = genusEl.querySelector('.search-bar__input');
+        if (input && input.value.trim()) {
+          countEl.textContent = t('search_hit').replace('{n}', rows.length).replace('{total}', totalCount);
+        } else {
+          countEl.textContent = totalCount + ' ' + t('cultivars_registered');
+        }
+      }
+    };
+
+    // Override globalSearch to use t()
+    var _origGlobalSearch = globalSearch;
+    globalSearch = function(query) {
+      var q = query.toLowerCase().trim();
+      if (!q) return;
+      var results = [];
+      document.querySelectorAll('.genus-content .cultivar-row').forEach(function(row) {
+        var nameEl = row.querySelector('.cultivar-row__name');
+        if (nameEl && nameEl.textContent.toLowerCase().includes(q)) {
+          results.push(row.cloneNode(true));
+        }
+      });
+      var searchPage = document.getElementById('page-search');
+      var title = searchPage.querySelector('.section-title');
+      if (title) title.textContent = t('search_title_tpl').replace('{q}', query);
+      var count = searchPage.querySelector('.text-muted.mb-lg');
+      if (count) count.textContent = t('results_count').replace('{n}', results.length);
+      var resultCard = searchPage.querySelector('.card');
+      if (resultCard) {
+        resultCard.innerHTML = '';
+        if (results.length === 0) {
+          resultCard.innerHTML = '<div style="padding:var(--space-xl);text-align:center;" class="text-muted">' + t('no_results') + '</div>';
+        } else {
+          results.forEach(function(r) { resultCard.appendChild(r); });
+        }
+      }
+      var searchPag = searchPage.querySelector('.pagination');
+      if (searchPag) searchPag.innerHTML = '<a class="page-link active">1</a>';
+      showPage('search');
+    };
+
+    // Re-initialize pagination with translated text
+    document.querySelectorAll('.genus-content').forEach(function(g) {
+      paginateGenus(g, 1);
+    });
+
+    // ========================================
+    // AFFILIATE LINKS
+    // ========================================
+    var affiliateProducts = [
+      { name: '鉢・ポット', nameEn: 'Pots', icon: '🪴', badge: '人気', badgeEn: 'Popular',
+        rakuten: '#rakuten-pots', amazon: '#amazon-pots', yahoo: '#yahoo-pots' },
+      { name: '用土・培養土', nameEn: 'Soil & Mix', icon: '🌱', badge: '', badgeEn: '',
+        rakuten: '#rakuten-soil', amazon: '#amazon-soil', yahoo: '#yahoo-soil' },
+      { name: '肥料', nameEn: 'Fertilizer', icon: '💧', badge: '', badgeEn: '',
+        rakuten: '#rakuten-fertilizer', amazon: '#amazon-fertilizer', yahoo: '#yahoo-fertilizer' }
+    ];
+
+    function renderAffiliateLinks(cultivarName) {
+      var container = document.getElementById('affiliate-links');
+      if (!container) return;
+
+      var html = '';
+      affiliateProducts.forEach(function(product) {
+        var prodName = currentLang === 'en' ? product.nameEn : product.name;
+        var badge = currentLang === 'en' ? product.badgeEn : product.badge;
+        html += '<div class="affiliate-product">';
+        html += '<div class="affiliate-product__header">';
+        html += '<span class="affiliate-product__icon">' + product.icon + '</span>';
+        html += '<span class="affiliate-product__name">' + prodName + '</span>';
+        if (badge) html += '<span class="affiliate-card__badge">' + badge + '</span>';
+        html += '</div>';
+        html += '<div class="affiliate-product__links">';
+        html += '<a href="' + product.rakuten + '" class="affiliate-link affiliate-link--rakuten" target="_blank" rel="noopener">';
+        html += '🛍️ ' + t('shop_rakuten') + '</a>';
+        html += '<a href="' + product.amazon + '" class="affiliate-link affiliate-link--amazon" target="_blank" rel="noopener">';
+        html += '📦 ' + t('shop_amazon') + '</a>';
+        html += '<a href="' + product.yahoo + '" class="affiliate-link affiliate-link--yahoo" target="_blank" rel="noopener">';
+        html += '🛒 ' + t('shop_yahoo') + '</a>';
+        html += '</div>';
+        html += '</div>';
+      });
+      container.innerHTML = html;
+    }
+
+    // Hook into updateCultivarDetail
+    var _origUpdateDetail = updateCultivarDetail;
+    updateCultivarDetail = function(cultivarName, rowEl) {
+      _origUpdateDetail(cultivarName, rowEl);
+      renderAffiliateLinks(cultivarName);
+    };
+
+    // ========================================
+    // IMAGE UPLOAD
+    // ========================================
+    (function() {
+      var MAX_SIZE = 5 * 1024 * 1024; // 5MB
+      var ALLOWED_TYPES = ['image/jpeg', 'image/png'];
+
+      function validateFile(file) {
+        if (ALLOWED_TYPES.indexOf(file.type) === -1) {
+          alert(t('upload_error_type'));
+          return false;
+        }
+        if (file.size > MAX_SIZE) {
+          alert(t('upload_error_size'));
+          return false;
+        }
+        return true;
+      }
+
+      // --- Gallery Upload (cultivar detail page) ---
+      var galleryUpload = document.getElementById('gallery-upload');
+      var galleryInput = document.getElementById('gallery-file-input');
+
+      if (galleryUpload && galleryInput) {
+        galleryUpload.addEventListener('click', function(e) {
+          if (e.target === galleryInput) return;
+          galleryInput.click();
+        });
+
+        galleryInput.addEventListener('change', function() {
+          var file = this.files[0];
+          if (!file || !validateFile(file)) { this.value = ''; return; }
+
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var item = document.createElement('div');
+            item.className = 'gallery__item';
+            item.innerHTML =
+              '<div class="gallery__img"><img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-md)"></div>' +
+              '<div class="gallery__actions">' +
+                '<div class="auth-vote">' +
+                  '<button class="auth-btn">Real <span class="auth-btn__count">0</span></button>' +
+                  '<button class="auth-btn">Fake <span class="auth-btn__count">0</span></button>' +
+                '</div>' +
+                '<a class="gallery__delete">' + t('request_delete') + '</a>' +
+              '</div>';
+            galleryUpload.parentNode.insertBefore(item, galleryUpload);
+          };
+          reader.readAsDataURL(file);
+          this.value = '';
+        });
+      }
+
+      // --- Contribute Form Upload ---
+      var contributeArea = document.getElementById('contribute-upload-area');
+      var contributeInput = document.getElementById('contribute-file-input');
+      var contributePreview = document.getElementById('contribute-preview');
+      var contributeImages = [];
+
+      if (contributeArea && contributeInput && contributePreview) {
+        // Click to upload
+        contributeArea.addEventListener('click', function(e) {
+          if (e.target === contributeInput) return;
+          contributeInput.click();
+        });
+
+        // Drag and drop
+        contributeArea.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          this.classList.add('upload-area--dragover');
+        });
+        contributeArea.addEventListener('dragleave', function() {
+          this.classList.remove('upload-area--dragover');
+        });
+        contributeArea.addEventListener('drop', function(e) {
+          e.preventDefault();
+          this.classList.remove('upload-area--dragover');
+          var files = e.dataTransfer.files;
+          for (var i = 0; i < files.length; i++) {
+            addContributeImage(files[i]);
+          }
+        });
+
+        // File input change
+        contributeInput.addEventListener('change', function() {
+          for (var i = 0; i < this.files.length; i++) {
+            addContributeImage(this.files[i]);
+          }
+          this.value = '';
+        });
+
+        function addContributeImage(file) {
+          if (contributeImages.length >= 3) {
+            alert(t('upload_error_max'));
+            return;
+          }
+          if (!validateFile(file)) return;
+
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var idx = contributeImages.length;
+            contributeImages.push(e.target.result);
+            renderContributePreview();
+          };
+          reader.readAsDataURL(file);
+        }
+
+        function renderContributePreview() {
+          contributePreview.innerHTML = '';
+          contributeImages.forEach(function(src, i) {
+            var item = document.createElement('div');
+            item.className = 'upload-preview__item';
+            item.innerHTML =
+              '<img class="upload-preview__img" src="' + src + '">' +
+              '<button class="upload-preview__remove" data-idx="' + i + '">&times;</button>';
+            contributePreview.appendChild(item);
+          });
+          // Attach remove handlers
+          contributePreview.querySelectorAll('.upload-preview__remove').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              contributeImages.splice(parseInt(this.getAttribute('data-idx')), 1);
+              renderContributePreview();
+            });
+          });
+        }
+
+        // Expose for form reset
+        window.resetContributeImages = function() {
+          contributeImages = [];
+          contributePreview.innerHTML = '';
+        };
+      }
+    })();
+
+    // ========================================
+    // CONTACT FORM - Demo handler
+    // ========================================
+    (function() {
+      var submitBtn = document.getElementById('contact-submit');
+      if (!submitBtn) return;
+      submitBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var name = document.getElementById('contact-name').value.trim();
+        var email = document.getElementById('contact-email').value.trim();
+        var message = document.getElementById('contact-message').value.trim();
+        if (!name || !email || !message) {
+          alert(t('contact_error_required'));
+          return;
+        }
+        alert(t('contact_success'));
+        document.getElementById('contact-name').value = '';
+        document.getElementById('contact-email').value = '';
+        document.getElementById('contact-message').value = '';
+      });
+    })();
+  </script>
+
+</body>
+</html>
