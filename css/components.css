@@ -1271,3 +1271,221 @@
   margin-top: var(--space-xs);
 }
 
+/* ========================================
+   AFFILIATE SECTION
+   ======================================== */
+.affiliate-section {
+  margin-top: var(--space-2xl);
+}
+
+.affiliate-section .section-title {
+  text-align: center;
+}
+
+.affiliate-banner {
+  background: linear-gradient(135deg, #2D6A4F 0%, #40916C 50%, #52B788 100%);
+  border-radius: 16px;
+  padding: 28px 24px 20px;
+  margin-top: var(--space-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.affiliate-banner::before {
+  content: '';
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 120px;
+  height: 120px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+}
+
+.affiliate-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: -20px;
+  width: 80px;
+  height: 80px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+
+.affiliate-banner__title {
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  margin-bottom: 16px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.affiliate-banner__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 600px) {
+  .affiliate-banner__grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+.affiliate-card {
+  background: rgba(255,255,255,0.95);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.affiliate-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.affiliate-card__icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.affiliate-card__name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-primary-dark);
+  margin-bottom: 4px;
+}
+
+.affiliate-card__badge {
+  display: inline-block;
+  background: #ff6b6b;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.affiliate-card__shops {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.affiliate-card__shop {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.affiliate-card__shop:hover {
+  opacity: 0.85;
+}
+
+.affiliate-card__shop--rakuten {
+  background: #BF0000;
+  color: #fff;
+}
+
+.affiliate-card__shop--amazon {
+  background: #FF9900;
+  color: #111;
+}
+
+.affiliate-card__shop--yahoo {
+  background: #FF0033;
+  color: #fff;
+}
+
+.affiliate-notice {
+  text-align: center;
+  color: rgba(255,255,255,0.7);
+  font-size: 0.7rem;
+  margin-top: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Affiliate in cultivar detail page */
+.affiliate-product {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.affiliate-product__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.affiliate-product__icon {
+  font-size: 1.3rem;
+}
+
+.affiliate-product__name {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.affiliate-product__links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.affiliate-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.affiliate-link:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.affiliate-link--rakuten {
+  background: #BF0000;
+  color: #fff;
+}
+
+.affiliate-link--amazon {
+  background: #FF9900;
+  color: #111;
+}
+
+.affiliate-link--yahoo {
+  background: #FF0033;
+  color: #fff;
+}
+

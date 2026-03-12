@@ -153,6 +153,15 @@
         </div>
       </div>
 
+      <!-- Affiliate Banner on Top Page -->
+      <div class="affiliate-section" id="top-affiliate">
+        <div class="affiliate-banner">
+          <div class="affiliate-banner__title" data-i18n="affiliate_top_title">植物のお世話に必要なアイテム</div>
+          <div class="affiliate-banner__grid" id="top-affiliate-grid"></div>
+          <p class="affiliate-notice" data-i18n="affiliate_notice">※ 上記はアフィリエイトリンクです。購入によりサイト運営をサポートできます。</p>
+        </div>
+      </div>
+
       <!-- How it works -->
       <div class="mt-2xl">
         <h2 class="section-title text-center" data-i18n="how_it_works">仕組み</h2>
@@ -618,6 +627,15 @@
 
         <div class="text-center mt-lg">
           <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="add_cultivar">+ 品種を追加</a>
+        </div>
+
+        <!-- Affiliate Banner on Genus Page -->
+        <div class="affiliate-section" id="genus-affiliate">
+          <div class="affiliate-banner">
+            <div class="affiliate-banner__title" data-i18n="affiliate_top_title">植物のお世話に必要なアイテム</div>
+            <div class="affiliate-banner__grid" id="genus-affiliate-grid"></div>
+            <p class="affiliate-notice" data-i18n="affiliate_notice">※ 上記はアフィリエイトリンクです。購入によりサイト運営をサポートできます。</p>
+          </div>
         </div>
       </div>
 
@@ -2301,6 +2319,7 @@
       origin_desc_required: { jp: '由来の説明を入力してください', en: 'Please enter a description for the origin' },
       buy_this_plant: { jp: '関連商品', en: 'Related Products' },
       affiliate_notice: { jp: '※ 上記はアフィリエイトリンクです。購入によりサイト運営をサポートできます。', en: '※ These are affiliate links. Purchases help support site operations.' },
+      affiliate_top_title: { jp: '🌿 植物のお世話に必要なアイテム', en: '🌿 Essential Items for Plant Care' },
       shop_rakuten: { jp: '楽天市場で探す', en: 'Shop on Rakuten' },
       shop_amazon: { jp: 'Amazonで探す', en: 'Shop on Amazon' },
       shop_yahoo: { jp: 'Yahoo!で探す', en: 'Shop on Yahoo!' },
@@ -3081,6 +3100,33 @@
         amazon: 'https://www.amazon.co.jp/s?k=%E8%A6%B3%E8%91%89%E6%A4%8D%E7%89%A9+%E8%82%A5%E6%96%99&tag=plantsstory-22',
         yahoo: 'https://shopping.yahoo.co.jp/search?p=%E8%A6%B3%E8%91%89%E6%A4%8D%E7%89%A9+%E8%82%A5%E6%96%99' }
     ];
+
+    // Render affiliate cards in banner style (for top page & genus page)
+    function renderAffiliateBanner(containerId) {
+      var container = document.getElementById(containerId);
+      if (!container) return;
+
+      var html = '';
+      affiliateProducts.forEach(function(product) {
+        var prodName = currentLang === 'en' ? product.nameEn : product.name;
+        var badge = currentLang === 'en' ? product.badgeEn : product.badge;
+        html += '<div class="affiliate-card">';
+        html += '<span class="affiliate-card__icon">' + product.icon + '</span>';
+        html += '<div class="affiliate-card__name">' + prodName + '</div>';
+        if (badge) html += '<span class="affiliate-card__badge">' + badge + '</span>';
+        html += '<div class="affiliate-card__shops">';
+        html += '<a href="' + product.rakuten + '" class="affiliate-card__shop affiliate-card__shop--rakuten" target="_blank" rel="noopener">楽天</a>';
+        html += '<a href="' + product.amazon + '" class="affiliate-card__shop affiliate-card__shop--amazon" target="_blank" rel="noopener">Amazon</a>';
+        html += '<a href="' + product.yahoo + '" class="affiliate-card__shop affiliate-card__shop--yahoo" target="_blank" rel="noopener">Yahoo!</a>';
+        html += '</div>';
+        html += '</div>';
+      });
+      container.innerHTML = html;
+    }
+
+    // Render on page load
+    renderAffiliateBanner('top-affiliate-grid');
+    renderAffiliateBanner('genus-affiliate-grid');
 
     function renderAffiliateLinks(cultivarName) {
       var container = document.getElementById('affiliate-links');
