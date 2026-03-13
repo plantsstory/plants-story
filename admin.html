@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plants Story - Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-primary);
+      background: var(--color-bg);
+      color: var(--color-black);
+      min-height: 100vh;
+    }
+
+    /* ---- Layout ---- */
+    .admin-header {
+      background: var(--color-primary-dark);
+      color: #fff;
+      padding: var(--space-md) var(--space-xl);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .admin-header h1 { font-family: var(--font-heading); font-size: var(--font-size-lg); }
+    .admin-header .user-info { font-size: var(--font-size-sm); opacity: 0.8; }
+    .admin-header button {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 6px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: var(--font-size-sm);
+    }
+    .admin-header button:hover { background: rgba(255,255,255,0.25); }
+
+    .admin-body { display: flex; min-height: calc(100vh - 56px); }
+
+    .admin-nav {
+      width: 220px;
+      background: var(--color-white);
+      border-right: 1px solid var(--color-light);
+      padding: var(--space-md) 0;
+      flex-shrink: 0;
+    }
+    .admin-nav a {
+      display: block;
+      padding: var(--space-sm) var(--space-lg);
+      color: var(--color-mid);
+      text-decoration: none;
+      font-size: var(--font-size-sm);
+      border-left: 3px solid transparent;
+      transition: var(--transition);
+    }
+    .admin-nav a:hover { background: var(--color-lighter); color: var(--color-primary); }
+    .admin-nav a.active {
+      color: var(--color-primary);
+      border-left-color: var(--color-primary);
+      background: var(--color-lighter);
+      font-weight: 700;
+    }
+
+    .admin-content {
+      flex: 1;
+      padding: var(--space-xl);
+      max-width: 1200px;
+      overflow-x: auto;
+    }
+
+    /* ---- Login ---- */
+    .login-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--color-bg);
+    }
+    .login-box {
+      background: var(--color-white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: var(--space-2xl);
+      width: 100%;
+      max-width: 400px;
+    }
+    .login-box h1 {
+      font-family: var(--font-heading);
+      color: var(--color-primary);
+      margin-bottom: var(--space-lg);
+      text-align: center;
+    }
+    .login-box input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--color-light);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-base);
+      margin-bottom: var(--space-md);
+    }
+    .login-box input:focus { outline: none; border-color: var(--color-primary); }
+    .login-error {
+      color: var(--color-danger);
+      font-size: var(--font-size-sm);
+      margin-bottom: var(--space-md);
+      display: none;
+    }
+
+    /* ---- Buttons ---- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: var(--font-primary);
+    }
+    .btn-primary { background: var(--color-primary); color: #fff; }
+    .btn-primary:hover { background: var(--color-primary-dark); }
+    .btn-danger { background: var(--color-danger); color: #fff; }
+    .btn-danger:hover { opacity: 0.85; }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--color-light);
+      color: var(--color-mid);
+    }
+    .btn-outline:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .btn-sm { padding: 4px 10px; font-size: var(--font-size-xs); }
+    .btn-warning { background: var(--color-accent-warm); color: #fff; }
+
+    /* ---- Cards ---- */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+    .stat-card {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-card .stat-value {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+    .stat-card .stat-label {
+      font-size: var(--font-size-sm);
+      color: var(--color-gray);
+      margin-top: var(--space-xs);
+    }
+
+    /* ---- Table ---- */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .data-table th, .data-table td {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: var(--font-size-sm);
+      border-bottom: 1px solid var(--color-lighter);
+    }
+    .data-table th {
+      background: var(--color-primary-dark);
+      color: #fff;
+      font-weight: 500;
+      font-size: var(--font-size-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .data-table tr:hover td { background: var(--color-bg); }
+    .data-table .actions { white-space: nowrap; }
+
+    /* ---- Modal ---- */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--color-white);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal h2 { font-family: var(--font-heading); margin-bottom: var(--space-lg); }
+    .modal label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      margin-bottom: var(--space-xs);
+      color: var(--color-mid);
+    }
+    .modal input, .modal textarea, .modal select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--color-light);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      margin-bottom: var(--space-md);
+      font-family: var(--font-primary);
+    }
+    .modal textarea { min-height: 80px; resize: vertical; }
+    .modal-actions { display: flex; gap: var(--space-sm); justify-content: flex-end; margin-top: var(--space-md); }
+
+    /* ---- Misc ---- */
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: var(--font-size-xl);
+      color: var(--color-primary);
+      margin-bottom: var(--space-lg);
+    }
+    .toolbar {
+      display: flex;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .toolbar input[type="text"] {
+      padding: 8px 12px;
+      border: 1px solid var(--color-light);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      width: 250px;
+    }
+    .toolbar select {
+      padding: 8px 12px;
+      border: 1px solid var(--color-light);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+    }
+    .badge-s { background: #8b5cf6; color: #fff; }
+    .badge-a { background: #3b82f6; color: #fff; }
+    .badge-b { background: #10b981; color: #fff; }
+    .badge-c { background: #f59e0b; color: #fff; }
+    .badge-d { background: #ef4444; color: #fff; }
+    .badge-ai { background: #f59e0b; color: #fff; }
+    .badge-user { background: var(--color-primary-light); color: #fff; }
+    .badge-completed { background: var(--color-primary-light); color: #fff; }
+    .badge-pending { background: var(--color-accent-warm); color: #fff; }
+    .badge-failed { background: var(--color-danger); color: #fff; }
+    .trust-bar {
+      display: inline-block;
+      width: 60px;
+      height: 8px;
+      background: var(--color-lighter);
+      border-radius: 4px;
+      overflow: hidden;
+      vertical-align: middle;
+    }
+    .trust-fill { height: 100%; border-radius: 4px; }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--color-primary);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      z-index: 300;
+      display: none;
+      font-size: var(--font-size-sm);
+    }
+    .toast.show { display: block; }
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--color-lighter);
+      border-radius: 3px;
+      overflow: hidden;
+      margin: var(--space-sm) 0;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--color-primary-light);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+    .hidden { display: none !important; }
+
+    @media (max-width: 768px) {
+      .admin-nav { display: none; }
+      .admin-content { padding: var(--space-md); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="login-screen" class="login-container">
+  <div class="login-box">
+    <h1>Plants Story Admin</h1>
+    <div id="login-error" class="login-error"></div>
+    <input type="email" id="login-email" placeholder="メールアドレス" autocomplete="email">
+    <input type="password" id="login-password" placeholder="パスワード" autocomplete="current-password">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" id="btn-login">ログイン</button>
+  </div>
+</div>
+
+<!-- ============ ADMIN APP ============ -->
+<div id="admin-app" class="hidden">
+  <header class="admin-header">
+    <h1>Plants Story Admin</h1>
+    <div style="display:flex;align-items:center;gap:var(--space-md);">
+      <span class="user-info" id="admin-email"></span>
+      <button id="btn-logout">ログアウト</button>
+      <a href="index.html" style="color:#fff;font-size:var(--font-size-sm);text-decoration:none;opacity:0.7;">サイトへ</a>
+    </div>
+  </header>
+  <div class="admin-body">
+    <nav class="admin-nav">
+      <a href="#" data-section="dashboard" class="active">ダッシュボード</a>
+      <a href="#" data-section="cultivars">品種管理</a>
+      <a href="#" data-section="origins">由来管理</a>
+      <a href="#" data-section="images">画像管理</a>
+      <a href="#" data-section="bulk">一括操作</a>
+    </nav>
+    <main class="admin-content">
+
+      <!-- ---- DASHBOARD ---- -->
+      <section id="sec-dashboard">
+        <h2 class="section-title">ダッシュボード</h2>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-cultivars">-</div>
+            <div class="stat-label">品種数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-origins">-</div>
+            <div class="stat-label">由来数（合計）</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-avg-trust">-</div>
+            <div class="stat-label">平均信頼度</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-ai-pending">-</div>
+            <div class="stat-label">AIリサーチ待ち</div>
+          </div>
+        </div>
+        <h3 style="margin-bottom:var(--space-md);font-size:var(--font-size-base);">Tier分布</h3>
+        <div id="tier-distribution" style="display:flex;gap:var(--space-sm);margin-bottom:var(--space-xl);flex-wrap:wrap;"></div>
+        <h3 style="margin-bottom:var(--space-md);font-size:var(--font-size-base);">属別品種数</h3>
+        <div id="genus-distribution" style="display:flex;gap:var(--space-sm);flex-wrap:wrap;"></div>
+      </section>
+
+      <!-- ---- CULTIVARS ---- -->
+      <section id="sec-cultivars" class="hidden">
+        <h2 class="section-title">品種管理</h2>
+        <div class="toolbar">
+          <input type="text" id="cultivar-search" placeholder="品種名で検索...">
+          <select id="cultivar-genus-filter">
+            <option value="">全属</option>
+            <option value="Anthurium">Anthurium</option>
+            <option value="Monstera">Monstera</option>
+            <option value="Philodendron">Philodendron</option>
+          </select>
+          <button class="btn btn-primary btn-sm" id="btn-refresh-cultivars">更新</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>品種名</th>
+              <th>属</th>
+              <th>タイプ</th>
+              <th>由来数</th>
+              <th>AI状態</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="cultivar-tbody"></tbody>
+        </table>
+      </section>
+
+      <!-- ---- ORIGINS ---- -->
+      <section id="sec-origins" class="hidden">
+        <h2 class="section-title">由来管理</h2>
+        <div class="toolbar">
+          <select id="origin-cultivar-select" style="width:350px;">
+            <option value="">品種を選択...</option>
+          </select>
+          <button class="btn btn-outline btn-sm" id="btn-load-origins">読み込み</button>
+        </div>
+        <div id="origins-list"></div>
+      </section>
+
+      <!-- ---- IMAGES ---- -->
+      <section id="sec-images" class="hidden">
+        <h2 class="section-title">画像管理</h2>
+        <p style="color:var(--color-gray);font-size:var(--font-size-sm);margin-bottom:var(--space-lg);">
+          現在、画像はブラウザメモリ上のみで管理されており、永続化されていません。<br>
+          Supabase Storage導入後にこのセクションが有効になります。
+        </p>
+      </section>
+
+      <!-- ---- BULK OPERATIONS ---- -->
+      <section id="sec-bulk" class="hidden">
+        <h2 class="section-title">一括操作</h2>
+
+        <div style="display:grid;gap:var(--space-lg);">
+          <!-- AI Re-research -->
+          <div class="stat-card">
+            <h3 style="margin-bottom:var(--space-md);">AI一括再リサーチ</h3>
+            <div class="toolbar">
+              <select id="bulk-genus-filter">
+                <option value="">全品種</option>
+                <option value="Anthurium">Anthurium</option>
+                <option value="Monstera">Monstera</option>
+                <option value="Philodendron">Philodendron</option>
+              </select>
+              <select id="bulk-target">
+                <option value="all">すべて再リサーチ</option>
+                <option value="empty">由来なしのみ</option>
+                <option value="low">信頼度50%以下のみ</option>
+              </select>
+              <button class="btn btn-warning" id="btn-bulk-research">実行</button>
+            </div>
+            <div id="bulk-progress" class="hidden">
+              <div class="progress-bar"><div class="progress-fill" id="bulk-progress-fill" style="width:0%"></div></div>
+              <div id="bulk-progress-text" style="font-size:var(--font-size-sm);color:var(--color-gray);"></div>
+              <div id="bulk-log" style="max-height:200px;overflow-y:auto;font-size:var(--font-size-xs);font-family:var(--font-mono);margin-top:var(--space-sm);background:var(--color-bg);padding:var(--space-sm);border-radius:var(--radius-sm);"></div>
+            </div>
+          </div>
+
+          <!-- Data Export -->
+          <div class="stat-card">
+            <h3 style="margin-bottom:var(--space-md);">データエクスポート</h3>
+            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">
+              全品種データをJSON形式でダウンロードします。
+            </p>
+            <button class="btn btn-primary" id="btn-export">JSONエクスポート</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============ MODAL ============ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- ============ TOAST ============ -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ========================================
+// Supabase Client
+// ========================================
+var SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
+var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+var allCultivars = [];
+var currentSession = null;
+
+// ========================================
+// Utility
+// ========================================
+function toast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(function() { el.classList.remove('show'); }, 3000);
+}
+
+function showModal(html) {
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+}
+
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function tierBadge(tier) {
+  if (!tier) return '';
+  return '<span class="badge badge-' + tier.toLowerCase() + '">Tier ' + tier + '</span>';
+}
+
+function trustColor(trust) {
+  if (trust >= 70) return 'var(--color-trust-high)';
+  if (trust >= 40) return 'var(--color-trust-mid)';
+  return 'var(--color-trust-low)';
+}
+
+// ========================================
+// Auth
+// ========================================
+document.getElementById('btn-login').addEventListener('click', async function() {
+  var email = document.getElementById('login-email').value.trim();
+  var password = document.getElementById('login-password').value;
+  var errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+
+  if (!email || !password) {
+    errEl.textContent = 'メールとパスワードを入力してください';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  var result = await sb.auth.signInWithPassword({ email: email, password: password });
+  if (result.error) {
+    errEl.textContent = 'ログインに失敗しました: ' + result.error.message;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  var role = result.data.user && result.data.user.app_metadata && result.data.user.app_metadata.role;
+  if (role !== 'admin') {
+    await sb.auth.signOut();
+    errEl.textContent = '管理者権限がありません';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  currentSession = result.data.session;
+  enterAdmin(result.data.user);
+});
+
+document.getElementById('login-password').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('btn-login').click();
+});
+
+document.getElementById('btn-logout').addEventListener('click', async function() {
+  await sb.auth.signOut();
+  currentSession = null;
+  document.getElementById('admin-app').classList.add('hidden');
+  document.getElementById('login-screen').style.display = 'flex';
+});
+
+// Check existing session on load
+(async function() {
+  var result = await sb.auth.getSession();
+  if (result.data.session) {
+    var user = result.data.session.user;
+    var role = user && user.app_metadata && user.app_metadata.role;
+    if (role === 'admin') {
+      currentSession = result.data.session;
+      enterAdmin(user);
+    }
+  }
+})();
+
+function enterAdmin(user) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-app').classList.remove('hidden');
+  document.getElementById('admin-email').textContent = user.email;
+  loadDashboard();
+  loadAllCultivars();
+}
+
+// ========================================
+// Navigation
+// ========================================
+document.querySelectorAll('.admin-nav a').forEach(function(link) {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    var section = this.getAttribute('data-section');
+    document.querySelectorAll('.admin-nav a').forEach(function(a) { a.classList.remove('active'); });
+    this.classList.add('active');
+    document.querySelectorAll('.admin-content > section').forEach(function(s) { s.classList.add('hidden'); });
+    document.getElementById('sec-' + section).classList.remove('hidden');
+  });
+});
+
+// ========================================
+// Load All Cultivars (shared data)
+// ========================================
+async function loadAllCultivars() {
+  var result = await sb.from('cultivars').select('*').order('id');
+  if (result.error) { toast('データ取得エラー'); return; }
+  allCultivars = result.data || [];
+  renderCultivarTable();
+  populateOriginSelect();
+}
+
+// ========================================
+// DASHBOARD
+// ========================================
+async function loadDashboard() {
+  var result = await sb.from('cultivars').select('*');
+  if (result.error) return;
+  var data = result.data || [];
+
+  document.getElementById('stat-cultivars').textContent = data.length;
+
+  var totalOrigins = 0;
+  var totalTrust = 0;
+  var trustCount = 0;
+  var pendingCount = 0;
+  var tierCounts = { S: 0, A: 0, B: 0, C: 0, D: 0 };
+  var genusCounts = {};
+
+  data.forEach(function(c) {
+    var origins = c.origins || [];
+    totalOrigins += origins.length;
+    origins.forEach(function(o) {
+      if (o.trust) { totalTrust += o.trust; trustCount++; }
+      if (o.source_tier && tierCounts.hasOwnProperty(o.source_tier)) {
+        tierCounts[o.source_tier]++;
+      }
+    });
+    if (c.ai_status === 'pending' || c.ai_status === 'researching') pendingCount++;
+    var g = c.genus || 'Unknown';
+    genusCounts[g] = (genusCounts[g] || 0) + 1;
+  });
+
+  document.getElementById('stat-origins').textContent = totalOrigins;
+  document.getElementById('stat-avg-trust').textContent = trustCount ? Math.round(totalTrust / trustCount) + '%' : '-';
+  document.getElementById('stat-ai-pending').textContent = pendingCount;
+
+  // Tier distribution
+  var tierHtml = '';
+  ['S', 'A', 'B', 'C', 'D'].forEach(function(t) {
+    tierHtml += '<div class="stat-card" style="padding:var(--space-md);text-align:center;min-width:80px;">';
+    tierHtml += tierBadge(t) + '<br>';
+    tierHtml += '<span style="font-size:var(--font-size-lg);font-weight:700;">' + tierCounts[t] + '</span>';
+    tierHtml += '</div>';
+  });
+  document.getElementById('tier-distribution').innerHTML = tierHtml;
+
+  // Genus distribution
+  var genusHtml = '';
+  Object.keys(genusCounts).sort().forEach(function(g) {
+    genusHtml += '<div class="stat-card" style="padding:var(--space-md);text-align:center;min-width:120px;">';
+    genusHtml += '<span style="font-size:var(--font-size-lg);font-weight:700;">' + genusCounts[g] + '</span><br>';
+    genusHtml += '<span style="font-size:var(--font-size-sm);color:var(--color-gray);">' + escapeHtml(g) + '</span>';
+    genusHtml += '</div>';
+  });
+  document.getElementById('genus-distribution').innerHTML = genusHtml;
+}
+
+// ========================================
+// CULTIVAR MANAGEMENT
+// ========================================
+function renderCultivarTable() {
+  var search = (document.getElementById('cultivar-search').value || '').toLowerCase();
+  var genusFilter = document.getElementById('cultivar-genus-filter').value;
+  var filtered = allCultivars.filter(function(c) {
+    if (search && c.cultivar_name.toLowerCase().indexOf(search) === -1) return false;
+    if (genusFilter && c.genus !== genusFilter) return false;
+    return true;
+  });
+
+  var html = '';
+  filtered.forEach(function(c) {
+    var originCount = (c.origins || []).length;
+    var statusClass = c.ai_status === 'completed' ? 'badge-completed' : (c.ai_status === 'failed' ? 'badge-failed' : 'badge-pending');
+    html += '<tr>';
+    html += '<td>' + c.id + '</td>';
+    html += '<td><strong>' + escapeHtml(c.cultivar_name) + '</strong></td>';
+    html += '<td>' + escapeHtml(c.genus) + '</td>';
+    html += '<td>' + escapeHtml(c.type) + '</td>';
+    html += '<td>' + originCount + '</td>';
+    html += '<td><span class="badge ' + statusClass + '">' + escapeHtml(c.ai_status || '-') + '</span></td>';
+    html += '<td class="actions">';
+    html += '<button class="btn btn-outline btn-sm" onclick="editCultivar(' + c.id + ')">編集</button> ';
+    html += '<button class="btn btn-outline btn-sm" onclick="reresearchCultivar(' + c.id + ')">AI再調査</button> ';
+    html += '<button class="btn btn-danger btn-sm" onclick="deleteCultivar(' + c.id + ',\'' + escapeHtml(c.cultivar_name).replace(/'/g,"\\'") + '\')">削除</button>';
+    html += '</td>';
+    html += '</tr>';
+  });
+  document.getElementById('cultivar-tbody').innerHTML = html || '<tr><td colspan="7" style="text-align:center;color:var(--color-gray);">データなし</td></tr>';
+}
+
+document.getElementById('cultivar-search').addEventListener('input', renderCultivarTable);
+document.getElementById('cultivar-genus-filter').addEventListener('change', renderCultivarTable);
+document.getElementById('btn-refresh-cultivars').addEventListener('click', function() {
+  loadAllCultivars();
+  toast('データを更新しました');
+});
+
+function editCultivar(id) {
+  var c = allCultivars.find(function(x) { return x.id === id; });
+  if (!c) return;
+  var html = '<h2>品種を編集</h2>';
+  html += '<label>品種名</label><input type="text" id="edit-name" value="' + escapeHtml(c.cultivar_name) + '">';
+  html += '<label>属</label><select id="edit-genus">';
+  ['Anthurium', 'Monstera', 'Philodendron'].forEach(function(g) {
+    html += '<option value="' + g + '"' + (c.genus === g ? ' selected' : '') + '>' + g + '</option>';
+  });
+  html += '</select>';
+  html += '<label>タイプ</label><select id="edit-type">';
+  ['species', 'hybrid', 'clone'].forEach(function(t) {
+    html += '<option value="' + t + '"' + (c.type === t ? ' selected' : '') + '>' + t + '</option>';
+  });
+  html += '</select>';
+  html += '<div class="modal-actions">';
+  html += '<button class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
+  html += '<button class="btn btn-primary" onclick="saveCultivar(' + id + ')">保存</button>';
+  html += '</div>';
+  showModal(html);
+}
+
+async function saveCultivar(id) {
+  var name = document.getElementById('edit-name').value.trim();
+  var genus = document.getElementById('edit-genus').value;
+  var type = document.getElementById('edit-type').value;
+  if (!name) { toast('品種名を入力してください'); return; }
+
+  var result = await sb.from('cultivars').update({
+    cultivar_name: name, genus: genus, type: type, updated_at: new Date().toISOString()
+  }).eq('id', id);
+
+  if (result.error) { toast('更新エラー: ' + result.error.message); return; }
+  closeModal();
+  toast('品種を更新しました');
+  loadAllCultivars();
+  loadDashboard();
+}
+
+async function deleteCultivar(id, name) {
+  if (!confirm('「' + name + '」を削除しますか？この操作は取り消せません。')) return;
+  var result = await sb.from('cultivars').delete().eq('id', id);
+  if (result.error) { toast('削除エラー: ' + result.error.message); return; }
+  toast('品種を削除しました');
+  loadAllCultivars();
+  loadDashboard();
+}
+
+async function reresearchCultivar(id) {
+  var c = allCultivars.find(function(x) { return x.id === id; });
+  if (!c) return;
+  if (!confirm('「' + c.cultivar_name + '」のAI由来リサーチを再実行しますか？')) return;
+
+  toast('AIリサーチを開始...');
+  try {
+    var session = await sb.auth.getSession();
+    var token = session.data.session ? session.data.session.access_token : SUPABASE_ANON_KEY;
+    var res = await fetch(SUPABASE_URL + '/functions/v1/research-origin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ cultivar_id: c.id, cultivar_name: c.cultivar_name, genus: c.genus, type: c.type })
+    });
+    var data = await res.json();
+    if (data.success) {
+      toast('リサーチ完了: ' + (data.origins_count || 0) + '件の由来');
+    } else {
+      toast('リサーチ失敗: ' + (data.error || 'Unknown'));
+    }
+  } catch (e) {
+    toast('エラー: ' + e.message);
+  }
+  loadAllCultivars();
+  loadDashboard();
+}
+
+// ========================================
+// ORIGIN MANAGEMENT
+// ========================================
+function populateOriginSelect() {
+  var sel = document.getElementById('origin-cultivar-select');
+  var html = '<option value="">品種を選択...</option>';
+  allCultivars.forEach(function(c) {
+    html += '<option value="' + c.id + '">' + escapeHtml(c.cultivar_name) + ' (' + (c.origins || []).length + '件)</option>';
+  });
+  sel.innerHTML = html;
+}
+
+document.getElementById('btn-load-origins').addEventListener('click', loadOrigins);
+document.getElementById('origin-cultivar-select').addEventListener('change', loadOrigins);
+
+function loadOrigins() {
+  var id = parseInt(document.getElementById('origin-cultivar-select').value);
+  if (!id) { document.getElementById('origins-list').innerHTML = ''; return; }
+  var c = allCultivars.find(function(x) { return x.id === id; });
+  if (!c) return;
+  renderOriginsList(c);
+}
+
+function renderOriginsList(cultivar) {
+  var origins = cultivar.origins || [];
+  if (!origins.length) {
+    document.getElementById('origins-list').innerHTML = '<p style="color:var(--color-gray);margin-top:var(--space-md);">由来データなし</p>';
+    return;
+  }
+
+  var html = '<table class="data-table" style="margin-top:var(--space-md);">';
+  html += '<thead><tr><th>#</th><th>ソース</th><th>信頼度</th><th>本文</th><th>著者</th><th>操作</th></tr></thead><tbody>';
+
+  origins.forEach(function(o, i) {
+    var authorLabel = o.author && o.author.isAI ? '<span class="badge badge-ai">AI</span>' : '<span class="badge badge-user">User</span>';
+    var bodyShort = (o.body || '').substring(0, 80);
+    if ((o.body || '').length > 80) bodyShort += '...';
+    var trustPct = o.trust || 0;
+    var tColor = trustColor(trustPct);
+
+    html += '<tr>';
+    html += '<td>' + (i + 1) + '</td>';
+    html += '<td>' + tierBadge(o.source_tier) + ' ' + escapeHtml(o.source_name || '-') + '</td>';
+    html += '<td>';
+    html += '<div class="trust-bar"><div class="trust-fill" style="width:' + trustPct + '%;background:' + tColor + ';"></div></div> ';
+    html += trustPct + '%';
+    html += '</td>';
+    html += '<td style="max-width:300px;">' + escapeHtml(bodyShort) + '</td>';
+    html += '<td>' + authorLabel + '</td>';
+    html += '<td class="actions">';
+    html += '<button class="btn btn-outline btn-sm" onclick="editOrigin(' + cultivar.id + ',' + i + ')">編集</button> ';
+    html += '<button class="btn btn-danger btn-sm" onclick="deleteOrigin(' + cultivar.id + ',' + i + ')">削除</button>';
+    html += '</td>';
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('origins-list').innerHTML = html;
+}
+
+function editOrigin(cultivarId, originIndex) {
+  var c = allCultivars.find(function(x) { return x.id === cultivarId; });
+  if (!c) return;
+  var o = c.origins[originIndex];
+  if (!o) return;
+
+  var html = '<h2>由来を編集 (#' + (originIndex + 1) + ')</h2>';
+  html += '<label>本文（日本語）</label><textarea id="edit-body">' + escapeHtml(o.body || '') + '</textarea>';
+  html += '<label>本文（英語）</label><textarea id="edit-body-en">' + escapeHtml(o.body_en || '') + '</textarea>';
+  html += '<label>信頼度 (0-100)</label><input type="number" id="edit-trust" min="0" max="100" value="' + (o.trust || 0) + '">';
+  html += '<label>ソース名</label><input type="text" id="edit-source-name" value="' + escapeHtml(o.source_name || '') + '">';
+  html += '<label>ソースURL</label><input type="text" id="edit-source-url" value="' + escapeHtml(o.source_url || '') + '">';
+  html += '<label>ソースTier</label><select id="edit-source-tier">';
+  ['S', 'A', 'B', 'C', 'D'].forEach(function(t) {
+    html += '<option value="' + t + '"' + (o.source_tier === t ? ' selected' : '') + '>' + t + '</option>';
+  });
+  html += '</select>';
+  html += '<label>発見者/作出者</label><input type="text" id="edit-discoverer" value="' + escapeHtml(o.discoverer_or_breeder || '') + '">';
+  html += '<label>発見年</label><input type="number" id="edit-year" value="' + (o.discovery_year || '') + '">';
+  html += '<label>自生地域</label><input type="text" id="edit-region" value="' + escapeHtml(o.native_region || '') + '">';
+
+  // Sources (URL list)
+  var sourcesJson = JSON.stringify(o.sources || []);
+  html += '<label>リンク一覧 (JSON)</label><textarea id="edit-sources" style="font-family:var(--font-mono);font-size:var(--font-size-xs);">' + escapeHtml(sourcesJson) + '</textarea>';
+
+  html += '<div class="modal-actions">';
+  html += '<button class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
+  html += '<button class="btn btn-primary" onclick="saveOrigin(' + cultivarId + ',' + originIndex + ')">保存</button>';
+  html += '</div>';
+  showModal(html);
+}
+
+async function saveOrigin(cultivarId, originIndex) {
+  var c = allCultivars.find(function(x) { return x.id === cultivarId; });
+  if (!c) return;
+  var origins = JSON.parse(JSON.stringify(c.origins || []));
+  var o = origins[originIndex];
+  if (!o) return;
+
+  o.body = document.getElementById('edit-body').value;
+  o.body_en = document.getElementById('edit-body-en').value;
+  o.trust = parseInt(document.getElementById('edit-trust').value) || 0;
+  o.trustClass = o.trust >= 70 ? 'trust--high' : (o.trust >= 40 ? 'trust--mid' : 'trust--low');
+  o.source_name = document.getElementById('edit-source-name').value;
+  o.source_url = document.getElementById('edit-source-url').value;
+  o.source_tier = document.getElementById('edit-source-tier').value;
+  o.discoverer_or_breeder = document.getElementById('edit-discoverer').value;
+  o.discovery_year = parseInt(document.getElementById('edit-year').value) || null;
+  o.native_region = document.getElementById('edit-region').value;
+
+  try {
+    var sourcesStr = document.getElementById('edit-sources').value;
+    o.sources = JSON.parse(sourcesStr);
+  } catch (e) { /* keep existing */ }
+
+  var result = await sb.from('cultivars').update({
+    origins: origins, updated_at: new Date().toISOString()
+  }).eq('id', cultivarId);
+
+  if (result.error) { toast('更新エラー: ' + result.error.message); return; }
+  closeModal();
+  toast('由来を更新しました');
+  await loadAllCultivars();
+  loadOrigins();
+}
+
+async function deleteOrigin(cultivarId, originIndex) {
+  var c = allCultivars.find(function(x) { return x.id === cultivarId; });
+  if (!c) return;
+  var o = c.origins[originIndex];
+  var bodyPreview = (o.body || '').substring(0, 40);
+  if (!confirm('由来 #' + (originIndex + 1) + '「' + bodyPreview + '...」を削除しますか？')) return;
+
+  var origins = JSON.parse(JSON.stringify(c.origins || []));
+  origins.splice(originIndex, 1);
+
+  var result = await sb.from('cultivars').update({
+    origins: origins, updated_at: new Date().toISOString()
+  }).eq('id', cultivarId);
+
+  if (result.error) { toast('削除エラー: ' + result.error.message); return; }
+  toast('由来を削除しました');
+  await loadAllCultivars();
+  loadOrigins();
+  loadDashboard();
+}
+
+// ========================================
+// BULK OPERATIONS
+// ========================================
+document.getElementById('btn-bulk-research').addEventListener('click', async function() {
+  var genusFilter = document.getElementById('bulk-genus-filter').value;
+  var target = document.getElementById('bulk-target').value;
+
+  var targets = allCultivars.filter(function(c) {
+    if (genusFilter && c.genus !== genusFilter) return false;
+    if (target === 'empty') return !(c.origins && c.origins.length);
+    if (target === 'low') {
+      var origins = c.origins || [];
+      if (!origins.length) return true;
+      var maxTrust = Math.max.apply(null, origins.map(function(o) { return o.trust || 0; }));
+      return maxTrust <= 50;
+    }
+    return true;
+  });
+
+  if (!targets.length) { toast('対象品種がありません'); return; }
+  if (!confirm(targets.length + '品種のAIリサーチを実行しますか？')) return;
+
+  var progressEl = document.getElementById('bulk-progress');
+  var fillEl = document.getElementById('bulk-progress-fill');
+  var textEl = document.getElementById('bulk-progress-text');
+  var logEl = document.getElementById('bulk-log');
+  progressEl.classList.remove('hidden');
+  logEl.innerHTML = '';
+  this.disabled = true;
+  var btn = this;
+
+  var session = await sb.auth.getSession();
+  var token = session.data.session ? session.data.session.access_token : SUPABASE_ANON_KEY;
+  var completed = 0;
+  var failed = 0;
+
+  for (var i = 0; i < targets.length; i++) {
+    var c = targets[i];
+    textEl.textContent = (i + 1) + ' / ' + targets.length + ' - ' + c.cultivar_name;
+    fillEl.style.width = Math.round(((i + 1) / targets.length) * 100) + '%';
+
+    try {
+      var res = await fetch(SUPABASE_URL + '/functions/v1/research-origin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ cultivar_id: c.id, cultivar_name: c.cultivar_name, genus: c.genus, type: c.type })
+      });
+      var data = await res.json();
+      if (data.success) {
+        logEl.innerHTML += '<div style="color:var(--color-primary-light);">[OK] ' + escapeHtml(c.cultivar_name) + ' - ' + (data.origins_count || 0) + '件</div>';
+        completed++;
+      } else {
+        logEl.innerHTML += '<div style="color:var(--color-danger);">[FAIL] ' + escapeHtml(c.cultivar_name) + ' - ' + escapeHtml(data.error || '') + '</div>';
+        failed++;
+      }
+    } catch (e) {
+      logEl.innerHTML += '<div style="color:var(--color-danger);">[ERROR] ' + escapeHtml(c.cultivar_name) + ' - ' + escapeHtml(e.message) + '</div>';
+      failed++;
+    }
+    logEl.scrollTop = logEl.scrollHeight;
+
+    // Rate limit delay
+    if (i < targets.length - 1) {
+      await new Promise(function(r) { setTimeout(r, 15000); });
+    }
+  }
+
+  textEl.textContent = '完了! 成功: ' + completed + ', 失敗: ' + failed;
+  btn.disabled = false;
+  loadAllCultivars();
+  loadDashboard();
+});
+
+document.getElementById('btn-export').addEventListener('click', async function() {
+  var result = await sb.from('cultivars').select('*').order('id');
+  if (result.error) { toast('エクスポートエラー'); return; }
+
+  var blob = new Blob([JSON.stringify(result.data, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'plants-story-export-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('エクスポート完了');
+});
+</script>
+</body>
+</html>

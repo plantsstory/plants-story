@@ -89,7 +89,7 @@
               <svg viewBox="0 0 100 100" width="64" height="64"><path d="M50 12C35 4 15 12 12 32C9 52 28 72 50 92C72 72 91 52 88 32C85 12 65 4 50 12Z" fill="#2D6A4F" opacity="0.5"/><path d="M50 12V92" stroke="#1B4332" stroke-width="2" fill="none"/><path d="M50 28L30 42M50 44L24 56M50 60L32 70" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.7"/><path d="M50 28L70 42M50 44L76 56M50 60L68 70" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.7"/></svg>
             </div>
             <div class="genus-card__title">Anthurium</div>
-            <div class="genus-card__count" data-i18n="cultivar_count">10 品種</div>
+            <div class="genus-card__count" data-i18n="cultivar_count">- 品種</div>
           </div>
           <div class="card genus-card card--clickable" data-nav="genus" data-genus="monstera">
             <div class="genus-card__img">
@@ -97,7 +97,7 @@
               <svg viewBox="0 0 100 100" width="64" height="64"><path d="M50 8C25 8 10 30 10 55C10 78 28 92 50 92C72 92 90 78 90 55C90 30 75 8 50 8Z" fill="#40916C" opacity="0.45"/><path d="M50 8V92" stroke="#1B4332" stroke-width="2" fill="none"/><ellipse cx="32" cy="38" rx="10" ry="14" fill="#F5F7F2" opacity="0.8"/><ellipse cx="68" cy="42" rx="9" ry="12" fill="#F5F7F2" opacity="0.8"/><ellipse cx="30" cy="65" rx="8" ry="11" fill="#F5F7F2" opacity="0.8"/><ellipse cx="70" cy="68" rx="7" ry="10" fill="#F5F7F2" opacity="0.8"/><path d="M50 30L28 45M50 55L22 68" stroke="#1B4332" stroke-width="1.3" fill="none" opacity="0.5"/><path d="M50 30L72 45M50 55L78 68" stroke="#1B4332" stroke-width="1.3" fill="none" opacity="0.5"/></svg>
             </div>
             <div class="genus-card__title">Monstera</div>
-            <div class="genus-card__count" data-i18n="monstera_count">9 品種</div>
+            <div class="genus-card__count" data-i18n="monstera_count">- 品種</div>
           </div>
           <div class="card genus-card card--clickable" data-nav="genus" data-genus="philodendron">
             <div class="genus-card__img">
@@ -105,7 +105,7 @@
               <svg viewBox="0 0 100 100" width="64" height="64"><path d="M50 8C30 8 15 25 18 50C21 75 38 92 50 92C62 92 79 75 82 50C85 25 70 8 50 8Z" fill="#52B788" opacity="0.4"/><path d="M50 8V92" stroke="#1B4332" stroke-width="2" fill="none"/><path d="M50 22L30 36M50 38L22 52M50 54L28 66M50 70L34 80" stroke="#1B4332" stroke-width="1.3" fill="none" opacity="0.5"/><path d="M50 22L70 36M50 38L78 52M50 54L72 66M50 70L66 80" stroke="#1B4332" stroke-width="1.3" fill="none" opacity="0.5"/></svg>
             </div>
             <div class="genus-card__title">Philodendron</div>
-            <div class="genus-card__count" data-i18n="philodendron_count">9 品種</div>
+            <div class="genus-card__count" data-i18n="philodendron_count">- 品種</div>
           </div>
         </div>
         <div class="text-center mt-lg">
@@ -202,7 +202,7 @@
       <!-- ===== Anthurium ===== -->
       <div class="genus-content" id="genus-anthurium">
         <h1 class="section-title">Anthurium</h1>
-        <p class="text-muted mb-lg">10 品種が登録されています</p>
+        <p class="text-muted mb-lg">読み込み中...</p>
 
         <div class="sort-bar">
           <div class="search-bar" style="max-width:300px;margin:0;">
@@ -355,7 +355,7 @@
       <!-- ===== Monstera ===== -->
       <div class="genus-content" id="genus-monstera" style="display:none;">
         <h1 class="section-title">Monstera</h1>
-        <p class="text-muted mb-lg">9 品種が登録されています</p>
+        <p class="text-muted mb-lg">読み込み中...</p>
 
         <div class="sort-bar">
           <div class="search-bar" style="max-width:300px;margin:0;">
@@ -486,7 +486,7 @@
       <!-- ===== Philodendron ===== -->
       <div class="genus-content" id="genus-philodendron" style="display:none;">
         <h1 class="section-title">Philodendron</h1>
-        <p class="text-muted mb-lg">9 品種が登録されています</p>
+        <p class="text-muted mb-lg">読み込み中...</p>
 
         <div class="sort-bar">
           <div class="search-bar" style="max-width:300px;margin:0;">
@@ -1216,7 +1216,7 @@
         <a href="#" data-nav="privacy" data-i18n="footer_privacy">プライバシー</a>
         <a href="#" data-nav="contact" data-i18n="footer_contact">お問い合わせ</a>
       </div>
-      <div class="footer__copy">&copy; 2026 Plants Story. All rights reserved.</div>
+      <div class="footer__copy">&copy; 2026 Plants Story. All rights reserved. <a href="admin.html" style="opacity:0.3;font-size:0.7rem;text-decoration:none;color:inherit;margin-left:8px;">Admin</a></div>
     </div>
   </footer>
 
@@ -1940,20 +1940,25 @@
         });
         refreshGenusUI();
 
-        // Then load from Supabase (async, may add more or update existing)
+        // Then load from Supabase (async, authoritative source)
         if (supabase) {
           supabase.from('cultivars').select('*').then(function(res) {
             if (res.error || !res.data) return;
-            var added = false;
-            res.data.forEach(function(row) {
-              if (cultivarData[row.cultivar_name]) {
-                // Update existing cultivar with latest Supabase data (AI results)
-                if (row.origins && row.origins.length > 0 && row.origins[0].trust > 0) {
-                  cultivarData[row.cultivar_name].origins = row.origins;
-                  updateCultivarRowUI(row.cultivar_name, row.origins);
-                }
-                return;
+
+            // Clear ALL rows and in-memory data, then rebuild from DB
+            ['anthurium', 'monstera', 'philodendron'].forEach(function(g) {
+              var section = document.getElementById('genus-' + g);
+              if (section) {
+                var rows = section.querySelectorAll('.cultivar-row');
+                rows.forEach(function(row) { row.remove(); });
               }
+            });
+            // Clear all in-memory cultivar data so addCultivarRow won't skip
+            Object.keys(cultivarData).forEach(function(key) {
+              delete cultivarData[key];
+            });
+
+            res.data.forEach(function(row) {
               var entry = {
                 origins: row.origins || [],
                 formula: null
@@ -1961,9 +1966,8 @@
               var genus = row.genus || 'Anthurium';
               var meta = { genus: genus, type: row.type || 'Hybrid' };
               addCultivarRow(row.cultivar_name, entry, meta);
-              added = true;
             });
-            if (added) refreshGenusUI();
+            refreshGenusUI();
           });
         }
       }
@@ -2044,12 +2048,38 @@
         // Sources
         html += '<div class="origin-card__sources">';
         html += '<div class="text-sm font-bold mb-sm">情報元:</div>';
-        origin.sources.forEach(function(src) {
+        // Show source tier badge + source name
+        if (origin.source_tier && origin.source_name) {
+          var tierColors = { S: '#8b5cf6', A: '#3b82f6', B: '#10b981', C: '#f59e0b', D: '#ef4444' };
+          var tierColor = tierColors[origin.source_tier] || '#6b7280';
+          html += '<div class="origin-card__source-item" style="margin-bottom:4px;">';
+          html += '<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:0.75rem;font-weight:bold;color:#fff;background:' + tierColor + ';">Tier ' + origin.source_tier + '</span> ';
+          html += '<span style="font-weight:600;">' + origin.source_name + '</span>';
+          if (origin.source_tier_label_jp) html += ' <span class="text-gray" style="font-size:0.8rem;">(' + origin.source_tier_label_jp + ')</span>';
+          html += '</div>';
+        }
+        // Show source links
+        var srcList = origin.sources || [];
+        srcList.forEach(function(src) {
+          var icon = src.icon || '&#x1F310;';
+          var text = src.text || src.label || src.url || '';
+          var href = src.url || '#';
+          if (!text) return;
           html += '<div class="origin-card__source-item">';
-          html += '<span class="source-link__icon">' + src.icon + '</span>';
-          html += '<a href="#">' + src.text + '</a>';
+          html += '<span class="source-link__icon">' + icon + '</span>';
+          if (href && href !== '#') {
+            html += '<a href="' + href + '" target="_blank" rel="noopener">' + text + '</a>';
+          } else {
+            html += '<span>' + text + '</span>';
+          }
           html += '</div>';
         });
+        if (!srcList.length && origin.source_url) {
+          html += '<div class="origin-card__source-item">';
+          html += '<span class="source-link__icon">&#x1F310;</span>';
+          html += '<a href="' + origin.source_url + '" target="_blank" rel="noopener">' + origin.source_url + '</a>';
+          html += '</div>';
+        }
         html += '</div>';
 
         // Footer
@@ -2415,9 +2445,9 @@
       hero_title: { jp: 'Plants Story', en: 'Plants Story' },
       hero_subtitle: { jp: '植物の原種・ハイブリッドの由来を知る', en: 'Know the origins of plant species and hybrids' },
       browse_genus: { jp: '属から探す', en: 'Browse by Genus' },
-      cultivar_count: { jp: '10 品種', en: '10 Cultivars' },
-      monstera_count: { jp: '9 品種', en: '9 Cultivars' },
-      philodendron_count: { jp: '9 品種', en: '9 Cultivars' },
+      cultivar_count: { jp: '- 品種', en: '- Cultivars' },
+      monstera_count: { jp: '- 品種', en: '- Cultivars' },
+      philodendron_count: { jp: '- 品種', en: '- Cultivars' },
       recently_added: { jp: '最近追加された品種', en: 'Recently Added Cultivars' },
       how_it_works: { jp: '仕組み', en: 'How It Works' },
       step1_title: { jp: 'AIが調査', en: 'AI Research' },
@@ -3176,12 +3206,36 @@
         html += '<div class="origin-card__body"><p>' + origin.body + '</p></div>';
         html += '<div class="origin-card__sources">';
         html += '<div class="text-sm font-bold mb-sm">' + t('source_label') + '</div>';
-        origin.sources.forEach(function(src) {
+        if (origin.source_tier && origin.source_name) {
+          var tierColors2 = { S: '#8b5cf6', A: '#3b82f6', B: '#10b981', C: '#f59e0b', D: '#ef4444' };
+          var tc2 = tierColors2[origin.source_tier] || '#6b7280';
+          html += '<div class="origin-card__source-item" style="margin-bottom:4px;">';
+          html += '<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:0.75rem;font-weight:bold;color:#fff;background:' + tc2 + ';">Tier ' + origin.source_tier + '</span> ';
+          html += '<span style="font-weight:600;">' + origin.source_name + '</span>';
+          if (origin.source_tier_label_jp) html += ' <span class="text-gray" style="font-size:0.8rem;">(' + origin.source_tier_label_jp + ')</span>';
+          html += '</div>';
+        }
+        var srcList2 = origin.sources || [];
+        srcList2.forEach(function(src) {
+          var icon = src.icon || '&#x1F310;';
+          var text = src.text || src.label || src.url || '';
+          var href = src.url || '#';
+          if (!text) return;
           html += '<div class="origin-card__source-item">';
-          html += '<span class="source-link__icon">' + src.icon + '</span>';
-          html += '<a href="#">' + src.text + '</a>';
+          html += '<span class="source-link__icon">' + icon + '</span>';
+          if (href && href !== '#') {
+            html += '<a href="' + href + '" target="_blank" rel="noopener">' + text + '</a>';
+          } else {
+            html += '<span>' + text + '</span>';
+          }
           html += '</div>';
         });
+        if (!srcList2.length && origin.source_url) {
+          html += '<div class="origin-card__source-item">';
+          html += '<span class="source-link__icon">&#x1F310;</span>';
+          html += '<a href="' + origin.source_url + '" target="_blank" rel="noopener">' + origin.source_url + '</a>';
+          html += '</div>';
+        }
         html += '</div>';
         html += '<div class="origin-card__footer">';
         html += '<div class="origin-card__author">';
