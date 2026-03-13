@@ -414,9 +414,9 @@
         <h2 class="section-title">由来管理</h2>
         <div class="toolbar">
           <select id="origin-cultivar-select" style="width:350px;">
-            <option value="">品種を選択...</option>
+            <option value="">すべての品種</option>
           </select>
-          <button class="btn btn-outline btn-sm" id="btn-load-origins">読み込み</button>
+          <input type="text" id="origin-search" placeholder="検索..." style="width:200px;">
         </div>
         <div id="origins-list"></div>
       </section>
@@ -609,6 +609,7 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
     this.classList.add('active');
     document.querySelectorAll('.admin-content > section').forEach(function(s) { s.classList.add('hidden'); });
     document.getElementById('sec-' + section).classList.remove('hidden');
+    if (section === 'origins') loadOrigins();
   });
 });
 
@@ -621,6 +622,7 @@ async function loadAllCultivars() {
   allCultivars = result.data || [];
   renderCultivarTable();
   populateOriginSelect();
+  loadOrigins();
 }
 
 // ========================================
@@ -797,55 +799,72 @@ async function reresearchCultivar(id) {
 // ========================================
 function populateOriginSelect() {
   var sel = document.getElementById('origin-cultivar-select');
-  var html = '<option value="">品種を選択...</option>';
+  var html = '<option value="">すべての品種</option>';
   allCultivars.forEach(function(c) {
-    html += '<option value="' + c.id + '">' + escapeHtml(c.cultivar_name) + ' (' + (c.origins || []).length + '件)</option>';
+    if ((c.origins || []).length) {
+      html += '<option value="' + c.id + '">' + escapeHtml(c.cultivar_name) + ' (' + (c.origins || []).length + '件)</option>';
+    }
   });
   sel.innerHTML = html;
 }
 
-document.getElementById('btn-load-origins').addEventListener('click', loadOrigins);
 document.getElementById('origin-cultivar-select').addEventListener('change', loadOrigins);
+document.getElementById('origin-search').addEventListener('input', loadOrigins);
 
 function loadOrigins() {
-  var id = parseInt(document.getElementById('origin-cultivar-select').value);
-  if (!id) { document.getElementById('origins-list').innerHTML = ''; return; }
-  var c = allCultivars.find(function(x) { return x.id === id; });
-  if (!c) return;
-  renderOriginsList(c);
-}
+  var filterId = parseInt(document.getElementById('origin-cultivar-select').value) || 0;
+  var search = (document.getElementById('origin-search').value || '').toLowerCase();
 
-function renderOriginsList(cultivar) {
-  var origins = cultivar.origins || [];
-  if (!origins.length) {
+  var targets = allCultivars.filter(function(c) {
+    if (filterId && c.id !== filterId) return false;
+    if (!c.origins || !c.origins.length) return false;
+    if (search) {
+      var match = (c.cultivar_name || '').toLowerCase().indexOf(search) >= 0
+        || (c.genus || '').toLowerCase().indexOf(search) >= 0
+        || (c.origins || []).some(function(o) {
+          return (o.body || '').toLowerCase().indexOf(search) >= 0
+            || (o.source_name || '').toLowerCase().indexOf(search) >= 0;
+        });
+      if (!match) return false;
+    }
+    return true;
+  });
+
+  if (!targets.length) {
     document.getElementById('origins-list').innerHTML = '<p style="color:var(--color-gray);margin-top:var(--space-md);">由来データなし</p>';
     return;
   }
 
-  var html = '<table class="data-table" style="margin-top:var(--space-md);">';
-  html += '<thead><tr><th>#</th><th>ソース</th><th>信頼度</th><th>本文</th><th>著者</th><th>操作</th></tr></thead><tbody>';
+  var totalOrigins = targets.reduce(function(s, c) { return s + (c.origins || []).length; }, 0);
+  var html = '<p style="color:var(--color-gray);font-size:var(--font-size-sm);margin:var(--space-sm) 0;">' + targets.length + ' 品種 / ' + totalOrigins + ' 件の由来</p>';
+  html += '<table class="data-table" style="margin-top:var(--space-sm);">';
+  html += '<thead><tr><th>品種</th><th>#</th><th>ソース</th><th>信頼度</th><th>本文</th><th>著者</th><th>操作</th></tr></thead><tbody>';
 
-  origins.forEach(function(o, i) {
-    var authorLabel = o.author && o.author.isAI ? '<span class="badge badge-ai">AI</span>' : '<span class="badge badge-user">User</span>';
-    var bodyShort = (o.body || '').substring(0, 80);
-    if ((o.body || '').length > 80) bodyShort += '...';
-    var trustPct = o.trust || 0;
-    var tColor = trustColor(trustPct);
+  targets.forEach(function(c) {
+    var origins = c.origins || [];
+    origins.forEach(function(o, i) {
+      var authorLabel = o.author && o.author.isAI ? '<span class="badge badge-ai">AI</span>' : '<span class="badge badge-user">User</span>';
+      var bodyShort = (o.body || '').substring(0, 60);
+      if ((o.body || '').length > 60) bodyShort += '...';
+      var trustPct = o.trust || 0;
+      var tColor = trustColor(trustPct);
 
-    html += '<tr>';
-    html += '<td>' + (i + 1) + '</td>';
-    html += '<td>' + tierBadge(o.source_tier) + ' ' + escapeHtml(o.source_name || '-') + '</td>';
-    html += '<td>';
-    html += '<div class="trust-bar"><div class="trust-fill" style="width:' + trustPct + '%;background:' + tColor + ';"></div></div> ';
-    html += trustPct + '%';
-    html += '</td>';
-    html += '<td style="max-width:300px;">' + escapeHtml(bodyShort) + '</td>';
-    html += '<td>' + authorLabel + '</td>';
-    html += '<td class="actions">';
-    html += '<button class="btn btn-outline btn-sm" onclick="editOrigin(' + cultivar.id + ',' + i + ')">編集</button> ';
-    html += '<button class="btn btn-danger btn-sm" onclick="deleteOrigin(' + cultivar.id + ',' + i + ')">削除</button>';
-    html += '</td>';
-    html += '</tr>';
+      html += '<tr>';
+      html += '<td style="white-space:nowrap;font-weight:600;font-size:var(--font-size-sm);">' + escapeHtml(c.cultivar_name) + '</td>';
+      html += '<td>' + (i + 1) + '</td>';
+      html += '<td>' + tierBadge(o.source_tier) + ' ' + escapeHtml(o.source_name || '-') + '</td>';
+      html += '<td>';
+      html += '<div class="trust-bar"><div class="trust-fill" style="width:' + trustPct + '%;background:' + tColor + ';"></div></div> ';
+      html += trustPct + '%';
+      html += '</td>';
+      html += '<td style="max-width:250px;font-size:var(--font-size-xs);">' + escapeHtml(bodyShort) + '</td>';
+      html += '<td>' + authorLabel + '</td>';
+      html += '<td class="actions">';
+      html += '<button class="btn btn-outline btn-sm" onclick="editOrigin(' + c.id + ',' + i + ')">編集</button> ';
+      html += '<button class="btn btn-danger btn-sm" onclick="deleteOrigin(' + c.id + ',' + i + ')">削除</button>';
+      html += '</td>';
+      html += '</tr>';
+    });
   });
 
   html += '</tbody></table>';
