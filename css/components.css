@@ -1489,3 +1489,50 @@
   color: #fff;
 }
 
+/* ========================================
+   AI RESEARCH ANIMATION
+   ======================================== */
+.ai-researching {
+  position: relative;
+  animation: ai-pulse 2s ease-in-out infinite;
+}
+
+.ai-researching::after {
+  content: '🤖 AI調査中...';
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  font-size: 0.7rem;
+  color: var(--color-primary);
+  animation: ai-dots 1.5s steps(3, end) infinite;
+  background: rgba(255,255,255,0.9);
+  padding: 2px 8px;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+@keyframes ai-pulse {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: rgba(45, 106, 79, 0.05); }
+}
+
+@keyframes ai-dots {
+  0% { content: '🤖 AI調査中.'; }
+  33% { content: '🤖 AI調査中..'; }
+  66% { content: '🤖 AI調査中...'; }
+}
+
+.badge--ai {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  animation: ai-badge-glow 2s ease-in-out infinite;
+}
+
+@keyframes ai-badge-glow {
+  0%, 100% { box-shadow: 0 0 4px rgba(102, 126, 234, 0.3); }
+  50% { box-shadow: 0 0 12px rgba(102, 126, 234, 0.6); }
+}
+

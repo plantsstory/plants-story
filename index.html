@@ -1725,19 +1725,159 @@
         saved[fullName] = { entry: entry, meta: meta };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
 
-        // Supabase insert
+        // Supabase insert + AI research trigger
         if (supabase) {
           supabase.from('cultivars').insert({
             genus: meta.genus,
             cultivar_name: fullName,
             type: meta.type || 'Hybrid',
             origins: entry.origins || [],
-            votes: {}
-          }).then(function(res) {
-            if (res.error) console.warn('Supabase insert error:', res.error.message);
+            votes: {},
+            ai_status: 'pending'
+          }).select().then(function(res) {
+            if (res.error) {
+              console.warn('Supabase insert error:', res.error.message);
+              return;
+            }
+            // Trigger AI research via Edge Function
+            var inserted = res.data && res.data[0];
+            if (inserted && inserted.id) {
+              triggerAIResearch(inserted.id, meta.genus, fullName, meta.type || 'Hybrid');
+            }
           });
         }
       };
+
+      // ========== AI Research Functions ==========
+      var EDGE_FUNCTION_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co/functions/v1/research-origin';
+      var aiPollingTimers = {};
+
+      // Trigger AI research for a cultivar
+      function triggerAIResearch(cultivarId, genus, cultivarName, type) {
+        console.log('Triggering AI research for:', cultivarName);
+        fetch(EDGE_FUNCTION_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({
+            cultivar_id: cultivarId,
+            genus: genus,
+            cultivar_name: cultivarName,
+            type: type
+          })
+        }).then(function(res) { return res.json(); })
+        .then(function(data) {
+          console.log('AI research result:', data);
+          if (data.success) {
+            // Refresh the cultivar data from DB
+            refreshCultivarFromDB(cultivarId, cultivarName);
+          }
+        }).catch(function(err) {
+          console.error('AI research trigger error:', err);
+        });
+      }
+
+      // Refresh a single cultivar from Supabase after AI completes
+      function refreshCultivarFromDB(cultivarId, cultivarName) {
+        if (!supabase) return;
+        supabase.from('cultivars').select('*').eq('id', cultivarId).single()
+        .then(function(res) {
+          if (res.error || !res.data) return;
+          var d = res.data;
+          if (d.ai_status === 'completed' && d.origins && d.origins.length > 0) {
+            // Update cultivarData in memory
+            if (cultivarData[d.cultivar_name]) {
+              cultivarData[d.cultivar_name].origins = d.origins;
+            }
+            // Update the DOM - find the cultivar row and update trust bar + badge
+            updateCultivarRowUI(d.cultivar_name, d.origins);
+            // Update localStorage
+            try {
+              var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+              if (saved[d.cultivar_name]) {
+                saved[d.cultivar_name].entry.origins = d.origins;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+              }
+            } catch(e) {}
+          }
+        });
+      }
+
+      // Update the cultivar row UI after AI research completes
+      function updateCultivarRowUI(cultivarName, origins) {
+        var rows = document.querySelectorAll('.cultivar-row');
+        for (var i = 0; i < rows.length; i++) {
+          var nameEl = rows[i].querySelector('.cultivar-row__name');
+          if (nameEl && nameEl.textContent === cultivarName) {
+            var origin = origins[0];
+            var trustPct = origin.trust || 0;
+            var trustClass = trustPct >= 70 ? 'trust--high' : (trustPct >= 40 ? 'trust--medium' : 'trust--low');
+            // Update trust bar
+            var fillEl = rows[i].querySelector('.trust__fill');
+            if (fillEl) {
+              fillEl.className = 'trust__fill ' + trustClass;
+              fillEl.style.width = trustPct + '%';
+            }
+            var labelEl = rows[i].querySelector('.trust__label');
+            if (labelEl) labelEl.textContent = trustPct + '%';
+            // Remove AI pending badge
+            var aiBadge = rows[i].querySelector('.badge--ai');
+            if (aiBadge) aiBadge.remove();
+            // Remove pulse animation
+            rows[i].classList.remove('ai-researching');
+            // Update origin count
+            var metaSpans = rows[i].querySelectorAll('.cultivar-row__meta > span');
+            if (metaSpans[0]) {
+              metaSpans[0].textContent = t('origin_prefix') + origins.length + t('origin_count_suffix');
+            }
+            break;
+          }
+        }
+        // Also update detail page if it's open
+        if (currentPage === 'page-cultivar') {
+          var detailName = document.querySelector('.detail-name');
+          if (detailName && detailName.textContent === cultivarName) {
+            showCultivarDetail(cultivarName);
+          }
+        }
+      }
+
+      // Poll for pending AI research on page load
+      function pollPendingAIResearch() {
+        if (!supabase) return;
+        supabase.from('cultivars').select('id, cultivar_name, ai_status')
+          .in('ai_status', ['pending', 'researching'])
+        .then(function(res) {
+          if (res.error || !res.data || res.data.length === 0) return;
+          res.data.forEach(function(c) {
+            // Add pulse animation to pending cultivars
+            var rows = document.querySelectorAll('.cultivar-row');
+            for (var i = 0; i < rows.length; i++) {
+              var nameEl = rows[i].querySelector('.cultivar-row__name');
+              if (nameEl && nameEl.textContent === c.cultivar_name) {
+                rows[i].classList.add('ai-researching');
+                break;
+              }
+            }
+            // Set up polling for this cultivar
+            if (!aiPollingTimers[c.id]) {
+              aiPollingTimers[c.id] = setInterval(function() {
+                refreshCultivarFromDB(c.id, c.cultivar_name);
+                // Check if completed and stop polling
+                supabase.from('cultivars').select('ai_status').eq('id', c.id).single()
+                .then(function(r) {
+                  if (r.data && (r.data.ai_status === 'completed' || r.data.ai_status === 'failed')) {
+                    clearInterval(aiPollingTimers[c.id]);
+                    delete aiPollingTimers[c.id];
+                  }
+                });
+              }, 5000); // Poll every 5 seconds
+            }
+          });
+        });
+      }
 
       // Add a row to the genus list DOM
       function addCultivarRow(fullName, entry, meta) {
@@ -1823,9 +1963,13 @@
 
       // Run after DOM is ready
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', restoreUserCultivars);
+        document.addEventListener('DOMContentLoaded', function() {
+          restoreUserCultivars();
+          setTimeout(pollPendingAIResearch, 2000); // Check for pending AI research
+        });
       } else {
         restoreUserCultivars();
+        setTimeout(pollPendingAIResearch, 2000);
       }
     })();
 
