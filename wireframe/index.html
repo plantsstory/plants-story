@@ -3067,6 +3067,7 @@
           contributeSources = [];
           renderContributeSources();
           if (duplicateAlert) duplicateAlert.style.display = 'none';
+          if (typeof window.resetContributeImages === 'function') window.resetContributeImages();
 
           alert(t('submit_success'));
         });
@@ -3407,6 +3408,10 @@
     updateCultivarDetail = function(cultivarName, rowEl) {
       _origUpdateDetail(cultivarName, rowEl);
       renderAffiliateBanner('affiliate-links-grid', { showRecommend: true });
+      // Restore gallery images for this cultivar
+      if (typeof window.renderGalleryForCultivar === 'function') {
+        window.renderGalleryForCultivar(cultivarName);
+      }
     };
 
     // ========================================
@@ -3415,6 +3420,7 @@
     (function() {
       var MAX_SIZE = 5 * 1024 * 1024; // 5MB
       var ALLOWED_TYPES = ['image/jpeg', 'image/png'];
+      var GALLERY_STORAGE_KEY = 'plants-story-gallery-images';
 
       function validateFile(file) {
         if (ALLOWED_TYPES.indexOf(file.type) === -1) {
@@ -3427,6 +3433,68 @@
         }
         return true;
       }
+
+      // --- Gallery image persistence per cultivar ---
+      function getGalleryStore() {
+        try { return JSON.parse(localStorage.getItem(GALLERY_STORAGE_KEY) || '{}'); } catch(e) { return {}; }
+      }
+
+      function saveGalleryImage(cultivarName, dataUrl) {
+        var store = getGalleryStore();
+        if (!store[cultivarName]) store[cultivarName] = [];
+        store[cultivarName].push(dataUrl);
+        localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(store));
+      }
+
+      function removeGalleryImage(cultivarName, index) {
+        var store = getGalleryStore();
+        if (store[cultivarName]) {
+          store[cultivarName].splice(index, 1);
+          if (store[cultivarName].length === 0) delete store[cultivarName];
+          localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(store));
+        }
+      }
+
+      function getGalleryImages(cultivarName) {
+        var store = getGalleryStore();
+        return store[cultivarName] || [];
+      }
+
+      function createGalleryItem(src, cultivarName, index) {
+        var item = document.createElement('div');
+        item.className = 'gallery__item';
+        item.setAttribute('data-user-upload', 'true');
+        item.setAttribute('data-gallery-idx', index);
+        item.innerHTML =
+          '<div class="gallery__img"><img src="' + src + '" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-md)"></div>' +
+          '<div class="gallery__actions">' +
+            '<div class="auth-vote">' +
+              '<button class="auth-btn">Real <span class="auth-btn__count">0</span></button>' +
+              '<button class="auth-btn">Fake <span class="auth-btn__count">0</span></button>' +
+            '</div>' +
+            '<a class="gallery__delete">' + t('request_delete') + '</a>' +
+          '</div>';
+        return item;
+      }
+
+      // Render gallery for a specific cultivar
+      window.renderGalleryForCultivar = function(cultivarName) {
+        var galleryUpload = document.getElementById('gallery-upload');
+        if (!galleryUpload) return;
+        var gallery = galleryUpload.parentNode;
+
+        // Remove all user-uploaded items
+        gallery.querySelectorAll('.gallery__item[data-user-upload]').forEach(function(el) {
+          el.remove();
+        });
+
+        // Restore saved images for this cultivar
+        var images = getGalleryImages(cultivarName);
+        images.forEach(function(src, i) {
+          var item = createGalleryItem(src, cultivarName, i);
+          gallery.insertBefore(item, galleryUpload);
+        });
+      };
 
       // --- Gallery Upload (cultivar detail page) ---
       var galleryUpload = document.getElementById('gallery-upload');
@@ -3444,21 +3512,37 @@
 
           var reader = new FileReader();
           reader.onload = function(e) {
-            var item = document.createElement('div');
-            item.className = 'gallery__item';
-            item.innerHTML =
-              '<div class="gallery__img"><img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-md)"></div>' +
-              '<div class="gallery__actions">' +
-                '<div class="auth-vote">' +
-                  '<button class="auth-btn">Real <span class="auth-btn__count">0</span></button>' +
-                  '<button class="auth-btn">Fake <span class="auth-btn__count">0</span></button>' +
-                '</div>' +
-                '<a class="gallery__delete">' + t('request_delete') + '</a>' +
-              '</div>';
-            galleryUpload.parentNode.insertBefore(item, galleryUpload);
+            // Get current cultivar name
+            var detailPage = document.getElementById('page-cultivar');
+            var h1 = detailPage ? detailPage.querySelector('h1') : null;
+            var cultivarName = h1 ? h1.textContent : '';
+            if (!cultivarName) return;
+
+            // Save to localStorage and render
+            saveGalleryImage(cultivarName, e.target.result);
+            renderGalleryForCultivar(cultivarName);
           };
           reader.readAsDataURL(file);
           this.value = '';
+        });
+
+        // Handle delete clicks for user-uploaded images
+        galleryUpload.parentNode.addEventListener('click', function(e) {
+          var deleteBtn = e.target.closest('.gallery__delete');
+          if (!deleteBtn) return;
+          var item = deleteBtn.closest('.gallery__item[data-user-upload]');
+          if (!item) return;
+
+          var detailPage = document.getElementById('page-cultivar');
+          var h1 = detailPage ? detailPage.querySelector('h1') : null;
+          var cultivarName = h1 ? h1.textContent : '';
+          if (!cultivarName) return;
+
+          var idx = parseInt(item.getAttribute('data-gallery-idx'));
+          if (!isNaN(idx)) {
+            removeGalleryImage(cultivarName, idx);
+            renderGalleryForCultivar(cultivarName);
+          }
         });
       }
 
