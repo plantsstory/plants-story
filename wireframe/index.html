@@ -628,15 +628,6 @@
         <div class="text-center mt-lg">
           <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="add_cultivar">+ 品種を追加</a>
         </div>
-
-        <!-- Affiliate Banner on Genus Page -->
-        <div class="affiliate-section" id="genus-affiliate">
-          <div class="affiliate-banner">
-            <div class="affiliate-banner__title" data-i18n="affiliate_top_title">管理人おすすめアイテム</div>
-            <div class="affiliate-banner__grid" id="genus-affiliate-grid"></div>
-            <p class="affiliate-notice" data-i18n="affiliate_notice">※ 上記はアフィリエイトリンクです。購入によりサイト運営をサポートできます。</p>
-          </div>
-        </div>
       </div>
 
     </div>
@@ -2722,10 +2713,13 @@
         }
       }
 
-      // Re-render affiliate links if on cultivar page
-      if (cultivarPage && cultivarPage.classList.contains('active')) {
-        var h1aff = cultivarPage.querySelector('h1');
-        if (h1aff && typeof renderAffiliateBanner === 'function') {
+      // Re-render affiliate banners
+      if (typeof renderAffiliateBanner === 'function') {
+        renderAffiliateBanner('top-affiliate-grid');
+        document.querySelectorAll('.genus-affiliate-grid').forEach(function(grid) {
+          renderAffiliateBanner(grid);
+        });
+        if (cultivarPage && cultivarPage.classList.contains('active')) {
           renderAffiliateBanner('affiliate-links-grid', { showRecommend: true });
         }
       }
@@ -3358,8 +3352,8 @@
     ];
 
     // Render affiliate cards in banner style
-    function renderAffiliateBanner(containerId, options) {
-      var container = document.getElementById(containerId);
+    function renderAffiliateBanner(containerOrId, options) {
+      var container = typeof containerOrId === 'string' ? document.getElementById(containerOrId) : containerOrId;
       if (!container) return;
       options = options || {};
 
@@ -3394,7 +3388,19 @@
 
     // Render on page load
     renderAffiliateBanner('top-affiliate-grid');
-    renderAffiliateBanner('genus-affiliate-grid');
+
+    // Add affiliate banner to all genus pages
+    document.querySelectorAll('.genus-content').forEach(function(genusEl) {
+      var section = document.createElement('div');
+      section.className = 'affiliate-section mt-lg';
+      section.innerHTML = '<div class="affiliate-banner">' +
+        '<div class="affiliate-banner__title" data-i18n="affiliate_top_title">' + t('affiliate_top_title') + '</div>' +
+        '<div class="affiliate-banner__grid genus-affiliate-grid"></div>' +
+        '<p class="affiliate-notice" data-i18n="affiliate_notice">' + t('affiliate_notice') + '</p>' +
+        '</div>';
+      genusEl.appendChild(section);
+      renderAffiliateBanner(section.querySelector('.genus-affiliate-grid'));
+    });
 
     // Hook into updateCultivarDetail
     var _origUpdateDetail = updateCultivarDetail;
