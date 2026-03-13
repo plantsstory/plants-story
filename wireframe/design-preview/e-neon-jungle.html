@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>案E: Neon Jungle - Plants Story</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #0F3D26;
+      --color-primary-dark: #0A1F14;
+      --color-primary-light: #1A5C3A;
+      --color-accent: #00E676;
+      --color-accent-warm: #FFB74D;
+      --color-black: #E0E8E2;
+      --color-mid: #A0B8A8;
+      --color-gray: #6B8573;
+      --color-light: #1E3A28;
+      --color-lighter: #162B1D;
+      --color-bg: #0D1B14;
+      --color-white: #142B1F;
+      --font-heading: "Playfair Display", Georgia, serif;
+      --font-primary: "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
+      --radius-md: 8px; --radius-lg: 12px; --radius-full: 9999px;
+      --shadow: 0 2px 12px rgba(0, 230, 118, 0.06);
+      --shadow-lg: 0 8px 32px rgba(0, 230, 118, 0.12);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--font-primary); background: var(--color-bg); color: var(--color-black); }
+    a { text-decoration: none; color: inherit; }
+
+    .header {
+      background: rgba(10, 31, 20, 0.95);
+      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100;
+      border-bottom: 1px solid rgba(0, 230, 118, 0.15);
+    }
+    .header__inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 16px;
+      display: flex; align-items: center; justify-content: space-between; height: 64px;
+    }
+    .header__logo {
+      font-family: var(--font-heading); font-size: 1.3rem; font-weight: 700;
+      color: var(--color-accent); letter-spacing: 0.03em;
+    }
+    .header__nav { display: flex; gap: 24px; }
+    .header__nav a { font-size: 0.875rem; color: var(--color-gray); transition: color 0.2s; }
+    .header__nav a:hover { color: var(--color-accent); }
+    .header__actions { display: flex; align-items: center; gap: 12px; }
+    .header__lang {
+      font-size: 0.75rem; padding: 4px 10px;
+      border: 1px solid rgba(0, 230, 118, 0.3); border-radius: 4px;
+      background: transparent; color: var(--color-mid); cursor: pointer;
+    }
+    .header__user-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(0, 230, 118, 0.15); color: var(--color-accent);
+      display: flex; align-items: center; justify-content: center; font-size: 0.75rem;
+      border: 1px solid rgba(0, 230, 118, 0.3);
+    }
+
+    .hero {
+      background: radial-gradient(ellipse at 50% 100%, rgba(0, 230, 118, 0.08) 0%, transparent 60%),
+                  linear-gradient(180deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+      position: relative; overflow: hidden;
+      padding: 80px 16px 70px; text-align: center;
+    }
+    .hero__leaf-left, .hero__leaf-right { position: absolute; }
+    .hero__leaf-left { left: -40px; bottom: -30px; opacity: 0.15; }
+    .hero__leaf-right { right: -30px; top: 0; opacity: 0.1; }
+    .hero__glow {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 400px; height: 400px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,230,118,0.06) 0%, transparent 70%);
+    }
+    .hero__title {
+      font-family: var(--font-heading); font-size: 3.2rem; font-weight: 700;
+      color: var(--color-accent); letter-spacing: 0.04em;
+      text-shadow: 0 0 40px rgba(0, 230, 118, 0.3);
+      position: relative; z-index: 1;
+    }
+    .hero__subtitle { font-size: 1.1rem; color: var(--color-mid); margin-top: 12px; position: relative; z-index: 1; }
+    .hero__subtitle-en { font-size: 0.875rem; color: var(--color-gray); margin-top: 8px; position: relative; z-index: 1; }
+    .search-bar {
+      max-width: 500px; margin: 28px auto 0; display: flex;
+      border-radius: 12px; overflow: hidden;
+      border: 1px solid rgba(0, 230, 118, 0.3);
+      background: rgba(20, 43, 31, 0.8); position: relative; z-index: 1;
+    }
+    .search-bar:focus-within { border-color: var(--color-accent); box-shadow: 0 0 20px rgba(0, 230, 118, 0.15); }
+    .search-bar input {
+      flex: 1; padding: 14px 18px; border: none; outline: none; font-size: 1rem;
+      background: transparent; color: var(--color-black);
+    }
+    .search-bar input::placeholder { color: var(--color-gray); }
+    .search-bar button {
+      padding: 14px 22px; background: var(--color-accent);
+      color: var(--color-primary-dark); border: none; cursor: pointer; font-size: 1rem; font-weight: 700;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+    .section-title {
+      font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700;
+      color: var(--color-accent); margin-bottom: 24px;
+    }
+    .section-title.text-center { text-align: center; }
+    .grid { display: grid; gap: 24px; }
+    .grid--3 { grid-template-columns: repeat(3, 1fr); }
+
+    .genus-card {
+      background: var(--color-white); border: 1px solid var(--color-light);
+      border-radius: var(--radius-lg); padding: 32px 24px; text-align: center;
+      transition: all 0.3s; cursor: pointer;
+    }
+    .genus-card:hover {
+      box-shadow: var(--shadow-lg); border-color: rgba(0, 230, 118, 0.4);
+      transform: translateY(-3px);
+    }
+    .genus-card__img {
+      width: 120px; height: 120px; border-radius: 50%;
+      background: rgba(0, 230, 118, 0.05);
+      margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(0, 230, 118, 0.15);
+    }
+    .genus-card__img svg { width: 60px; height: 60px; }
+    .genus-card__title { font-family: var(--font-heading); font-size: 1.2rem; font-weight: 700; color: var(--color-accent); margin-bottom: 4px; }
+    .genus-card__count { font-size: 0.875rem; color: var(--color-gray); }
+
+    .recent-card {
+      background: var(--color-white); border: 1px solid var(--color-light);
+      border-radius: var(--radius-lg); overflow: hidden; transition: all 0.3s; cursor: pointer;
+    }
+    .recent-card:hover { box-shadow: var(--shadow-lg); border-color: rgba(0, 230, 118, 0.3); }
+    .recent-card__img {
+      height: 120px; background: linear-gradient(135deg, rgba(0,230,118,0.03), rgba(0,230,118,0.08));
+      display: flex; align-items: center; justify-content: center;
+    }
+    .recent-card__img svg { width: 50px; height: 50px; }
+    .recent-card__body { padding: 16px; }
+    .recent-card__name { font-weight: 700; margin-bottom: 4px; color: #C8E0CF; }
+    .recent-card__genus { font-size: 0.875rem; color: var(--color-gray); }
+    .trust { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .trust__bar { flex: 1; height: 6px; background: var(--color-light); border-radius: 99px; overflow: hidden; }
+    .trust__fill { height: 100%; border-radius: 99px; }
+    .trust__fill--high { background: var(--color-accent); }
+    .trust__fill--mid { background: var(--color-accent-warm); }
+    .trust__label { font-size: 0.875rem; font-weight: 700; color: var(--color-accent); min-width: 36px; }
+
+    .footer {
+      background: var(--color-primary-dark); padding: 32px 0; margin-top: 64px; text-align: center;
+      border-top: 1px solid rgba(0, 230, 118, 0.1);
+    }
+    .footer__links { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 12px; }
+    .footer__links a { font-size: 0.875rem; color: var(--color-gray); }
+    .footer__links a:hover { color: var(--color-accent); }
+    .footer__copy { font-size: 0.75rem; color: rgba(160,184,168,0.4); }
+
+    .mt-2xl { margin-top: 48px; }
+
+    @media (max-width: 767px) {
+      .grid--3 { grid-template-columns: 1fr; }
+      .hero__title { font-size: 2rem; }
+      .header__nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header__inner">
+      <span class="header__logo">Plants Story</span>
+      <nav class="header__nav">
+        <a href="#">Anthurium</a>
+        <a href="#">Monstera</a>
+        <a href="#">Philodendron</a>
+      </nav>
+      <div class="header__actions">
+        <button class="header__lang">EN / JP</button>
+        <div class="header__user-icon">P</div>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero__glow"></div>
+    <svg class="hero__leaf-left" width="300" height="400" viewBox="0 0 300 400"><path d="M150 380C80 300 10 250 30 150C50 50 150 20 150 20C150 20 250 50 270 150C290 250 220 300 150 380Z" fill="none" stroke="#00E676" stroke-width="1.5"/><path d="M150 20V380" stroke="#00E676" stroke-width="1" fill="none"/><path d="M150 80L100 130M150 140L80 190M150 200L90 260M150 260L110 310" stroke="#00E676" stroke-width="0.8" fill="none"/><path d="M150 80L200 130M150 140L220 190M150 200L210 260M150 260L190 310" stroke="#00E676" stroke-width="0.8" fill="none"/></svg>
+    <svg class="hero__leaf-right" width="280" height="320" viewBox="0 0 280 320"><path d="M140 300C70 240 20 170 40 90C60 10 140 5 140 5C140 5 220 10 240 90C260 170 210 240 140 300Z" fill="none" stroke="#00E676" stroke-width="1.5"/><circle cx="100" cy="80" r="25" fill="none" stroke="#00E676" stroke-width="0.8"/><circle cx="180" cy="110" r="18" fill="none" stroke="#00E676" stroke-width="0.8"/><circle cx="120" cy="170" r="15" fill="none" stroke="#00E676" stroke-width="0.8"/></svg>
+
+    <h1 class="hero__title">Plants Story</h1>
+    <p class="hero__subtitle">植物の原種・ハイブリッドの由来を知る</p>
+    <p class="hero__subtitle-en">Discover the origins of your favorite plants</p>
+    <div class="search-bar">
+      <input type="text" placeholder="品種名を検索... / Search cultivar...">
+      <button>&#x1F50D;</button>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="mt-2xl">
+      <h2 class="section-title text-center">属から探す</h2>
+      <div class="grid grid--3">
+        <div class="genus-card">
+          <div class="genus-card__img">
+            <svg viewBox="0 0 100 100"><path d="M50 90C50 90 20 70 15 45C10 20 30 5 50 10C70 5 90 20 85 45C80 70 50 90 50 90Z" fill="none" stroke="#00E676" stroke-width="1.5" opacity="0.6"/><path d="M50 10V90" stroke="#00E676" stroke-width="1" fill="none" opacity="0.4"/><path d="M50 30L30 45M50 50L25 60M50 70L35 78" stroke="#00E676" stroke-width="0.8" fill="none" opacity="0.3"/><path d="M50 30L70 45M50 50L75 60M50 70L65 78" stroke="#00E676" stroke-width="0.8" fill="none" opacity="0.3"/></svg>
+          </div>
+          <div class="genus-card__title">Anthurium</div>
+          <div class="genus-card__count">234 品種</div>
+        </div>
+        <div class="genus-card">
+          <div class="genus-card__img">
+            <svg viewBox="0 0 100 100"><path d="M50 85C50 85 15 65 20 35C25 5 50 5 50 5C50 5 75 5 80 35C85 65 50 85 50 85Z" fill="none" stroke="#00E676" stroke-width="1.5" opacity="0.6"/><path d="M50 5V85" stroke="#00E676" stroke-width="1" fill="none" opacity="0.4"/><circle cx="35" cy="35" r="12" fill="none" stroke="#00E676" stroke-width="0.8" opacity="0.3"/><circle cx="65" cy="45" r="10" fill="none" stroke="#00E676" stroke-width="0.8" opacity="0.3"/></svg>
+          </div>
+          <div class="genus-card__title">Monstera</div>
+          <div class="genus-card__count">156 品種</div>
+        </div>
+        <div class="genus-card">
+          <div class="genus-card__img">
+            <svg viewBox="0 0 100 100"><path d="M50 90C50 90 10 60 20 30C30 0 50 5 50 5C50 5 70 0 80 30C90 60 50 90 50 90Z" fill="none" stroke="#00E676" stroke-width="1.5" opacity="0.6"/><path d="M50 5V90" stroke="#00E676" stroke-width="1" fill="none" opacity="0.4"/><path d="M50 25L25 40M50 45L20 58" stroke="#00E676" stroke-width="0.8" fill="none" opacity="0.3"/><path d="M50 25L75 40M50 45L80 58" stroke="#00E676" stroke-width="0.8" fill="none" opacity="0.3"/></svg>
+          </div>
+          <div class="genus-card__title">Philodendron</div>
+          <div class="genus-card__count">312 品種</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-2xl">
+      <h2 class="section-title">最近追加された品種</h2>
+      <div class="grid grid--3">
+        <div class="recent-card">
+          <div class="recent-card__img"><svg viewBox="0 0 60 60" width="50" height="50"><path d="M30 55C30 55 10 40 12 22C14 5 30 5 30 5C30 5 46 5 48 22C50 40 30 55 30 55Z" fill="none" stroke="#00E676" stroke-width="1" opacity="0.3"/></svg></div>
+          <div class="recent-card__body">
+            <div class="recent-card__name">Anthurium warocqueanum</div>
+            <div class="recent-card__genus">Anthurium</div>
+            <div class="trust"><div class="trust__bar"><div class="trust__fill trust__fill--high" style="width:92%"></div></div><span class="trust__label">92%</span></div>
+          </div>
+        </div>
+        <div class="recent-card">
+          <div class="recent-card__img"><svg viewBox="0 0 60 60" width="50" height="50"><path d="M30 55C30 55 10 40 12 22C14 5 30 5 30 5C30 5 46 5 48 22C50 40 30 55 30 55Z" fill="none" stroke="#00E676" stroke-width="1" opacity="0.3"/></svg></div>
+          <div class="recent-card__body">
+            <div class="recent-card__name">Monstera deliciosa</div>
+            <div class="recent-card__genus">Monstera</div>
+            <div class="trust"><div class="trust__bar"><div class="trust__fill trust__fill--high" style="width:87%"></div></div><span class="trust__label">87%</span></div>
+          </div>
+        </div>
+        <div class="recent-card">
+          <div class="recent-card__img"><svg viewBox="0 0 60 60" width="50" height="50"><path d="M30 55C30 55 10 40 12 22C14 5 30 5 30 5C30 5 46 5 48 22C50 40 30 55 30 55Z" fill="none" stroke="#00E676" stroke-width="1" opacity="0.3"/></svg></div>
+          <div class="recent-card__body">
+            <div class="recent-card__name">Philodendron gloriosum</div>
+            <div class="recent-card__genus">Philodendron</div>
+            <div class="trust"><div class="trust__bar"><div class="trust__fill trust__fill--mid" style="width:74%"></div></div><span class="trust__label">74%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__links"><a href="#">About</a><a href="#">利用規約</a><a href="#">プライバシー</a><a href="#">お問い合わせ</a></div>
+      <div class="footer__copy">&copy; 2024 Plants Story. All rights reserved.</div>
+    </div>
+  </footer>
+</body>
+</html>
