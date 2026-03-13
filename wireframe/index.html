@@ -763,9 +763,15 @@
 
       <!-- Affiliate links -->
       <div class="affiliate-section mt-lg">
-        <h2 class="section-title" data-i18n="buy_this_plant">関連商品</h2>
-        <div class="affiliate-grid" id="affiliate-links"></div>
-        <p class="text-xs text-gray mt-sm" data-i18n="affiliate_notice">※ 上記はアフィリエイトリンクです。購入によりサイト運営をサポートできます。</p>
+        <div class="affiliate-banner affiliate-banner--detail">
+          <div class="affiliate-banner__context">
+            <span class="affiliate-banner__context-icon">🌿</span>
+            <span data-i18n="affiliate_context">この植物のお世話に</span>
+          </div>
+          <div class="affiliate-banner__title" data-i18n="affiliate_detail_title">管理人おすすめアイテム</div>
+          <div class="affiliate-banner__grid" id="affiliate-links-grid"></div>
+          <p class="affiliate-notice" data-i18n="affiliate_notice">※ 上記はアフィリエイトリンクです。購入によりサイト運営をサポートできます。</p>
+        </div>
       </div>
 
     </div>
@@ -2526,6 +2532,8 @@
       buy_this_plant: { jp: '関連商品', en: 'Related Products' },
       affiliate_notice: { jp: '※ 上記はアフィリエイトリンクです。購入によりサイト運営をサポートできます。', en: '※ These are affiliate links. Purchases help support site operations.' },
       affiliate_top_title: { jp: '🌿 管理人おすすめアイテム', en: '🌿 Staff Picks' },
+      affiliate_detail_title: { jp: '🌿 管理人おすすめアイテム', en: '🌿 Staff Picks' },
+      affiliate_context: { jp: 'この植物のお世話に', en: 'Care items for this plant' },
       shop_rakuten: { jp: '楽天市場で探す', en: 'Shop on Rakuten' },
       shop_amazon: { jp: 'Amazonで探す', en: 'Shop on Amazon' },
       shop_yahoo: { jp: 'Yahoo!で探す', en: 'Shop on Yahoo!' },
@@ -2717,8 +2725,8 @@
       // Re-render affiliate links if on cultivar page
       if (cultivarPage && cultivarPage.classList.contains('active')) {
         var h1aff = cultivarPage.querySelector('h1');
-        if (h1aff && typeof renderAffiliateLinks === 'function') {
-          renderAffiliateLinks(h1aff.textContent);
+        if (h1aff && typeof renderAffiliateBanner === 'function') {
+          renderAffiliateBanner('affiliate-links-grid', { showRecommend: true });
         }
       }
     }
@@ -3320,11 +3328,11 @@
     // ========================================
     var affiliateProducts = [
       { name: '自動ミストスプレー', nameEn: 'Auto Mist Sprayer',
-        productName: '霧吹きスプレー 1L', productNameEn: 'Mist Spray Bottle 1L',
-        image: 'https://hbb.afl.rakuten.co.jp/hgb/51ddedb3.99449b0c.51ddedb4.4e65ef0f/?me_id=1205937&item_id=10048475&pc=https%3A%2F%2Fthumbnail.image.rakuten.co.jp%2F%400_mall%2Fe-kurashi%2Fcabinet%2Fmain-img%2F017%2Fmain-s1j70.jpg%3F_ex%3D128x128&s=128x128&t=picttext',
+        productName: '霧吹きスプレー 1L EasyPump', productNameEn: 'Mist Spray 1L EasyPump',
+        image: 'https://hbb.afl.rakuten.co.jp/hgb/51ddedb3.99449b0c.51ddedb4.4e65ef0f/?me_id=1205937&item_id=10048478&pc=https%3A%2F%2Fthumbnail.image.rakuten.co.jp%2F%400_mall%2Fe-kurashi%2Fcabinet%2Fmain-img%2F017%2Fmain-s1j71.jpg%3F_ex%3D128x128&s=128x128&t=picttext',
         icon: '🌫️', badge: '', badgeEn: '',
-        rakuten: 'https://hb.afl.rakuten.co.jp/ichiba/51ddedb3.99449b0c.51ddedb4.4e65ef0f/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fe-kurashi%2Fs1j70%2F&link_type=picttext&ut=eyJwYWdlIjoiaXRlbSIsInR5cGUiOiJwaWN0dGV4dCIsInNpemUiOiIxMjh4MTI4IiwibmFtIjoxLCJuYW1wIjoicmlnaHQiLCJjb20iOjEsImNvbXAiOiJkb3duIiwicHJpY2UiOjEsImJvciI6MSwiY29sIjoxLCJiYnRuIjoxLCJwcm9kIjowLCJhbXAiOmZhbHNlfQ%3D%3D',
-        amazon: 'https://amzn.to/4saB4a0',
+        rakuten: 'https://hb.afl.rakuten.co.jp/ichiba/51ddedb3.99449b0c.51ddedb4.4e65ef0f/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fe-kurashi%2Fs1j71%2F&link_type=picttext&ut=eyJwYWdlIjoiaXRlbSIsInR5cGUiOiJwaWN0dGV4dCIsInNpemUiOiI2NHg2NCIsIm5hbSI6MSwibmFtcCI6InJpZ2h0IiwiY29tIjoxLCJjb21wIjoiZG93biIsInByaWNlIjoxLCJib3IiOjEsImNvbCI6MSwiYmJ0biI6MSwicHJvZCI6MCwiYW1wIjpmYWxzZX0%3D',
+        amazon: 'https://amzn.to/4lvXyzJ',
         yahoo: 'https://yahoo.jp/emnJPd' },
       { name: '活力剤', nameEn: 'Plant Tonic',
         productName: 'SUPERthrive 120ml', productNameEn: 'SUPERthrive 120ml',
@@ -3349,17 +3357,21 @@
         yahoo: 'https://yahoo.jp/S4_cwH' }
     ];
 
-    // Render affiliate cards in banner style (for top page & genus page)
-    function renderAffiliateBanner(containerId) {
+    // Render affiliate cards in banner style
+    function renderAffiliateBanner(containerId, options) {
       var container = document.getElementById(containerId);
       if (!container) return;
+      options = options || {};
 
       var html = '';
-      affiliateProducts.forEach(function(product) {
+      affiliateProducts.forEach(function(product, index) {
         var catName = currentLang === 'en' ? product.nameEn : product.name;
         var prodName = currentLang === 'en' ? (product.productNameEn || product.nameEn) : (product.productName || product.name);
         var badge = currentLang === 'en' ? product.badgeEn : product.badge;
         html += '<div class="affiliate-card">';
+        if (options.showRecommend && index === 0) {
+          html += '<span class="affiliate-card__recommend">' + (currentLang === 'en' ? 'Pick' : 'おすすめ') + '</span>';
+        }
         if (product.image) {
           html += '<a href="' + product.rakuten + '" target="_blank" rel="nofollow sponsored noopener">';
           html += '<img class="affiliate-card__image" src="' + product.image + '" alt="' + prodName + '" loading="lazy">';
@@ -3384,48 +3396,11 @@
     renderAffiliateBanner('top-affiliate-grid');
     renderAffiliateBanner('genus-affiliate-grid');
 
-    function renderAffiliateLinks(cultivarName) {
-      var container = document.getElementById('affiliate-links');
-      if (!container) return;
-
-      var html = '';
-      affiliateProducts.forEach(function(product) {
-        var catName = currentLang === 'en' ? product.nameEn : product.name;
-        var prodName = currentLang === 'en' ? (product.productNameEn || product.nameEn) : (product.productName || product.name);
-        var badge = currentLang === 'en' ? product.badgeEn : product.badge;
-        html += '<div class="affiliate-product">';
-        html += '<div class="affiliate-product__header">';
-        if (product.image) {
-          html += '<a href="' + product.rakuten + '" target="_blank" rel="nofollow sponsored noopener">';
-          html += '<img class="affiliate-product__image" src="' + product.image + '" alt="' + prodName + '" loading="lazy">';
-          html += '</a>';
-        } else {
-          html += '<span class="affiliate-product__icon">' + product.icon + '</span>';
-        }
-        html += '<div class="affiliate-product__info">';
-        html += '<span class="affiliate-product__category">' + catName + '</span>';
-        html += '<span class="affiliate-product__name">' + prodName + '</span>';
-        if (badge) html += '<span class="affiliate-card__badge">' + badge + '</span>';
-        html += '</div>';
-        html += '</div>';
-        html += '<div class="affiliate-product__links">';
-        html += '<a href="' + product.rakuten + '" class="affiliate-link affiliate-link--rakuten" target="_blank" rel="nofollow sponsored noopener">';
-        html += t('shop_rakuten') + '</a>';
-        html += '<a href="' + product.amazon + '" class="affiliate-link affiliate-link--amazon" target="_blank" rel="nofollow sponsored noopener">';
-        html += t('shop_amazon') + '</a>';
-        html += '<a href="' + product.yahoo + '" class="affiliate-link affiliate-link--yahoo" target="_blank" rel="nofollow sponsored noopener">';
-        html += t('shop_yahoo') + '</a>';
-        html += '</div>';
-        html += '</div>';
-      });
-      container.innerHTML = html;
-    }
-
     // Hook into updateCultivarDetail
     var _origUpdateDetail = updateCultivarDetail;
     updateCultivarDetail = function(cultivarName, rowEl) {
       _origUpdateDetail(cultivarName, rowEl);
-      renderAffiliateLinks(cultivarName);
+      renderAffiliateBanner('affiliate-links-grid', { showRecommend: true });
     };
 
     // ========================================
