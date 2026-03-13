@@ -511,6 +511,12 @@
   border-color: var(--color-primary);
 }
 
+.auth-btn--active {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
 .auth-btn__count {
   font-weight: 700;
 }

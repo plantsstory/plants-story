@@ -1701,6 +1701,8 @@
       try {
         if (window.supabase && window.supabase.createClient) {
           supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          window._supabaseClient = supabase;
+          window._SUPABASE_URL = SUPABASE_URL;
         }
       } catch(e) { console.warn('Supabase init failed:', e); }
 
@@ -3421,6 +3423,11 @@
       var MAX_SIZE = 5 * 1024 * 1024; // 5MB
       var ALLOWED_TYPES = ['image/jpeg', 'image/png'];
       var GALLERY_STORAGE_KEY = 'plants-story-gallery-images';
+      var VOTE_STORAGE_KEY = 'plants-story-image-votes';
+      var BUCKET_NAME = 'gallery-images';
+
+      function getSupabase() { return window._supabaseClient || null; }
+      function getSupabaseUrl() { return window._SUPABASE_URL || ''; }
 
       function validateFile(file) {
         if (ALLOWED_TYPES.indexOf(file.type) === -1) {
@@ -3434,19 +3441,17 @@
         return true;
       }
 
-      // --- Gallery image persistence per cultivar ---
+      // --- localStorage fallback ---
       function getGalleryStore() {
         try { return JSON.parse(localStorage.getItem(GALLERY_STORAGE_KEY) || '{}'); } catch(e) { return {}; }
       }
-
-      function saveGalleryImage(cultivarName, dataUrl) {
+      function saveGalleryImageLocal(cultivarName, dataUrl) {
         var store = getGalleryStore();
         if (!store[cultivarName]) store[cultivarName] = [];
         store[cultivarName].push(dataUrl);
         localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(store));
       }
-
-      function removeGalleryImage(cultivarName, index) {
+      function removeGalleryImageLocal(cultivarName, index) {
         var store = getGalleryStore();
         if (store[cultivarName]) {
           store[cultivarName].splice(index, 1);
@@ -3454,30 +3459,117 @@
           localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(store));
         }
       }
-
-      function getGalleryImages(cultivarName) {
+      function getGalleryImagesLocal(cultivarName) {
         var store = getGalleryStore();
         return store[cultivarName] || [];
       }
 
-      function createGalleryItem(src, cultivarName, index) {
+      // --- Vote tracking (prevent duplicate votes) ---
+      function getVotedImages() {
+        try { return JSON.parse(localStorage.getItem(VOTE_STORAGE_KEY) || '{}'); } catch(e) { return {}; }
+      }
+      function markVoted(imageId, voteType) {
+        var voted = getVotedImages();
+        voted[imageId] = voteType;
+        localStorage.setItem(VOTE_STORAGE_KEY, JSON.stringify(voted));
+      }
+      function getVote(imageId) {
+        return getVotedImages()[imageId] || null;
+      }
+
+      // --- Supabase Storage helpers ---
+      function getPublicUrl(storagePath) {
+        return getSupabaseUrl() + '/storage/v1/object/public/' + BUCKET_NAME + '/' + storagePath;
+      }
+
+      function uploadToSupabase(file, cultivarName) {
+        var sb = getSupabase();
+        if (!sb) return Promise.reject('No Supabase');
+        var safeName = cultivarName.replace(/[^a-zA-Z0-9_' -]/g, '_');
+        var ext = file.name.split('.').pop();
+        var path = safeName + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+        return sb.storage.from(BUCKET_NAME).upload(path, file, {
+          contentType: file.type,
+          upsert: false
+        }).then(function(res) {
+          if (res.error) throw res.error;
+          return sb.from('cultivar_images').insert({
+            cultivar_name: cultivarName,
+            storage_path: path
+          }).select().then(function(dbRes) {
+            if (dbRes.error) throw dbRes.error;
+            return dbRes.data[0];
+          });
+        });
+      }
+
+      function fetchImagesFromSupabase(cultivarName) {
+        var sb = getSupabase();
+        if (!sb) return Promise.reject('No Supabase');
+        return sb.from('cultivar_images')
+          .select('*')
+          .eq('cultivar_name', cultivarName)
+          .order('created_at', { ascending: true })
+          .then(function(res) {
+            if (res.error) throw res.error;
+            return res.data || [];
+          });
+      }
+
+      function deleteImageFromSupabase(imageId, storagePath) {
+        var sb = getSupabase();
+        if (!sb) return Promise.reject('No Supabase');
+        return sb.storage.from(BUCKET_NAME).remove([storagePath]).then(function() {
+          return sb.from('cultivar_images').delete().eq('id', imageId);
+        });
+      }
+
+      function voteImage(imageId, voteType) {
+        var sb = getSupabase();
+        if (!sb) return Promise.reject('No Supabase');
+        var prev = getVote(imageId);
+        if (prev === voteType) return Promise.resolve(); // already voted same
+        // Build update: increment new vote, decrement old if switching
+        return sb.from('cultivar_images').select('real_votes, fake_votes').eq('id', imageId).single().then(function(res) {
+          if (res.error) throw res.error;
+          var updates = {};
+          if (voteType === 'real') updates.real_votes = (res.data.real_votes || 0) + 1;
+          if (voteType === 'fake') updates.fake_votes = (res.data.fake_votes || 0) + 1;
+          if (prev === 'real') updates.real_votes = Math.max(0, (res.data.real_votes || 0) - 1);
+          if (prev === 'fake') updates.fake_votes = Math.max(0, (res.data.fake_votes || 0) - 1);
+          return sb.from('cultivar_images').update(updates).eq('id', imageId);
+        }).then(function() {
+          markVoted(imageId, voteType);
+        });
+      }
+
+      // --- Create gallery item DOM ---
+      function createGalleryItem(src, opts) {
+        // opts: { imageId, storagePath, realVotes, fakeVotes, isLocal, localIdx }
         var item = document.createElement('div');
         item.className = 'gallery__item';
         item.setAttribute('data-user-upload', 'true');
-        item.setAttribute('data-gallery-idx', index);
+        if (opts.imageId) item.setAttribute('data-image-id', opts.imageId);
+        if (opts.storagePath) item.setAttribute('data-storage-path', opts.storagePath);
+        if (opts.isLocal) item.setAttribute('data-gallery-idx', opts.localIdx);
+        var realVotes = opts.realVotes || 0;
+        var fakeVotes = opts.fakeVotes || 0;
+        var votedAs = opts.imageId ? getVote(opts.imageId) : null;
+        var realActive = votedAs === 'real' ? ' auth-btn--active' : '';
+        var fakeActive = votedAs === 'fake' ? ' auth-btn--active' : '';
         item.innerHTML =
           '<div class="gallery__img"><img src="' + src + '" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-md)"></div>' +
           '<div class="gallery__actions">' +
             '<div class="auth-vote">' +
-              '<button class="auth-btn">Real <span class="auth-btn__count">0</span></button>' +
-              '<button class="auth-btn">Fake <span class="auth-btn__count">0</span></button>' +
+              '<button class="auth-btn' + realActive + '" data-vote="real">Real <span class="auth-btn__count">' + realVotes + '</span></button>' +
+              '<button class="auth-btn' + fakeActive + '" data-vote="fake">Fake <span class="auth-btn__count">' + fakeVotes + '</span></button>' +
             '</div>' +
             '<a class="gallery__delete">' + t('request_delete') + '</a>' +
           '</div>';
         return item;
       }
 
-      // Render gallery for a specific cultivar
+      // --- Render gallery for a specific cultivar ---
       window.renderGalleryForCultivar = function(cultivarName) {
         var galleryUpload = document.getElementById('gallery-upload');
         if (!galleryUpload) return;
@@ -3488,13 +3580,41 @@
           el.remove();
         });
 
-        // Restore saved images for this cultivar
-        var images = getGalleryImages(cultivarName);
+        var sb = getSupabase();
+        if (sb) {
+          // Fetch from Supabase
+          fetchImagesFromSupabase(cultivarName).then(function(images) {
+            // Check cultivar hasn't changed while loading
+            var detailPage = document.getElementById('page-cultivar');
+            var h1 = detailPage ? detailPage.querySelector('h1') : null;
+            if (!h1 || h1.textContent !== cultivarName) return;
+
+            images.forEach(function(img) {
+              var url = getPublicUrl(img.storage_path);
+              var item = createGalleryItem(url, {
+                imageId: img.id,
+                storagePath: img.storage_path,
+                realVotes: img.real_votes,
+                fakeVotes: img.fake_votes
+              });
+              gallery.insertBefore(item, galleryUpload);
+            });
+          }).catch(function(err) {
+            console.warn('Failed to load gallery from Supabase, falling back to localStorage:', err);
+            renderLocalGallery(cultivarName, gallery, galleryUpload);
+          });
+        } else {
+          renderLocalGallery(cultivarName, gallery, galleryUpload);
+        }
+      };
+
+      function renderLocalGallery(cultivarName, gallery, galleryUpload) {
+        var images = getGalleryImagesLocal(cultivarName);
         images.forEach(function(src, i) {
-          var item = createGalleryItem(src, cultivarName, i);
+          var item = createGalleryItem(src, { isLocal: true, localIdx: i });
           gallery.insertBefore(item, galleryUpload);
         });
-      };
+      }
 
       // --- Gallery Upload (cultivar detail page) ---
       var galleryUpload = document.getElementById('gallery-upload');
@@ -3510,24 +3630,59 @@
           var file = this.files[0];
           if (!file || !validateFile(file)) { this.value = ''; return; }
 
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            // Get current cultivar name
-            var detailPage = document.getElementById('page-cultivar');
-            var h1 = detailPage ? detailPage.querySelector('h1') : null;
-            var cultivarName = h1 ? h1.textContent : '';
-            if (!cultivarName) return;
+          var detailPage = document.getElementById('page-cultivar');
+          var h1 = detailPage ? detailPage.querySelector('h1') : null;
+          var cultivarName = h1 ? h1.textContent : '';
+          if (!cultivarName) return;
 
-            // Save to localStorage and render
-            saveGalleryImage(cultivarName, e.target.result);
-            renderGalleryForCultivar(cultivarName);
-          };
-          reader.readAsDataURL(file);
+          var sb = getSupabase();
+          if (sb) {
+            // Upload to Supabase Storage
+            uploadToSupabase(file, cultivarName).then(function() {
+              renderGalleryForCultivar(cultivarName);
+            }).catch(function(err) {
+              console.warn('Supabase upload failed, saving locally:', err);
+              // Fallback to localStorage
+              var reader = new FileReader();
+              reader.onload = function(e) {
+                saveGalleryImageLocal(cultivarName, e.target.result);
+                renderGalleryForCultivar(cultivarName);
+              };
+              reader.readAsDataURL(file);
+            });
+          } else {
+            // localStorage fallback
+            var reader = new FileReader();
+            reader.onload = function(e) {
+              saveGalleryImageLocal(cultivarName, e.target.result);
+              renderGalleryForCultivar(cultivarName);
+            };
+            reader.readAsDataURL(file);
+          }
           this.value = '';
         });
 
-        // Handle delete clicks for user-uploaded images
+        // Handle vote and delete clicks
         galleryUpload.parentNode.addEventListener('click', function(e) {
+          // --- Vote handling ---
+          var voteBtn = e.target.closest('.auth-btn[data-vote]');
+          if (voteBtn) {
+            var item = voteBtn.closest('.gallery__item[data-user-upload]');
+            if (!item) return;
+            var imageId = item.getAttribute('data-image-id');
+            if (!imageId) return; // local images can't be voted on
+            var voteType = voteBtn.getAttribute('data-vote');
+            voteImage(imageId, voteType).then(function() {
+              var detailPage = document.getElementById('page-cultivar');
+              var h1 = detailPage ? detailPage.querySelector('h1') : null;
+              if (h1) renderGalleryForCultivar(h1.textContent);
+            }).catch(function(err) {
+              console.warn('Vote failed:', err);
+            });
+            return;
+          }
+
+          // --- Delete handling ---
           var deleteBtn = e.target.closest('.gallery__delete');
           if (!deleteBtn) return;
           var item = deleteBtn.closest('.gallery__item[data-user-upload]');
@@ -3538,10 +3693,23 @@
           var cultivarName = h1 ? h1.textContent : '';
           if (!cultivarName) return;
 
-          var idx = parseInt(item.getAttribute('data-gallery-idx'));
-          if (!isNaN(idx)) {
-            removeGalleryImage(cultivarName, idx);
-            renderGalleryForCultivar(cultivarName);
+          var imageId = item.getAttribute('data-image-id');
+          var storagePath = item.getAttribute('data-storage-path');
+
+          if (imageId && storagePath) {
+            // Delete from Supabase
+            deleteImageFromSupabase(imageId, storagePath).then(function() {
+              renderGalleryForCultivar(cultivarName);
+            }).catch(function(err) {
+              console.warn('Delete failed:', err);
+            });
+          } else {
+            // Delete from localStorage
+            var idx = parseInt(item.getAttribute('data-gallery-idx'));
+            if (!isNaN(idx)) {
+              removeGalleryImageLocal(cultivarName, idx);
+              renderGalleryForCultivar(cultivarName);
+            }
           }
         });
       }
