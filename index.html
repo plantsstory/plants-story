@@ -1940,13 +1940,20 @@
         });
         refreshGenusUI();
 
-        // Then load from Supabase (async, may add more)
+        // Then load from Supabase (async, may add more or update existing)
         if (supabase) {
           supabase.from('cultivars').select('*').then(function(res) {
             if (res.error || !res.data) return;
             var added = false;
             res.data.forEach(function(row) {
-              if (cultivarData[row.cultivar_name]) return;
+              if (cultivarData[row.cultivar_name]) {
+                // Update existing cultivar with latest Supabase data (AI results)
+                if (row.origins && row.origins.length > 0 && row.origins[0].trust > 0) {
+                  cultivarData[row.cultivar_name].origins = row.origins;
+                  updateCultivarRowUI(row.cultivar_name, row.origins);
+                }
+                return;
+              }
               var entry = {
                 origins: row.origins || [],
                 formula: null
@@ -1977,6 +1984,29 @@
     function renderOrigins(cultivarName) {
       var container = document.getElementById('origins-container');
       if (!container) return;
+      var data = cultivarData[cultivarName];
+
+      // Try to fetch latest data from Supabase (async update)
+      if (supabase) {
+        supabase.from('cultivars').select('origins, ai_status').eq('cultivar_name', cultivarName).single()
+        .then(function(res) {
+          if (res.data && res.data.origins && res.data.origins.length > 0) {
+            var dbOrigin = res.data.origins[0];
+            // Only update if DB has better data (AI completed)
+            if (dbOrigin.trust > 0 && (!data || !data.origins || data.origins.length === 0 || data.origins[0].trust === 0)) {
+              if (cultivarData[cultivarName]) {
+                cultivarData[cultivarName].origins = res.data.origins;
+              }
+              renderOriginsInner(cultivarName, container);
+            }
+          }
+        });
+      }
+
+      renderOriginsInner(cultivarName, container);
+    }
+
+    function renderOriginsInner(cultivarName, container) {
       var data = cultivarData[cultivarName];
       if (!data || !data.origins) {
         container.innerHTML = '<div class="text-center text-muted" style="padding:var(--space-xl);">この品種の由来情報はまだ登録されていません。</div>';
