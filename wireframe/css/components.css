@@ -1325,13 +1325,20 @@
 
 .affiliate-banner__grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   position: relative;
   z-index: 1;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .affiliate-banner__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+@media (max-width: 400px) {
   .affiliate-banner__grid {
     grid-template-columns: 1fr;
     gap: 10px;
