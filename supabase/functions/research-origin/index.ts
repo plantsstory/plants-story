@@ -226,6 +226,41 @@ async function callGroq(
 }
 
 // ============================================================
+// Helper: Call OpenAI API (GPT-4o mini fallback)
+// ============================================================
+async function callOpenAI(
+  apiKey: string,
+  systemPrompt: string,
+  userPrompt: string,
+  maxTokens = 2048
+) {
+  const response = await fetch(
+    "https://api.openai.com/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.15,
+        max_tokens: maxTokens,
+      }),
+    }
+  );
+  const data = await response.json();
+  if (data?.error) {
+    throw new Error(data.error.message || "OpenAI API error");
+  }
+  return data?.choices?.[0]?.message?.content || "";
+}
+
+// ============================================================
 // Helper: Extract JSON from text
 // ============================================================
 function extractJson(text: string) {
@@ -380,6 +415,7 @@ serve(async (req: Request) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const geminiApiKey = Deno.env.get("GEMINI_API_KEY") || "";
     const groqApiKey = Deno.env.get("GROQ_API_KEY") || "";
+    const openaiApiKey = Deno.env.get("OPENAI_API_KEY") || "";
 
     // Update status to researching
     await supabase
@@ -462,6 +498,36 @@ Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特
               }
             } catch (e) {
               console.log("[Desc] Groq FAILED:", String(e));
+            }
+          }
+
+          // Fallback 3: GPT-4o mini
+          if ((!bodyJp || bodyJp.length < 50) && openaiApiKey) {
+            try {
+              console.log("[Desc] Trying GPT-4o mini for description...");
+              const dist = botResult.nativeDistribution.join(", ") || "不明";
+              const yearPart = botResult.publicationYear ? ` in ${botResult.publicationYear}` : "";
+              const pubPart = botResult.publication ? ` in ${botResult.publication} ${botResult.referenceCollation}` : "";
+              const simplePrompt = `Describe the plant "${botResult.name}" (Araceae) for plant enthusiasts.
+Include: leaf shape, size, color, texture, venation, and growth habit.
+It was described by ${botResult.authors}${yearPart}${pubPart}. Native to ${dist}.
+
+Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特徴→自生地。学名・人名・地名は英語", "body_en": "English 100-200 words"}`;
+              const openaiText = await callOpenAI(
+                openaiApiKey,
+                "You are a botanical writer. Return ONLY valid JSON.",
+                simplePrompt,
+                1500
+              );
+              console.log("[Desc] GPT-4o mini raw response length:", openaiText?.length);
+              const openaiDesc = extractJson(openaiText);
+              if (openaiDesc?.body && openaiDesc.body.length >= 50) {
+                bodyJp = openaiDesc.body;
+                bodyEn = openaiDesc.body_en || bodyEn;
+                console.log("[Desc] GPT-4o mini OK, body length:", bodyJp.length);
+              }
+            } catch (e) {
+              console.log("[Desc] GPT-4o mini FAILED:", String(e));
             }
           }
 
@@ -557,6 +623,26 @@ Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特
         }
       }
 
+      // Fallback 3: GPT-4o mini
+      if (!researchResult && openaiApiKey) {
+        try {
+          console.log("Using GPT-4o mini for cultivar research...");
+          const text = await callOpenAI(
+            openaiApiKey,
+            "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
+            researchPrompt,
+            3000
+          );
+          researchResult = extractJson(text);
+          if (researchResult?.origins?.length) {
+            researchSource = "gpt-4o-mini";
+            console.log(`GPT-4o mini returned ${researchResult.origins.length} origins`);
+          }
+        } catch (e) {
+          console.error("GPT-4o mini error:", e);
+        }
+      }
+
       // Process AI results
       if (researchResult?.origins?.length) {
         for (const origin of researchResult.origins) {
@@ -598,7 +684,7 @@ Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特
             native_region: origin.native_region || null,
             first_description: origin.first_description || null,
             author: {
-              name: researchSource === "gemini" ? "AI (Gemini 2.0 Flash)" : "AI (Llama 3.3 70B)",
+              name: researchSource === "gemini" ? "AI (Gemini 2.0 Flash)" : researchSource === "gpt-4o-mini" ? "AI (GPT-4o mini)" : "AI (Llama 3.3 70B)",
               isAI: true,
               date: new Date().toISOString().split("T")[0],
             },
