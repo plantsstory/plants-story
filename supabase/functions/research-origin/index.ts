@@ -257,13 +257,11 @@ function parseSpeciesName(cultivarName: string): { genus: string; species: strin
 function buildSpeciesDescriptionPrompt(bot: BotanicalResult): string {
   const distribution = bot.nativeDistribution.join(", ") || "不明";
 
-  return `You are given VERIFIED botanical data from IPNI and POWO (Kew Gardens) databases.
-Write a factual description of this species based ONLY on the provided data below.
-Do NOT add any information not present in the data.
-Do NOT speculate about discovery circumstances or ecology.
-Do NOT mention flower language, care tips, or aesthetic qualities.
-You may add 1-2 sentences about the species' most notable morphological features
-(leaf shape, size, color, texture) ONLY if they are well-established facts.
+  return `You are a botanical writer creating an accessible, informative description of a plant species.
+You are given VERIFIED data from IPNI and POWO (Kew Gardens).
+
+Your goal: Write a description that a plant enthusiast (not a scientist) can enjoy reading.
+Include the scientific citation, but ALSO describe what makes this plant special and recognizable.
 
 === VERIFIED DATA ===
 Scientific name: ${bot.name}
@@ -273,11 +271,18 @@ Publication: ${bot.publication || "unknown"} ${bot.referenceCollation || ""}
 Family: Araceae
 Native distribution: ${distribution}
 
+=== WRITING GUIDELINES ===
+1. Start with the scientific citation (who described it, when, where published).
+2. Then describe the plant's APPEARANCE: leaf shape, size, color, texture, venation pattern, petiole characteristics. These are well-known morphological features for Araceae - use your knowledge.
+3. Mention the native habitat briefly (tropical rainforest, cloud forest, etc.) based on distribution.
+4. Keep it engaging but factual. No care tips, no flower language, no commercial info.
+5. 日本語: 自然な日本語で、植物好きの人が読んで楽しい文章にする。学名・人名・地名は英語のまま。
+
 === OUTPUT FORMAT ===
 Return ONLY valid JSON (no markdown, no code blocks):
 {
-  "body": "日本語の説明文 (100-200文字)。記載者名・学名・地名は英語のまま。形式: '{Authors}が{Year}年に{Publication}にて記載。{Distribution}原産。' の後に特徴を1-2文。",
-  "body_en": "English description (80-200 words). Format: '{Name} was described by {Authors} in {Year} in {Publication}. Native to {Distribution}.' followed by 1-2 sentences of distinguishing characteristics."
+  "body": "日本語の説明文 (150-300文字)。最初に記載情報、次に植物の見た目の特徴、最後に自生地の環境。",
+  "body_en": "English description (100-250 words). Scientific citation first, then appearance and habitat."
 }`;
 }
 
@@ -342,7 +347,14 @@ Return ONLY valid JSON (no markdown):
 - Return 1 origin only. Quality over quantity.
 - confidence: YOUR confidence this info is accurate (0.0-1.0). Be honest.
 - If you truly cannot find reliable info, return confidence: 0.2 with tier "D".
-- description_jp MUST be a complete Japanese paragraph, not a stub.`;
+- description_jp MUST be a complete Japanese paragraph, not a stub.
+
+=== WRITING STYLE ===
+- Write for plant enthusiasts, not scientists. Keep it readable and engaging.
+- Even if origin is UNKNOWN, describe the plant's APPEARANCE (leaf shape, color, variegation pattern, size, growth habit) so the reader learns something useful.
+- For unknown origins, be CONCISE: "由来は不明。" then describe the plant itself.
+- Do NOT write long apologies about lack of information. Just state it briefly and move on to describing the plant.
+- 日本語: 自然で読みやすい文章。「信頼できる情報源が見つからなかったため…」のような冗長な表現は避ける。`;
 }
 
 // ============================================================
@@ -400,24 +412,64 @@ serve(async (req: Request) => {
 
         if (geminiApiKey) {
           try {
+            console.log("[Desc] Trying Gemini for description...");
             const text = await callGemini(geminiApiKey, descPrompt);
+            console.log("[Desc] Gemini raw response length:", text?.length, "first 100:", text?.substring(0, 100));
             const descParsed = extractJson(text);
             if (descParsed?.body && descParsed?.body_en) {
               bodyJp = descParsed.body;
               bodyEn = descParsed.body_en;
+              console.log("[Desc] Gemini OK, body length:", bodyJp.length);
+            } else {
+              console.log("[Desc] Gemini returned no valid JSON");
             }
           } catch (e) {
-            console.log("Gemini description gen failed:", String(e));
+            console.log("[Desc] Gemini FAILED:", String(e));
           }
+        } else {
+          console.log("[Desc] No Gemini API key");
         }
 
-        // Fallback: generate from structured data
-        if (!bodyJp || bodyJp.length < 20) {
+        // Fallback: generate from structured data with Groq (simpler prompt)
+        if (!bodyJp || bodyJp.length < 50) {
           const dist = botResult.nativeDistribution.join(", ") || "不明";
-          const yearPart = botResult.publicationYear ? `${botResult.publicationYear}年に` : "";
-          const pubPart = botResult.publication ? `${botResult.publication} ${botResult.referenceCollation}にて` : "";
-          bodyJp = `${botResult.authors}が${yearPart}${pubPart}記載。${dist}原産。`;
-          bodyEn = `${botResult.name} was described by ${botResult.authors}${botResult.publicationYear ? ` in ${botResult.publicationYear}` : ""}${botResult.publication ? ` in ${botResult.publication} ${botResult.referenceCollation}` : ""}. Native to ${dist}.`;
+          const yearPart = botResult.publicationYear ? ` in ${botResult.publicationYear}` : "";
+          const pubPart = botResult.publication ? ` in ${botResult.publication} ${botResult.referenceCollation}` : "";
+
+          if (groqApiKey) {
+            try {
+              console.log("[Desc] bodyJp length:", bodyJp?.length, "- trying Groq with simple prompt...");
+              const simplePrompt = `Describe the plant "${botResult.name}" (Araceae) for plant enthusiasts.
+Include: leaf shape, size, color, texture, venation, and growth habit.
+It was described by ${botResult.authors}${yearPart}${pubPart}. Native to ${dist}.
+
+Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特徴→自生地。学名・人名・地名は英語", "body_en": "English 100-200 words"}`;
+              const groqText = await callGroq(
+                groqApiKey,
+                "llama-3.3-70b-versatile",
+                "You are a botanical writer. Return ONLY valid JSON.",
+                simplePrompt,
+                1500
+              );
+              console.log("[Desc] Groq raw response length:", groqText?.length, "first 100:", groqText?.substring(0, 100));
+              const groqDesc = extractJson(groqText);
+              if (groqDesc?.body && groqDesc.body.length >= 50) {
+                bodyJp = groqDesc.body;
+                bodyEn = groqDesc.body_en || bodyEn;
+                console.log("[Desc] Groq OK, body length:", bodyJp.length);
+              } else {
+                console.log("[Desc] Groq returned no valid JSON or body too short");
+              }
+            } catch (e) {
+              console.log("[Desc] Groq FAILED:", String(e));
+            }
+          }
+
+          // Final fallback: structured template
+          if (!bodyJp || bodyJp.length < 50) {
+            bodyJp = `${botResult.authors}が${botResult.publicationYear ? botResult.publicationYear + "年に" : ""}${botResult.publication ? botResult.publication + " " + botResult.referenceCollation + "にて" : ""}記載。${dist}原産。サトイモ科（Araceae）に属する着生または地生植物。`;
+            bodyEn = `${botResult.name} was described by ${botResult.authors}${yearPart}${pubPart}. Native to ${dist}. An epiphytic or terrestrial member of the family Araceae.`;
+          }
         }
 
         const tierInfo = TIER_CONFIG.S;
@@ -564,8 +616,8 @@ serve(async (req: Request) => {
     if (originEntries.length === 0) {
       const tierInfo = TIER_CONFIG.D;
       originEntries.push({
-        body: `${cultivar_name}の由来に関する信頼できる情報は見つかりませんでした。`,
-        body_en: `No reliable origin information was found for ${cultivar_name}.`,
+        body: `${cultivar_name}の由来は不明です。正確な作出者・交配親についての学術的な記録は確認されていません。`,
+        body_en: `The origin of ${cultivar_name} is unknown. No academic records confirming the creator or parentage have been verified.`,
         trust: 20,
         trustClass: "trust--low",
         source_type: "none",
@@ -635,6 +687,8 @@ serve(async (req: Request) => {
         best_trust: bestTrust,
         research_source: researchSource,
         ai_status: "completed",
+        debug_body_length: originEntries[0]?.body?.length || 0,
+        debug_has_fallback: (originEntries[0]?.body || "").includes("サトイモ科"),
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
