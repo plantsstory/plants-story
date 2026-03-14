@@ -314,9 +314,43 @@
     }
     .hidden { display: none !important; }
 
+    /* ---- Hamburger button (mobile only) ---- */
+    .hamburger-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      line-height: 1;
+    }
+    .nav-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 199;
+    }
+    .nav-overlay.show { display: block; }
+
     @media (max-width: 768px) {
-      .admin-nav { display: none; }
+      .hamburger-btn { display: block; }
+      .admin-nav {
+        position: fixed;
+        top: 0;
+        left: -260px;
+        width: 250px;
+        height: 100vh;
+        z-index: 200;
+        transition: left 0.25s ease;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+        padding-top: var(--space-xl);
+      }
+      .admin-nav.open { left: 0; }
       .admin-content { padding: var(--space-md); }
+      .admin-content table { font-size: var(--font-size-sm); }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
@@ -336,7 +370,10 @@
 <!-- ============ ADMIN APP ============ -->
 <div id="admin-app" class="hidden">
   <header class="admin-header">
-    <h1>Plants Story Admin</h1>
+    <div style="display:flex;align-items:center;gap:var(--space-sm);">
+      <button class="hamburger-btn" id="hamburger-btn" aria-label="メニュー">☰</button>
+      <h1>Plants Story Admin</h1>
+    </div>
     <div style="display:flex;align-items:center;gap:var(--space-md);">
       <span class="user-info" id="admin-email"></span>
       <button id="btn-logout">ログアウト</button>
@@ -351,6 +388,7 @@
       <a href="#" data-section="images">画像管理</a>
       <a href="#" data-section="bulk">一括操作</a>
     </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>
     <main class="admin-content">
 
       <!-- ---- DASHBOARD ---- -->
@@ -601,6 +639,15 @@ function enterAdmin(user) {
 // ========================================
 // Navigation
 // ========================================
+// ---- Mobile nav toggle ----
+var navEl = document.querySelector('.admin-nav');
+var overlayEl = document.getElementById('nav-overlay');
+var hamburgerEl = document.getElementById('hamburger-btn');
+function closeNav() { navEl.classList.remove('open'); overlayEl.classList.remove('show'); }
+function openNav() { navEl.classList.add('open'); overlayEl.classList.add('show'); }
+hamburgerEl.addEventListener('click', function() { navEl.classList.contains('open') ? closeNav() : openNav(); });
+overlayEl.addEventListener('click', closeNav);
+
 document.querySelectorAll('.admin-nav a').forEach(function(link) {
   link.addEventListener('click', function(e) {
     e.preventDefault();
@@ -610,6 +657,7 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
     document.querySelectorAll('.admin-content > section').forEach(function(s) { s.classList.add('hidden'); });
     document.getElementById('sec-' + section).classList.remove('hidden');
     if (section === 'origins') loadOrigins();
+    closeNav();
   });
 });
 
