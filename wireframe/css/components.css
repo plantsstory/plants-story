@@ -632,16 +632,35 @@
    IMAGE GALLERY
    ======================================== */
 .gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-md);
 }
 
-.gallery__item {
+/* Uploaded images: large, shown first via order */
+.gallery__item[data-user-upload] {
+  order: -1;
+  width: calc(50% - var(--space-md) / 2);
   border: 1px solid var(--color-lighter);
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--color-white);
+}
+
+/* Default placeholder items: small */
+.gallery__item:not([data-user-upload]) {
+  order: 1;
+  width: 100px;
+  border: 1px solid var(--color-lighter);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-white);
+  opacity: 0.5;
+}
+
+/* Hide placeholders when uploaded images exist */
+.gallery:has(.gallery__item[data-user-upload]) .gallery__item:not([data-user-upload]) {
+  display: none;
 }
 
 .gallery__img {
@@ -673,21 +692,30 @@
 }
 
 .gallery__upload {
+  order: 2;
+  width: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
   border: 2px dashed var(--color-light);
   border-radius: var(--radius-md);
   cursor: pointer;
-  min-height: 200px;
+  min-height: 100px;
   color: var(--color-gray);
+  font-size: var(--font-size-xs);
   transition: border-color var(--transition);
 }
 
 .gallery__upload:hover {
   border-color: var(--color-primary);
+}
+
+@media (max-width: 480px) {
+  .gallery__item[data-user-upload] {
+    width: 100%;
+  }
 }
 
 /* ========================================
