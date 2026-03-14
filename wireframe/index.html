@@ -1938,8 +1938,9 @@
         });
       }
 
-      // Which genera have seedling tabs
+      // Which genera have seedling tabs (exposed globally for contribute form)
       var SEEDLING_GENERA = ['anthurium'];
+      window.SEEDLING_GENERA = SEEDLING_GENERA;
 
       // Add a row to the genus list DOM
       function addCultivarRow(fullName, entry, meta) {
@@ -3029,6 +3030,25 @@
         });
       }
 
+      // Show/hide seedling radio based on genus
+      var seedlingRadioLabel = document.querySelector('#page-contribute input[name="cultivar-type"][value="seedling"]');
+      if (seedlingRadioLabel) seedlingRadioLabel = seedlingRadioLabel.closest('label');
+      function updateSeedlingVisibility() {
+        var genus = contributeGenus ? contributeGenus.value.toLowerCase() : '';
+        var hasSeedlings = SEEDLING_GENERA.indexOf(genus) !== -1;
+        if (seedlingRadioLabel) seedlingRadioLabel.style.display = hasSeedlings ? '' : 'none';
+        // If seedling is selected but genus doesn't support it, switch to species
+        var checked = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
+        if (checked && checked.value === 'seedling' && !hasSeedlings) {
+          var speciesRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="species"]');
+          if (speciesRadio) { speciesRadio.checked = true; speciesRadio.dispatchEvent(new Event('change')); }
+        }
+      }
+      if (contributeGenus) {
+        contributeGenus.addEventListener('change', updateSeedlingVisibility);
+      }
+      updateSeedlingVisibility();
+
       // Show/hide formula and parent photos based on type
       var parentPhotosSection = document.getElementById('parent-photos-section');
       document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(radio) {
@@ -3074,16 +3094,18 @@
         });
       });
 
-      // Improved duplicate detection - checks all cultivarData keys
+      // Exact-match duplicate detection only
       if (contributeName && duplicateAlert) {
         contributeName.addEventListener('input', function() {
           var inputVal = this.value.trim().toLowerCase();
-          if (inputVal.length < 3) { duplicateAlert.style.display = 'none'; return; }
+          if (inputVal.length < 1) { duplicateAlert.style.display = 'none'; return; }
           var genus = contributeGenus ? contributeGenus.value : 'Anthurium';
+          var exactSpecies = (genus.toLowerCase() + ' ' + inputVal);
+          var exactCultivar = (genus.toLowerCase() + " '" + inputVal + "'");
           var found = null;
           Object.keys(cultivarData).forEach(function(name) {
             var nameLower = name.toLowerCase();
-            if (nameLower.includes(inputVal) || nameLower === (genus.toLowerCase() + ' ' + inputVal) || nameLower === (genus.toLowerCase() + " '" + inputVal + "'")) {
+            if (nameLower === exactSpecies || nameLower === exactCultivar) {
               found = name;
             }
           });
