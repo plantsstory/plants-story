@@ -3385,6 +3385,8 @@
 
           // Grab gallery files before any async operations
           var galleryFiles = typeof window.getContributeFiles === 'function' ? window.getContributeFiles() : [];
+          // Gallery uses display name (without [Seedling]) to match h1 and detail page
+          var galleryName = fullName.replace(' [Seedling]', '');
 
           // After parent photos are ready, save to DB, upload gallery images, then update UI
           photoUploadPromise.then(function() {
@@ -3393,16 +3395,15 @@
             // Upload gallery images after DB record exists
             if (galleryFiles.length > 0 && typeof window.uploadGalleryImage === 'function') {
               return Promise.all(galleryFiles.map(function(file) {
-                return window.uploadGalleryImage(file, fullName).catch(function(err) {
-                  console.warn('Gallery image upload error:', err);
-                  return null; // Don't block other uploads
+                return window.uploadGalleryImage(file, galleryName).catch(function(err) {
+                  console.warn('Gallery image upload failed:', file.name, err);
+                  return null;
                 });
               }));
             }
           }).then(function() {
             finishSubmit();
           }).catch(function(err) {
-            console.warn('Submit error:', err);
             handleSubmitError('DB保存エラー: ' + (err.message || err));
           });
         });
