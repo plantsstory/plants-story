@@ -1278,6 +1278,16 @@
        MINIMAL JS: Page switching & Tabs
        ======================================== -->
   <script>
+    // Toast notification helper (non-blocking replacement for alert)
+    function showToast(msg, isError) {
+      var toast = document.createElement('div');
+      toast.className = 'toast-notification' + (isError ? ' toast-error' : '');
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(function() { toast.classList.add('show'); }, 10);
+      setTimeout(function() { toast.classList.remove('show'); setTimeout(function() { toast.remove(); }, 300); }, 3000);
+    }
+
     // Page navigation
     function showPage(pageId) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -3161,8 +3171,8 @@
           var desc = contributeDesc ? contributeDesc.value.trim() : '';
 
           // Validation
-          if (!genus) { alert(t('error_genus_required')); return; }
-          if (!name) { alert(t('error_name_required')); return; }
+          if (!genus) { showToast(t('error_genus_required'), true); return; }
+          if (!name) { showToast(t('error_name_required'), true); return; }
 
           // Build full name
           var fullName;
@@ -3175,7 +3185,7 @@
           }
 
           // Check duplicate
-          if (cultivarData[fullName]) { alert(t('error_duplicate')); return; }
+          if (cultivarData[fullName]) { showToast(t('error_duplicate'), true); return; }
 
           // Build data entry
           var newEntry = { origins: [] };
@@ -3347,13 +3357,7 @@
           });
           if (parentPhotosSection) parentPhotosSection.style.display = 'none';
 
-          // Show toast notification instead of blocking alert
-          var toast = document.createElement('div');
-          toast.className = 'toast-notification';
-          toast.textContent = t('submit_success');
-          document.body.appendChild(toast);
-          setTimeout(function() { toast.classList.add('show'); }, 10);
-          setTimeout(function() { toast.classList.remove('show'); setTimeout(function() { toast.remove(); }, 300); }, 3000);
+          showToast(t('submit_success'));
         });
       }
     })();
@@ -3415,7 +3419,7 @@
           e.preventDefault();
           var desc = originForm.querySelector('.form-textarea');
           var descText = desc ? desc.value.trim() : '';
-          if (!descText) { alert(t('origin_desc_required')); return; }
+          if (!descText) { showToast(t('origin_desc_required'), true); return; }
 
           // Get current cultivar
           var cultivarPage = document.getElementById('page-cultivar');
@@ -3457,7 +3461,7 @@
           var toggle = document.getElementById('add-origin-toggle');
           if (toggle) toggle.style.display = 'block';
 
-          alert(t('origin_added'));
+          showToast(t('origin_added'));
         });
       }
     })();
@@ -3714,11 +3718,11 @@
 
       function validateFile(file) {
         if (ALLOWED_TYPES.indexOf(file.type) === -1) {
-          alert(t('upload_error_type'));
+          showToast(t('upload_error_type'), true);
           return false;
         }
         if (file.size > MAX_SIZE) {
-          alert(t('upload_error_size'));
+          showToast(t('upload_error_size'), true);
           return false;
         }
         return true;
@@ -4037,7 +4041,7 @@
 
         function addContributeImage(file) {
           if (contributeImages.length >= 3) {
-            alert(t('upload_error_max'));
+            showToast(t('upload_error_max'), true);
             return;
           }
           if (!validateFile(file)) return;
@@ -4091,10 +4095,10 @@
         var email = document.getElementById('contact-email').value.trim();
         var message = document.getElementById('contact-message').value.trim();
         if (!name || !email || !message) {
-          alert(t('contact_error_required'));
+          showToast(t('contact_error_required'), true);
           return;
         }
-        alert(t('contact_success'));
+        showToast(t('contact_success'));
         document.getElementById('contact-name').value = '';
         document.getElementById('contact-email').value = '';
         document.getElementById('contact-message').value = '';
