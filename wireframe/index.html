@@ -4283,34 +4283,60 @@
     var lightbox = document.getElementById('parentPhotoLightbox');
     var lbImg = lightbox.querySelector('img');
     var lbLabel = lightbox.querySelector('.lightbox-label');
+    var savedScrollY = 0;
 
     function openLightbox(src, label) {
       lbImg.src = src;
       lbLabel.textContent = label || '';
-      lightbox.classList.add('active');
+      // Lock body scroll — mobile Safari needs position:fixed
+      savedScrollY = window.pageYOffset || document.documentElement.scrollTop;
+      document.body.style.position = 'fixed';
+      document.body.style.top = '-' + savedScrollY + 'px';
+      document.body.style.left = '0';
+      document.body.style.right = '0';
       document.body.style.overflow = 'hidden';
+      lightbox.classList.add('active');
     }
     function closeLightbox() {
       lightbox.classList.remove('active');
+      // Restore body scroll
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
       document.body.style.overflow = '';
+      window.scrollTo(0, savedScrollY);
       lbImg.src = '';
     }
 
-    // Close on backdrop click or X button
-    lightbox.addEventListener('click', closeLightbox);
-    lightbox.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
+    // Close on backdrop click/tap
+    lightbox.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeLightbox();
+    });
 
     // Close on Escape key
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
     });
 
-    // Delegate click on parent photo images
+    // Block touch scroll while lightbox is open
+    lightbox.addEventListener('touchmove', function(e) {
+      e.preventDefault();
+    }, { passive: false });
+
+    // Delegate click/tap on parent photo images
     document.addEventListener('click', function(e) {
-      var img = e.target.closest('.parent-photo-display img.has-photo');
-      if (img) {
-        e.stopPropagation();
-        openLightbox(img.src, img.alt);
+      var el = e.target;
+      while (el && el !== document) {
+        if (el.tagName === 'IMG' && el.classList.contains('has-photo') && el.closest('.parent-photo-display')) {
+          e.preventDefault();
+          e.stopPropagation();
+          openLightbox(el.src, el.alt);
+          return;
+        }
+        el = el.parentElement;
       }
     });
   })();
