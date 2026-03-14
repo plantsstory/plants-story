@@ -1314,6 +1314,90 @@
       }
     }
 
+    // ---- Hash-based routing (History API) ----
+    // Known simple pages (no sub-parameters)
+    var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact'];
+    // Known genus names for URL mapping
+    var knownGenera = ['anthurium', 'monstera', 'philodendron'];
+
+    function buildHash(page, options) {
+      options = options || {};
+      if (page === 'top') return '#/';
+      if (page === 'genus' && options.genus) return '#/' + options.genus.toLowerCase();
+      if (page === 'cultivar' && options.cultivar) {
+        // e.g. "Anthurium crystallinum" -> #/anthurium/crystallinum
+        var parts = options.cultivar.split(' ');
+        var g = parts[0].toLowerCase();
+        var rest = parts.slice(1).join(' ');
+        return '#/' + g + '/' + encodeURIComponent(rest);
+      }
+      if (simplePages.indexOf(page) !== -1) return '#/' + page;
+      return '#/';
+    }
+
+    function parseHash() {
+      var hash = location.hash || '#/';
+      var path = hash.replace(/^#\/?/, '');  // remove leading #/
+      if (!path) return { page: 'top' };
+
+      var segments = path.split('/').map(function(s) { return decodeURIComponent(s); });
+      var first = segments[0].toLowerCase();
+
+      // Check if it's a genus
+      if (knownGenera.indexOf(first) !== -1) {
+        if (segments.length > 1 && segments[1]) {
+          // Cultivar detail: #/anthurium/crystallinum
+          var genusProper = first.charAt(0).toUpperCase() + first.slice(1);
+          return { page: 'cultivar', genus: first, cultivar: genusProper + ' ' + segments[1] };
+        }
+        return { page: 'genus', genus: first };
+      }
+
+      // Check simple pages
+      if (simplePages.indexOf(first) !== -1) return { page: first };
+
+      return { page: 'top' };
+    }
+
+    function navigateTo(page, options, pushHistory) {
+      options = options || {};
+      showPage(page);
+      if (page === 'genus' && options.genus) showGenus(options.genus);
+      if (page === 'cultivar' && options.cultivar && !options._skipUpdate) {
+        // Find the cultivar row to pass badge info (used by popstate)
+        var cultivarKey = options.cultivar;
+        var rowEl = document.querySelector('.cultivar-row__name[data-key="' + cultivarKey.replace(/"/g, '\\"') + '"]');
+        var parentRow = rowEl ? rowEl.closest('[data-nav]') : null;
+        updateCultivarDetail(cultivarKey, parentRow);
+      }
+
+      if (pushHistory !== false) {
+        var hash = buildHash(page, options);
+        history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar }, '', hash);
+      }
+    }
+
+    // Disable browser's automatic scroll restoration for SPA navigation
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+
+    // Handle browser back/forward
+    window.addEventListener('popstate', function(e) {
+      var state = e.state || parseHash();
+      navigateTo(state.page, state, false);
+    });
+
+    // Handle initial route on page load
+    (function handleInitialRoute() {
+      var state = parseHash();
+      if (state.page !== 'top') {
+        navigateTo(state.page, state, false);
+      }
+      // Record initial state so back button works from first navigation
+      history.replaceState({ page: state.page, genus: state.genus, cultivar: state.cultivar }, '', buildHash(state.page, state));
+    })();
+
     // ---- Cultivar origin data ----
     // 信頼度基準:
     //   論文・学術誌: 85-95%  |  植物園・標本記録: 80-92%
@@ -1812,7 +1896,11 @@
             if (!isSeedling) {
               var inserted = res.data && res.data[0];
               if (inserted && inserted.id) {
-                triggerAIResearch(inserted.id, meta.genus, fullName, meta.type || 'Hybrid');
+                // Pass manual origins directly to avoid race condition with DB read
+                var manualOrigins = (entry.origins || []).filter(function(o) {
+                  return o.source_type === 'manual' || (o.author && o.author.isAI === false);
+                });
+                triggerAIResearch(inserted.id, meta.genus, fullName, meta.type || 'Hybrid', manualOrigins);
               }
             }
           });
@@ -1830,20 +1918,25 @@
       var aiPollingTimers = {};
 
       // Trigger AI research for a cultivar
-      function triggerAIResearch(cultivarId, genus, cultivarName, type) {
+      function triggerAIResearch(cultivarId, genus, cultivarName, type, manualOrigins) {
         console.log('Triggering AI research for:', cultivarName);
+        var payload = {
+          cultivar_id: cultivarId,
+          genus: genus,
+          cultivar_name: cultivarName,
+          type: type
+        };
+        // Pass manual origins directly so Edge Function doesn't need to race with DB
+        if (manualOrigins && manualOrigins.length > 0) {
+          payload.manual_origins = manualOrigins;
+        }
         fetch(EDGE_FUNCTION_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
           },
-          body: JSON.stringify({
-            cultivar_id: cultivarId,
-            genus: genus,
-            cultivar_name: cultivarName,
-            type: type
-          })
+          body: JSON.stringify(payload)
         }).then(function(res) { return res.json(); })
         .then(function(data) {
           console.log('AI research result:', data);
@@ -2076,8 +2169,40 @@
             refreshGenusUI();
             // Load cultivar thumbnails after rows are created
             setTimeout(loadCultivarThumbnails, 100);
-            // Sync localStorage with DB (remove orphaned local entries)
-            try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+            // Sync localStorage: only remove entries that exist in DB with origins intact
+            try {
+              var localData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+              var dbNames = {};
+              res.data.forEach(function(row) { dbNames[row.cultivar_name] = row.origins || []; });
+              var remaining = {};
+              var hasRemaining = false;
+              Object.keys(localData).forEach(function(name) {
+                var dbOrigins = dbNames[name];
+                // Keep local entry if not in DB or DB has empty origins (manual origin may have been lost)
+                if (!dbOrigins || dbOrigins.length === 0) {
+                  remaining[name] = localData[name];
+                  hasRemaining = true;
+                } else {
+                  // Check if DB preserved the manual origin
+                  var hasManual = dbOrigins.some(function(o) {
+                    return o.source_type === 'manual' || (o.author && o.author.isAI === false);
+                  });
+                  var localHasManual = (localData[name].entry.origins || []).some(function(o) {
+                    return o.source_type === 'manual' || (o.author && o.author.isAI === false);
+                  });
+                  // Keep local backup if local had manual origin but DB doesn't
+                  if (localHasManual && !hasManual) {
+                    remaining[name] = localData[name];
+                    hasRemaining = true;
+                  }
+                }
+              });
+              if (hasRemaining) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(remaining));
+              } else {
+                localStorage.removeItem(STORAGE_KEY);
+              }
+            } catch(e) {}
           });
         }
       }
@@ -2481,7 +2606,7 @@
         searchPag.innerHTML = '<a class="page-link active">1</a>';
       }
 
-      showPage('search');
+      navigateTo('search', {});
     }
 
     // Navigation click handler
@@ -2506,22 +2631,26 @@
         e.preventDefault();
         var page = navEl.getAttribute('data-nav');
         var genus = navEl.getAttribute('data-genus');
+        var navOptions = {};
 
-        // If clicking a cultivar row, update detail page dynamically
+        // If clicking a cultivar row, get key and update detail page
         if (page === 'cultivar') {
           var nameEl = navEl.querySelector('.cultivar-row__name');
           if (nameEl) {
             var cultivarKey = nameEl.getAttribute('data-key') || nameEl.textContent;
+            // Pass the row element so navigateTo can use badge info;
+            // updateCultivarDetail is called inside navigateTo via popstate too
             updateCultivarDetail(cultivarKey, navEl);
+            navOptions.cultivar = cultivarKey;
+            navOptions._skipUpdate = true;
           }
         }
 
-        showPage(page);
-
-        // Switch genus content if applicable
         if (page === 'genus' && genus) {
-          showGenus(genus);
+          navOptions.genus = genus.toLowerCase();
         }
+
+        navigateTo(page, navOptions);
 
         // Pre-select genus if coming from genus page, otherwise reset to placeholder
         if (page === 'contribute') {
@@ -3044,7 +3173,7 @@
             if (data.formula) badgeClass = 'badge--hybrid';
             fakeRow.innerHTML = '<span class="badge ' + badgeClass + '"></span>';
             updateCultivarDetail(name, fakeRow);
-            showPage('cultivar');
+            navigateTo('cultivar', { cultivar: name, _skipUpdate: true }, true);
           }
         });
       }
@@ -3375,7 +3504,7 @@
             fakeRow.innerHTML = '<span class="badge badge--' + type + '"></span>';
             if (type === 'species') fakeRow.innerHTML = '<span class="badge badge--species"></span>';
             updateCultivarDetail(fullName, fakeRow);
-            showPage('cultivar');
+            navigateTo('cultivar', { cultivar: fullName, _skipUpdate: true }, true);
 
             // Reset form
             if (contributeName) contributeName.value = '';
@@ -3556,6 +3685,32 @@
 
           renderOrigins(cultivarName);
 
+          // Persist to Supabase
+          if (supabase) {
+            supabase.from('cultivars').select('id, origins').eq('cultivar_name', cultivarName).single()
+            .then(function(res) {
+              if (res.error || !res.data) {
+                console.error('Failed to find cultivar for origin save:', res.error);
+                return;
+              }
+              var dbOrigins = res.data.origins || [];
+              dbOrigins.push(newOrigin);
+              // Also save formula if newly added
+              if (pA && pB) {
+                var hasFormula = dbOrigins.some(function(o) { return o && o._type === 'formula'; });
+                if (!hasFormula) {
+                  dbOrigins.push({ _type: 'formula', formula: { parentA: pA, parentB: pB } });
+                }
+              }
+              return supabase.from('cultivars').update({ origins: dbOrigins }).eq('id', res.data.id);
+            }).then(function(res) {
+              if (res && res.error) {
+                console.error('Failed to save origin to DB:', res.error);
+                showToast('DB保存に失敗しました', true);
+              }
+            });
+          }
+
           // Reset form
           if (desc) desc.value = '';
           originSources = [];
@@ -3727,7 +3882,7 @@
       }
       var searchPag = searchPage.querySelector('.pagination');
       if (searchPag) searchPag.innerHTML = '<a class="page-link active">1</a>';
-      showPage('search');
+      navigateTo('search', {});
     };
 
     // Re-initialize pagination with translated text

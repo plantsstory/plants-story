@@ -403,7 +403,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { cultivar_id, genus, cultivar_name, type } = await req.json();
+    const { cultivar_id, genus, cultivar_name, type, manual_origins } = await req.json();
 
     if (!cultivar_id || !cultivar_name) {
       return new Response(
@@ -427,15 +427,26 @@ serve(async (req: Request) => {
     const groqApiKey = Deno.env.get("GROQ_API_KEY") || "";
     const openaiApiKey = Deno.env.get("OPENAI_API_KEY") || "";
 
-    // Fetch existing origins to preserve manual (user-written) entries
-    const { data: existingRow } = await supabase
-      .from("cultivars")
-      .select("origins")
-      .eq("id", cultivar_id)
-      .single();
-    const manualOrigins: any[] = (existingRow?.origins || []).filter(
-      (o: any) => o.source_type === "manual" || (o.author && o.author.isAI === false)
-    );
+    // Preserve manual (user-written) origins
+    // Priority: use manual_origins passed directly from frontend (avoids race condition)
+    // Fallback: fetch from DB for re-research scenarios (admin "AI再調査" button)
+    let manualOrigins: any[] = [];
+    if (manual_origins && Array.isArray(manual_origins) && manual_origins.length > 0) {
+      manualOrigins = manual_origins;
+      console.log(`[Manual] Using ${manualOrigins.length} manual origins passed from frontend`);
+    } else {
+      const { data: existingRow } = await supabase
+        .from("cultivars")
+        .select("origins")
+        .eq("id", cultivar_id)
+        .single();
+      manualOrigins = (existingRow?.origins || []).filter(
+        (o: any) => o.source_type === "manual" || (o.author && o.author.isAI === false)
+      );
+      if (manualOrigins.length > 0) {
+        console.log(`[Manual] Preserved ${manualOrigins.length} manual origins from DB`);
+      }
+    }
 
     // Update status to researching
     await supabase
