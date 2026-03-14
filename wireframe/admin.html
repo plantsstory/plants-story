@@ -1246,7 +1246,8 @@ document.getElementById('image-grid').addEventListener('click', async function(e
   btn.disabled = true;
   btn.textContent = '削除中...';
   try {
-    await sb.storage.from('gallery-images').remove([storagePath]);
+    // Storage deletion may fail due to RLS - continue with DB deletion regardless
+    try { await sb.storage.from('gallery-images').remove([storagePath]); } catch(e) { console.warn('Storage delete failed (non-critical):', e); }
     var res = await sb.from('cultivar_images').delete().eq('id', imageId);
     if (res.error) throw res.error;
     allImages = allImages.filter(function(img) { return img.id !== imageId; });
