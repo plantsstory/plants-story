@@ -2159,17 +2159,27 @@
       if (!data || !data.origins || data.origins.length === 0) {
         container.innerHTML = '<div class="text-center text-muted" style="padding:var(--space-xl);">' + (isSeedling ? 'この実生の説明はまだ登録されていません。' : 'この品種の由来情報はまだ登録されていません。') + '</div>';
         if (data && data.formula) {
-          var fHtml = '<div class="formula-box mb-lg" style="justify-content:center;">';
-          if (data.formula.motherPhoto) {
-            var motherUrl = _sb ? _sb.storage.from('gallery-images').getPublicUrl(data.formula.motherPhoto).data.publicUrl : '';
-            fHtml += '<div class="parent-photo-display"><img src="' + motherUrl + '" alt="Mother"><div class="text-xs mt-sm">Mother</div></div>';
+          var fHtml = '<div class="formula-box mb-lg" style="justify-content:center;align-items:center;">';
+          // Mother photo - always show frame for seedlings
+          if (isSeedling) {
+            if (data.formula.motherPhoto && _sb) {
+              var motherUrl = _sb.storage.from('gallery-images').getPublicUrl(data.formula.motherPhoto).data.publicUrl;
+              fHtml += '<div class="parent-photo-display"><img src="' + motherUrl + '" alt="Mother"><div class="text-xs mt-sm">Mother</div></div>';
+            } else {
+              fHtml += '<div class="parent-photo-display"><div style="width:80px;height:80px;border-radius:var(--radius-md);border:2px dashed var(--color-light);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:0.7rem;">No Photo</div><div class="text-xs mt-sm">Mother</div></div>';
+            }
           }
           fHtml += '<span class="formula-parent">' + (data.formula.parentA || '') + '</span>';
           fHtml += '<span class="formula-operator">&times;</span>';
           fHtml += '<span class="formula-parent">' + (data.formula.parentB || '') + '</span>';
-          if (data.formula.fatherPhoto) {
-            var fatherUrl = _sb ? _sb.storage.from('gallery-images').getPublicUrl(data.formula.fatherPhoto).data.publicUrl : '';
-            fHtml += '<div class="parent-photo-display"><img src="' + fatherUrl + '" alt="Father"><div class="text-xs mt-sm">Father</div></div>';
+          // Father photo - always show frame for seedlings
+          if (isSeedling) {
+            if (data.formula.fatherPhoto && _sb) {
+              var fatherUrl = _sb.storage.from('gallery-images').getPublicUrl(data.formula.fatherPhoto).data.publicUrl;
+              fHtml += '<div class="parent-photo-display"><img src="' + fatherUrl + '" alt="Father"><div class="text-xs mt-sm">Father</div></div>';
+            } else {
+              fHtml += '<div class="parent-photo-display"><div style="width:80px;height:80px;border-radius:var(--radius-md);border:2px dashed var(--color-light);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:0.7rem;">No Photo</div><div class="text-xs mt-sm">Father</div></div>';
+            }
           }
           fHtml += '</div>';
           container.innerHTML = fHtml + container.innerHTML;
@@ -2184,16 +2194,24 @@
       // Show formula if exists (with parent photos for seedlings)
       if (data.formula) {
         html += '<div class="formula-box mb-lg" style="justify-content:center;align-items:center;">';
-        if (data.formula.motherPhoto) {
-          var motherUrl = _sb ? _sb.storage.from('gallery-images').getPublicUrl(data.formula.motherPhoto).data.publicUrl : '';
-          html += '<div class="parent-photo-display"><img src="' + motherUrl + '" alt="Mother"><div class="text-xs mt-sm">Mother</div></div>';
+        if (isSeedling) {
+          if (data.formula.motherPhoto && _sb) {
+            var motherUrl = _sb.storage.from('gallery-images').getPublicUrl(data.formula.motherPhoto).data.publicUrl;
+            html += '<div class="parent-photo-display"><img src="' + motherUrl + '" alt="Mother"><div class="text-xs mt-sm">Mother</div></div>';
+          } else {
+            html += '<div class="parent-photo-display"><div style="width:80px;height:80px;border-radius:var(--radius-md);border:2px dashed var(--color-light);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:0.7rem;">No Photo</div><div class="text-xs mt-sm">Mother</div></div>';
+          }
         }
         html += '<span class="formula-parent">' + data.formula.parentA + '</span>';
         html += '<span class="formula-operator">&times;</span>';
         html += '<span class="formula-parent">' + data.formula.parentB + '</span>';
-        if (data.formula.fatherPhoto) {
-          var fatherUrl = _sb ? _sb.storage.from('gallery-images').getPublicUrl(data.formula.fatherPhoto).data.publicUrl : '';
-          html += '<div class="parent-photo-display"><img src="' + fatherUrl + '" alt="Father"><div class="text-xs mt-sm">Father</div></div>';
+        if (isSeedling) {
+          if (data.formula.fatherPhoto && _sb) {
+            var fatherUrl = _sb.storage.from('gallery-images').getPublicUrl(data.formula.fatherPhoto).data.publicUrl;
+            html += '<div class="parent-photo-display"><img src="' + fatherUrl + '" alt="Father"><div class="text-xs mt-sm">Father</div></div>';
+          } else {
+            html += '<div class="parent-photo-display"><div style="width:80px;height:80px;border-radius:var(--radius-md);border:2px dashed var(--color-light);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:0.7rem;">No Photo</div><div class="text-xs mt-sm">Father</div></div>';
+          }
         }
         html += '</div>';
       }
