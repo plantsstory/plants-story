@@ -435,10 +435,84 @@
   color: #8B6B3D;
 }
 
+.badge--seedling {
+  background: rgba(76, 175, 80, 0.12);
+  border-color: #4CAF50;
+  color: #2E7D32;
+}
+
 .badge--ai {
   background: var(--color-lighter);
   border-color: var(--color-light);
   color: var(--color-mid);
+}
+
+/* Genus page tabs */
+.genus-tabs {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+.genus-tab {
+  padding: var(--space-sm) var(--space-xl);
+  border: 2px solid var(--color-light);
+  background: var(--color-white);
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-mid);
+  border-radius: var(--radius-full);
+  transition: all 0.2s;
+  font-size: 0.95rem;
+}
+.genus-tab:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.genus-tab.active {
+  color: var(--color-white);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.genus-tab[data-tab="seedlings"] {
+  background: rgba(76, 175, 80, 0.08);
+  border-color: #4CAF50;
+  color: #2E7D32;
+}
+.genus-tab[data-tab="seedlings"]:hover {
+  background: rgba(76, 175, 80, 0.18);
+}
+.genus-tab[data-tab="seedlings"].active {
+  background: #2E7D32;
+  border-color: #2E7D32;
+  color: var(--color-white);
+}
+
+/* Parent photo display */
+.parent-photo-display {
+  text-align: center;
+  margin: 0 var(--space-sm);
+}
+.parent-photo-display img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--color-light);
+}
+.upload-area--small {
+  padding: var(--space-md);
+  min-height: 80px;
+  cursor: pointer;
+  border: 2px dashed var(--color-light);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s;
+}
+.upload-area--small:hover {
+  border-color: var(--color-primary);
 }
 
 /* ========================================

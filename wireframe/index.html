@@ -204,6 +204,12 @@
         <h1 class="section-title">Anthurium</h1>
         <p class="text-muted mb-lg">読み込み中...</p>
 
+        <div class="genus-tabs" id="genus-tabs-anthurium">
+          <button class="genus-tab active" data-tab="species-clones">&#x1F4D6; Species / Clones</button>
+          <button class="genus-tab" data-tab="seedlings">&#x1F331; My Seedlings</button>
+        </div>
+
+        <div data-genus-view="species-clones">
         <div class="sort-bar">
           <div class="search-bar" style="max-width:300px;margin:0;">
             <input type="text" class="search-bar__input" placeholder="属内を検索..." data-i18n-placeholder="genus_search">
@@ -350,6 +356,24 @@
         <div class="text-center mt-lg">
           <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="add_cultivar">+ 品種を追加</a>
         </div>
+        </div><!-- /species-clones view -->
+
+        <div data-genus-view="seedlings" style="display:none;">
+          <div class="sort-bar">
+            <div class="search-bar" style="max-width:300px;margin:0;">
+              <input type="text" class="search-bar__input seedling-search" placeholder="実生を検索...">
+              <button class="search-bar__btn">&#x1F50D;</button>
+            </div>
+          </div>
+          <div class="card seedling-list" style="padding:0;">
+            <div class="text-center text-muted" style="padding:var(--space-xl);">まだ実生が登録されていません。</div>
+          </div>
+          <div class="pagination seedling-pagination"></div>
+          <div class="text-center mt-lg">
+            <a href="#" class="btn btn--primary" data-nav="contribute" data-contribute-type="seedling">+ 実生を追加</a>
+          </div>
+        </div><!-- /seedlings view -->
+
       </div>
 
       <!-- ===== Monstera ===== -->
@@ -816,6 +840,10 @@
               <input type="radio" name="cultivar-type" value="clone">
               <span data-i18n="type_clone">クローン (Clone)</span>
             </label>
+            <label class="form-radio">
+              <input type="radio" name="cultivar-type" value="seedling">
+              <span data-i18n="type_seedling">実生 (Seedling)</span>
+            </label>
           </div>
         </div>
       </div>
@@ -842,6 +870,34 @@
             <input type="text" class="form-input" placeholder="Parent B" style="flex:1;">
           </div>
           <p class="form-hint" data-i18n="formula_hint">品種名を入力すると既存品種から候補が表示されます</p>
+        </div>
+
+        <!-- Parent photos (seedling only) -->
+        <div class="form-group" id="parent-photos-section" style="display:none;">
+          <label class="form-label">交配親の写真</label>
+          <div style="display:flex;gap:var(--space-lg);align-items:flex-start;">
+            <div style="flex:1;text-align:center;">
+              <div class="text-sm font-bold mb-sm">Mother (母)</div>
+              <div class="upload-area upload-area--small" id="mother-upload">
+                <input type="file" id="mother-photo-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+                <div class="upload-area__icon">&#x1F4F7;</div>
+                <div class="upload-area__text text-xs">写真をアップロード</div>
+              </div>
+              <div id="mother-preview" style="margin-top:var(--space-sm);"></div>
+            </div>
+            <div style="display:flex;align-items:center;padding-top:2rem;">
+              <span class="formula-operator" style="font-size:1.5rem;">&times;</span>
+            </div>
+            <div style="flex:1;text-align:center;">
+              <div class="text-sm font-bold mb-sm">Father (父)</div>
+              <div class="upload-area upload-area--small" id="father-upload">
+                <input type="file" id="father-photo-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+                <div class="upload-area__icon">&#x1F4F7;</div>
+                <div class="upload-area__text text-xs">写真をアップロード</div>
+              </div>
+              <div id="father-preview" style="margin-top:var(--space-sm);"></div>
+            </div>
+          </div>
         </div>
 
         <!-- Source links -->
@@ -1726,22 +1782,26 @@
 
         // Supabase insert + AI research trigger
         if (supabase) {
+          var isSeedling = meta.type === 'seedling';
           supabase.from('cultivars').insert({
             genus: meta.genus,
             cultivar_name: fullName,
             type: meta.type || 'Hybrid',
             origins: entry.origins || [],
+            formula: entry.formula || null,
             votes: {},
-            ai_status: 'pending'
+            ai_status: isSeedling ? null : 'pending'
           }).select().then(function(res) {
             if (res.error) {
               console.warn('Supabase insert error:', res.error.message);
               return;
             }
-            // Trigger AI research via Edge Function
-            var inserted = res.data && res.data[0];
-            if (inserted && inserted.id) {
-              triggerAIResearch(inserted.id, meta.genus, fullName, meta.type || 'Hybrid');
+            // Trigger AI research via Edge Function (skip for seedlings)
+            if (!isSeedling) {
+              var inserted = res.data && res.data[0];
+              if (inserted && inserted.id) {
+                triggerAIResearch(inserted.id, meta.genus, fullName, meta.type || 'Hybrid');
+              }
             }
           });
         }
@@ -1878,21 +1938,37 @@
         });
       }
 
+      // Which genera have seedling tabs
+      var SEEDLING_GENERA = ['anthurium'];
+
       // Add a row to the genus list DOM
       function addCultivarRow(fullName, entry, meta) {
         if (cultivarData[fullName]) return;
+        entry._type = meta.type;
         cultivarData[fullName] = entry;
 
         var genusEl = document.getElementById('genus-' + meta.genus.toLowerCase());
         if (!genusEl) return;
-        var container = genusEl.querySelector('.card[style*="padding:0"]');
+        var isSeedling = meta.type === 'seedling';
+        var container;
+        if (isSeedling) {
+          container = genusEl.querySelector('[data-genus-view="seedlings"] .seedling-list');
+        } else {
+          container = genusEl.querySelector('[data-genus-view="species-clones"] .card[style*="padding:0"]') || genusEl.querySelector('.card[style*="padding:0"]');
+        }
         if (!container) return;
+
+        // Clear empty placeholder for seedlings
+        if (isSeedling) {
+          var emptyMsg = container.querySelector('.text-center.text-muted');
+          if (emptyMsg) emptyMsg.remove();
+        }
 
         var row = document.createElement('div');
         row.className = 'cultivar-row';
         row.setAttribute('data-nav', 'cultivar');
-        var badgeClass = meta.type === 'species' ? 'badge--species' : (meta.type === 'hybrid' ? 'badge--hybrid' : 'badge--clone');
-        var badgeText = meta.type === 'species' ? t('badge_species') : (meta.type === 'hybrid' ? 'Hybrid' : 'Clone');
+        var badgeClass = meta.type === 'species' ? 'badge--species' : (meta.type === 'hybrid' ? 'badge--hybrid' : (meta.type === 'seedling' ? 'badge--seedling' : 'badge--clone'));
+        var badgeText = meta.type === 'species' ? t('badge_species') : (meta.type === 'hybrid' ? 'Hybrid' : (meta.type === 'seedling' ? 'Seedling' : 'Clone'));
         var hasDesc = entry.origins.length > 0 && entry.origins[0].trust > 0;
         var originCount = hasDesc ? entry.origins.length : 0;
         var trustPct = hasDesc ? entry.origins[0].trust : 0;
@@ -1900,10 +1976,14 @@
         rowHtml += '<div class="cultivar-row__info">';
         rowHtml += '<div class="cultivar-row__name">' + fullName + '</div>';
         rowHtml += '<div class="cultivar-row__meta">';
-        rowHtml += '<span>' + t('origin_prefix') + originCount + t('origin_count_suffix') + '</span>';
+        if (!isSeedling) {
+          rowHtml += '<span>' + t('origin_prefix') + originCount + t('origin_count_suffix') + '</span>';
+        }
         rowHtml += '<span class="badge ' + badgeClass + '">' + badgeText + '</span>';
-        if (!hasDesc) rowHtml += '<span class="badge badge--ai">' + t('ai_pending_badge') + '</span>';
-        rowHtml += '<div class="trust"><div class="trust__bar"><div class="trust__fill trust--low" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + (hasDesc ? trustPct + '%' : '-') + '</span></div>';
+        if (!isSeedling && !hasDesc) rowHtml += '<span class="badge badge--ai">' + t('ai_pending_badge') + '</span>';
+        if (!isSeedling) {
+          rowHtml += '<div class="trust"><div class="trust__bar"><div class="trust__fill trust--low" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + (hasDesc ? trustPct + '%' : '-') + '</span></div>';
+        }
         rowHtml += '</div>';
         if (entry.formula) {
           rowHtml += '<div class="text-sm text-muted mt-sm"><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + entry.formula.parentA + '</span><span class="formula-operator" style="font-size:0.875rem;">&times;</span><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + entry.formula.parentB + '</span></div>';
@@ -1960,7 +2040,7 @@
             res.data.forEach(function(row) {
               var entry = {
                 origins: row.origins || [],
-                formula: null
+                formula: row.formula || null
               };
               var genus = row.genus || 'Anthurium';
               var meta = { genus: genus, type: row.type || 'Hybrid' };
@@ -2011,8 +2091,25 @@
 
     function renderOriginsInner(cultivarName, container) {
       var data = cultivarData[cultivarName];
-      if (!data || !data.origins) {
-        container.innerHTML = '<div class="text-center text-muted" style="padding:var(--space-xl);">この品種の由来情報はまだ登録されていません。</div>';
+      var isSeedling = data && data._type === 'seedling';
+      if (!data || !data.origins || data.origins.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted" style="padding:var(--space-xl);">' + (isSeedling ? 'この実生の説明はまだ登録されていません。' : 'この品種の由来情報はまだ登録されていません。') + '</div>';
+        if (data && data.formula) {
+          var fHtml = '<div class="formula-box mb-lg" style="justify-content:center;">';
+          if (data.formula.motherPhoto) {
+            var motherUrl = supabase ? supabase.storage.from('gallery-images').getPublicUrl(data.formula.motherPhoto).data.publicUrl : '';
+            fHtml += '<div class="parent-photo-display"><img src="' + motherUrl + '" alt="Mother"><div class="text-xs mt-sm">Mother</div></div>';
+          }
+          fHtml += '<span class="formula-parent">' + (data.formula.parentA || '') + '</span>';
+          fHtml += '<span class="formula-operator">&times;</span>';
+          fHtml += '<span class="formula-parent">' + (data.formula.parentB || '') + '</span>';
+          if (data.formula.fatherPhoto) {
+            var fatherUrl = supabase ? supabase.storage.from('gallery-images').getPublicUrl(data.formula.fatherPhoto).data.publicUrl : '';
+            fHtml += '<div class="parent-photo-display"><img src="' + fatherUrl + '" alt="Father"><div class="text-xs mt-sm">Father</div></div>';
+          }
+          fHtml += '</div>';
+          container.innerHTML = fHtml + container.innerHTML;
+        }
         return;
       }
 
@@ -2020,12 +2117,20 @@
       var origins = data.origins.slice().sort(function(a, b) { return b.trust - a.trust; });
       var html = '';
 
-      // Show formula if exists
+      // Show formula if exists (with parent photos for seedlings)
       if (data.formula) {
-        html += '<div class="formula-box mb-lg" style="justify-content:center;">';
+        html += '<div class="formula-box mb-lg" style="justify-content:center;align-items:center;">';
+        if (data.formula.motherPhoto) {
+          var motherUrl = supabase ? supabase.storage.from('gallery-images').getPublicUrl(data.formula.motherPhoto).data.publicUrl : '';
+          html += '<div class="parent-photo-display"><img src="' + motherUrl + '" alt="Mother"><div class="text-xs mt-sm">Mother</div></div>';
+        }
         html += '<span class="formula-parent">' + data.formula.parentA + '</span>';
         html += '<span class="formula-operator">&times;</span>';
         html += '<span class="formula-parent">' + data.formula.parentB + '</span>';
+        if (data.formula.fatherPhoto) {
+          var fatherUrl = supabase ? supabase.storage.from('gallery-images').getPublicUrl(data.formula.fatherPhoto).data.publicUrl : '';
+          html += '<div class="parent-photo-display"><img src="' + fatherUrl + '" alt="Father"><div class="text-xs mt-sm">Father</div></div>';
+        }
         html += '</div>';
       }
 
@@ -2033,13 +2138,15 @@
         var trustLevel = origin.trust >= 70 ? 'trust--high' : (origin.trust >= 40 ? 'trust--mid' : 'trust--low');
         html += '<div class="origin-card">';
 
-        // Header with rank and trust
-        html += '<div class="origin-card__header">';
-        html += '<span class="origin-card__rank">#' + (i + 1) + '</span>';
-        html += '<div class="trust trust--lg" style="flex:1;margin-left:var(--space-md);">';
-        html += '<div class="trust__bar"><div class="trust__fill ' + trustLevel + '" style="width:' + origin.trust + '%"></div></div>';
-        html += '<span class="trust__label">' + origin.trust + '%</span>';
-        html += '</div></div>';
+        if (!isSeedling) {
+          // Header with rank and trust (not for seedlings)
+          html += '<div class="origin-card__header">';
+          html += '<span class="origin-card__rank">#' + (i + 1) + '</span>';
+          html += '<div class="trust trust--lg" style="flex:1;margin-left:var(--space-md);">';
+          html += '<div class="trust__bar"><div class="trust__fill ' + trustLevel + '" style="width:' + origin.trust + '%"></div></div>';
+          html += '<span class="trust__label">' + origin.trust + '%</span>';
+          html += '</div></div>';
+        }
 
         // Body
         html += '<div class="origin-card__body"><p>' + origin.body + '</p></div>';
@@ -2132,6 +2239,8 @@
           badgeClass = 'badge--hybrid'; badgeText = 'Hybrid';
         } else if (badgeEl.classList.contains('badge--clone')) {
           badgeClass = 'badge--clone'; badgeText = 'Clone';
+        } else if (badgeEl.classList.contains('badge--seedling')) {
+          badgeClass = 'badge--seedling'; badgeText = 'Seedling';
         }
       }
 
@@ -2320,9 +2429,30 @@
           showGenus(genus);
         }
 
+        // Pre-select seedling type if coming from seedling tab
+        if (page === 'contribute' && navEl.getAttribute('data-contribute-type') === 'seedling') {
+          var seedlingRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="seedling"]');
+          if (seedlingRadio) { seedlingRadio.checked = true; seedlingRadio.dispatchEvent(new Event('change')); }
+        }
+
         // Close mobile nav
         document.getElementById('mobileNav').classList.remove('open');
       }
+    });
+
+    // Tab switching for genus pages (Species/Clones vs My Seedlings)
+    document.addEventListener('click', function(e) {
+      var tab = e.target.closest('.genus-tab');
+      if (!tab) return;
+      var tabBar = tab.parentElement;
+      var genusContent = tabBar.closest('.genus-content');
+      if (!genusContent) return;
+      tabBar.querySelectorAll('.genus-tab').forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      var view = tab.getAttribute('data-tab');
+      genusContent.querySelectorAll('[data-genus-view]').forEach(function(v) {
+        v.style.display = v.getAttribute('data-genus-view') === view ? '' : 'none';
+      });
     });
 
     // Hamburger menu
@@ -2899,15 +3029,20 @@
         });
       }
 
-      // Show/hide formula based on type
+      // Show/hide formula and parent photos based on type
+      var parentPhotosSection = document.getElementById('parent-photos-section');
       document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(radio) {
         radio.addEventListener('change', function() {
           var formulaGroup = formulaSection ? formulaSection.closest('.form-group') : null;
-          if (!formulaGroup) return;
           if (this.value === 'species') {
-            formulaGroup.style.display = 'none';
+            if (formulaGroup) formulaGroup.style.display = 'none';
+            if (parentPhotosSection) parentPhotosSection.style.display = 'none';
+          } else if (this.value === 'seedling') {
+            if (formulaGroup) formulaGroup.style.display = '';
+            if (parentPhotosSection) parentPhotosSection.style.display = '';
           } else {
-            formulaGroup.style.display = '';
+            if (formulaGroup) formulaGroup.style.display = '';
+            if (parentPhotosSection) parentPhotosSection.style.display = 'none';
           }
         });
       });
@@ -2917,6 +3052,27 @@
         var fg = formulaSection.closest('.form-group');
         if (fg) fg.style.display = 'none';
       }
+
+      // Parent photo upload handlers
+      var motherPhotoFile = null, fatherPhotoFile = null;
+      ['mother', 'father'].forEach(function(parent) {
+        var uploadArea = document.getElementById(parent + '-upload');
+        var fileInput = document.getElementById(parent + '-photo-input');
+        var preview = document.getElementById(parent + '-preview');
+        if (!uploadArea || !fileInput) return;
+        uploadArea.addEventListener('click', function() { fileInput.click(); });
+        fileInput.addEventListener('change', function() {
+          var file = this.files[0];
+          if (!file) return;
+          if (parent === 'mother') motherPhotoFile = file; else fatherPhotoFile = file;
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            preview.innerHTML = '<img src="' + e.target.result + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid var(--color-light);">';
+            uploadArea.style.display = 'none';
+          };
+          reader.readAsDataURL(file);
+        });
+      });
 
       // Improved duplicate detection - checks all cultivarData keys
       if (contributeName && duplicateAlert) {
@@ -2967,18 +3123,21 @@
 
           // Build data entry
           var newEntry = { origins: [] };
+          var isSeedling = type === 'seedling';
+          newEntry._type = type;
 
           if (desc) {
             // User provided origin
             var origin = {
-              trust: 30, trustClass: 'trust--low',
+              trust: isSeedling ? 50 : 30, trustClass: isSeedling ? 'trust--mid' : 'trust--low',
               body: desc,
+              source_type: 'manual',
               sources: contributeSources.map(function(url) { return { icon: '\u{1F310}', text: url }; }),
               author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
               votes: { agree: 0, disagree: 0 }
             };
-          } else {
-            // AI will fill in later
+          } else if (!isSeedling) {
+            // AI will fill in later (not for seedlings)
             var origin = {
               trust: 0, trustClass: 'trust--low',
               body: t('ai_pending_origin'),
@@ -2986,9 +3145,12 @@
               author: { isAI: true, name: 'AI (Pending)', date: new Date().toISOString().slice(0, 10) },
               votes: { agree: 0, disagree: 0 }
             };
+          } else {
+            // Seedling with no description - still manual, just empty
+            var origin = null;
           }
 
-          // Formula for hybrids
+          // Formula for hybrids/seedlings
           if (type !== 'species' && formulaParentA && formulaParentB) {
             var pA = formulaParentA.value.trim();
             var pB = formulaParentB.value.trim();
@@ -2996,8 +3158,33 @@
               newEntry.formula = { parentA: pA, parentB: pB };
             }
           }
-          newEntry.origins.push(origin);
+          if (origin) newEntry.origins.push(origin);
           cultivarData[fullName] = newEntry;
+
+          // Upload parent photos for seedlings
+          if (isSeedling && supabase) {
+            var uploadParentPhoto = function(file, role) {
+              if (!file) return Promise.resolve(null);
+              var ext = file.name.split('.').pop();
+              var path = 'seedling-parents/' + fullName.replace(/[^a-zA-Z0-9]/g, '_') + '/' + role + '_' + Date.now() + '.' + ext;
+              return supabase.storage.from('gallery-images').upload(path, file, { upsert: true }).then(function(res) {
+                if (res.error) { console.warn('Parent photo upload error:', res.error); return null; }
+                return path;
+              });
+            };
+            Promise.all([
+              uploadParentPhoto(motherPhotoFile, 'mother'),
+              uploadParentPhoto(fatherPhotoFile, 'father')
+            ]).then(function(paths) {
+              if (paths[0] || paths[1]) {
+                if (!newEntry.formula) newEntry.formula = {};
+                if (paths[0]) newEntry.formula.motherPhoto = paths[0];
+                if (paths[1]) newEntry.formula.fatherPhoto = paths[1];
+                // Update in Supabase
+                supabase.from('cultivars').update({ formula: newEntry.formula }).eq('cultivar_name', fullName);
+              }
+            });
+          }
 
           // Save to localStorage
           if (typeof addUserCultivar === 'function') {
@@ -3007,24 +3194,37 @@
           // Add row to genus list
           var genusEl = document.getElementById('genus-' + genus.toLowerCase());
           if (genusEl) {
-            var container = genusEl.querySelector('.card[style*="padding:0"]');
+            var container;
+            if (isSeedling) {
+              container = genusEl.querySelector('[data-genus-view="seedlings"] .seedling-list');
+              // Clear empty placeholder
+              if (container) {
+                var emptyMsg = container.querySelector('.text-center.text-muted');
+                if (emptyMsg) emptyMsg.remove();
+              }
+            } else {
+              container = genusEl.querySelector('[data-genus-view="species-clones"] .card[style*="padding:0"]') || genusEl.querySelector('.card[style*="padding:0"]');
+            }
             if (container) {
               var row = document.createElement('div');
               row.className = 'cultivar-row';
               row.setAttribute('data-nav', 'cultivar');
-              var badgeClass = type === 'species' ? 'badge--species' : (type === 'hybrid' ? 'badge--hybrid' : 'badge--clone');
-              var badgeText = type === 'species' ? t('badge_species') : (type === 'hybrid' ? 'Hybrid' : 'Clone');
+              var badgeClass = type === 'species' ? 'badge--species' : (type === 'hybrid' ? 'badge--hybrid' : (type === 'seedling' ? 'badge--seedling' : 'badge--clone'));
+              var badgeText = type === 'species' ? t('badge_species') : (type === 'hybrid' ? 'Hybrid' : (type === 'seedling' ? 'Seedling' : 'Clone'));
               var rowHtml = '<div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>';
               rowHtml += '<div class="cultivar-row__info">';
               rowHtml += '<div class="cultivar-row__name">' + fullName + '</div>';
               rowHtml += '<div class="cultivar-row__meta">';
-              var originCount = desc ? 1 : 0;
-              var trustPct = desc ? 30 : 0;
-              var trustLabel = desc ? '30%' : t('ai_pending_badge');
-              rowHtml += '<span>' + t('origin_prefix') + originCount + t('origin_count_suffix') + '</span>';
+              if (!isSeedling) {
+                var originCount = desc ? 1 : 0;
+                var trustPct = desc ? 30 : 0;
+                rowHtml += '<span>' + t('origin_prefix') + originCount + t('origin_count_suffix') + '</span>';
+              }
               rowHtml += '<span class="badge ' + badgeClass + '">' + badgeText + '</span>';
-              if (!desc) rowHtml += '<span class="badge badge--ai">' + t('ai_pending_badge') + '</span>';
-              rowHtml += '<div class="trust"><div class="trust__bar"><div class="trust__fill trust--low" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + (desc ? '30%' : '-') + '</span></div>';
+              if (!isSeedling && !desc) rowHtml += '<span class="badge badge--ai">' + t('ai_pending_badge') + '</span>';
+              if (!isSeedling) {
+                rowHtml += '<div class="trust"><div class="trust__bar"><div class="trust__fill trust--low" style="width:' + (desc ? 30 : 0) + '%"></div></div><span class="trust__label">' + (desc ? '30%' : '-') + '</span></div>';
+              }
               rowHtml += '</div>';
               if (newEntry.formula) {
                 rowHtml += '<div class="text-sm text-muted mt-sm"><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + newEntry.formula.parentA + '</span><span class="formula-operator" style="font-size:0.875rem;">&times;</span><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + newEntry.formula.parentB + '</span></div>';
@@ -3070,6 +3270,17 @@
           renderContributeSources();
           if (duplicateAlert) duplicateAlert.style.display = 'none';
           if (typeof window.resetContributeImages === 'function') window.resetContributeImages();
+          // Reset parent photos
+          motherPhotoFile = null; fatherPhotoFile = null;
+          ['mother', 'father'].forEach(function(p) {
+            var inp = document.getElementById(p + '-photo-input');
+            var prev = document.getElementById(p + '-preview');
+            var area = document.getElementById(p + '-upload');
+            if (inp) inp.value = '';
+            if (prev) prev.innerHTML = '';
+            if (area) area.style.display = '';
+          });
+          if (parentPhotosSection) parentPhotosSection.style.display = 'none';
 
           alert(t('submit_success'));
         });
@@ -3149,6 +3360,7 @@
           var newOrigin = {
             trust: 25, trustClass: 'trust--low',
             body: descText,
+            source_type: 'manual',
             sources: originSources.map(function(url) { return { icon: '\u{1F310}', text: url }; }),
             author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
             votes: { agree: 0, disagree: 0 }

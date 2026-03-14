@@ -308,7 +308,8 @@ Native distribution: ${distribution}
 
 === WRITING GUIDELINES ===
 1. Start with the scientific citation (who described it, when, where published).
-2. Then describe the plant's APPEARANCE: leaf shape, size, color, texture, venation pattern, petiole characteristics. These are well-known morphological features for Araceae - use your knowledge.
+2. Then describe the plant's APPEARANCE: leaf shape, color, texture, venation pattern, petiole characteristics. These are well-known morphological features for Araceae - use your knowledge.
+   IMPORTANT: Do NOT include specific size measurements (e.g., "30-40cm", "1m tall"). Sizes vary greatly between individuals depending on growing conditions.
 3. Mention the native habitat briefly (tropical rainforest, cloud forest, etc.) based on distribution.
 4. Keep it engaging but factual. No care tips, no flower language, no commercial info.
 5. 日本語: 自然な日本語で、植物好きの人が読んで楽しい文章にする。学名・人名・地名は英語のまま。
@@ -386,7 +387,8 @@ Return ONLY valid JSON (no markdown):
 
 === WRITING STYLE ===
 - Write for plant enthusiasts, not scientists. Keep it readable and engaging.
-- Even if origin is UNKNOWN, describe the plant's APPEARANCE (leaf shape, color, variegation pattern, size, growth habit) so the reader learns something useful.
+- Even if origin is UNKNOWN, describe the plant's APPEARANCE (leaf shape, color, variegation pattern, growth habit) so the reader learns something useful.
+- Do NOT include specific size measurements (e.g., "30-40cm", "1m tall"). Sizes vary greatly between individuals depending on growing conditions.
 - For unknown origins, be CONCISE: "由来は不明。" then describe the plant itself.
 - Do NOT write long apologies about lack of information. Just state it briefly and move on to describing the plant.
 - 日本語: 自然で読みやすい文章。「信頼できる情報源が見つからなかったため…」のような冗長な表現は避ける。`;
@@ -410,12 +412,30 @@ serve(async (req: Request) => {
       );
     }
 
+    // Skip AI research for seedlings
+    if (type === "seedling") {
+      return new Response(
+        JSON.stringify({ success: false, reason: "AI research not applicable for seedlings" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const geminiApiKey = Deno.env.get("GEMINI_API_KEY") || "";
     const groqApiKey = Deno.env.get("GROQ_API_KEY") || "";
     const openaiApiKey = Deno.env.get("OPENAI_API_KEY") || "";
+
+    // Fetch existing origins to preserve manual (user-written) entries
+    const { data: existingRow } = await supabase
+      .from("cultivars")
+      .select("origins")
+      .eq("id", cultivar_id)
+      .single();
+    const manualOrigins: any[] = (existingRow?.origins || []).filter(
+      (o: any) => o.source_type === "manual" || (o.author && o.author.isAI === false)
+    );
 
     // Update status to researching
     await supabase
@@ -476,7 +496,7 @@ serve(async (req: Request) => {
             try {
               console.log("[Desc] bodyJp length:", bodyJp?.length, "- trying Groq with simple prompt...");
               const simplePrompt = `Describe the plant "${botResult.name}" (Araceae) for plant enthusiasts.
-Include: leaf shape, size, color, texture, venation, and growth habit.
+Include: leaf shape, color, texture, venation, and growth habit. Do NOT include specific size measurements as they vary by individual.
 It was described by ${botResult.authors}${yearPart}${pubPart}. Native to ${dist}.
 
 Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特徴→自生地。学名・人名・地名は英語", "body_en": "English 100-200 words"}`;
@@ -509,7 +529,7 @@ Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特
               const yearPart = botResult.publicationYear ? ` in ${botResult.publicationYear}` : "";
               const pubPart = botResult.publication ? ` in ${botResult.publication} ${botResult.referenceCollation}` : "";
               const simplePrompt = `Describe the plant "${botResult.name}" (Araceae) for plant enthusiasts.
-Include: leaf shape, size, color, texture, venation, and growth habit.
+Include: leaf shape, color, texture, venation, and growth habit. Do NOT include specific size measurements as they vary by individual.
 It was described by ${botResult.authors}${yearPart}${pubPart}. Native to ${dist}.
 
 Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特徴→自生地。学名・人名・地名は英語", "body_en": "English 100-200 words"}`;
@@ -729,11 +749,14 @@ Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特
       });
     }
 
+    // Merge: AI origins + preserved manual origins
+    originEntries = [...originEntries, ...manualOrigins];
+
     // Sort by trust descending
     originEntries.sort((a, b) => b.trust - a.trust);
 
     // ================================================================
-    // Update database (full reset — no merge with existing)
+    // Update database (AI origins + preserved manual origins)
     // ================================================================
     const bestTrust = originEntries[0]?.trust || 0;
 
