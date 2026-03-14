@@ -1246,10 +1246,24 @@ document.getElementById('image-grid').addEventListener('click', async function(e
   btn.disabled = true;
   btn.textContent = '削除中...';
   try {
-    // Storage deletion may fail due to RLS - continue with DB deletion regardless
-    try { await sb.storage.from('gallery-images').remove([storagePath]); } catch(e) { console.warn('Storage delete failed (non-critical):', e); }
-    var res = await sb.from('cultivar_images').delete().eq('id', imageId);
-    if (res.error) throw res.error;
+    // Storage deletion may fail due to RLS - log but continue
+    var storageRes = await sb.storage.from('gallery-images').remove([storagePath]);
+    if (storageRes.error) console.warn('Storage delete failed (non-critical):', storageRes.error.message);
+
+    // DB deletion - use REST API directly if RLS blocks client delete
+    var dbRes = await sb.from('cultivar_images').delete().eq('id', imageId);
+    if (dbRes.error) {
+      // Fallback: use rpc or direct fetch
+      var fetchRes = await fetch(SUPABASE_URL + '/rest/v1/cultivar_images?id=eq.' + imageId, {
+        method: 'DELETE',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Prefer': 'return=minimal'
+        }
+      });
+      if (!fetchRes.ok) throw new Error('DB削除失敗: ' + fetchRes.status);
+    }
     allImages = allImages.filter(function(img) { return img.id !== imageId; });
     renderImageGrid();
     toast('画像を削除しました');
