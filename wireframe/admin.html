@@ -776,6 +776,12 @@ document.getElementById('btn-refresh-cultivars').addEventListener('click', funct
 function editCultivar(id) {
   var c = allCultivars.find(function(x) { return x.id === id; });
   if (!c) return;
+  var isSeedling = c.type === 'seedling';
+  // Extract formula from origins if exists
+  var formula = null;
+  if (c.origins) {
+    c.origins.forEach(function(o) { if (o && o._type === 'formula') formula = o.formula; });
+  }
   var html = '<h2>品種を編集</h2>';
   html += '<label>品種名</label><input type="text" id="edit-name" value="' + escapeHtml(c.cultivar_name) + '">';
   html += '<label>属</label><select id="edit-genus">';
@@ -784,10 +790,28 @@ function editCultivar(id) {
   });
   html += '</select>';
   html += '<label>タイプ</label><select id="edit-type">';
-  ['species', 'hybrid', 'clone'].forEach(function(t) {
+  ['species', 'hybrid', 'clone', 'seedling'].forEach(function(t) {
     html += '<option value="' + t + '"' + (c.type === t ? ' selected' : '') + '>' + t + '</option>';
   });
   html += '</select>';
+  if (isSeedling) {
+    html += '<hr style="margin:var(--space-md) 0;">';
+    html += '<h3 style="font-size:1rem;margin-bottom:var(--space-sm);">親株画像</h3>';
+    html += '<label>母株 (Mother) 画像</label>';
+    if (formula && formula.motherPhoto) {
+      html += '<div id="edit-mother-preview" style="margin-bottom:var(--space-sm);"><img src="' + SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + formula.motherPhoto + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #ddd;"></div>';
+    } else {
+      html += '<div id="edit-mother-preview" style="margin-bottom:var(--space-sm);color:var(--color-gray);font-size:0.85rem;">未設定</div>';
+    }
+    html += '<input type="file" id="edit-mother-photo" accept="image/jpeg,image/png" style="margin-bottom:var(--space-md);">';
+    html += '<label>父株 (Father) 画像</label>';
+    if (formula && formula.fatherPhoto) {
+      html += '<div id="edit-father-preview" style="margin-bottom:var(--space-sm);"><img src="' + SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + formula.fatherPhoto + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #ddd;"></div>';
+    } else {
+      html += '<div id="edit-father-preview" style="margin-bottom:var(--space-sm);color:var(--color-gray);font-size:0.85rem;">未設定</div>';
+    }
+    html += '<input type="file" id="edit-father-photo" accept="image/jpeg,image/png" style="margin-bottom:var(--space-md);">';
+  }
   html += '<div class="modal-actions">';
   html += '<button class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
   html += '<button class="btn btn-primary" onclick="saveCultivar(' + id + ')">保存</button>';
@@ -801,9 +825,56 @@ async function saveCultivar(id) {
   var type = document.getElementById('edit-type').value;
   if (!name) { toast('品種名を入力してください'); return; }
 
-  var result = await sb.from('cultivars').update({
+  // Handle parent photo uploads for seedlings
+  var c = allCultivars.find(function(x) { return x.id === id; });
+  var updatedOrigins = null;
+  if (type === 'seedling' && c) {
+    var motherInput = document.getElementById('edit-mother-photo');
+    var fatherInput = document.getElementById('edit-father-photo');
+    var motherFile = motherInput && motherInput.files[0];
+    var fatherFile = fatherInput && fatherInput.files[0];
+
+    if (motherFile || fatherFile) {
+      // Get existing origins and formula
+      var origins = c.origins ? c.origins.slice() : [];
+      var formulaIdx = -1;
+      var formula = null;
+      origins.forEach(function(o, i) { if (o && o._type === 'formula') { formula = o.formula; formulaIdx = i; } });
+      if (!formula) formula = {};
+
+      // Upload photos
+      var safeName = name.replace(/[^a-zA-Z0-9]/g, '_');
+      if (motherFile) {
+        var ext = motherFile.name.split('.').pop();
+        var path = 'seedling-parents/' + safeName + '/mother_' + Date.now() + '.' + ext;
+        var res = await sb.storage.from('gallery-images').upload(path, motherFile, { upsert: true });
+        if (res.error) { toast('母株画像アップロードエラー: ' + res.error.message); return; }
+        formula.motherPhoto = path;
+      }
+      if (fatherFile) {
+        var ext = fatherFile.name.split('.').pop();
+        var path = 'seedling-parents/' + safeName + '/father_' + Date.now() + '.' + ext;
+        var res = await sb.storage.from('gallery-images').upload(path, fatherFile, { upsert: true });
+        if (res.error) { toast('父株画像アップロードエラー: ' + res.error.message); return; }
+        formula.fatherPhoto = path;
+      }
+
+      // Update formula in origins
+      if (formulaIdx >= 0) {
+        origins[formulaIdx].formula = formula;
+      } else {
+        origins.push({ _type: 'formula', formula: formula });
+      }
+      updatedOrigins = origins;
+    }
+  }
+
+  var updateData = {
     cultivar_name: name, genus: genus, type: type, updated_at: new Date().toISOString()
-  }).eq('id', id);
+  };
+  if (updatedOrigins) updateData.origins = updatedOrigins;
+
+  var result = await sb.from('cultivars').update(updateData).eq('id', id);
 
   if (result.error) { toast('更新エラー: ' + result.error.message); return; }
   closeModal();

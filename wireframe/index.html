@@ -2074,6 +2074,8 @@
               addCultivarRow(row.cultivar_name, entry, meta);
             });
             refreshGenusUI();
+            // Load cultivar thumbnails after rows are created
+            setTimeout(loadCultivarThumbnails, 100);
             // Sync localStorage with DB (remove orphaned local entries)
             try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
           });
@@ -2092,6 +2094,37 @@
       }
     })();
 
+    // ---- Load cultivar thumbnails from gallery images ----
+    function loadCultivarThumbnails() {
+      var sb = window._supabaseClient;
+      var baseUrl = window._SUPABASE_URL;
+      if (!sb || !baseUrl) return;
+      sb.from('cultivar_images')
+        .select('cultivar_name, storage_path')
+        .order('created_at', { ascending: true })
+        .then(function(res) {
+          if (res.error || !res.data) return;
+          var thumbMap = {};
+          res.data.forEach(function(img) {
+            if (!thumbMap[img.cultivar_name]) {
+              thumbMap[img.cultivar_name] = img.storage_path;
+            }
+          });
+          document.querySelectorAll('.cultivar-row').forEach(function(row) {
+            var nameEl = row.querySelector('.cultivar-row__name');
+            var thumbEl = row.querySelector('.cultivar-row__thumb');
+            if (!nameEl || !thumbEl) return;
+            var key = nameEl.getAttribute('data-key');
+            var displayName = key ? key.replace(' [Seedling]', '') : '';
+            if (thumbMap[displayName]) {
+              var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
+              thumbEl.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-md);" alt="" loading="lazy">';
+            }
+          });
+        });
+    }
+    window.loadCultivarThumbnails = loadCultivarThumbnails;
+
     // ---- Render origin cards from data ----
     function renderOrigins(cultivarName) {
       var container = document.getElementById('origins-container');
@@ -2099,8 +2132,9 @@
       var data = cultivarData[cultivarName];
 
       // Try to fetch latest data from Supabase (async update)
-      if (supabase) {
-        supabase.from('cultivars').select('origins, ai_status').eq('cultivar_name', cultivarName).single()
+      var _sb = window._supabaseClient;
+      if (_sb) {
+        _sb.from('cultivars').select('origins, ai_status').eq('cultivar_name', cultivarName).single()
         .then(function(res) {
           if (res.data && res.data.origins && res.data.origins.length > 0) {
             var dbOrigin = res.data.origins[0];
@@ -2121,19 +2155,20 @@
     function renderOriginsInner(cultivarName, container) {
       var data = cultivarData[cultivarName];
       var isSeedling = data && data._type === 'seedling';
+      var _sb = window._supabaseClient;
       if (!data || !data.origins || data.origins.length === 0) {
         container.innerHTML = '<div class="text-center text-muted" style="padding:var(--space-xl);">' + (isSeedling ? 'この実生の説明はまだ登録されていません。' : 'この品種の由来情報はまだ登録されていません。') + '</div>';
         if (data && data.formula) {
           var fHtml = '<div class="formula-box mb-lg" style="justify-content:center;">';
           if (data.formula.motherPhoto) {
-            var motherUrl = supabase ? supabase.storage.from('gallery-images').getPublicUrl(data.formula.motherPhoto).data.publicUrl : '';
+            var motherUrl = _sb ? _sb.storage.from('gallery-images').getPublicUrl(data.formula.motherPhoto).data.publicUrl : '';
             fHtml += '<div class="parent-photo-display"><img src="' + motherUrl + '" alt="Mother"><div class="text-xs mt-sm">Mother</div></div>';
           }
           fHtml += '<span class="formula-parent">' + (data.formula.parentA || '') + '</span>';
           fHtml += '<span class="formula-operator">&times;</span>';
           fHtml += '<span class="formula-parent">' + (data.formula.parentB || '') + '</span>';
           if (data.formula.fatherPhoto) {
-            var fatherUrl = supabase ? supabase.storage.from('gallery-images').getPublicUrl(data.formula.fatherPhoto).data.publicUrl : '';
+            var fatherUrl = _sb ? _sb.storage.from('gallery-images').getPublicUrl(data.formula.fatherPhoto).data.publicUrl : '';
             fHtml += '<div class="parent-photo-display"><img src="' + fatherUrl + '" alt="Father"><div class="text-xs mt-sm">Father</div></div>';
           }
           fHtml += '</div>';
@@ -2150,14 +2185,14 @@
       if (data.formula) {
         html += '<div class="formula-box mb-lg" style="justify-content:center;align-items:center;">';
         if (data.formula.motherPhoto) {
-          var motherUrl = supabase ? supabase.storage.from('gallery-images').getPublicUrl(data.formula.motherPhoto).data.publicUrl : '';
+          var motherUrl = _sb ? _sb.storage.from('gallery-images').getPublicUrl(data.formula.motherPhoto).data.publicUrl : '';
           html += '<div class="parent-photo-display"><img src="' + motherUrl + '" alt="Mother"><div class="text-xs mt-sm">Mother</div></div>';
         }
         html += '<span class="formula-parent">' + data.formula.parentA + '</span>';
         html += '<span class="formula-operator">&times;</span>';
         html += '<span class="formula-parent">' + data.formula.parentB + '</span>';
         if (data.formula.fatherPhoto) {
-          var fatherUrl = supabase ? supabase.storage.from('gallery-images').getPublicUrl(data.formula.fatherPhoto).data.publicUrl : '';
+          var fatherUrl = _sb ? _sb.storage.from('gallery-images').getPublicUrl(data.formula.fatherPhoto).data.publicUrl : '';
           html += '<div class="parent-photo-display"><img src="' + fatherUrl + '" alt="Father"><div class="text-xs mt-sm">Father</div></div>';
         }
         html += '</div>';
@@ -3403,6 +3438,9 @@
             }
           }).then(function() {
             finishSubmit();
+            if (typeof window.loadCultivarThumbnails === 'function') {
+              setTimeout(window.loadCultivarThumbnails, 500);
+            }
           }).catch(function(err) {
             handleSubmitError('DB保存エラー: ' + (err.message || err));
           });
@@ -3908,6 +3946,7 @@
 
       // --- Render gallery for a specific cultivar ---
       window.renderGalleryForCultivar = function(cultivarName) {
+        cultivarName = cultivarName.replace(' [Seedling]', '');
         var galleryUpload = document.getElementById('gallery-upload');
         if (!galleryUpload) return;
         var gallery = galleryUpload.parentNode;
@@ -3977,6 +4016,7 @@
             // Upload to Supabase Storage
             uploadToSupabase(file, cultivarName).then(function() {
               renderGalleryForCultivar(cultivarName);
+              if (typeof loadCultivarThumbnails === 'function') loadCultivarThumbnails();
             }).catch(function(err) {
               console.warn('Supabase upload failed, saving locally:', err);
               // Fallback to localStorage
