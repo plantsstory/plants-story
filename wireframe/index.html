@@ -1784,12 +1784,17 @@
         // Supabase insert + AI research trigger
         if (supabase) {
           var isSeedling = meta.type === 'seedling';
+          var originsData = entry.origins || [];
+          // Store formula inside origins metadata since formula column may not exist
+          if (entry.formula) {
+            originsData = JSON.parse(JSON.stringify(originsData));
+            originsData.push({ _type: 'formula', formula: entry.formula });
+          }
           supabase.from('cultivars').insert({
             genus: meta.genus,
             cultivar_name: fullName,
             type: meta.type || 'Hybrid',
-            origins: entry.origins || [],
-            formula: entry.formula || null,
+            origins: originsData,
             votes: {},
             ai_status: isSeedling ? null : 'pending'
           }).select().then(function(res) {
@@ -2041,9 +2046,16 @@
             });
 
             res.data.forEach(function(row) {
+              var origins = row.origins || [];
+              // Extract formula from origins if stored there
+              var formula = null;
+              origins = origins.filter(function(o) {
+                if (o && o._type === 'formula') { formula = o.formula; return false; }
+                return true;
+              });
               var entry = {
-                origins: row.origins || [],
-                formula: row.formula || null
+                origins: origins,
+                formula: formula
               };
               var genus = row.genus || 'Anthurium';
               var meta = { genus: genus, type: row.type || 'Hybrid' };
@@ -3224,8 +3236,16 @@
                 if (!newEntry.formula) newEntry.formula = {};
                 if (paths[0]) newEntry.formula.motherPhoto = paths[0];
                 if (paths[1]) newEntry.formula.fatherPhoto = paths[1];
-                // Update in Supabase
-                supabase.from('cultivars').update({ formula: newEntry.formula }).eq('cultivar_name', fullName);
+                // Update formula in origins array in Supabase
+                supabase.from('cultivars').select('origins').eq('cultivar_name', fullName).single().then(function(r) {
+                  if (r.data) {
+                    var origins = r.data.origins || [];
+                    // Remove old formula entry if exists, add new one
+                    origins = origins.filter(function(o) { return !o._type || o._type !== 'formula'; });
+                    origins.push({ _type: 'formula', formula: newEntry.formula });
+                    supabase.from('cultivars').update({ origins: origins }).eq('cultivar_name', fullName);
+                  }
+                });
               }
             });
           }
