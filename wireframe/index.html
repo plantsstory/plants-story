@@ -3585,22 +3585,42 @@
       }
       var origins = data.origins.slice().sort(function(a, b) { return b.trust - a.trust; });
       var html = '';
+      var isSeedling = data && data._type === 'seedling';
+      var _sb = window._supabaseClient;
       if (data.formula) {
-        html += '<div class="formula-box mb-lg" style="justify-content:center;">';
+        html += '<div class="formula-box mb-lg" style="justify-content:center;align-items:center;">';
+        if (isSeedling) {
+          if (data.formula.motherPhoto && _sb) {
+            var motherUrl = _sb.storage.from('gallery-images').getPublicUrl(data.formula.motherPhoto).data.publicUrl;
+            html += '<div class="parent-photo-display"><img src="' + motherUrl + '" alt="Mother"><div class="text-xs mt-sm">Mother</div></div>';
+          } else {
+            html += '<div class="parent-photo-display"><div style="width:80px;height:80px;border-radius:var(--radius-md);border:2px dashed var(--color-light);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:0.7rem;">No Photo</div><div class="text-xs mt-sm">Mother</div></div>';
+          }
+        }
         html += '<span class="formula-parent">' + data.formula.parentA + '</span>';
         html += '<span class="formula-operator">&times;</span>';
         html += '<span class="formula-parent">' + data.formula.parentB + '</span>';
+        if (isSeedling) {
+          if (data.formula.fatherPhoto && _sb) {
+            var fatherUrl = _sb.storage.from('gallery-images').getPublicUrl(data.formula.fatherPhoto).data.publicUrl;
+            html += '<div class="parent-photo-display"><img src="' + fatherUrl + '" alt="Father"><div class="text-xs mt-sm">Father</div></div>';
+          } else {
+            html += '<div class="parent-photo-display"><div style="width:80px;height:80px;border-radius:var(--radius-md);border:2px dashed var(--color-light);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:0.7rem;">No Photo</div><div class="text-xs mt-sm">Father</div></div>';
+          }
+        }
         html += '</div>';
       }
       origins.forEach(function(origin, i) {
         var trustLevel = origin.trust >= 70 ? 'trust--high' : (origin.trust >= 40 ? 'trust--mid' : 'trust--low');
         html += '<div class="origin-card">';
+        if (!isSeedling) {
         html += '<div class="origin-card__header">';
         html += '<span class="origin-card__rank">#' + (i + 1) + '</span>';
         html += '<div class="trust trust--lg" style="flex:1;margin-left:var(--space-md);">';
         html += '<div class="trust__bar"><div class="trust__fill ' + trustLevel + '" style="width:' + origin.trust + '%"></div></div>';
         html += '<span class="trust__label">' + origin.trust + '%</span>';
         html += '</div></div>';
+        }
         html += '<div class="origin-card__body"><p>' + origin.body + '</p></div>';
         html += '<div class="origin-card__sources">';
         html += '<div class="text-sm font-bold mb-sm">' + t('source_label') + '</div>';

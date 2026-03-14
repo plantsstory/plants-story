@@ -1246,23 +1246,32 @@ document.getElementById('image-grid').addEventListener('click', async function(e
   btn.disabled = true;
   btn.textContent = '削除中...';
   try {
-    // Try storage deletion first (may fail due to RLS - non-critical)
+    // Try storage deletion (non-critical if fails)
     var storageRes = await sb.storage.from('gallery-images').remove([storagePath]);
-    if (storageRes.error) console.warn('Storage delete skipped:', storageRes.error.message);
+    if (storageRes.error) console.warn('Storage delete warning:', storageRes.error.message);
 
-    // DB deletion via REST API (more reliable than client with RLS)
-    var fetchRes = await fetch(SUPABASE_URL + '/rest/v1/cultivar_images?id=eq.' + imageId, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Prefer': 'return=minimal'
+    // DB deletion via Supabase client
+    var dbRes = await sb.from('cultivar_images').delete().eq('id', imageId);
+    if (dbRes.error) {
+      console.warn('Client delete failed:', dbRes.error.message, '- trying REST API...');
+      // Fallback: REST API with return=representation to check if rows were deleted
+      var fetchRes = await fetch(SUPABASE_URL + '/rest/v1/cultivar_images?id=eq.' + imageId, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Prefer': 'return=representation'
+        }
+      });
+      if (!fetchRes.ok) {
+        var errText = await fetchRes.text();
+        throw new Error('削除失敗 (' + fetchRes.status + '): ' + errText);
       }
-    });
-    if (!fetchRes.ok) {
-      var errText = await fetchRes.text();
-      throw new Error('削除失敗 (' + fetchRes.status + '): ' + errText);
+      var deleted = await fetchRes.json();
+      if (!deleted || deleted.length === 0) {
+        throw new Error('RLSポリシーにより削除が拒否されました。Supabaseダッシュボードでcultvar_imagesテーブルのDELETEポリシーを追加してください。');
+      }
     }
     allImages = allImages.filter(function(img) { return String(img.id) !== String(imageId); });
     renderImageGrid();
