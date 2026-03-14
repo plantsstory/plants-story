@@ -1785,12 +1785,6 @@
 
       // Add cultivar to both Supabase and localStorage
       window.addUserCultivar = function(fullName, entry, meta) {
-        // localStorage fallback
-        var saved = {};
-        try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
-        saved[fullName] = { entry: entry, meta: meta };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-
         // Supabase insert + AI research trigger
         if (supabase) {
           var isSeedling = meta.type === 'seedling';
@@ -1810,8 +1804,14 @@
           }).select().then(function(res) {
             if (res.error) {
               console.warn('Supabase insert error:', res.error.message);
+              showToast('DB保存エラー: ' + res.error.message, true);
               return;
             }
+            // Save to localStorage only after successful DB insert
+            var saved = {};
+            try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
+            saved[fullName] = { entry: entry, meta: meta };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
             // Trigger AI research via Edge Function (skip for seedlings)
             if (!isSeedling) {
               var inserted = res.data && res.data[0];
@@ -1820,6 +1820,12 @@
               }
             }
           });
+        } else {
+          // No Supabase, save to localStorage only
+          var saved = {};
+          try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
+          saved[fullName] = { entry: entry, meta: meta };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
         }
       };
 
@@ -2072,6 +2078,8 @@
               addCultivarRow(row.cultivar_name, entry, meta);
             });
             refreshGenusUI();
+            // Sync localStorage with DB (remove orphaned local entries)
+            try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
           });
         }
       }
