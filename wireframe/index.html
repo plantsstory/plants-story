@@ -3685,27 +3685,25 @@
 
           renderOrigins(cultivarName);
 
-          // Persist to Supabase
+          // Persist to Supabase via RPC (bypasses RLS UPDATE restriction)
           if (supabase) {
-            supabase.from('cultivars').select('id, origins').eq('cultivar_name', cultivarName).single()
-            .then(function(res) {
-              if (res.error || !res.data) {
-                console.error('Failed to find cultivar for origin save:', res.error);
-                return;
-              }
-              var dbOrigins = res.data.origins || [];
-              dbOrigins.push(newOrigin);
-              // Also save formula if newly added
-              if (pA && pB) {
-                var hasFormula = dbOrigins.some(function(o) { return o && o._type === 'formula'; });
-                if (!hasFormula) {
-                  dbOrigins.push({ _type: 'formula', formula: { parentA: pA, parentB: pB } });
-                }
-              }
-              return supabase.from('cultivars').update({ origins: dbOrigins }).eq('id', res.data.id);
-            }).then(function(res) {
-              if (res && res.error) {
-                console.error('Failed to save origin to DB:', res.error);
+            var originToSave = JSON.parse(JSON.stringify(newOrigin));
+            // Also include formula as a separate origin entry if provided
+            var originsToAppend = [originToSave];
+            if (pA && pB) {
+              originsToAppend.push({ _type: 'formula', formula: { parentA: pA, parentB: pB } });
+            }
+            // Append each origin via RPC
+            var savePromises = originsToAppend.map(function(o) {
+              return supabase.rpc('append_origin', {
+                p_cultivar_name: cultivarName,
+                p_origin: o
+              });
+            });
+            Promise.all(savePromises).then(function(results) {
+              var failed = results.filter(function(r) { return r.error; });
+              if (failed.length > 0) {
+                console.error('Failed to save origin to DB:', failed[0].error);
                 showToast('DB保存に失敗しました', true);
               }
             });
