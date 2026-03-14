@@ -3315,6 +3315,19 @@
             contributeSources = [];
             renderContributeSources();
             if (duplicateAlert) duplicateAlert.style.display = 'none';
+            // Upload gallery images to Supabase
+            var filesToUpload = typeof window.getContributeFiles === 'function' ? window.getContributeFiles() : [];
+            if (filesToUpload.length > 0 && typeof window.uploadGalleryImage === 'function') {
+              filesToUpload.forEach(function(file) {
+                window.uploadGalleryImage(file, fullName).then(function(imgRecord) {
+                  if (typeof window.renderGalleryForCultivar === 'function') {
+                    window.renderGalleryForCultivar(fullName);
+                  }
+                }).catch(function(err) {
+                  console.warn('Gallery image upload error:', err);
+                });
+              });
+            }
             if (typeof window.resetContributeImages === 'function') window.resetContributeImages();
             motherPhotoFile = null; fatherPhotoFile = null;
             ['mother', 'father'].forEach(function(p) {
@@ -3807,6 +3820,8 @@
         });
       }
 
+      window.uploadGalleryImage = uploadToSupabase;
+
       function fetchImagesFromSupabase(cultivarName) {
         var sb = getSupabase();
         if (!sb) return Promise.reject('No Supabase');
@@ -4023,6 +4038,7 @@
       var contributeInput = document.getElementById('contribute-file-input');
       var contributePreview = document.getElementById('contribute-preview');
       var contributeImages = [];
+      var contributeFiles = []; // Store original File objects for upload
 
       if (contributeArea && contributeInput && contributePreview) {
         // Click to upload
@@ -4063,9 +4079,9 @@
           }
           if (!validateFile(file)) return;
 
+          contributeFiles.push(file);
           var reader = new FileReader();
           reader.onload = function(e) {
-            var idx = contributeImages.length;
             contributeImages.push(e.target.result);
             renderContributePreview();
           };
@@ -4086,7 +4102,9 @@
           contributePreview.querySelectorAll('.upload-preview__remove').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
               e.stopPropagation();
-              contributeImages.splice(parseInt(this.getAttribute('data-idx')), 1);
+              var idx = parseInt(this.getAttribute('data-idx'));
+              contributeImages.splice(idx, 1);
+              contributeFiles.splice(idx, 1);
               renderContributePreview();
             });
           });
@@ -4095,7 +4113,11 @@
         // Expose for form reset
         window.resetContributeImages = function() {
           contributeImages = [];
+          contributeFiles = [];
           contributePreview.innerHTML = '';
+        };
+        window.getContributeFiles = function() {
+          return contributeFiles.slice();
         };
       }
     })();
