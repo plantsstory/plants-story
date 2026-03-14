@@ -3686,7 +3686,8 @@
           renderOrigins(cultivarName);
 
           // Persist to Supabase via RPC (bypasses RLS UPDATE restriction)
-          if (supabase) {
+          var _sb = window._supabaseClient;
+          if (_sb) {
             var originToSave = JSON.parse(JSON.stringify(newOrigin));
             // Also include formula as a separate origin entry if provided
             var originsToAppend = [originToSave];
@@ -3695,7 +3696,7 @@
             }
             // Append each origin via RPC
             var savePromises = originsToAppend.map(function(o) {
-              return supabase.rpc('append_origin', {
+              return _sb.rpc('append_origin', {
                 p_cultivar_name: cultivarName,
                 p_origin: o
               });
