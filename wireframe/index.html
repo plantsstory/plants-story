@@ -1784,17 +1784,15 @@
       };
 
       // Add cultivar to both Supabase and localStorage
+      // Returns a Promise that resolves on success, rejects on DB error
       window.addUserCultivar = function(fullName, entry, meta) {
-        // Supabase insert + AI research trigger
         if (supabase) {
           var isSeedling = meta.type === 'seedling';
-          var originsData = entry.origins || [];
-          // Store formula inside origins metadata since formula column may not exist
+          var originsData = JSON.parse(JSON.stringify(entry.origins || []));
           if (entry.formula) {
-            originsData = JSON.parse(JSON.stringify(originsData));
             originsData.push({ _type: 'formula', formula: entry.formula });
           }
-          supabase.from('cultivars').insert({
+          return supabase.from('cultivars').insert({
             genus: meta.genus,
             cultivar_name: fullName,
             type: meta.type || 'Hybrid',
@@ -1803,16 +1801,14 @@
             ai_status: isSeedling ? null : 'pending'
           }).select().then(function(res) {
             if (res.error) {
-              console.warn('Supabase insert error:', res.error.message);
-              showToast('DB保存エラー: ' + res.error.message, true);
-              return;
+              throw new Error(res.error.message);
             }
             // Save to localStorage only after successful DB insert
             var saved = {};
             try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
             saved[fullName] = { entry: entry, meta: meta };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-            // Trigger AI research via Edge Function (skip for seedlings)
+            // Trigger AI research (skip for seedlings)
             if (!isSeedling) {
               var inserted = res.data && res.data[0];
               if (inserted && inserted.id) {
@@ -1821,11 +1817,11 @@
             }
           });
         } else {
-          // No Supabase, save to localStorage only
           var saved = {};
           try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
           saved[fullName] = { entry: entry, meta: meta };
           localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+          return Promise.resolve();
         }
       };
 
@@ -3233,20 +3229,128 @@
             }
           }
           if (origin) newEntry.origins.push(origin);
-          cultivarData[fullName] = newEntry;
 
-          // Upload parent photos for seedlings
-          if (isSeedling && supabase) {
+          // Disable submit button to prevent double-click
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = '0.5';
+
+          // --- Helper: finish submit (add to UI, navigate, reset form) ---
+          function finishSubmit() {
+            cultivarData[fullName] = newEntry;
+
+            // Add row to genus list
+            var genusEl = document.getElementById('genus-' + genus.toLowerCase());
+            if (genusEl) {
+              var container;
+              if (isSeedling) {
+                container = genusEl.querySelector('[data-genus-view="seedlings"] .seedling-list');
+                if (container) {
+                  var emptyMsg = container.querySelector('.text-center.text-muted');
+                  if (emptyMsg) emptyMsg.remove();
+                }
+              } else {
+                container = genusEl.querySelector('[data-genus-view="species-clones"] .card[style*="padding:0"]') || genusEl.querySelector('.card[style*="padding:0"]');
+              }
+              if (container) {
+                var row = document.createElement('div');
+                row.className = 'cultivar-row';
+                row.setAttribute('data-nav', 'cultivar');
+                var badgeClass = type === 'species' ? 'badge--species' : (type === 'hybrid' ? 'badge--hybrid' : (type === 'seedling' ? 'badge--seedling' : 'badge--clone'));
+                var badgeText = type === 'species' ? t('badge_species') : (type === 'hybrid' ? 'Hybrid' : (type === 'seedling' ? 'Seedling' : 'Clone'));
+                var rowHtml = '<div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>';
+                rowHtml += '<div class="cultivar-row__info">';
+                var displayName = isSeedling ? fullName.replace(' [Seedling]', '') : fullName;
+                rowHtml += '<div class="cultivar-row__name" data-key="' + fullName.replace(/"/g, '&quot;') + '">' + displayName + '</div>';
+                rowHtml += '<div class="cultivar-row__meta">';
+                if (!isSeedling) {
+                  var originCount = desc ? 1 : 0;
+                  var trustPct = desc ? 30 : 0;
+                  rowHtml += '<span>' + t('origin_prefix') + originCount + t('origin_count_suffix') + '</span>';
+                }
+                rowHtml += '<span class="badge ' + badgeClass + '">' + badgeText + '</span>';
+                if (!isSeedling && !desc) rowHtml += '<span class="badge badge--ai">' + t('ai_pending_badge') + '</span>';
+                if (!isSeedling) {
+                  rowHtml += '<div class="trust"><div class="trust__bar"><div class="trust__fill trust--low" style="width:' + (desc ? 30 : 0) + '%"></div></div><span class="trust__label">' + (desc ? '30%' : '-') + '</span></div>';
+                }
+                rowHtml += '</div>';
+                if (newEntry.formula) {
+                  rowHtml += '<div class="text-sm text-muted mt-sm"><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + newEntry.formula.parentA + '</span><span class="formula-operator" style="font-size:0.875rem;">&times;</span><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + newEntry.formula.parentB + '</span></div>';
+                }
+                rowHtml += '</div>';
+                row.innerHTML = rowHtml;
+                container.appendChild(row);
+                paginateGenus(genusEl, 1);
+
+                var genusCards = document.querySelectorAll('.genus-card');
+                genusCards.forEach(function(card) {
+                  var g = card.getAttribute('data-genus');
+                  if (g === genus.toLowerCase()) {
+                    var countEl = card.querySelector('.genus-card__count');
+                    var genusSection = document.getElementById('genus-' + g);
+                    if (countEl && genusSection) {
+                      var total = genusSection.querySelectorAll('.cultivar-row').length;
+                      countEl.textContent = total + (currentLang === 'en' ? ' Cultivars' : ' 品種');
+                    }
+                  }
+                });
+              }
+            }
+
+            // Navigate to new cultivar detail
+            var fakeRow = document.createElement('div');
+            fakeRow.innerHTML = '<span class="badge badge--' + type + '"></span>';
+            if (type === 'species') fakeRow.innerHTML = '<span class="badge badge--species"></span>';
+            updateCultivarDetail(fullName, fakeRow);
+            showPage('cultivar');
+
+            // Reset form
+            if (contributeName) contributeName.value = '';
+            if (contributeDesc) contributeDesc.value = '';
+            if (contributeGenus) contributeGenus.selectedIndex = 0;
+            var speciesRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="species"]');
+            if (speciesRadio) { speciesRadio.checked = true; speciesRadio.dispatchEvent(new Event('change')); }
+            if (formulaParentA) formulaParentA.value = '';
+            if (formulaParentB) formulaParentB.value = '';
+            if (contributeSourceInput) contributeSourceInput.value = '';
+            contributeSources = [];
+            renderContributeSources();
+            if (duplicateAlert) duplicateAlert.style.display = 'none';
+            if (typeof window.resetContributeImages === 'function') window.resetContributeImages();
+            motherPhotoFile = null; fatherPhotoFile = null;
+            ['mother', 'father'].forEach(function(p) {
+              var inp = document.getElementById(p + '-photo-input');
+              var prev = document.getElementById(p + '-preview');
+              var area = document.getElementById(p + '-upload');
+              if (inp) inp.value = '';
+              if (prev) prev.innerHTML = '';
+              if (area) area.style.display = '';
+            });
+            if (parentPhotosSection) parentPhotosSection.style.display = 'none';
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '';
+            showToast(t('submit_success'));
+          }
+
+          function handleSubmitError(msg) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '';
+            showToast(msg, true);
+          }
+
+          // --- Upload parent photos first (seedlings), then save to DB ---
+          var photoUploadPromise;
+          var sbClient = window._supabaseClient;
+          if (isSeedling && sbClient && (motherPhotoFile || fatherPhotoFile)) {
             var uploadParentPhoto = function(file, role) {
               if (!file) return Promise.resolve(null);
               var ext = file.name.split('.').pop();
               var path = 'seedling-parents/' + fullName.replace(/[^a-zA-Z0-9]/g, '_') + '/' + role + '_' + Date.now() + '.' + ext;
-              return supabase.storage.from('gallery-images').upload(path, file, { upsert: true }).then(function(res) {
+              return sbClient.storage.from('gallery-images').upload(path, file, { upsert: true }).then(function(res) {
                 if (res.error) { console.warn('Parent photo upload error:', res.error); return null; }
                 return path;
               });
             };
-            Promise.all([
+            photoUploadPromise = Promise.all([
               uploadParentPhoto(motherPhotoFile, 'mother'),
               uploadParentPhoto(fatherPhotoFile, 'father')
             ]).then(function(paths) {
@@ -3254,118 +3358,23 @@
                 if (!newEntry.formula) newEntry.formula = {};
                 if (paths[0]) newEntry.formula.motherPhoto = paths[0];
                 if (paths[1]) newEntry.formula.fatherPhoto = paths[1];
-                // Update formula in origins array in Supabase
-                supabase.from('cultivars').select('origins').eq('cultivar_name', fullName).single().then(function(r) {
-                  if (r.data) {
-                    var origins = r.data.origins || [];
-                    // Remove old formula entry if exists, add new one
-                    origins = origins.filter(function(o) { return !o._type || o._type !== 'formula'; });
-                    origins.push({ _type: 'formula', formula: newEntry.formula });
-                    supabase.from('cultivars').update({ origins: origins }).eq('cultivar_name', fullName);
-                  }
-                });
               }
+            }).catch(function(err) {
+              console.warn('Parent photo upload failed:', err);
             });
+          } else {
+            photoUploadPromise = Promise.resolve();
           }
 
-          // Save to localStorage
-          if (typeof addUserCultivar === 'function') {
-            addUserCultivar(fullName, newEntry, { genus: genus, type: type });
-          }
-
-          // Add row to genus list
-          var genusEl = document.getElementById('genus-' + genus.toLowerCase());
-          if (genusEl) {
-            var container;
-            if (isSeedling) {
-              container = genusEl.querySelector('[data-genus-view="seedlings"] .seedling-list');
-              // Clear empty placeholder
-              if (container) {
-                var emptyMsg = container.querySelector('.text-center.text-muted');
-                if (emptyMsg) emptyMsg.remove();
-              }
-            } else {
-              container = genusEl.querySelector('[data-genus-view="species-clones"] .card[style*="padding:0"]') || genusEl.querySelector('.card[style*="padding:0"]');
-            }
-            if (container) {
-              var row = document.createElement('div');
-              row.className = 'cultivar-row';
-              row.setAttribute('data-nav', 'cultivar');
-              var badgeClass = type === 'species' ? 'badge--species' : (type === 'hybrid' ? 'badge--hybrid' : (type === 'seedling' ? 'badge--seedling' : 'badge--clone'));
-              var badgeText = type === 'species' ? t('badge_species') : (type === 'hybrid' ? 'Hybrid' : (type === 'seedling' ? 'Seedling' : 'Clone'));
-              var rowHtml = '<div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>';
-              rowHtml += '<div class="cultivar-row__info">';
-              var displayName = isSeedling ? fullName.replace(' [Seedling]', '') : fullName;
-              rowHtml += '<div class="cultivar-row__name" data-key="' + fullName.replace(/"/g, '&quot;') + '">' + displayName + '</div>';
-              rowHtml += '<div class="cultivar-row__meta">';
-              if (!isSeedling) {
-                var originCount = desc ? 1 : 0;
-                var trustPct = desc ? 30 : 0;
-                rowHtml += '<span>' + t('origin_prefix') + originCount + t('origin_count_suffix') + '</span>';
-              }
-              rowHtml += '<span class="badge ' + badgeClass + '">' + badgeText + '</span>';
-              if (!isSeedling && !desc) rowHtml += '<span class="badge badge--ai">' + t('ai_pending_badge') + '</span>';
-              if (!isSeedling) {
-                rowHtml += '<div class="trust"><div class="trust__bar"><div class="trust__fill trust--low" style="width:' + (desc ? 30 : 0) + '%"></div></div><span class="trust__label">' + (desc ? '30%' : '-') + '</span></div>';
-              }
-              rowHtml += '</div>';
-              if (newEntry.formula) {
-                rowHtml += '<div class="text-sm text-muted mt-sm"><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + newEntry.formula.parentA + '</span><span class="formula-operator" style="font-size:0.875rem;">&times;</span><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + newEntry.formula.parentB + '</span></div>';
-              }
-              rowHtml += '</div>';
-              row.innerHTML = rowHtml;
-              container.appendChild(row);
-              paginateGenus(genusEl, 1);
-
-              // Update genus card count on top page
-              var genusCards = document.querySelectorAll('.genus-card');
-              genusCards.forEach(function(card) {
-                var g = card.getAttribute('data-genus');
-                if (g === genus.toLowerCase()) {
-                  var countEl = card.querySelector('.genus-card__count');
-                  var genusSection = document.getElementById('genus-' + g);
-                  if (countEl && genusSection) {
-                    var total = genusSection.querySelectorAll('.cultivar-row').length;
-                    countEl.textContent = total + (currentLang === 'en' ? ' Cultivars' : ' 品種');
-                  }
-                }
-              });
-            }
-          }
-
-          // Navigate to new cultivar detail
-          var fakeRow = document.createElement('div');
-          fakeRow.innerHTML = '<span class="badge badge--' + type + '"></span>';
-          if (type === 'species') fakeRow.innerHTML = '<span class="badge badge--species"></span>';
-          updateCultivarDetail(fullName, fakeRow);
-          showPage('cultivar');
-
-          // Reset form
-          if (contributeName) contributeName.value = '';
-          if (contributeDesc) contributeDesc.value = '';
-          if (contributeGenus) contributeGenus.selectedIndex = 0;
-          var speciesRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="species"]');
-          if (speciesRadio) { speciesRadio.checked = true; speciesRadio.dispatchEvent(new Event('change')); }
-          if (formulaParentA) formulaParentA.value = '';
-          if (formulaParentB) formulaParentB.value = '';
-          if (contributeSourceInput) contributeSourceInput.value = '';
-          contributeSources = [];
-          renderContributeSources();
-          if (duplicateAlert) duplicateAlert.style.display = 'none';
-          if (typeof window.resetContributeImages === 'function') window.resetContributeImages();
-          // Reset parent photos
-          motherPhotoFile = null; fatherPhotoFile = null;
-          ['mother', 'father'].forEach(function(p) {
-            var inp = document.getElementById(p + '-photo-input');
-            var prev = document.getElementById(p + '-preview');
-            var area = document.getElementById(p + '-upload');
-            if (inp) inp.value = '';
-            if (prev) prev.innerHTML = '';
-            if (area) area.style.display = '';
+          // After photos are ready, save to DB then update UI
+          photoUploadPromise.then(function() {
+            return addUserCultivar(fullName, newEntry, { genus: genus, type: type });
+          }).then(function() {
+            finishSubmit();
+          }).catch(function(err) {
+            console.warn('Submit error:', err);
+            handleSubmitError('DB保存エラー: ' + (err.message || err));
           });
-          if (parentPhotosSection) parentPhotosSection.style.display = 'none';
-
-          showToast(t('submit_success'));
         });
       }
     })();
