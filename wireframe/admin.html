@@ -462,15 +462,29 @@
       <!-- ---- IMAGES ---- -->
       <section id="sec-images" class="hidden">
         <h2 class="section-title">画像管理</h2>
-        <div class="toolbar">
-          <input type="text" id="image-search" placeholder="品種名で検索...">
-          <label style="display:flex;align-items:center;gap:4px;font-size:var(--font-size-sm);cursor:pointer;">
-            <input type="checkbox" id="image-flag-filter"> Fake票が多い画像のみ
-          </label>
-          <button class="btn btn-primary btn-sm" id="btn-refresh-images">更新</button>
+        <div style="display:flex;gap:0;margin-bottom:var(--space-md);border-bottom:2px solid var(--color-light);">
+          <button class="btn btn-sm image-tab active" data-image-tab="gallery" style="border-radius:var(--radius-md) var(--radius-md) 0 0;border-bottom:2px solid var(--color-primary);margin-bottom:-2px;font-weight:600;">ギャラリー画像</button>
+          <button class="btn btn-sm image-tab" data-image-tab="formula" style="border-radius:var(--radius-md) var(--radius-md) 0 0;margin-bottom:-2px;opacity:0.6;">交配式画像（母/父）</button>
         </div>
-        <div id="image-stats" style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);"></div>
-        <div id="image-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--space-md);"></div>
+        <div id="gallery-tab-content">
+          <div class="toolbar">
+            <input type="text" id="image-search" placeholder="品種名で検索...">
+            <label style="display:flex;align-items:center;gap:4px;font-size:var(--font-size-sm);cursor:pointer;">
+              <input type="checkbox" id="image-flag-filter"> Fake票が多い画像のみ
+            </label>
+            <button class="btn btn-primary btn-sm" id="btn-refresh-images">更新</button>
+          </div>
+          <div id="image-stats" style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);"></div>
+          <div id="image-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--space-md);"></div>
+        </div>
+        <div id="formula-tab-content" style="display:none;">
+          <div class="toolbar">
+            <input type="text" id="formula-image-search" placeholder="品種名で検索...">
+            <button class="btn btn-primary btn-sm" id="btn-refresh-formula-images">更新</button>
+          </div>
+          <div id="formula-image-stats" style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);"></div>
+          <div id="formula-image-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--space-md);"></div>
+        </div>
       </section>
 
       <!-- ---- BULK OPERATIONS ---- -->
@@ -1278,6 +1292,134 @@ document.getElementById('image-grid').addEventListener('click', async function(e
     toast('画像を削除しました');
   } catch (err) {
     console.error('Image delete error:', err);
+    toast('削除エラー: ' + (err.message || err));
+    btn.disabled = false;
+    btn.textContent = '削除';
+  }
+});
+
+// ========================================
+// IMAGE TAB SWITCHING
+// ========================================
+document.querySelectorAll('.image-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.image-tab').forEach(function(t) {
+      t.classList.remove('active');
+      t.style.borderBottom = 'none';
+      t.style.opacity = '0.6';
+      t.style.fontWeight = 'normal';
+    });
+    this.classList.add('active');
+    this.style.borderBottom = '2px solid var(--color-primary)';
+    this.style.opacity = '1';
+    this.style.fontWeight = '600';
+    var which = this.getAttribute('data-image-tab');
+    document.getElementById('gallery-tab-content').style.display = which === 'gallery' ? '' : 'none';
+    document.getElementById('formula-tab-content').style.display = which === 'formula' ? '' : 'none';
+    if (which === 'formula' && allFormulaImages.length === 0) loadFormulaImages();
+  });
+});
+
+// ========================================
+// FORMULA (PARENT) IMAGE MANAGEMENT
+// ========================================
+var allFormulaImages = [];
+
+async function loadFormulaImages() {
+  var result = await sb.from('cultivars').select('id, cultivar_name, origins').eq('type', 'seedling');
+  if (result.error) { toast('交配式画像の取得エラー'); return; }
+  allFormulaImages = [];
+  (result.data || []).forEach(function(c) {
+    if (!c.origins || !Array.isArray(c.origins)) return;
+    var formula = null;
+    c.origins.forEach(function(o) { if (o && o._type === 'formula') formula = o.formula; });
+    if (!formula) return;
+    if (formula.motherPhoto) {
+      allFormulaImages.push({ cultivarId: c.id, cultivarName: c.cultivar_name, role: 'mother', storagePath: formula.motherPhoto });
+    }
+    if (formula.fatherPhoto) {
+      allFormulaImages.push({ cultivarId: c.id, cultivarName: c.cultivar_name, role: 'father', storagePath: formula.fatherPhoto });
+    }
+  });
+  renderFormulaImageGrid();
+}
+
+function renderFormulaImageGrid() {
+  var grid = document.getElementById('formula-image-grid');
+  var statsEl = document.getElementById('formula-image-stats');
+  var search = (document.getElementById('formula-image-search').value || '').toLowerCase().trim();
+
+  var filtered = allFormulaImages.filter(function(img) {
+    if (search && !(img.cultivarName || '').toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  statsEl.textContent = filtered.length + ' / ' + allFormulaImages.length + ' 交配式画像';
+  grid.innerHTML = '';
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--color-gray);padding:var(--space-xl);">交配式画像がありません</div>';
+    return;
+  }
+
+  filtered.forEach(function(img) {
+    var card = document.createElement('div');
+    card.style.cssText = 'background:var(--color-white);border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--color-light);';
+    var roleLabel = img.role === 'mother' ? 'Mother（母）' : 'Father（父）';
+    var roleColor = img.role === 'mother' ? '#e91e63' : '#1976d2';
+    card.innerHTML =
+      '<div style="position:relative;">' +
+        '<img src="' + getImageUrl(img.storagePath) + '" style="width:100%;height:160px;object-fit:cover;display:block;" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22160%22><rect fill=%22%23eee%22 width=%22200%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23999%22>Error</text></svg>\'">' +
+        '<span style="position:absolute;top:4px;right:4px;background:' + roleColor + ';color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;">' + roleLabel + '</span>' +
+      '</div>' +
+      '<div style="padding:8px;font-size:var(--font-size-sm);">' +
+        '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(img.cultivarName || '') + '">' + escapeHtml(img.cultivarName || '不明') + '</div>' +
+        '<div style="color:var(--color-gray);font-size:0.75rem;margin:4px 0;">Storage: ' + escapeHtml(img.storagePath.split('/').pop()) + '</div>' +
+        '<button class="btn btn-sm" style="margin-top:6px;color:#c62828;border-color:#c62828;width:100%;" data-delete-formula-image data-cultivar-id="' + img.cultivarId + '" data-role="' + img.role + '" data-storage-path="' + escapeHtml(img.storagePath) + '">削除</button>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+}
+
+document.getElementById('btn-refresh-formula-images').addEventListener('click', loadFormulaImages);
+document.getElementById('formula-image-search').addEventListener('input', renderFormulaImageGrid);
+
+// Delete formula image handler
+document.getElementById('formula-image-grid').addEventListener('click', async function(e) {
+  var btn = e.target.closest('[data-delete-formula-image]');
+  if (!btn) return;
+  var cultivarId = btn.getAttribute('data-cultivar-id');
+  var role = btn.getAttribute('data-role');
+  var storagePath = btn.getAttribute('data-storage-path');
+  if (!confirm('この交配式画像（' + (role === 'mother' ? '母' : '父') + '）を削除しますか？')) return;
+
+  btn.disabled = true;
+  btn.textContent = '削除中...';
+  try {
+    // Delete from storage
+    var storageRes = await sb.storage.from('gallery-images').remove([storagePath]);
+    if (storageRes.error) console.warn('Storage delete warning:', storageRes.error.message);
+
+    // Get current cultivar origins and update formula
+    var getRes = await sb.from('cultivars').select('origins').eq('id', cultivarId).single();
+    if (getRes.error) throw new Error('品種データ取得エラー: ' + getRes.error.message);
+    var origins = getRes.data.origins || [];
+    origins.forEach(function(o) {
+      if (o && o._type === 'formula' && o.formula) {
+        if (role === 'mother') o.formula.motherPhoto = null;
+        if (role === 'father') o.formula.fatherPhoto = null;
+      }
+    });
+    var upRes = await sb.from('cultivars').update({ origins: origins }).eq('id', cultivarId);
+    if (upRes.error) throw new Error('DB更新エラー: ' + upRes.error.message);
+
+    allFormulaImages = allFormulaImages.filter(function(img) {
+      return !(String(img.cultivarId) === String(cultivarId) && img.role === role);
+    });
+    renderFormulaImageGrid();
+    toast('交配式画像を削除しました');
+  } catch (err) {
+    console.error('Formula image delete error:', err);
     toast('削除エラー: ' + (err.message || err));
     btn.disabled = false;
     btn.textContent = '削除';
