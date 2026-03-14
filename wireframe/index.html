@@ -2164,7 +2164,7 @@
           if (isSeedling) {
             if (data.formula.motherPhoto && _sb) {
               var motherUrl = _sb.storage.from('gallery-images').getPublicUrl(data.formula.motherPhoto).data.publicUrl;
-              fHtml += '<div class="parent-photo-display"><img src="' + motherUrl + '" alt="Mother"><div class="text-xs mt-sm">Mother</div></div>';
+              fHtml += '<div class="parent-photo-display"><img class="has-photo" src="' + motherUrl + '" alt="Mother"><div class="text-xs mt-sm">Mother</div></div>';
             } else {
               fHtml += '<div class="parent-photo-display"><div style="width:80px;height:80px;border-radius:var(--radius-md);border:2px dashed var(--color-light);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:0.7rem;">No Photo</div><div class="text-xs mt-sm">Mother</div></div>';
             }
@@ -2176,7 +2176,7 @@
           if (isSeedling) {
             if (data.formula.fatherPhoto && _sb) {
               var fatherUrl = _sb.storage.from('gallery-images').getPublicUrl(data.formula.fatherPhoto).data.publicUrl;
-              fHtml += '<div class="parent-photo-display"><img src="' + fatherUrl + '" alt="Father"><div class="text-xs mt-sm">Father</div></div>';
+              fHtml += '<div class="parent-photo-display"><img class="has-photo" src="' + fatherUrl + '" alt="Father"><div class="text-xs mt-sm">Father</div></div>';
             } else {
               fHtml += '<div class="parent-photo-display"><div style="width:80px;height:80px;border-radius:var(--radius-md);border:2px dashed var(--color-light);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:0.7rem;">No Photo</div><div class="text-xs mt-sm">Father</div></div>';
             }
@@ -2197,7 +2197,7 @@
         if (isSeedling) {
           if (data.formula.motherPhoto && _sb) {
             var motherUrl = _sb.storage.from('gallery-images').getPublicUrl(data.formula.motherPhoto).data.publicUrl;
-            html += '<div class="parent-photo-display"><img src="' + motherUrl + '" alt="Mother"><div class="text-xs mt-sm">Mother</div></div>';
+            html += '<div class="parent-photo-display"><img class="has-photo" src="' + motherUrl + '" alt="Mother"><div class="text-xs mt-sm">Mother</div></div>';
           } else {
             html += '<div class="parent-photo-display"><div style="width:80px;height:80px;border-radius:var(--radius-md);border:2px dashed var(--color-light);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:0.7rem;">No Photo</div><div class="text-xs mt-sm">Mother</div></div>';
           }
@@ -2208,7 +2208,7 @@
         if (isSeedling) {
           if (data.formula.fatherPhoto && _sb) {
             var fatherUrl = _sb.storage.from('gallery-images').getPublicUrl(data.formula.fatherPhoto).data.publicUrl;
-            html += '<div class="parent-photo-display"><img src="' + fatherUrl + '" alt="Father"><div class="text-xs mt-sm">Father</div></div>';
+            html += '<div class="parent-photo-display"><img class="has-photo" src="' + fatherUrl + '" alt="Father"><div class="text-xs mt-sm">Father</div></div>';
           } else {
             html += '<div class="parent-photo-display"><div style="width:80px;height:80px;border-radius:var(--radius-md);border:2px dashed var(--color-light);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:0.7rem;">No Photo</div><div class="text-xs mt-sm">Father</div></div>';
           }
@@ -3195,8 +3195,12 @@
           if (parent === 'mother') motherPhotoFile = file; else fatherPhotoFile = file;
           var reader = new FileReader();
           reader.onload = function(e) {
-            preview.innerHTML = '<img src="' + e.target.result + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid var(--color-light);">';
+            preview.innerHTML = '<img src="' + e.target.result + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid var(--color-light);cursor:pointer;" title="クリックで画像を変更">';
             uploadArea.style.display = 'none';
+            // Click preview image to re-select
+            preview.querySelector('img').addEventListener('click', function() {
+              fileInput.click();
+            });
           };
           reader.readAsDataURL(file);
         });
@@ -3592,7 +3596,7 @@
         if (isSeedling) {
           if (data.formula.motherPhoto && _sb) {
             var motherUrl = _sb.storage.from('gallery-images').getPublicUrl(data.formula.motherPhoto).data.publicUrl;
-            html += '<div class="parent-photo-display"><img src="' + motherUrl + '" alt="Mother"><div class="text-xs mt-sm">Mother</div></div>';
+            html += '<div class="parent-photo-display"><img class="has-photo" src="' + motherUrl + '" alt="Mother"><div class="text-xs mt-sm">Mother</div></div>';
           } else {
             html += '<div class="parent-photo-display"><div style="width:80px;height:80px;border-radius:var(--radius-md);border:2px dashed var(--color-light);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:0.7rem;">No Photo</div><div class="text-xs mt-sm">Mother</div></div>';
           }
@@ -3603,7 +3607,7 @@
         if (isSeedling) {
           if (data.formula.fatherPhoto && _sb) {
             var fatherUrl = _sb.storage.from('gallery-images').getPublicUrl(data.formula.fatherPhoto).data.publicUrl;
-            html += '<div class="parent-photo-display"><img src="' + fatherUrl + '" alt="Father"><div class="text-xs mt-sm">Father</div></div>';
+            html += '<div class="parent-photo-display"><img class="has-photo" src="' + fatherUrl + '" alt="Father"><div class="text-xs mt-sm">Father</div></div>';
           } else {
             html += '<div class="parent-photo-display"><div style="width:80px;height:80px;border-radius:var(--radius-md);border:2px dashed var(--color-light);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:0.7rem;">No Photo</div><div class="text-xs mt-sm">Father</div></div>';
           }
@@ -4135,11 +4139,13 @@
       var contributePreview = document.getElementById('contribute-preview');
       var contributeImages = [];
       var contributeFiles = []; // Store original File objects for upload
+      var contributeReplaceIdx = null; // Track which image is being replaced
 
       if (contributeArea && contributeInput && contributePreview) {
         // Click to upload
         contributeArea.addEventListener('click', function(e) {
           if (e.target === contributeInput) return;
+          contributeReplaceIdx = null;
           contributeInput.click();
         });
 
@@ -4162,8 +4168,25 @@
 
         // File input change
         contributeInput.addEventListener('change', function() {
-          for (var i = 0; i < this.files.length; i++) {
-            addContributeImage(this.files[i]);
+          if (contributeReplaceIdx !== null) {
+            // Replace mode: swap the image at replaceIdx
+            var file = this.files[0];
+            if (file && validateFile(file)) {
+              var idx = contributeReplaceIdx;
+              contributeFiles[idx] = file;
+              var reader = new FileReader();
+              reader.onload = function(e) {
+                contributeImages[idx] = e.target.result;
+                renderContributePreview();
+              };
+              reader.readAsDataURL(file);
+            }
+            contributeReplaceIdx = null;
+          } else {
+            // Add mode
+            for (var i = 0; i < this.files.length; i++) {
+              addContributeImage(this.files[i]);
+            }
           }
           this.value = '';
         });
@@ -4190,7 +4213,7 @@
             var item = document.createElement('div');
             item.className = 'upload-preview__item';
             item.innerHTML =
-              '<img class="upload-preview__img" src="' + src + '">' +
+              '<img class="upload-preview__img" src="' + src + '" data-idx="' + i + '" title="クリックで画像を変更">' +
               '<button class="upload-preview__remove" data-idx="' + i + '">&times;</button>';
             contributePreview.appendChild(item);
           });
@@ -4202,6 +4225,14 @@
               contributeImages.splice(idx, 1);
               contributeFiles.splice(idx, 1);
               renderContributePreview();
+            });
+          });
+          // Attach click-to-replace handlers on preview images
+          contributePreview.querySelectorAll('.upload-preview__img').forEach(function(img) {
+            img.addEventListener('click', function(e) {
+              e.stopPropagation();
+              contributeReplaceIdx = parseInt(this.getAttribute('data-idx'));
+              contributeInput.click();
             });
           });
         }
@@ -4239,6 +4270,50 @@
         document.getElementById('contact-message').value = '';
       });
     })();
+  </script>
+
+  <!-- Parent photo lightbox -->
+  <div class="parent-photo-lightbox" id="parentPhotoLightbox">
+    <button class="lightbox-close" aria-label="Close">&times;</button>
+    <img src="" alt="">
+    <div class="lightbox-label"></div>
+  </div>
+  <script>
+  (function() {
+    var lightbox = document.getElementById('parentPhotoLightbox');
+    var lbImg = lightbox.querySelector('img');
+    var lbLabel = lightbox.querySelector('.lightbox-label');
+
+    function openLightbox(src, label) {
+      lbImg.src = src;
+      lbLabel.textContent = label || '';
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      lightbox.classList.remove('active');
+      document.body.style.overflow = '';
+      lbImg.src = '';
+    }
+
+    // Close on backdrop click or X button
+    lightbox.addEventListener('click', closeLightbox);
+    lightbox.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+    });
+
+    // Delegate click on parent photo images
+    document.addEventListener('click', function(e) {
+      var img = e.target.closest('.parent-photo-display img.has-photo');
+      if (img) {
+        e.stopPropagation();
+        openLightbox(img.src, img.alt);
+      }
+    });
+  })();
   </script>
 
 </body>
