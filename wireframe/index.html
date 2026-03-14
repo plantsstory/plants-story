@@ -2231,7 +2231,7 @@
       }
 
       // Short name for breadcrumb
-      var shortName = cultivarName.replace(genusName + ' ', '').replace(/'/g, '');
+      var shortName = cultivarName.replace(' [Seedling]', '').replace(genusName + ' ', '').replace(/'/g, '');
 
       // Get badge info from row
       var badgeEl = rowEl ? rowEl.querySelector('.badge') : null;
@@ -3327,7 +3327,13 @@
           });
           if (parentPhotosSection) parentPhotosSection.style.display = 'none';
 
-          alert(t('submit_success'));
+          // Show toast notification instead of blocking alert
+          var toast = document.createElement('div');
+          toast.className = 'toast-notification';
+          toast.textContent = t('submit_success');
+          document.body.appendChild(toast);
+          setTimeout(function() { toast.classList.add('show'); }, 10);
+          setTimeout(function() { toast.classList.remove('show'); setTimeout(function() { toast.remove(); }, 300); }, 3000);
         });
       }
     })();
