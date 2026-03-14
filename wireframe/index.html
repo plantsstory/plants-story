@@ -4272,71 +4272,55 @@
     })();
   </script>
 
-  <!-- Parent photo lightbox -->
-  <div class="parent-photo-lightbox" id="parentPhotoLightbox">
-    <button class="lightbox-close" aria-label="Close">&times;</button>
-    <img src="" alt="">
-    <div class="lightbox-label"></div>
-  </div>
+  <!-- Parent photo dialog lightbox -->
+  <dialog class="parent-photo-dialog" id="parentPhotoDialog">
+    <div class="dialog-inner">
+      <button class="dialog-close" aria-label="Close">&times;</button>
+      <img src="" alt="">
+      <div class="dialog-label"></div>
+    </div>
+  </dialog>
   <script>
   (function() {
-    var lightbox = document.getElementById('parentPhotoLightbox');
-    var lbImg = lightbox.querySelector('img');
-    var lbLabel = lightbox.querySelector('.lightbox-label');
-    var savedScrollY = 0;
+    var dialog = document.getElementById('parentPhotoDialog');
+    var dlgImg = dialog.querySelector('img');
+    var dlgLabel = dialog.querySelector('.dialog-label');
+    var dlgClose = dialog.querySelector('.dialog-close');
 
-    function openLightbox(src, label) {
-      lbImg.src = src;
-      lbLabel.textContent = label || '';
-      // Lock body scroll — mobile Safari needs position:fixed
-      savedScrollY = window.pageYOffset || document.documentElement.scrollTop;
-      document.body.style.position = 'fixed';
-      document.body.style.top = '-' + savedScrollY + 'px';
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.overflow = 'hidden';
-      lightbox.classList.add('active');
-    }
-    function closeLightbox() {
-      lightbox.classList.remove('active');
-      // Restore body scroll
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.overflow = '';
-      window.scrollTo(0, savedScrollY);
-      lbImg.src = '';
-    }
-
-    // Close on backdrop click/tap
-    lightbox.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      closeLightbox();
+    // Close on × button
+    dlgClose.addEventListener('click', function() {
+      dialog.close();
     });
 
-    // Close on Escape key
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+    // Close on backdrop click (click outside the dialog-inner)
+    dialog.addEventListener('click', function(e) {
+      if (e.target === dialog) {
+        dialog.close();
+      }
     });
 
-    // Block touch scroll while lightbox is open
-    lightbox.addEventListener('touchmove', function(e) {
-      e.preventDefault();
-    }, { passive: false });
+    // Close on image click (tap again to close)
+    dlgImg.addEventListener('click', function() {
+      dialog.close();
+    });
 
-    // Delegate click/tap on parent photo images
+    // Clean up on close
+    dialog.addEventListener('close', function() {
+      dlgImg.src = '';
+    });
+
+    // Open on parent photo click/tap
     document.addEventListener('click', function(e) {
       var el = e.target;
-      while (el && el !== document) {
-        if (el.tagName === 'IMG' && el.classList.contains('has-photo') && el.closest('.parent-photo-display')) {
+      if (el.tagName === 'IMG' && el.classList.contains('has-photo')) {
+        var parent = el.closest('.parent-photo-display');
+        if (parent) {
           e.preventDefault();
           e.stopPropagation();
-          openLightbox(el.src, el.alt);
-          return;
+          dlgImg.src = el.src;
+          dlgLabel.textContent = el.alt || '';
+          dialog.showModal();
         }
-        el = el.parentElement;
       }
     });
   })();
