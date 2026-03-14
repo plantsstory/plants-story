@@ -1974,8 +1974,9 @@
         var originCount = hasDesc ? entry.origins.length : 0;
         var trustPct = hasDesc ? entry.origins[0].trust : 0;
         var rowHtml = '<div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>';
+        var displayName = isSeedling ? fullName.replace(' [Seedling]', '') : fullName;
         rowHtml += '<div class="cultivar-row__info">';
-        rowHtml += '<div class="cultivar-row__name">' + fullName + '</div>';
+        rowHtml += '<div class="cultivar-row__name" data-key="' + fullName.replace(/"/g, '&quot;') + '">' + displayName + '</div>';
         rowHtml += '<div class="cultivar-row__meta">';
         if (!isSeedling) {
           rowHtml += '<span>' + t('origin_prefix') + originCount + t('origin_count_suffix') + '</span>';
@@ -2247,7 +2248,7 @@
 
       // Update title
       var h1 = detailPage.querySelector('h1');
-      if (h1) h1.textContent = cultivarName;
+      if (h1) h1.textContent = cultivarName.replace(' [Seedling]', '');
 
       // Update badge
       var detailBadge = detailPage.querySelector('.badge');
@@ -2419,7 +2420,8 @@
         if (page === 'cultivar') {
           var nameEl = navEl.querySelector('.cultivar-row__name');
           if (nameEl) {
-            updateCultivarDetail(nameEl.textContent, navEl);
+            var cultivarKey = nameEl.getAttribute('data-key') || nameEl.textContent;
+            updateCultivarDetail(cultivarKey, navEl);
           }
         }
 
@@ -3100,19 +3102,26 @@
           var inputVal = this.value.trim().toLowerCase();
           if (inputVal.length < 1) { duplicateAlert.style.display = 'none'; return; }
           var genus = contributeGenus ? contributeGenus.value : 'Anthurium';
-          var exactSpecies = (genus.toLowerCase() + ' ' + inputVal);
-          var exactCultivar = (genus.toLowerCase() + " '" + inputVal + "'");
+          var currentType = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
+          currentType = currentType ? currentType.value : 'species';
+          var exactKey;
+          if (currentType === 'species') {
+            exactKey = genus.toLowerCase() + ' ' + inputVal;
+          } else if (currentType === 'seedling') {
+            exactKey = genus.toLowerCase() + " '" + inputVal + "' [seedling]";
+          } else {
+            exactKey = genus.toLowerCase() + " '" + inputVal + "'";
+          }
           var found = null;
           Object.keys(cultivarData).forEach(function(name) {
-            var nameLower = name.toLowerCase();
-            if (nameLower === exactSpecies || nameLower === exactCultivar) {
+            if (name.toLowerCase() === exactKey) {
               found = name;
             }
           });
           if (found) {
             duplicateAlert.style.display = 'block';
             var msgEl = duplicateAlert.querySelector('.text-sm.text-muted');
-            if (msgEl) msgEl.textContent = '「' + found + '」は既に登録済みです。由来を追加する場合は品種ページから行えます。';
+            if (msgEl) msgEl.textContent = '「' + found.replace(' [Seedling]', '') + '」は既に登録済みです。由来を追加する場合は品種ページから行えます。';
           } else {
             duplicateAlert.style.display = 'none';
           }
@@ -3136,6 +3145,8 @@
           var fullName;
           if (type === 'species') {
             fullName = genus + ' ' + name;
+          } else if (type === 'seedling') {
+            fullName = genus + " '" + name + "' [Seedling]";
           } else {
             fullName = genus + " '" + name + "'";
           }
@@ -3235,7 +3246,8 @@
               var badgeText = type === 'species' ? t('badge_species') : (type === 'hybrid' ? 'Hybrid' : (type === 'seedling' ? 'Seedling' : 'Clone'));
               var rowHtml = '<div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>';
               rowHtml += '<div class="cultivar-row__info">';
-              rowHtml += '<div class="cultivar-row__name">' + fullName + '</div>';
+              var displayName = isSeedling ? fullName.replace(' [Seedling]', '') : fullName;
+              rowHtml += '<div class="cultivar-row__name" data-key="' + fullName.replace(/"/g, '&quot;') + '">' + displayName + '</div>';
               rowHtml += '<div class="cultivar-row__meta">';
               if (!isSeedling) {
                 var originCount = desc ? 1 : 0;
