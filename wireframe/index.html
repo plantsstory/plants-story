@@ -2308,11 +2308,21 @@
     }
 
     // ---- Genus search (filter within genus) ----
+    // Get the active view container within a genus element
+    function getActiveView(genusEl) {
+      var views = genusEl.querySelectorAll('[data-genus-view]');
+      for (var i = 0; i < views.length; i++) {
+        if (views[i].style.display !== 'none') return views[i];
+      }
+      return genusEl; // fallback: no views (e.g. Monstera/Philodendron)
+    }
+
     function filterGenusRows(genusEl, query) {
-      const rows = genusEl.querySelectorAll('.cultivar-row');
-      const q = query.toLowerCase().trim();
+      var scope = getActiveView(genusEl);
+      var rows = scope.querySelectorAll('.cultivar-row');
+      var q = query.toLowerCase().trim();
       rows.forEach(function(row) {
-        const name = row.querySelector('.cultivar-row__name');
+        var name = row.querySelector('.cultivar-row__name');
         if (!q || (name && name.textContent.toLowerCase().includes(q))) {
           row.removeAttribute('data-filtered');
         } else {
@@ -2326,21 +2336,21 @@
 
     function paginateGenus(genusEl, page) {
       page = page || 1;
-      var rows = Array.from(genusEl.querySelectorAll('.cultivar-row:not([data-filtered])'));
+      var scope = getActiveView(genusEl);
+      var rows = Array.from(scope.querySelectorAll('.cultivar-row:not([data-filtered])'));
       var totalPages = Math.max(1, Math.ceil(rows.length / ITEMS_PER_PAGE));
       if (page > totalPages) page = totalPages;
 
-      // Show/hide rows
+      // Show/hide rows within active view only
       rows.forEach(function(row, i) {
         row.style.display = (i >= (page - 1) * ITEMS_PER_PAGE && i < page * ITEMS_PER_PAGE) ? '' : 'none';
       });
-      // Hide filtered rows
-      genusEl.querySelectorAll('.cultivar-row[data-filtered]').forEach(function(r) {
+      scope.querySelectorAll('.cultivar-row[data-filtered]').forEach(function(r) {
         r.style.display = 'none';
       });
 
-      // Update pagination
-      var pagDiv = genusEl.querySelector('.pagination');
+      // Update pagination within active view
+      var pagDiv = scope.querySelector('.pagination');
       if (!pagDiv) return;
       pagDiv.innerHTML = '';
 
@@ -2367,12 +2377,13 @@
       next.setAttribute('data-page', Math.min(totalPages, page + 1));
       pagDiv.appendChild(next);
 
-      // Update count text
-      var countEl = genusEl.querySelector('.text-muted.mb-lg');
+      // Update count text within active view
+      var countEl = scope.querySelector('.text-muted.mb-lg');
       if (countEl) {
         var visibleCount = rows.length;
-        var totalCount = genusEl.querySelectorAll('.cultivar-row').length;
-        if (genusEl.querySelector('.search-bar__input') && genusEl.querySelector('.search-bar__input').value.trim()) {
+        var totalCount = scope.querySelectorAll('.cultivar-row').length;
+        var searchInput = scope.querySelector('.search-bar__input');
+        if (searchInput && searchInput.value.trim()) {
           countEl.textContent = visibleCount + ' 件ヒット（全 ' + totalCount + ' 品種中）';
         } else {
           countEl.textContent = totalCount + ' 品種が登録されています';
@@ -2490,6 +2501,12 @@
       genusContent.querySelectorAll('[data-genus-view]').forEach(function(v) {
         v.style.display = v.getAttribute('data-genus-view') === view ? '' : 'none';
       });
+      // Reset search and re-paginate for the newly active view
+      var activeView = getActiveView(genusContent);
+      var searchInput = activeView.querySelector('.search-bar__input');
+      if (searchInput) searchInput.value = '';
+      filterGenusRows(genusContent, '');
+      paginateGenus(genusContent, 1);
     });
 
     // Hamburger menu
@@ -3315,19 +3332,6 @@
             contributeSources = [];
             renderContributeSources();
             if (duplicateAlert) duplicateAlert.style.display = 'none';
-            // Upload gallery images to Supabase
-            var filesToUpload = typeof window.getContributeFiles === 'function' ? window.getContributeFiles() : [];
-            if (filesToUpload.length > 0 && typeof window.uploadGalleryImage === 'function') {
-              filesToUpload.forEach(function(file) {
-                window.uploadGalleryImage(file, fullName).then(function(imgRecord) {
-                  if (typeof window.renderGalleryForCultivar === 'function') {
-                    window.renderGalleryForCultivar(fullName);
-                  }
-                }).catch(function(err) {
-                  console.warn('Gallery image upload error:', err);
-                });
-              });
-            }
             if (typeof window.resetContributeImages === 'function') window.resetContributeImages();
             motherPhotoFile = null; fatherPhotoFile = null;
             ['mother', 'father'].forEach(function(p) {
@@ -3379,9 +3383,22 @@
             photoUploadPromise = Promise.resolve();
           }
 
-          // After photos are ready, save to DB then update UI
+          // Grab gallery files before any async operations
+          var galleryFiles = typeof window.getContributeFiles === 'function' ? window.getContributeFiles() : [];
+
+          // After parent photos are ready, save to DB, upload gallery images, then update UI
           photoUploadPromise.then(function() {
             return addUserCultivar(fullName, newEntry, { genus: genus, type: type });
+          }).then(function() {
+            // Upload gallery images after DB record exists
+            if (galleryFiles.length > 0 && typeof window.uploadGalleryImage === 'function') {
+              return Promise.all(galleryFiles.map(function(file) {
+                return window.uploadGalleryImage(file, fullName).catch(function(err) {
+                  console.warn('Gallery image upload error:', err);
+                  return null; // Don't block other uploads
+                });
+              }));
+            }
           }).then(function() {
             finishSubmit();
           }).catch(function(err) {

@@ -462,10 +462,15 @@
       <!-- ---- IMAGES ---- -->
       <section id="sec-images" class="hidden">
         <h2 class="section-title">画像管理</h2>
-        <p style="color:var(--color-gray);font-size:var(--font-size-sm);margin-bottom:var(--space-lg);">
-          現在、画像はブラウザメモリ上のみで管理されており、永続化されていません。<br>
-          Supabase Storage導入後にこのセクションが有効になります。
-        </p>
+        <div class="toolbar">
+          <input type="text" id="image-search" placeholder="品種名で検索...">
+          <label style="display:flex;align-items:center;gap:4px;font-size:var(--font-size-sm);cursor:pointer;">
+            <input type="checkbox" id="image-flag-filter"> Fake票が多い画像のみ
+          </label>
+          <button class="btn btn-primary btn-sm" id="btn-refresh-images">更新</button>
+        </div>
+        <div id="image-stats" style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);"></div>
+        <div id="image-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--space-md);"></div>
       </section>
 
       <!-- ---- BULK OPERATIONS ---- -->
@@ -1100,6 +1105,94 @@ document.getElementById('btn-export').addEventListener('click', async function()
   a.click();
   URL.revokeObjectURL(url);
   toast('エクスポート完了');
+});
+
+// ========================================
+// IMAGE MANAGEMENT
+// ========================================
+var allImages = [];
+
+async function loadImages() {
+  var result = await sb.from('cultivar_images').select('*').order('created_at', { ascending: false });
+  if (result.error) { toast('画像取得エラー'); return; }
+  allImages = result.data || [];
+  renderImageGrid();
+}
+
+function getImageUrl(storagePath) {
+  return SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + storagePath;
+}
+
+function renderImageGrid() {
+  var grid = document.getElementById('image-grid');
+  var statsEl = document.getElementById('image-stats');
+  var search = (document.getElementById('image-search').value || '').toLowerCase().trim();
+  var flagOnly = document.getElementById('image-flag-filter').checked;
+
+  var filtered = allImages.filter(function(img) {
+    if (search && !(img.cultivar_name || '').toLowerCase().includes(search)) return false;
+    if (flagOnly && (img.fake_votes || 0) <= (img.real_votes || 0)) return false;
+    return true;
+  });
+
+  statsEl.textContent = filtered.length + ' / ' + allImages.length + ' 画像';
+  grid.innerHTML = '';
+
+  filtered.forEach(function(img) {
+    var card = document.createElement('div');
+    card.style.cssText = 'background:var(--color-white);border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--color-light);';
+    var fakeHigh = (img.fake_votes || 0) > (img.real_votes || 0);
+    card.innerHTML =
+      '<div style="position:relative;">' +
+        '<img src="' + getImageUrl(img.storage_path) + '" style="width:100%;height:160px;object-fit:cover;display:block;" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22160%22><rect fill=%22%23eee%22 width=%22200%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23999%22>Error</text></svg>\'">' +
+        (fakeHigh ? '<span style="position:absolute;top:4px;right:4px;background:#c62828;color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;">Fake多</span>' : '') +
+      '</div>' +
+      '<div style="padding:8px;font-size:var(--font-size-sm);">' +
+        '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(img.cultivar_name || '') + '">' + escapeHtml(img.cultivar_name || '不明') + '</div>' +
+        '<div style="display:flex;gap:8px;margin:4px 0;color:var(--color-gray);">' +
+          '<span>Real: ' + (img.real_votes || 0) + '</span>' +
+          '<span>Fake: ' + (img.fake_votes || 0) + '</span>' +
+        '</div>' +
+        '<div style="color:var(--color-gray);font-size:0.75rem;">' + (img.created_at ? new Date(img.created_at).toLocaleDateString('ja') : '') + '</div>' +
+        '<button class="btn btn-sm" style="margin-top:6px;color:#c62828;border-color:#c62828;width:100%;" data-delete-image="' + img.id + '" data-storage-path="' + escapeHtml(img.storage_path) + '">削除</button>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+}
+
+document.getElementById('btn-refresh-images').addEventListener('click', loadImages);
+document.getElementById('image-search').addEventListener('input', renderImageGrid);
+document.getElementById('image-flag-filter').addEventListener('change', renderImageGrid);
+
+// Delete image handler
+document.getElementById('image-grid').addEventListener('click', async function(e) {
+  var btn = e.target.closest('[data-delete-image]');
+  if (!btn) return;
+  var imageId = parseInt(btn.getAttribute('data-delete-image'));
+  var storagePath = btn.getAttribute('data-storage-path');
+  if (!confirm('この画像を削除しますか？')) return;
+
+  btn.disabled = true;
+  btn.textContent = '削除中...';
+  try {
+    await sb.storage.from('gallery-images').remove([storagePath]);
+    var res = await sb.from('cultivar_images').delete().eq('id', imageId);
+    if (res.error) throw res.error;
+    allImages = allImages.filter(function(img) { return img.id !== imageId; });
+    renderImageGrid();
+    toast('画像を削除しました');
+  } catch (err) {
+    toast('削除エラー: ' + (err.message || err));
+    btn.disabled = false;
+    btn.textContent = '削除';
+  }
+});
+
+// Load images when section is shown
+document.querySelectorAll('.admin-nav a').forEach(function(link) {
+  link.addEventListener('click', function() {
+    if (this.getAttribute('data-section') === 'images') loadImages();
+  });
 });
 </script>
 </body>
