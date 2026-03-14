@@ -354,7 +354,7 @@
         </div>
 
         <div class="text-center mt-lg">
-          <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="add_cultivar">+ 品種を追加</a>
+          <a href="#" class="btn btn--primary" data-nav="contribute" data-genus="Anthurium" data-i18n="add_cultivar">+ 品種を追加</a>
         </div>
         </div><!-- /species-clones view -->
 
@@ -370,7 +370,7 @@
           </div>
           <div class="pagination seedling-pagination"></div>
           <div class="text-center mt-lg">
-            <a href="#" class="btn btn--primary" data-nav="contribute" data-contribute-type="seedling">+ 実生を追加</a>
+            <a href="#" class="btn btn--primary" data-nav="contribute" data-genus="Anthurium" data-contribute-type="seedling">+ 実生を追加</a>
           </div>
         </div><!-- /seedlings view -->
 
@@ -503,7 +503,7 @@
         </div>
 
         <div class="text-center mt-lg">
-          <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="add_cultivar">+ 品種を追加</a>
+          <a href="#" class="btn btn--primary" data-nav="contribute" data-genus="Monstera" data-i18n="add_cultivar">+ 品種を追加</a>
         </div>
       </div>
 
@@ -650,7 +650,7 @@
         </div>
 
         <div class="text-center mt-lg">
-          <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="add_cultivar">+ 品種を追加</a>
+          <a href="#" class="btn btn--primary" data-nav="contribute" data-genus="Philodendron" data-i18n="add_cultivar">+ 品種を追加</a>
         </div>
       </div>
 
@@ -808,6 +808,7 @@
         <div class="form-group">
           <label class="form-label" data-i18n="label_genus">属</label>
           <select class="form-select">
+            <option value="" disabled selected data-i18n="select_genus_placeholder">-- 選択してください --</option>
             <option>Anthurium</option>
             <option>Monstera</option>
             <option>Philodendron</option>
@@ -2432,7 +2433,14 @@
           showGenus(genus);
         }
 
-        // Pre-select seedling type if coming from seedling tab
+        // Pre-select genus if coming from genus page, otherwise reset to placeholder
+        if (page === 'contribute') {
+          var genusSelect = document.querySelector('#page-contribute .form-select');
+          if (genusSelect) {
+            if (genus) { genusSelect.value = genus; } else { genusSelect.selectedIndex = 0; }
+            genusSelect.dispatchEvent(new Event('change'));
+          }
+        }
         if (page === 'contribute' && navEl.getAttribute('data-contribute-type') === 'seedling') {
           var seedlingRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="seedling"]');
           if (seedlingRadio) { seedlingRadio.checked = true; seedlingRadio.dispatchEvent(new Event('change')); }
@@ -2650,6 +2658,8 @@
       formula_label: { jp: '交配式: 不明', en: 'Formula: Unknown' },
       badge_species: { jp: '原種', en: 'Species' },
       submit_success: { jp: '品種が登録されました！', en: 'Cultivar registered successfully!' },
+      error_genus_required: { jp: '属を選択してください', en: 'Please select a genus' },
+      select_genus_placeholder: { jp: '-- 選択してください --', en: '-- Select --' },
       error_name_required: { jp: '品種名を入力してください', en: 'Please enter a cultivar name' },
       error_desc_required: { jp: '由来の説明を入力してください', en: 'Please enter an origin description' },
       error_duplicate: { jp: 'この品種は既に登録されています', en: 'This cultivar is already registered' },
@@ -3132,13 +3142,14 @@
       if (submitBtn) {
         submitBtn.addEventListener('click', function(e) {
           e.preventDefault();
-          var genus = contributeGenus ? contributeGenus.value : 'Anthurium';
+          var genus = contributeGenus ? contributeGenus.value : '';
           var name = contributeName ? contributeName.value.trim() : '';
           var type = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
           type = type ? type.value : 'species';
           var desc = contributeDesc ? contributeDesc.value.trim() : '';
 
           // Validation
+          if (!genus) { alert(t('error_genus_required')); return; }
           if (!name) { alert(t('error_name_required')); return; }
 
           // Build full name
