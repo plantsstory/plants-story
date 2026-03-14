@@ -674,6 +674,17 @@
   color: var(--color-gray);
 }
 
+/* Uploaded images: show full image without cropping */
+[data-user-upload] .gallery__img {
+  aspect-ratio: auto;
+}
+
+[data-user-upload] .gallery__img img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
 .gallery__actions {
   padding: var(--space-sm);
 }
