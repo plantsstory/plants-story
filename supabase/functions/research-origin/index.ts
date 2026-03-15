@@ -926,7 +926,7 @@ serve(async (req: Request) => {
         .eq("id", cultivar_id)
         .single();
       manualOrigins = (existingRow?.origins || []).filter(
-        (o: any) => o.source_type === "manual" || (o.author && o.author.isAI === false)
+        (o: any) => o.source_type === "manual" || (o.author && o.author.isAI === false && o.source_type !== "user_verified")
       );
       if (manualOrigins.length > 0) {
         console.log(`[Manual] Preserved ${manualOrigins.length} manual origins from DB`);

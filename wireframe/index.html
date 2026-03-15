@@ -4595,7 +4595,7 @@
         // Verification details (user_verified origins) - i18n version
         if (origin.source_type === 'user_verified' && origin.verification) {
           var v = origin.verification;
-          var vid = 'verify-detail-i18n-' + idx;
+          var vid = 'verify-detail-i18n-' + i;
           html += '<div class="verification-details">';
           html += '<button class="verification-toggle" onclick="var el=document.getElementById(\'' + vid + '\');el.style.display=el.style.display===\'none\'?\'block\':\'none\';">検証詳細</button>';
           html += '<div id="' + vid + '" style="display:none;margin-top:8px;">';
