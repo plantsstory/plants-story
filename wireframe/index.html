@@ -1902,32 +1902,20 @@
             originsData.push({ _type: 'formula', formula: entry.formula });
           }
 
-          // Use RPC if edit key is provided, otherwise use direct insert
-          var insertPromise;
-          if (editKey) {
-            insertPromise = supabase.rpc('insert_with_edit_key', {
-              p_genus: meta.genus,
-              p_cultivar_name: fullName,
-              p_type: meta.type || 'Hybrid',
-              p_origins: originsData,
-              p_edit_key: editKey,
-              p_ai_status: isSeedling ? null : 'pending'
-            }).then(function(res) {
-              if (res.error) throw new Error(res.error.message);
-              var result = res.data;
-              if (result && !result.success) throw new Error(result.error || 'Insert failed');
-              return { data: [{ id: result.id }] };
-            });
-          } else {
-            insertPromise = supabase.from('cultivars').insert({
+          // Hash edit key client-side if provided, then direct insert
+          var hashPromise = editKey ? sha256(editKey) : Promise.resolve(null);
+          var insertPromise = hashPromise.then(function(editKeyHash) {
+            var insertData = {
               genus: meta.genus,
               cultivar_name: fullName,
               type: meta.type || 'Hybrid',
               origins: originsData,
               votes: {},
               ai_status: isSeedling ? null : 'pending'
-            }).select();
-          }
+            };
+            if (editKeyHash) insertData.edit_key_hash = editKeyHash;
+            return supabase.from('cultivars').insert(insertData).select();
+          });
 
           return insertPromise.then(function(res) {
             if (res.error) {
@@ -3671,6 +3659,14 @@
           // Validation
           if (!genus) { showToast(t('error_genus_required'), true); return; }
           if (!name) { showToast(t('error_name_required'), true); return; }
+
+          // Edit key validation (must be exactly 4 digits or empty)
+          var editKeyInput = document.getElementById('edit-key-input');
+          var editKeyVal = editKeyInput ? editKeyInput.value.trim() : '';
+          if (editKeyVal && !/^[0-9]{4}$/.test(editKeyVal)) {
+            showToast('編集キーは4桁の数字で入力してください', true);
+            return;
+          }
 
           // Build full name
           var fullName;
