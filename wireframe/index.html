@@ -2617,6 +2617,12 @@
         }
       }
 
+      // Hide "add origin" section for seedlings
+      var addOriginSection = document.getElementById('add-origin-section');
+      if (addOriginSection) {
+        addOriginSection.style.display = (cData && cData._type === 'seedling') ? 'none' : '';
+      }
+
       // Render origins dynamically
       renderOrigins(cultivarName);
     }
