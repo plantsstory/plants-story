@@ -3479,7 +3479,7 @@
           creatorInput.value = (data.formula && data.formula.creatorName) || data._creatorName || '';
         }
 
-        // Pre-fill parent photos (show existing images in preview, click to replace)
+        // Pre-fill parent photos (show existing images in preview with × to remove)
         if (data.formula && type === 'seedling') {
           var _sb = window._supabaseClient;
           ['mother', 'father'].forEach(function(role) {
@@ -3489,11 +3489,22 @@
             var fileInput = document.getElementById(role + '-photo-input');
             if (photoPath && _sb && preview) {
               var url = _sb.storage.from('gallery-images').getPublicUrl(photoPath).data.publicUrl;
-              preview.innerHTML = '<img src="' + url + '" style="max-width:100%;max-height:120px;border-radius:var(--radius-md);cursor:pointer;" title="クリックで写真を変更">';
+              preview.innerHTML = '<div style="position:relative;display:inline-block;">' +
+                '<img src="' + url + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid var(--color-light);cursor:pointer;" title="クリックで写真を変更">' +
+                '<button class="parent-photo-remove" style="position:absolute;top:-6px;right:-6px;background:#dc3545;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;line-height:1;padding:0;">&times;</button>' +
+                '</div>';
               if (uploadArea) uploadArea.style.display = 'none';
-              // Click preview to replace photo
+              // Click image to replace
               preview.querySelector('img').addEventListener('click', function() {
                 if (fileInput) fileInput.click();
+              });
+              // Click × to remove
+              preview.querySelector('.parent-photo-remove').addEventListener('click', function(e) {
+                e.stopPropagation();
+                preview.innerHTML = '';
+                if (uploadArea) uploadArea.style.display = '';
+                if (role === 'mother') { motherPhotoFile = null; data.formula.motherPhoto = null; }
+                else { fatherPhotoFile = null; data.formula.fatherPhoto = null; }
               });
             }
           });
@@ -3513,7 +3524,7 @@
         }
         renderContributeSources();
 
-        // Pre-load existing gallery images as previews
+        // Pre-load existing gallery images as previews with × to delete
         var editDisplayName = key.replace(' [Seedling]', '');
         var _sbForGallery = window._supabaseClient;
         if (_sbForGallery) {
@@ -3530,8 +3541,31 @@
                 var url = _sbForGallery.storage.from('gallery-images').getPublicUrl(img.storage_path).data.publicUrl;
                 var item = document.createElement('div');
                 item.className = 'upload-preview__item';
-                item.innerHTML = '<img class="upload-preview__img" src="' + url + '" style="opacity:0.7;" title="登録済み画像（新しい画像を追加するにはアップロードエリアを使用）">';
+                item.setAttribute('data-image-id', img.id);
+                item.setAttribute('data-storage-path', img.storage_path);
+                item.innerHTML =
+                  '<img class="upload-preview__img" src="' + url + '" title="登録済み画像">' +
+                  '<button class="upload-preview__remove" data-image-id="' + img.id + '" data-storage-path="' + img.storage_path + '">&times;</button>';
                 previewEl.appendChild(item);
+              });
+              // Attach × handlers to delete from DB
+              previewEl.querySelectorAll('.upload-preview__remove').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                  e.stopPropagation();
+                  var imageId = this.getAttribute('data-image-id');
+                  var storagePath = this.getAttribute('data-storage-path');
+                  var itemEl = this.parentElement;
+                  if (!confirm('この画像を削除しますか？')) return;
+                  // Delete from Storage and DB
+                  _sbForGallery.storage.from('gallery-images').remove([storagePath]).then(function() {
+                    return _sbForGallery.from('cultivar_images').delete().eq('id', imageId);
+                  }).then(function() {
+                    itemEl.remove();
+                    showToast('画像を削除しました');
+                  }).catch(function(err) {
+                    showToast('画像削除エラー: ' + (err.message || err), true);
+                  });
+                });
               });
             });
         }
@@ -3764,11 +3798,21 @@
           if (parent === 'mother') motherPhotoFile = file; else fatherPhotoFile = file;
           var reader = new FileReader();
           reader.onload = function(e) {
-            preview.innerHTML = '<img src="' + e.target.result + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid var(--color-light);cursor:pointer;" title="クリックで画像を変更">';
+            preview.innerHTML = '<div style="position:relative;display:inline-block;">' +
+              '<img src="' + e.target.result + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid var(--color-light);cursor:pointer;" title="クリックで画像を変更">' +
+              '<button class="parent-photo-remove" style="position:absolute;top:-6px;right:-6px;background:#dc3545;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;line-height:1;padding:0;">&times;</button>' +
+              '</div>';
             uploadArea.style.display = 'none';
-            // Click preview image to re-select
+            // Click image to re-select
             preview.querySelector('img').addEventListener('click', function() {
               fileInput.click();
+            });
+            // Click × to remove
+            preview.querySelector('.parent-photo-remove').addEventListener('click', function(ev) {
+              ev.stopPropagation();
+              preview.innerHTML = '';
+              uploadArea.style.display = '';
+              if (parent === 'mother') motherPhotoFile = null; else fatherPhotoFile = null;
             });
           };
           reader.readAsDataURL(file);
