@@ -2637,7 +2637,9 @@
       var q = query.toLowerCase().trim();
       rows.forEach(function(row) {
         var name = row.querySelector('.cultivar-row__name');
-        if (!q || (name && name.textContent.toLowerCase().includes(q))) {
+        var nameMatch = name && name.textContent.toLowerCase().includes(q);
+        var creatorMatch = row.textContent.toLowerCase().includes(q);
+        if (!q || nameMatch || creatorMatch) {
           row.removeAttribute('data-filtered');
         } else {
           row.setAttribute('data-filtered', 'true');
