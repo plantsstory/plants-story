@@ -3842,54 +3842,104 @@
             submitBtn.disabled = true;
             submitBtn.style.opacity = '0.5';
 
-            // Build DB origins (include formula entry)
-            var dbOrigins = updatedOrigins.filter(function(o) { return o._type !== 'formula'; });
-            if (updatedFormula) {
-              dbOrigins.push({ _type: 'formula', formula: updatedFormula });
-            }
-
-            // Update in Supabase
             var sbClient = window._supabaseClient;
             var editKeyValue = verifiedEditKey || '';
             var nameChanged = fullName !== editCultivarKey;
-            var updatePromise;
+            var isSeedlingEdit = type === 'seedling';
 
-            if (sbClient && editKeyValue) {
-              // Edit key verified: hash client-side, then use RPC for full update
-              var encoder = new TextEncoder();
-              var keyData = encoder.encode(editKeyValue);
-              updatePromise = crypto.subtle.digest('SHA-256', keyData).then(function(buffer) {
-                var hashArray = Array.from(new Uint8Array(buffer));
-                var inputHash = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-                return sbClient.rpc('update_with_edit_key_hash', {
-                  p_cultivar_name: editCultivarKey,
-                  p_edit_key_hash: inputHash,
-                  p_new_cultivar_name: nameChanged ? fullName : null,
-                  p_new_genus: nameChanged ? genus : null,
-                  p_new_type: type,
-                  p_origins: dbOrigins
+            // --- Upload parent photos if changed (seedlings) ---
+            var editParentPhotoPromise;
+            if (isSeedlingEdit && sbClient && (motherPhotoFile || fatherPhotoFile)) {
+              var uploadParentPhoto = function(file, role) {
+                if (!file) return Promise.resolve(null);
+                var ext = file.name.split('.').pop();
+                var path = 'seedling-parents/' + fullName.replace(/[^a-zA-Z0-9]/g, '_') + '/' + role + '_' + Date.now() + '.' + ext;
+                return sbClient.storage.from('gallery-images').upload(path, file, { upsert: true }).then(function(res) {
+                  if (res.error) { console.warn('Parent photo upload error:', res.error); return null; }
+                  return path;
                 });
-              }).then(function(res) {
-                if (res.error) throw new Error(res.error.message);
-                var result = res.data;
-                if (result && !result.success) throw new Error(result.error || 'Update failed');
+              };
+              editParentPhotoPromise = Promise.all([
+                uploadParentPhoto(motherPhotoFile, 'mother'),
+                uploadParentPhoto(fatherPhotoFile, 'father')
+              ]).then(function(paths) {
+                if (!updatedFormula) updatedFormula = {};
+                if (paths[0]) updatedFormula.motherPhoto = paths[0];
+                if (paths[1]) updatedFormula.fatherPhoto = paths[1];
+              }).catch(function(err) {
+                console.warn('Parent photo upload failed:', err);
               });
-            } else if (sbClient) {
-              // No edit key: update only origins (current behavior)
-              if (nameChanged) {
-                return showToast('品種名を変更するには編集キーが必要です', true);
-              }
-              updatePromise = sbClient.from('cultivars')
-                .update({ origins: dbOrigins })
-                .eq('cultivar_name', editCultivarKey)
-                .then(function(res) {
-                  if (res.error) throw new Error(res.error.message);
-                });
             } else {
-              updatePromise = Promise.resolve();
+              editParentPhotoPromise = Promise.resolve();
             }
 
-            updatePromise.then(function() {
+            // --- Upload gallery images if added ---
+            var editGalleryFiles = typeof window.getContributeFiles === 'function' ? window.getContributeFiles() : [];
+            var editGalleryName = fullName.replace(' [Seedling]', '');
+
+            editParentPhotoPromise.then(function() {
+              // Build DB origins (include formula entry)
+              var dbOrigins = updatedOrigins.filter(function(o) { return o._type !== 'formula'; });
+              if (updatedFormula) {
+                dbOrigins.push({ _type: 'formula', formula: updatedFormula });
+              }
+
+              // Update in Supabase
+              var updatePromise;
+
+              if (sbClient && editKeyValue) {
+                // Edit key verified: hash client-side, then use RPC for full update
+                var encoder = new TextEncoder();
+                var keyData = encoder.encode(editKeyValue);
+                updatePromise = crypto.subtle.digest('SHA-256', keyData).then(function(buffer) {
+                  var hashArray = Array.from(new Uint8Array(buffer));
+                  var inputHash = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+                  return sbClient.rpc('update_with_edit_key_hash', {
+                    p_cultivar_name: editCultivarKey,
+                    p_edit_key_hash: inputHash,
+                    p_new_cultivar_name: nameChanged ? fullName : null,
+                    p_new_genus: nameChanged ? genus : null,
+                    p_new_type: type,
+                    p_origins: dbOrigins
+                  });
+                }).then(function(res) {
+                  if (res.error) throw new Error(res.error.message);
+                  var result = res.data;
+                  if (result && !result.success) throw new Error(result.error || 'Update failed');
+                });
+              } else if (sbClient) {
+                // No edit key: update only origins (current behavior)
+                if (nameChanged) {
+                  submitBtn.disabled = false;
+                  submitBtn.style.opacity = '';
+                  showToast('品種名を変更するには編集キーが必要です', true);
+                  return;
+                }
+                updatePromise = sbClient.from('cultivars')
+                  .update({ origins: dbOrigins })
+                  .eq('cultivar_name', editCultivarKey)
+                  .then(function(res) {
+                    if (res.error) throw new Error(res.error.message);
+                  });
+              } else {
+                updatePromise = Promise.resolve();
+              }
+
+              return updatePromise.then(function() {
+                // Upload gallery images if any
+                if (sbClient && editGalleryFiles.length > 0) {
+                  return Promise.all(editGalleryFiles.map(function(file) {
+                    var ext = file.name.split('.').pop();
+                    var path = 'cultivar-images/' + editGalleryName.replace(/[^a-zA-Z0-9]/g, '_') + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 6) + '.' + ext;
+                    return sbClient.storage.from('gallery-images').upload(path, file, { upsert: true }).then(function(res) {
+                      if (res.error) { console.warn('Gallery upload error:', res.error); return null; }
+                      return path;
+                    });
+                  }));
+                }
+                return Promise.resolve([]);
+              });
+            }).then(function() {
               // Update local data
               if (nameChanged) {
                 // Move data to new key
@@ -3906,6 +3956,12 @@
               }
               existingData.origins = updatedOrigins;
               if (updatedFormula) existingData.formula = updatedFormula;
+              // Update derived local fields
+              if (updatedFormula && updatedFormula.creatorName) {
+                existingData._creatorName = updatedFormula.creatorName;
+              } else {
+                existingData._creatorName = null;
+              }
 
               // Navigate back to cultivar detail
               var navKey = nameChanged ? fullName : editCultivarKey;
@@ -3919,6 +3975,7 @@
               window.exitEditMode();
               submitBtn.disabled = false;
               submitBtn.style.opacity = '';
+              motherPhotoFile = null; fatherPhotoFile = null;
               showToast('更新しました');
             }).catch(function(err) {
               submitBtn.disabled = false;
