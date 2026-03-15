@@ -1029,8 +1029,8 @@ function loadOrigins() {
   var totalOrigins = targets.reduce(function(s, c) { return s + (c.origins || []).length; }, 0);
   var html = '<p style="color:var(--color-gray);font-size:var(--font-size-sm);margin:var(--space-sm) 0;">' + targets.length + ' 品種 / ' + totalOrigins + ' 件の由来</p>';
   html += '<div style="overflow-x:auto;"><table class="data-table" style="margin-top:var(--space-sm);width:100%;table-layout:fixed;">';
-  html += '<colgroup><col style="width:22%"><col style="width:3%"><col style="width:10%"><col style="width:10%"><col style="width:25%"><col style="width:10%"><col style="width:10%"><col style="width:10%"></colgroup>';
-  html += '<thead><tr><th>品種</th><th>#</th><th>ソース</th><th>信頼度</th><th>本文</th><th>著者</th><th>投票</th><th>操作</th></tr></thead><tbody>';
+  html += '<colgroup><col style="width:25%"><col style="width:3%"><col style="width:12%"><col style="width:10%"><col style="width:25%"><col style="width:10%"><col style="width:15%"></colgroup>';
+  html += '<thead><tr><th>品種</th><th>#</th><th>ソース</th><th>信頼度</th><th>本文</th><th>著者</th><th>投票</th></tr></thead><tbody>';
 
   targets.forEach(function(c) {
     var origins = c.origins || [];
@@ -1051,12 +1051,18 @@ function loadOrigins() {
       var tColor = trustColor(trustPct);
 
       html += '<tr>';
+      html += '<td style="max-width:150px;font-size:var(--font-size-sm);vertical-align:top;border-right:2px solid var(--color-lighter);word-break:break-word;">';
       if (i === 0) {
-        html += '<td rowspan="' + origins.length + '" style="max-width:150px;font-weight:600;font-size:var(--font-size-sm);vertical-align:top;border-right:2px solid var(--color-lighter);word-break:break-word;">';
-        html += escapeHtml(c.cultivar_name);
-        html += '<br><button class="btn btn-outline btn-sm" style="margin-top:4px;font-size:0.7rem;" onclick="reresearchCultivar(' + c.id + ')" id="rr-btn-' + c.id + '">AI再調査</button>';
-        html += '</td>';
+        html += '<span style="font-weight:600;">' + escapeHtml(c.cultivar_name) + '</span>';
       }
+      html += '<div style="display:flex;gap:3px;margin-top:' + (i === 0 ? '4px' : '0') + ';flex-wrap:wrap;">';
+      if (i === 0) {
+        html += '<button class="btn btn-outline btn-sm" style="font-size:0.65rem;" onclick="reresearchCultivar(' + c.id + ')" id="rr-btn-' + c.id + '">AI再調査</button>';
+      }
+      html += '<button class="btn btn-outline btn-sm" style="font-size:0.65rem;" onclick="editOrigin(' + c.id + ',' + i + ')">編集</button>';
+      html += '<button class="btn btn-danger btn-sm" style="font-size:0.65rem;" onclick="deleteOrigin(' + c.id + ',' + i + ')">削除</button>';
+      html += '</div>';
+      html += '</td>';
       html += '<td>' + (i + 1) + '</td>';
       html += '<td>' + tierBadge(o.source_tier) + ' ' + escapeHtml(o.source_name || '-') + '</td>';
       html += '<td>';
@@ -1067,10 +1073,6 @@ function loadOrigins() {
       html += '<td>' + authorLabel + '</td>';
       var votes = o.votes || { agree: 0, disagree: 0 };
       html += '<td style="white-space:nowrap;font-size:var(--font-size-xs);">&#x1F44D; ' + (votes.agree || 0) + ' / &#x1F44E; ' + (votes.disagree || 0) + '</td>';
-      html += '<td class="actions">';
-      html += '<button class="btn btn-outline btn-sm" onclick="editOrigin(' + c.id + ',' + i + ')">編集</button> ';
-      html += '<button class="btn btn-danger btn-sm" onclick="deleteOrigin(' + c.id + ',' + i + ')">削除</button>';
-      html += '</td>';
       html += '</tr>';
     });
   });
