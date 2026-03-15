@@ -568,6 +568,32 @@ var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var allCultivars = [];
 var currentSession = null;
 
+// Compress image using Canvas API (preserves aspect ratio)
+function compressImage(file, maxLongSide, quality) {
+  maxLongSide = maxLongSide || 2048;
+  quality = quality || 0.8;
+  return new Promise(function(resolve, reject) {
+    var img = new Image();
+    img.onload = function() {
+      var w = img.width;
+      var h = img.height;
+      if (Math.max(w, h) > maxLongSide) {
+        if (w > h) { h = Math.round(h * maxLongSide / w); w = maxLongSide; }
+        else { w = Math.round(w * maxLongSide / h); h = maxLongSide; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob(function(blob) {
+        if (!blob) { reject(new Error('Compression failed')); return; }
+        resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = function() { reject(new Error('Failed to load image')); };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 // ========================================
 // Utility
 // ========================================
@@ -874,19 +900,19 @@ async function saveCultivar(id) {
       origins.forEach(function(o, i) { if (o && o._type === 'formula') { formula = o.formula; formulaIdx = i; } });
       if (!formula) formula = {};
 
-      // Upload photos
+      // Upload photos (with compression)
       var safeName = name.replace(/[^a-zA-Z0-9]/g, '_');
       if (motherFile) {
-        var ext = motherFile.name.split('.').pop();
-        var path = 'seedling-parents/' + safeName + '/mother_' + Date.now() + '.' + ext;
-        var res = await sb.storage.from('gallery-images').upload(path, motherFile, { upsert: true });
+        var compressed = await compressImage(motherFile);
+        var path = 'seedling-parents/' + safeName + '/mother_' + Date.now() + '.jpg';
+        var res = await sb.storage.from('gallery-images').upload(path, compressed, { contentType: 'image/jpeg', upsert: true });
         if (res.error) { toast('母株画像アップロードエラー: ' + res.error.message); return; }
         formula.motherPhoto = path;
       }
       if (fatherFile) {
-        var ext = fatherFile.name.split('.').pop();
-        var path = 'seedling-parents/' + safeName + '/father_' + Date.now() + '.' + ext;
-        var res = await sb.storage.from('gallery-images').upload(path, fatherFile, { upsert: true });
+        var compressed = await compressImage(fatherFile);
+        var path = 'seedling-parents/' + safeName + '/father_' + Date.now() + '.jpg';
+        var res = await sb.storage.from('gallery-images').upload(path, compressed, { contentType: 'image/jpeg', upsert: true });
         if (res.error) { toast('父株画像アップロードエラー: ' + res.error.message); return; }
         formula.fatherPhoto = path;
       }

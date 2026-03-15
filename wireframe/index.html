@@ -680,7 +680,7 @@
             <input type="file" id="gallery-file-input" accept="image/jpeg,image/png" style="display:none">
             <div class="upload-area__icon">&#x2B06;</div>
             <div class="upload-area__text" data-i18n="upload_image">画像をアップロード</div>
-            <div class="upload-area__hint">JPG/PNG, 5MB以下</div>
+            <div class="upload-area__hint">JPG/PNG, 20MB以下（自動圧縮）</div>
           </div>
         </div>
         <p class="text-xs text-gray mt-sm" data-i18n="image_policy">
@@ -914,7 +914,7 @@
           <input type="file" id="contribute-file-input" accept="image/jpeg,image/png" multiple style="display:none">
           <div class="upload-area__icon">&#x1F4F7;</div>
           <div class="upload-area__text" data-i18n="drag_drop">ドラッグ&ドロップ または クリック</div>
-          <div class="upload-area__hint">最大3枚, JPG/PNG, 各5MB以下</div>
+          <div class="upload-area__hint">最大3枚, JPG/PNG, 各20MB以下（自動圧縮）</div>
         </div>
         <div class="upload-preview" id="contribute-preview"></div>
       </div>
@@ -3180,7 +3180,7 @@
       ad_label: { jp: '広告', en: 'Advertisement' },
       donate_btn: { jp: '☕ サイトを応援する', en: '☕ Support This Site' },
       upload_error_type: { jp: 'JPGまたはPNG画像のみアップロードできます', en: 'Only JPG or PNG images can be uploaded' },
-      upload_error_size: { jp: 'ファイルサイズは5MB以下にしてください', en: 'File size must be 5MB or less' },
+      upload_error_size: { jp: 'ファイルサイズは20MB以下にしてください', en: 'File size must be 20MB or less' },
       upload_error_max: { jp: '最大3枚までアップロードできます', en: 'Maximum 3 images can be uploaded' },
       ai_pending_origin: { jp: 'AIによる由来情報の生成待ちです', en: 'Awaiting AI-generated origin information' },
       ai_pending_badge: { jp: 'AI生成待ち', en: 'AI Pending' },
@@ -3914,6 +3914,7 @@
         fileInput.addEventListener('change', function() {
           var file = this.files[0];
           if (!file) return;
+          if (file.size > 20 * 1024 * 1024) { showToast('ファイルサイズは20MB以下にしてください', true); this.value = ''; return; }
           if (parent === 'mother') motherPhotoFile = file; else fatherPhotoFile = file;
           var reader = new FileReader();
           reader.onload = function(e) {
@@ -4075,11 +4076,12 @@
             if (isSeedlingEdit && sbClient && (motherPhotoFile || fatherPhotoFile)) {
               var uploadParentPhoto = function(file, role) {
                 if (!file) return Promise.resolve(null);
-                var ext = file.name.split('.').pop();
-                var path = 'seedling-parents/' + fullName.replace(/[^a-zA-Z0-9]/g, '_') + '/' + role + '_' + Date.now() + '.' + ext;
-                return sbClient.storage.from('gallery-images').upload(path, file, { upsert: true }).then(function(res) {
-                  if (res.error) { console.warn('Parent photo upload error:', res.error); return null; }
-                  return path;
+                return window.compressImage(file).then(function(compressed) {
+                  var path = 'seedling-parents/' + fullName.replace(/[^a-zA-Z0-9]/g, '_') + '/' + role + '_' + Date.now() + '.jpg';
+                  return sbClient.storage.from('gallery-images').upload(path, compressed, { contentType: 'image/jpeg', upsert: true }).then(function(res) {
+                    if (res.error) { console.warn('Parent photo upload error:', res.error); return null; }
+                    return path;
+                  });
                 });
               };
               editParentPhotoPromise = Promise.all([
@@ -4367,11 +4369,12 @@
           if (isSeedling && sbClient && (motherPhotoFile || fatherPhotoFile)) {
             var uploadParentPhoto = function(file, role) {
               if (!file) return Promise.resolve(null);
-              var ext = file.name.split('.').pop();
-              var path = 'seedling-parents/' + fullName.replace(/[^a-zA-Z0-9]/g, '_') + '/' + role + '_' + Date.now() + '.' + ext;
-              return sbClient.storage.from('gallery-images').upload(path, file, { upsert: true }).then(function(res) {
-                if (res.error) { console.warn('Parent photo upload error:', res.error); return null; }
-                return path;
+              return window.compressImage(file).then(function(compressed) {
+                var path = 'seedling-parents/' + fullName.replace(/[^a-zA-Z0-9]/g, '_') + '/' + role + '_' + Date.now() + '.jpg';
+                return sbClient.storage.from('gallery-images').upload(path, compressed, { contentType: 'image/jpeg', upsert: true }).then(function(res) {
+                  if (res.error) { console.warn('Parent photo upload error:', res.error); return null; }
+                  return path;
+                });
               });
             };
             photoUploadPromise = Promise.all([
@@ -4856,7 +4859,7 @@
     // IMAGE UPLOAD
     // ========================================
     (function() {
-      var MAX_SIZE = 5 * 1024 * 1024; // 5MB
+      var MAX_SIZE = 20 * 1024 * 1024; // 20MB
       var ALLOWED_TYPES = ['image/jpeg', 'image/png'];
       var GALLERY_STORAGE_KEY = 'plants-story-gallery-images';
       var VOTE_STORAGE_KEY = 'plants-story-image-votes';
@@ -4864,6 +4867,41 @@
 
       function getSupabase() { return window._supabaseClient || null; }
       function getSupabaseUrl() { return window._SUPABASE_URL || ''; }
+
+      // Compress image using Canvas API (preserves aspect ratio)
+      function compressImage(file, maxLongSide, quality) {
+        maxLongSide = maxLongSide || 2048;
+        quality = quality || 0.8;
+        return new Promise(function(resolve, reject) {
+          var img = new Image();
+          img.onload = function() {
+            var w = img.width;
+            var h = img.height;
+            // Resize if longer side exceeds maxLongSide
+            if (Math.max(w, h) > maxLongSide) {
+              if (w > h) {
+                h = Math.round(h * maxLongSide / w);
+                w = maxLongSide;
+              } else {
+                w = Math.round(w * maxLongSide / h);
+                h = maxLongSide;
+              }
+            }
+            var canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            canvas.toBlob(function(blob) {
+              if (!blob) { reject(new Error('Compression failed')); return; }
+              resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
+            }, 'image/jpeg', quality);
+          };
+          img.onerror = function() { reject(new Error('Failed to load image')); };
+          img.src = URL.createObjectURL(file);
+        });
+      }
+      window.compressImage = compressImage; // Expose for parent photo uploads
 
       function validateFile(file) {
         if (ALLOWED_TYPES.indexOf(file.type) === -1) {
@@ -4922,19 +4960,21 @@
         var sb = getSupabase();
         if (!sb) return Promise.reject('No Supabase');
         var safeName = cultivarName.replace(/[^a-zA-Z0-9_' -]/g, '_');
-        var ext = file.name.split('.').pop();
-        var path = safeName + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
-        return sb.storage.from(BUCKET_NAME).upload(path, file, {
-          contentType: file.type,
-          upsert: false
-        }).then(function(res) {
-          if (res.error) throw res.error;
-          return sb.from('cultivar_images').insert({
-            cultivar_name: cultivarName,
-            storage_path: path
-          }).select().then(function(dbRes) {
-            if (dbRes.error) throw dbRes.error;
-            return dbRes.data[0];
+        return compressImage(file).then(function(compressed) {
+          var ext = 'jpg';
+          var path = safeName + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+          return sb.storage.from(BUCKET_NAME).upload(path, compressed, {
+            contentType: 'image/jpeg',
+            upsert: false
+          }).then(function(res) {
+            if (res.error) throw res.error;
+            return sb.from('cultivar_images').insert({
+              cultivar_name: cultivarName,
+              storage_path: path
+            }).select().then(function(dbRes) {
+              if (dbRes.error) throw dbRes.error;
+              return dbRes.data[0];
+            });
           });
         });
       }
