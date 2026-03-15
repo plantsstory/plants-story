@@ -3479,6 +3479,21 @@
           creatorInput.value = (data.formula && data.formula.creatorName) || data._creatorName || '';
         }
 
+        // Pre-fill parent photos (show existing images in preview)
+        if (data.formula && type === 'seedling') {
+          var _sb = window._supabaseClient;
+          ['mother', 'father'].forEach(function(role) {
+            var photoPath = role === 'mother' ? data.formula.motherPhoto : data.formula.fatherPhoto;
+            var preview = document.getElementById(role + '-preview');
+            var uploadArea = document.getElementById(role + '-upload');
+            if (photoPath && _sb && preview) {
+              var url = _sb.storage.from('gallery-images').getPublicUrl(photoPath).data.publicUrl;
+              preview.innerHTML = '<img src="' + url + '" style="max-width:100%;max-height:120px;border-radius:var(--radius-md);">';
+              if (uploadArea) uploadArea.style.display = 'none';
+            }
+          });
+        }
+
         // Pre-fill sources from first non-formula origin
         contributeSources = [];
         if (data.origins) {
