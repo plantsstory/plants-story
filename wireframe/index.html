@@ -3479,17 +3479,22 @@
           creatorInput.value = (data.formula && data.formula.creatorName) || data._creatorName || '';
         }
 
-        // Pre-fill parent photos (show existing images in preview)
+        // Pre-fill parent photos (show existing images in preview, click to replace)
         if (data.formula && type === 'seedling') {
           var _sb = window._supabaseClient;
           ['mother', 'father'].forEach(function(role) {
             var photoPath = role === 'mother' ? data.formula.motherPhoto : data.formula.fatherPhoto;
             var preview = document.getElementById(role + '-preview');
             var uploadArea = document.getElementById(role + '-upload');
+            var fileInput = document.getElementById(role + '-photo-input');
             if (photoPath && _sb && preview) {
               var url = _sb.storage.from('gallery-images').getPublicUrl(photoPath).data.publicUrl;
-              preview.innerHTML = '<img src="' + url + '" style="max-width:100%;max-height:120px;border-radius:var(--radius-md);">';
+              preview.innerHTML = '<img src="' + url + '" style="max-width:100%;max-height:120px;border-radius:var(--radius-md);cursor:pointer;" title="クリックで写真を変更">';
               if (uploadArea) uploadArea.style.display = 'none';
+              // Click preview to replace photo
+              preview.querySelector('img').addEventListener('click', function() {
+                if (fileInput) fileInput.click();
+              });
             }
           });
         }
@@ -3507,6 +3512,29 @@
           }
         }
         renderContributeSources();
+
+        // Pre-load existing gallery images as previews
+        var editDisplayName = key.replace(' [Seedling]', '');
+        var _sbForGallery = window._supabaseClient;
+        if (_sbForGallery) {
+          _sbForGallery.from('cultivar_images')
+            .select('id, storage_path')
+            .eq('cultivar_name', editDisplayName)
+            .order('created_at', { ascending: true })
+            .then(function(res) {
+              if (res.error || !res.data || res.data.length === 0) return;
+              var previewEl = document.getElementById('contribute-preview');
+              if (!previewEl) return;
+              previewEl.innerHTML = '';
+              res.data.forEach(function(img) {
+                var url = _sbForGallery.storage.from('gallery-images').getPublicUrl(img.storage_path).data.publicUrl;
+                var item = document.createElement('div');
+                item.className = 'upload-preview__item';
+                item.innerHTML = '<img class="upload-preview__img" src="' + url + '" style="opacity:0.7;" title="登録済み画像（新しい画像を追加するにはアップロードエリアを使用）">';
+                previewEl.appendChild(item);
+              });
+            });
+        }
 
         // Hide duplicate alert
         if (duplicateAlert) duplicateAlert.style.display = 'none';
@@ -3568,6 +3596,23 @@
         contributeSources = [];
         renderContributeSources();
         if (duplicateAlert) duplicateAlert.style.display = 'none';
+
+        // Reset parent photo previews
+        ['mother', 'father'].forEach(function(role) {
+          var preview = document.getElementById(role + '-preview');
+          var uploadArea = document.getElementById(role + '-upload');
+          if (preview) preview.innerHTML = '';
+          if (uploadArea) uploadArea.style.display = '';
+        });
+
+        // Reset gallery preview
+        var contributePreviewEl = document.getElementById('contribute-preview');
+        if (contributePreviewEl) contributePreviewEl.innerHTML = '';
+        if (typeof window.resetContributeImages === 'function') window.resetContributeImages();
+
+        // Reset creator name
+        var creatorInput = document.getElementById('creator-name-input');
+        if (creatorInput) creatorInput.value = '';
 
         // Hide delete button
         var editDeleteBtn = document.getElementById('edit-delete-btn');
