@@ -37,6 +37,7 @@
         <a href="#" data-nav="genus" data-genus="philodendron" data-i18n="nav_philodendron">Philodendron</a>
       </nav>
       <div class="header__actions">
+        <a href="#" data-nav="favorites" style="font-size:1.3rem;text-decoration:none;color:var(--color-gray);line-height:1;" title="お気に入り">&#x2661;</a>
         <button class="header__lang" data-i18n="lang_toggle">EN / JP</button>
         <button class="header__hamburger" id="hamburger" aria-label="Menu">
           <span></span><span></span><span></span>
@@ -52,6 +53,7 @@
     <a href="#" data-nav="genus" data-genus="monstera">Monstera</a>
     <a href="#" data-nav="genus" data-genus="philodendron">Philodendron</a>
     <a href="#" data-nav="search" data-i18n="nav_search">Search</a>
+    <a href="#" data-nav="favorites" data-i18n="nav_favorites">&#x2661; お気に入り</a>
   </div>
 
   <!-- ========================================
@@ -637,7 +639,10 @@
       <!-- Cultivar Header -->
       <div class="flex flex-between flex-align-center flex-wrap gap-md mb-lg">
         <div>
-          <h1 style="font-size:var(--font-size-2xl);">Anthurium crystallinum</h1>
+          <div class="flex gap-sm flex-align-center">
+            <h1 style="font-size:var(--font-size-2xl);">Anthurium crystallinum</h1>
+            <button id="fav-btn" style="background:none;border:none;font-size:1.6rem;cursor:pointer;padding:4px;line-height:1;color:var(--color-gray);" title="お気に入り">&#x2661;</button>
+          </div>
           <div class="flex gap-sm mt-sm flex-align-center">
             <span class="badge badge--species">原種 / Original Species</span>
             <span class="text-sm text-muted">Anthurium</span>
@@ -1247,6 +1252,17 @@
     </div>
   </section>
 
+  <!-- ========================================
+       PAGE: FAVORITES
+       ======================================== -->
+  <section id="page-favorites" class="page">
+    <div class="container">
+      <h1 class="section-title" data-i18n="favorites_title">お気に入り</h1>
+      <p class="text-muted mb-lg" data-i18n="favorites_desc">ブックマークした品種の一覧です。</p>
+      <div id="favorites-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-md);"></div>
+    </div>
+  </section>
+
   <footer class="footer">
     <div class="container footer__inner">
       <div class="footer__donate">
@@ -1304,7 +1320,7 @@
 
     // ---- Hash-based routing (History API) ----
     // Known simple pages (no sub-parameters)
-    var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact'];
+    var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'favorites'];
     // Known genus names for URL mapping
     var knownGenera = ['anthurium', 'monstera', 'philodendron'];
 
@@ -1354,6 +1370,7 @@
       if (page === 'contribute' && typeof window.exitEditMode === 'function') {
         window.exitEditMode();
       }
+      if (page === 'favorites') renderFavoritesPage();
       if (page === 'genus' && options.genus) showGenus(options.genus);
       if (page === 'cultivar' && options.cultivar && !options._skipUpdate) {
         // Find the cultivar row to pass badge info (used by popstate)
@@ -2338,6 +2355,144 @@
     }
     window.loadCultivarThumbnails = loadCultivarThumbnails;
 
+    // ---- Favorites (localStorage-based bookmarks) ----
+    var FAV_KEY = 'plants-story-favorites';
+
+    function getFavorites() {
+      try { return JSON.parse(localStorage.getItem(FAV_KEY) || '{}'); } catch(e) { return {}; }
+    }
+
+    function isFavorite(name) {
+      return !!getFavorites()[name];
+    }
+
+    function toggleFavorite(name) {
+      var favs = getFavorites();
+      var added;
+      if (favs[name]) {
+        delete favs[name];
+        added = false;
+      } else {
+        favs[name] = Date.now();
+        added = true;
+      }
+      localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+      updateFavBtn(name);
+      updateHeaderFavIcon();
+      return added;
+    }
+
+    function updateFavBtn(name) {
+      var btn = document.getElementById('fav-btn');
+      if (!btn) return;
+      var fav = isFavorite(name);
+      btn.innerHTML = fav ? '&#x2665;' : '&#x2661;';
+      btn.style.color = fav ? '#dc3545' : 'var(--color-gray)';
+    }
+
+    function updateHeaderFavIcon() {
+      var headerFav = document.querySelector('.header__actions [data-nav="favorites"]');
+      if (!headerFav) return;
+      var count = Object.keys(getFavorites()).length;
+      headerFav.innerHTML = count > 0 ? '&#x2665;' : '&#x2661;';
+      headerFav.style.color = count > 0 ? '#dc3545' : 'var(--color-gray)';
+    }
+
+    // Fav button click handler
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('#fav-btn');
+      if (!btn) return;
+      var h1 = document.querySelector('#page-cultivar h1');
+      if (!h1) return;
+      var name = h1.textContent;
+      var added = toggleFavorite(name);
+      showToast(t(added ? 'favorites_added' : 'favorites_removed'));
+    });
+
+    // Render favorites page
+    function renderFavoritesPage() {
+      var grid = document.getElementById('favorites-grid');
+      if (!grid) return;
+      var favs = getFavorites();
+      var names = Object.keys(favs).sort(function(a, b) { return favs[b] - favs[a]; });
+
+      if (names.length === 0) {
+        grid.innerHTML = '<div class="text-center text-muted" style="grid-column:1/-1;padding:var(--space-xl);">' + t('favorites_empty') + '</div>';
+        return;
+      }
+
+      var sb = window._supabaseClient;
+      var baseUrl = window._SUPABASE_URL;
+
+      // Get thumbnails for favorites
+      var thumbPromise;
+      if (sb) {
+        thumbPromise = sb.from('cultivar_images').select('cultivar_name, storage_path').then(function(res) {
+          var map = {};
+          if (res.data) res.data.forEach(function(img) { if (!map[img.cultivar_name]) map[img.cultivar_name] = img.storage_path; });
+          return map;
+        });
+      } else {
+        thumbPromise = Promise.resolve({});
+      }
+
+      thumbPromise.then(function(thumbMap) {
+        var html = '';
+        names.forEach(function(name) {
+          var cData = cultivarData[name] || cultivarData[name + ' [Seedling]'];
+          if (!cData) return;
+          var displayName = name.replace(' [Seedling]', '');
+          var genus = displayName.split(' ')[0];
+          var type = cData._type || 'species';
+          var badgeClass = type === 'species' ? 'badge--species' : (type === 'hybrid' ? 'badge--hybrid' : (type === 'clone' ? 'badge--clone' : 'badge--seedling'));
+          var badgeText = type === 'species' ? t('badge_species') : (type === 'hybrid' ? 'Hybrid' : (type === 'clone' ? 'Clone' : 'Seedling'));
+          var hasOrigins = cData.origins && cData.origins.length > 0 && cData.origins[0].trust > 0;
+          var trustPct = hasOrigins ? cData.origins.reduce(function(max, o) { return Math.max(max, o.trust || 0); }, 0) : 0;
+          var trustClass = trustPct >= 70 ? 'trust--high' : (trustPct >= 40 ? 'trust--mid' : 'trust--low');
+
+          html += '<div class="card card--clickable" data-nav="cultivar" style="position:relative;">';
+
+          // Thumbnail or plant icon
+          if (thumbMap[displayName] && baseUrl) {
+            var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
+            html += '<div style="height:120px;overflow:hidden;border-radius:var(--radius-md) var(--radius-md) 0 0;"><img src="' + url + '" style="width:100%;height:100%;object-fit:cover;" alt="" loading="lazy"></div>';
+          } else {
+            html += '<div class="recent-card__img">';
+            html += '<svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
+            html += '</div>';
+          }
+
+          html += '<div style="padding:var(--space-sm);">';
+          html += '<div class="font-bold">' + displayName + '</div>';
+          html += '<div class="text-sm text-muted">' + genus + ' <span class="badge ' + badgeClass + '" style="font-size:0.65rem;padding:1px 6px;">' + badgeText + '</span></div>';
+          if (hasOrigins) {
+            html += '<div class="trust mt-sm"><div class="trust__bar"><div class="trust__fill ' + trustClass + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + trustPct + '%</span></div>';
+          }
+          html += '</div>';
+
+          // Remove button
+          html += '<button class="fav-remove-btn" data-fav-remove="' + name.replace(/"/g, '&quot;') + '" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:28px;height:28px;font-size:1.1rem;color:#dc3545;cursor:pointer;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.15);">&#x2665;</button>';
+
+          html += '</div>';
+        });
+        grid.innerHTML = html || '<div class="text-center text-muted" style="grid-column:1/-1;padding:var(--space-xl);">' + t('favorites_empty') + '</div>';
+      });
+    }
+
+    // Remove from favorites page
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-fav-remove]');
+      if (!btn) return;
+      e.stopPropagation();
+      var name = btn.getAttribute('data-fav-remove');
+      toggleFavorite(name);
+      showToast(t('favorites_removed'));
+      renderFavoritesPage();
+    });
+
+    // Initialize header fav icon on load
+    setTimeout(updateHeaderFavIcon, 500);
+
     // ---- Render origin cards from data ----
     function renderOrigins(cultivarName) {
       var container = document.getElementById('origins-container');
@@ -2586,6 +2741,9 @@
       // Update title
       var h1 = detailPage.querySelector('h1');
       if (h1) h1.textContent = cultivarName.replace(' [Seedling]', '');
+
+      // Update favorite button
+      updateFavBtn(cultivarName.replace(' [Seedling]', ''));
 
       // Update badge
       var detailBadge = detailPage.querySelector('.badge');
@@ -3080,6 +3238,12 @@
       nav_philodendron: { jp: 'Philodendron', en: 'Philodendron' },
       nav_home: { jp: 'Home', en: 'Home' },
       nav_search: { jp: 'Search', en: 'Search' },
+      nav_favorites: { jp: '&#x2661; お気に入り', en: '&#x2661; Favorites' },
+      favorites_title: { jp: 'お気に入り', en: 'Favorites' },
+      favorites_desc: { jp: 'ブックマークした品種の一覧です。', en: 'Your bookmarked cultivars.' },
+      favorites_empty: { jp: 'お気に入りはまだありません。品種ページの♡ボタンで追加できます。', en: 'No favorites yet. Tap the ♡ button on a cultivar page to add one.' },
+      favorites_added: { jp: 'お気に入りに追加しました', en: 'Added to favorites' },
+      favorites_removed: { jp: 'お気に入りから削除しました', en: 'Removed from favorites' },
       hero_title: { jp: 'Plants Story', en: 'Plants Story' },
       hero_subtitle: { jp: '植物の原種・ハイブリッドの由来を知る', en: 'Know the origins of plant species and hybrids' },
       browse_genus: { jp: '属から探す', en: 'Browse by Genus' },
