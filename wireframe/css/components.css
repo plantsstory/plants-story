@@ -126,6 +126,15 @@
   text-decoration: none;
 }
 
+/* PC: menu slides in from right, 25% width */
+@media (min-width: 768px) {
+  .mobile-nav {
+    left: auto;
+    width: 25%;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
 /* Hamburger always visible, nav links moved to mobile menu */
 
 /* ========================================
