@@ -3548,15 +3548,12 @@
           var result = res.data;
           if (result && !result.success) throw new Error(result.error || 'Failed');
 
-          // Remove from local data
-          delete cultivarData[editCultivarKey];
           // Remove DOM row
           var rows = document.querySelectorAll('.cultivar-row');
           rows.forEach(function(row) {
             var nameEl = row.querySelector('.cultivar-row__name');
             if (nameEl && nameEl.getAttribute('data-key') === editCultivarKey) row.remove();
           });
-          refreshGenusUI();
           window.exitEditMode();
           navigateTo('top');
           showToast('品種を削除しました');
