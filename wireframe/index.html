@@ -2529,8 +2529,8 @@
         html += '<span class="text-gray">' + (origin.author ? origin.author.date : '') + '</span>';
         html += '</div>';
         html += '<div class="vote-group">';
-        html += '<button class="vote-btn vote-btn--agree">&#x1F44D; 賛成 <span class="vote-btn__count">' + (origin.votes ? origin.votes.agree : 0) + '</span></button>';
-        html += '<button class="vote-btn vote-btn--disagree">&#x1F44E; 反対 <span class="vote-btn__count">' + (origin.votes ? origin.votes.disagree : 0) + '</span></button>';
+        html += '<button class="vote-btn vote-btn--agree" data-origin-idx="' + i + '">&#x1F44D; 賛成 <span class="vote-btn__count">' + (origin.votes ? origin.votes.agree : 0) + '</span></button>';
+        html += '<button class="vote-btn vote-btn--disagree" data-origin-idx="' + i + '">&#x1F44E; 反対 <span class="vote-btn__count">' + (origin.votes ? origin.votes.disagree : 0) + '</span></button>';
         html += '</div>';
         html += '</div>';
 
@@ -2970,11 +2970,48 @@
       });
     });
 
-    // Vote button toggle (demo)
-    document.querySelectorAll('.vote-btn, .auth-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        this.classList.toggle('voted');
-      });
+    // Vote button handler (persists to Supabase)
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.vote-btn');
+      if (!btn) return;
+      var sb = window._supabaseClient;
+      if (!sb) return;
+      var originIdx = parseInt(btn.getAttribute('data-origin-idx'));
+      if (isNaN(originIdx)) return;
+      var h1 = document.querySelector('#page-cultivar h1');
+      if (!h1) return;
+      var cultivarName = h1.textContent;
+      var isAgree = btn.classList.contains('vote-btn--agree');
+      var voteType = isAgree ? 'agree' : 'disagree';
+
+      // Check localStorage to prevent double voting
+      var voteKey = 'vote_' + cultivarName + '_' + originIdx + '_' + voteType;
+      if (localStorage.getItem(voteKey)) {
+        showToast('既に投票済みです', true);
+        return;
+      }
+
+      btn.disabled = true;
+      sb.from('cultivars').select('origins').eq('cultivar_name', cultivarName).single().then(function(res) {
+        if (res.error || !res.data || !res.data.origins) { btn.disabled = false; return; }
+        var origins = res.data.origins;
+        if (!origins[originIdx]) { btn.disabled = false; return; }
+        if (!origins[originIdx].votes) origins[originIdx].votes = { agree: 0, disagree: 0 };
+        origins[originIdx].votes[voteType] = (origins[originIdx].votes[voteType] || 0) + 1;
+        return sb.from('cultivars').update({ origins: origins }).eq('cultivar_name', cultivarName);
+      }).then(function(res) {
+        if (res && res.error) { btn.disabled = false; showToast('投票に失敗しました', true); return; }
+        localStorage.setItem(voteKey, '1');
+        btn.classList.add('voted');
+        var countEl = btn.querySelector('.vote-btn__count');
+        if (countEl) countEl.textContent = parseInt(countEl.textContent) + 1;
+        // Update in-memory data
+        if (cultivarData[cultivarName] && cultivarData[cultivarName].origins && cultivarData[cultivarName].origins[originIdx]) {
+          if (!cultivarData[cultivarName].origins[originIdx].votes) cultivarData[cultivarName].origins[originIdx].votes = { agree: 0, disagree: 0 };
+          cultivarData[cultivarName].origins[originIdx].votes[voteType]++;
+        }
+        btn.disabled = false;
+      }).catch(function() { btn.disabled = false; });
     });
 
     // Add origin form toggle
@@ -4634,8 +4671,8 @@
         html += '<span class="text-gray">' + (origin.author ? origin.author.date : '') + '</span>';
         html += '</div>';
         html += '<div class="vote-group">';
-        html += '<button class="vote-btn vote-btn--agree">&#x1F44D; ' + t('vote_agree') + ' <span class="vote-btn__count">' + (origin.votes ? origin.votes.agree : 0) + '</span></button>';
-        html += '<button class="vote-btn vote-btn--disagree">&#x1F44E; ' + t('vote_disagree') + ' <span class="vote-btn__count">' + (origin.votes ? origin.votes.disagree : 0) + '</span></button>';
+        html += '<button class="vote-btn vote-btn--agree" data-origin-idx="' + i + '">&#x1F44D; ' + t('vote_agree') + ' <span class="vote-btn__count">' + (origin.votes ? origin.votes.agree : 0) + '</span></button>';
+        html += '<button class="vote-btn vote-btn--disagree" data-origin-idx="' + i + '">&#x1F44E; ' + t('vote_disagree') + ' <span class="vote-btn__count">' + (origin.votes ? origin.votes.disagree : 0) + '</span></button>';
         html += '</div>';
         html += '</div>';
         html += '</div>';

@@ -1005,7 +1005,7 @@ function loadOrigins() {
   var totalOrigins = targets.reduce(function(s, c) { return s + (c.origins || []).length; }, 0);
   var html = '<p style="color:var(--color-gray);font-size:var(--font-size-sm);margin:var(--space-sm) 0;">' + targets.length + ' 品種 / ' + totalOrigins + ' 件の由来</p>';
   html += '<table class="data-table" style="margin-top:var(--space-sm);">';
-  html += '<thead><tr><th>品種</th><th>#</th><th>ソース</th><th>信頼度</th><th>本文</th><th>著者</th><th>操作</th></tr></thead><tbody>';
+  html += '<thead><tr><th>品種</th><th>#</th><th>ソース</th><th>信頼度</th><th>本文</th><th>著者</th><th>投票</th><th>操作</th></tr></thead><tbody>';
 
   targets.forEach(function(c) {
     var origins = c.origins || [];
@@ -1040,6 +1040,8 @@ function loadOrigins() {
       html += '</td>';
       html += '<td style="max-width:250px;font-size:var(--font-size-xs);">' + escapeHtml(bodyShort) + '</td>';
       html += '<td>' + authorLabel + '</td>';
+      var votes = o.votes || { agree: 0, disagree: 0 };
+      html += '<td style="white-space:nowrap;font-size:var(--font-size-xs);">&#x1F44D; ' + (votes.agree || 0) + ' / &#x1F44E; ' + (votes.disagree || 0) + '</td>';
       html += '<td class="actions">';
       html += '<button class="btn btn-outline btn-sm" onclick="editOrigin(' + c.id + ',' + i + ')">編集</button> ';
       html += '<button class="btn btn-danger btn-sm" onclick="deleteOrigin(' + c.id + ',' + i + ')">削除</button>';
