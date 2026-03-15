@@ -116,40 +116,8 @@
       <!-- Recently Added -->
       <div class="mt-2xl">
         <h2 class="section-title" data-i18n="recently_added">最近追加された品種</h2>
-        <div class="grid grid--3">
-          <div class="card card--clickable" data-nav="cultivar">
-            <div class="recent-card__img">
-              <svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>
-            </div>
-            <div class="font-bold">Anthurium warocqueanum</div>
-            <div class="text-sm text-muted">Anthurium</div>
-            <div class="trust mt-sm">
-              <div class="trust__bar"><div class="trust__fill trust--high" style="width:92%"></div></div>
-              <span class="trust__label">92%</span>
-            </div>
-          </div>
-          <div class="card card--clickable" data-nav="cultivar">
-            <div class="recent-card__img">
-              <svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 4C20 4 8 18 8 36C8 52 22 58 40 58C58 58 72 52 72 36C72 18 60 4 40 4Z" fill="#40916C" opacity="0.3"/><ellipse cx="28" cy="28" rx="6" ry="8" fill="#F5F7F2" opacity="0.6"/><ellipse cx="52" cy="30" rx="5" ry="7" fill="#F5F7F2" opacity="0.6"/></svg>
-            </div>
-            <div class="font-bold">Monstera deliciosa</div>
-            <div class="text-sm text-muted">Monstera</div>
-            <div class="trust mt-sm">
-              <div class="trust__bar"><div class="trust__fill trust--high" style="width:87%"></div></div>
-              <span class="trust__label">87%</span>
-            </div>
-          </div>
-          <div class="card card--clickable" data-nav="cultivar">
-            <div class="recent-card__img">
-              <svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 4C25 4 12 16 14 35C16 52 30 58 40 58C50 58 64 52 66 35C68 16 55 4 40 4Z" fill="#52B788" opacity="0.25"/><path d="M40 4V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.3"/></svg>
-            </div>
-            <div class="font-bold">Philodendron gloriosum</div>
-            <div class="text-sm text-muted">Philodendron</div>
-            <div class="trust mt-sm">
-              <div class="trust__bar"><div class="trust__fill trust--high" style="width:74%"></div></div>
-              <span class="trust__label">74%</span>
-            </div>
-          </div>
+        <div class="grid grid--3" id="recently-added-grid">
+          <div class="text-center text-muted" style="grid-column:1/-1;padding:var(--space-xl);">読み込み中...</div>
         </div>
       </div>
 
@@ -2198,6 +2166,48 @@
         });
       }
 
+      // Populate "Recently Added" on home page from cultivarData
+      function refreshRecentlyAdded() {
+        var grid = document.getElementById('recently-added-grid');
+        if (!grid) return;
+        var items = Object.keys(cultivarData).map(function(name) {
+          var d = cultivarData[name];
+          return { name: name, created_at: d._created_at || '', type: d._type || '', origins: d.origins || [] };
+        }).filter(function(item) {
+          return item.type !== 'seedling';
+        }).sort(function(a, b) {
+          return (b.created_at || '').localeCompare(a.created_at || '');
+        }).slice(0, 6);
+
+        if (items.length === 0) {
+          grid.innerHTML = '<div class="text-center text-muted" style="grid-column:1/-1;padding:var(--space-xl);">まだ品種が登録されていません。</div>';
+          return;
+        }
+
+        var html = '';
+        items.forEach(function(item) {
+          var displayName = item.name.replace(' [Seedling]', '');
+          var genus = displayName.split(' ')[0];
+          var hasOrigins = item.origins.length > 0 && item.origins[0].trust > 0;
+          var trustPct = hasOrigins ? item.origins.reduce(function(max, o) { return Math.max(max, o.trust || 0); }, 0) : 0;
+          var trustClass = trustPct >= 70 ? 'trust--high' : (trustPct >= 40 ? 'trust--mid' : 'trust--low');
+          var badgeClass = item.type === 'species' ? 'badge--species' : (item.type === 'hybrid' ? 'badge--hybrid' : 'badge--clone');
+          var badgeText = item.type === 'species' ? t('badge_species') : (item.type === 'hybrid' ? 'Hybrid' : 'Clone');
+
+          html += '<div class="card card--clickable" data-nav="cultivar">';
+          html += '<div class="recent-card__img">';
+          html += '<svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
+          html += '</div>';
+          html += '<div class="font-bold">' + displayName + '</div>';
+          html += '<div class="text-sm text-muted">' + genus + ' <span class="badge ' + badgeClass + '" style="font-size:0.65rem;padding:1px 6px;">' + badgeText + '</span></div>';
+          if (hasOrigins) {
+            html += '<div class="trust mt-sm"><div class="trust__bar"><div class="trust__fill ' + trustClass + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + trustPct + '%</span></div>';
+          }
+          html += '</div>';
+        });
+        grid.innerHTML = html;
+      }
+
       // Restore cultivars from Supabase first, then localStorage as fallback
       function restoreUserCultivars() {
         // Always load localStorage first (instant)
@@ -2207,6 +2217,7 @@
           addCultivarRow(fullName, localSaved[fullName].entry, localSaved[fullName].meta);
         });
         refreshGenusUI();
+        refreshRecentlyAdded();
 
         // Then load from Supabase (async, authoritative source)
         if (supabase) {
@@ -2243,6 +2254,7 @@
               addCultivarRow(row.cultivar_name, entry, meta);
             });
             refreshGenusUI();
+            refreshRecentlyAdded();
             // Load cultivar thumbnails after rows are created
             setTimeout(loadCultivarThumbnails, 100);
             // Sync localStorage: only remove entries that exist in DB with origins intact
