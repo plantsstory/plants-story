@@ -2776,6 +2776,11 @@
         var detailH1 = document.querySelector('#page-cultivar h1');
         var cultivarName = detailH1 ? detailH1.textContent : '';
         if (!cultivarName) { showToast('品種が見つかりません', true); return; }
+        // Check if this is a seedling (badge says Seedling) - DB stores with [Seedling] suffix
+        var detailBadge = document.querySelector('#page-cultivar .badge');
+        if (detailBadge && detailBadge.classList.contains('badge--seedling')) {
+          cultivarName = cultivarName + ' [Seedling]';
+        }
 
         if (!editKey || editKey.length !== 4) {
           showToast('4桁の編集キーを入力してください', true);
