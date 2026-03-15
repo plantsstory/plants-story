@@ -1004,7 +1004,7 @@ function loadOrigins() {
 
   var totalOrigins = targets.reduce(function(s, c) { return s + (c.origins || []).length; }, 0);
   var html = '<p style="color:var(--color-gray);font-size:var(--font-size-sm);margin:var(--space-sm) 0;">' + targets.length + ' 品種 / ' + totalOrigins + ' 件の由来</p>';
-  html += '<table class="data-table" style="margin-top:var(--space-sm);">';
+  html += '<div style="overflow-x:auto;"><table class="data-table" style="margin-top:var(--space-sm);min-width:900px;">';
   html += '<thead><tr><th>品種</th><th>#</th><th>ソース</th><th>信頼度</th><th>本文</th><th>著者</th><th>投票</th><th>操作</th></tr></thead><tbody>';
 
   targets.forEach(function(c) {
@@ -1050,7 +1050,7 @@ function loadOrigins() {
     });
   });
 
-  html += '</tbody></table>';
+  html += '</tbody></table></div>';
   document.getElementById('origins-list').innerHTML = html;
 }
 
