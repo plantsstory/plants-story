@@ -31,13 +31,7 @@
   <header class="header">
     <div class="container header__inner">
       <a class="header__logo" data-nav="top" data-i18n="site_title">Plants Story</a>
-      <nav class="header__nav">
-        <a href="#" data-nav="genus" data-genus="anthurium" data-i18n="nav_anthurium">Anthurium</a>
-        <a href="#" data-nav="genus" data-genus="monstera" data-i18n="nav_monstera">Monstera</a>
-        <a href="#" data-nav="genus" data-genus="philodendron" data-i18n="nav_philodendron">Philodendron</a>
-      </nav>
       <div class="header__actions">
-        <a href="#" data-nav="favorites" style="font-size:1.3rem;text-decoration:none;color:var(--color-gray);line-height:1;" title="お気に入り">&#x2661;</a>
         <button class="header__lang" data-i18n="lang_toggle">EN / JP</button>
         <button class="header__hamburger" id="hamburger" aria-label="Menu">
           <span></span><span></span><span></span>
@@ -2391,11 +2385,11 @@
     }
 
     function updateHeaderFavIcon() {
-      var headerFav = document.querySelector('.header__actions [data-nav="favorites"]');
-      if (!headerFav) return;
+      var navFav = document.querySelector('.mobile-nav [data-nav="favorites"]');
+      if (!navFav) return;
       var count = Object.keys(getFavorites()).length;
-      headerFav.innerHTML = count > 0 ? '&#x2665;' : '&#x2661;';
-      headerFav.style.color = count > 0 ? '#dc3545' : 'var(--color-gray)';
+      var heart = count > 0 ? '&#x2665;' : '&#x2661;';
+      navFav.innerHTML = heart + ' ' + t('favorites_title') + (count > 0 ? ' (' + count + ')' : '');
     }
 
     // Fav button click handler

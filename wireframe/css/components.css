@@ -126,14 +126,7 @@
   text-decoration: none;
 }
 
-@media (min-width: 768px) {
-  .header__nav {
-    display: flex;
-  }
-  .header__hamburger {
-    display: none;
-  }
-}
+/* Hamburger always visible, nav links moved to mobile menu */
 
 /* ========================================
    FOOTER
