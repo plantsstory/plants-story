@@ -679,6 +679,7 @@
           <div class="flex gap-sm mt-sm flex-align-center">
             <span class="badge badge--species">原種 / Original Species</span>
             <span class="text-sm text-muted">Anthurium</span>
+            <span class="text-sm text-muted" id="detail-created-at" style="margin-left:4px;"></span>
           </div>
         </div>
         <div class="flex gap-sm flex-align-center" id="edit-key-section">
@@ -2100,6 +2101,7 @@
       function addCultivarRow(fullName, entry, meta) {
         if (cultivarData[fullName]) return;
         entry._type = meta.type;
+        entry._created_at = meta.created_at || '';
         cultivarData[fullName] = entry;
 
         var genusEl = document.getElementById('genus-' + meta.genus.toLowerCase());
@@ -2507,8 +2509,18 @@
       }
 
       // Update genus label next to badge
-      var genusLabel = detailPage.querySelector('.flex.gap-sm .text-sm.text-muted');
+      var genusLabel = detailPage.querySelector('.flex.gap-sm .text-sm.text-muted:not(#detail-created-at)');
       if (genusLabel) genusLabel.textContent = genusName;
+
+      // Update created_at date
+      var createdAtEl = document.getElementById('detail-created-at');
+      var cData = cultivarData[cultivarName];
+      if (createdAtEl && cData && cData._created_at) {
+        var d = new Date(cData._created_at);
+        createdAtEl.textContent = d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
+      } else if (createdAtEl) {
+        createdAtEl.textContent = '';
+      }
 
       // Update breadcrumb
       var breadcrumb = detailPage.querySelector('.breadcrumb');
@@ -2759,20 +2771,21 @@
         crypto.subtle.digest('SHA-256', keyData).then(function(buffer) {
           var hashArray = Array.from(new Uint8Array(buffer));
           var inputHash = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-          return sbClient.from('cultivars').select('edit_key_hash').eq('cultivar_name', cultivarName).limit(1).then(function(res) {
+          return sbClient.from('cultivars').select('id, edit_key_hash').eq('cultivar_name', cultivarName).limit(1).then(function(res) {
             if (res.error) throw new Error(res.error.message);
             if (!res.data || res.data.length === 0) throw new Error('品種が見つかりません');
             var storedHash = res.data[0].edit_key_hash;
             if (!storedHash) throw new Error('この品種には編集キーが設定されていません');
             if (inputHash !== storedHash) throw new Error('編集キーが正しくありません');
+            return res.data[0].id;
           });
-        }).then(function() {
+        }).then(function(cultivarId) {
           editBtn.disabled = false;
           editBtn.style.opacity = '';
           // Key verified - navigate to edit page
           navigateTo('contribute', {});
           if (typeof window.enterEditMode === 'function') {
-            window.enterEditMode(cultivarName, editKey);
+            window.enterEditMode(cultivarName, editKey, cultivarId);
           }
         }).catch(function(err) {
           editBtn.disabled = false;
@@ -3351,12 +3364,13 @@
       // ---- Edit mode state ----
       var editMode = false;
       var editCultivarKey = null; // original full name (key in cultivarData)
+      var editCultivarId = null;  // DB id for delete
       var verifiedEditKey = null; // edit key verified on detail page
       var contributePageTitle = document.getElementById('contribute-page-title');
       var contributePageDesc = document.getElementById('contribute-page-desc');
       var contributeSubmitBtn = document.getElementById('contribute-submit-btn');
 
-      window.enterEditMode = function(cultivarName, editKeyFromDetail) {
+      window.enterEditMode = function(cultivarName, editKeyFromDetail, cultivarIdFromDetail) {
         // Find the cultivar in data - try exact match first, then with [Seedling] suffix
         var data = cultivarData[cultivarName] || cultivarData[cultivarName + ' [Seedling]'];
         var key = cultivarData[cultivarName] ? cultivarName : (cultivarData[cultivarName + ' [Seedling]'] ? cultivarName + ' [Seedling]' : null);
@@ -3373,6 +3387,7 @@
 
         editMode = true;
         editCultivarKey = key;
+        editCultivarId = cultivarIdFromDetail || null;
         verifiedEditKey = editKeyFromDetail || null;
 
         // Update page title and button
@@ -3466,6 +3481,7 @@
       window.exitEditMode = function() {
         editMode = false;
         editCultivarKey = null;
+        editCultivarId = null;
 
         // Restore page title and button
         if (contributePageTitle) contributePageTitle.textContent = t('contribute_title');
@@ -3514,6 +3530,7 @@
         var sbClient = window._supabaseClient;
         if (!sbClient) { showToast('データベース接続エラー', true); return; }
         if (!verifiedEditKey) { showToast('編集キーが未検証です', true); return; }
+        if (!editCultivarId) { showToast('品種IDが不明です', true); return; }
 
         btn.disabled = true;
         btn.textContent = '削除中...';
@@ -3523,7 +3540,7 @@
           var hashArray = Array.from(new Uint8Array(buffer));
           var inputHash = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
           return sbClient.rpc('delete_with_edit_key_hash', {
-            p_cultivar_name: editCultivarKey,
+            p_cultivar_id: editCultivarId,
             p_edit_key_hash: inputHash
           });
         }).then(function(res) {
