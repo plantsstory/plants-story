@@ -1028,8 +1028,8 @@ function loadOrigins() {
 
   var totalOrigins = targets.reduce(function(s, c) { return s + (c.origins || []).length; }, 0);
   var html = '<p style="color:var(--color-gray);font-size:var(--font-size-sm);margin:var(--space-sm) 0;">' + targets.length + ' 品種 / ' + totalOrigins + ' 件の由来</p>';
-  html += '<div style="overflow-x:auto;"><table class="data-table" style="margin-top:var(--space-sm);width:100%;table-layout:fixed;">';
-  html += '<colgroup><col style="width:25%"><col style="width:3%"><col style="width:12%"><col style="width:10%"><col style="width:25%"><col style="width:10%"><col style="width:15%"></colgroup>';
+  html += '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table class="data-table" style="margin-top:var(--space-sm);min-width:900px;">';
+  html += '<colgroup><col style="width:200px"><col style="width:30px"><col style="width:110px"><col style="width:90px"><col style="width:250px"><col style="width:80px"><col style="width:120px"></colgroup>';
   html += '<thead><tr><th>品種</th><th>#</th><th>ソース</th><th>信頼度</th><th>本文</th><th>著者</th><th>投票</th></tr></thead><tbody>';
 
   targets.forEach(function(c) {
