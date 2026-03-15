@@ -1562,7 +1562,22 @@ document.getElementById('sec-delete-requests').addEventListener('click', async f
           await sb.storage.from('gallery-images').remove([imgResult.data[0].storage_path]);
         }
         var delResult = await sb.from('cultivar_images').delete().eq('id', targetId);
-        if (delResult.error) throw new Error(delResult.error.message);
+        if (delResult.error) {
+          // Fallback: REST API delete (same as existing image delete handler)
+          var fetchRes = await fetch(SUPABASE_URL + '/rest/v1/cultivar_images?id=eq.' + targetId, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+              'Prefer': 'return=representation'
+            }
+          });
+          if (!fetchRes.ok) {
+            var errText = await fetchRes.text();
+            throw new Error('画像削除失敗 (' + fetchRes.status + '): ' + errText);
+          }
+        }
       }
 
       // Update request status
