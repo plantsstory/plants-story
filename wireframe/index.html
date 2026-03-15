@@ -685,6 +685,7 @@
           <input type="password" id="detail-edit-key" class="form-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="編集キー" style="width:100px;padding:4px 8px;font-size:0.85rem;">
           <button class="btn btn--secondary btn--sm" id="detail-edit-btn">&#x270F; 編集</button>
         </div>
+        <button class="btn btn--sm" id="detail-delete-request-btn" style="margin-top:8px;color:#dc3545;border-color:#dc3545;border:1px solid #dc3545;background:transparent;font-size:0.8rem;cursor:pointer;">&#x1F5D1; 削除依頼</button>
       </div>
 
       <!-- Image Gallery -->
@@ -4671,35 +4672,7 @@
             return;
           }
 
-          // --- Delete handling ---
-          var deleteBtn = e.target.closest('.gallery__delete');
-          if (!deleteBtn) return;
-          var item = deleteBtn.closest('.gallery__item[data-user-upload]');
-          if (!item) return;
-
-          var detailPage = document.getElementById('page-cultivar');
-          var h1 = detailPage ? detailPage.querySelector('h1') : null;
-          var cultivarName = h1 ? h1.textContent : '';
-          if (!cultivarName) return;
-
-          var imageId = item.getAttribute('data-image-id');
-          var storagePath = item.getAttribute('data-storage-path');
-
-          if (imageId && storagePath) {
-            // Delete from Supabase
-            deleteImageFromSupabase(imageId, storagePath).then(function() {
-              renderGalleryForCultivar(cultivarName);
-            }).catch(function(err) {
-              console.warn('Delete failed:', err);
-            });
-          } else {
-            // Delete from localStorage
-            var idx = parseInt(item.getAttribute('data-gallery-idx'));
-            if (!isNaN(idx)) {
-              removeGalleryImageLocal(cultivarName, idx);
-              renderGalleryForCultivar(cultivarName);
-            }
-          }
+          // Delete handling is now in the Deletion Request System IIFE
         });
       }
 
@@ -4894,7 +4867,169 @@
       }
     });
   })();
+
+  // ---- Deletion Request System ----
+  (function() {
+    var currentRequest = null; // { targetType, targetId, targetName }
+    var _dialog, _targetEl, _optionsEl, _detailEl, _submitBtn, _cancelBtn;
+    var _bound = false;
+
+    function getEls() {
+      _dialog = document.getElementById('delete-request-dialog');
+      _targetEl = document.getElementById('delete-request-target');
+      _optionsEl = document.getElementById('delete-reason-options');
+      _detailEl = document.getElementById('delete-reason-detail');
+      _submitBtn = document.getElementById('delete-request-submit');
+      _cancelBtn = document.getElementById('delete-request-cancel');
+      return !!_dialog;
+    }
+
+    function bindOnce() {
+      if (_bound) return;
+      _bound = true;
+
+      _optionsEl.addEventListener('change', function(e) {
+        if (e.target.name === 'delete-reason') {
+          _detailEl.style.display = e.target.value === 'other' ? '' : 'none';
+        }
+      });
+
+      _cancelBtn.addEventListener('click', function() {
+        _dialog.close();
+        currentRequest = null;
+      });
+
+      _dialog.addEventListener('click', function(e) {
+        if (e.target === _dialog) { _dialog.close(); currentRequest = null; }
+      });
+
+      _submitBtn.addEventListener('click', function() {
+        if (!currentRequest) return;
+        var selected = _dialog.querySelector('input[name="delete-reason"]:checked');
+        if (!selected) { showToast('理由を選択してください', true); return; }
+        var reason = selected.value;
+        var reasonDetail = reason === 'other' ? _detailEl.value.trim() : null;
+        if (reason === 'other' && !reasonDetail) { showToast('詳細を入力してください', true); return; }
+
+        var sbClient = window._supabaseClient;
+        if (!sbClient) { showToast('データベース接続エラー', true); return; }
+
+        _submitBtn.disabled = true;
+        _submitBtn.textContent = '送信中...';
+        sbClient.rpc('submit_deletion_request', {
+          p_target_type: currentRequest.targetType,
+          p_target_id: currentRequest.targetId,
+          p_target_name: currentRequest.targetName,
+          p_reason: reason,
+          p_reason_detail: reasonDetail
+        }).then(function(res) {
+          _submitBtn.disabled = false;
+          _submitBtn.textContent = '送信';
+          if (res.error) throw new Error(res.error.message);
+          var result = res.data;
+          if (result && !result.success) throw new Error(result.error || 'Failed');
+          _dialog.close();
+          currentRequest = null;
+          showToast('削除依頼を送信しました');
+        }).catch(function(err) {
+          _submitBtn.disabled = false;
+          _submitBtn.textContent = '送信';
+          showToast(err.message || '送信に失敗しました', true);
+        });
+      });
+    }
+
+    var cultivarReasons = [
+      { value: 'duplicate', label: '重複している品種' },
+      { value: 'wrong_info', label: '誤った情報' },
+      { value: 'created_by_mistake', label: '間違えて作成した' },
+      { value: 'spam', label: 'スパム・不適切な内容' },
+      { value: 'other', label: 'その他' }
+    ];
+
+    var imageReasons = [
+      { value: 'irrelevant', label: '無関係な画像' },
+      { value: 'inappropriate', label: '不適切な画像' },
+      { value: 'copyright', label: '著作権侵害の可能性' },
+      { value: 'uploaded_by_mistake', label: '間違えてアップロードした' },
+      { value: 'other', label: 'その他' }
+    ];
+
+    function openDialog(targetType, targetId, targetName) {
+      if (!getEls()) return;
+      bindOnce();
+      currentRequest = { targetType: targetType, targetId: targetId, targetName: targetName };
+      _targetEl.textContent = targetName || '';
+      var reasons = targetType === 'cultivar' ? cultivarReasons : imageReasons;
+      _optionsEl.innerHTML = '';
+      reasons.forEach(function(r) {
+        var label = document.createElement('label');
+        label.style.cssText = 'display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.9rem;';
+        var radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'delete-reason';
+        radio.value = r.value;
+        label.appendChild(radio);
+        label.appendChild(document.createTextNode(r.label));
+        _optionsEl.appendChild(label);
+      });
+      _detailEl.style.display = 'none';
+      _detailEl.value = '';
+      _dialog.showModal();
+    }
+
+    // Cultivar delete request button (event delegation)
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('#detail-delete-request-btn');
+      if (!btn) return;
+      e.preventDefault();
+      var h1 = document.querySelector('#page-cultivar h1');
+      var cultivarName = h1 ? h1.textContent : '';
+      if (!cultivarName) return;
+
+      // Get cultivar ID from Supabase
+      var sbClient = window._supabaseClient;
+      if (!sbClient) { showToast('データベース接続エラー', true); return; }
+      sbClient.from('cultivars').select('id').eq('cultivar_name', cultivarName).limit(1).then(function(res) {
+        if (res.error || !res.data || res.data.length === 0) {
+          showToast('品種が見つかりません', true);
+          return;
+        }
+        openDialog('cultivar', res.data[0].id, cultivarName);
+      });
+    });
+
+    // Image delete request (modify existing gallery__delete behavior)
+    document.addEventListener('click', function(e) {
+      var deleteLink = e.target.closest('.gallery__delete');
+      if (!deleteLink) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      var item = deleteLink.closest('.gallery__item');
+      if (!item) return;
+
+      var imageId = item.getAttribute('data-image-id');
+      if (!imageId) return; // no image ID, can't submit request
+
+      var h1 = document.querySelector('#page-cultivar h1');
+      var cultivarName = h1 ? h1.textContent : '';
+      openDialog('image', parseInt(imageId), cultivarName);
+    });
+  })();
   </script>
+
+  <!-- Deletion Request Dialog -->
+  <dialog id="delete-request-dialog" style="border:none;border-radius:12px;padding:24px;max-width:400px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+    <h3 style="margin:0 0 8px 0;font-size:1.1rem;">削除依頼</h3>
+    <p id="delete-request-target" style="margin:0 0 16px 0;font-size:0.9rem;color:#666;"></p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;" id="delete-reason-options"></div>
+    <textarea id="delete-reason-detail" placeholder="詳細を入力..." rows="3" style="display:none;width:100%;box-sizing:border-box;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:0.9rem;margin-bottom:16px;resize:vertical;"></textarea>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn--secondary btn--sm" id="delete-request-cancel">キャンセル</button>
+      <button class="btn btn--sm" id="delete-request-submit" style="background:#dc3545;color:#fff;border:none;">送信</button>
+    </div>
+  </dialog>
 
 </body>
 </html>

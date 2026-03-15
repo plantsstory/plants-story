@@ -386,6 +386,7 @@
       <a href="#" data-section="cultivars">品種管理</a>
       <a href="#" data-section="origins">由来管理</a>
       <a href="#" data-section="images">画像管理</a>
+      <a href="#" data-section="delete-requests">削除依頼</a>
       <a href="#" data-section="bulk">一括操作</a>
     </nav>
     <div class="nav-overlay" id="nav-overlay"></div>
@@ -484,6 +485,23 @@
           </div>
           <div id="formula-image-stats" style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);"></div>
           <div id="formula-image-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--space-md);"></div>
+        </div>
+      </section>
+
+      <!-- ---- DELETION REQUESTS ---- -->
+      <section id="sec-delete-requests" class="hidden">
+        <h2 class="section-title">削除依頼</h2>
+        <div style="display:flex;gap:0;margin-bottom:var(--space-md);border-bottom:2px solid var(--color-light);">
+          <button class="btn btn-sm dr-tab active" data-dr-tab="cultivar" style="border-radius:var(--radius-md) var(--radius-md) 0 0;border-bottom:2px solid var(--color-primary);margin-bottom:-2px;font-weight:600;">品種</button>
+          <button class="btn btn-sm dr-tab" data-dr-tab="image" style="border-radius:var(--radius-md) var(--radius-md) 0 0;margin-bottom:-2px;opacity:0.6;">画像</button>
+        </div>
+        <div id="dr-cultivar-content">
+          <div id="dr-cultivar-list" style="display:grid;gap:var(--space-md);"></div>
+          <p id="dr-cultivar-empty" style="color:var(--color-gray);font-size:var(--font-size-sm);">品種の削除依頼はありません</p>
+        </div>
+        <div id="dr-image-content" style="display:none;">
+          <div id="dr-image-list" style="display:grid;gap:var(--space-md);"></div>
+          <p id="dr-image-empty" style="color:var(--color-gray);font-size:var(--font-size-sm);">画像の削除依頼はありません</p>
         </div>
       </section>
 
@@ -1430,7 +1448,148 @@ document.getElementById('formula-image-grid').addEventListener('click', async fu
 document.querySelectorAll('.admin-nav a').forEach(function(link) {
   link.addEventListener('click', function() {
     if (this.getAttribute('data-section') === 'images') loadImages();
+    if (this.getAttribute('data-section') === 'delete-requests') loadDeletionRequests();
   });
+});
+
+// ========================================
+// Deletion Requests
+// ========================================
+var reasonLabels = {
+  duplicate: '重複している品種',
+  wrong_info: '誤った情報',
+  created_by_mistake: '間違えて作成した',
+  spam: 'スパム・不適切な内容',
+  irrelevant: '無関係な画像',
+  inappropriate: '不適切な画像',
+  copyright: '著作権侵害の可能性',
+  uploaded_by_mistake: '間違えてアップロードした',
+  other: 'その他'
+};
+
+// Tab switching
+document.querySelectorAll('.dr-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.dr-tab').forEach(function(t) {
+      t.classList.remove('active');
+      t.style.borderBottom = 'none';
+      t.style.fontWeight = 'normal';
+      t.style.opacity = '0.6';
+    });
+    this.classList.add('active');
+    this.style.borderBottom = '2px solid var(--color-primary)';
+    this.style.fontWeight = '600';
+    this.style.opacity = '1';
+    var tabName = this.getAttribute('data-dr-tab');
+    document.getElementById('dr-cultivar-content').style.display = tabName === 'cultivar' ? '' : 'none';
+    document.getElementById('dr-image-content').style.display = tabName === 'image' ? '' : 'none';
+  });
+});
+
+async function loadDeletionRequests() {
+  var result = await sb.from('deletion_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+  if (result.error) { toast('削除依頼の取得エラー: ' + result.error.message); return; }
+  var requests = result.data || [];
+
+  var cultivarRequests = requests.filter(function(r) { return r.target_type === 'cultivar'; });
+  var imageRequests = requests.filter(function(r) { return r.target_type === 'image'; });
+
+  renderDeletionList('dr-cultivar-list', 'dr-cultivar-empty', cultivarRequests, 'cultivar');
+  renderDeletionList('dr-image-list', 'dr-image-empty', imageRequests, 'image');
+}
+
+function renderDeletionList(listId, emptyId, requests, type) {
+  var listEl = document.getElementById(listId);
+  var emptyEl = document.getElementById(emptyId);
+  listEl.innerHTML = '';
+  emptyEl.style.display = requests.length === 0 ? '' : 'none';
+
+  requests.forEach(function(req) {
+    var card = document.createElement('div');
+    card.style.cssText = 'background:var(--color-white);border:1px solid var(--color-light);border-radius:var(--radius-md);padding:var(--space-md);';
+    var reasonText = reasonLabels[req.reason] || req.reason;
+    if (req.reason === 'other' && req.reason_detail) {
+      reasonText += ': ' + req.reason_detail;
+    }
+    var dateStr = new Date(req.created_at).toLocaleString('ja-JP');
+
+    var html = '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-md);">';
+    html += '<div>';
+    html += '<div style="font-weight:600;margin-bottom:4px;">' + escapeHtml(req.target_name || 'ID: ' + req.target_id) + '</div>';
+    html += '<div style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:4px;">理由: ' + escapeHtml(reasonText) + '</div>';
+    html += '<div style="font-size:var(--font-size-xs);color:var(--color-gray);">' + dateStr + '</div>';
+    html += '</div>';
+    html += '<div style="display:flex;gap:var(--space-sm);flex-shrink:0;">';
+    html += '<button class="btn btn-sm" style="background:#dc3545;color:#fff;border:none;" data-dr-approve="' + req.id + '" data-dr-type="' + type + '" data-dr-target="' + req.target_id + '" data-dr-name="' + escapeHtml(req.target_name || '') + '">承認(削除)</button>';
+    html += '<button class="btn btn-sm" style="background:var(--color-gray);color:#fff;border:none;" data-dr-reject="' + req.id + '">却下</button>';
+    html += '</div></div>';
+    card.innerHTML = html;
+    listEl.appendChild(card);
+  });
+}
+
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Handle approve/reject clicks
+document.getElementById('sec-delete-requests').addEventListener('click', async function(e) {
+  var approveBtn = e.target.closest('[data-dr-approve]');
+  var rejectBtn = e.target.closest('[data-dr-reject]');
+
+  if (approveBtn) {
+    var reqId = parseInt(approveBtn.getAttribute('data-dr-approve'));
+    var drType = approveBtn.getAttribute('data-dr-type');
+    var targetId = parseInt(approveBtn.getAttribute('data-dr-target'));
+    var targetName = approveBtn.getAttribute('data-dr-name');
+
+    if (!confirm('「' + (targetName || 'ID:' + targetId) + '」を削除しますか？')) return;
+
+    approveBtn.disabled = true;
+    approveBtn.textContent = '処理中...';
+
+    try {
+      // Delete the target
+      if (drType === 'cultivar') {
+        var delResult = await sb.from('cultivars').delete().eq('id', targetId);
+        if (delResult.error) throw new Error(delResult.error.message);
+      } else if (drType === 'image') {
+        // Get image info first for storage path
+        var imgResult = await sb.from('cultivar_images').select('storage_path').eq('id', targetId).limit(1);
+        if (imgResult.data && imgResult.data.length > 0 && imgResult.data[0].storage_path) {
+          await sb.storage.from('gallery-images').remove([imgResult.data[0].storage_path]);
+        }
+        var delResult = await sb.from('cultivar_images').delete().eq('id', targetId);
+        if (delResult.error) throw new Error(delResult.error.message);
+      }
+
+      // Update request status
+      await sb.from('deletion_requests').update({ status: 'approved', resolved_at: new Date().toISOString() }).eq('id', reqId);
+      toast('削除しました');
+      loadDeletionRequests();
+    } catch (err) {
+      toast('エラー: ' + err.message);
+      approveBtn.disabled = false;
+      approveBtn.textContent = '承認(削除)';
+    }
+  }
+
+  if (rejectBtn) {
+    var reqId = parseInt(rejectBtn.getAttribute('data-dr-reject'));
+    rejectBtn.disabled = true;
+    rejectBtn.textContent = '処理中...';
+    try {
+      await sb.from('deletion_requests').update({ status: 'rejected', resolved_at: new Date().toISOString() }).eq('id', reqId);
+      toast('却下しました');
+      loadDeletionRequests();
+    } catch (err) {
+      toast('エラー: ' + err.message);
+      rejectBtn.disabled = false;
+      rejectBtn.textContent = '却下';
+    }
+  }
 });
 </script>
 </body>
