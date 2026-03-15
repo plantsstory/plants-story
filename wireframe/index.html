@@ -681,7 +681,10 @@
             <span class="text-sm text-muted">Anthurium</span>
           </div>
         </div>
-        <a href="#" class="btn btn--secondary btn--sm" data-nav="contribute" data-edit="true" data-i18n="edit">&#x270F; 編集</a>
+        <div class="flex gap-sm flex-align-center" id="edit-key-section">
+          <input type="password" id="detail-edit-key" class="form-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="編集キー" style="width:100px;padding:4px 8px;font-size:0.85rem;">
+          <button class="btn btn--secondary btn--sm" id="detail-edit-btn">&#x270F; 編集</button>
+        </div>
       </div>
 
       <!-- Image Gallery -->
@@ -2724,6 +2727,69 @@
         document.getElementById('mobileNav').classList.remove('open');
       }
     });
+
+    // Edit button on cultivar detail page - verify edit key before entering edit mode
+    (function() {
+      var editBtn = document.getElementById('detail-edit-btn');
+      if (!editBtn) return;
+      editBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var editKeyInput = document.getElementById('detail-edit-key');
+        var editKey = editKeyInput ? editKeyInput.value.trim() : '';
+        var detailH1 = document.querySelector('#page-cultivar h1');
+        var cultivarName = detailH1 ? detailH1.textContent : '';
+        if (!cultivarName) { showToast('品種が見つかりません', true); return; }
+
+        if (!editKey || editKey.length !== 4) {
+          showToast('4桁の編集キーを入力してください', true);
+          return;
+        }
+
+        // Verify edit key via Supabase RPC
+        var sbClient = window._supabaseClient;
+        if (!sbClient) {
+          showToast('データベース接続エラー', true);
+          return;
+        }
+
+        editBtn.disabled = true;
+        editBtn.style.opacity = '0.5';
+
+        // Use update_with_edit_key with only the key check (no actual changes)
+        sbClient.rpc('update_with_edit_key', {
+          p_cultivar_name: cultivarName,
+          p_edit_key: editKey,
+          p_new_cultivar_name: null,
+          p_new_genus: null,
+          p_new_type: null,
+          p_origins: null
+        }).then(function(res) {
+          editBtn.disabled = false;
+          editBtn.style.opacity = '';
+          if (res.error) { showToast('検証エラー: ' + res.error.message, true); return; }
+          var result = res.data;
+          if (result && !result.success) {
+            showToast('編集キーが正しくありません', true);
+            return;
+          }
+          // Key verified - navigate to edit page
+          navigateTo('contribute', {});
+          if (typeof window.enterEditMode === 'function') {
+            window.enterEditMode(cultivarName);
+          }
+          // Pre-fill the edit key on the contribute page so user doesn't have to re-enter
+          var contributeEditKey = document.getElementById('edit-key-input');
+          if (contributeEditKey) {
+            contributeEditKey.value = editKey;
+            contributeEditKey.dispatchEvent(new Event('input'));
+          }
+        }).catch(function(err) {
+          editBtn.disabled = false;
+          editBtn.style.opacity = '';
+          showToast('検証エラー: ' + (err.message || err), true);
+        });
+      });
+    })();
 
     // Tab switching for genus pages (Species/Clones vs My Seedlings)
     document.addEventListener('click', function(e) {
