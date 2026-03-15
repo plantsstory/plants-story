@@ -2518,24 +2518,24 @@
       var noPhoto = '<div style="width:60px;height:60px;border-radius:var(--radius-md);border:2px dashed var(--color-light);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:0.65rem;">No Photo</div>';
 
       function parentBlock(role, name, photoPath) {
-        var label = role === 'mother' ? 'Mother' : 'Father';
-        var h = '<div style="display:flex;align-items:center;gap:var(--space-sm);">';
+        var label = role === 'mother' ? 'Mother (母)' : 'Father (父)';
+        var h = '<div style="display:flex;align-items:center;gap:var(--space-md);min-width:0;">';
         if (isSeedling) {
           if (photoPath && _sb) {
             var url = _sb.storage.from('gallery-images').getPublicUrl(photoPath).data.publicUrl;
-            h += '<div class="parent-photo-display"><img class="has-photo" src="' + url + '" alt="' + label + '" style="width:60px;height:60px;"></div>';
+            h += '<div class="parent-photo-display" style="flex-shrink:0;"><img class="has-photo" src="' + url + '" alt="' + label + '" style="width:60px;height:60px;"></div>';
           } else {
-            h += '<div class="parent-photo-display">' + noPhoto + '</div>';
+            h += '<div class="parent-photo-display" style="flex-shrink:0;">' + noPhoto + '</div>';
           }
         }
-        h += '<div>';
-        h += '<div style="font-size:0.7rem;color:var(--color-gray);margin-bottom:2px;">' + label + '</div>';
-        h += '<span class="formula-parent">' + (name || '') + '</span>';
+        h += '<div style="min-width:0;">';
+        h += '<div style="font-size:0.7rem;color:var(--color-gray);margin-bottom:4px;">' + label + '</div>';
+        h += '<span class="formula-parent" style="display:inline-block;word-break:break-word;white-space:normal;max-width:100%;">' + (name || '') + '</span>';
         h += '</div></div>';
         return h;
       }
 
-      var fHtml = '<div class="formula-box mb-lg" style="justify-content:center;align-items:center;flex-direction:column;gap:var(--space-sm);">';
+      var fHtml = '<div class="formula-box mb-lg" style="justify-content:center;align-items:center;flex-direction:column;gap:var(--space-md);padding:var(--space-lg);">';
       fHtml += parentBlock('mother', data.formula.parentA, data.formula.motherPhoto);
       fHtml += '<span class="formula-operator">&times;</span>';
       fHtml += parentBlock('father', data.formula.parentB, data.formula.fatherPhoto);
