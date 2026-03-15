@@ -1902,24 +1902,27 @@
             originsData.push({ _type: 'formula', formula: entry.formula });
           }
 
-          // Hash edit key client-side if provided, then direct insert
+          // Hash edit key client-side, then insert via RPC (SECURITY DEFINER)
           var hashPromise = editKey ? sha256(editKey) : Promise.resolve(null);
           var insertPromise = hashPromise.then(function(editKeyHash) {
-            var insertData = {
-              genus: meta.genus,
-              cultivar_name: fullName,
-              type: meta.type || 'Hybrid',
-              origins: originsData,
-              votes: {},
-              ai_status: isSeedling ? null : 'pending'
-            };
-            if (editKeyHash) insertData.edit_key_hash = editKeyHash;
-            return supabase.from('cultivars').insert(insertData).select();
+            return supabase.rpc('insert_with_edit_key_hash', {
+              p_genus: meta.genus,
+              p_cultivar_name: fullName,
+              p_type: meta.type || 'Hybrid',
+              p_origins: originsData,
+              p_edit_key_hash: editKeyHash,
+              p_ai_status: isSeedling ? null : 'pending'
+            });
           });
 
           return insertPromise.then(function(res) {
             if (res.error) {
               throw new Error(res.error.message);
+            }
+            // RPC returns {success, id} in res.data
+            var rpcResult = res.data;
+            if (rpcResult && !rpcResult.success) {
+              throw new Error(rpcResult.error || 'Insert failed');
             }
             // Save to localStorage only after successful DB insert
             var saved = {};
@@ -1928,13 +1931,12 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
             // Trigger AI research (skip for seedlings)
             if (!isSeedling) {
-              var inserted = res.data && res.data[0];
-              if (inserted && inserted.id) {
-                // Pass manual origins directly to avoid race condition with DB read
+              var insertedId = rpcResult && rpcResult.id;
+              if (insertedId) {
                 var manualOrigins = (entry.origins || []).filter(function(o) {
                   return o.source_type === 'manual' || (o.author && o.author.isAI === false);
                 });
-                triggerAIResearch(inserted.id, meta.genus, fullName, meta.type || 'Hybrid', manualOrigins);
+                triggerAIResearch(insertedId, meta.genus, fullName, meta.type || 'Hybrid', manualOrigins);
               }
             }
           });
@@ -2718,9 +2720,9 @@
 
     // Edit button on cultivar detail page - verify edit key before entering edit mode
     (function() {
-      var editBtn = document.getElementById('detail-edit-btn');
-      if (!editBtn) return;
-      editBtn.addEventListener('click', function(e) {
+      document.addEventListener('click', function(e) {
+        var editBtn = e.target.closest('#detail-edit-btn');
+        if (!editBtn) return;
         e.preventDefault();
         var editKeyInput = document.getElementById('detail-edit-key');
         var editKey = editKeyInput ? editKeyInput.value.trim() : '';
@@ -2743,23 +2745,22 @@
         editBtn.disabled = true;
         editBtn.style.opacity = '0.5';
 
-        // Use update_with_edit_key with only the key check (no actual changes)
-        sbClient.rpc('update_with_edit_key', {
-          p_cultivar_name: cultivarName,
-          p_edit_key: editKey,
-          p_new_cultivar_name: null,
-          p_new_genus: null,
-          p_new_type: null,
-          p_origins: null
-        }).then(function(res) {
+        // Verify edit key client-side: hash input and compare with DB
+        var encoder = new TextEncoder();
+        var keyData = encoder.encode(editKey);
+        crypto.subtle.digest('SHA-256', keyData).then(function(buffer) {
+          var hashArray = Array.from(new Uint8Array(buffer));
+          var inputHash = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+          return sbClient.from('cultivars').select('edit_key_hash').eq('cultivar_name', cultivarName).limit(1).then(function(res) {
+            if (res.error) throw new Error(res.error.message);
+            if (!res.data || res.data.length === 0) throw new Error('品種が見つかりません');
+            var storedHash = res.data[0].edit_key_hash;
+            if (!storedHash) throw new Error('この品種には編集キーが設定されていません');
+            if (inputHash !== storedHash) throw new Error('編集キーが正しくありません');
+          });
+        }).then(function() {
           editBtn.disabled = false;
           editBtn.style.opacity = '';
-          if (res.error) { showToast('検証エラー: ' + res.error.message, true); return; }
-          var result = res.data;
-          if (result && !result.success) {
-            showToast('編集キーが正しくありません', true);
-            return;
-          }
           // Key verified - navigate to edit page
           navigateTo('contribute', {});
           if (typeof window.enterEditMode === 'function') {
@@ -2774,7 +2775,7 @@
         }).catch(function(err) {
           editBtn.disabled = false;
           editBtn.style.opacity = '';
-          showToast('検証エラー: ' + (err.message || err), true);
+          showToast(err.message || '検証エラー', true);
         });
       });
     })();
@@ -3746,14 +3747,20 @@
             var updatePromise;
 
             if (sbClient && editKeyValue && editKeyValue.length === 4) {
-              // Edit key provided: use RPC for full update (including name change)
-              updatePromise = sbClient.rpc('update_with_edit_key', {
-                p_cultivar_name: editCultivarKey,
-                p_edit_key: editKeyValue,
-                p_new_cultivar_name: nameChanged ? fullName : null,
-                p_new_genus: nameChanged ? genus : null,
-                p_new_type: type,
-                p_origins: dbOrigins
+              // Edit key provided: hash client-side, verify, then use RPC for full update
+              var encoder = new TextEncoder();
+              var keyData = encoder.encode(editKeyValue);
+              updatePromise = crypto.subtle.digest('SHA-256', keyData).then(function(buffer) {
+                var hashArray = Array.from(new Uint8Array(buffer));
+                var inputHash = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+                return sbClient.rpc('update_with_edit_key_hash', {
+                  p_cultivar_name: editCultivarKey,
+                  p_edit_key_hash: inputHash,
+                  p_new_cultivar_name: nameChanged ? fullName : null,
+                  p_new_genus: nameChanged ? genus : null,
+                  p_new_type: type,
+                  p_origins: dbOrigins
+                });
               }).then(function(res) {
                 if (res.error) throw new Error(res.error.message);
                 var result = res.data;
