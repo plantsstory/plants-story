@@ -2120,6 +2120,7 @@
         var row = document.createElement('div');
         row.className = 'cultivar-row';
         row.setAttribute('data-nav', 'cultivar');
+        if (meta.created_at) row.setAttribute('data-created', meta.created_at);
         var badgeClass = meta.type === 'species' ? 'badge--species' : (meta.type === 'hybrid' ? 'badge--hybrid' : (meta.type === 'seedling' ? 'badge--seedling' : 'badge--clone'));
         var badgeText = meta.type === 'species' ? t('badge_species') : (meta.type === 'hybrid' ? 'Hybrid' : (meta.type === 'seedling' ? 'Seedling' : 'Clone'));
         var hasDesc = entry.origins.length > 0 && entry.origins[0].trust > 0;
@@ -2204,7 +2205,7 @@
                 formula: formula
               };
               var genus = row.genus || 'Anthurium';
-              var meta = { genus: genus, type: row.type || 'Hybrid' };
+              var meta = { genus: genus, type: row.type || 'Hybrid', created_at: row.created_at || '' };
               addCultivarRow(row.cultivar_name, entry, meta);
             });
             refreshGenusUI();
@@ -3260,9 +3261,11 @@
             var trustB = parseInt(b.querySelector('.trust__label') ? b.querySelector('.trust__label').textContent : '0');
             return trustB - trustA;
           }
-          // By Newest (reverse DOM order = newest first)
+          // By Newest (sort by created_at descending)
           if (sortType === '新着順' || sortType === 'Newest') {
-            return rows.indexOf(b) - rows.indexOf(a);
+            var dateA = a.getAttribute('data-created') || '';
+            var dateB = b.getAttribute('data-created') || '';
+            return dateB.localeCompare(dateA);
           }
           return 0;
         });
