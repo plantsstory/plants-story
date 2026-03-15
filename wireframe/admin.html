@@ -1542,7 +1542,7 @@ document.getElementById('sec-delete-requests').addEventListener('click', async f
   if (approveBtn) {
     var reqId = parseInt(approveBtn.getAttribute('data-dr-approve'));
     var drType = approveBtn.getAttribute('data-dr-type');
-    var targetId = parseInt(approveBtn.getAttribute('data-dr-target'));
+    var targetId = approveBtn.getAttribute('data-dr-target');
     var targetName = approveBtn.getAttribute('data-dr-name');
 
     if (!confirm('「' + (targetName || 'ID:' + targetId) + '」を削除しますか？')) return;

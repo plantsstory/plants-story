@@ -7,7 +7,7 @@
 CREATE TABLE IF NOT EXISTS public.deletion_requests (
   id BIGSERIAL PRIMARY KEY,
   target_type TEXT NOT NULL,        -- 'cultivar' or 'image'
-  target_id BIGINT NOT NULL,
+  target_id TEXT NOT NULL,
   target_name TEXT,                  -- display name
   reason TEXT NOT NULL,
   reason_detail TEXT,
@@ -35,7 +35,7 @@ CREATE POLICY "Admin delete deletion_requests" ON public.deletion_requests
 -- 4. RPC to submit deletion request (SECURITY DEFINER for anonymous access)
 CREATE OR REPLACE FUNCTION public.submit_deletion_request(
   p_target_type TEXT,
-  p_target_id BIGINT,
+  p_target_id TEXT,
   p_target_name TEXT DEFAULT NULL,
   p_reason TEXT DEFAULT NULL,
   p_reason_detail TEXT DEFAULT NULL
@@ -56,4 +56,4 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.submit_deletion_request(TEXT, BIGINT, TEXT, TEXT, TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.submit_deletion_request(TEXT, TEXT, TEXT, TEXT, TEXT) TO anon, authenticated;
