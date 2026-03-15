@@ -1376,6 +1376,10 @@
     function navigateTo(page, options, pushHistory) {
       options = options || {};
       showPage(page);
+      // Reset edit mode when navigating to contribute page via hash (not from detail page edit flow)
+      if (page === 'contribute' && typeof window.exitEditMode === 'function') {
+        window.exitEditMode();
+      }
       if (page === 'genus' && options.genus) showGenus(options.genus);
       if (page === 'cultivar' && options.cultivar && !options._skipUpdate) {
         // Find the cultivar row to pass badge info (used by popstate)
@@ -2764,13 +2768,7 @@
           // Key verified - navigate to edit page
           navigateTo('contribute', {});
           if (typeof window.enterEditMode === 'function') {
-            window.enterEditMode(cultivarName);
-          }
-          // Pre-fill the edit key on the contribute page so user doesn't have to re-enter
-          var contributeEditKey = document.getElementById('edit-key-input');
-          if (contributeEditKey) {
-            contributeEditKey.value = editKey;
-            contributeEditKey.dispatchEvent(new Event('input'));
+            window.enterEditMode(cultivarName, editKey);
           }
         }).catch(function(err) {
           editBtn.disabled = false;
@@ -3347,11 +3345,12 @@
       // ---- Edit mode state ----
       var editMode = false;
       var editCultivarKey = null; // original full name (key in cultivarData)
+      var verifiedEditKey = null; // edit key verified on detail page
       var contributePageTitle = document.getElementById('contribute-page-title');
       var contributePageDesc = document.getElementById('contribute-page-desc');
       var contributeSubmitBtn = document.getElementById('contribute-submit-btn');
 
-      window.enterEditMode = function(cultivarName) {
+      window.enterEditMode = function(cultivarName, editKeyFromDetail) {
         // Find the cultivar in data - try exact match first, then with [Seedling] suffix
         var data = cultivarData[cultivarName] || cultivarData[cultivarName + ' [Seedling]'];
         var key = cultivarData[cultivarName] ? cultivarName : (cultivarData[cultivarName + ' [Seedling]'] ? cultivarName + ' [Seedling]' : null);
@@ -3368,6 +3367,7 @@
 
         editMode = true;
         editCultivarKey = key;
+        verifiedEditKey = editKeyFromDetail || null;
 
         // Update page title and button
         if (contributePageTitle) contributePageTitle.textContent = t('edit_title');
@@ -3443,32 +3443,14 @@
         // Disable type radios
         document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(r) { r.disabled = true; });
 
-        // Show edit-mode hint for edit key
-        var editKeyHint = document.getElementById('edit-key-hint');
-        var editKeyHintEdit = document.getElementById('edit-key-hint-edit');
-        if (editKeyHint) editKeyHint.style.display = 'none';
-        if (editKeyHintEdit) editKeyHintEdit.style.display = '';
+        // Hide edit key card in edit mode (already verified on detail page)
+        var editKeyCard = document.getElementById('edit-key-card');
+        if (editKeyCard) editKeyCard.style.display = 'none';
 
-        // Clear edit key input
-        var editKeyInput = document.getElementById('edit-key-input');
-        if (editKeyInput) {
-          editKeyInput.value = '';
-          // Unlock fields when 4-digit key is entered
-          editKeyInput.addEventListener('input', function onEditKeyInput() {
-            var val = editKeyInput.value.trim();
-            if (val.length === 4 && /^[0-9]{4}$/.test(val)) {
-              // Unlock genus, name, and type fields
-              if (contributeGenus) contributeGenus.disabled = false;
-              if (contributeName) contributeName.disabled = false;
-              document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(r) { r.disabled = false; });
-            } else {
-              // Re-lock if key is incomplete
-              if (contributeGenus) contributeGenus.disabled = true;
-              if (contributeName) contributeName.disabled = true;
-              document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(r) { r.disabled = true; });
-            }
-          });
-        }
+        // Unlock genus, name, type fields (key was already verified)
+        if (contributeGenus) contributeGenus.disabled = false;
+        if (contributeName) contributeName.disabled = false;
+        document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(r) { r.disabled = false; });
       };
 
       window.exitEditMode = function() {
@@ -3485,7 +3467,10 @@
         if (contributeName) contributeName.disabled = false;
         document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(r) { r.disabled = false; });
 
-        // Clear edit key and restore hints
+        // Clear edit key and restore card/hints
+        verifiedEditKey = null;
+        var editKeyCard = document.getElementById('edit-key-card');
+        if (editKeyCard) editKeyCard.style.display = '';
         var editKeyInput = document.getElementById('edit-key-input');
         if (editKeyInput) editKeyInput.value = '';
         var editKeyHint = document.getElementById('edit-key-hint');
@@ -3661,16 +3646,18 @@
           if (!genus) { showToast(t('error_genus_required'), true); return; }
           if (!name) { showToast(t('error_name_required'), true); return; }
 
-          // Edit key validation (required, must be exactly 4 digits)
-          var editKeyInput = document.getElementById('edit-key-input');
-          var editKeyVal = editKeyInput ? editKeyInput.value.trim() : '';
-          if (!editKeyVal) {
-            showToast('編集キーを記入してください', true);
-            return;
-          }
-          if (!/^[0-9]{4}$/.test(editKeyVal)) {
-            showToast('編集キーは4桁の数字で入力してください', true);
-            return;
+          // Edit key validation (required for new registration, skip in edit mode)
+          if (!editMode) {
+            var editKeyInput = document.getElementById('edit-key-input');
+            var editKeyVal = editKeyInput ? editKeyInput.value.trim() : '';
+            if (!editKeyVal) {
+              showToast('編集キーを記入してください', true);
+              return;
+            }
+            if (!/^[0-9]{4}$/.test(editKeyVal)) {
+              showToast('編集キーは4桁の数字で入力してください', true);
+              return;
+            }
           }
 
           // Build full name
@@ -3741,13 +3728,12 @@
 
             // Update in Supabase
             var sbClient = window._supabaseClient;
-            var editKeyInput = document.getElementById('edit-key-input');
-            var editKeyValue = editKeyInput ? editKeyInput.value.trim() : '';
+            var editKeyValue = verifiedEditKey || '';
             var nameChanged = fullName !== editCultivarKey;
             var updatePromise;
 
-            if (sbClient && editKeyValue && editKeyValue.length === 4) {
-              // Edit key provided: hash client-side, verify, then use RPC for full update
+            if (sbClient && editKeyValue) {
+              // Edit key verified: hash client-side, then use RPC for full update
               var encoder = new TextEncoder();
               var keyData = encoder.encode(editKeyValue);
               updatePromise = crypto.subtle.digest('SHA-256', keyData).then(function(buffer) {
