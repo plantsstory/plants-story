@@ -3926,14 +3926,12 @@
               }
 
               return updatePromise.then(function() {
-                // Upload gallery images if any
-                if (sbClient && editGalleryFiles.length > 0) {
+                // Upload gallery images if any (use same uploadGalleryImage as new registration)
+                if (editGalleryFiles.length > 0 && typeof window.uploadGalleryImage === 'function') {
                   return Promise.all(editGalleryFiles.map(function(file) {
-                    var ext = file.name.split('.').pop();
-                    var path = 'cultivar-images/' + editGalleryName.replace(/[^a-zA-Z0-9]/g, '_') + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 6) + '.' + ext;
-                    return sbClient.storage.from('gallery-images').upload(path, file, { upsert: true }).then(function(res) {
-                      if (res.error) { console.warn('Gallery upload error:', res.error); return null; }
-                      return path;
+                    return window.uploadGalleryImage(file, editGalleryName).catch(function(err) {
+                      console.warn('Gallery image upload failed:', file.name, err);
+                      return null;
                     });
                   }));
                 }
