@@ -2177,7 +2177,7 @@
           return item.type !== 'seedling';
         }).sort(function(a, b) {
           return (b.created_at || '').localeCompare(a.created_at || '');
-        }).slice(0, 6);
+        }).slice(0, 3);
 
         if (items.length === 0) {
           grid.innerHTML = '<div class="text-center text-muted" style="grid-column:1/-1;padding:var(--space-xl);">まだ品種が登録されていません。</div>';
