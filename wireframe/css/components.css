@@ -447,6 +447,57 @@
   color: var(--color-mid);
 }
 
+.badge--verified {
+  background: #2D6A4F;
+  border-color: #1B4332;
+  color: #fff;
+}
+
+/* Verification details */
+.verification-details {
+  margin-top: 8px;
+  border-top: 1px solid var(--color-border, #e0e0e0);
+  padding-top: 8px;
+}
+
+.verification-toggle {
+  background: none;
+  border: none;
+  color: var(--color-primary, #2D6A4F);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0;
+}
+
+.verification-toggle:hover {
+  text-decoration: underline;
+}
+
+.claim {
+  padding: 3px 0;
+  font-size: 0.85rem;
+}
+
+.claim--verified { color: #2D6A4F; }
+.claim--partial { color: #D4A373; }
+.claim--unverifiable { color: #6c757d; }
+.claim--contradicted { color: #BC4749; }
+
+.verification-warnings {
+  color: #BC4749;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.found-source {
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.found-source a {
+  color: var(--color-primary, #2D6A4F);
+}
+
 /* Genus page tabs */
 .genus-tabs {
   display: flex;

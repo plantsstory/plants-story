@@ -927,14 +927,26 @@ async function deleteCultivar(id, name) {
 async function reresearchCultivar(id) {
   var c = allCultivars.find(function(x) { return x.id === id; });
   if (!c) return;
-  if (!confirm('「' + c.cultivar_name + '」のAI由来リサーチを再実行しますか？')) return;
+  var actionLabel = (c.type === 'clone' || c.type === 'hybrid') ? 'AI検証' : 'AI由来リサーチ';
+  if (!confirm('「' + c.cultivar_name + '」の' + actionLabel + 'を再実行しますか？')) return;
 
-  toast('AIリサーチを開始...');
+  toast(actionLabel + 'を開始...');
+  // For CLONE/hybrid, extract user text from existing origins for re-verification
+  var payload = { cultivar_id: c.id, cultivar_name: c.cultivar_name, genus: c.genus, type: c.type };
+  if (c.type === 'clone' || c.type === 'hybrid') {
+    var userOrigin = (c.origins || []).find(function(o) {
+      return o.source_type === 'user_verified' || o.source_type === 'manual' || (o.author && o.author.isAI === false);
+    });
+    if (userOrigin) {
+      payload.user_text = userOrigin.body || '';
+      payload.user_sources = (userOrigin.sources || []).map(function(s) { return s.url || s.text || ''; }).filter(Boolean);
+    }
+  }
   try {
     var res = await fetch(SUPABASE_URL + '/functions/v1/research-origin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-      body: JSON.stringify({ cultivar_id: c.id, cultivar_name: c.cultivar_name, genus: c.genus, type: c.type })
+      body: JSON.stringify(payload)
     });
     var data = await res.json();
     if (data.success) {
@@ -1001,6 +1013,8 @@ function loadOrigins() {
       var authorLabel;
       if (o.source_type === 'ipni_powo') {
         authorLabel = '<span class="badge badge-s" style="font-size:0.65rem;">IPNI/Kew</span>';
+      } else if (o.source_type === 'user_verified') {
+        authorLabel = '<span class="badge" style="background:#2D6A4F;color:#fff;font-size:0.65rem;">AI検証済</span>';
       } else if (o.author && o.author.isAI) {
         authorLabel = '<span class="badge badge-ai">AI</span>';
       } else {

@@ -767,6 +767,92 @@ ${hasExternalData ? "- External data was found: set confidence higher (0.5-0.9) 
 }
 
 // ============================================================
+// Build verification prompt for user-written CLONE/Hybrid origins
+// ============================================================
+function buildVerificationPrompt(
+  cultivarName: string,
+  genus: string,
+  plantType: string,
+  userText: string,
+  userSources: string[],
+  ext: ExternalData
+): string {
+  const externalContext = buildExternalDataContext(ext);
+  const sourcesBlock = userSources.length > 0
+    ? `\n=== USER-PROVIDED SOURCE LINKS ===\n${userSources.map((u, i) => `${i + 1}. ${u}`).join("\n")}\n`
+    : "\n(No source links provided by user)\n";
+
+  return `You are a botanical FACT-CHECKER verifying a user-written description of the ${plantType} cultivar "${cultivarName}" (genus: ${genus}).
+
+=== USER'S DESCRIPTION ===
+${userText}
+${sourcesBlock}${externalContext}
+=== YOUR TASK ===
+Cross-reference the user's claims against the external database results above and your own knowledge.
+Extract each factual claim from the user's text and determine if it can be verified.
+
+=== CRITICAL RULES ===
+1. Do NOT rewrite, improve, or modify the user's text. You are ONLY evaluating accuracy.
+2. Be fair: "unverifiable" does NOT mean "false". Community knowledge that cannot be formally confirmed should be rated honestly.
+3. If external data confirms a claim, cite the specific source.
+4. If external data contradicts a claim, flag it as a warning with the correct information.
+5. Include any reliable sources you discover during verification in found_sources.
+
+=== SOURCE RELIABILITY RANKING ===
+- academic: Peer-reviewed papers, taxonomic journals (Aroideana, Phytotaxa, etc.) → Tier A
+- database: Official databases (Wikidata, IPNI, USPTO patents, botanical garden records) → Tier B
+- community: Hobbyist publications, collector forums, nursery records with evidence → Tier C
+- unverifiable: No corroborating sources found → Tier D
+
+=== OUTPUT FORMAT ===
+Return ONLY valid JSON (no markdown):
+{
+  "verification_tier": "A|B|C|D",
+  "confidence": 0.0-1.0,
+  "claims_verified": [
+    {
+      "claim": "short description of the factual claim",
+      "status": "verified|partially_verified|unverifiable|contradicted",
+      "source": "what source verified or contradicted this (or empty string)"
+    }
+  ],
+  "source_quality": "academic|database|community|unverifiable",
+  "found_sources": [
+    {
+      "url": "https://...",
+      "label": "Source name (year)",
+      "reliability": "high|medium|low"
+    }
+  ],
+  "verification_summary_jp": "検証結果の1-2文要約（日本語）",
+  "verification_summary_en": "1-2 sentence verification summary",
+  "warnings": ["Any contradictions or red flags (empty array if none)"]
+}
+
+=== TIER ASSIGNMENT RULES ===
+- A: Key claims verified by academic papers or patent records
+- B: Key claims verified by official databases (Wikidata, institutional records)
+- C: Claims match community/collector knowledge but no formal verification
+- D: Claims cannot be verified or are contradicted by evidence
+- confidence: How confident you are in your verification assessment (0.0-1.0)`;
+}
+
+// ============================================================
+// Calculate trust from verification result
+// ============================================================
+function calculateVerificationTrust(
+  verificationTier: string,
+  confidence: number
+): number {
+  const tier = verificationTier || "D";
+  const tierInfo = TIER_CONFIG[tier] || TIER_CONFIG.D;
+  const conf = Math.max(0, Math.min(1, confidence || 0));
+  let trust = Math.round(tierInfo.base_min + (tierInfo.base_max - tierInfo.base_min) * conf);
+  trust = Math.max(tierInfo.base_min, Math.min(tierInfo.base_max, trust));
+  return trust;
+}
+
+// ============================================================
 // Enhanced trust calculation for external data
 // ============================================================
 function calculateEnhancedTrust(
@@ -802,7 +888,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { cultivar_id, genus, cultivar_name, type, manual_origins } = await req.json();
+    const { cultivar_id, genus, cultivar_name, type, manual_origins, user_text, user_sources } = await req.json();
 
     if (!cultivar_id || !cultivar_name) {
       return new Response(
@@ -1007,176 +1093,300 @@ Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特
     }
 
     // ================================================================
-    // ROUTE B: Cultivar/Hybrid/Clone OR Species not found → AI research
+    // ROUTE B: CLONE/Hybrid → AI VERIFICATION of user text
+    //          Species not found → AI generation (legacy)
     // ================================================================
     if (originEntries.length === 0) {
-      console.log(`[Research] AI research for: ${cultivar_name} (type: ${plantType})`);
-
-      // Extract cultivar epithet for external searches
-      // e.g., "Anthurium 'Dark Mama'" → "Dark Mama"
-      // e.g., "Monstera deliciosa 'Thai Constellation'" → "Thai Constellation"
       const epithetMatch = cultivar_name.match(/'([^']+)'/);
       const cultivarEpithet = epithetMatch ? epithetMatch[1] : cultivar_name.split(/\s+/).slice(1).join(" ");
       const effectiveGenus = genus || parsed.genus;
 
-      // Gather external data for hybrid/clone types
-      let externalData: ExternalData = { wikidata: null, papers: [] };
+      // ---- CLONE/Hybrid: Verify user text (no AI generation) ----
       if (plantType === "hybrid" || plantType === "clone") {
-        console.log(`[Research] Gathering external data for ${plantType}: ${effectiveGenus} ${cultivarEpithet}`);
-        externalData = await gatherExternalData(effectiveGenus, cultivarEpithet);
-        const hasWd = externalData.wikidata ? "yes" : "no";
-        const paperCount = externalData.papers.length;
-        console.log(`[Research] External data: wikidata=${hasWd}, papers=${paperCount}`);
-      }
+        // Resolve user text: prefer passed user_text, fallback to DB manual origins
+        let effectiveUserText = (user_text || "").trim();
+        let effectiveUserSources: string[] = Array.isArray(user_sources) ? user_sources.filter(Boolean) : [];
 
-      // Build type-specific prompt
-      let researchPrompt: string;
-      if (plantType === "hybrid") {
-        researchPrompt = buildHybridResearchPrompt(cultivar_name, effectiveGenus, externalData);
-      } else if (plantType === "clone") {
-        researchPrompt = buildCloneResearchPrompt(cultivar_name, effectiveGenus, externalData);
-      } else {
-        researchPrompt = buildCultivarResearchPrompt(cultivar_name, effectiveGenus, plantType);
-      }
-
-      let researchResult: any = null;
-
-      // Try Gemini first
-      if (geminiApiKey) {
-        try {
-          console.log("Trying Gemini for cultivar research...");
-          const text = await callGemini(geminiApiKey, researchPrompt, 3000);
-          researchResult = extractJson(text);
-          if (researchResult?.origins?.length) {
-            researchSource = "gemini";
-            console.log(`Gemini returned ${researchResult.origins.length} origins`);
-          } else {
-            researchResult = null;
-          }
-        } catch (e) {
-          console.log("Gemini failed:", String(e));
-        }
-      }
-
-      // Fallback: Groq
-      if (!researchResult && groqApiKey) {
-        try {
-          console.log("Using Groq (Llama 3.3 70B) for research...");
-          const text = await callGroq(
-            groqApiKey,
-            "llama-3.3-70b-versatile",
-            "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
-            researchPrompt,
-            3000
+        if (!effectiveUserText) {
+          // Try to find user text from manual_origins or DB
+          const userOrigin = manualOrigins.find(
+            (o: any) => o.source_type === "user_verified" || o.source_type === "manual" || (o.author && o.author.isAI === false)
           );
-          researchResult = extractJson(text);
-          if (researchResult?.origins?.length) {
-            researchSource = "groq-llama3.3-70b";
-            console.log(`Groq returned ${researchResult.origins.length} origins`);
+          if (userOrigin) {
+            effectiveUserText = userOrigin.body || "";
+            effectiveUserSources = (userOrigin.sources || []).map((s: any) => s.url || s.text || "").filter(Boolean);
           }
-        } catch (e) {
-          console.error("Groq error:", e);
         }
-      }
 
-      // Fallback 3: GPT-4o mini
-      if (!researchResult && openaiApiKey) {
-        try {
-          console.log("Using GPT-4o mini for cultivar research...");
-          const text = await callOpenAI(
-            openaiApiKey,
-            "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
-            researchPrompt,
-            3000
+        if (!effectiveUserText) {
+          // No user text available — skip AI, just mark completed
+          console.log(`[Verify] No user text for ${plantType} "${cultivar_name}", skipping verification`);
+          researchSource = "none";
+        } else {
+          console.log(`[Verify] Verifying user text for ${plantType}: ${cultivar_name} (${effectiveUserText.length} chars)`);
+
+          // Gather external data for cross-referencing
+          let externalData: ExternalData = { wikidata: null, papers: [] };
+          console.log(`[Verify] Gathering external data for ${plantType}: ${effectiveGenus} ${cultivarEpithet}`);
+          externalData = await gatherExternalData(effectiveGenus, cultivarEpithet);
+          const hasWd = externalData.wikidata ? "yes" : "no";
+          const paperCount = externalData.papers.length;
+          console.log(`[Verify] External data: wikidata=${hasWd}, papers=${paperCount}`);
+
+          // Build verification prompt
+          const verifyPrompt = buildVerificationPrompt(
+            cultivar_name, effectiveGenus, plantType,
+            effectiveUserText, effectiveUserSources, externalData
           );
-          researchResult = extractJson(text);
-          if (researchResult?.origins?.length) {
-            researchSource = "gpt-4o-mini";
-            console.log(`GPT-4o mini returned ${researchResult.origins.length} origins`);
-          }
-        } catch (e) {
-          console.error("GPT-4o mini error:", e);
-        }
-      }
 
-      // Process AI results
-      if (researchResult?.origins?.length) {
-        for (const origin of researchResult.origins) {
-          let tier = origin.source_tier || "D";
-          const aiConf = Math.max(0, Math.min(1, origin.confidence || 0));
+          let verifyResult: any = null;
 
-          // Enhanced trust: if external data found, boost tier/trust
-          let trust: number;
-          if (plantType === "hybrid" || plantType === "clone") {
-            const enhanced = calculateEnhancedTrust(externalData, tier, aiConf);
-            if (enhanced.trust >= 0) {
-              tier = enhanced.tier;
-              trust = enhanced.trust;
-              console.log(`[Trust] Enhanced: tier=${tier}, trust=${trust} (external data boost)`);
-            } else {
-              const tierInfo = TIER_CONFIG[tier] || TIER_CONFIG.D;
-              trust = Math.round(tierInfo.base_min + (tierInfo.base_max - tierInfo.base_min) * aiConf);
-              trust = Math.max(tierInfo.base_min, Math.min(tierInfo.base_max, trust));
+          // LLM cascade for verification
+          if (geminiApiKey) {
+            try {
+              console.log("[Verify] Trying Gemini...");
+              const text = await callGemini(geminiApiKey, verifyPrompt, 3000);
+              verifyResult = extractJson(text);
+              if (verifyResult?.verification_tier) {
+                researchSource = "gemini-verify";
+                console.log(`[Verify] Gemini OK: tier=${verifyResult.verification_tier}`);
+              } else {
+                verifyResult = null;
+              }
+            } catch (e) {
+              console.log("[Verify] Gemini failed:", String(e));
             }
+          }
+
+          if (!verifyResult && groqApiKey) {
+            try {
+              console.log("[Verify] Trying Groq...");
+              const text = await callGroq(
+                groqApiKey, "llama-3.3-70b-versatile",
+                "You are a botanical fact-checker. Respond ONLY with valid JSON, no markdown.",
+                verifyPrompt, 3000
+              );
+              verifyResult = extractJson(text);
+              if (verifyResult?.verification_tier) {
+                researchSource = "groq-verify";
+                console.log(`[Verify] Groq OK: tier=${verifyResult.verification_tier}`);
+              }
+            } catch (e) {
+              console.log("[Verify] Groq failed:", String(e));
+            }
+          }
+
+          if (!verifyResult && openaiApiKey) {
+            try {
+              console.log("[Verify] Trying GPT-4o mini...");
+              const text = await callOpenAI(
+                openaiApiKey,
+                "You are a botanical fact-checker. Respond ONLY with valid JSON, no markdown.",
+                verifyPrompt, 3000
+              );
+              verifyResult = extractJson(text);
+              if (verifyResult?.verification_tier) {
+                researchSource = "gpt4o-mini-verify";
+                console.log(`[Verify] GPT-4o mini OK: tier=${verifyResult.verification_tier}`);
+              }
+            } catch (e) {
+              console.log("[Verify] GPT-4o mini failed:", String(e));
+            }
+          }
+
+          // Build verified origin entry
+          if (verifyResult?.verification_tier) {
+            const vTier = verifyResult.verification_tier || "D";
+            const vConf = Math.max(0, Math.min(1, verifyResult.confidence || 0));
+            const trust = calculateVerificationTrust(vTier, vConf);
+            const tierInfo = TIER_CONFIG[vTier] || TIER_CONFIG.D;
+
+            let trustClass = "trust--low";
+            if (trust >= 70) trustClass = "trust--high";
+            else if (trust >= 40) trustClass = "trust--mid";
+
+            // Build sources: user sources + AI-found sources + external DB sources
+            const sourcesArr: any[] = effectiveUserSources.map(u => ({ url: u, label: u }));
+            const foundSources = verifyResult.found_sources || [];
+            for (const fs of foundSources) {
+              if (fs.url) sourcesArr.push({ url: fs.url, label: fs.label || fs.url });
+            }
+            if (externalData.wikidata) {
+              sourcesArr.push({ url: externalData.wikidata.wikidataUrl, label: "Wikidata" });
+            }
+            for (const paper of externalData.papers) {
+              sourcesArr.push({ url: `https://doi.org/${paper.doi}`, label: `${paper.journal} (${paper.year})` });
+            }
+
+            originEntries.push({
+              body: effectiveUserText,
+              body_en: "",
+              trust,
+              trustClass,
+              source_type: "user_verified",
+              source_tier: vTier,
+              source_tier_label_en: tierInfo.label_en,
+              source_tier_label_jp: tierInfo.label_jp,
+              source_name: "",
+              source_url: "",
+              source_language: "ja",
+              parentage: null,
+              discovery_year: null,
+              discoverer_or_breeder: null,
+              native_region: null,
+              first_description: null,
+              verification: {
+                claims: verifyResult.claims_verified || [],
+                summary_jp: verifyResult.verification_summary_jp || "",
+                summary_en: verifyResult.verification_summary_en || "",
+                warnings: verifyResult.warnings || [],
+                source_quality: verifyResult.source_quality || "unverifiable",
+                found_sources: foundSources,
+                verified_at: new Date().toISOString(),
+              },
+              author: {
+                name: "User",
+                isAI: false,
+                date: new Date().toISOString().split("T")[0],
+              },
+              sources: sourcesArr,
+              votes: { agree: 0, disagree: 0 },
+              verified: false,
+            });
           } else {
+            // Verification LLM failed — save user text without verification
+            console.log("[Verify] All LLMs failed, saving user text without verification");
+            const tierInfo = TIER_CONFIG.D;
+            originEntries.push({
+              body: effectiveUserText,
+              body_en: "",
+              trust: 20,
+              trustClass: "trust--low",
+              source_type: "manual",
+              source_tier: "D",
+              source_tier_label_en: tierInfo.label_en,
+              source_tier_label_jp: tierInfo.label_jp,
+              source_name: "",
+              source_url: "",
+              source_language: "ja",
+              parentage: null,
+              discovery_year: null,
+              discoverer_or_breeder: null,
+              native_region: null,
+              first_description: null,
+              author: {
+                name: "User",
+                isAI: false,
+                date: new Date().toISOString().split("T")[0],
+              },
+              sources: effectiveUserSources.map(u => ({ url: u, label: u })),
+              votes: { agree: 0, disagree: 0 },
+              verified: false,
+            });
+          }
+        }
+
+      // ---- Species fallback: AI generation (unchanged) ----
+      } else {
+        console.log(`[Research] AI research for: ${cultivar_name} (type: ${plantType})`);
+
+        let externalData: ExternalData = { wikidata: null, papers: [] };
+        const researchPrompt = buildCultivarResearchPrompt(cultivar_name, effectiveGenus, plantType);
+
+        let researchResult: any = null;
+
+        if (geminiApiKey) {
+          try {
+            console.log("Trying Gemini for cultivar research...");
+            const text = await callGemini(geminiApiKey, researchPrompt, 3000);
+            researchResult = extractJson(text);
+            if (researchResult?.origins?.length) {
+              researchSource = "gemini";
+            } else {
+              researchResult = null;
+            }
+          } catch (e) {
+            console.log("Gemini failed:", String(e));
+          }
+        }
+
+        if (!researchResult && groqApiKey) {
+          try {
+            const text = await callGroq(
+              groqApiKey, "llama-3.3-70b-versatile",
+              "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
+              researchPrompt, 3000
+            );
+            researchResult = extractJson(text);
+            if (researchResult?.origins?.length) {
+              researchSource = "groq-llama3.3-70b";
+            }
+          } catch (e) {
+            console.error("Groq error:", e);
+          }
+        }
+
+        if (!researchResult && openaiApiKey) {
+          try {
+            const text = await callOpenAI(
+              openaiApiKey,
+              "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
+              researchPrompt, 3000
+            );
+            researchResult = extractJson(text);
+            if (researchResult?.origins?.length) {
+              researchSource = "gpt-4o-mini";
+            }
+          } catch (e) {
+            console.error("GPT-4o mini error:", e);
+          }
+        }
+
+        if (researchResult?.origins?.length) {
+          for (const origin of researchResult.origins) {
+            const tier = origin.source_tier || "D";
+            const aiConf = Math.max(0, Math.min(1, origin.confidence || 0));
             const tierInfo = TIER_CONFIG[tier] || TIER_CONFIG.D;
-            trust = Math.round(tierInfo.base_min + (tierInfo.base_max - tierInfo.base_min) * aiConf);
+            let trust = Math.round(tierInfo.base_min + (tierInfo.base_max - tierInfo.base_min) * aiConf);
             trust = Math.max(tierInfo.base_min, Math.min(tierInfo.base_max, trust));
+
+            let bodyJp = origin.description_jp || "";
+            const bodyEn = origin.description_en || "";
+            if (!bodyJp || bodyJp.length < 15) bodyJp = bodyEn;
+
+            let trustClass = "trust--low";
+            if (trust >= 70) trustClass = "trust--high";
+            else if (trust >= 40) trustClass = "trust--mid";
+
+            const sourcesArr: any[] = origin.source_url ? [{ url: origin.source_url, label: origin.source_name }] : [];
+
+            originEntries.push({
+              body: bodyJp,
+              body_en: bodyEn,
+              trust,
+              trustClass,
+              source_type: "ai_research",
+              source_tier: tier,
+              source_tier_label_en: tierInfo.label_en,
+              source_tier_label_jp: tierInfo.label_jp,
+              source_name: origin.source_name || "",
+              source_url: origin.source_url || "",
+              source_language: origin.source_language || "en",
+              parentage: origin.parentage || null,
+              discovery_year: origin.discovery_year || null,
+              discoverer_or_breeder: origin.discoverer_or_breeder || null,
+              native_region: origin.native_region || null,
+              first_description: origin.first_description || null,
+              author: {
+                name: researchSource === "gemini" ? "AI (Gemini 2.0 Flash)" : researchSource === "gpt-4o-mini" ? "AI (GPT-4o mini)" : "AI (Llama 3.3 70B)",
+                isAI: true,
+                date: new Date().toISOString().split("T")[0],
+              },
+              sources: sourcesArr,
+              votes: { agree: 0, disagree: 0 },
+              verified: false,
+            });
           }
-
-          const tierInfo = TIER_CONFIG[tier] || TIER_CONFIG.D;
-
-          let bodyJp = origin.description_jp || "";
-          const bodyEn = origin.description_en || "";
-
-          // JP fallback
-          if (!bodyJp || bodyJp.length < 15) {
-            bodyJp = bodyEn;
-          }
-
-          let trustClass = "trust--low";
-          if (trust >= 70) trustClass = "trust--high";
-          else if (trust >= 40) trustClass = "trust--mid";
-
-          // Determine source_type based on external data availability
-          const hasExternal = externalData.wikidata || externalData.papers.length > 0;
-          const sourceType = hasExternal ? "ai_research_enhanced" : "ai_research";
-
-          // Build sources array including external references
-          const sourcesArr: any[] = origin.source_url ? [{ url: origin.source_url, label: origin.source_name }] : [];
-          if (externalData.wikidata) {
-            sourcesArr.push({ url: externalData.wikidata.wikidataUrl, label: "Wikidata" });
-          }
-          for (const paper of externalData.papers) {
-            sourcesArr.push({ url: `https://doi.org/${paper.doi}`, label: `${paper.journal} (${paper.year})` });
-          }
-
-          originEntries.push({
-            body: bodyJp,
-            body_en: bodyEn,
-            trust,
-            trustClass,
-            source_type: sourceType,
-            source_tier: tier,
-            source_tier_label_en: tierInfo.label_en,
-            source_tier_label_jp: tierInfo.label_jp,
-            source_name: origin.source_name || "",
-            source_url: origin.source_url || "",
-            source_language: origin.source_language || "en",
-            parentage: origin.parentage || null,
-            discovery_year: origin.discovery_year || null,
-            discoverer_or_breeder: origin.discoverer_or_breeder || null,
-            native_region: origin.native_region || null,
-            first_description: origin.first_description || null,
-            author: {
-              name: researchSource === "gemini" ? "AI (Gemini 2.0 Flash)" : researchSource === "gpt-4o-mini" ? "AI (GPT-4o mini)" : "AI (Llama 3.3 70B)",
-              isAI: true,
-              date: new Date().toISOString().split("T")[0],
-            },
-            sources: sourcesArr,
-            votes: { agree: 0, disagree: 0 },
-            verified: false,
-          });
         }
       }
     }

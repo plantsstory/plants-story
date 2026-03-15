@@ -862,6 +862,7 @@
         <div class="form-group">
           <label class="form-label" data-i18n="label_description">説明</label>
           <textarea class="form-textarea" placeholder="この品種の由来や歴史を記述してください..."></textarea>
+          <p class="form-hint" id="origin-ai-hint" style="display:none;"></p>
         </div>
 
         <!-- Breeding formula (hybrid only) -->
@@ -1951,7 +1952,14 @@
                 var manualOrigins = (entry.origins || []).filter(function(o) {
                   return o.source_type === 'manual' || (o.author && o.author.isAI === false);
                 });
-                triggerAIResearch(insertedId, meta.genus, fullName, meta.type || 'Hybrid', manualOrigins);
+                // Extract user text and sources for CLONE/hybrid verification
+                var userText = '';
+                var userSources = [];
+                if (manualOrigins.length > 0) {
+                  userText = manualOrigins[0].body || '';
+                  userSources = (manualOrigins[0].sources || []).map(function(s) { return s.text || s.url || ''; }).filter(Boolean);
+                }
+                triggerAIResearch(insertedId, meta.genus, fullName, meta.type || 'Hybrid', manualOrigins, userText, userSources);
               }
             }
           });
@@ -1969,7 +1977,7 @@
       var aiPollingTimers = {};
 
       // Trigger AI research for a cultivar
-      function triggerAIResearch(cultivarId, genus, cultivarName, type, manualOrigins) {
+      function triggerAIResearch(cultivarId, genus, cultivarName, type, manualOrigins, userText, userSources) {
         console.log('Triggering AI research for:', cultivarName);
         var payload = {
           cultivar_id: cultivarId,
@@ -1980,6 +1988,13 @@
         // Pass manual origins directly so Edge Function doesn't need to race with DB
         if (manualOrigins && manualOrigins.length > 0) {
           payload.manual_origins = manualOrigins;
+        }
+        // Pass user text and sources for CLONE/hybrid verification
+        if (userText) {
+          payload.user_text = userText;
+        }
+        if (userSources && userSources.length > 0) {
+          payload.user_sources = userSources;
         }
         fetch(EDGE_FUNCTION_URL, {
           method: 'POST',
@@ -2425,6 +2440,48 @@
         // Body
         html += '<div class="origin-card__body"><p>' + origin.body + '</p></div>';
 
+        // Verification details (user_verified origins)
+        if (origin.source_type === 'user_verified' && origin.verification) {
+          var v = origin.verification;
+          var vid = 'verify-detail-' + i;
+          html += '<div class="verification-details">';
+          html += '<button class="verification-toggle" onclick="var el=document.getElementById(\'' + vid + '\');el.style.display=el.style.display===\'none\'?\'block\':\'none\';this.textContent=el.style.display===\'none\'?\'\\u691c\\u8a3c\\u8a73\\u7d30 \\u25BC\':\'\\u691c\\u8a3c\\u8a73\\u7d30 \\u25B2\'">検証詳細 &#x25BC;</button>';
+          html += '<div id="' + vid + '" style="display:none;margin-top:8px;">';
+          // Verification summary
+          if (v.summary_jp) {
+            html += '<div class="text-sm" style="margin-bottom:8px;font-style:italic;">' + v.summary_jp + '</div>';
+          }
+          // Individual claims
+          if (v.claims && v.claims.length > 0) {
+            v.claims.forEach(function(c) {
+              var statusIcon = '?';
+              var statusClass = 'claim--unverifiable';
+              if (c.status === 'verified') { statusIcon = '\\u2713'; statusClass = 'claim--verified'; }
+              else if (c.status === 'partially_verified') { statusIcon = '~'; statusClass = 'claim--partial'; }
+              else if (c.status === 'contradicted') { statusIcon = '\\u26A0'; statusClass = 'claim--contradicted'; }
+              html += '<div class="claim ' + statusClass + '">' + statusIcon + ' ' + c.claim;
+              if (c.source) html += ' <span class="text-gray text-xs">(' + c.source + ')</span>';
+              html += '</div>';
+            });
+          }
+          // Warnings
+          if (v.warnings && v.warnings.length > 0) {
+            v.warnings.forEach(function(w) {
+              html += '<div class="verification-warnings">&#x26A0; ' + w + '</div>';
+            });
+          }
+          // AI-found sources
+          if (v.found_sources && v.found_sources.length > 0) {
+            html += '<div class="text-sm font-bold" style="margin-top:8px;">AI\u304c\u767a\u898b\u3057\u305f\u30ea\u30f3\u30af:</div>';
+            v.found_sources.forEach(function(fs) {
+              var reliabilityColor = fs.reliability === 'high' ? '#2D6A4F' : fs.reliability === 'medium' ? '#D4A373' : '#6c757d';
+              html += '<div class="found-source"><a href="' + fs.url + '" target="_blank" rel="noopener">' + (fs.label || fs.url) + '</a>';
+              html += ' <span style="font-size:0.75rem;color:' + reliabilityColor + ';">(' + fs.reliability + ')</span></div>';
+            });
+          }
+          html += '</div></div>';
+        }
+
         // Sources
         html += '<div class="origin-card__sources">';
         html += '<div class="text-sm font-bold mb-sm">情報元:</div>';
@@ -2467,17 +2524,19 @@
         html += '<div class="origin-card__author">';
         if (origin.source_type === 'ipni_powo') {
           html += '<span class="badge badge--ai" style="background:#8b5cf6;">&#x1F4DA; IPNI/Kew</span>';
-        } else if (origin.author.isAI) {
+        } else if (origin.source_type === 'user_verified') {
+          html += '<span class="badge badge--verified">&#x2705; AI&#x691C;&#x8A3C;&#x6E08;</span>';
+        } else if (origin.author && origin.author.isAI) {
           html += '<span class="badge badge--ai">&#x1F916; AI</span>';
         } else {
           html += '<span>&#x1F464;</span>';
-          html += '<span>' + origin.author.name + '</span>';
+          html += '<span>' + (origin.author ? origin.author.name : 'User') + '</span>';
         }
-        html += '<span class="text-gray">' + origin.author.date + '</span>';
+        html += '<span class="text-gray">' + (origin.author ? origin.author.date : '') + '</span>';
         html += '</div>';
         html += '<div class="vote-group">';
-        html += '<button class="vote-btn vote-btn--agree">&#x1F44D; 賛成 <span class="vote-btn__count">' + origin.votes.agree + '</span></button>';
-        html += '<button class="vote-btn vote-btn--disagree">&#x1F44E; 反対 <span class="vote-btn__count">' + origin.votes.disagree + '</span></button>';
+        html += '<button class="vote-btn vote-btn--agree">&#x1F44D; 賛成 <span class="vote-btn__count">' + (origin.votes ? origin.votes.agree : 0) + '</span></button>';
+        html += '<button class="vote-btn vote-btn--disagree">&#x1F44E; 反対 <span class="vote-btn__count">' + (origin.votes ? origin.votes.disagree : 0) + '</span></button>';
         html += '</div>';
         html += '</div>';
 
@@ -3759,6 +3818,7 @@
       // Show/hide formula and parent photos based on type
       var parentPhotosSection = document.getElementById('parent-photos-section');
       var creatorNameSection = document.getElementById('creator-name-section');
+      var originAiHint = document.getElementById('origin-ai-hint');
       document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(radio) {
         radio.addEventListener('change', function() {
           var formulaGroup = formulaSection ? formulaSection.closest('.form-group') : null;
@@ -3766,14 +3826,18 @@
             if (formulaGroup) formulaGroup.style.display = 'none';
             if (parentPhotosSection) parentPhotosSection.style.display = 'none';
             if (creatorNameSection) creatorNameSection.style.display = 'none';
+            if (originAiHint) { originAiHint.textContent = 'AIが自動で由来を調査します'; originAiHint.style.display = ''; }
           } else if (this.value === 'seedling') {
             if (formulaGroup) formulaGroup.style.display = '';
             if (parentPhotosSection) parentPhotosSection.style.display = '';
             if (creatorNameSection) creatorNameSection.style.display = '';
+            if (originAiHint) originAiHint.style.display = 'none';
           } else {
+            // clone or hybrid
             if (formulaGroup) formulaGroup.style.display = '';
             if (parentPhotosSection) parentPhotosSection.style.display = 'none';
             if (creatorNameSection) creatorNameSection.style.display = 'none';
+            if (originAiHint) { originAiHint.textContent = '由来を記入するとAIが内容を検証し、信頼度スコアを算出します'; originAiHint.style.display = ''; }
           }
         });
       });
@@ -4412,6 +4476,15 @@
               if (failed.length > 0) {
                 console.error('Failed to save origin to DB:', failed[0].error);
                 showToast('DB保存に失敗しました', true);
+              } else {
+                // Trigger AI verification for CLONE/hybrid after origin is saved
+                var cData = cultivarData[cultivarName];
+                var cType = cData && cData._type;
+                if ((cType === 'clone' || cType === 'hybrid') && descText && cData && cData._id) {
+                  var srcUrls = originSources.slice();
+                  triggerAIResearch(cData._id, cData._genus || '', cultivarName, cType, [], descText, srcUrls);
+                  showToast('AI検証を開始しました');
+                }
               }
             });
           }
@@ -4519,21 +4592,54 @@
           html += '</div>';
         }
         html += '</div>';
+        // Verification details (user_verified origins) - i18n version
+        if (origin.source_type === 'user_verified' && origin.verification) {
+          var v = origin.verification;
+          var vid = 'verify-detail-i18n-' + idx;
+          html += '<div class="verification-details">';
+          html += '<button class="verification-toggle" onclick="var el=document.getElementById(\'' + vid + '\');el.style.display=el.style.display===\'none\'?\'block\':\'none\';">検証詳細</button>';
+          html += '<div id="' + vid + '" style="display:none;margin-top:8px;">';
+          if (v.summary_jp) html += '<div class="text-sm" style="margin-bottom:8px;font-style:italic;">' + v.summary_jp + '</div>';
+          if (v.claims && v.claims.length > 0) {
+            v.claims.forEach(function(c) {
+              var si = '?', sc = 'claim--unverifiable';
+              if (c.status === 'verified') { si = '\\u2713'; sc = 'claim--verified'; }
+              else if (c.status === 'partially_verified') { si = '~'; sc = 'claim--partial'; }
+              else if (c.status === 'contradicted') { si = '\\u26A0'; sc = 'claim--contradicted'; }
+              html += '<div class="claim ' + sc + '">' + si + ' ' + c.claim;
+              if (c.source) html += ' <span class="text-gray text-xs">(' + c.source + ')</span>';
+              html += '</div>';
+            });
+          }
+          if (v.warnings && v.warnings.length > 0) {
+            v.warnings.forEach(function(w) { html += '<div class="verification-warnings">&#x26A0; ' + w + '</div>'; });
+          }
+          if (v.found_sources && v.found_sources.length > 0) {
+            html += '<div class="text-sm font-bold" style="margin-top:8px;">AI\u304c\u767a\u898b\u3057\u305f\u30ea\u30f3\u30af:</div>';
+            v.found_sources.forEach(function(fs) {
+              var rc = fs.reliability === 'high' ? '#2D6A4F' : fs.reliability === 'medium' ? '#D4A373' : '#6c757d';
+              html += '<div class="found-source"><a href="' + fs.url + '" target="_blank" rel="noopener">' + (fs.label || fs.url) + '</a> <span style="font-size:0.75rem;color:' + rc + ';">(' + fs.reliability + ')</span></div>';
+            });
+          }
+          html += '</div></div>';
+        }
         html += '<div class="origin-card__footer">';
         html += '<div class="origin-card__author">';
         if (origin.source_type === 'ipni_powo') {
           html += '<span class="badge badge--ai" style="background:#8b5cf6;">&#x1F4DA; IPNI/Kew</span>';
-        } else if (origin.author.isAI) {
+        } else if (origin.source_type === 'user_verified') {
+          html += '<span class="badge badge--verified">&#x2705; AI&#x691C;&#x8A3C;&#x6E08;</span>';
+        } else if (origin.author && origin.author.isAI) {
           html += '<span class="badge badge--ai">&#x1F916; AI</span>';
         } else {
           html += '<span>&#x1F464;</span>';
-          html += '<span>' + origin.author.name + '</span>';
+          html += '<span>' + (origin.author ? origin.author.name : 'User') + '</span>';
         }
-        html += '<span class="text-gray">' + origin.author.date + '</span>';
+        html += '<span class="text-gray">' + (origin.author ? origin.author.date : '') + '</span>';
         html += '</div>';
         html += '<div class="vote-group">';
-        html += '<button class="vote-btn vote-btn--agree">&#x1F44D; ' + t('vote_agree') + ' <span class="vote-btn__count">' + origin.votes.agree + '</span></button>';
-        html += '<button class="vote-btn vote-btn--disagree">&#x1F44E; ' + t('vote_disagree') + ' <span class="vote-btn__count">' + origin.votes.disagree + '</span></button>';
+        html += '<button class="vote-btn vote-btn--agree">&#x1F44D; ' + t('vote_agree') + ' <span class="vote-btn__count">' + (origin.votes ? origin.votes.agree : 0) + '</span></button>';
+        html += '<button class="vote-btn vote-btn--disagree">&#x1F44E; ' + t('vote_disagree') + ' <span class="vote-btn__count">' + (origin.votes ? origin.votes.disagree : 0) + '</span></button>';
         html += '</div>';
         html += '</div>';
         html += '</div>';
