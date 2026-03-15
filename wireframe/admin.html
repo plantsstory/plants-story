@@ -534,6 +534,28 @@
             </div>
           </div>
 
+          <!-- Bulk Image Compression -->
+          <div class="stat-card">
+            <h3 style="margin-bottom:var(--space-md);">画像一括圧縮</h3>
+            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">
+              既存画像をCanvas APIで再圧縮します。長辺2048px超はリサイズ、JPEG品質0.8で再エンコード。<br>
+              <strong>スキップ条件:</strong> 長辺2048px以下 かつ 500KB未満の画像はスキップします。
+            </p>
+            <div class="toolbar" style="margin-bottom:var(--space-md);">
+              <select id="compress-target">
+                <option value="gallery">ギャラリー画像</option>
+                <option value="parent">親写真（母/父）</option>
+                <option value="all">すべて</option>
+              </select>
+              <button class="btn btn-warning" id="btn-bulk-compress">圧縮実行</button>
+            </div>
+            <div id="compress-progress" class="hidden">
+              <div class="progress-bar"><div class="progress-fill" id="compress-progress-fill" style="width:0%"></div></div>
+              <div id="compress-progress-text" style="font-size:var(--font-size-sm);color:var(--color-gray);"></div>
+              <div id="compress-log" style="max-height:300px;overflow-y:auto;font-size:var(--font-size-xs);font-family:var(--font-mono);margin-top:var(--space-sm);background:var(--color-bg);padding:var(--space-sm);border-radius:var(--radius-sm);"></div>
+            </div>
+          </div>
+
           <!-- Data Export -->
           <div class="stat-card">
             <h3 style="margin-bottom:var(--space-md);">データエクスポート</h3>
@@ -1251,6 +1273,113 @@ document.getElementById('btn-export').addEventListener('click', async function()
   a.click();
   URL.revokeObjectURL(url);
   toast('エクスポート完了');
+});
+
+// ========================================
+// BULK IMAGE COMPRESSION
+// ========================================
+document.getElementById('btn-bulk-compress').addEventListener('click', async function() {
+  var btn = this;
+  var target = document.getElementById('compress-target').value;
+  var progressEl = document.getElementById('compress-progress');
+  var fillEl = document.getElementById('compress-progress-fill');
+  var textEl = document.getElementById('compress-progress-text');
+  var logEl = document.getElementById('compress-log');
+
+  btn.disabled = true;
+  progressEl.classList.remove('hidden');
+  fillEl.style.width = '0%';
+  logEl.innerHTML = '';
+  var stats = { total: 0, compressed: 0, skipped: 0, error: 0, savedBytes: 0 };
+
+  function log(msg) {
+    logEl.innerHTML += msg + '<br>';
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  // Collect image list
+  var images = [];
+  if (target === 'gallery' || target === 'all') {
+    var res = await sb.from('cultivar_images').select('id, storage_path, cultivar_name');
+    if (res.data) images = images.concat(res.data.map(function(r) { return { type: 'gallery', id: r.id, path: r.storage_path, name: r.cultivar_name }; }));
+  }
+  if (target === 'parent' || target === 'all') {
+    var res2 = await sb.from('cultivars').select('id, cultivar_name, origins');
+    if (res2.data) {
+      res2.data.forEach(function(c) {
+        if (!c.origins) return;
+        c.origins.forEach(function(o) {
+          if (o && o._type === 'formula' && o.formula) {
+            if (o.formula.motherPhoto) images.push({ type: 'parent', cultivarId: c.id, path: o.formula.motherPhoto, name: c.cultivar_name, role: 'mother', origins: c.origins });
+            if (o.formula.fatherPhoto) images.push({ type: 'parent', cultivarId: c.id, path: o.formula.fatherPhoto, name: c.cultivar_name, role: 'father', origins: c.origins });
+          }
+        });
+      });
+    }
+  }
+
+  stats.total = images.length;
+  log('対象画像: ' + stats.total + '件');
+  if (stats.total === 0) {
+    textEl.textContent = '対象画像がありません';
+    btn.disabled = false;
+    return;
+  }
+
+  for (var i = 0; i < images.length; i++) {
+    var img = images[i];
+    var pct = Math.round(((i + 1) / images.length) * 100);
+    fillEl.style.width = pct + '%';
+    textEl.textContent = (i + 1) + ' / ' + images.length + ' (' + pct + '%)';
+
+    try {
+      // Download original image
+      var publicUrl = SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + img.path;
+      var resp = await fetch(publicUrl);
+      if (!resp.ok) { log('[ERROR] ' + img.name + ' (' + img.path + '): ダウンロード失敗'); stats.error++; continue; }
+      var originalBlob = await resp.blob();
+      var originalSize = originalBlob.size;
+
+      // Check dimensions to decide skip
+      var shouldSkip = await new Promise(function(resolve) {
+        var testImg = new Image();
+        testImg.onload = function() {
+          var longSide = Math.max(testImg.width, testImg.height);
+          // Skip if long side <= 2048 AND size < 500KB
+          resolve(longSide <= 2048 && originalSize < 500 * 1024);
+        };
+        testImg.onerror = function() { resolve(false); };
+        testImg.src = URL.createObjectURL(originalBlob);
+      });
+
+      if (shouldSkip) {
+        log('[SKIP] ' + img.name + ' (' + Math.round(originalSize / 1024) + 'KB, 条件内)');
+        stats.skipped++;
+        continue;
+      }
+
+      // Compress
+      var originalFile = new File([originalBlob], img.path.split('/').pop() || 'image.jpg', { type: originalBlob.type });
+      var compressed = await compressImage(originalFile);
+      var savedKB = Math.round((originalSize - compressed.size) / 1024);
+
+      // Upload (overwrite)
+      var upRes = await sb.storage.from('gallery-images').upload(img.path, compressed, { contentType: 'image/jpeg', upsert: true });
+      if (upRes.error) { log('[ERROR] ' + img.name + ': アップロード失敗 - ' + upRes.error.message); stats.error++; continue; }
+
+      stats.compressed++;
+      stats.savedBytes += (originalSize - compressed.size);
+      log('[OK] ' + img.name + ': ' + Math.round(originalSize / 1024) + 'KB → ' + Math.round(compressed.size / 1024) + 'KB (' + (savedKB > 0 ? '-' + savedKB + 'KB' : '+' + Math.abs(savedKB) + 'KB') + ')');
+    } catch (e) {
+      log('[ERROR] ' + img.name + ': ' + e.message);
+      stats.error++;
+    }
+  }
+
+  var totalSavedMB = (stats.savedBytes / (1024 * 1024)).toFixed(1);
+  textEl.textContent = '完了! 圧縮: ' + stats.compressed + ' / スキップ: ' + stats.skipped + ' / エラー: ' + stats.error + ' / 削減: ' + totalSavedMB + 'MB';
+  log('--- 完了 ---');
+  btn.disabled = false;
 });
 
 // ========================================
