@@ -930,7 +930,7 @@
         <div class="form-group">
           <label class="form-label" data-i18n="label_edit_key">4桁の編集キー</label>
           <input type="password" id="edit-key-input" class="form-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="4桁の数字" style="max-width:200px;">
-          <p class="form-hint" id="edit-key-hint" data-i18n="edit_key_hint">この品種を後から編集するためのパスワードです。</p>
+          <p class="form-hint" id="edit-key-hint" data-i18n="edit_key_hint">編集する時に必要な4ケタのパスワードです。</p>
           <p class="form-hint" id="edit-key-hint-edit" style="display:none;" data-i18n="edit_key_hint_edit">正しいキーを入力すると品種名・タイプも変更できます。</p>
         </div>
       </div>
@@ -2955,7 +2955,7 @@
       btn_update: { jp: '📤 更新する', en: '📤 Update' },
       edit_key_title: { jp: '編集キー', en: 'Edit Key' },
       label_edit_key: { jp: '4桁の編集キー', en: '4-digit Edit Key' },
-      edit_key_hint: { jp: 'この品種を後から編集するためのパスワードです。', en: 'A password to edit this cultivar later.' },
+      edit_key_hint: { jp: '編集する時に必要な4ケタのパスワードです。', en: 'A 4-digit password required for editing.' },
       edit_key_hint_edit: { jp: '正しいキーを入力すると品種名・タイプも変更できます。', en: 'Enter the correct key to also change name and type.' },
       error_edit_key_required: { jp: '品種名を変更するには編集キーが必要です', en: 'Edit key is required to change cultivar name' },
       cultivar_info: { jp: '品種情報', en: 'Cultivar Info' },
@@ -3660,10 +3660,14 @@
           if (!genus) { showToast(t('error_genus_required'), true); return; }
           if (!name) { showToast(t('error_name_required'), true); return; }
 
-          // Edit key validation (must be exactly 4 digits or empty)
+          // Edit key validation (required, must be exactly 4 digits)
           var editKeyInput = document.getElementById('edit-key-input');
           var editKeyVal = editKeyInput ? editKeyInput.value.trim() : '';
-          if (editKeyVal && !/^[0-9]{4}$/.test(editKeyVal)) {
+          if (!editKeyVal) {
+            showToast('編集キーを記入してください', true);
+            return;
+          }
+          if (!/^[0-9]{4}$/.test(editKeyVal)) {
             showToast('編集キーは4桁の数字で入力してください', true);
             return;
           }
