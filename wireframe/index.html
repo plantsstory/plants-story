@@ -3762,9 +3762,13 @@
         var creatorInput = document.getElementById('creator-name-input');
         if (creatorInput) creatorInput.value = '';
 
-        // Hide delete button
+        // Hide and reset delete button
         var editDeleteBtn = document.getElementById('edit-delete-btn');
-        if (editDeleteBtn) editDeleteBtn.style.display = 'none';
+        if (editDeleteBtn) {
+          editDeleteBtn.style.display = 'none';
+          editDeleteBtn.disabled = false;
+          editDeleteBtn.textContent = '\uD83D\uDDD1 この品種を削除';
+        }
       };
 
       // Edit-mode delete handler
