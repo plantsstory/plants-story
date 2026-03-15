@@ -951,6 +951,8 @@
       <!-- Submit -->
       <button class="btn btn--primary btn--block" id="contribute-submit-btn" data-i18n="btn_submit">&#x1F4E4; 投稿する</button>
 
+      <button class="btn btn--block" id="edit-delete-btn" style="display:none;margin-top:12px;background:transparent;color:#dc3545;border:1px solid #dc3545;cursor:pointer;">&#x1F5D1; この品種を削除</button>
+
     </div>
   </section>
 
@@ -3455,6 +3457,10 @@
         if (contributeGenus) contributeGenus.disabled = false;
         if (contributeName) contributeName.disabled = false;
         document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(r) { r.disabled = false; });
+
+        // Show delete button in edit mode
+        var editDeleteBtn = document.getElementById('edit-delete-btn');
+        if (editDeleteBtn) editDeleteBtn.style.display = '';
       };
 
       window.exitEditMode = function() {
@@ -3493,7 +3499,56 @@
         contributeSources = [];
         renderContributeSources();
         if (duplicateAlert) duplicateAlert.style.display = 'none';
+
+        // Hide delete button
+        var editDeleteBtn = document.getElementById('edit-delete-btn');
+        if (editDeleteBtn) editDeleteBtn.style.display = 'none';
       };
+
+      // Edit-mode delete handler
+      document.addEventListener('click', function(e) {
+        var btn = e.target.closest('#edit-delete-btn');
+        if (!btn || !editMode || !editCultivarKey) return;
+        if (!confirm('「' + editCultivarKey + '」を削除しますか？この操作は取り消せません。')) return;
+
+        var sbClient = window._supabaseClient;
+        if (!sbClient) { showToast('データベース接続エラー', true); return; }
+        if (!verifiedEditKey) { showToast('編集キーが未検証です', true); return; }
+
+        btn.disabled = true;
+        btn.textContent = '削除中...';
+
+        var keyData = new TextEncoder().encode(verifiedEditKey);
+        crypto.subtle.digest('SHA-256', keyData).then(function(buffer) {
+          var hashArray = Array.from(new Uint8Array(buffer));
+          var inputHash = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+          return sbClient.rpc('delete_with_edit_key_hash', {
+            p_cultivar_name: editCultivarKey,
+            p_edit_key_hash: inputHash
+          });
+        }).then(function(res) {
+          if (res.error) throw new Error(res.error.message);
+          var result = res.data;
+          if (result && !result.success) throw new Error(result.error || 'Failed');
+
+          // Remove from local data
+          delete cultivarData[editCultivarKey];
+          // Remove DOM row
+          var rows = document.querySelectorAll('.cultivar-row');
+          rows.forEach(function(row) {
+            var nameEl = row.querySelector('.cultivar-row__name');
+            if (nameEl && nameEl.getAttribute('data-key') === editCultivarKey) row.remove();
+          });
+          refreshGenusUI();
+          window.exitEditMode();
+          navigateTo('top');
+          showToast('品種を削除しました');
+        }).catch(function(err) {
+          btn.disabled = false;
+          btn.textContent = '\uD83D\uDDD1 この品種を削除';
+          showToast('削除エラー: ' + err.message, true);
+        });
+      });
 
       // Clear example sources on load
       if (contributeSourceList) contributeSourceList.innerHTML = '';
