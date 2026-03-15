@@ -680,6 +680,7 @@
             <span class="badge badge--species">原種 / Original Species</span>
             <span class="text-sm text-muted">Anthurium</span>
             <span class="text-sm text-muted" id="detail-created-at" style="margin-left:4px;"></span>
+            <span class="text-sm text-muted" id="detail-creator-name" style="margin-left:4px;"></span>
           </div>
         </div>
         <div class="flex gap-sm flex-align-center" id="edit-key-section">
@@ -904,6 +905,12 @@
               <div id="father-preview" style="margin-top:var(--space-sm);"></div>
             </div>
           </div>
+        </div>
+
+        <!-- Creator name (seedling only) -->
+        <div class="form-group" id="creator-name-section" style="display:none;">
+          <label class="form-label">作出者名 (Creator/Breeder)</label>
+          <input type="text" id="creator-name-input" class="form-input" placeholder="例: 山田太郎">
         </div>
 
         <!-- Source links -->
@@ -2102,6 +2109,17 @@
         if (cultivarData[fullName]) return;
         entry._type = meta.type;
         entry._created_at = meta.created_at || '';
+        // Extract creatorName from formula in origins
+        if (entry.formula && entry.formula.creatorName) {
+          entry._creatorName = entry.formula.creatorName;
+        } else if (entry.origins) {
+          for (var i = 0; i < entry.origins.length; i++) {
+            if (entry.origins[i]._type === 'formula' && entry.origins[i].formula && entry.origins[i].formula.creatorName) {
+              entry._creatorName = entry.origins[i].formula.creatorName;
+              break;
+            }
+          }
+        }
         cultivarData[fullName] = entry;
 
         var genusEl = document.getElementById('genus-' + meta.genus.toLowerCase());
@@ -2146,6 +2164,9 @@
         rowHtml += '</div>';
         if (entry.formula) {
           rowHtml += '<div class="text-sm text-muted mt-sm"><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + entry.formula.parentA + '</span><span class="formula-operator" style="font-size:0.875rem;">&times;</span><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + entry.formula.parentB + '</span></div>';
+        }
+        if (isSeedling && entry._creatorName) {
+          rowHtml += '<div class="text-xs text-muted" style="margin-top:2px;">作出者: ' + entry._creatorName + '</div>';
         }
         rowHtml += '</div>';
         row.innerHTML = rowHtml;
@@ -2520,6 +2541,12 @@
         createdAtEl.textContent = d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
       } else if (createdAtEl) {
         createdAtEl.textContent = '';
+      }
+
+      // Update creator name (seedlings only)
+      var creatorNameEl = document.getElementById('detail-creator-name');
+      if (creatorNameEl) {
+        creatorNameEl.textContent = (cData && cData._creatorName) ? '作出者: ' + cData._creatorName : '';
       }
 
       // Update breadcrumb
@@ -3441,6 +3468,12 @@
           formulaParentB.value = data.formula.parentB || '';
         }
 
+        // Pre-fill creator name
+        var creatorInput = document.getElementById('creator-name-input');
+        if (creatorInput) {
+          creatorInput.value = (data.formula && data.formula.creatorName) || data._creatorName || '';
+        }
+
         // Pre-fill sources from first non-formula origin
         contributeSources = [];
         if (data.origins) {
@@ -3626,18 +3659,22 @@
 
       // Show/hide formula and parent photos based on type
       var parentPhotosSection = document.getElementById('parent-photos-section');
+      var creatorNameSection = document.getElementById('creator-name-section');
       document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(radio) {
         radio.addEventListener('change', function() {
           var formulaGroup = formulaSection ? formulaSection.closest('.form-group') : null;
           if (this.value === 'species') {
             if (formulaGroup) formulaGroup.style.display = 'none';
             if (parentPhotosSection) parentPhotosSection.style.display = 'none';
+            if (creatorNameSection) creatorNameSection.style.display = 'none';
           } else if (this.value === 'seedling') {
             if (formulaGroup) formulaGroup.style.display = '';
             if (parentPhotosSection) parentPhotosSection.style.display = '';
+            if (creatorNameSection) creatorNameSection.style.display = '';
           } else {
             if (formulaGroup) formulaGroup.style.display = '';
             if (parentPhotosSection) parentPhotosSection.style.display = 'none';
+            if (creatorNameSection) creatorNameSection.style.display = 'none';
           }
         });
       });
@@ -3788,6 +3825,13 @@
                 updatedFormula = Object.assign({}, updatedFormula || {}, { parentA: pA, parentB: pB });
               }
             }
+            // Update creator name for seedlings
+            if (type === 'seedling') {
+              var creatorInput = document.getElementById('creator-name-input');
+              var creatorVal = creatorInput ? creatorInput.value.trim() : '';
+              if (!updatedFormula) updatedFormula = {};
+              updatedFormula.creatorName = creatorVal || null;
+            }
 
             // Disable submit button
             submitBtn.disabled = true;
@@ -3914,6 +3958,15 @@
             var pB = formulaParentB.value.trim();
             if (pA && pB) {
               newEntry.formula = { parentA: pA, parentB: pB };
+            }
+          }
+          // Creator name for seedlings
+          if (type === 'seedling') {
+            var creatorInput = document.getElementById('creator-name-input');
+            var creatorVal = creatorInput ? creatorInput.value.trim() : '';
+            if (creatorVal) {
+              if (!newEntry.formula) newEntry.formula = {};
+              newEntry.formula.creatorName = creatorVal;
             }
           }
           if (origin) newEntry.origins.push(origin);
