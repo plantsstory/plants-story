@@ -510,30 +510,6 @@
         <h2 class="section-title">一括操作</h2>
 
         <div style="display:grid;gap:var(--space-lg);">
-          <!-- AI Re-research -->
-          <div class="stat-card">
-            <h3 style="margin-bottom:var(--space-md);">AI一括再リサーチ</h3>
-            <div class="toolbar">
-              <select id="bulk-genus-filter">
-                <option value="">全品種</option>
-                <option value="Anthurium">Anthurium</option>
-                <option value="Monstera">Monstera</option>
-                <option value="Philodendron">Philodendron</option>
-              </select>
-              <select id="bulk-target">
-                <option value="all">すべて再リサーチ</option>
-                <option value="empty">由来なしのみ</option>
-                <option value="low">信頼度50%以下のみ</option>
-              </select>
-              <button class="btn btn-warning" id="btn-bulk-research">実行</button>
-            </div>
-            <div id="bulk-progress" class="hidden">
-              <div class="progress-bar"><div class="progress-fill" id="bulk-progress-fill" style="width:0%"></div></div>
-              <div id="bulk-progress-text" style="font-size:var(--font-size-sm);color:var(--color-gray);"></div>
-              <div id="bulk-log" style="max-height:200px;overflow-y:auto;font-size:var(--font-size-xs);font-family:var(--font-mono);margin-top:var(--space-sm);background:var(--color-bg);padding:var(--space-sm);border-radius:var(--radius-sm);"></div>
-            </div>
-          </div>
-
           <!-- Bulk Image Compression -->
           <div class="stat-card">
             <h3 style="margin-bottom:var(--space-md);">画像一括圧縮</h3>
@@ -1193,74 +1169,6 @@ async function deleteOrigin(cultivarId, originIndex) {
 // ========================================
 // BULK OPERATIONS
 // ========================================
-document.getElementById('btn-bulk-research').addEventListener('click', async function() {
-  var genusFilter = document.getElementById('bulk-genus-filter').value;
-  var target = document.getElementById('bulk-target').value;
-
-  var targets = allCultivars.filter(function(c) {
-    if (genusFilter && c.genus !== genusFilter) return false;
-    if (target === 'empty') return !(c.origins && c.origins.length);
-    if (target === 'low') {
-      var origins = c.origins || [];
-      if (!origins.length) return true;
-      var maxTrust = Math.max.apply(null, origins.map(function(o) { return o.trust || 0; }));
-      return maxTrust <= 50;
-    }
-    return true;
-  });
-
-  if (!targets.length) { toast('対象品種がありません'); return; }
-  if (!confirm(targets.length + '品種のAIリサーチを実行しますか？')) return;
-
-  var progressEl = document.getElementById('bulk-progress');
-  var fillEl = document.getElementById('bulk-progress-fill');
-  var textEl = document.getElementById('bulk-progress-text');
-  var logEl = document.getElementById('bulk-log');
-  progressEl.classList.remove('hidden');
-  logEl.innerHTML = '';
-  this.disabled = true;
-  var btn = this;
-
-  var completed = 0;
-  var failed = 0;
-
-  for (var i = 0; i < targets.length; i++) {
-    var c = targets[i];
-    textEl.textContent = (i + 1) + ' / ' + targets.length + ' - ' + c.cultivar_name;
-    fillEl.style.width = Math.round(((i + 1) / targets.length) * 100) + '%';
-
-    try {
-      var res = await fetch(SUPABASE_URL + '/functions/v1/research-origin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-        body: JSON.stringify({ cultivar_id: c.id, cultivar_name: c.cultivar_name, genus: c.genus, type: c.type })
-      });
-      var data = await res.json();
-      if (data.success) {
-        logEl.innerHTML += '<div style="color:var(--color-primary-light);">[OK] ' + escapeHtml(c.cultivar_name) + ' - ' + (data.origins_count || 0) + '件</div>';
-        completed++;
-      } else {
-        logEl.innerHTML += '<div style="color:var(--color-danger);">[FAIL] ' + escapeHtml(c.cultivar_name) + ' - ' + escapeHtml(data.error || '') + '</div>';
-        failed++;
-      }
-    } catch (e) {
-      logEl.innerHTML += '<div style="color:var(--color-danger);">[ERROR] ' + escapeHtml(c.cultivar_name) + ' - ' + escapeHtml(e.message) + '</div>';
-      failed++;
-    }
-    logEl.scrollTop = logEl.scrollHeight;
-
-    // Rate limit delay
-    if (i < targets.length - 1) {
-      await new Promise(function(r) { setTimeout(r, 15000); });
-    }
-  }
-
-  textEl.textContent = '完了! 成功: ' + completed + ', 失敗: ' + failed;
-  btn.disabled = false;
-  loadAllCultivars();
-  loadDashboard();
-});
-
 document.getElementById('btn-export').addEventListener('click', async function() {
   var result = await sb.from('cultivars').select('*').order('id');
   if (result.error) { toast('エクスポートエラー'); return; }
