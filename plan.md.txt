@@ -1,0 +1,19 @@
+原種とCLONE,ハイブリッドの枠組みとは別で新たにMy　seedingというページを作成したい。
+My seedingではseedingだけを扱う。基本的な枠組みは変わらないが、AIを使った由来の投稿とAI信頼度の調査は必要なく、すべてユーザー投稿をする形にする。また、交配式の母と父の写真を投稿できるようにする。
+
+seedingがあまりない属に対してはMy　seedingのページが必要ないため、毎回属を追加するときにどちらのプランで作成するかを選択していく。今回はanthuriumにMy　seedingのページを作る。
+
+下の図を書いたが、他にもっと良い案があれば教えて
+
+
+Genus
+│
+├ Species
+│    ├ Species info
+│    ├ Clones
+│    │   └ Parents
+│　　└ hybrid
+│         └ Parents
+│
+└ My Seedlings
+     └ Parents

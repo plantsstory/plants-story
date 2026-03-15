@@ -171,6 +171,226 @@ async function queryBotanicalDBs(genus: string, species: string): Promise<Botani
 }
 
 // ============================================================
+// Wikidata SPARQL: Search for cultivar/hybrid data
+// ============================================================
+interface WikidataResult {
+  parentage: string | null;
+  breeder: string | null;
+  year: number | null;
+  country: string | null;
+  description: string | null;
+  wikidataUrl: string;
+}
+
+async function queryWikidata(genus: string, epithet: string): Promise<WikidataResult | null> {
+  try {
+    // Search by label containing the cultivar epithet within the genus
+    const sparql = `
+SELECT ?item ?itemLabel ?itemDescription ?parentTaxon ?parentTaxonLabel
+       ?creator ?creatorLabel ?inception ?country ?countryLabel WHERE {
+  {
+    ?item rdfs:label ?label .
+    FILTER(LANG(?label) = "en")
+    FILTER(CONTAINS(LCASE(?label), "${epithet.toLowerCase()}"))
+    FILTER(CONTAINS(LCASE(?label), "${genus.toLowerCase()}"))
+  }
+  OPTIONAL { ?item wdt:P171 ?parentTaxon }
+  OPTIONAL { ?item wdt:P61 ?creator }
+  OPTIONAL { ?item wdt:P575 ?inception }
+  OPTIONAL { ?item wdt:P17 ?country }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en,ja" }
+} LIMIT 5`;
+
+    const url = `https://query.wikidata.org/sparql?query=${encodeURIComponent(sparql)}&format=json`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    const res = await fetch(url, {
+      headers: { "Accept": "application/json", "User-Agent": "PlantStoryBot/1.0" },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (!res.ok) {
+      console.log(`[Wikidata] HTTP ${res.status}`);
+      return null;
+    }
+
+    const data = await res.json();
+    const bindings = data?.results?.bindings || [];
+    if (bindings.length === 0) {
+      console.log(`[Wikidata] No results for ${genus} ${epithet}`);
+      return null;
+    }
+
+    const first = bindings[0];
+    const itemUri = first.item?.value || "";
+    const wikidataId = itemUri.split("/").pop() || "";
+
+    // Try to extract parentage from multiple results (parent taxa)
+    const parentLabels = bindings
+      .map((b: any) => b.parentTaxonLabel?.value)
+      .filter((v: string | undefined) => v && v !== wikidataId);
+    const uniqueParents = [...new Set(parentLabels)];
+    let parentage: string | null = null;
+    if (uniqueParents.length >= 2) {
+      parentage = `${uniqueParents[0]} × ${uniqueParents[1]}`;
+    } else if (uniqueParents.length === 1) {
+      parentage = uniqueParents[0];
+    }
+
+    const result: WikidataResult = {
+      parentage,
+      breeder: first.creatorLabel?.value || null,
+      year: first.inception?.value ? new Date(first.inception.value).getFullYear() : null,
+      country: first.countryLabel?.value || null,
+      description: first.itemDescription?.value || null,
+      wikidataUrl: itemUri,
+    };
+
+    console.log(`[Wikidata] Found: parentage=${result.parentage}, breeder=${result.breeder}, year=${result.year}`);
+    return result;
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") {
+      console.log("[Wikidata] Timeout (5s)");
+    } else {
+      console.log("[Wikidata] Error:", String(e));
+    }
+    return null;
+  }
+}
+
+// ============================================================
+// CrossRef: Search for academic papers about cultivar
+// ============================================================
+interface CrossRefResult {
+  title: string;
+  authors: string[];
+  year: number;
+  journal: string;
+  doi: string;
+}
+
+async function searchCrossRef(genus: string, epithet: string): Promise<CrossRefResult[]> {
+  try {
+    const query = encodeURIComponent(`${genus} ${epithet}`);
+    const url = `https://api.crossref.org/works?query=${query}&rows=10&select=title,author,published-print,container-title,DOI`;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    const res = await fetch(url, {
+      headers: { "User-Agent": "PlantStoryBot/1.0 (mailto:plants-story@example.com)" },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (!res.ok) {
+      console.log(`[CrossRef] HTTP ${res.status}`);
+      return [];
+    }
+
+    const data = await res.json();
+    const items = data?.message?.items || [];
+
+    // Relevant journal names for Araceae research
+    const relevantJournals = [
+      "aroideana", "phytotaxa", "willdenowia", "taxon", "botanical journal",
+      "kew bulletin", "annals of botany", "plant systematics", "systematic botany",
+      "novon", "nordic journal of botany", "blumea", "gardens' bulletin",
+      "horticulturae", "hortscience", "scientia horticulturae", "plant cell",
+      "tissue and organ culture", "in vitro cellular", "propagation of ornamental",
+      "journal of the american society for horticultural science", "plant science",
+      "international journal of molecular sciences", "plants", "frontiers in plant",
+    ];
+
+    const results: CrossRefResult[] = [];
+    for (const item of items) {
+      const title = (item.title?.[0] || "").toLowerCase();
+      const journal = (item["container-title"]?.[0] || "").toLowerCase();
+
+      // Filter: title must mention the genus or epithet
+      const titleRelevant = title.includes(genus.toLowerCase()) || title.includes(epithet.toLowerCase());
+      const journalRelevant = relevantJournals.some(j => journal.includes(j));
+      // Accept if: (title relevant AND journal relevant) OR (title contains BOTH genus AND epithet)
+      const titleStrong = title.includes(genus.toLowerCase()) && title.includes(epithet.toLowerCase());
+
+      if ((titleRelevant && journalRelevant) || titleStrong) {
+        const authors = (item.author || []).map((a: any) =>
+          `${a.given || ""} ${a.family || ""}`.trim()
+        );
+        const year = item["published-print"]?.["date-parts"]?.[0]?.[0] || 0;
+
+        results.push({
+          title: item.title?.[0] || "",
+          authors,
+          year,
+          journal: item["container-title"]?.[0] || "",
+          doi: item.DOI || "",
+        });
+      }
+    }
+
+    console.log(`[CrossRef] Found ${results.length} relevant papers for ${genus} ${epithet}`);
+    return results.slice(0, 3); // Top 3 most relevant
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") {
+      console.log("[CrossRef] Timeout (5s)");
+    } else {
+      console.log("[CrossRef] Error:", String(e));
+    }
+    return [];
+  }
+}
+
+// ============================================================
+// Gather external data in parallel
+// ============================================================
+interface ExternalData {
+  wikidata: WikidataResult | null;
+  papers: CrossRefResult[];
+}
+
+async function gatherExternalData(genus: string, epithet: string): Promise<ExternalData> {
+  const [wikidata, papers] = await Promise.all([
+    queryWikidata(genus, epithet),
+    searchCrossRef(genus, epithet),
+  ]);
+  return { wikidata, papers };
+}
+
+// ============================================================
+// Build external data context block for LLM prompts
+// ============================================================
+function buildExternalDataContext(ext: ExternalData): string {
+  const sections: string[] = [];
+
+  if (ext.wikidata) {
+    const wd = ext.wikidata;
+    let wdInfo = `[Wikidata] ${wd.wikidataUrl}`;
+    if (wd.parentage) wdInfo += `\n  Parentage: ${wd.parentage}`;
+    if (wd.breeder) wdInfo += `\n  Creator/Breeder: ${wd.breeder}`;
+    if (wd.year) wdInfo += `\n  Year: ${wd.year}`;
+    if (wd.country) wdInfo += `\n  Country of origin: ${wd.country}`;
+    if (wd.description) wdInfo += `\n  Description: ${wd.description}`;
+    sections.push(wdInfo);
+  }
+
+  if (ext.papers.length > 0) {
+    const paperLines = ext.papers.map((p, i) =>
+      `  ${i + 1}. "${p.title}" by ${p.authors.join(", ")} (${p.year}) in ${p.journal}. DOI: ${p.doi}`
+    );
+    sections.push(`[Academic Papers]\n${paperLines.join("\n")}`);
+  }
+
+  if (sections.length === 0) {
+    return "";
+  }
+
+  return `\n=== EXTERNAL DATABASE RESULTS (verified data — do NOT contradict) ===\n${sections.join("\n\n")}\n`;
+}
+
+// ============================================================
 // Helper: Call Gemini API
 // ============================================================
 async function callGemini(apiKey: string, prompt: string, maxTokens = 2048) {
@@ -395,6 +615,185 @@ Return ONLY valid JSON (no markdown):
 }
 
 // ============================================================
+// Build enhanced research prompt for Hybrid (with external data)
+// ============================================================
+function buildHybridResearchPrompt(cultivarName: string, genus: string, ext: ExternalData): string {
+  const externalContext = buildExternalDataContext(ext);
+  const hasExternalData = externalContext.length > 0;
+
+  return `You are a botanical taxonomist researching the origin of the HYBRID cultivar "${cultivarName}" (genus: ${genus}).
+${externalContext}
+=== CRITICAL RULES — VIOLATIONS WILL INVALIDATE YOUR RESPONSE ===
+
+1. UNKNOWN = UNKNOWN. If the creator, breeder, or parentage is unknown, write null.
+   NEVER guess or speculate. NEVER write "believed to be", "thought to be",
+   "possibly", "likely", "speculated", "assumed", or "presumed".
+
+2. NEVER attribute creation to plant SELLERS or NURSERIES unless they are the
+   VERIFIED original breeder with published evidence. These are SELLERS, not creators:
+   NSE Tropicals, Ecuagenera, LCA Plants, Aroid Greenhouses, Gabriella Plants,
+   Peace Love Happiness Club, Steve's Leaves, Logee's, etc.
+
+3. SOURCE PRIORITY (strict order):
+   a. External database results shown above (if any) — HIGHEST PRIORITY, do NOT contradict
+   b. Peer-reviewed academic papers (Aroideana, Phytotaxa, etc.)
+   c. International Aroid Society publications
+   d. Verified breeder records with published evidence
+   e. NOTHING ELSE is reliable for factual claims about origin.
+
+4. NEVER use information from: nursery product pages, Instagram, Reddit,
+   Facebook groups, Japanese blogs, Yahoo Auctions JP, Mercari JP.
+
+=== HYBRID-SPECIFIC GUIDELINES ===
+- Focus on PARENTAGE (Parent A × Parent B) — this is the most important info for hybrids.
+- If external data confirms parentage, USE IT and cite the source.
+- Identify the BREEDER if known (who created this cross).
+- Note when the cross was first made or registered.
+- Describe the hybrid's distinctive features compared to its parents.
+${hasExternalData ? "- The external data above has been verified from databases. Incorporate it into your description." : "- No external data was found. Research from your training data only, following strict rules above."}
+
+=== OUTPUT FORMAT ===
+Return ONLY valid JSON (no markdown):
+{
+  "origins": [
+    {
+      "source_tier": "${hasExternalData ? "B" : "C"} | adjust based on your confidence",
+      "source_name": "Name of source",
+      "source_url": "URL or empty string",
+      "description_en": "Factual English description (100-250 words). Focus on parentage, breeder, and distinctive features.",
+      "description_jp": "日本語の完全な説明文 (100-250文字)。交配親・作出者・特徴に焦点。学名・人名・地名は英語のまま。",
+      "parentage": "Parent A × Parent B (or null if unknown)",
+      "discovery_year": null,
+      "discoverer_or_breeder": "Name or null",
+      "native_region": null,
+      "first_description": "Author & publication or null",
+      "confidence": 0.0
+    }
+  ],
+  "cultivar_summary_en": "One-sentence factual summary",
+  "cultivar_summary_jp": "事実の一文要約"
+}
+
+=== RULES ===
+- Return 1 origin only. Quality over quantity.
+- confidence: YOUR confidence this info is accurate (0.0-1.0). Be honest.
+${hasExternalData ? "- External data was found: set confidence higher (0.5-0.9) if it corroborates your knowledge." : "- No external data found: be conservative with confidence."}
+- If you truly cannot find reliable info, return confidence: 0.2 with tier "D".
+- description_jp MUST be a complete Japanese paragraph, not a stub.
+
+=== WRITING STYLE ===
+- Write for plant enthusiasts, not scientists. Keep it readable and engaging.
+- Even if origin is UNKNOWN, describe the plant's APPEARANCE (leaf shape, color, variegation pattern, growth habit).
+- Do NOT include specific size measurements. Sizes vary greatly between individuals.
+- For unknown origins, be CONCISE: "由来は不明。" then describe the plant itself.
+- 日本語: 自然で読みやすい文章。冗長な表現は避ける。`;
+}
+
+// ============================================================
+// Build enhanced research prompt for Clone (with external data)
+// ============================================================
+function buildCloneResearchPrompt(cultivarName: string, genus: string, ext: ExternalData): string {
+  const externalContext = buildExternalDataContext(ext);
+  const hasExternalData = externalContext.length > 0;
+
+  return `You are a botanical taxonomist researching the origin of the CLONE cultivar "${cultivarName}" (genus: ${genus}).
+A "clone" is a vegetatively propagated selection — a specific individual chosen for unique traits (variegation, color, leaf shape).
+${externalContext}
+=== CRITICAL RULES — VIOLATIONS WILL INVALIDATE YOUR RESPONSE ===
+
+1. UNKNOWN = UNKNOWN. If the origin, discoverer, or original plant is unknown, write null.
+   NEVER guess or speculate. NEVER write "believed to be", "thought to be",
+   "possibly", "likely", "speculated", "assumed", or "presumed".
+
+2. NEVER attribute discovery to plant SELLERS or NURSERIES unless they are the
+   VERIFIED original selector/discoverer with published evidence. These are SELLERS, not discoverers:
+   NSE Tropicals, Ecuagenera, LCA Plants, Aroid Greenhouses, Gabriella Plants,
+   Peace Love Happiness Club, Steve's Leaves, Logee's, etc.
+
+3. SOURCE PRIORITY (strict order):
+   a. External database results shown above (if any) — HIGHEST PRIORITY, do NOT contradict
+   b. Plant patent records (USPTO USPP) — very reliable for clones
+   c. Peer-reviewed academic papers (Aroideana, Phytotaxa, etc.)
+   d. Tissue culture laboratory records with published evidence
+   e. NOTHING ELSE is reliable for factual claims about origin.
+
+4. NEVER use information from: nursery product pages, Instagram, Reddit,
+   Facebook groups, Japanese blogs, Yahoo Auctions JP, Mercari JP.
+
+=== CLONE-SPECIFIC GUIDELINES ===
+- Focus on ORIGIN STORY: How was this clone discovered or selected?
+- Was it a natural mutation (sport), tissue culture mutation, or deliberate selection?
+- If it has a plant patent (USPP), cite the patent number and inventor.
+- Who discovered or first propagated this clone?
+- What makes this clone DISTINCT from the typical species form?
+- If it originated from tissue culture (e.g., Thai Constellation), note the laboratory/company.
+${hasExternalData ? "- The external data above has been verified from databases. Incorporate it into your description." : "- No external data was found. Research from your training data only, following strict rules above."}
+
+=== OUTPUT FORMAT ===
+Return ONLY valid JSON (no markdown):
+{
+  "origins": [
+    {
+      "source_tier": "${hasExternalData ? "B" : "C"} | adjust based on your confidence",
+      "source_name": "Name of source",
+      "source_url": "URL or empty string",
+      "description_en": "Factual English description (100-250 words). Focus on origin story, discoverer, and distinguishing traits.",
+      "description_jp": "日本語の完全な説明文 (100-250文字)。発見経緯・特徴に焦点。学名・人名・地名は英語のまま。",
+      "parentage": "Parent species or null",
+      "discovery_year": null,
+      "discoverer_or_breeder": "Name or null",
+      "native_region": "Where discovered or null",
+      "first_description": "Patent number or publication or null",
+      "confidence": 0.0
+    }
+  ],
+  "cultivar_summary_en": "One-sentence factual summary",
+  "cultivar_summary_jp": "事実の一文要約"
+}
+
+=== RULES ===
+- Return 1 origin only. Quality over quantity.
+- confidence: YOUR confidence this info is accurate (0.0-1.0). Be honest.
+${hasExternalData ? "- External data was found: set confidence higher (0.5-0.9) if it corroborates your knowledge." : "- No external data found: be conservative with confidence."}
+- If you truly cannot find reliable info, return confidence: 0.2 with tier "D".
+- description_jp MUST be a complete Japanese paragraph, not a stub.
+
+=== WRITING STYLE ===
+- Write for plant enthusiasts, not scientists. Keep it readable and engaging.
+- Even if origin is UNKNOWN, describe the clone's APPEARANCE (leaf shape, color, variegation pattern, growth habit).
+- Do NOT include specific size measurements. Sizes vary greatly between individuals.
+- For unknown origins, be CONCISE: "由来は不明。" then describe the plant itself.
+- 日本語: 自然で読みやすい文章。冗長な表現は避ける。`;
+}
+
+// ============================================================
+// Enhanced trust calculation for external data
+// ============================================================
+function calculateEnhancedTrust(
+  ext: ExternalData,
+  aiTier: string,
+  aiConfidence: number
+): { tier: string; trust: number } {
+  // If academic papers found → bump to A tier
+  if (ext.papers.length > 0) {
+    const tierInfo = TIER_CONFIG.A;
+    const trust = Math.round(tierInfo.base_min + (tierInfo.base_max - tierInfo.base_min) * Math.max(aiConfidence, 0.3));
+    return { tier: "A", trust: Math.max(tierInfo.base_min, Math.min(tierInfo.base_max, trust)) };
+  }
+
+  // If Wikidata has parentage or breeder → bump to B tier minimum
+  if (ext.wikidata && (ext.wikidata.parentage || ext.wikidata.breeder)) {
+    const effectiveTier = aiTier === "A" ? "A" : "B";
+    const tierInfo = TIER_CONFIG[effectiveTier];
+    const trust = Math.round(tierInfo.base_min + (tierInfo.base_max - tierInfo.base_min) * Math.max(aiConfidence, 0.4));
+    return { tier: effectiveTier, trust: Math.max(tierInfo.base_min, Math.min(tierInfo.base_max, trust)) };
+  }
+
+  // No external data → use AI's own tier/confidence (existing logic)
+  return { tier: aiTier, trust: -1 }; // -1 signals: use existing calculation
+}
+
+// ============================================================
 // Main Handler
 // ============================================================
 serve(async (req: Request) => {
@@ -608,11 +1007,37 @@ Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特
     }
 
     // ================================================================
-    // ROUTE B: Cultivar/Hybrid OR Species not found in IPNI → AI research
+    // ROUTE B: Cultivar/Hybrid/Clone OR Species not found → AI research
     // ================================================================
     if (originEntries.length === 0) {
-      console.log(`[Cultivar/Hybrid] AI research for: ${cultivar_name}`);
-      const researchPrompt = buildCultivarResearchPrompt(cultivar_name, genus || parsed.genus, plantType);
+      console.log(`[Research] AI research for: ${cultivar_name} (type: ${plantType})`);
+
+      // Extract cultivar epithet for external searches
+      // e.g., "Anthurium 'Dark Mama'" → "Dark Mama"
+      // e.g., "Monstera deliciosa 'Thai Constellation'" → "Thai Constellation"
+      const epithetMatch = cultivar_name.match(/'([^']+)'/);
+      const cultivarEpithet = epithetMatch ? epithetMatch[1] : cultivar_name.split(/\s+/).slice(1).join(" ");
+      const effectiveGenus = genus || parsed.genus;
+
+      // Gather external data for hybrid/clone types
+      let externalData: ExternalData = { wikidata: null, papers: [] };
+      if (plantType === "hybrid" || plantType === "clone") {
+        console.log(`[Research] Gathering external data for ${plantType}: ${effectiveGenus} ${cultivarEpithet}`);
+        externalData = await gatherExternalData(effectiveGenus, cultivarEpithet);
+        const hasWd = externalData.wikidata ? "yes" : "no";
+        const paperCount = externalData.papers.length;
+        console.log(`[Research] External data: wikidata=${hasWd}, papers=${paperCount}`);
+      }
+
+      // Build type-specific prompt
+      let researchPrompt: string;
+      if (plantType === "hybrid") {
+        researchPrompt = buildHybridResearchPrompt(cultivar_name, effectiveGenus, externalData);
+      } else if (plantType === "clone") {
+        researchPrompt = buildCloneResearchPrompt(cultivar_name, effectiveGenus, externalData);
+      } else {
+        researchPrompt = buildCultivarResearchPrompt(cultivar_name, effectiveGenus, plantType);
+      }
 
       let researchResult: any = null;
 
@@ -677,13 +1102,29 @@ Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特
       // Process AI results
       if (researchResult?.origins?.length) {
         for (const origin of researchResult.origins) {
-          const tier = origin.source_tier || "D";
-          const tierInfo = TIER_CONFIG[tier] || TIER_CONFIG.D;
+          let tier = origin.source_tier || "D";
           const aiConf = Math.max(0, Math.min(1, origin.confidence || 0));
-          let trust = Math.round(tierInfo.base_min + (tierInfo.base_max - tierInfo.base_min) * aiConf);
 
-          // Ensure trust stays within tier bounds
-          trust = Math.max(tierInfo.base_min, Math.min(tierInfo.base_max, trust));
+          // Enhanced trust: if external data found, boost tier/trust
+          let trust: number;
+          if (plantType === "hybrid" || plantType === "clone") {
+            const enhanced = calculateEnhancedTrust(externalData, tier, aiConf);
+            if (enhanced.trust >= 0) {
+              tier = enhanced.tier;
+              trust = enhanced.trust;
+              console.log(`[Trust] Enhanced: tier=${tier}, trust=${trust} (external data boost)`);
+            } else {
+              const tierInfo = TIER_CONFIG[tier] || TIER_CONFIG.D;
+              trust = Math.round(tierInfo.base_min + (tierInfo.base_max - tierInfo.base_min) * aiConf);
+              trust = Math.max(tierInfo.base_min, Math.min(tierInfo.base_max, trust));
+            }
+          } else {
+            const tierInfo = TIER_CONFIG[tier] || TIER_CONFIG.D;
+            trust = Math.round(tierInfo.base_min + (tierInfo.base_max - tierInfo.base_min) * aiConf);
+            trust = Math.max(tierInfo.base_min, Math.min(tierInfo.base_max, trust));
+          }
+
+          const tierInfo = TIER_CONFIG[tier] || TIER_CONFIG.D;
 
           let bodyJp = origin.description_jp || "";
           const bodyEn = origin.description_en || "";
@@ -697,12 +1138,25 @@ Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特
           if (trust >= 70) trustClass = "trust--high";
           else if (trust >= 40) trustClass = "trust--mid";
 
+          // Determine source_type based on external data availability
+          const hasExternal = externalData.wikidata || externalData.papers.length > 0;
+          const sourceType = hasExternal ? "ai_research_enhanced" : "ai_research";
+
+          // Build sources array including external references
+          const sourcesArr: any[] = origin.source_url ? [{ url: origin.source_url, label: origin.source_name }] : [];
+          if (externalData.wikidata) {
+            sourcesArr.push({ url: externalData.wikidata.wikidataUrl, label: "Wikidata" });
+          }
+          for (const paper of externalData.papers) {
+            sourcesArr.push({ url: `https://doi.org/${paper.doi}`, label: `${paper.journal} (${paper.year})` });
+          }
+
           originEntries.push({
             body: bodyJp,
             body_en: bodyEn,
             trust,
             trustClass,
-            source_type: "ai_research",
+            source_type: sourceType,
             source_tier: tier,
             source_tier_label_en: tierInfo.label_en,
             source_tier_label_jp: tierInfo.label_jp,
@@ -719,7 +1173,7 @@ Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特
               isAI: true,
               date: new Date().toISOString().split("T")[0],
             },
-            sources: origin.source_url ? [{ url: origin.source_url, label: origin.source_name }] : [],
+            sources: sourcesArr,
             votes: { agree: 0, disagree: 0 },
             verified: false,
           });

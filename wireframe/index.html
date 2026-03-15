@@ -681,7 +681,7 @@
             <span class="text-sm text-muted">Anthurium</span>
           </div>
         </div>
-        <a href="#" class="btn btn--secondary btn--sm" data-nav="contribute" data-i18n="edit">&#x270F; 編集</a>
+        <a href="#" class="btn btn--secondary btn--sm" data-nav="contribute" data-edit="true" data-i18n="edit">&#x270F; 編集</a>
       </div>
 
       <!-- Image Gallery -->
@@ -798,8 +798,8 @@
   <section id="page-contribute" class="page">
     <div class="container container--narrow">
 
-      <h1 class="section-title" data-i18n="contribute_title">新しい品種を登録</h1>
-      <p class="text-muted mb-lg" data-i18n="contribute_desc">既存品種に由来を追加する場合は、その品種のページから追加できます。</p>
+      <h1 class="section-title" id="contribute-page-title" data-i18n="contribute_title">新しい品種を登録</h1>
+      <p class="text-muted mb-lg" id="contribute-page-desc" data-i18n="contribute_desc">既存品種に由来を追加する場合は、その品種のページから追加できます。</p>
 
       <!-- Cultivar info -->
       <div class="card mb-lg">
@@ -934,7 +934,7 @@
       </div>
 
       <!-- Submit -->
-      <button class="btn btn--primary btn--block" data-i18n="btn_submit">&#x1F4E4; 投稿する</button>
+      <button class="btn btn--primary btn--block" id="contribute-submit-btn" data-i18n="btn_submit">&#x1F4E4; 投稿する</button>
 
     </div>
   </section>
@@ -2654,10 +2654,22 @@
 
         // Pre-select genus if coming from genus page, otherwise reset to placeholder
         if (page === 'contribute') {
-          var genusSelect = document.querySelector('#page-contribute .form-select');
-          if (genusSelect) {
-            if (genus) { genusSelect.value = genus; } else { genusSelect.selectedIndex = 0; }
-            genusSelect.dispatchEvent(new Event('change'));
+          var isEditMode = navEl.getAttribute('data-edit') === 'true';
+          if (isEditMode) {
+            // Get current cultivar name from the detail page h1
+            var detailH1 = document.querySelector('#page-cultivar h1');
+            var editCultivarName = detailH1 ? detailH1.textContent : '';
+            if (editCultivarName && typeof window.enterEditMode === 'function') {
+              window.enterEditMode(editCultivarName);
+            }
+          } else {
+            // Reset to new registration mode
+            if (typeof window.exitEditMode === 'function') window.exitEditMode();
+            var genusSelect = document.querySelector('#page-contribute .form-select');
+            if (genusSelect) {
+              if (genus) { genusSelect.value = genus; } else { genusSelect.selectedIndex = 0; }
+              genusSelect.dispatchEvent(new Event('change'));
+            }
           }
         }
         if (page === 'contribute' && navEl.getAttribute('data-contribute-type') === 'seedling') {
@@ -2841,6 +2853,9 @@
       btn_cancel: { jp: 'キャンセル', en: 'Cancel' },
       contribute_title: { jp: '新しい品種を登録', en: 'Register New Cultivar' },
       contribute_desc: { jp: '既存品種に由来を追加する場合は、その品種のページから追加できます。', en: 'To add origins to an existing cultivar, go to that cultivar\'s page.' },
+      edit_title: { jp: '品種を編集', en: 'Edit Cultivar' },
+      edit_desc: { jp: '品種の情報を編集できます。', en: 'Edit cultivar information.' },
+      btn_update: { jp: '📤 更新する', en: '📤 Update' },
       cultivar_info: { jp: '品種情報', en: 'Cultivar Info' },
       label_genus: { jp: '属', en: 'Genus' },
       label_name: { jp: '品種名', en: 'Cultivar Name' },
@@ -3226,6 +3241,133 @@
       // Sources management
       var contributeSources = [];
 
+      // ---- Edit mode state ----
+      var editMode = false;
+      var editCultivarKey = null; // original full name (key in cultivarData)
+      var contributePageTitle = document.getElementById('contribute-page-title');
+      var contributePageDesc = document.getElementById('contribute-page-desc');
+      var contributeSubmitBtn = document.getElementById('contribute-submit-btn');
+
+      window.enterEditMode = function(cultivarName) {
+        // Find the cultivar in data - try exact match first, then with [Seedling] suffix
+        var data = cultivarData[cultivarName] || cultivarData[cultivarName + ' [Seedling]'];
+        var key = cultivarData[cultivarName] ? cultivarName : (cultivarData[cultivarName + ' [Seedling]'] ? cultivarName + ' [Seedling]' : null);
+        if (!data || !key) {
+          // Fallback: search case-insensitively
+          Object.keys(cultivarData).forEach(function(k) {
+            if (k.replace(' [Seedling]', '') === cultivarName) {
+              data = cultivarData[k];
+              key = k;
+            }
+          });
+        }
+        if (!data || !key) return;
+
+        editMode = true;
+        editCultivarKey = key;
+
+        // Update page title and button
+        if (contributePageTitle) contributePageTitle.textContent = t('edit_title');
+        if (contributePageDesc) contributePageDesc.textContent = t('edit_desc');
+        if (contributeSubmitBtn) contributeSubmitBtn.textContent = t('btn_update');
+
+        // Determine genus and short name
+        var genus = '';
+        var shortName = '';
+        var type = data._type || 'species';
+        ['Anthurium', 'Monstera', 'Philodendron'].forEach(function(g) {
+          if (key.toLowerCase().startsWith(g.toLowerCase())) {
+            genus = g;
+            shortName = key.replace(g + ' ', '').replace(' [Seedling]', '').replace(/^'|'$/g, '');
+          }
+        });
+
+        // Pre-fill genus
+        if (contributeGenus && genus) {
+          contributeGenus.value = genus;
+          contributeGenus.dispatchEvent(new Event('change'));
+        }
+
+        // Pre-fill name
+        if (contributeName) contributeName.value = shortName;
+
+        // Pre-fill type
+        var typeRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="' + type + '"]');
+        if (typeRadio) {
+          typeRadio.checked = true;
+          typeRadio.dispatchEvent(new Event('change'));
+        }
+
+        // Pre-fill description from first non-formula origin
+        if (contributeDesc) {
+          contributeDesc.value = '';
+          if (data.origins) {
+            for (var i = 0; i < data.origins.length; i++) {
+              if (data.origins[i]._type !== 'formula' && data.origins[i].body) {
+                contributeDesc.value = data.origins[i].body;
+                break;
+              }
+            }
+          }
+        }
+
+        // Pre-fill formula
+        if (data.formula && formulaParentA && formulaParentB) {
+          formulaParentA.value = data.formula.parentA || '';
+          formulaParentB.value = data.formula.parentB || '';
+        }
+
+        // Pre-fill sources from first non-formula origin
+        contributeSources = [];
+        if (data.origins) {
+          for (var i = 0; i < data.origins.length; i++) {
+            if (data.origins[i]._type !== 'formula' && data.origins[i].sources) {
+              data.origins[i].sources.forEach(function(s) {
+                if (s.text) contributeSources.push(s.text);
+              });
+              break;
+            }
+          }
+        }
+        renderContributeSources();
+
+        // Hide duplicate alert
+        if (duplicateAlert) duplicateAlert.style.display = 'none';
+
+        // Disable genus and name fields (can't change the identity)
+        if (contributeGenus) contributeGenus.disabled = true;
+        if (contributeName) contributeName.disabled = true;
+        // Disable type radios
+        document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(r) { r.disabled = true; });
+      };
+
+      window.exitEditMode = function() {
+        editMode = false;
+        editCultivarKey = null;
+
+        // Restore page title and button
+        if (contributePageTitle) contributePageTitle.textContent = t('contribute_title');
+        if (contributePageDesc) contributePageDesc.textContent = t('contribute_desc');
+        if (contributeSubmitBtn) contributeSubmitBtn.textContent = t('btn_submit');
+
+        // Re-enable fields
+        if (contributeGenus) contributeGenus.disabled = false;
+        if (contributeName) contributeName.disabled = false;
+        document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(r) { r.disabled = false; });
+
+        // Reset form
+        if (contributeName) contributeName.value = '';
+        if (contributeDesc) contributeDesc.value = '';
+        if (contributeGenus) contributeGenus.selectedIndex = 0;
+        var speciesRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="species"]');
+        if (speciesRadio) { speciesRadio.checked = true; speciesRadio.dispatchEvent(new Event('change')); }
+        if (formulaParentA) formulaParentA.value = '';
+        if (formulaParentB) formulaParentB.value = '';
+        contributeSources = [];
+        renderContributeSources();
+        if (duplicateAlert) duplicateAlert.style.display = 'none';
+      };
+
       // Clear example sources on load
       if (contributeSourceList) contributeSourceList.innerHTML = '';
 
@@ -3391,8 +3533,99 @@
             fullName = genus + " '" + name + "'";
           }
 
-          // Check duplicate
-          if (cultivarData[fullName]) { showToast(t('error_duplicate'), true); return; }
+          // Check duplicate (skip in edit mode)
+          if (!editMode && cultivarData[fullName]) { showToast(t('error_duplicate'), true); return; }
+
+          // ---- EDIT MODE: update existing record ----
+          if (editMode && editCultivarKey) {
+            var existingData = cultivarData[editCultivarKey];
+            if (!existingData) { showToast('品種データが見つかりません', true); return; }
+
+            // Update description in first non-formula origin
+            var updatedDesc = desc;
+            var updatedSources = contributeSources.map(function(url) { return { icon: '\u{1F310}', text: url }; });
+            var foundOrigin = false;
+            var updatedOrigins = (existingData.origins || []).map(function(o) {
+              if (o._type === 'formula') return o;
+              if (!foundOrigin) {
+                foundOrigin = true;
+                return Object.assign({}, o, {
+                  body: updatedDesc || o.body,
+                  sources: updatedSources.length > 0 ? updatedSources : o.sources
+                });
+              }
+              return o;
+            });
+            // If no non-formula origin existed and user wrote a description, add one
+            if (!foundOrigin && updatedDesc) {
+              updatedOrigins.unshift({
+                trust: type === 'seedling' ? 50 : 30, trustClass: type === 'seedling' ? 'trust--mid' : 'trust--low',
+                body: updatedDesc,
+                source_type: 'manual',
+                sources: updatedSources,
+                author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
+                votes: { agree: 0, disagree: 0 }
+              });
+            }
+
+            // Update formula
+            var updatedFormula = existingData.formula || null;
+            if (type !== 'species' && formulaParentA && formulaParentB) {
+              var pA = formulaParentA.value.trim();
+              var pB = formulaParentB.value.trim();
+              if (pA && pB) {
+                updatedFormula = Object.assign({}, updatedFormula || {}, { parentA: pA, parentB: pB });
+              }
+            }
+
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.5';
+
+            // Build DB origins (include formula entry)
+            var dbOrigins = updatedOrigins.filter(function(o) { return o._type !== 'formula'; });
+            if (updatedFormula) {
+              dbOrigins.push({ _type: 'formula', formula: updatedFormula });
+            }
+
+            // Update in Supabase
+            var sbClient = window._supabaseClient;
+            var updatePromise;
+            if (sbClient) {
+              updatePromise = sbClient.from('cultivars')
+                .update({ origins: dbOrigins })
+                .eq('cultivar_name', editCultivarKey)
+                .then(function(res) {
+                  if (res.error) throw new Error(res.error.message);
+                });
+            } else {
+              updatePromise = Promise.resolve();
+            }
+
+            updatePromise.then(function() {
+              // Update local data
+              existingData.origins = updatedOrigins;
+              if (updatedFormula) existingData.formula = updatedFormula;
+
+              // Navigate back to cultivar detail
+              var fakeRow = document.createElement('div');
+              fakeRow.innerHTML = '<span class="badge badge--' + type + '"></span>';
+              if (type === 'species') fakeRow.innerHTML = '<span class="badge badge--species"></span>';
+              updateCultivarDetail(editCultivarKey, fakeRow);
+              navigateTo('cultivar', { cultivar: editCultivarKey, _skipUpdate: true }, true);
+
+              // Exit edit mode and reset
+              window.exitEditMode();
+              submitBtn.disabled = false;
+              submitBtn.style.opacity = '';
+              showToast('更新しました');
+            }).catch(function(err) {
+              submitBtn.disabled = false;
+              submitBtn.style.opacity = '';
+              showToast('更新エラー: ' + (err.message || err), true);
+            });
+            return; // Don't continue to new registration logic
+          }
 
           // Build data entry
           var newEntry = { origins: [] };
