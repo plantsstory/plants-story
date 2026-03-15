@@ -538,7 +538,7 @@
           <div class="stat-card">
             <h3 style="margin-bottom:var(--space-md);">画像一括圧縮</h3>
             <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">
-              既存画像をCanvas APIで再圧縮します。長辺2048px超はリサイズ、JPEG品質0.8で再エンコード。<br>
+              既存画像をCanvas APIで再圧縮します。長辺2048px超はリサイズ、JPEG品質0.9で再エンコード。<br>
               <strong>スキップ条件:</strong> 長辺2048px以下 かつ 500KB未満の画像はスキップします。
             </p>
             <div class="toolbar" style="margin-bottom:var(--space-md);">
@@ -593,7 +593,7 @@ var currentSession = null;
 // Compress image using Canvas API (preserves aspect ratio)
 function compressImage(file, maxLongSide, quality) {
   maxLongSide = maxLongSide || 2048;
-  quality = quality || 0.8;
+  quality = quality || 0.9;
   return new Promise(function(resolve, reject) {
     var img = new Image();
     img.onload = function() {

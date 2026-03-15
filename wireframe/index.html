@@ -4871,7 +4871,7 @@
       // Compress image using Canvas API (preserves aspect ratio)
       function compressImage(file, maxLongSide, quality) {
         maxLongSide = maxLongSide || 2048;
-        quality = quality || 0.8;
+        quality = quality || 0.9;
         return new Promise(function(resolve, reject) {
           var img = new Image();
           img.onload = function() {
