@@ -825,6 +825,30 @@
       <h1 class="section-title" id="contribute-page-title" data-i18n="contribute_title">新しい品種を登録</h1>
       <p class="text-muted mb-lg" id="contribute-page-desc" data-i18n="contribute_desc">既存品種に由来を追加する場合は、その品種のページから追加できます。</p>
 
+      <!-- Login benefits card -->
+      <div id="login-benefits-card" class="card mb-lg" style="background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border:1px solid #c8e6c9;">
+        <div id="login-benefits-content" style="display:flex;align-items:center;gap:var(--space-md);flex-wrap:wrap;">
+          <div style="flex:1;min-width:200px;">
+            <h3 style="margin:0 0 var(--space-xs);font-size:var(--font-size-base);">Googleでログインすると</h3>
+            <ul style="margin:0;padding-left:1.2em;font-size:var(--font-size-sm);color:var(--color-gray);">
+              <li>編集キーなしでいつでも投稿を編集可能</li>
+              <li>自分の投稿履歴を確認できます</li>
+            </ul>
+          </div>
+          <button class="btn btn--primary" id="google-login-btn" type="button" style="white-space:nowrap;">
+            <svg width="18" height="18" viewBox="0 0 48 48" style="vertical-align:middle;margin-right:6px;"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#34A853" d="M10.53 28.59A14.5 14.5 0 019.5 24c0-1.59.28-3.14.77-4.59l-7.98-6.19A23.94 23.94 0 000 24c0 3.77.9 7.35 2.56 10.52l7.97-5.93z"/><path fill="#FBBC05" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 5.93C6.51 42.62 14.62 48 24 48z"/></svg>
+            Googleでログイン
+          </button>
+        </div>
+        <div id="logged-in-info" style="display:none;">
+          <div style="flex:1;min-width:200px;">
+            <p style="margin:0;font-size:var(--font-size-sm);">ログイン中: <strong id="logged-in-email"></strong></p>
+            <p style="margin:var(--space-xs) 0 0;font-size:var(--font-size-sm);color:var(--color-gray);">編集キーなしで投稿を編集できます</p>
+          </div>
+          <button class="btn btn--outline" id="logout-btn" type="button" style="white-space:nowrap;">ログアウト</button>
+        </div>
+      </div>
+
       <!-- Cultivar info -->
       <div class="card mb-lg">
         <h2 class="text-lg font-bold mb-md" data-i18n="cultivar_info">品種情報</h2>
@@ -1980,6 +2004,64 @@
         }
       } catch(e) { console.warn('Supabase init failed:', e); }
 
+      // --- Auth: session management ---
+      window._currentUser = null;
+
+      function updateLoginUI() {
+        var benefitsContent = document.getElementById('login-benefits-content');
+        var loggedInInfo = document.getElementById('logged-in-info');
+        var editKeyCard = document.getElementById('edit-key-card');
+        if (!benefitsContent) return;
+        if (window._currentUser) {
+          benefitsContent.style.display = 'none';
+          loggedInInfo.style.display = 'flex';
+          loggedInInfo.style.alignItems = 'center';
+          loggedInInfo.style.gap = 'var(--space-md)';
+          loggedInInfo.style.flexWrap = 'wrap';
+          document.getElementById('logged-in-email').textContent = window._currentUser.email || '';
+          if (editKeyCard) editKeyCard.style.display = 'none';
+        } else {
+          benefitsContent.style.display = 'flex';
+          loggedInInfo.style.display = 'none';
+          if (editKeyCard) editKeyCard.style.display = '';
+        }
+      }
+
+      if (supabase) {
+        supabase.auth.getSession().then(function(res) {
+          if (res.data && res.data.session) {
+            window._currentUser = res.data.session.user;
+            updateLoginUI();
+          }
+        });
+        supabase.auth.onAuthStateChange(function(event, session) {
+          window._currentUser = session ? session.user : null;
+          updateLoginUI();
+        });
+      }
+
+      // Google login button
+      var googleLoginBtn = document.getElementById('google-login-btn');
+      if (googleLoginBtn && supabase) {
+        googleLoginBtn.addEventListener('click', function() {
+          supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: window.location.origin + window.location.pathname }
+          });
+        });
+      }
+
+      // Logout button
+      var logoutBtn = document.getElementById('logout-btn');
+      if (logoutBtn && supabase) {
+        logoutBtn.addEventListener('click', function() {
+          supabase.auth.signOut().then(function() {
+            window._currentUser = null;
+            updateLoginUI();
+          });
+        });
+      }
+
       // Save to localStorage (fallback)
       window.saveUserCultivars = function() {
         var saved = {};
@@ -2023,7 +2105,8 @@
               p_origins: originsData,
               p_edit_key_hash: editKeyHash,
               p_ai_status: isSeedling ? null : 'pending',
-              p_created_ip: userIp
+              p_created_ip: userIp,
+              p_user_id: window._currentUser ? window._currentUser.id : null
             });
           });
 
@@ -2220,6 +2303,7 @@
         if (cultivarData[fullName]) return;
         entry._type = meta.type;
         entry._created_at = meta.created_at || '';
+        entry._userId = meta.user_id || null;
         // Extract creatorName from formula in origins
         if (entry.formula && entry.formula.creatorName) {
           entry._creatorName = entry.formula.creatorName;
@@ -2384,7 +2468,7 @@
                 formula: formula
               };
               var genus = row.genus || 'Anthurium';
-              var meta = { genus: genus, type: row.type || 'Hybrid', created_at: row.created_at || '' };
+              var meta = { genus: genus, type: row.type || 'Hybrid', created_at: row.created_at || '', user_id: row.user_id || null };
               addCultivarRow(row.cultivar_name, entry, meta);
             });
             refreshGenusUI();
@@ -2959,6 +3043,15 @@
       var addPhotoBtn = document.getElementById('detail-add-photo-btn');
       if (addPhotoBtn) addPhotoBtn.style.display = isSeedlingDetail ? 'none' : '';
 
+      // If logged-in user owns this cultivar, hide edit key input
+      var editKeySection = document.getElementById('edit-key-section');
+      var detailEditKeyInput = document.getElementById('detail-edit-key');
+      if (editKeySection && window._currentUser && cData && cData._userId === window._currentUser.id) {
+        if (detailEditKeyInput) detailEditKeyInput.style.display = 'none';
+      } else {
+        if (detailEditKeyInput) detailEditKeyInput.style.display = '';
+      }
+
       // Render origins dynamically
       renderOrigins(cultivarName);
     }
@@ -3179,11 +3272,6 @@
           cultivarName = cultivarName + ' [Seedling]';
         }
 
-        if (!editKey || editKey.length !== 4) {
-          showToast('4桁の編集キーを入力してください', true);
-          return;
-        }
-
         // Verify edit key via Supabase RPC
         var sbClient = window._supabaseClient;
         if (!sbClient) {
@@ -3194,19 +3282,31 @@
         editBtn.disabled = true;
         editBtn.style.opacity = '0.5';
 
-        // Verify edit key client-side: hash input and compare with DB
-        var encoder = new TextEncoder();
-        var keyData = encoder.encode(editKey);
-        crypto.subtle.digest('SHA-256', keyData).then(function(buffer) {
-          var hashArray = Array.from(new Uint8Array(buffer));
-          var inputHash = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-          return sbClient.from('cultivars').select('id, edit_key_hash').eq('cultivar_name', cultivarName).limit(1).then(function(res) {
-            if (res.error) throw new Error(res.error.message);
-            if (!res.data || res.data.length === 0) throw new Error('品種が見つかりません');
-            var storedHash = res.data[0].edit_key_hash;
-            if (!storedHash) throw new Error('この品種には編集キーが設定されていません');
+        // Check if logged-in user owns this cultivar (skip edit key)
+        sbClient.from('cultivars').select('id, edit_key_hash, user_id').eq('cultivar_name', cultivarName).limit(1).then(function(res) {
+          if (res.error) throw new Error(res.error.message);
+          if (!res.data || res.data.length === 0) throw new Error('品種が見つかりません');
+          var row = res.data[0];
+
+          // If logged-in user owns this cultivar, skip edit key
+          if (window._currentUser && row.user_id && window._currentUser.id === row.user_id) {
+            return row.id;
+          }
+
+          // Otherwise require edit key
+          if (!editKey || editKey.length !== 4) {
+            throw new Error('4桁の編集キーを入力してください');
+          }
+          var storedHash = row.edit_key_hash;
+          if (!storedHash) throw new Error('この品種には編集キーが設定されていません');
+
+          var encoder = new TextEncoder();
+          var keyData = encoder.encode(editKey);
+          return crypto.subtle.digest('SHA-256', keyData).then(function(buffer) {
+            var hashArray = Array.from(new Uint8Array(buffer));
+            var inputHash = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
             if (inputHash !== storedHash) throw new Error('編集キーが正しくありません');
-            return res.data[0].id;
+            return row.id;
           });
         }).then(function(cultivarId) {
           editBtn.disabled = false;
@@ -4703,22 +4803,28 @@
               // Update in Supabase
               var updatePromise;
 
-              if (sbClient && editKeyValue) {
-                // Edit key verified: hash client-side, then use RPC for full update
-                var encoder = new TextEncoder();
-                var keyData = encoder.encode(editKeyValue);
-                updatePromise = crypto.subtle.digest('SHA-256', keyData).then(function(buffer) {
-                  var hashArray = Array.from(new Uint8Array(buffer));
-                  var inputHash = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-                  return sbClient.rpc('update_with_edit_key_hash', {
-                    p_cultivar_name: editCultivarKey,
-                    p_edit_key_hash: inputHash,
-                    p_new_cultivar_name: nameChanged ? fullName : null,
-                    p_new_genus: nameChanged ? genus : null,
-                    p_new_type: type,
-                    p_origins: dbOrigins
+              if (sbClient && (editKeyValue || window._currentUser)) {
+                // Edit key or logged-in user: use RPC for full update
+                var rpcParams = {
+                  p_cultivar_name: editCultivarKey,
+                  p_new_cultivar_name: nameChanged ? fullName : null,
+                  p_new_genus: nameChanged ? genus : null,
+                  p_new_type: type,
+                  p_origins: dbOrigins,
+                  p_user_id: window._currentUser ? window._currentUser.id : null
+                };
+                if (editKeyValue) {
+                  var encoder = new TextEncoder();
+                  var keyData = encoder.encode(editKeyValue);
+                  updatePromise = crypto.subtle.digest('SHA-256', keyData).then(function(buffer) {
+                    var hashArray = Array.from(new Uint8Array(buffer));
+                    rpcParams.p_edit_key_hash = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+                    return sbClient.rpc('update_with_edit_key_hash', rpcParams);
                   });
-                }).then(function(res) {
+                } else {
+                  updatePromise = sbClient.rpc('update_with_edit_key_hash', rpcParams);
+                }
+                updatePromise = updatePromise.then(function(res) {
                   if (res.error) throw new Error(res.error.message);
                   var result = res.data;
                   if (result && !result.success) throw new Error(result.error || 'Update failed');
