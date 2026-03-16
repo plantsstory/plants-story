@@ -509,16 +509,13 @@ function parseSpeciesName(cultivarName: string): { genus: string; species: strin
 // ============================================================
 // Build description from IPNI/POWO data (species only)
 // ============================================================
-function buildSpeciesDescriptionPrompt(bot: BotanicalResult): string {
+function buildSpeciesStructuredPrompt(bot: BotanicalResult): string {
   const distribution = bot.nativeDistribution.join(", ") || "不明";
 
-  return `You are a botanical writer creating an accessible, informative description of a plant species.
-You are given VERIFIED data from IPNI and POWO (Kew Gardens).
+  return `You are a botanical researcher extracting structured data about a plant species.
+You are given VERIFIED data from IPNI and POWO (Kew Gardens). Your task is to supplement this with additional structured information from RELIABLE academic sources only.
 
-Your goal: Write a description that a plant enthusiast (not a scientist) can enjoy reading.
-Include the scientific citation, but ALSO describe what makes this plant special and recognizable.
-
-=== VERIFIED DATA ===
+=== ALREADY KNOWN (from IPNI/POWO — do NOT repeat in notes) ===
 Scientific name: ${bot.name}
 Authors: ${bot.authors}
 Publication year: ${bot.publicationYear || "unknown"}
@@ -526,19 +523,31 @@ Publication: ${bot.publication || "unknown"} ${bot.referenceCollation || ""}
 Family: Araceae
 Native distribution: ${distribution}
 
-=== WRITING GUIDELINES ===
-1. Start with the scientific citation (who described it, when, where published).
-2. Then describe the plant's APPEARANCE: leaf shape, color, texture, venation pattern, petiole characteristics. These are well-known morphological features for Araceae - use your knowledge.
-   IMPORTANT: Do NOT include specific size measurements (e.g., "30-40cm", "1m tall"). Sizes vary greatly between individuals depending on growing conditions.
-3. Mention the native habitat briefly (tropical rainforest, cloud forest, etc.) based on distribution.
-4. Keep it engaging but factual. No care tips, no flower language, no commercial info.
-5. 日本語: 自然な日本語で、植物好きの人が読んで楽しい文章にする。学名・人名・地名は英語のまま。
+=== YOUR TASK ===
+Research and return structured data about this species. Use ONLY:
+- Peer-reviewed academic papers (Aroideana, Phytotaxa, Annals of the Missouri Botanical Garden, etc.)
+- Official botanical databases (IPNI, POWO, Tropicos, GBIF, botanical garden specimen records)
+- Taxonomic monographs and revisions
+
+NEVER use: nursery pages, Instagram, Reddit, Facebook, blogs, Yahoo Auctions, Mercari.
+
+=== CRITICAL RULES ===
+1. If information is unknown or uncertain, write "不明" (unknown). NEVER guess or speculate.
+2. NEVER write "believed to be", "thought to be", "possibly", "likely", or "presumed".
+3. collector = the person who FIRST COLLECTED the type specimen (not the describing author, unless they also collected it).
+4. type_locality = the specific location where the type specimen was collected (e.g., "Chocó, Colombia, 800m elevation").
+5. Do NOT include specific size measurements in notes (plants vary by growing conditions).
+6. notes should describe the plant's APPEARANCE: leaf shape, color, texture, venation pattern, petiole characteristics. Keep it engaging for plant enthusiasts.
 
 === OUTPUT FORMAT ===
 Return ONLY valid JSON (no markdown, no code blocks):
 {
-  "body": "日本語の説明文 (150-300文字)。最初に記載情報、次に植物の見た目の特徴、最後に自生地の環境。",
-  "body_en": "English description (100-250 words). Scientific citation first, then appearance and habitat."
+  "collector": "タイプ標本の採取者名 (string, 不明なら \"不明\")",
+  "collection_year": "採取年 (number or null, 不明ならnull)",
+  "type_locality": "タイプ産地 — 初めて標本が採取された場所 (string, 不明なら \"不明\")",
+  "known_habitats": "生息環境の簡潔な記述 (例: 熱帯雲霧林、標高300-1000mの着生植物)",
+  "notes": "日本語の補足テキスト (100-200文字)。植物の外見的特徴（葉の形状・色・質感・葉脈パターン等）を記述。学名・人名・地名は英語のまま。",
+  "notes_en": "English supplementary text (80-150 words). Describe appearance: leaf shape, color, texture, venation, petiole."
 }`;
 }
 
@@ -956,103 +965,68 @@ serve(async (req: Request) => {
       if (botResult) {
         researchSource = "ipni-powo";
 
-        // Generate description text using AI (based on DB data only)
-        let bodyJp = "";
-        let bodyEn = "";
+        // AI structured data: collector, collection_year, type_locality, known_habitats, notes
+        const structuredPrompt = buildSpeciesStructuredPrompt(botResult);
+        let aiStructured: any = null;
 
-        const descPrompt = buildSpeciesDescriptionPrompt(botResult);
-
+        // LLM cascade: Gemini (free) → Groq (free) → GPT-4o mini (paid, last resort)
         if (geminiApiKey) {
           try {
-            console.log("[Desc] Trying Gemini for description...");
-            const text = await callGemini(geminiApiKey, descPrompt);
-            console.log("[Desc] Gemini raw response length:", text?.length, "first 100:", text?.substring(0, 100));
-            const descParsed = extractJson(text);
-            if (descParsed?.body && descParsed?.body_en) {
-              bodyJp = descParsed.body;
-              bodyEn = descParsed.body_en;
-              console.log("[Desc] Gemini OK, body length:", bodyJp.length);
-            } else {
-              console.log("[Desc] Gemini returned no valid JSON");
+            console.log("[Structured] Trying Gemini...");
+            const text = await callGemini(geminiApiKey, structuredPrompt);
+            console.log("[Structured] Gemini raw length:", text?.length, "first 100:", text?.substring(0, 100));
+            const parsed = extractJson(text);
+            if (parsed?.notes) {
+              aiStructured = parsed;
+              console.log("[Structured] Gemini OK");
             }
           } catch (e) {
-            console.log("[Desc] Gemini FAILED:", String(e));
-          }
-        } else {
-          console.log("[Desc] No Gemini API key");
-        }
-
-        // Fallback: generate from structured data with Groq (simpler prompt)
-        if (!bodyJp || bodyJp.length < 50) {
-          const dist = botResult.nativeDistribution.join(", ") || "不明";
-          const yearPart = botResult.publicationYear ? ` in ${botResult.publicationYear}` : "";
-          const pubPart = botResult.publication ? ` in ${botResult.publication} ${botResult.referenceCollation}` : "";
-
-          if (groqApiKey) {
-            try {
-              console.log("[Desc] bodyJp length:", bodyJp?.length, "- trying Groq with simple prompt...");
-              const simplePrompt = `Describe the plant "${botResult.name}" (Araceae) for plant enthusiasts.
-Include: leaf shape, color, texture, venation, and growth habit. Do NOT include specific size measurements as they vary by individual.
-It was described by ${botResult.authors}${yearPart}${pubPart}. Native to ${dist}.
-
-Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特徴→自生地。学名・人名・地名は英語", "body_en": "English 100-200 words"}`;
-              const groqText = await callGroq(
-                groqApiKey,
-                "llama-3.3-70b-versatile",
-                "You are a botanical writer. Return ONLY valid JSON.",
-                simplePrompt,
-                1500
-              );
-              console.log("[Desc] Groq raw response length:", groqText?.length, "first 100:", groqText?.substring(0, 100));
-              const groqDesc = extractJson(groqText);
-              if (groqDesc?.body && groqDesc.body.length >= 50) {
-                bodyJp = groqDesc.body;
-                bodyEn = groqDesc.body_en || bodyEn;
-                console.log("[Desc] Groq OK, body length:", bodyJp.length);
-              } else {
-                console.log("[Desc] Groq returned no valid JSON or body too short");
-              }
-            } catch (e) {
-              console.log("[Desc] Groq FAILED:", String(e));
-            }
-          }
-
-          // Fallback 3: GPT-4o mini
-          if ((!bodyJp || bodyJp.length < 50) && openaiApiKey) {
-            try {
-              console.log("[Desc] Trying GPT-4o mini for description...");
-              const dist = botResult.nativeDistribution.join(", ") || "不明";
-              const yearPart = botResult.publicationYear ? ` in ${botResult.publicationYear}` : "";
-              const pubPart = botResult.publication ? ` in ${botResult.publication} ${botResult.referenceCollation}` : "";
-              const simplePrompt = `Describe the plant "${botResult.name}" (Araceae) for plant enthusiasts.
-Include: leaf shape, color, texture, venation, and growth habit. Do NOT include specific size measurements as they vary by individual.
-It was described by ${botResult.authors}${yearPart}${pubPart}. Native to ${dist}.
-
-Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特徴→自生地。学名・人名・地名は英語", "body_en": "English 100-200 words"}`;
-              const openaiText = await callOpenAI(
-                openaiApiKey,
-                "You are a botanical writer. Return ONLY valid JSON.",
-                simplePrompt,
-                1500
-              );
-              console.log("[Desc] GPT-4o mini raw response length:", openaiText?.length);
-              const openaiDesc = extractJson(openaiText);
-              if (openaiDesc?.body && openaiDesc.body.length >= 50) {
-                bodyJp = openaiDesc.body;
-                bodyEn = openaiDesc.body_en || bodyEn;
-                console.log("[Desc] GPT-4o mini OK, body length:", bodyJp.length);
-              }
-            } catch (e) {
-              console.log("[Desc] GPT-4o mini FAILED:", String(e));
-            }
-          }
-
-          // Final fallback: structured template
-          if (!bodyJp || bodyJp.length < 50) {
-            bodyJp = `${botResult.authors}が${botResult.publicationYear ? botResult.publicationYear + "年に" : ""}${botResult.publication ? botResult.publication + " " + botResult.referenceCollation + "にて" : ""}記載。${dist}原産。サトイモ科（Araceae）に属する着生または地生植物。`;
-            bodyEn = `${botResult.name} was described by ${botResult.authors}${yearPart}${pubPart}. Native to ${dist}. An epiphytic or terrestrial member of the family Araceae.`;
+            console.log("[Structured] Gemini FAILED:", String(e));
           }
         }
+
+        if (!aiStructured && groqApiKey) {
+          try {
+            console.log("[Structured] Trying Groq...");
+            const text = await callGroq(
+              groqApiKey, "llama-3.3-70b-versatile",
+              "You are a botanical researcher. Return ONLY valid JSON, no markdown.",
+              structuredPrompt, 2000
+            );
+            const parsed = extractJson(text);
+            if (parsed?.notes) {
+              aiStructured = parsed;
+              console.log("[Structured] Groq OK");
+            }
+          } catch (e) {
+            console.log("[Structured] Groq FAILED:", String(e));
+          }
+        }
+
+        if (!aiStructured && openaiApiKey) {
+          try {
+            console.log("[Structured] Trying GPT-4o mini (last resort)...");
+            const text = await callOpenAI(
+              openaiApiKey,
+              "You are a botanical researcher. Return ONLY valid JSON, no markdown.",
+              structuredPrompt, 2000
+            );
+            const parsed = extractJson(text);
+            if (parsed?.notes) {
+              aiStructured = parsed;
+              console.log("[Structured] GPT-4o mini OK");
+            }
+          } catch (e) {
+            console.log("[Structured] GPT-4o mini FAILED:", String(e));
+          }
+        }
+
+        // Build body text from structured data for backward compatibility
+        const dist = botResult.nativeDistribution.join(", ") || "不明";
+        const bodyJp = aiStructured?.notes || `${botResult.authors}が${botResult.publicationYear ? botResult.publicationYear + "年に" : ""}${botResult.publication ? botResult.publication + " " + botResult.referenceCollation + "にて" : ""}記載。${dist}原産。サトイモ科（Araceae）に属する着生または地生植物。`;
+        const yearPart = botResult.publicationYear ? ` in ${botResult.publicationYear}` : "";
+        const pubPart = botResult.publication ? ` in ${botResult.publication} ${botResult.referenceCollation}` : "";
+        const bodyEn = aiStructured?.notes_en || `${botResult.name} was described by ${botResult.authors}${yearPart}${pubPart}. Native to ${dist}. An epiphytic or terrestrial member of the family Araceae.`;
 
         const tierInfo = TIER_CONFIG.S;
         const ipniId = botResult.fqId.replace("urn:lsid:ipni.org:names:", "");
@@ -1075,6 +1049,20 @@ Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特
           first_description: botResult.publicationYear
             ? `${botResult.authors}, ${botResult.publication} ${botResult.referenceCollation} (${botResult.publicationYear})`
             : `${botResult.authors}`,
+          structured: {
+            origin_type: "species",
+            author_name: botResult.authors || "不明",
+            publication_year: botResult.publicationYear ? parseInt(botResult.publicationYear) : null,
+            collector: aiStructured?.collector || "不明",
+            collection_year: aiStructured?.collection_year || null,
+            type_locality: aiStructured?.type_locality || botResult.nativeDistribution[0] || "不明",
+            known_habitats: aiStructured?.known_habitats || dist,
+            notes: bodyJp,
+            citation_links: [
+              { url: `https://www.ipni.org/n/${ipniId}`, label: "IPNI" },
+              { url: `https://powo.science.kew.org/taxon/${botResult.fqId}`, label: "POWO (Kew)" },
+            ],
+          },
           author: {
             name: "IPNI / POWO",
             isAI: true,
@@ -1360,6 +1348,21 @@ Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特
 
             const sourcesArr: any[] = origin.source_url ? [{ url: origin.source_url, label: origin.source_name }] : [];
 
+            // Build structured fields from AI research result (species fallback)
+            const structuredEntry: any = {
+              origin_type: plantType === "species" ? "species" : plantType,
+              author_name: origin.discoverer_or_breeder || "不明",
+              publication_year: origin.discovery_year || null,
+              collector: "不明",
+              collection_year: null,
+              type_locality: origin.native_region || "不明",
+              known_habitats: origin.native_region || "不明",
+              notes: bodyJp,
+              citation_links: origin.source_url
+                ? [{ url: origin.source_url, label: origin.source_name || origin.source_url }]
+                : [],
+            };
+
             originEntries.push({
               body: bodyJp,
               body_en: bodyEn,
@@ -1377,6 +1380,7 @@ Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特
               discoverer_or_breeder: origin.discoverer_or_breeder || null,
               native_region: origin.native_region || null,
               first_description: origin.first_description || null,
+              structured: structuredEntry,
               author: {
                 name: researchSource === "gemini" ? "AI (Gemini 2.0 Flash)" : researchSource === "gpt-4o-mini" ? "AI (GPT-4o mini)" : "AI (Llama 3.3 70B)",
                 isAI: true,
@@ -1396,8 +1400,9 @@ Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特
     // ================================================================
     if (originEntries.length === 0) {
       const tierInfo = TIER_CONFIG.D;
+      const placeholderBodyJp = `${cultivar_name}の由来は不明です。正確な作出者・交配親についての学術的な記録は確認されていません。`;
       originEntries.push({
-        body: `${cultivar_name}の由来は不明です。正確な作出者・交配親についての学術的な記録は確認されていません。`,
+        body: placeholderBodyJp,
         body_en: `The origin of ${cultivar_name} is unknown. No academic records confirming the creator or parentage have been verified.`,
         trust: 20,
         trustClass: "trust--low",
@@ -1413,6 +1418,17 @@ Return JSON only: {"body": "日本語150-300文字。記載情報→外見の特
         discoverer_or_breeder: null,
         native_region: null,
         first_description: null,
+        structured: {
+          origin_type: plantType || "species",
+          author_name: "不明",
+          publication_year: null,
+          collector: "不明",
+          collection_year: null,
+          type_locality: "不明",
+          known_habitats: "不明",
+          notes: placeholderBodyJp,
+          citation_links: [],
+        },
         author: {
           name: "System",
           isAI: true,

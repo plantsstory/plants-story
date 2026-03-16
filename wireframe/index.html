@@ -1464,7 +1464,7 @@
       options = options || {};
       showPage(page);
       // Reset edit mode when navigating to contribute page via hash (not from detail page edit flow)
-      if (page === 'contribute' && typeof window.exitEditMode === 'function') {
+      if (page === 'contribute' && !options._editFlow && typeof window.exitEditMode === 'function') {
         window.exitEditMode();
       }
       if (page === 'favorites') renderFavoritesPage();
@@ -3189,7 +3189,7 @@
           editBtn.disabled = false;
           editBtn.style.opacity = '';
           // Key verified - navigate to edit page
-          navigateTo('contribute', {});
+          navigateTo('contribute', { _editFlow: true });
           if (typeof window.enterEditMode === 'function') {
             window.enterEditMode(cultivarName, editKey, cultivarId);
           }
