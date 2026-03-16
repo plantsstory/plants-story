@@ -4645,8 +4645,8 @@
           if (!genus) { showToast(t('error_genus_required'), true); return; }
           if (!name) { showToast(t('error_name_required'), true); return; }
 
-          // Edit key validation (required for new registration, skip in edit mode)
-          if (!editMode) {
+          // Edit key validation (required for new registration, skip in edit mode or when logged in)
+          if (!editMode && !window._currentUser) {
             var editKeyInput = document.getElementById('edit-key-input');
             var editKeyVal = editKeyInput ? editKeyInput.value.trim() : '';
             if (!editKeyVal) {
