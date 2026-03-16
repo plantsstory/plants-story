@@ -1960,6 +1960,16 @@
       var SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
       var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
 
+      // --- IP address helper (cached per session, global) ---
+      window._cachedIp = null;
+      window.getUserIp = function() {
+        if (window._cachedIp) return Promise.resolve(window._cachedIp);
+        return fetch('https://api.ipify.org?format=json')
+          .then(function(r) { return r.json(); })
+          .then(function(d) { window._cachedIp = d.ip; return d.ip; })
+          .catch(function() { return null; });
+      };
+
       var supabase = null;
       try {
         if (window.supabase && window.supabase.createClient) {
@@ -2002,14 +2012,17 @@
 
           // Hash edit key client-side, then insert via RPC (SECURITY DEFINER)
           var hashPromise = editKey ? sha256(editKey) : Promise.resolve(null);
-          var insertPromise = hashPromise.then(function(editKeyHash) {
+          var insertPromise = Promise.all([hashPromise, getUserIp()]).then(function(results) {
+            var editKeyHash = results[0];
+            var userIp = results[1];
             return supabase.rpc('insert_with_edit_key_hash', {
               p_genus: meta.genus,
               p_cultivar_name: fullName,
               p_type: meta.type || 'Hybrid',
               p_origins: originsData,
               p_edit_key_hash: editKeyHash,
-              p_ai_status: isSeedling ? null : 'pending'
+              p_ai_status: isSeedling ? null : 'pending',
+              p_created_ip: userIp
             });
           });
 
@@ -5166,14 +5179,17 @@
             if (pA && pB) {
               originsToAppend.push({ _type: 'formula', formula: { parentA: pA, parentB: pB } });
             }
-            // Append each origin via RPC
-            var savePromises = originsToAppend.map(function(o) {
-              return _sb.rpc('append_origin', {
-                p_cultivar_name: cultivarName,
-                p_origin: o
-              });
+            // Append each origin via RPC (with IP tracking)
+            var savePromises = getUserIp().then(function(userIp) {
+              return Promise.all(originsToAppend.map(function(o) {
+                return _sb.rpc('append_origin', {
+                  p_cultivar_name: cultivarName,
+                  p_origin: o,
+                  p_ip: userIp
+                });
+              }));
             });
-            Promise.all(savePromises).then(function(results) {
+            savePromises.then(function(results) {
               var failed = results.filter(function(r) { return r.error; });
               if (failed.length > 0) {
                 console.error('Failed to save origin to DB:', failed[0].error);
@@ -5593,7 +5609,9 @@
         var sb = getSupabase();
         if (!sb) return Promise.reject('No Supabase');
         var safeName = cultivarName.replace(/[^a-zA-Z0-9_' -]/g, '_');
-        return compressImage(file).then(function(compressed) {
+        return Promise.all([compressImage(file), getUserIp()]).then(function(results) {
+          var compressed = results[0];
+          var userIp = results[1];
           var ext = 'jpg';
           var path = safeName + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
           return sb.storage.from(BUCKET_NAME).upload(path, compressed, {
@@ -5607,6 +5625,7 @@
             };
             if (caption) row.caption = caption;
             if (linkUrl) row.link_url = linkUrl;
+            if (userIp) row.created_ip = userIp;
             return sb.from('cultivar_images').insert(row).select().then(function(dbRes) {
               if (dbRes.error) throw dbRes.error;
               return dbRes.data[0];

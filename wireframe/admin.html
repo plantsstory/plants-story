@@ -441,6 +441,8 @@
               <th>タイプ</th>
               <th>由来数</th>
               <th>AI状態</th>
+              <th>投稿IP</th>
+              <th>由来追加IP</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -718,6 +720,11 @@ function enterAdmin(user) {
   document.getElementById('admin-email').textContent = user.email;
   loadDashboard();
   loadAllCultivars();
+  // Cleanup IPs older than 180 days on admin login
+  sb.rpc('cleanup_old_ips').then(function(res) {
+    if (res.error) console.warn('IP cleanup error:', res.error.message);
+    else console.log('IP cleanup completed');
+  });
 }
 
 // ========================================
@@ -836,13 +843,15 @@ function renderCultivarTable() {
     html += '<td>' + escapeHtml(c.type) + '</td>';
     html += '<td>' + originCount + '</td>';
     html += '<td><span class="badge ' + statusClass + '">' + escapeHtml(c.ai_status || '-') + '</span></td>';
+    html += '<td style="font-size:0.75rem;color:var(--color-gray);font-family:monospace;">' + escapeHtml(c.created_ip || '-') + '</td>';
+    html += '<td style="font-size:0.75rem;color:var(--color-gray);font-family:monospace;">' + escapeHtml(c.origin_added_ip || '-') + '</td>';
     html += '<td class="actions">';
     html += '<button class="btn btn-outline btn-sm" onclick="editCultivar(' + c.id + ')">編集</button> ';
     html += '<button class="btn btn-danger btn-sm" onclick="deleteCultivar(' + c.id + ',\'' + escapeHtml(c.cultivar_name).replace(/'/g,"\\'") + '\')">削除</button>';
     html += '</td>';
     html += '</tr>';
   });
-  document.getElementById('cultivar-tbody').innerHTML = html || '<tr><td colspan="7" style="text-align:center;color:var(--color-gray);">データなし</td></tr>';
+  document.getElementById('cultivar-tbody').innerHTML = html || '<tr><td colspan="9" style="text-align:center;color:var(--color-gray);">データなし</td></tr>';
 }
 
 document.getElementById('cultivar-search').addEventListener('input', renderCultivarTable);
@@ -1645,6 +1654,7 @@ function renderImageGrid() {
           '<span>Fake: ' + (img.fake_votes || 0) + '</span>' +
         '</div>' +
         '<div style="color:var(--color-gray);font-size:0.75rem;">' + (img.created_at ? new Date(img.created_at).toLocaleDateString('ja') : '') + '</div>' +
+        '<div style="color:var(--color-gray);font-size:0.7rem;font-family:monospace;">IP: ' + escapeHtml(img.created_ip || '-') + '</div>' +
         '<button class="btn btn-sm" style="margin-top:6px;color:#c62828;border-color:#c62828;width:100%;" data-delete-image="' + img.id + '" data-storage-path="' + escapeHtml(img.storage_path) + '">削除</button>' +
       '</div>';
     grid.appendChild(card);
