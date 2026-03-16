@@ -451,9 +451,16 @@
       <!-- ---- ORIGINS ---- -->
       <section id="sec-origins" class="hidden">
         <h2 class="section-title">由来管理</h2>
-        <div class="toolbar">
+        <div class="toolbar" style="flex-wrap:wrap;gap:8px;">
           <select id="origin-cultivar-select" style="width:350px;">
             <option value="">すべての品種</option>
+          </select>
+          <select id="origin-type-filter" style="width:160px;">
+            <option value="">すべてのタイプ</option>
+            <option value="species">原種 (Species)</option>
+            <option value="clone">クローン (Clone)</option>
+            <option value="hybrid">交配種 (Hybrid)</option>
+            <option value="seedling">実生 (Seedling)</option>
           </select>
           <input type="text" id="origin-search" placeholder="検索..." style="width:200px;">
         </div>
@@ -1016,21 +1023,70 @@ function populateOriginSelect() {
 }
 
 document.getElementById('origin-cultivar-select').addEventListener('change', loadOrigins);
+document.getElementById('origin-type-filter').addEventListener('change', loadOrigins);
 document.getElementById('origin-search').addEventListener('input', loadOrigins);
+
+function originTypeBadge(t) {
+  var map = { species: ['原種', '#1B4332'], clone: ['CLONE', '#4A235A'], hybrid: ['交配種', '#7B2D26'], seedling: ['実生', '#1A5276'] };
+  var m = map[t] || [t || '?', '#666'];
+  return '<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:0.65rem;font-weight:600;color:#fff;background:' + m[1] + ';">' + m[0] + '</span>';
+}
+
+function structuredSummaryHtml(s, cType) {
+  if (!s) return '<span style="color:#999;">構造化データなし</span>';
+  var parts = [];
+  if (cType === 'species') {
+    if (s.author_name) parts.push('<b>発表者:</b> ' + escapeHtml(s.author_name));
+    if (s.publication_year) parts.push('<b>発表年:</b> ' + s.publication_year);
+    if (s.collector) parts.push('<b>発見者:</b> ' + escapeHtml(s.collector));
+    if (s.collection_year) parts.push('<b>採取年:</b> ' + s.collection_year);
+    if (s.type_locality) parts.push('<b>採取地:</b> ' + escapeHtml(s.type_locality));
+    if (s.known_habitats) parts.push('<b>生息地:</b> ' + escapeHtml((s.known_habitats || '').substring(0, 40)));
+  } else if (cType === 'clone') {
+    if (s.namer) parts.push('<b>命名者:</b> ' + escapeHtml(s.namer));
+    if (s.naming_year) parts.push('<b>命名年:</b> ' + s.naming_year);
+    if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
+  } else if (cType === 'hybrid') {
+    if (s.breeder) parts.push('<b>作出者:</b> ' + escapeHtml(s.breeder));
+    if (s.naming_year) parts.push('<b>命名年:</b> ' + s.naming_year);
+    if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
+  } else if (cType === 'seedling') {
+    if (s.breeder) parts.push('<b>作出者:</b> ' + escapeHtml(s.breeder));
+    if (s.sowing_date) parts.push('<b>播種日:</b> ' + escapeHtml(s.sowing_date));
+    if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
+  }
+  if (s.notes) {
+    var notesShort = s.notes.substring(0, 30);
+    if (s.notes.length > 30) notesShort += '...';
+    parts.push('<b>補足:</b> ' + escapeHtml(notesShort));
+  }
+  if (s.citation_links && s.citation_links.length) {
+    parts.push('<b>引用:</b> ' + s.citation_links.length + '件');
+  }
+  if (!parts.length) return '<span style="color:#999;">データ未入力</span>';
+  return parts.join('<br>');
+}
 
 function loadOrigins() {
   var filterId = parseInt(document.getElementById('origin-cultivar-select').value) || 0;
+  var filterType = document.getElementById('origin-type-filter').value;
   var search = (document.getElementById('origin-search').value || '').toLowerCase();
 
   var targets = allCultivars.filter(function(c) {
     if (filterId && c.id !== filterId) return false;
+    if (filterType && (c.type || 'species') !== filterType) return false;
     if (!c.origins || !c.origins.length) return false;
     if (search) {
       var match = (c.cultivar_name || '').toLowerCase().indexOf(search) >= 0
         || (c.genus || '').toLowerCase().indexOf(search) >= 0
         || (c.origins || []).some(function(o) {
+          var s = o.structured || {};
           return (o.body || '').toLowerCase().indexOf(search) >= 0
-            || (o.source_name || '').toLowerCase().indexOf(search) >= 0;
+            || (o.source_name || '').toLowerCase().indexOf(search) >= 0
+            || (s.author_name || '').toLowerCase().indexOf(search) >= 0
+            || (s.breeder || '').toLowerCase().indexOf(search) >= 0
+            || (s.namer || '').toLowerCase().indexOf(search) >= 0
+            || (s.collector || '').toLowerCase().indexOf(search) >= 0;
         });
       if (!match) return false;
     }
@@ -1044,11 +1100,12 @@ function loadOrigins() {
 
   var totalOrigins = targets.reduce(function(s, c) { return s + (c.origins || []).length; }, 0);
   var html = '<p style="color:var(--color-gray);font-size:var(--font-size-sm);margin:var(--space-sm) 0;">' + targets.length + ' 品種 / ' + totalOrigins + ' 件の由来</p>';
-  html += '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table class="data-table" style="margin-top:var(--space-sm);min-width:900px;">';
-  html += '<colgroup><col style="width:200px"><col style="width:30px"><col style="width:110px"><col style="width:90px"><col style="width:250px"><col style="width:80px"><col style="width:120px"></colgroup>';
-  html += '<thead><tr><th>品種</th><th>#</th><th>ソース</th><th>信頼度</th><th>本文</th><th>著者</th><th>投票</th></tr></thead><tbody>';
+  html += '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table class="data-table" style="margin-top:var(--space-sm);min-width:1000px;">';
+  html += '<colgroup><col style="width:180px"><col style="width:30px"><col style="width:70px"><col style="width:100px"><col style="width:80px"><col style="width:340px"><col style="width:70px"><col style="width:100px"></colgroup>';
+  html += '<thead><tr><th>品種</th><th>#</th><th>タイプ</th><th>ソース</th><th>信頼度</th><th>構造化データ</th><th>著者</th><th>投票</th></tr></thead><tbody>';
 
   targets.forEach(function(c) {
+    var cType = c.type || 'species';
     var origins = c.origins || [];
     origins.forEach(function(o, i) {
       var authorLabel;
@@ -1061,10 +1118,10 @@ function loadOrigins() {
       } else {
         authorLabel = '<span class="badge badge-user">User</span>';
       }
-      var bodyShort = (o.body || '').substring(0, 60);
-      if ((o.body || '').length > 60) bodyShort += '...';
       var trustPct = o.trust || 0;
       var tColor = trustColor(trustPct);
+      var s = o.structured || {};
+      var oType = s.origin_type || cType;
 
       html += '<tr>';
       html += '<td style="max-width:150px;font-size:var(--font-size-sm);vertical-align:top;border-right:2px solid var(--color-lighter);word-break:break-word;">';
@@ -1080,12 +1137,13 @@ function loadOrigins() {
       html += '</div>';
       html += '</td>';
       html += '<td>' + (i + 1) + '</td>';
-      html += '<td>' + tierBadge(o.source_tier) + ' ' + escapeHtml(o.source_name || '-') + '</td>';
+      html += '<td>' + originTypeBadge(oType) + '</td>';
+      html += '<td style="font-size:var(--font-size-xs);">' + tierBadge(o.source_tier) + ' ' + escapeHtml(o.source_name || '-') + '</td>';
       html += '<td>';
       html += '<div class="trust-bar"><div class="trust-fill" style="width:' + trustPct + '%;background:' + tColor + ';"></div></div> ';
       html += trustPct + '%';
       html += '</td>';
-      html += '<td style="max-width:250px;font-size:var(--font-size-xs);">' + escapeHtml(bodyShort) + '</td>';
+      html += '<td style="font-size:var(--font-size-xs);line-height:1.5;">' + structuredSummaryHtml(s, oType) + '</td>';
       html += '<td>' + authorLabel + '</td>';
       var votes = o.votes || { agree: 0, disagree: 0 };
       html += '<td style="white-space:nowrap;font-size:var(--font-size-xs);">&#x1F44D; ' + (votes.agree || 0) + ' / &#x1F44E; ' + (votes.disagree || 0) + '</td>';
@@ -1105,43 +1163,71 @@ function editOrigin(cultivarId, originIndex) {
   var s = o.structured || {};
   var cType = c.type || 'species';
 
-  var html = '<h2>由来を編集 (#' + (originIndex + 1) + ') — ' + cType + '</h2>';
+  var html = '<h2 style="margin-bottom:4px;">由来を編集 (#' + (originIndex + 1) + ')</h2>';
+  html += '<div style="margin-bottom:12px;">' + originTypeBadge(cType) + ' <span style="font-size:0.85rem;color:#666;">' + escapeHtml(c.cultivar_name) + '</span></div>';
 
   // Structured fields by type
   html += '<div style="border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:12px;background:#f9f9f9;">';
-  html += '<h3 style="font-size:0.9rem;margin-bottom:8px;">構造化データ</h3>';
 
   if (cType === 'species') {
-    html += '<label>発表者 (Author)</label><input type="text" id="edit-s-author-name" value="' + escapeHtml(s.author_name || '') + '">';
-    html += '<label>発表年 (Year)</label><input type="number" id="edit-s-publication-year" value="' + (s.publication_year || '') + '">';
-    html += '<label>発見者 (Collector)</label><input type="text" id="edit-s-collector" value="' + escapeHtml(s.collector || '') + '">';
-    html += '<label>採取年 (Collection year)</label><input type="number" id="edit-s-collection-year" value="' + (s.collection_year || '') + '">';
+    html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#1B4332;">記載情報</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div><label>発表者 (Author)</label><input type="text" id="edit-s-author-name" value="' + escapeHtml(s.author_name || '') + '" placeholder="例: Engl."></div>';
+    html += '<div><label>発表年</label><input type="number" id="edit-s-publication-year" value="' + (s.publication_year || '') + '" placeholder="例: 1898"></div>';
+    html += '</div>';
+    html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#1B4332;">採取情報</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div><label>発見者 (Collector)</label><input type="text" id="edit-s-collector" value="' + escapeHtml(s.collector || '') + '"></div>';
+    html += '<div><label>採取年</label><input type="number" id="edit-s-collection-year" value="' + (s.collection_year || '') + '"></div>';
+    html += '</div>';
     html += '<label>採取地 (Type locality)</label><input type="text" id="edit-s-type-locality" value="' + escapeHtml(s.type_locality || '') + '">';
-    html += '<label>生息地</label><textarea id="edit-s-known-habitats">' + escapeHtml(s.known_habitats || '') + '</textarea>';
+    html += '<label>生息地</label><textarea id="edit-s-known-habitats" rows="2">' + escapeHtml(s.known_habitats || '') + '</textarea>';
   } else if (cType === 'clone') {
-    html += '<label>名付けた人物</label><input type="text" id="edit-s-namer" value="' + escapeHtml(s.namer || '') + '">';
-    html += '<label>名付けた年</label><input type="number" id="edit-s-naming-year" value="' + (s.naming_year || '') + '">';
+    html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#4A235A;">命名情報</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div><label>命名者</label><input type="text" id="edit-s-namer" value="' + escapeHtml(s.namer || '') + '"></div>';
+    html += '<div><label>命名年</label><input type="number" id="edit-s-naming-year" value="' + (s.naming_year || '') + '"></div>';
+    html += '</div>';
     var sf = s.formula || {};
-    html += '<label>交配式 Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '">';
-    html += '<label>交配式 Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '">';
+    html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#4A235A;">交配式</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;">';
+    html += '<div><label>Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '"></div>';
+    html += '<span style="padding-bottom:8px;font-weight:bold;font-size:1.1rem;">×</span>';
+    html += '<div><label>Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '"></div>';
+    html += '</div>';
   } else if (cType === 'hybrid') {
-    html += '<label>作出者 / ナーセリー</label><input type="text" id="edit-s-breeder" value="' + escapeHtml(s.breeder || '') + '">';
-    html += '<label>名付けた年</label><input type="number" id="edit-s-naming-year" value="' + (s.naming_year || '') + '">';
+    html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#7B2D26;">作出情報</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div><label>作出者 / ナーセリー</label><input type="text" id="edit-s-breeder" value="' + escapeHtml(s.breeder || '') + '"></div>';
+    html += '<div><label>命名年</label><input type="number" id="edit-s-naming-year" value="' + (s.naming_year || '') + '"></div>';
+    html += '</div>';
     var sf = s.formula || {};
-    html += '<label>交配式 Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '">';
-    html += '<label>交配式 Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '">';
+    html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#7B2D26;">交配式</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;">';
+    html += '<div><label>Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '"></div>';
+    html += '<span style="padding-bottom:8px;font-weight:bold;font-size:1.1rem;">×</span>';
+    html += '<div><label>Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '"></div>';
+    html += '</div>';
   } else if (cType === 'seedling') {
-    html += '<label>作出者</label><input type="text" id="edit-s-breeder" value="' + escapeHtml(s.breeder || '') + '">';
-    html += '<label>播種日</label><input type="date" id="edit-s-sowing-date" value="' + escapeHtml(s.sowing_date || '') + '">';
+    html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#1A5276;">作出情報</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div><label>作出者</label><input type="text" id="edit-s-breeder" value="' + escapeHtml(s.breeder || '') + '"></div>';
+    html += '<div><label>播種日</label><input type="date" id="edit-s-sowing-date" value="' + escapeHtml(s.sowing_date || '') + '"></div>';
+    html += '</div>';
     var sf = s.formula || {};
-    html += '<label>交配式 Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '">';
-    html += '<label>交配式 Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '">';
+    html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#1A5276;">交配式</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;">';
+    html += '<div><label>Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '"></div>';
+    html += '<span style="padding-bottom:8px;font-weight:bold;font-size:1.1rem;">×</span>';
+    html += '<div><label>Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '"></div>';
+    html += '</div>';
   }
 
-  html += '<label>補足欄 (notes)</label><textarea id="edit-s-notes">' + escapeHtml(s.notes || '') + '</textarea>';
+  html += '<hr style="margin:12px 0;border:none;border-top:1px solid #ddd;">';
+  html += '<label>補足欄 (notes)</label><textarea id="edit-s-notes" rows="3">' + escapeHtml(s.notes || '') + '</textarea>';
 
   var citationLinks = (s.citation_links || []).map(function(l) { return typeof l === 'string' ? l : l.url; }).join('\n');
-  html += '<label>引用リンク (1行1URL)</label><textarea id="edit-s-citations" style="font-family:monospace;font-size:0.8rem;">' + escapeHtml(citationLinks) + '</textarea>';
+  html += '<label>引用リンク (1行1URL)</label><textarea id="edit-s-citations" rows="3" style="font-family:monospace;font-size:0.8rem;">' + escapeHtml(citationLinks) + '</textarea>';
   html += '</div>';
 
   // Legacy fields
