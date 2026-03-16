@@ -1469,6 +1469,12 @@
 
     function parseHash() {
       var hash = location.hash || '#/';
+      // Detect Supabase auth tokens in hash (from implicit OAuth flow)
+      if (hash.indexOf('access_token=') !== -1 || hash.indexOf('error=') !== -1) {
+        // Let Supabase client handle the tokens, then navigate to contribute
+        setTimeout(function() { location.hash = '#/contribute'; }, 500);
+        return { page: 'contribute' };
+      }
       var path = hash.replace(/^#\/?/, '');  // remove leading #/
       if (!path) return { page: 'top' };
 
@@ -2068,7 +2074,10 @@
         googleLoginBtn.addEventListener('click', function() {
           supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: window.location.origin + window.location.pathname + '#/contribute' }
+            options: {
+              redirectTo: window.location.origin + window.location.pathname,
+              queryParams: { prompt: 'select_account' }
+            }
           });
         });
       }
