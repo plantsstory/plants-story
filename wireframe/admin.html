@@ -532,6 +532,22 @@
             </div>
           </div>
 
+          <!-- Bulk Origin Migration -->
+          <div class="stat-card">
+            <h3 style="margin-bottom:var(--space-md);">由来データ構造化移行</h3>
+            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">
+              既存の由来データ（bodyテキスト）を構造化フィールド（structured.notes）に移行します。<br>
+              <strong>対象:</strong> structuredフィールドが未設定の由来のみ。既に構造化済みの由来はスキップします。<br>
+              また、レガシーフィールド（discoverer_or_breeder, native_region, discovery_year）も対応するstructuredフィールドに移行します。
+            </p>
+            <button class="btn btn-warning" id="btn-bulk-migrate">移行実行</button>
+            <div id="migrate-progress" class="hidden" style="margin-top:var(--space-md);">
+              <div class="progress-bar"><div class="progress-fill" id="migrate-progress-fill" style="width:0%"></div></div>
+              <div id="migrate-progress-text" style="font-size:var(--font-size-sm);color:var(--color-gray);"></div>
+              <div id="migrate-log" style="max-height:300px;overflow-y:auto;font-size:var(--font-size-xs);font-family:var(--font-mono);margin-top:var(--space-sm);background:var(--color-bg);padding:var(--space-sm);border-radius:var(--radius-sm);"></div>
+            </div>
+          </div>
+
           <!-- Data Export -->
           <div class="stat-card">
             <h3 style="margin-bottom:var(--space-md);">データエクスポート</h3>
@@ -1086,8 +1102,50 @@ function editOrigin(cultivarId, originIndex) {
   if (!c) return;
   var o = c.origins[originIndex];
   if (!o) return;
+  var s = o.structured || {};
+  var cType = c.type || 'species';
 
-  var html = '<h2>由来を編集 (#' + (originIndex + 1) + ')</h2>';
+  var html = '<h2>由来を編集 (#' + (originIndex + 1) + ') — ' + cType + '</h2>';
+
+  // Structured fields by type
+  html += '<div style="border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:12px;background:#f9f9f9;">';
+  html += '<h3 style="font-size:0.9rem;margin-bottom:8px;">構造化データ</h3>';
+
+  if (cType === 'species') {
+    html += '<label>発表者 (Author)</label><input type="text" id="edit-s-author-name" value="' + escapeHtml(s.author_name || '') + '">';
+    html += '<label>発表年 (Year)</label><input type="number" id="edit-s-publication-year" value="' + (s.publication_year || '') + '">';
+    html += '<label>発見者 (Collector)</label><input type="text" id="edit-s-collector" value="' + escapeHtml(s.collector || '') + '">';
+    html += '<label>採取年 (Collection year)</label><input type="number" id="edit-s-collection-year" value="' + (s.collection_year || '') + '">';
+    html += '<label>採取地 (Type locality)</label><input type="text" id="edit-s-type-locality" value="' + escapeHtml(s.type_locality || '') + '">';
+    html += '<label>生息地</label><textarea id="edit-s-known-habitats">' + escapeHtml(s.known_habitats || '') + '</textarea>';
+  } else if (cType === 'clone') {
+    html += '<label>名付けた人物</label><input type="text" id="edit-s-namer" value="' + escapeHtml(s.namer || '') + '">';
+    html += '<label>名付けた年</label><input type="number" id="edit-s-naming-year" value="' + (s.naming_year || '') + '">';
+    var sf = s.formula || {};
+    html += '<label>交配式 Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '">';
+    html += '<label>交配式 Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '">';
+  } else if (cType === 'hybrid') {
+    html += '<label>作出者 / ナーセリー</label><input type="text" id="edit-s-breeder" value="' + escapeHtml(s.breeder || '') + '">';
+    html += '<label>名付けた年</label><input type="number" id="edit-s-naming-year" value="' + (s.naming_year || '') + '">';
+    var sf = s.formula || {};
+    html += '<label>交配式 Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '">';
+    html += '<label>交配式 Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '">';
+  } else if (cType === 'seedling') {
+    html += '<label>作出者</label><input type="text" id="edit-s-breeder" value="' + escapeHtml(s.breeder || '') + '">';
+    html += '<label>播種日</label><input type="date" id="edit-s-sowing-date" value="' + escapeHtml(s.sowing_date || '') + '">';
+    var sf = s.formula || {};
+    html += '<label>交配式 Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '">';
+    html += '<label>交配式 Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '">';
+  }
+
+  html += '<label>補足欄 (notes)</label><textarea id="edit-s-notes">' + escapeHtml(s.notes || '') + '</textarea>';
+
+  var citationLinks = (s.citation_links || []).map(function(l) { return typeof l === 'string' ? l : l.url; }).join('\n');
+  html += '<label>引用リンク (1行1URL)</label><textarea id="edit-s-citations" style="font-family:monospace;font-size:0.8rem;">' + escapeHtml(citationLinks) + '</textarea>';
+  html += '</div>';
+
+  // Legacy fields
+  html += '<details style="margin-bottom:12px;"><summary style="cursor:pointer;font-size:0.85rem;color:#666;">レガシーフィールド</summary>';
   html += '<label>本文（日本語）</label><textarea id="edit-body">' + escapeHtml(o.body || '') + '</textarea>';
   html += '<label>本文（英語）</label><textarea id="edit-body-en">' + escapeHtml(o.body_en || '') + '</textarea>';
   html += '<label>信頼度 (0-100)</label><input type="number" id="edit-trust" min="0" max="100" value="' + (o.trust || 0) + '">';
@@ -1101,10 +1159,9 @@ function editOrigin(cultivarId, originIndex) {
   html += '<label>発見者/作出者</label><input type="text" id="edit-discoverer" value="' + escapeHtml(o.discoverer_or_breeder || '') + '">';
   html += '<label>発見年</label><input type="number" id="edit-year" value="' + (o.discovery_year || '') + '">';
   html += '<label>自生地域</label><input type="text" id="edit-region" value="' + escapeHtml(o.native_region || '') + '">';
-
-  // Sources (URL list)
   var sourcesJson = JSON.stringify(o.sources || []);
   html += '<label>リンク一覧 (JSON)</label><textarea id="edit-sources" style="font-family:var(--font-mono);font-size:var(--font-size-xs);">' + escapeHtml(sourcesJson) + '</textarea>';
+  html += '</details>';
 
   html += '<div class="modal-actions">';
   html += '<button class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
@@ -1119,7 +1176,57 @@ async function saveOrigin(cultivarId, originIndex) {
   var origins = JSON.parse(JSON.stringify(c.origins || []));
   var o = origins[originIndex];
   if (!o) return;
+  var cType = c.type || 'species';
 
+  // Save structured data
+  var s = o.structured || { origin_type: cType };
+  s.origin_type = cType;
+
+  if (cType === 'species') {
+    var v;
+    v = document.getElementById('edit-s-author-name'); if (v) s.author_name = v.value.trim();
+    v = document.getElementById('edit-s-publication-year'); if (v) s.publication_year = parseInt(v.value) || null;
+    v = document.getElementById('edit-s-collector'); if (v) s.collector = v.value.trim();
+    v = document.getElementById('edit-s-collection-year'); if (v) s.collection_year = parseInt(v.value) || null;
+    v = document.getElementById('edit-s-type-locality'); if (v) s.type_locality = v.value.trim();
+    v = document.getElementById('edit-s-known-habitats'); if (v) s.known_habitats = v.value.trim();
+  } else if (cType === 'clone') {
+    var v;
+    v = document.getElementById('edit-s-namer'); if (v) s.namer = v.value.trim();
+    v = document.getElementById('edit-s-naming-year'); if (v) s.naming_year = parseInt(v.value) || null;
+    var pA = document.getElementById('edit-s-parentA'), pB = document.getElementById('edit-s-parentB');
+    if (pA && pB && (pA.value.trim() || pB.value.trim())) {
+      s.formula = { parentA: pA.value.trim(), parentB: pB.value.trim() };
+    }
+  } else if (cType === 'hybrid') {
+    var v;
+    v = document.getElementById('edit-s-breeder'); if (v) s.breeder = v.value.trim();
+    v = document.getElementById('edit-s-naming-year'); if (v) s.naming_year = parseInt(v.value) || null;
+    var pA = document.getElementById('edit-s-parentA'), pB = document.getElementById('edit-s-parentB');
+    if (pA && pB && (pA.value.trim() || pB.value.trim())) {
+      s.formula = { parentA: pA.value.trim(), parentB: pB.value.trim() };
+    }
+  } else if (cType === 'seedling') {
+    var v;
+    v = document.getElementById('edit-s-breeder'); if (v) s.breeder = v.value.trim();
+    v = document.getElementById('edit-s-sowing-date'); if (v) s.sowing_date = v.value;
+    var pA = document.getElementById('edit-s-parentA'), pB = document.getElementById('edit-s-parentB');
+    if (pA && pB && (pA.value.trim() || pB.value.trim())) {
+      s.formula = { parentA: pA.value.trim(), parentB: pB.value.trim() };
+    }
+  }
+
+  var notesEl = document.getElementById('edit-s-notes');
+  if (notesEl) s.notes = notesEl.value.trim();
+
+  var citationsEl = document.getElementById('edit-s-citations');
+  if (citationsEl) {
+    s.citation_links = citationsEl.value.split('\n').filter(function(u) { return u.trim(); }).map(function(u) { return { url: u.trim() }; });
+  }
+
+  o.structured = s;
+
+  // Legacy fields
   o.body = document.getElementById('edit-body').value;
   o.body_en = document.getElementById('edit-body-en').value;
   o.trust = parseInt(document.getElementById('edit-trust').value) || 0;
@@ -1171,6 +1278,119 @@ async function deleteOrigin(cultivarId, originIndex) {
 // ========================================
 // BULK OPERATIONS
 // ========================================
+// ========================================
+// BULK ORIGIN MIGRATION
+// ========================================
+document.getElementById('btn-bulk-migrate').addEventListener('click', async function() {
+  var btn = this;
+  if (!confirm('既存の由来データを構造化フィールドに移行しますか？\nstructured未設定の由来のみが対象です。')) return;
+
+  btn.disabled = true;
+  var progressEl = document.getElementById('migrate-progress');
+  var fillEl = document.getElementById('migrate-progress-fill');
+  var textEl = document.getElementById('migrate-progress-text');
+  var logEl = document.getElementById('migrate-log');
+  progressEl.classList.remove('hidden');
+  fillEl.style.width = '0%';
+  logEl.innerHTML = '';
+  var stats = { total: 0, migrated: 0, skipped: 0, error: 0 };
+
+  function log(msg) {
+    logEl.innerHTML += msg + '<br>';
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  var res = await sb.from('cultivars').select('id, cultivar_name, type, origins');
+  if (res.error) {
+    log('[ERROR] データ取得失敗: ' + res.error.message);
+    btn.disabled = false;
+    return;
+  }
+
+  var cultivars = res.data.filter(function(c) { return c.origins && c.origins.length > 0; });
+  log('対象品種: ' + cultivars.length + '件');
+
+  for (var i = 0; i < cultivars.length; i++) {
+    var c = cultivars[i];
+    var pct = Math.round(((i + 1) / cultivars.length) * 100);
+    fillEl.style.width = pct + '%';
+    textEl.textContent = (i + 1) + ' / ' + cultivars.length + ' (' + pct + '%)';
+
+    var origins = JSON.parse(JSON.stringify(c.origins));
+    var changed = false;
+    var cType = c.type || 'species';
+
+    for (var j = 0; j < origins.length; j++) {
+      var o = origins[j];
+      stats.total++;
+
+      // Skip formula-type origins and already-structured origins
+      if (o._type === 'formula') { stats.skipped++; continue; }
+      if (o.structured) { stats.skipped++; continue; }
+
+      // Build structured from legacy fields
+      var s = { origin_type: cType };
+
+      if (cType === 'species') {
+        if (o.discoverer_or_breeder) s.collector = o.discoverer_or_breeder;
+        if (o.discovery_year) s.collection_year = o.discovery_year;
+        if (o.native_region) s.known_habitats = o.native_region;
+      } else if (cType === 'clone') {
+        if (o.discoverer_or_breeder) s.namer = o.discoverer_or_breeder;
+        if (o.discovery_year) s.naming_year = o.discovery_year;
+      } else if (cType === 'hybrid') {
+        if (o.discoverer_or_breeder) s.breeder = o.discoverer_or_breeder;
+        if (o.discovery_year) s.naming_year = o.discovery_year;
+      } else if (cType === 'seedling') {
+        if (o.discoverer_or_breeder) s.breeder = o.discoverer_or_breeder;
+      }
+
+      // Move body to notes
+      if (o.body) s.notes = o.body;
+
+      // Extract formula from formula-type origins in same cultivar
+      var formulaOrigin = origins.find(function(fo) { return fo._type === 'formula' && fo.formula; });
+      if (formulaOrigin && formulaOrigin.formula) {
+        s.formula = {
+          parentA: formulaOrigin.formula.parentA || '',
+          parentB: formulaOrigin.formula.parentB || ''
+        };
+      }
+
+      // Extract citation links from sources
+      if (o.sources && o.sources.length > 0) {
+        s.citation_links = o.sources.filter(function(src) { return src.url; }).map(function(src) { return { url: src.url, label: src.name || '' }; });
+      }
+
+      o.structured = s;
+      changed = true;
+      stats.migrated++;
+    }
+
+    if (changed) {
+      var upd = await sb.from('cultivars').update({
+        origins: origins, updated_at: new Date().toISOString()
+      }).eq('id', c.id);
+
+      if (upd.error) {
+        log('[ERROR] ' + c.cultivar_name + ': ' + upd.error.message);
+        stats.error++;
+      } else {
+        log('[OK] ' + c.cultivar_name + ' (' + cType + ')');
+      }
+    } else {
+      log('[SKIP] ' + c.cultivar_name + ' (全て構造化済み)');
+    }
+  }
+
+  log('---');
+  log('完了: 移行=' + stats.migrated + ', スキップ=' + stats.skipped + ', エラー=' + stats.error + ' / 合計=' + stats.total);
+  textEl.textContent = '完了 — 移行: ' + stats.migrated + '件, スキップ: ' + stats.skipped + '件';
+  btn.disabled = false;
+  await loadAllCultivars();
+  loadOrigins();
+});
+
 document.getElementById('btn-export').addEventListener('click', async function() {
   var result = await sb.from('cultivars').select('*').order('id');
   if (result.error) { toast('エクスポートエラー'); return; }

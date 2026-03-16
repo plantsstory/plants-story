@@ -1796,3 +1796,75 @@ dialog.parent-photo-dialog .dialog-label {
   border-radius: var(--radius-md);
 }
 
+/* ========================================
+   STRUCTURED ORIGIN FIELDS
+   ======================================== */
+.structured-section {
+  margin-bottom: var(--space-md);
+}
+.structured-section__title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-xs);
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--color-light);
+}
+.structured-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-sm) var(--space-lg);
+}
+.structured-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.structured-field__label {
+  font-size: 0.75rem;
+  color: var(--color-gray);
+  font-weight: 600;
+}
+.structured-field__value {
+  font-size: 0.9rem;
+  color: var(--color-dark);
+  line-height: 1.5;
+}
+.structured-citation {
+  margin-bottom: 4px;
+}
+.structured-citation a {
+  font-size: 0.85rem;
+  color: var(--color-primary);
+  word-break: break-all;
+}
+
+/* Structured form fieldset styling */
+.structured-fieldset {
+  border: 1px solid var(--color-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.structured-fieldset__legend {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  margin-bottom: var(--space-sm);
+}
+.structured-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+@media (max-width: 480px) {
+  .structured-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .structured-fields {
+    grid-template-columns: 1fr;
+  }
+}
+

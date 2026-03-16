@@ -703,26 +703,83 @@
           <div id="add-origin-form" style="display:none;">
             <h3 class="text-lg font-bold mb-md" data-i18n="add_origin_title">由来を追加</h3>
 
-            <div class="form-group">
-              <label class="form-label" data-i18n="label_description">説明</label>
-              <textarea class="form-textarea" placeholder="この品種の由来や歴史を記述してください..."></textarea>
+            <!-- Species inline fields -->
+            <div id="ao-species-fields" style="display:none;">
+              <div class="structured-fieldset">
+                <div class="structured-fieldset__legend">記載情報</div>
+                <div class="structured-form-grid">
+                  <div class="form-group"><label class="form-label">発表者</label><input type="text" id="ao-author-name" class="form-input" placeholder="例: Engl."></div>
+                  <div class="form-group"><label class="form-label">発表年</label><input type="number" id="ao-publication-year" class="form-input" placeholder="例: 1898"></div>
+                </div>
+              </div>
+              <div class="structured-fieldset">
+                <div class="structured-fieldset__legend">採取情報</div>
+                <div class="structured-form-grid">
+                  <div class="form-group"><label class="form-label">発見者</label><input type="text" id="ao-collector" class="form-input"></div>
+                  <div class="form-group"><label class="form-label">採取年</label><input type="number" id="ao-collection-year" class="form-input"></div>
+                </div>
+                <div class="form-group"><label class="form-label">採取地</label><input type="text" id="ao-type-locality" class="form-input"></div>
+              </div>
+              <div class="form-group"><label class="form-label">生息地</label><textarea id="ao-known-habitats" class="form-textarea" rows="2"></textarea></div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">交配式 <span class="text-gray text-xs">※ハイブリッドの場合のみ</span></label>
-              <label class="form-radio mb-sm">
-                <input type="checkbox">
-                <span>交配式が不明</span>
-              </label>
-              <div class="formula-box">
-                <input type="text" class="form-input" placeholder="Parent A" style="flex:1;">
-                <span class="formula-operator">&times;</span>
-                <input type="text" class="form-input" placeholder="Parent B" style="flex:1;">
+            <!-- Clone inline fields -->
+            <div id="ao-clone-fields" style="display:none;">
+              <div class="structured-form-grid">
+                <div class="form-group"><label class="form-label">名付けた人物</label><input type="text" id="ao-clone-namer" class="form-input"></div>
+                <div class="form-group"><label class="form-label">名付けた年</label><input type="number" id="ao-clone-naming-year" class="form-input"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">交配式</label>
+                <div class="formula-box">
+                  <input type="text" class="form-input" id="ao-clone-parentA" placeholder="Parent A" style="flex:1;">
+                  <span class="formula-operator">&times;</span>
+                  <input type="text" class="form-input" id="ao-clone-parentB" placeholder="Parent B" style="flex:1;">
+                </div>
               </div>
             </div>
 
+            <!-- Hybrid inline fields -->
+            <div id="ao-hybrid-fields" style="display:none;">
+              <div class="structured-form-grid">
+                <div class="form-group"><label class="form-label">作出者</label><input type="text" id="ao-hybrid-breeder" class="form-input"></div>
+                <div class="form-group"><label class="form-label">名付けた年</label><input type="number" id="ao-hybrid-naming-year" class="form-input"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">交配式</label>
+                <div class="formula-box">
+                  <input type="text" class="form-input" id="ao-hybrid-parentA" placeholder="Parent A" style="flex:1;">
+                  <span class="formula-operator">&times;</span>
+                  <input type="text" class="form-input" id="ao-hybrid-parentB" placeholder="Parent B" style="flex:1;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Seedling inline fields -->
+            <div id="ao-seedling-fields" style="display:none;">
+              <div class="structured-form-grid">
+                <div class="form-group"><label class="form-label">作出者</label><input type="text" id="ao-seedling-breeder" class="form-input"></div>
+                <div class="form-group"><label class="form-label">播種日</label><input type="date" id="ao-sowing-date" class="form-input"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">交配式</label>
+                <div class="formula-box">
+                  <input type="text" class="form-input" id="ao-seedling-parentA" placeholder="Parent A" style="flex:1;">
+                  <span class="formula-operator">&times;</span>
+                  <input type="text" class="form-input" id="ao-seedling-parentB" placeholder="Parent B" style="flex:1;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Shared: 補足欄 -->
             <div class="form-group">
-              <label class="form-label" data-i18n="label_sources">情報元リンク</label>
+              <label class="form-label">補足欄</label>
+              <textarea class="form-textarea" placeholder="補足情報があれば記入してください..."></textarea>
+            </div>
+
+            <!-- Shared: 引用リンク -->
+            <div class="form-group">
+              <label class="form-label" data-i18n="label_sources">引用リンク</label>
               <div class="flex gap-sm mb-sm">
                 <input type="url" class="form-input" placeholder="https://..." style="flex:1;">
                 <button class="btn btn--secondary">+ 追加</button>
@@ -828,82 +885,128 @@
         <div class="upload-preview" id="contribute-preview"></div>
       </div>
 
-      <!-- Origin story -->
-      <div class="card mb-lg">
+      <!-- Origin story — structured fields per type -->
+      <div class="card mb-lg" id="origin-card">
         <h2 class="text-lg font-bold mb-md" data-i18n="origin_story">由来</h2>
+        <p class="form-hint" id="origin-ai-hint" style="display:none;"></p>
 
-        <div class="form-group">
-          <label class="form-label" data-i18n="label_description">説明</label>
-          <textarea class="form-textarea" placeholder="この品種の由来や歴史を記述してください..."></textarea>
-          <p class="form-hint" id="origin-ai-hint" style="display:none;"></p>
-        </div>
-
-        <!-- Breeding formula (hybrid only) -->
-        <div class="form-group">
-          <label class="form-label" data-i18n="label_formula">交配式 <span class="text-gray text-xs">※ハイブリッドの場合のみ</span></label>
-          <label class="form-radio mb-sm">
-            <input type="checkbox" id="formula-unknown">
-            <span data-i18n="formula_unknown">交配式が不明</span>
-          </label>
-          <div class="formula-box" id="formula-inputs">
-            <input type="text" class="form-input" placeholder="Parent A" style="flex:1;">
-            <span class="formula-operator">&times;</span>
-            <input type="text" class="form-input" placeholder="Parent B" style="flex:1;">
+        <!-- ① Species fields -->
+        <div id="species-fields" style="display:none;">
+          <div class="structured-fieldset">
+            <div class="structured-fieldset__legend">記載情報</div>
+            <div class="structured-form-grid">
+              <div class="form-group"><label class="form-label">発表者 (Author)</label><input type="text" id="sf-author-name" class="form-input" placeholder="例: Engl."></div>
+              <div class="form-group"><label class="form-label">発表年 (Year)</label><input type="number" id="sf-publication-year" class="form-input" placeholder="例: 1898" min="1700" max="2100"></div>
+            </div>
           </div>
-          <p class="form-hint" data-i18n="formula_hint">品種名を入力すると既存品種から候補が表示されます</p>
+          <div class="structured-fieldset">
+            <div class="structured-fieldset__legend">採取情報</div>
+            <div class="structured-form-grid">
+              <div class="form-group"><label class="form-label">発見者 (Collector)</label><input type="text" id="sf-collector" class="form-input" placeholder="例: Thomas B. Croat"></div>
+              <div class="form-group"><label class="form-label">採取年 (Collection year)</label><input type="number" id="sf-collection-year" class="form-input" placeholder="例: 1975" min="1700" max="2100"></div>
+            </div>
+            <div class="form-group"><label class="form-label">採取地 (Type locality)</label><input type="text" id="sf-type-locality" class="form-input" placeholder="例: Colombia, Antioquia"></div>
+          </div>
+          <div class="form-group"><label class="form-label">現在わかっている生息地</label><textarea id="sf-known-habitats" class="form-textarea" rows="2" placeholder="例: コロンビア、エクアドル、ペルーの熱帯雨林"></textarea></div>
         </div>
 
-        <!-- Parent photos (seedling only) -->
-        <div class="form-group" id="parent-photos-section" style="display:none;">
-          <label class="form-label">交配親の写真</label>
-          <div style="display:flex;gap:var(--space-lg);align-items:flex-start;">
-            <div style="flex:1;text-align:center;">
-              <div class="text-sm font-bold mb-sm">Mother (母)</div>
-              <div class="upload-area upload-area--small" id="mother-upload">
-                <input type="file" id="mother-photo-input" accept="image/jpeg,image/png,image/webp" style="display:none">
-                <div class="upload-area__icon">&#x1F4F7;</div>
-                <div class="upload-area__text text-xs">写真をアップロード</div>
-              </div>
-              <div id="mother-preview" style="margin-top:var(--space-sm);"></div>
-            </div>
-            <div style="display:flex;align-items:center;padding-top:2rem;">
-              <span class="formula-operator" style="font-size:1.5rem;">&times;</span>
-            </div>
-            <div style="flex:1;text-align:center;">
-              <div class="text-sm font-bold mb-sm">Father (父)</div>
-              <div class="upload-area upload-area--small" id="father-upload">
-                <input type="file" id="father-photo-input" accept="image/jpeg,image/png,image/webp" style="display:none">
-                <div class="upload-area__icon">&#x1F4F7;</div>
-                <div class="upload-area__text text-xs">写真をアップロード</div>
-              </div>
-              <div id="father-preview" style="margin-top:var(--space-sm);"></div>
+        <!-- ② Clone fields -->
+        <div id="clone-fields" style="display:none;">
+          <div class="structured-form-grid">
+            <div class="form-group"><label class="form-label">名付けた人物</label><input type="text" id="sf-clone-namer" class="form-input" placeholder="例: John Doe"></div>
+            <div class="form-group"><label class="form-label">名付けた年</label><input type="number" id="sf-clone-naming-year" class="form-input" placeholder="例: 2020" min="1900" max="2100"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">交配式 <span class="text-gray text-xs">※原種であれば不要</span></label>
+            <label class="form-radio mb-sm">
+              <input type="checkbox" id="formula-unknown">
+              <span data-i18n="formula_unknown">交配式が不明</span>
+            </label>
+            <div class="formula-box" id="formula-inputs">
+              <input type="text" class="form-input" placeholder="Parent A" style="flex:1;">
+              <span class="formula-operator">&times;</span>
+              <input type="text" class="form-input" placeholder="Parent B" style="flex:1;">
             </div>
           </div>
         </div>
 
-        <!-- Creator name (seedling only) -->
-        <div class="form-group" id="creator-name-section" style="display:none;">
-          <label class="form-label">作出者名 (Creator/Breeder)</label>
-          <input type="text" id="creator-name-input" class="form-input" placeholder="例: 山田太郎">
+        <!-- ③ Hybrid fields -->
+        <div id="hybrid-fields" style="display:none;">
+          <div class="structured-form-grid">
+            <div class="form-group"><label class="form-label">作出者 / ナーセリー</label><input type="text" id="sf-hybrid-breeder" class="form-input" placeholder="例: Ecuagenera"></div>
+            <div class="form-group"><label class="form-label">名付けた年</label><input type="number" id="sf-hybrid-naming-year" class="form-input" placeholder="例: 2022" min="1900" max="2100"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">交配式 <span class="text-gray text-xs" style="color:#dc3545;">※必須</span></label>
+            <div class="formula-box" id="hybrid-formula-inputs">
+              <input type="text" class="form-input" placeholder="Parent A (母)" style="flex:1;">
+              <span class="formula-operator">&times;</span>
+              <input type="text" class="form-input" placeholder="Parent B (父)" style="flex:1;">
+            </div>
+          </div>
         </div>
 
-        <!-- Source links -->
+        <!-- ④ Seedling fields -->
+        <div id="seedling-fields" style="display:none;">
+          <div class="structured-form-grid">
+            <div class="form-group"><label class="form-label">作出者 (Creator/Breeder)</label><input type="text" id="creator-name-input" class="form-input" placeholder="例: 山田太郎"></div>
+            <div class="form-group"><label class="form-label">播種した日付</label><input type="date" id="sf-sowing-date" class="form-input"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">交配式</label>
+            <label class="form-radio mb-sm">
+              <input type="checkbox" id="seedling-formula-unknown">
+              <span>交配式が不明</span>
+            </label>
+            <div class="formula-box" id="seedling-formula-inputs">
+              <input type="text" class="form-input" placeholder="Parent A (母)" style="flex:1;">
+              <span class="formula-operator">&times;</span>
+              <input type="text" class="form-input" placeholder="Parent B (父)" style="flex:1;">
+            </div>
+          </div>
+          <!-- Parent photos -->
+          <div class="form-group" id="parent-photos-section">
+            <label class="form-label">交配親の写真</label>
+            <div style="display:flex;gap:var(--space-lg);align-items:flex-start;">
+              <div style="flex:1;text-align:center;">
+                <div class="text-sm font-bold mb-sm">Mother (母)</div>
+                <div class="upload-area upload-area--small" id="mother-upload">
+                  <input type="file" id="mother-photo-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+                  <div class="upload-area__icon">&#x1F4F7;</div>
+                  <div class="upload-area__text text-xs">写真をアップロード</div>
+                </div>
+                <div id="mother-preview" style="margin-top:var(--space-sm);"></div>
+              </div>
+              <div style="display:flex;align-items:center;padding-top:2rem;">
+                <span class="formula-operator" style="font-size:1.5rem;">&times;</span>
+              </div>
+              <div style="flex:1;text-align:center;">
+                <div class="text-sm font-bold mb-sm">Father (父)</div>
+                <div class="upload-area upload-area--small" id="father-upload">
+                  <input type="file" id="father-photo-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+                  <div class="upload-area__icon">&#x1F4F7;</div>
+                  <div class="upload-area__text text-xs">写真をアップロード</div>
+                </div>
+                <div id="father-preview" style="margin-top:var(--space-sm);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shared: 補足欄 (all types) -->
         <div class="form-group">
-          <label class="form-label" data-i18n="label_sources">情報元リンク</label>
+          <label class="form-label">補足欄</label>
+          <textarea class="form-textarea" placeholder="補足情報があれば記入してください..."></textarea>
+        </div>
+
+        <!-- Shared: 引用リンク (all types) -->
+        <div class="form-group">
+          <label class="form-label" data-i18n="label_sources">引用リンク</label>
           <div class="flex gap-sm mb-sm">
             <input type="url" class="form-input" placeholder="https://..." style="flex:1;">
             <button class="btn btn--secondary">+ 追加</button>
           </div>
-          <div class="source-list">
-            <div class="source-list__item">
-              <a href="#">https://example.com/paper-about-crystallinum</a>
-              <span class="source-list__remove">&times;</span>
-            </div>
-            <div class="source-list__item">
-              <a href="#">https://instagram.com/p/example123</a>
-              <span class="source-list__remove">&times;</span>
-            </div>
-          </div>
+          <div class="source-list"></div>
         </div>
       </div>
 
@@ -2514,6 +2617,58 @@
       renderOriginsInner(cultivarName, container);
     }
 
+    // Render structured origin fields as HTML
+    function renderStructuredOrigin(s) {
+      var h = '';
+      if (s.origin_type === 'species') {
+        // 記載情報
+        var hasPublication = s.species_name || s.author_name || s.publication_year;
+        if (hasPublication) {
+          h += '<div class="structured-section">';
+          h += '<div class="structured-section__title">記載情報</div>';
+          h += '<div class="structured-fields">';
+          if (s.species_name) h += '<div class="structured-field"><span class="structured-field__label">種名</span><span class="structured-field__value">' + s.species_name + '</span></div>';
+          if (s.author_name) h += '<div class="structured-field"><span class="structured-field__label">発表者</span><span class="structured-field__value">' + s.author_name + '</span></div>';
+          if (s.publication_year) h += '<div class="structured-field"><span class="structured-field__label">発表年</span><span class="structured-field__value">' + s.publication_year + '</span></div>';
+          h += '</div></div>';
+        }
+        // 採取情報
+        var hasCollection = s.collector || s.collection_year || s.type_locality;
+        if (hasCollection) {
+          h += '<div class="structured-section">';
+          h += '<div class="structured-section__title">採取情報</div>';
+          h += '<div class="structured-fields">';
+          if (s.collector) h += '<div class="structured-field"><span class="structured-field__label">発見者</span><span class="structured-field__value">' + s.collector + '</span></div>';
+          if (s.collection_year) h += '<div class="structured-field"><span class="structured-field__label">採取年</span><span class="structured-field__value">' + s.collection_year + '</span></div>';
+          if (s.type_locality) h += '<div class="structured-field"><span class="structured-field__label">採取地</span><span class="structured-field__value">' + s.type_locality + '</span></div>';
+          h += '</div></div>';
+        }
+        if (s.known_habitats) h += '<div class="structured-section"><div class="structured-section__title">生息地</div><div class="structured-field__value">' + s.known_habitats + '</div></div>';
+      } else if (s.origin_type === 'clone') {
+        if (s.namer) h += '<div class="structured-field"><span class="structured-field__label">名付けた人物</span><span class="structured-field__value">' + s.namer + '</span></div>';
+        if (s.naming_year) h += '<div class="structured-field"><span class="structured-field__label">名付けた年</span><span class="structured-field__value">' + s.naming_year + '</span></div>';
+      } else if (s.origin_type === 'hybrid') {
+        if (s.breeder) h += '<div class="structured-field"><span class="structured-field__label">作出者</span><span class="structured-field__value">' + s.breeder + '</span></div>';
+        if (s.naming_year) h += '<div class="structured-field"><span class="structured-field__label">名付けた年</span><span class="structured-field__value">' + s.naming_year + '</span></div>';
+      } else if (s.origin_type === 'seedling') {
+        if (s.breeder) h += '<div class="structured-field"><span class="structured-field__label">作出者</span><span class="structured-field__value">' + s.breeder + '</span></div>';
+        if (s.sowing_date) h += '<div class="structured-field"><span class="structured-field__label">播種日</span><span class="structured-field__value">' + s.sowing_date + '</span></div>';
+      }
+      // 補足欄 (all types)
+      if (s.notes) h += '<div class="structured-section"><div class="structured-section__title">補足</div><div class="structured-field__value">' + s.notes + '</div></div>';
+      // 引用リンク (all types)
+      if (s.citation_links && s.citation_links.length > 0) {
+        h += '<div class="structured-section"><div class="structured-section__title">引用</div>';
+        s.citation_links.forEach(function(link) {
+          var url = typeof link === 'string' ? link : link.url;
+          var label = (typeof link === 'object' && link.label) ? link.label : url;
+          if (url) h += '<div class="structured-citation"><a href="' + url + '" target="_blank" rel="noopener">' + label + '</a></div>';
+        });
+        h += '</div>';
+      }
+      return h;
+    }
+
     function buildFormulaHtml(data, isSeedling, _sb) {
       var noPhoto = '<div style="width:60px;height:60px;border-radius:var(--radius-md);border:2px dashed var(--color-light);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:0.65rem;">No Photo</div>';
 
@@ -2578,8 +2733,12 @@
           html += '</div></div>';
         }
 
-        // Body
-        html += '<div class="origin-card__body"><p>' + origin.body + '</p></div>';
+        // Body — structured or freeform
+        if (origin.structured) {
+          html += '<div class="origin-card__body">' + renderStructuredOrigin(origin.structured) + '</div>';
+        } else {
+          html += '<div class="origin-card__body"><p>' + origin.body + '</p></div>';
+        }
 
         // Verification details (user_verified origins)
         if (origin.source_type === 'user_verified' && origin.verification) {
@@ -3183,6 +3342,18 @@
       btnAddOrigin.addEventListener('click', function() {
         addOriginToggle.style.display = 'none';
         addOriginForm.style.display = 'block';
+        // Show type-specific fields based on current cultivar type
+        var h1 = document.querySelector('#page-cultivar h1');
+        var cName = h1 ? h1.textContent : '';
+        var cData = cultivarData[cName] || cultivarData[cName + ' [Seedling]'];
+        var cType = cData ? (cData._type || 'species') : 'species';
+        ['ao-species-fields','ao-clone-fields','ao-hybrid-fields','ao-seedling-fields'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.style.display = 'none';
+        });
+        var showId = 'ao-' + cType + '-fields';
+        var showEl = document.getElementById(showId);
+        if (showEl) showEl.style.display = '';
       });
     }
     if (btnCancelOrigin) {
@@ -3635,17 +3806,46 @@
       var contributeGenus = document.querySelector('#page-contribute .form-select');
       var contributeName = document.getElementById('cultivar-name-input');
       var duplicateAlert = document.getElementById('duplicate-alert');
-      var contributeDesc = document.querySelector('#page-contribute .form-textarea');
-      var contributeSourceInput = document.querySelector('#page-contribute .form-group input[type="url"]');
-      var contributeSourceBtn = document.querySelector('#page-contribute .form-group .btn--secondary');
+      var contributeDesc = document.querySelector('#page-contribute .form-textarea'); // 補足欄
+      var contributeSourceInput = document.querySelector('#page-contribute input[type="url"]');
+      var contributeSourceBtn = contributeSourceInput ? contributeSourceInput.parentElement.querySelector('.btn--secondary') : null;
       var contributeSourceList = document.querySelector('#page-contribute .source-list');
       var submitBtn = document.querySelector('#page-contribute .btn--primary.btn--block');
+      // Type-specific field containers
+      var speciesFields = document.getElementById('species-fields');
+      var cloneFields = document.getElementById('clone-fields');
+      var hybridFields = document.getElementById('hybrid-fields');
+      var seedlingFields = document.getElementById('seedling-fields');
+      // Formula inputs per type (clone uses #formula-inputs, hybrid uses #hybrid-formula-inputs, seedling uses #seedling-formula-inputs)
       var formulaSection = document.querySelector('#page-contribute #formula-inputs');
       var formulaParentA, formulaParentB;
       if (formulaSection) {
         var inputs = formulaSection.querySelectorAll('.form-input');
         formulaParentA = inputs[0];
         formulaParentB = inputs[1];
+      }
+      // Hybrid formula
+      var hybridFormulaSection = document.getElementById('hybrid-formula-inputs');
+      var hybridFormulaA, hybridFormulaB;
+      if (hybridFormulaSection) {
+        var hInputs = hybridFormulaSection.querySelectorAll('.form-input');
+        hybridFormulaA = hInputs[0];
+        hybridFormulaB = hInputs[1];
+      }
+      // Seedling formula
+      var seedlingFormulaSection = document.getElementById('seedling-formula-inputs');
+      var seedlingFormulaA, seedlingFormulaB;
+      if (seedlingFormulaSection) {
+        var sInputs = seedlingFormulaSection.querySelectorAll('.form-input');
+        seedlingFormulaA = sInputs[0];
+        seedlingFormulaB = sInputs[1];
+      }
+      // Helper to get active formula inputs based on type
+      function getActiveFormula(type) {
+        if (type === 'hybrid') return { a: hybridFormulaA, b: hybridFormulaB };
+        if (type === 'seedling') return { a: seedlingFormulaA, b: seedlingFormulaB };
+        if (type === 'clone') return { a: formulaParentA, b: formulaParentB };
+        return { a: null, b: null };
       }
 
       // Sources management
@@ -3712,10 +3912,24 @@
           typeRadio.dispatchEvent(new Event('change'));
         }
 
-        // Pre-fill description from first non-formula origin
+        // Pre-fill structured fields from first non-formula origin
+        var editStructured = null;
+        if (data.origins) {
+          for (var i = 0; i < data.origins.length; i++) {
+            if (data.origins[i]._type !== 'formula' && data.origins[i].structured) {
+              editStructured = data.origins[i].structured;
+              break;
+            }
+          }
+        }
+
+        // Pre-fill 補足欄 (shared textarea)
         if (contributeDesc) {
           contributeDesc.value = '';
-          if (data.origins) {
+          if (editStructured && editStructured.notes) {
+            contributeDesc.value = editStructured.notes;
+          } else if (data.origins) {
+            // Fallback: use body from first non-formula origin (legacy data)
             for (var i = 0; i < data.origins.length; i++) {
               if (data.origins[i]._type !== 'formula' && data.origins[i].body) {
                 contributeDesc.value = data.origins[i].body;
@@ -3725,16 +3939,48 @@
           }
         }
 
-        // Pre-fill formula
-        if (data.formula && formulaParentA && formulaParentB) {
-          formulaParentA.value = data.formula.parentA || '';
-          formulaParentB.value = data.formula.parentB || '';
+        // Pre-fill type-specific structured fields
+        if (editStructured) {
+          if (type === 'species') {
+            var v;
+            v = document.getElementById('sf-author-name'); if (v) v.value = editStructured.author_name || '';
+            v = document.getElementById('sf-publication-year'); if (v) v.value = editStructured.publication_year || '';
+            v = document.getElementById('sf-collector'); if (v) v.value = editStructured.collector || '';
+            v = document.getElementById('sf-collection-year'); if (v) v.value = editStructured.collection_year || '';
+            v = document.getElementById('sf-type-locality'); if (v) v.value = editStructured.type_locality || '';
+            v = document.getElementById('sf-known-habitats'); if (v) v.value = editStructured.known_habitats || '';
+          } else if (type === 'clone') {
+            var v;
+            v = document.getElementById('sf-clone-namer'); if (v) v.value = editStructured.namer || '';
+            v = document.getElementById('sf-clone-naming-year'); if (v) v.value = editStructured.naming_year || '';
+          } else if (type === 'hybrid') {
+            var v;
+            v = document.getElementById('sf-hybrid-breeder'); if (v) v.value = editStructured.breeder || '';
+            v = document.getElementById('sf-hybrid-naming-year'); if (v) v.value = editStructured.naming_year || '';
+          } else if (type === 'seedling') {
+            var v;
+            v = document.getElementById('sf-sowing-date'); if (v) v.value = editStructured.sowing_date || '';
+          }
+        }
+
+        // Pre-fill formula from structured or legacy data.formula
+        var editFormula = (editStructured && editStructured.formula) || data.formula;
+        if (editFormula) {
+          var f = getActiveFormula(type);
+          if (f.a) f.a.value = editFormula.parentA || '';
+          if (f.b) f.b.value = editFormula.parentB || '';
         }
 
         // Pre-fill creator name
         var creatorInput = document.getElementById('creator-name-input');
         if (creatorInput) {
-          creatorInput.value = (data.formula && data.formula.creatorName) || data._creatorName || '';
+          creatorInput.value = (editStructured && editStructured.breeder) || (data.formula && data.formula.creatorName) || data._creatorName || '';
+        }
+
+        // Pre-fill citation links into source list
+        if (editStructured && editStructured.citation_links && editStructured.citation_links.length > 0) {
+          contributeSources = editStructured.citation_links.map(function(l) { return typeof l === 'string' ? l : l.url; });
+          renderContributeSources();
         }
 
         // Pre-fill parent photos (show existing images in preview with × to remove)
@@ -3883,8 +4129,18 @@
         if (contributeGenus) contributeGenus.selectedIndex = 0;
         var speciesRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="species"]');
         if (speciesRadio) { speciesRadio.checked = true; speciesRadio.dispatchEvent(new Event('change')); }
+        // Clear all formula inputs
         if (formulaParentA) formulaParentA.value = '';
         if (formulaParentB) formulaParentB.value = '';
+        if (hybridFormulaA) hybridFormulaA.value = '';
+        if (hybridFormulaB) hybridFormulaB.value = '';
+        if (seedlingFormulaA) seedlingFormulaA.value = '';
+        if (seedlingFormulaB) seedlingFormulaB.value = '';
+        // Clear structured fields
+        ['sf-author-name','sf-publication-year','sf-collector','sf-collection-year','sf-type-locality','sf-known-habitats',
+         'sf-clone-namer','sf-clone-naming-year','sf-hybrid-breeder','sf-hybrid-naming-year','sf-sowing-date'].forEach(function(id) {
+          var el = document.getElementById(id); if (el) el.value = '';
+        });
         contributeSources = [];
         renderContributeSources();
         if (duplicateAlert) duplicateAlert.style.display = 'none';
@@ -4018,38 +4274,27 @@
       }
       updateSeedlingVisibility();
 
-      // Show/hide formula and parent photos based on type
-      var parentPhotosSection = document.getElementById('parent-photos-section');
-      var creatorNameSection = document.getElementById('creator-name-section');
+      // Show/hide structured fields based on type
       var originAiHint = document.getElementById('origin-ai-hint');
+      function showTypeFields(type) {
+        if (speciesFields) speciesFields.style.display = type === 'species' ? '' : 'none';
+        if (cloneFields) cloneFields.style.display = type === 'clone' ? '' : 'none';
+        if (hybridFields) hybridFields.style.display = type === 'hybrid' ? '' : 'none';
+        if (seedlingFields) seedlingFields.style.display = type === 'seedling' ? '' : 'none';
+        if (originAiHint) {
+          if (type === 'species') { originAiHint.textContent = 'AIが自動で由来を調査します'; originAiHint.style.display = ''; }
+          else if (type === 'seedling') { originAiHint.style.display = 'none'; }
+          else { originAiHint.textContent = '由来を記入するとAIが内容を検証し、信頼度スコアを算出します'; originAiHint.style.display = ''; }
+        }
+      }
       document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(radio) {
         radio.addEventListener('change', function() {
-          var formulaGroup = formulaSection ? formulaSection.closest('.form-group') : null;
-          if (this.value === 'species') {
-            if (formulaGroup) formulaGroup.style.display = 'none';
-            if (parentPhotosSection) parentPhotosSection.style.display = 'none';
-            if (creatorNameSection) creatorNameSection.style.display = 'none';
-            if (originAiHint) { originAiHint.textContent = 'AIが自動で由来を調査します'; originAiHint.style.display = ''; }
-          } else if (this.value === 'seedling') {
-            if (formulaGroup) formulaGroup.style.display = '';
-            if (parentPhotosSection) parentPhotosSection.style.display = '';
-            if (creatorNameSection) creatorNameSection.style.display = '';
-            if (originAiHint) originAiHint.style.display = 'none';
-          } else {
-            // clone or hybrid
-            if (formulaGroup) formulaGroup.style.display = '';
-            if (parentPhotosSection) parentPhotosSection.style.display = 'none';
-            if (creatorNameSection) creatorNameSection.style.display = 'none';
-            if (originAiHint) { originAiHint.textContent = '由来を記入するとAIが内容を検証し、信頼度スコアを算出します'; originAiHint.style.display = ''; }
-          }
+          showTypeFields(this.value);
         });
       });
-      // Initialize: hide formula if species is default
+      // Initialize: show species fields by default
       var activeType = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
-      if (activeType && activeType.value === 'species' && formulaSection) {
-        var fg = formulaSection.closest('.form-group');
-        if (fg) fg.style.display = 'none';
-      }
+      showTypeFields(activeType ? activeType.value : 'species');
 
       // Parent photo upload handlers
       var motherPhotoFile = null, fatherPhotoFile = null;
@@ -4163,31 +4408,111 @@
           if (!editMode && cultivarData[fullName]) { showToast(t('error_duplicate'), true); return; }
           if (editMode && fullName !== editCultivarKey && cultivarData[fullName]) { showToast(t('error_duplicate'), true); return; }
 
+          // ---- Build structured data from form fields ----
+          function buildStructuredFromForm(type) {
+            var s = { origin_type: type };
+            var f = getActiveFormula(type);
+            if (type === 'species') {
+              var v;
+              v = document.getElementById('sf-author-name'); if (v) s.author_name = v.value.trim();
+              v = document.getElementById('sf-publication-year'); if (v && v.value) s.publication_year = parseInt(v.value) || null;
+              v = document.getElementById('sf-collector'); if (v) s.collector = v.value.trim();
+              v = document.getElementById('sf-collection-year'); if (v && v.value) s.collection_year = parseInt(v.value) || null;
+              v = document.getElementById('sf-type-locality'); if (v) s.type_locality = v.value.trim();
+              v = document.getElementById('sf-known-habitats'); if (v) s.known_habitats = v.value.trim();
+            } else if (type === 'clone') {
+              var v;
+              v = document.getElementById('sf-clone-namer'); if (v) s.namer = v.value.trim();
+              v = document.getElementById('sf-clone-naming-year'); if (v && v.value) s.naming_year = parseInt(v.value) || null;
+              if (f.a && f.b) {
+                var pA = f.a.value.trim(), pB = f.b.value.trim();
+                if (pA && pB) s.formula = { parentA: pA, parentB: pB };
+              }
+            } else if (type === 'hybrid') {
+              var v;
+              v = document.getElementById('sf-hybrid-breeder'); if (v) s.breeder = v.value.trim();
+              v = document.getElementById('sf-hybrid-naming-year'); if (v && v.value) s.naming_year = parseInt(v.value) || null;
+              if (f.a && f.b) {
+                var pA = f.a.value.trim(), pB = f.b.value.trim();
+                if (pA && pB) s.formula = { parentA: pA, parentB: pB };
+              }
+            } else if (type === 'seedling') {
+              var v;
+              v = document.getElementById('creator-name-input'); if (v) s.breeder = v.value.trim();
+              v = document.getElementById('sf-sowing-date'); if (v) s.sowing_date = v.value;
+              if (f.a && f.b) {
+                var pA = f.a.value.trim(), pB = f.b.value.trim();
+                if (pA && pB) s.formula = { parentA: pA, parentB: pB };
+              }
+            }
+            // 補足欄 (shared)
+            s.notes = desc;
+            // 引用リンク (shared)
+            if (contributeSources.length > 0) {
+              s.citation_links = contributeSources.map(function(url) { return { url: url }; });
+            }
+            return s;
+          }
+
+          // Generate auto body text from structured fields (for backward compat)
+          function generateBodyFromStructured(s) {
+            var parts = [];
+            if (s.origin_type === 'species') {
+              if (s.author_name) parts.push('発表者: ' + s.author_name + (s.publication_year ? ' (' + s.publication_year + ')' : ''));
+              if (s.collector) parts.push('発見者: ' + s.collector + (s.collection_year ? ' (' + s.collection_year + ')' : ''));
+              if (s.type_locality) parts.push('採取地: ' + s.type_locality);
+              if (s.known_habitats) parts.push('生息地: ' + s.known_habitats);
+            } else if (s.origin_type === 'clone') {
+              if (s.namer) parts.push('名付けた人物: ' + s.namer + (s.naming_year ? ' (' + s.naming_year + ')' : ''));
+            } else if (s.origin_type === 'hybrid') {
+              if (s.breeder) parts.push('作出者: ' + s.breeder + (s.naming_year ? ' (' + s.naming_year + ')' : ''));
+            } else if (s.origin_type === 'seedling') {
+              if (s.breeder) parts.push('作出者: ' + s.breeder);
+              if (s.sowing_date) parts.push('播種日: ' + s.sowing_date);
+            }
+            if (s.formula) parts.push('交配式: ' + s.formula.parentA + ' × ' + s.formula.parentB);
+            if (s.notes) parts.push(s.notes);
+            return parts.join('. ') || '';
+          }
+
+          // Hybrid formula validation
+          if (type === 'hybrid') {
+            var hf = getActiveFormula('hybrid');
+            if (!hf.a || !hf.b || !hf.a.value.trim() || !hf.b.value.trim()) {
+              showToast('ハイブリッドには交配式が必須です', true);
+              return;
+            }
+          }
+
+          var structured = buildStructuredFromForm(type);
+
           // ---- EDIT MODE: update existing record ----
           if (editMode && editCultivarKey) {
             var existingData = cultivarData[editCultivarKey];
             if (!existingData) { showToast('品種データが見つかりません', true); return; }
 
-            // Update description in first non-formula origin
-            var updatedDesc = desc;
+            // Update structured data in first non-formula origin
             var updatedSources = contributeSources.map(function(url) { return { icon: '\u{1F310}', text: url }; });
+            var autoBody = generateBodyFromStructured(structured);
             var foundOrigin = false;
             var updatedOrigins = (existingData.origins || []).map(function(o) {
               if (o._type === 'formula') return o;
               if (!foundOrigin) {
                 foundOrigin = true;
                 return Object.assign({}, o, {
-                  body: updatedDesc || o.body,
+                  body: autoBody || o.body,
+                  structured: structured,
                   sources: updatedSources.length > 0 ? updatedSources : o.sources
                 });
               }
               return o;
             });
-            // If no non-formula origin existed and user wrote a description, add one
-            if (!foundOrigin && updatedDesc) {
+            // If no non-formula origin existed, add one
+            if (!foundOrigin) {
               updatedOrigins.unshift({
                 trust: type === 'seedling' ? 50 : 30, trustClass: type === 'seedling' ? 'trust--mid' : 'trust--low',
-                body: updatedDesc,
+                body: autoBody,
+                structured: structured,
                 source_type: 'manual',
                 sources: updatedSources,
                 author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
@@ -4195,21 +4520,15 @@
               });
             }
 
-            // Update formula
+            // Update formula (backward compat: keep data.formula for buildFormulaHtml)
             var updatedFormula = existingData.formula || null;
-            if (type !== 'species' && formulaParentA && formulaParentB) {
-              var pA = formulaParentA.value.trim();
-              var pB = formulaParentB.value.trim();
-              if (pA && pB) {
-                updatedFormula = Object.assign({}, updatedFormula || {}, { parentA: pA, parentB: pB });
-              }
+            if (structured.formula) {
+              updatedFormula = Object.assign({}, updatedFormula || {}, structured.formula);
             }
             // Update creator name for seedlings
-            if (type === 'seedling') {
-              var creatorInput = document.getElementById('creator-name-input');
-              var creatorVal = creatorInput ? creatorInput.value.trim() : '';
+            if (type === 'seedling' && structured.breeder) {
               if (!updatedFormula) updatedFormula = {};
-              updatedFormula.creatorName = creatorVal || null;
+              updatedFormula.creatorName = structured.breeder || null;
             }
 
             // Disable submit button
@@ -4358,16 +4677,20 @@
             return; // Don't continue to new registration logic
           }
 
-          // Build data entry
+          // Build data entry with structured fields
           var newEntry = { origins: [] };
           var isSeedling = type === 'seedling';
           newEntry._type = type;
+          var autoBody = generateBodyFromStructured(structured);
+          // Check if structured has any meaningful content
+          var hasStructuredContent = autoBody || structured.notes || (structured.formula && structured.formula.parentA);
 
-          if (desc) {
-            // User provided origin
+          if (hasStructuredContent) {
+            // User provided structured origin
             var origin = {
               trust: isSeedling ? 50 : 30, trustClass: isSeedling ? 'trust--mid' : 'trust--low',
-              body: desc,
+              body: autoBody,
+              structured: structured,
               source_type: 'manual',
               sources: contributeSources.map(function(url) { return { icon: '\u{1F310}', text: url }; }),
               author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
@@ -4378,31 +4701,32 @@
             var origin = {
               trust: 0, trustClass: 'trust--low',
               body: t('ai_pending_origin'),
+              structured: structured,
               sources: [],
               author: { isAI: true, name: 'AI (Pending)', date: new Date().toISOString().slice(0, 10) },
               votes: { agree: 0, disagree: 0 }
             };
           } else {
-            // Seedling with no description - still manual, just empty
-            var origin = null;
+            // Seedling with minimal data
+            var origin = hasStructuredContent ? null : {
+              trust: 50, trustClass: 'trust--mid',
+              body: '',
+              structured: structured,
+              source_type: 'manual',
+              sources: [],
+              author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
+              votes: { agree: 0, disagree: 0 }
+            };
           }
 
-          // Formula for hybrids/seedlings
-          if (type !== 'species' && formulaParentA && formulaParentB) {
-            var pA = formulaParentA.value.trim();
-            var pB = formulaParentB.value.trim();
-            if (pA && pB) {
-              newEntry.formula = { parentA: pA, parentB: pB };
-            }
+          // Formula for backward compat (keep data.formula for buildFormulaHtml)
+          if (structured.formula) {
+            newEntry.formula = Object.assign({}, structured.formula);
           }
-          // Creator name for seedlings
-          if (type === 'seedling') {
-            var creatorInput = document.getElementById('creator-name-input');
-            var creatorVal = creatorInput ? creatorInput.value.trim() : '';
-            if (creatorVal) {
-              if (!newEntry.formula) newEntry.formula = {};
-              newEntry.formula.creatorName = creatorVal;
-            }
+          // Creator name for seedlings (backward compat)
+          if (type === 'seedling' && structured.breeder) {
+            if (!newEntry.formula) newEntry.formula = {};
+            newEntry.formula.creatorName = structured.breeder;
           }
           if (origin) newEntry.origins.push(origin);
 
@@ -4487,6 +4811,14 @@
             if (speciesRadio) { speciesRadio.checked = true; speciesRadio.dispatchEvent(new Event('change')); }
             if (formulaParentA) formulaParentA.value = '';
             if (formulaParentB) formulaParentB.value = '';
+            if (hybridFormulaA) hybridFormulaA.value = '';
+            if (hybridFormulaB) hybridFormulaB.value = '';
+            if (seedlingFormulaA) seedlingFormulaA.value = '';
+            if (seedlingFormulaB) seedlingFormulaB.value = '';
+            ['sf-author-name','sf-publication-year','sf-collector','sf-collection-year','sf-type-locality','sf-known-habitats',
+             'sf-clone-namer','sf-clone-naming-year','sf-hybrid-breeder','sf-hybrid-naming-year','sf-sowing-date'].forEach(function(id) {
+              var el = document.getElementById(id); if (el) el.value = '';
+            });
             if (contributeSourceInput) contributeSourceInput.value = '';
             contributeSources = [];
             renderContributeSources();
@@ -4634,31 +4966,77 @@
           e.preventDefault();
           var desc = originForm.querySelector('.form-textarea');
           var descText = desc ? desc.value.trim() : '';
-          if (!descText) { showToast(t('origin_desc_required'), true); return; }
 
           // Get current cultivar
           var cultivarPage = document.getElementById('page-cultivar');
           var h1 = cultivarPage ? cultivarPage.querySelector('h1') : null;
           var cultivarName = h1 ? h1.textContent : '';
-          if (!cultivarName || !cultivarData[cultivarName]) return;
+          var cData = cultivarData[cultivarName] || cultivarData[cultivarName + ' [Seedling]'];
+          if (!cultivarName || !cData) return;
+          var cType = cData._type || 'species';
 
-          // Build formula if provided
-          var formulaInputs = originForm.querySelectorAll('.formula-box .form-input');
-          var pA = formulaInputs[0] ? formulaInputs[0].value.trim() : '';
-          var pB = formulaInputs[1] ? formulaInputs[1].value.trim() : '';
+          // Build structured data from inline form
+          var aoStructured = { origin_type: cType, notes: descText };
+          if (cType === 'species') {
+            var v;
+            v = document.getElementById('ao-author-name'); if (v && v.value.trim()) aoStructured.author_name = v.value.trim();
+            v = document.getElementById('ao-publication-year'); if (v && v.value) aoStructured.publication_year = parseInt(v.value) || null;
+            v = document.getElementById('ao-collector'); if (v && v.value.trim()) aoStructured.collector = v.value.trim();
+            v = document.getElementById('ao-collection-year'); if (v && v.value) aoStructured.collection_year = parseInt(v.value) || null;
+            v = document.getElementById('ao-type-locality'); if (v && v.value.trim()) aoStructured.type_locality = v.value.trim();
+            v = document.getElementById('ao-known-habitats'); if (v && v.value.trim()) aoStructured.known_habitats = v.value.trim();
+          } else if (cType === 'clone') {
+            var v;
+            v = document.getElementById('ao-clone-namer'); if (v && v.value.trim()) aoStructured.namer = v.value.trim();
+            v = document.getElementById('ao-clone-naming-year'); if (v && v.value) aoStructured.naming_year = parseInt(v.value) || null;
+            var pA = document.getElementById('ao-clone-parentA'), pB = document.getElementById('ao-clone-parentB');
+            if (pA && pB && pA.value.trim() && pB.value.trim()) aoStructured.formula = { parentA: pA.value.trim(), parentB: pB.value.trim() };
+          } else if (cType === 'hybrid') {
+            var v;
+            v = document.getElementById('ao-hybrid-breeder'); if (v && v.value.trim()) aoStructured.breeder = v.value.trim();
+            v = document.getElementById('ao-hybrid-naming-year'); if (v && v.value) aoStructured.naming_year = parseInt(v.value) || null;
+            var pA = document.getElementById('ao-hybrid-parentA'), pB = document.getElementById('ao-hybrid-parentB');
+            if (pA && pB && pA.value.trim() && pB.value.trim()) aoStructured.formula = { parentA: pA.value.trim(), parentB: pB.value.trim() };
+          } else if (cType === 'seedling') {
+            var v;
+            v = document.getElementById('ao-seedling-breeder'); if (v && v.value.trim()) aoStructured.breeder = v.value.trim();
+            v = document.getElementById('ao-sowing-date'); if (v && v.value) aoStructured.sowing_date = v.value;
+            var pA = document.getElementById('ao-seedling-parentA'), pB = document.getElementById('ao-seedling-parentB');
+            if (pA && pB && pA.value.trim() && pB.value.trim()) aoStructured.formula = { parentA: pA.value.trim(), parentB: pB.value.trim() };
+          }
+          if (originSources.length > 0) {
+            aoStructured.citation_links = originSources.map(function(url) { return { url: url }; });
+          }
+
+          // Auto-generate body for backward compat
+          var bodyParts = [];
+          if (aoStructured.author_name) bodyParts.push('発表者: ' + aoStructured.author_name);
+          if (aoStructured.collector) bodyParts.push('発見者: ' + aoStructured.collector);
+          if (aoStructured.type_locality) bodyParts.push('採取地: ' + aoStructured.type_locality);
+          if (aoStructured.breeder || aoStructured.namer) bodyParts.push((aoStructured.breeder || aoStructured.namer));
+          if (aoStructured.formula) bodyParts.push(aoStructured.formula.parentA + ' × ' + aoStructured.formula.parentB);
+          if (descText) bodyParts.push(descText);
+          var autoBody = bodyParts.join('. ');
+
+          // Require at least some content
+          if (!autoBody && !descText) { showToast(t('origin_desc_required'), true); return; }
+
+          var pA = aoStructured.formula ? aoStructured.formula.parentA : '';
+          var pB = aoStructured.formula ? aoStructured.formula.parentB : '';
 
           var newOrigin = {
             trust: 25, trustClass: 'trust--low',
-            body: descText,
+            body: autoBody,
+            structured: aoStructured,
             source_type: 'manual',
             sources: originSources.map(function(url) { return { icon: '\u{1F310}', text: url }; }),
             author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
             votes: { agree: 0, disagree: 0 }
           };
 
-          cultivarData[cultivarName].origins.push(newOrigin);
-          if (pA && pB && !cultivarData[cultivarName].formula) {
-            cultivarData[cultivarName].formula = { parentA: pA, parentB: pB };
+          cData.origins.push(newOrigin);
+          if (pA && pB && !cData.formula) {
+            cData.formula = { parentA: pA, parentB: pB };
           }
 
           renderOrigins(cultivarName);
@@ -4702,8 +5080,13 @@
           originSources = [];
           var list = originForm.querySelector('.origin-source-list');
           if (list) list.innerHTML = '';
-          if (formulaInputs[0]) formulaInputs[0].value = '';
-          if (formulaInputs[1]) formulaInputs[1].value = '';
+          // Clear all inline structured fields
+          ['ao-author-name','ao-publication-year','ao-collector','ao-collection-year','ao-type-locality','ao-known-habitats',
+           'ao-clone-namer','ao-clone-naming-year','ao-clone-parentA','ao-clone-parentB',
+           'ao-hybrid-breeder','ao-hybrid-naming-year','ao-hybrid-parentA','ao-hybrid-parentB',
+           'ao-seedling-breeder','ao-sowing-date','ao-seedling-parentA','ao-seedling-parentB'].forEach(function(id) {
+            var el = document.getElementById(id); if (el) el.value = '';
+          });
 
           // Hide form, show button
           originForm.style.display = 'none';
@@ -4746,7 +5129,11 @@
         html += '<span class="trust__label">' + origin.trust + '%</span>';
         html += '</div></div>';
         }
-        html += '<div class="origin-card__body"><p>' + origin.body + '</p></div>';
+        if (origin.structured) {
+          html += '<div class="origin-card__body">' + renderStructuredOrigin(origin.structured) + '</div>';
+        } else {
+          html += '<div class="origin-card__body"><p>' + origin.body + '</p></div>';
+        }
         html += '<div class="origin-card__sources">';
         html += '<div class="text-sm font-bold mb-sm">' + t('source_label') + '</div>';
         if (origin.source_tier && origin.source_name) {
