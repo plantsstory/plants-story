@@ -635,9 +635,8 @@ Return ONLY valid JSON (no markdown, no code blocks):
   "collector": "採取者名 — English only. Example: T. B. Croat. 不明なら \"不明\"",
   "collection_year": "採取年 (number or null, 不明ならnull)",
   "type_locality": "タイプ産地 — English only. Example: Chocó, Colombia. 不明なら \"不明\"",
-  "known_habitats": "生息環境・自生地の環境のみ (例: 熱帯雲霧林、標高300-1000mの着生植物)。地名は英語アルファベットで記述。※植物の外見や葉の特徴は絶対にここに書かないこと。",
-  "notes": "日本語の補足テキスト (100-200文字)。植物の外見的特徴（葉の形状・色・質感・葉脈パターン等）をここに記述。人名・種名・地名は英語アルファベットで記載。※生息地情報はここに書かないこと。",
-  "notes_en": "English supplementary text (80-150 words). Describe appearance: leaf shape, color, texture, venation, petiole. Do NOT include habitat info here."
+  "notes": "日本語の補足テキスト (100-200文字)。植物の外見的特徴（葉の形状・色・質感・葉脈パターン等）を記述。人名・種名・地名は英語アルファベットで記載。",
+  "notes_en": "English supplementary text (80-150 words). Describe appearance: leaf shape, color, texture, venation, petiole."
 }`;
 }
 
@@ -1239,7 +1238,7 @@ serve(async (req: Request) => {
               collector: known(aiStructured?.collector) || ipniCollector || "不明",
               collection_year: aiStructured?.collection_year || null,
               type_locality: known(aiStructured?.type_locality) || ipniLocality || botResult.nativeDistribution[0] || "不明",
-              known_habitats: known(aiStructured?.known_habitats) || botResult.typeDistribution || dist,
+              known_habitats: botResult.typeDistribution || dist || "不明",
               notes: bodyJp,
               citation_links: [
                 { url: `https://www.ipni.org/n/${ipniId}`, label: "IPNI" },
