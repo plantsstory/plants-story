@@ -4096,12 +4096,13 @@
           var currentType = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
           currentType = currentType ? currentType.value : 'species';
           var exactKey;
+          var cleanVal = inputVal.replace(/^'+|'+$/g, '');
           if (currentType === 'species') {
-            exactKey = genus.toLowerCase() + ' ' + inputVal;
+            exactKey = genus.toLowerCase() + ' ' + cleanVal;
           } else if (currentType === 'seedling') {
-            exactKey = genus.toLowerCase() + " '" + inputVal + "' [seedling]";
+            exactKey = genus.toLowerCase() + " '" + cleanVal + "' [seedling]";
           } else {
-            exactKey = genus.toLowerCase() + " '" + inputVal + "'";
+            exactKey = genus.toLowerCase() + " '" + cleanVal + "'";
           }
           var found = null;
           Object.keys(cultivarData).forEach(function(name) {
@@ -4147,7 +4148,8 @@
             }
           }
 
-          // Build full name
+          // Build full name — strip existing quotes to avoid double-quoting
+          name = name.replace(/^'+|'+$/g, '');
           var fullName;
           if (type === 'species') {
             fullName = genus + ' ' + name;
