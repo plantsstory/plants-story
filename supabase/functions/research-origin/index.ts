@@ -622,19 +622,18 @@ NEVER use: nursery pages, Instagram, Reddit, Facebook, blogs, Yahoo Auctions, Me
 6. notes should describe the plant's APPEARANCE: leaf shape, color, texture, venation pattern, petiole characteristics. Keep it engaging for plant enthusiasts.
 
 === WRITING RULES FOR JAPANESE TEXT ===
-- Person names: Write in English, followed by katakana in parentheses. Example: "T. B. Croat (クロート)"
-- Species names: Write the scientific name in italic/English. Example: "Anthurium crystallinum"
-- Place/region names: Write in English, followed by katakana in parentheses. Example: "Chocó (チョコ), Colombia (コロンビア)"
-- For well-known place names, you may use the standard Japanese name: "Colombia" → "コロンビア", "Peru" → "ペルー", "Ecuador" → "エクアドル"
+- Person names: Write in English only (no katakana). Example: "T. B. Croat"
+- Species names: Write the scientific name in English only. Example: "Anthurium crystallinum"
+- Place/region names: Write in English only (no katakana). Example: "Chocó, Colombia"
 
 === OUTPUT FORMAT ===
 Return ONLY valid JSON (no markdown, no code blocks):
 {
-  "collector": "採取者名 — English (カタカナ) format. Example: T. B. Croat (クロート). 不明なら \"不明\"",
+  "collector": "採取者名 — English only. Example: T. B. Croat. 不明なら \"不明\"",
   "collection_year": "採取年 (number or null, 不明ならnull)",
-  "type_locality": "タイプ産地 — English (カタカナ) format. Example: Chocó (チョコ), Colombia (コロンビア). 不明なら \"不明\"",
-  "known_habitats": "生息環境の簡潔な記述 (例: 熱帯雲霧林、標高300-1000mの着生植物). 地名は English (カタカナ) で記述",
-  "notes": "日本語の補足テキスト (100-200文字)。植物の外見的特徴（葉の形状・色・質感・葉脈パターン等）を記述。人名・種名・地名は English (カタカナ) で記載。",
+  "type_locality": "タイプ産地 — English only. Example: Chocó, Colombia. 不明なら \"不明\"",
+  "known_habitats": "生息環境の簡潔な記述 (例: 熱帯雲霧林、標高300-1000mの着生植物). 地名は英語で記述",
+  "notes": "日本語の補足テキスト (100-200文字)。植物の外見的特徴（葉の形状・色・質感・葉脈パターン等）を記述。人名・種名・地名は英語で記載。",
   "notes_en": "English supplementary text (80-150 words). Describe appearance: leaf shape, color, texture, venation, petiole."
 }`;
 }
@@ -689,10 +688,9 @@ Use ONLY information that is verified or directly stated in the user text. Do NO
 4. notes should be a 1-2 sentence summary of key facts about this cultivar in Japanese.
 
 === WRITING RULES FOR JAPANESE TEXT ===
-- Person names: Write in English, followed by katakana in parentheses. Example: "John Banta (バンタ)"
-- Species names: Write the scientific name in English. Example: "Anthurium crystallinum"
-- Place/region names: Write in English, followed by katakana in parentheses. Example: "Florida (フロリダ)"
-- For well-known place names, you may use the standard Japanese name: "Colombia" → "コロンビア", "Thailand" → "タイ"
+- Person names: Write in English only (no katakana). Example: "John Banta"
+- Species names: Write the scientific name in English only. Example: "Anthurium crystallinum"
+- Place/region names: Write in English only (no katakana). Example: "Florida, USA"
 
 === OUTPUT FORMAT ===
 Return ONLY valid JSON (no markdown, no code blocks):
@@ -702,7 +700,7 @@ Return ONLY valid JSON (no markdown, no code blocks):
     "parentA": "片親A (string or empty, 不明なら \\"\\")",
     "parentB": "片親B (string or empty, 不明なら \\"\\")"
   },
-  "notes": "日本語の補足テキスト (50-150文字). 人名・種名・地名は English (カタカナ) で記載",
+  "notes": "日本語の補足テキスト (50-150文字). 人名・種名・地名は英語で記載",
   "notes_en": "English supplementary text (30-80 words)"
 }`;
 }
@@ -779,11 +777,9 @@ Return ONLY valid JSON (no markdown):
 - 日本語: 自然で読みやすい文章。「信頼できる情報源が見つからなかったため…」のような冗長な表現は避ける。
 
 === WRITING RULES FOR JAPANESE TEXT ===
-- Person names: Write in English, followed by katakana in parentheses. Example: "T. B. Croat (クロート)"
-- Species names: Write the scientific name in English. Example: "Anthurium luxurians"
-- Place/region names: Write in English, followed by katakana in parentheses. Example: "Chocó (チョコ), Colombia (コロンビア)"
-- For well-known place names, you may use the standard Japanese name: "Colombia" → "コロンビア", "Peru" → "ペルー"
-- discoverer_or_breeder field: Use English name only (no katakana). Katakana is for description_jp text only.`;
+- Person names: Write in English only (no katakana). Example: "T. B. Croat"
+- Species names: Write the scientific name in English only. Example: "Anthurium luxurians"
+- Place/region names: Write in English only (no katakana). Example: "Chocó, Colombia"`;
 }
 
 // ============================================================
@@ -861,11 +857,9 @@ ${hasExternalData ? "- External data was found: set confidence higher (0.5-0.9) 
 - 日本語: 自然で読みやすい文章。冗長な表現は避ける。
 
 === WRITING RULES FOR JAPANESE TEXT ===
-- Person names: Write in English, followed by katakana in parentheses. Example: "John Banta (バンタ)"
-- Species names: Write the scientific name in English. Example: "Anthurium crystallinum"
-- Place/region names: Write in English, followed by katakana in parentheses. Example: "Florida (フロリダ)"
-- For well-known place names, you may use the standard Japanese name: "Colombia" → "コロンビア", "Thailand" → "タイ"
-- discoverer_or_breeder field: Use English name only (no katakana). Katakana is for description_jp text only.`;
+- Person names: Write in English only (no katakana). Example: "John Banta"
+- Species names: Write the scientific name in English only. Example: "Anthurium crystallinum"
+- Place/region names: Write in English only (no katakana). Example: "Florida, USA"`;
 }
 
 // ============================================================
@@ -945,11 +939,9 @@ ${hasExternalData ? "- External data was found: set confidence higher (0.5-0.9) 
 - 日本語: 自然で読みやすい文章。冗長な表現は避ける。
 
 === WRITING RULES FOR JAPANESE TEXT ===
-- Person names: Write in English, followed by katakana in parentheses. Example: "John Banta (バンタ)"
-- Species names: Write the scientific name in English. Example: "Anthurium crystallinum"
-- Place/region names: Write in English, followed by katakana in parentheses. Example: "Florida (フロリダ)"
-- For well-known place names, you may use the standard Japanese name: "Colombia" → "コロンビア", "Thailand" → "タイ"
-- discoverer_or_breeder field: Use English name only (no katakana). Katakana is for description_jp text only.`;
+- Person names: Write in English only (no katakana). Example: "John Banta"
+- Species names: Write the scientific name in English only. Example: "Anthurium crystallinum"
+- Place/region names: Write in English only (no katakana). Example: "Florida, USA"`;
 }
 
 // ============================================================
