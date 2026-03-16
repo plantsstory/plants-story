@@ -1469,12 +1469,6 @@
 
     function parseHash() {
       var hash = location.hash || '#/';
-      // Detect Supabase auth tokens in hash (from implicit OAuth flow)
-      if (hash.indexOf('access_token=') !== -1 || hash.indexOf('error=') !== -1) {
-        // Let Supabase client handle the tokens, then navigate to contribute
-        setTimeout(function() { location.hash = '#/contribute'; }, 500);
-        return { page: 'contribute' };
-      }
       var path = hash.replace(/^#\/?/, '');  // remove leading #/
       if (!path) return { page: 'top' };
 
@@ -2004,7 +1998,9 @@
       var supabase = null;
       try {
         if (window.supabase && window.supabase.createClient) {
-          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: { flowType: 'pkce' }
+          });
           window._supabaseClient = supabase;
           window._SUPABASE_URL = SUPABASE_URL;
         }
@@ -2053,6 +2049,7 @@
           updateLoginUI();
           if (event === 'SIGNED_IN' && window.location.search.indexOf('code=') !== -1) {
             window.history.replaceState({}, '', window.location.pathname + '#/contribute');
+            if (typeof navigateTo === 'function') navigateTo('contribute');
           }
         });
         supabase.auth.getSession().then(function(res) {
