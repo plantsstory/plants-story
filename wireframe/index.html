@@ -2024,8 +2024,8 @@
             try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
             saved[fullName] = { entry: entry, meta: meta };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-            // Trigger AI research (skip for seedlings and when AI autofill was used)
-            if (!isSeedling && !window._aiAutofillUsed) {
+            // Trigger AI research (skip for seedlings only — always run for trust scoring)
+            if (!isSeedling) {
               var insertedId = rpcResult && rpcResult.id;
               if (insertedId) {
                 var manualOrigins = (entry.origins || []).filter(function(o) {
@@ -2041,7 +2041,6 @@
                 triggerAIResearch(insertedId, meta.genus, fullName, meta.type || 'Hybrid', manualOrigins, userText, userSources);
               }
             }
-            window._aiAutofillUsed = false; // Reset flag after submission
           });
         } else {
           var saved = {};
@@ -4363,7 +4362,6 @@
                 });
                 renderContributeSources();
               }
-              window._aiAutofillUsed = true;
               if (aiAutofillStatus) aiAutofillStatus.textContent = '記入完了 — 内容を確認してください';
             } else {
               if (aiAutofillStatus) aiAutofillStatus.textContent = 'データが見つかりませんでした';
