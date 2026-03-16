@@ -611,15 +611,15 @@ Research and return structured data about this species. Use ONLY:
 NEVER use: nursery pages, Instagram, Reddit, Facebook, blogs, Yahoo Auctions, Mercari.
 
 === CRITICAL RULES ===
-1. Use information from academic papers, monographs, and botanical databases you know from training data. This is NOT guessing — citing published data is encouraged.
-2. Only write "不明" when NO published source exists. Do NOT default to "不明" just because the data is not in the IPNI/POWO fields above.
+1. You MUST actively use your training knowledge of botanical literature (protologues, monographs, taxonomic revisions like Croat's Anthurium revisions, Aroideana papers, etc.) to fill in collector and type_locality. This is citing published science, NOT guessing.
+2. "不明" is a LAST RESORT — only use it when you are certain no published record exists for that field. If the species was described by a known taxonomist (e.g., Croat, Engler, Schott), protologues almost always contain collector and locality data — look it up.
 3. NEVER use unverified internet sources (nursery pages, social media, blogs).
 4. collector = the person who FIRST COLLECTED the type specimen.
-   If "Collector Team" is provided in TYPE SPECIMEN DATA above, use THAT. Parse the collector name from the collector number (e.g., "T. B. Croat 94069" → collector is "T. B. Croat").
-   If not provided above, check your knowledge of published protologues and monographs for the collector.
+   Priority: (a) "Collector Team" from TYPE SPECIMEN DATA above, (b) your knowledge of the protologue/original description, (c) the describing author if they also collected the type.
+   Parse the collector name from the collector number (e.g., "T. B. Croat 94069" → "T. B. Croat").
 5. type_locality = the specific location where the type specimen was collected.
-   If "Locality" is provided above, use THAT. If "sine loc." (without locality), check Type Remarks or published protologue for location info.
-   If Type Remarks mention the original collection location, use that information.
+   Priority: (a) "Locality" from TYPE SPECIMEN DATA above, (b) Type Remarks, (c) your knowledge of the protologue, (d) the native distribution region.
+   Be as specific as possible (department/province, country, elevation if known).
 6. Do NOT include specific size measurements in notes (plants vary by growing conditions).
 7. notes should describe the plant's APPEARANCE: leaf shape, color, texture, venation pattern, petiole characteristics. Keep it engaging for plant enthusiasts.
 
@@ -1225,20 +1225,26 @@ serve(async (req: Request) => {
           first_description: botResult.publicationYear
             ? `${botResult.authors}, ${botResult.publication} ${botResult.referenceCollation} (${botResult.publicationYear})`
             : `${botResult.authors}`,
-          structured: {
-            origin_type: "species",
-            author_name: botResult.authors || "不明",
-            publication_year: botResult.publicationYear ? parseInt(botResult.publicationYear) : null,
-            collector: aiStructured?.collector || (botResult.collectorTeam ? botResult.collectorTeam.replace(/\s+\d+$/, "") : "") || "不明",
-            collection_year: aiStructured?.collection_year || null,
-            type_locality: aiStructured?.type_locality || (botResult.typeLocality && botResult.typeLocality !== "sine loc." ? botResult.typeLocality : "") || botResult.nativeDistribution[0] || "不明",
-            known_habitats: aiStructured?.known_habitats || (botResult.typeDistribution || dist),
-            notes: bodyJp,
-            citation_links: [
-              { url: `https://www.ipni.org/n/${ipniId}`, label: "IPNI" },
-              { url: `https://powo.science.kew.org/taxon/${botResult.fqId}`, label: "POWO (Kew)" },
-            ],
-          },
+          structured: (() => {
+            // Helper: treat "不明" as empty so fallback chain works
+            const known = (v: any) => v && v !== "不明" ? v : "";
+            const ipniCollector = botResult.collectorTeam ? botResult.collectorTeam.replace(/\s+\d+$/, "") : "";
+            const ipniLocality = botResult.typeLocality && botResult.typeLocality !== "sine loc." ? botResult.typeLocality : "";
+            return {
+              origin_type: "species" as const,
+              author_name: botResult.authors || "不明",
+              publication_year: botResult.publicationYear ? parseInt(botResult.publicationYear) : null,
+              collector: known(aiStructured?.collector) || ipniCollector || "不明",
+              collection_year: aiStructured?.collection_year || null,
+              type_locality: known(aiStructured?.type_locality) || ipniLocality || botResult.nativeDistribution[0] || "不明",
+              known_habitats: known(aiStructured?.known_habitats) || botResult.typeDistribution || dist,
+              notes: bodyJp,
+              citation_links: [
+                { url: `https://www.ipni.org/n/${ipniId}`, label: "IPNI" },
+                { url: `https://powo.science.kew.org/taxon/${botResult.fqId}`, label: "POWO (Kew)" },
+              ],
+            };
+          })(),
           author: {
             name: "IPNI / POWO",
             isAI: true,
