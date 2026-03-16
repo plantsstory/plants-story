@@ -890,6 +890,12 @@
         <h2 class="text-lg font-bold mb-md" data-i18n="origin_story">由来</h2>
         <p class="form-hint" id="origin-ai-hint" style="display:none;"></p>
 
+        <!-- AI auto-fill button (shown for species when name is entered) -->
+        <div id="ai-autofill-container" style="display:none; margin-bottom:var(--space-md);">
+          <button class="btn btn--secondary" id="ai-autofill-btn" type="button">AI自動記入</button>
+          <span id="ai-autofill-status" class="text-sm text-muted" style="margin-left:var(--space-sm);"></span>
+        </div>
+
         <!-- ① Species fields -->
         <div id="species-fields" style="display:none;">
           <div class="structured-fieldset">
@@ -2021,8 +2027,8 @@
             try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
             saved[fullName] = { entry: entry, meta: meta };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-            // Trigger AI research (skip for seedlings)
-            if (!isSeedling) {
+            // Trigger AI research (skip for seedlings and when AI autofill was used)
+            if (!isSeedling && !window._aiAutofillUsed) {
               var insertedId = rpcResult && rpcResult.id;
               if (insertedId) {
                 var manualOrigins = (entry.origins || []).filter(function(o) {
@@ -2038,6 +2044,7 @@
                 triggerAIResearch(insertedId, meta.genus, fullName, meta.type || 'Hybrid', manualOrigins, userText, userSources);
               }
             }
+            window._aiAutofillUsed = false; // Reset flag after submission
           });
         } else {
           var saved = {};
@@ -4276,6 +4283,14 @@
 
       // Show/hide structured fields based on type
       var originAiHint = document.getElementById('origin-ai-hint');
+      function updateAiAutofillVisibility() {
+        var aiContainer = document.getElementById('ai-autofill-container');
+        if (!aiContainer) return;
+        var checkedRadio = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
+        var currentType = checkedRadio ? checkedRadio.value : 'species';
+        aiContainer.style.display = (currentType === 'species') ? '' : 'none';
+      }
+
       function showTypeFields(type) {
         if (speciesFields) speciesFields.style.display = type === 'species' ? '' : 'none';
         if (cloneFields) cloneFields.style.display = type === 'clone' ? '' : 'none';
@@ -4286,6 +4301,7 @@
           else if (type === 'seedling') { originAiHint.style.display = 'none'; }
           else { originAiHint.textContent = '由来を記入するとAIが内容を検証し、信頼度スコアを算出します'; originAiHint.style.display = ''; }
         }
+        updateAiAutofillVisibility();
       }
       document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(radio) {
         radio.addEventListener('change', function() {
@@ -4295,6 +4311,75 @@
       // Initialize: show species fields by default
       var activeType = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
       showTypeFields(activeType ? activeType.value : 'species');
+
+      // AI auto-fill: show/hide button when name changes
+      if (contributeName) {
+        contributeName.addEventListener('input', updateAiAutofillVisibility);
+      }
+
+      // AI auto-fill click handler
+      var aiAutofillBtn = document.getElementById('ai-autofill-btn');
+      var aiAutofillStatus = document.getElementById('ai-autofill-status');
+      if (aiAutofillBtn) {
+        aiAutofillBtn.addEventListener('click', function() {
+          var genus = contributeGenus ? contributeGenus.value : '';
+          var nameVal = contributeName ? contributeName.value.trim() : '';
+          if (!nameVal) { showToast('品種名を入力してください', true); return; }
+          if (!genus) { showToast('属を選択してください', true); return; }
+          var fullName = genus + ' ' + nameVal;
+
+          aiAutofillBtn.disabled = true;
+          aiAutofillBtn.textContent = '調査中...';
+          if (aiAutofillStatus) aiAutofillStatus.textContent = 'IPNI/POWOデータベースを検索中...';
+
+          fetch(EDGE_FUNCTION_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+            body: JSON.stringify({ cultivar_name: fullName, genus: genus, type: 'species', preview: true })
+          })
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            if (data.success && data.structured) {
+              var s = data.structured;
+              var el;
+              el = document.getElementById('sf-author-name');
+              if (el && s.author_name && s.author_name !== '不明') el.value = s.author_name;
+              el = document.getElementById('sf-publication-year');
+              if (el && s.publication_year) el.value = s.publication_year;
+              el = document.getElementById('sf-collector');
+              if (el && s.collector && s.collector !== '不明') el.value = s.collector;
+              el = document.getElementById('sf-collection-year');
+              if (el && s.collection_year) el.value = s.collection_year;
+              el = document.getElementById('sf-type-locality');
+              if (el && s.type_locality && s.type_locality !== '不明') el.value = s.type_locality;
+              el = document.getElementById('sf-known-habitats');
+              if (el && s.known_habitats) el.value = s.known_habitats;
+              // Fill notes
+              if (contributeDesc && s.notes) contributeDesc.value = s.notes;
+              // Fill citation links
+              if (s.citation_links && s.citation_links.length > 0) {
+                s.citation_links.forEach(function(link) {
+                  var url = typeof link === 'string' ? link : link.url;
+                  if (url && contributeSources.indexOf(url) === -1) contributeSources.push(url);
+                });
+                renderContributeSources();
+              }
+              window._aiAutofillUsed = true;
+              if (aiAutofillStatus) aiAutofillStatus.textContent = '記入完了 — 内容を確認してください';
+            } else {
+              if (aiAutofillStatus) aiAutofillStatus.textContent = 'データが見つかりませんでした';
+            }
+          })
+          .catch(function(err) {
+            console.error('AI autofill error:', err);
+            if (aiAutofillStatus) aiAutofillStatus.textContent = 'エラーが発生しました';
+          })
+          .finally(function() {
+            aiAutofillBtn.disabled = false;
+            aiAutofillBtn.textContent = 'AI自動記入';
+          });
+        });
+      }
 
       // Parent photo upload handlers
       var motherPhotoFile = null, fatherPhotoFile = null;
@@ -4903,7 +4988,7 @@
               setTimeout(window.loadCultivarThumbnails, 500);
             }
           }).catch(function(err) {
-            handleSubmitError('DB保存エラー: ' + (err.message || err));
+            handleSubmitError('エラー: ' + (err.message || err));
           });
         });
       }

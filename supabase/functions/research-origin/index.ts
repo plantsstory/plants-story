@@ -1073,9 +1073,9 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { cultivar_id, genus, cultivar_name, type, manual_origins, user_text, user_sources } = await req.json();
+    const { cultivar_id, genus, cultivar_name, type, manual_origins, user_text, user_sources, preview } = await req.json();
 
-    if (!cultivar_id || !cultivar_name) {
+    if ((!cultivar_id && !preview) || !cultivar_name) {
       return new Response(
         JSON.stringify({ error: "cultivar_id and cultivar_name are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -1104,7 +1104,7 @@ serve(async (req: Request) => {
     if (manual_origins && Array.isArray(manual_origins) && manual_origins.length > 0) {
       manualOrigins = manual_origins;
       console.log(`[Manual] Using ${manualOrigins.length} manual origins passed from frontend`);
-    } else {
+    } else if (!preview) {
       const { data: existingRow } = await supabase
         .from("cultivars")
         .select("origins")
@@ -1118,11 +1118,13 @@ serve(async (req: Request) => {
       }
     }
 
-    // Update status to researching
-    await supabase
-      .from("cultivars")
-      .update({ ai_status: "researching" })
-      .eq("id", cultivar_id);
+    // Update status to researching (skip in preview mode)
+    if (!preview) {
+      await supabase
+        .from("cultivars")
+        .update({ ai_status: "researching" })
+        .eq("id", cultivar_id);
+    }
 
     const plantType = type || "unknown";
     const parsed = parseSpeciesName(cultivar_name);
@@ -1748,6 +1750,20 @@ serve(async (req: Request) => {
     // Update database (AI origins + preserved manual origins)
     // ================================================================
     const bestTrust = originEntries[0]?.trust || 0;
+
+    // Preview mode: return structured data without DB writes
+    if (preview) {
+      console.log(`[Preview] ${cultivar_name}: ${originEntries.length} origins, best trust: ${bestTrust}%`);
+      return new Response(
+        JSON.stringify({
+          success: originEntries.length > 0,
+          structured: originEntries[0]?.structured || null,
+          body: originEntries[0]?.body || null,
+          sources: originEntries[0]?.sources || [],
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const { error: updateError } = await supabase
       .from("cultivars")
