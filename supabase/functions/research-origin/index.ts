@@ -552,6 +552,68 @@ Return ONLY valid JSON (no markdown, no code blocks):
 }
 
 // ============================================================
+// Build structured extraction prompt for clone/hybrid/seedling
+// ============================================================
+function buildCultivarStructuredPrompt(
+  cultivarName: string,
+  genus: string,
+  plantType: string,
+  userText: string,
+  verifyResult: any
+): string {
+  const claimsContext = (verifyResult?.claims_verified || [])
+    .filter((c: any) => c.status === "verified" || c.status === "partially_verified")
+    .map((c: any) => `- ${c.claim} (${c.status}, source: ${c.source || "N/A"})`)
+    .join("\n");
+
+  const foundSourcesContext = (verifyResult?.found_sources || [])
+    .map((s: any) => `- ${s.label}: ${s.url}`)
+    .join("\n");
+
+  const typeFields = plantType === "clone"
+    ? `"namer": "この品種に名前をつけた人物 (string, 不明なら \\"不明\\")",
+  "naming_year": "命名された年 (number or null, 不明ならnull)",`
+    : plantType === "seedling"
+    ? `"breeder": "作出者 (string, 不明なら \\"不明\\")",
+  "sowing_date": "播種日 (string YYYY-MM-DD or null, 不明ならnull)",`
+    : `"breeder": "作出者 / ナーセリー (string, 不明なら \\"不明\\")",
+  "naming_year": "命名された年 (number or null, 不明ならnull)",`;
+
+  return `You are a botanical researcher extracting STRUCTURED data about the ${plantType} cultivar "${cultivarName}" (genus: ${genus}).
+
+=== USER'S DESCRIPTION ===
+${userText}
+
+=== VERIFIED CLAIMS ===
+${claimsContext || "(none)"}
+
+=== FOUND SOURCES ===
+${foundSourcesContext || "(none)"}
+
+=== YOUR TASK ===
+Extract structured fields from the user's description and verified claims above.
+Use ONLY information that is verified or directly stated in the user text. Do NOT speculate.
+
+=== CRITICAL RULES ===
+1. If a field is unknown or uncertain, write "不明" for strings, null for numbers/dates.
+2. NEVER guess. NEVER write "believed to be", "possibly", "likely".
+3. formula.parentA and formula.parentB should be the parent cultivar names (e.g., "A. crystallinum", "A. magnificum").
+4. notes should be a 1-2 sentence summary of key facts about this cultivar in Japanese.
+
+=== OUTPUT FORMAT ===
+Return ONLY valid JSON (no markdown, no code blocks):
+{
+  ${typeFields}
+  "formula": {
+    "parentA": "片親A (string or empty, 不明なら \\"\\")",
+    "parentB": "片親B (string or empty, 不明なら \\"\\")"
+  },
+  "notes": "日本語の補足テキスト (50-150文字)",
+  "notes_en": "English supplementary text (30-80 words)"
+}`;
+}
+
+// ============================================================
 // Build research prompt for cultivars/hybrids (improved)
 // ============================================================
 function buildCultivarResearchPrompt(cultivarName: string, genus: string, type: string): string {
@@ -1206,9 +1268,79 @@ serve(async (req: Request) => {
               sourcesArr.push({ url: `https://doi.org/${paper.doi}`, label: `${paper.journal} (${paper.year})` });
             }
 
+            // Extract structured data for clone/hybrid/seedling
+            let cultivarStructured: any = null;
+            const structPrompt = buildCultivarStructuredPrompt(
+              cultivar_name, effectiveGenus, plantType, effectiveUserText, verifyResult
+            );
+
+            // LLM cascade for structured extraction
+            if (geminiApiKey) {
+              try {
+                console.log("[CultivarStructured] Trying Gemini...");
+                const text = await callGemini(geminiApiKey, structPrompt);
+                cultivarStructured = extractJson(text);
+                if (cultivarStructured) console.log("[CultivarStructured] Gemini OK");
+              } catch (e) {
+                console.log("[CultivarStructured] Gemini FAILED:", String(e));
+              }
+            }
+            if (!cultivarStructured && groqApiKey) {
+              try {
+                console.log("[CultivarStructured] Trying Groq...");
+                const text = await callGroq(
+                  groqApiKey, "llama-3.3-70b-versatile",
+                  "You are a botanical researcher. Return ONLY valid JSON, no markdown.",
+                  structPrompt, 2000
+                );
+                cultivarStructured = extractJson(text);
+                if (cultivarStructured) console.log("[CultivarStructured] Groq OK");
+              } catch (e) {
+                console.log("[CultivarStructured] Groq FAILED:", String(e));
+              }
+            }
+            if (!cultivarStructured && openaiApiKey) {
+              try {
+                console.log("[CultivarStructured] Trying GPT-4o mini...");
+                const text = await callOpenAI(
+                  openaiApiKey,
+                  "You are a botanical researcher. Return ONLY valid JSON, no markdown.",
+                  structPrompt, 2000
+                );
+                cultivarStructured = extractJson(text);
+                if (cultivarStructured) console.log("[CultivarStructured] GPT-4o mini OK");
+              } catch (e) {
+                console.log("[CultivarStructured] GPT-4o mini FAILED:", String(e));
+              }
+            }
+
+            // Build structured object from AI result
+            const cs = cultivarStructured || {};
+            const structuredObj: any = { origin_type: plantType };
+            if (plantType === "clone") {
+              structuredObj.namer = cs.namer || "不明";
+              structuredObj.naming_year = cs.naming_year || null;
+            } else if (plantType === "hybrid") {
+              structuredObj.breeder = cs.breeder || "不明";
+              structuredObj.naming_year = cs.naming_year || null;
+            } else if (plantType === "seedling") {
+              structuredObj.breeder = cs.breeder || "不明";
+              structuredObj.sowing_date = cs.sowing_date || null;
+            }
+            if (cs.formula && (cs.formula.parentA || cs.formula.parentB)) {
+              structuredObj.formula = {
+                parentA: cs.formula.parentA || "",
+                parentB: cs.formula.parentB || "",
+              };
+            }
+            structuredObj.notes = cs.notes || effectiveUserText.substring(0, 150);
+            structuredObj.citation_links = sourcesArr
+              .filter((s: any) => s.url)
+              .map((s: any) => ({ url: s.url, label: s.label || s.url }));
+
             originEntries.push({
               body: effectiveUserText,
-              body_en: "",
+              body_en: cs.notes_en || "",
               trust,
               trustClass,
               source_type: "user_verified",
@@ -1218,11 +1350,14 @@ serve(async (req: Request) => {
               source_name: "",
               source_url: "",
               source_language: "ja",
-              parentage: null,
-              discovery_year: null,
-              discoverer_or_breeder: null,
+              parentage: structuredObj.formula
+                ? `${structuredObj.formula.parentA} × ${structuredObj.formula.parentB}`
+                : null,
+              discovery_year: structuredObj.naming_year || null,
+              discoverer_or_breeder: structuredObj.namer || structuredObj.breeder || null,
               native_region: null,
               first_description: null,
+              structured: structuredObj,
               verification: {
                 claims: verifyResult.claims_verified || [],
                 summary_jp: verifyResult.verification_summary_jp || "",
@@ -1245,6 +1380,22 @@ serve(async (req: Request) => {
             // Verification LLM failed — save user text without verification
             console.log("[Verify] All LLMs failed, saving user text without verification");
             const tierInfo = TIER_CONFIG.D;
+            const fallbackStructured: any = { origin_type: plantType };
+            if (plantType === "clone") {
+              fallbackStructured.namer = "不明";
+              fallbackStructured.naming_year = null;
+            } else if (plantType === "hybrid") {
+              fallbackStructured.breeder = "不明";
+              fallbackStructured.naming_year = null;
+            } else if (plantType === "seedling") {
+              fallbackStructured.breeder = "不明";
+              fallbackStructured.sowing_date = null;
+            }
+            fallbackStructured.notes = effectiveUserText.substring(0, 150);
+            fallbackStructured.citation_links = effectiveUserSources
+              .filter(Boolean)
+              .map(u => ({ url: u, label: u }));
+
             originEntries.push({
               body: effectiveUserText,
               body_en: "",
@@ -1262,6 +1413,7 @@ serve(async (req: Request) => {
               discoverer_or_breeder: null,
               native_region: null,
               first_description: null,
+              structured: fallbackStructured,
               author: {
                 name: "User",
                 isAI: false,
@@ -1348,20 +1500,41 @@ serve(async (req: Request) => {
 
             const sourcesArr: any[] = origin.source_url ? [{ url: origin.source_url, label: origin.source_name }] : [];
 
-            // Build structured fields from AI research result (species fallback)
-            const structuredEntry: any = {
-              origin_type: plantType === "species" ? "species" : plantType,
-              author_name: origin.discoverer_or_breeder || "不明",
-              publication_year: origin.discovery_year || null,
-              collector: "不明",
-              collection_year: null,
-              type_locality: origin.native_region || "不明",
-              known_habitats: origin.native_region || "不明",
-              notes: bodyJp,
-              citation_links: origin.source_url
-                ? [{ url: origin.source_url, label: origin.source_name || origin.source_url }]
-                : [],
-            };
+            // Build structured fields from AI research result — adapt to plantType
+            const citLinks = origin.source_url
+              ? [{ url: origin.source_url, label: origin.source_name || origin.source_url }]
+              : [];
+            const structuredEntry: any = { origin_type: plantType, notes: bodyJp, citation_links: citLinks };
+
+            if (plantType === "species") {
+              structuredEntry.author_name = origin.discoverer_or_breeder || "不明";
+              structuredEntry.publication_year = origin.discovery_year || null;
+              structuredEntry.collector = "不明";
+              structuredEntry.collection_year = null;
+              structuredEntry.type_locality = origin.native_region || "不明";
+              structuredEntry.known_habitats = origin.native_region || "不明";
+            } else if (plantType === "clone") {
+              structuredEntry.namer = origin.discoverer_or_breeder || "不明";
+              structuredEntry.naming_year = origin.discovery_year || null;
+              if (origin.parentage) {
+                const parts = (origin.parentage || "").split(/\s*[×x]\s*/i);
+                structuredEntry.formula = { parentA: parts[0] || "", parentB: parts[1] || "" };
+              }
+            } else if (plantType === "hybrid") {
+              structuredEntry.breeder = origin.discoverer_or_breeder || "不明";
+              structuredEntry.naming_year = origin.discovery_year || null;
+              if (origin.parentage) {
+                const parts = (origin.parentage || "").split(/\s*[×x]\s*/i);
+                structuredEntry.formula = { parentA: parts[0] || "", parentB: parts[1] || "" };
+              }
+            } else if (plantType === "seedling") {
+              structuredEntry.breeder = origin.discoverer_or_breeder || "不明";
+              structuredEntry.sowing_date = null;
+              if (origin.parentage) {
+                const parts = (origin.parentage || "").split(/\s*[×x]\s*/i);
+                structuredEntry.formula = { parentA: parts[0] || "", parentB: parts[1] || "" };
+              }
+            }
 
             originEntries.push({
               body: bodyJp,
@@ -1418,17 +1591,22 @@ serve(async (req: Request) => {
         discoverer_or_breeder: null,
         native_region: null,
         first_description: null,
-        structured: {
-          origin_type: plantType || "species",
-          author_name: "不明",
-          publication_year: null,
-          collector: "不明",
-          collection_year: null,
-          type_locality: "不明",
-          known_habitats: "不明",
-          notes: placeholderBodyJp,
-          citation_links: [],
-        },
+        structured: (function() {
+          const pt = plantType || "species";
+          const base: any = { origin_type: pt, notes: placeholderBodyJp, citation_links: [] };
+          if (pt === "species") {
+            base.author_name = "不明"; base.publication_year = null;
+            base.collector = "不明"; base.collection_year = null;
+            base.type_locality = "不明"; base.known_habitats = "不明";
+          } else if (pt === "clone") {
+            base.namer = "不明"; base.naming_year = null;
+          } else if (pt === "hybrid") {
+            base.breeder = "不明"; base.naming_year = null;
+          } else if (pt === "seedling") {
+            base.breeder = "不明"; base.sowing_date = null;
+          }
+          return base;
+        })(),
         author: {
           name: "System",
           isAI: true,
