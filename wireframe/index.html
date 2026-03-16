@@ -48,7 +48,7 @@
     <a href="#" data-nav="genus" data-genus="monstera">Monstera</a>
     <a href="#" data-nav="genus" data-genus="philodendron">Philodendron</a>
     <a href="#" data-nav="search" data-i18n="nav_search">Search</a>
-    <a href="#" data-nav="favorites" data-i18n="nav_favorites">&#x2661; お気に入り</a>
+    <a href="#" data-nav="favorites" data-i18n="nav_favorites">&#x2606; お気に入り</a>
     <a href="#" data-nav="mypost" id="nav-mypost" style="display:none;">&#x1F4DD; 投稿履歴</a>
   </div>
 
@@ -637,7 +637,7 @@
         <div>
           <div class="flex gap-sm flex-align-center">
             <h1 style="font-size:var(--font-size-2xl);">Anthurium crystallinum</h1>
-            <button id="fav-btn" style="background:none;border:none;font-size:1.6rem;cursor:pointer;padding:4px;line-height:1;color:var(--color-gray);" title="お気に入り">&#x2661;</button>
+            <button id="fav-btn" style="background:none;border:none;font-size:1.6rem;cursor:pointer;padding:4px;line-height:1;color:var(--color-gray);" title="お気に入り">&#x2606;</button>
           </div>
           <div class="flex gap-sm mt-sm flex-align-center">
             <span class="badge badge--species">原種 / Original Species</span>
@@ -2703,16 +2703,16 @@
       var btn = document.getElementById('fav-btn');
       if (!btn) return;
       var fav = isFavorite(name);
-      btn.innerHTML = fav ? '&#x2665;' : '&#x2661;';
-      btn.style.color = fav ? '#dc3545' : 'var(--color-gray)';
+      btn.innerHTML = fav ? '&#x2605;' : '&#x2606;';
+      btn.style.color = fav ? '#f5c518' : 'var(--color-gray)';
     }
 
     function updateHeaderFavIcon() {
       var navFav = document.querySelector('.mobile-nav [data-nav="favorites"]');
       if (!navFav) return;
       var count = Object.keys(getFavorites()).length;
-      var heart = count > 0 ? '&#x2665;' : '&#x2661;';
-      navFav.innerHTML = heart + ' ' + t('favorites_title') + (count > 0 ? ' (' + count + ')' : '');
+      var star = count > 0 ? '&#x2605;' : '&#x2606;';
+      navFav.innerHTML = star + ' ' + t('favorites_title') + (count > 0 ? ' (' + count + ')' : '');
     }
 
     // Fav button click handler
@@ -2788,7 +2788,7 @@
           html += '</div>';
 
           // Remove button
-          html += '<button class="fav-remove-btn" data-fav-remove="' + name.replace(/"/g, '&quot;') + '" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:28px;height:28px;font-size:1.1rem;color:#dc3545;cursor:pointer;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.15);">&#x2665;</button>';
+          html += '<button class="fav-remove-btn" data-fav-remove="' + name.replace(/"/g, '&quot;') + '" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:28px;height:28px;font-size:1.1rem;color:#f5c518;cursor:pointer;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.15);">&#x2605;</button>';
 
           html += '</div>';
         });
@@ -3628,7 +3628,7 @@
       nav_philodendron: { jp: 'Philodendron', en: 'Philodendron' },
       nav_home: { jp: 'Home', en: 'Home' },
       nav_search: { jp: 'Search', en: 'Search' },
-      nav_favorites: { jp: '&#x2661; お気に入り', en: '&#x2661; Favorites' },
+      nav_favorites: { jp: '&#x2606; お気に入り', en: '&#x2606; Favorites' },
       favorites_title: { jp: 'お気に入り', en: 'Favorites' },
       favorites_desc: { jp: 'ブックマークした品種の一覧です。', en: 'Your bookmarked cultivars.' },
       favorites_empty: { jp: 'お気に入りはまだありません。品種ページの♡ボタンで追加できます。', en: 'No favorites yet. Tap the ♡ button on a cultivar page to add one.' },
