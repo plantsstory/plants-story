@@ -4042,7 +4042,7 @@
         var _sbForGallery = window._supabaseClient;
         if (_sbForGallery) {
           _sbForGallery.from('cultivar_images')
-            .select('id, storage_path')
+            .select('id, storage_path, caption, link_url')
             .eq('cultivar_name', editDisplayName)
             .order('created_at', { ascending: true })
             .then(function(res) {
@@ -4057,8 +4057,14 @@
                 item.setAttribute('data-image-id', img.id);
                 item.setAttribute('data-storage-path', img.storage_path);
                 item.innerHTML =
-                  '<img class="upload-preview__img" src="' + url + '" title="登録済み画像">' +
-                  '<button class="upload-preview__remove" data-image-id="' + img.id + '" data-storage-path="' + img.storage_path + '">&times;</button>';
+                  '<div class="upload-preview__img-wrap">' +
+                    '<img class="upload-preview__img" src="' + url + '" title="登録済み画像">' +
+                    '<button class="upload-preview__remove" data-image-id="' + img.id + '" data-storage-path="' + img.storage_path + '">&times;</button>' +
+                  '</div>' +
+                  '<div class="upload-preview__meta">' +
+                    '<input type="text" placeholder="補足（入手先等）" data-image-id="' + img.id + '" data-field="caption" value="' + (img.caption || '').replace(/"/g, '&quot;') + '">' +
+                    '<input type="url" placeholder="リンクURL" data-image-id="' + img.id + '" data-field="link_url" value="' + (img.link_url || '').replace(/"/g, '&quot;') + '">' +
+                  '</div>';
                 previewEl.appendChild(item);
               });
               // Attach × handlers to delete from DB
@@ -4067,9 +4073,8 @@
                   e.stopPropagation();
                   var imageId = this.getAttribute('data-image-id');
                   var storagePath = this.getAttribute('data-storage-path');
-                  var itemEl = this.parentElement;
+                  var itemEl = this.closest('.upload-preview__item');
                   if (!confirm('この画像を削除しますか？')) return;
-                  // Delete from Storage and DB
                   _sbForGallery.storage.from('gallery-images').remove([storagePath]).then(function() {
                     return _sbForGallery.from('cultivar_images').delete().eq('id', imageId);
                   }).then(function() {
@@ -4077,6 +4082,19 @@
                     showToast('画像を削除しました');
                   }).catch(function(err) {
                     showToast('画像削除エラー: ' + (err.message || err), true);
+                  });
+                });
+              });
+              // Attach caption/link save handlers (save on blur)
+              previewEl.querySelectorAll('.upload-preview__meta input').forEach(function(inp) {
+                inp.addEventListener('blur', function() {
+                  var imageId = this.getAttribute('data-image-id');
+                  var field = this.getAttribute('data-field');
+                  var val = this.value.trim();
+                  var updates = {};
+                  updates[field] = val || null;
+                  _sbForGallery.from('cultivar_images').update(updates).eq('id', imageId).then(function(res) {
+                    if (res.error) console.warn('Failed to update image ' + field + ':', res.error);
                   });
                 });
               });
@@ -4657,6 +4675,8 @@
 
             // --- Upload gallery images if added ---
             var editGalleryFiles = typeof window.getContributeFiles === 'function' ? window.getContributeFiles() : [];
+            var editGalleryCaptions = typeof window.getContributeCaptions === 'function' ? window.getContributeCaptions() : [];
+            var editGalleryLinkUrls = typeof window.getContributeLinkUrls === 'function' ? window.getContributeLinkUrls() : [];
             var editGalleryName = fullName.replace(' [Seedling]', '');
 
             editParentPhotoPromise.then(function() {
@@ -4710,8 +4730,8 @@
               return updatePromise.then(function() {
                 // Upload gallery images if any (use same uploadGalleryImage as new registration)
                 if (editGalleryFiles.length > 0 && typeof window.uploadGalleryImage === 'function') {
-                  return Promise.all(editGalleryFiles.map(function(file) {
-                    return window.uploadGalleryImage(file, editGalleryName).catch(function(err) {
+                  return Promise.all(editGalleryFiles.map(function(file, fi) {
+                    return window.uploadGalleryImage(file, editGalleryName, editGalleryCaptions[fi] || '', editGalleryLinkUrls[fi] || '').catch(function(err) {
                       console.warn('Gallery image upload failed:', file.name, err);
                       return null;
                     });
@@ -4966,6 +4986,8 @@
 
           // Grab gallery files before any async operations
           var galleryFiles = typeof window.getContributeFiles === 'function' ? window.getContributeFiles() : [];
+          var galleryCaptions = typeof window.getContributeCaptions === 'function' ? window.getContributeCaptions() : [];
+          var galleryLinkUrls = typeof window.getContributeLinkUrls === 'function' ? window.getContributeLinkUrls() : [];
           // Gallery uses display name (without [Seedling]) to match h1 and detail page
           var galleryName = fullName.replace(' [Seedling]', '');
 
@@ -4979,8 +5001,8 @@
           }).then(function() {
             // Upload gallery images after DB record exists
             if (galleryFiles.length > 0 && typeof window.uploadGalleryImage === 'function') {
-              return Promise.all(galleryFiles.map(function(file) {
-                return window.uploadGalleryImage(file, galleryName).catch(function(err) {
+              return Promise.all(galleryFiles.map(function(file, fi) {
+                return window.uploadGalleryImage(file, galleryName, galleryCaptions[fi] || '', galleryLinkUrls[fi] || '').catch(function(err) {
                   console.warn('Gallery image upload failed:', file.name, err);
                   return null;
                 });
@@ -5567,7 +5589,7 @@
         return getSupabaseUrl() + '/storage/v1/object/public/' + BUCKET_NAME + '/' + storagePath;
       }
 
-      function uploadToSupabase(file, cultivarName) {
+      function uploadToSupabase(file, cultivarName, caption, linkUrl) {
         var sb = getSupabase();
         if (!sb) return Promise.reject('No Supabase');
         var safeName = cultivarName.replace(/[^a-zA-Z0-9_' -]/g, '_');
@@ -5579,10 +5601,13 @@
             upsert: false
           }).then(function(res) {
             if (res.error) throw res.error;
-            return sb.from('cultivar_images').insert({
+            var row = {
               cultivar_name: cultivarName,
               storage_path: path
-            }).select().then(function(dbRes) {
+            };
+            if (caption) row.caption = caption;
+            if (linkUrl) row.link_url = linkUrl;
+            return sb.from('cultivar_images').insert(row).select().then(function(dbRes) {
               if (dbRes.error) throw dbRes.error;
               return dbRes.data[0];
             });
@@ -5634,7 +5659,7 @@
 
       // --- Create gallery item DOM ---
       function createGalleryItem(src, opts) {
-        // opts: { imageId, storagePath, realVotes, fakeVotes, isLocal, localIdx }
+        // opts: { imageId, storagePath, realVotes, fakeVotes, isLocal, localIdx, caption, linkUrl }
         var item = document.createElement('div');
         item.className = 'gallery__item';
         item.setAttribute('data-user-upload', 'true');
@@ -5646,8 +5671,21 @@
         var votedAs = opts.imageId ? getVote(opts.imageId) : null;
         var realActive = votedAs === 'real' ? ' auth-btn--active' : '';
         var fakeActive = votedAs === 'fake' ? ' auth-btn--active' : '';
+        var caption = opts.caption || '';
+        var linkUrl = opts.linkUrl || '';
+        var hasOverlay = caption || linkUrl;
+        var overlayHtml = '';
+        if (hasOverlay) {
+          overlayHtml = '<div class="gallery__overlay">';
+          if (caption) overlayHtml += '<div class="gallery__overlay-caption">' + caption.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+          if (linkUrl) {
+            var displayLink = linkUrl.replace(/^https?:\/\//, '').substring(0, 40);
+            overlayHtml += '<div class="gallery__overlay-link"><a href="' + linkUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener">🔗 ' + displayLink.replace(/</g, '&lt;') + '</a></div>';
+          }
+          overlayHtml += '</div>';
+        }
         item.innerHTML =
-          '<div class="gallery__img"><img src="' + src + '" style="width:100%;height:auto;object-fit:contain;border-radius:var(--radius-md)"></div>' +
+          '<div class="gallery__img"><img src="' + src + '" style="width:100%;height:auto;object-fit:contain;border-radius:var(--radius-md)">' + overlayHtml + '</div>' +
           '<div class="gallery__actions">' +
             '<div class="auth-vote">' +
               '<button class="auth-btn' + realActive + '" data-vote="real">Real <span class="auth-btn__count">' + realVotes + '</span></button>' +
@@ -5655,6 +5693,16 @@
             '</div>' +
             '<a class="gallery__delete">' + t('request_delete') + '</a>' +
           '</div>';
+        // Tap to toggle overlay
+        if (hasOverlay) {
+          var imgDiv = item.querySelector('.gallery__img');
+          var overlay = item.querySelector('.gallery__overlay');
+          imgDiv.addEventListener('click', function(e) {
+            // Don't toggle if clicking on the link itself
+            if (e.target.closest('.gallery__overlay-link a')) return;
+            overlay.classList.toggle('gallery__overlay--visible');
+          });
+        }
         return item;
       }
 
@@ -5685,7 +5733,9 @@
                 imageId: img.id,
                 storagePath: img.storage_path,
                 realVotes: img.real_votes,
-                fakeVotes: img.fake_votes
+                fakeVotes: img.fake_votes,
+                caption: img.caption,
+                linkUrl: img.link_url
               });
               gallery.insertBefore(item, galleryUpload);
             });
@@ -5792,15 +5842,17 @@
           var cultivarName = h1 ? h1.textContent : '';
           if (!cultivarName) return;
 
+          // Prompt for caption and link
+          var caption = prompt('画像の補足（入手先、撮影日など）を入力してください（任意）：') || '';
+          var linkUrl = prompt('リンクURL（Instagram等）を入力してください（任意）：') || '';
+
           var sb = getSupabase();
           if (sb) {
-            // Upload to Supabase Storage
-            uploadToSupabase(file, cultivarName).then(function() {
+            uploadToSupabase(file, cultivarName, caption.trim(), linkUrl.trim()).then(function() {
               renderGalleryForCultivar(cultivarName);
               if (typeof loadCultivarThumbnails === 'function') loadCultivarThumbnails();
             }).catch(function(err) {
               console.warn('Supabase upload failed, saving locally:', err);
-              // Fallback to localStorage
               var reader = new FileReader();
               reader.onload = function(e) {
                 saveGalleryImageLocal(cultivarName, e.target.result);
@@ -5809,7 +5861,6 @@
               reader.readAsDataURL(file);
             });
           } else {
-            // localStorage fallback
             var reader = new FileReader();
             reader.onload = function(e) {
               saveGalleryImageLocal(cultivarName, e.target.result);
@@ -5850,6 +5901,8 @@
       var contributePreview = document.getElementById('contribute-preview');
       var contributeImages = [];
       var contributeFiles = []; // Store original File objects for upload
+      var contributeCaptions = []; // Caption text per image
+      var contributeLinkUrls = []; // Link URL per image
       var contributeReplaceIdx = null; // Track which image is being replaced
 
       if (contributeArea && contributeInput && contributePreview) {
@@ -5910,6 +5963,8 @@
           if (!validateFile(file)) return;
 
           contributeFiles.push(file);
+          contributeCaptions.push('');
+          contributeLinkUrls.push('');
           var reader = new FileReader();
           reader.onload = function(e) {
             contributeImages.push(e.target.result);
@@ -5924,8 +5979,14 @@
             var item = document.createElement('div');
             item.className = 'upload-preview__item';
             item.innerHTML =
-              '<img class="upload-preview__img" src="' + src + '" data-idx="' + i + '" title="クリックで画像を変更">' +
-              '<button class="upload-preview__remove" data-idx="' + i + '">&times;</button>';
+              '<div class="upload-preview__img-wrap">' +
+                '<img class="upload-preview__img" src="' + src + '" data-idx="' + i + '" title="クリックで画像を変更">' +
+                '<button class="upload-preview__remove" data-idx="' + i + '">&times;</button>' +
+              '</div>' +
+              '<div class="upload-preview__meta">' +
+                '<input type="text" placeholder="補足（入手先等）" data-idx="' + i + '" data-field="caption" value="' + (contributeCaptions[i] || '').replace(/"/g, '&quot;') + '">' +
+                '<input type="url" placeholder="リンクURL" data-idx="' + i + '" data-field="link" value="' + (contributeLinkUrls[i] || '').replace(/"/g, '&quot;') + '">' +
+              '</div>';
             contributePreview.appendChild(item);
           });
           // Attach remove handlers
@@ -5935,6 +5996,8 @@
               var idx = parseInt(this.getAttribute('data-idx'));
               contributeImages.splice(idx, 1);
               contributeFiles.splice(idx, 1);
+              contributeCaptions.splice(idx, 1);
+              contributeLinkUrls.splice(idx, 1);
               renderContributePreview();
             });
           });
@@ -5946,16 +6009,33 @@
               contributeInput.click();
             });
           });
+          // Attach caption/link input handlers
+          contributePreview.querySelectorAll('.upload-preview__meta input').forEach(function(inp) {
+            inp.addEventListener('input', function() {
+              var idx = parseInt(this.getAttribute('data-idx'));
+              var field = this.getAttribute('data-field');
+              if (field === 'caption') contributeCaptions[idx] = this.value;
+              else if (field === 'link') contributeLinkUrls[idx] = this.value;
+            });
+          });
         }
 
         // Expose for form reset
         window.resetContributeImages = function() {
           contributeImages = [];
           contributeFiles = [];
+          contributeCaptions = [];
+          contributeLinkUrls = [];
           contributePreview.innerHTML = '';
         };
         window.getContributeFiles = function() {
           return contributeFiles.slice();
+        };
+        window.getContributeCaptions = function() {
+          return contributeCaptions.slice();
+        };
+        window.getContributeLinkUrls = function() {
+          return contributeLinkUrls.slice();
         };
       }
     })();
