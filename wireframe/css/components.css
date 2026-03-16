@@ -789,6 +789,9 @@
   align-items: center;
   gap: var(--space-xs);
   position: relative;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .gallery-carousel__viewport {
@@ -878,6 +881,7 @@
 [data-user-upload] .gallery__img img {
   width: 100%;
   height: auto;
+  max-height: 400px;
   object-fit: contain;
 }
 
