@@ -611,15 +611,17 @@ Research and return structured data about this species. Use ONLY:
 NEVER use: nursery pages, Instagram, Reddit, Facebook, blogs, Yahoo Auctions, Mercari.
 
 === CRITICAL RULES ===
-1. If information is unknown or uncertain, write "不明" (unknown). NEVER guess or speculate.
-2. NEVER write "believed to be", "thought to be", "possibly", "likely", or "presumed".
-3. collector = the person who FIRST COLLECTED the type specimen (not the describing author, unless they also collected it).
-   If "Collector Team" is provided above, use THAT as the collector. Parse the collector name from the collector number (e.g., "T. B. Croat 94069" → collector is "T. B. Croat").
-4. type_locality = the specific location where the type specimen was collected.
-   If "Locality" is provided above, use THAT. If "sine loc." (without locality), write "不明".
+1. Use information from academic papers, monographs, and botanical databases you know from training data. This is NOT guessing — citing published data is encouraged.
+2. Only write "不明" when NO published source exists. Do NOT default to "不明" just because the data is not in the IPNI/POWO fields above.
+3. NEVER use unverified internet sources (nursery pages, social media, blogs).
+4. collector = the person who FIRST COLLECTED the type specimen.
+   If "Collector Team" is provided in TYPE SPECIMEN DATA above, use THAT. Parse the collector name from the collector number (e.g., "T. B. Croat 94069" → collector is "T. B. Croat").
+   If not provided above, check your knowledge of published protologues and monographs for the collector.
+5. type_locality = the specific location where the type specimen was collected.
+   If "Locality" is provided above, use THAT. If "sine loc." (without locality), check Type Remarks or published protologue for location info.
    If Type Remarks mention the original collection location, use that information.
-5. Do NOT include specific size measurements in notes (plants vary by growing conditions).
-6. notes should describe the plant's APPEARANCE: leaf shape, color, texture, venation pattern, petiole characteristics. Keep it engaging for plant enthusiasts.
+6. Do NOT include specific size measurements in notes (plants vary by growing conditions).
+7. notes should describe the plant's APPEARANCE: leaf shape, color, texture, venation pattern, petiole characteristics. Keep it engaging for plant enthusiasts.
 
 === WRITING RULES FOR JAPANESE TEXT ===
 - Person names: Write in English only (no katakana). Example: "T. B. Croat"
@@ -682,8 +684,8 @@ Extract structured fields from the user's description and verified claims above.
 Use ONLY information that is verified or directly stated in the user text. Do NOT speculate.
 
 === CRITICAL RULES ===
-1. If a field is unknown or uncertain, write "不明" for strings, null for numbers/dates.
-2. NEVER guess. NEVER write "believed to be", "possibly", "likely".
+1. Use verified claims and user text to fill fields. Only write "不明" or null when NO information exists.
+2. NEVER write "believed to be", "possibly", "likely".
 3. formula.parentA and formula.parentB should be the parent cultivar names (e.g., "A. crystallinum", "A. magnificum").
 4. notes should be a 1-2 sentence summary of key facts about this cultivar in Japanese.
 
@@ -713,9 +715,9 @@ function buildCultivarResearchPrompt(cultivarName: string, genus: string, type: 
 
 === CRITICAL RULES — VIOLATIONS WILL INVALIDATE YOUR RESPONSE ===
 
-1. UNKNOWN = UNKNOWN. If the creator, breeder, or parentage is unknown, write null.
-   NEVER guess or speculate. NEVER write "believed to be", "thought to be",
-   "possibly", "likely", "speculated", "assumed", or "presumed".
+1. Use information from academic papers, monographs, and botanical databases you know from training data. Citing published data is encouraged — this is NOT guessing.
+   Only write null when NO published source exists.
+   NEVER write "believed to be", "thought to be", "possibly", "likely", "speculated", "assumed", or "presumed".
 
 2. NEVER attribute creation to plant SELLERS or NURSERIES unless they are the
    VERIFIED original breeder with published evidence. These are SELLERS, not creators:
@@ -793,9 +795,9 @@ function buildHybridResearchPrompt(cultivarName: string, genus: string, ext: Ext
 ${externalContext}
 === CRITICAL RULES — VIOLATIONS WILL INVALIDATE YOUR RESPONSE ===
 
-1. UNKNOWN = UNKNOWN. If the creator, breeder, or parentage is unknown, write null.
-   NEVER guess or speculate. NEVER write "believed to be", "thought to be",
-   "possibly", "likely", "speculated", "assumed", or "presumed".
+1. Use information from academic papers, monographs, patents, and botanical databases you know from training data. Citing published data is encouraged — this is NOT guessing.
+   Only write null when NO published source exists.
+   NEVER write "believed to be", "thought to be", "possibly", "likely", "speculated", "assumed", or "presumed".
 
 2. NEVER attribute creation to plant SELLERS or NURSERIES unless they are the
    VERIFIED original breeder with published evidence. These are SELLERS, not creators:
@@ -874,9 +876,9 @@ A "clone" is a vegetatively propagated selection — a specific individual chose
 ${externalContext}
 === CRITICAL RULES — VIOLATIONS WILL INVALIDATE YOUR RESPONSE ===
 
-1. UNKNOWN = UNKNOWN. If the origin, discoverer, or original plant is unknown, write null.
-   NEVER guess or speculate. NEVER write "believed to be", "thought to be",
-   "possibly", "likely", "speculated", "assumed", or "presumed".
+1. Use information from academic papers, patents, monographs, and botanical databases you know from training data. Citing published data is encouraged — this is NOT guessing.
+   Only write null when NO published source exists.
+   NEVER write "believed to be", "thought to be", "possibly", "likely", "speculated", "assumed", or "presumed".
 
 2. NEVER attribute discovery to plant SELLERS or NURSERIES unless they are the
    VERIFIED original selector/discoverer with published evidence. These are SELLERS, not discoverers:
