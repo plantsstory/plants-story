@@ -2028,15 +2028,37 @@
       }
 
       if (supabase) {
-        supabase.auth.getSession().then(function(res) {
-          if (res.data && res.data.session) {
-            window._currentUser = res.data.session.user;
-            updateLoginUI();
+        // DEBUG: show auth state on page (temporary)
+        var _debugAuth = function(msg) {
+          var el = document.getElementById('auth-debug');
+          if (!el) {
+            el = document.createElement('div');
+            el.id = 'auth-debug';
+            el.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#333;color:#0f0;padding:8px;font-size:12px;z-index:99999;font-family:monospace;';
+            document.body.appendChild(el);
           }
-        });
+          el.textContent = msg;
+        };
+        _debugAuth('URL: ' + window.location.href.substring(0, 120));
+
         supabase.auth.onAuthStateChange(function(event, session) {
+          _debugAuth('authChange: ' + event + ' | user: ' + (session ? session.user.email : 'none'));
           window._currentUser = session ? session.user : null;
           updateLoginUI();
+          if (event === 'SIGNED_IN' && window.location.search.indexOf('code=') !== -1) {
+            window.history.replaceState({}, '', window.location.pathname + '#/contribute');
+          }
+        });
+        supabase.auth.getSession().then(function(res) {
+          if (res.data && res.data.session) {
+            _debugAuth('session found: ' + res.data.session.user.email);
+            window._currentUser = res.data.session.user;
+            updateLoginUI();
+          } else {
+            _debugAuth('no session | URL: ' + window.location.href.substring(0, 100));
+          }
+        }).catch(function(err) {
+          _debugAuth('session error: ' + (err.message || err));
         });
       }
 
@@ -2046,7 +2068,7 @@
         googleLoginBtn.addEventListener('click', function() {
           supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: window.location.origin + window.location.pathname }
+            options: { redirectTo: window.location.origin + window.location.pathname + '#/contribute' }
           });
         });
       }
