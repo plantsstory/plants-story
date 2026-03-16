@@ -651,37 +651,34 @@
         <button class="btn btn--sm" id="detail-delete-request-btn" style="margin-top:8px;color:#dc3545;border-color:#dc3545;border:1px solid #dc3545;background:transparent;font-size:0.8rem;cursor:pointer;">&#x1F5D1; 削除依頼</button>
       </div>
 
-      <!-- Image Gallery -->
+      <!-- Image Gallery (Carousel) -->
       <div class="mb-lg">
         <h2 class="section-title" data-i18n="images">画像</h2>
-        <div class="gallery">
-          <div class="gallery__item">
-            <div class="gallery__img"><svg viewBox="0 0 60 60" width="48" height="48"><path d="M30 6C20 2 8 8 6 20C4 32 18 44 30 54C42 44 56 32 54 20C52 8 40 2 30 6Z" fill="#2D6A4F" opacity="0.2"/><path d="M30 6V54" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.3"/></svg></div>
-            <div class="gallery__actions">
-              <div class="auth-vote">
-                <button class="auth-btn">Real <span class="auth-btn__count">0</span></button>
-                <button class="auth-btn">Fake <span class="auth-btn__count">0</span></button>
+        <div class="gallery-carousel" id="gallery-carousel">
+          <button class="gallery-carousel__arrow gallery-carousel__arrow--left" id="gallery-prev" style="display:none;">&#x2039;</button>
+          <div class="gallery-carousel__viewport">
+            <div class="gallery">
+              <div class="gallery__item">
+                <div class="gallery__img"><svg viewBox="0 0 60 60" width="48" height="48"><path d="M30 6C20 2 8 8 6 20C4 32 18 44 30 54C42 44 56 32 54 20C52 8 40 2 30 6Z" fill="#2D6A4F" opacity="0.2"/><path d="M30 6V54" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.3"/></svg></div>
+                <div class="gallery__actions">
+                  <div class="auth-vote">
+                    <button class="auth-btn">Real <span class="auth-btn__count">0</span></button>
+                    <button class="auth-btn">Fake <span class="auth-btn__count">0</span></button>
+                  </div>
+                  <a class="gallery__delete" data-i18n="request_delete">&#x1F6A9; 削除依頼</a>
+                </div>
               </div>
-              <a class="gallery__delete" data-i18n="request_delete">&#x1F6A9; 削除依頼</a>
+              <div class="gallery__upload" id="gallery-upload">
+                <input type="file" id="gallery-file-input" accept="image/jpeg,image/png" style="display:none">
+                <div class="upload-area__icon">&#x2B06;</div>
+                <div class="upload-area__text" data-i18n="upload_image">画像をアップロード</div>
+                <div class="upload-area__hint">JPG/PNG, 20MB以下（自動圧縮）</div>
+              </div>
             </div>
           </div>
-          <div class="gallery__item">
-            <div class="gallery__img"><svg viewBox="0 0 60 60" width="48" height="48"><path d="M30 6C20 2 8 8 6 20C4 32 18 44 30 54C42 44 56 32 54 20C52 8 40 2 30 6Z" fill="#2D6A4F" opacity="0.2"/><path d="M30 6V54" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.3"/></svg></div>
-            <div class="gallery__actions">
-              <div class="auth-vote">
-                <button class="auth-btn">Real <span class="auth-btn__count">0</span></button>
-                <button class="auth-btn">Fake <span class="auth-btn__count">0</span></button>
-              </div>
-              <a class="gallery__delete">&#x1F6A9; 削除依頼</a>
-            </div>
-          </div>
-          <div class="gallery__upload" id="gallery-upload">
-            <input type="file" id="gallery-file-input" accept="image/jpeg,image/png" style="display:none">
-            <div class="upload-area__icon">&#x2B06;</div>
-            <div class="upload-area__text" data-i18n="upload_image">画像をアップロード</div>
-            <div class="upload-area__hint">JPG/PNG, 20MB以下（自動圧縮）</div>
-          </div>
+          <button class="gallery-carousel__arrow gallery-carousel__arrow--right" id="gallery-next" style="display:none;">&#x203A;</button>
         </div>
+        <div class="gallery-carousel__counter" id="gallery-counter" style="display:none;"></div>
         <p class="text-xs text-gray mt-sm" data-i18n="image_policy">
           ※ Fake投票が多い画像は自動削除されます。削除依頼は即時対応します。
         </p>
@@ -5682,6 +5679,8 @@
               });
               gallery.insertBefore(item, galleryUpload);
             });
+            galleryCarouselIdx = 0;
+            updateGalleryCarousel();
           }).catch(function(err) {
             console.warn('Failed to load gallery from Supabase, falling back to localStorage:', err);
             renderLocalGallery(cultivarName, gallery, galleryUpload);
@@ -5697,7 +5696,61 @@
           var item = createGalleryItem(src, { isLocal: true, localIdx: i });
           gallery.insertBefore(item, galleryUpload);
         });
+        galleryCarouselIdx = 0;
+        updateGalleryCarousel();
       }
+
+      // --- Gallery Carousel ---
+      var galleryCarouselIdx = 0;
+      function updateGalleryCarousel() {
+        var gallery = document.querySelector('#gallery-carousel .gallery');
+        if (!gallery) return;
+        var items = gallery.querySelectorAll('.gallery__item[data-user-upload]');
+        var prevBtn = document.getElementById('gallery-prev');
+        var nextBtn = document.getElementById('gallery-next');
+        var counter = document.getElementById('gallery-counter');
+        var total = items.length;
+
+        if (total <= 1) {
+          // Hide arrows and counter for 0-1 images
+          if (prevBtn) prevBtn.style.display = 'none';
+          if (nextBtn) nextBtn.style.display = 'none';
+          if (counter) counter.style.display = 'none';
+          // Show the single image or placeholder
+          items.forEach(function(item) { item.style.display = ''; });
+          gallery.querySelectorAll('.gallery__item:not([data-user-upload])').forEach(function(el) {
+            el.style.display = total === 0 ? '' : 'none';
+          });
+          return;
+        }
+
+        // Clamp index
+        if (galleryCarouselIdx >= total) galleryCarouselIdx = 0;
+        if (galleryCarouselIdx < 0) galleryCarouselIdx = total - 1;
+
+        // Hide all, show current
+        items.forEach(function(item, i) {
+          item.style.display = i === galleryCarouselIdx ? '' : 'none';
+        });
+        // Hide placeholders
+        gallery.querySelectorAll('.gallery__item:not([data-user-upload])').forEach(function(el) {
+          el.style.display = 'none';
+        });
+
+        // Show arrows and counter
+        if (prevBtn) prevBtn.style.display = '';
+        if (nextBtn) nextBtn.style.display = '';
+        if (counter) { counter.style.display = ''; counter.textContent = (galleryCarouselIdx + 1) + ' / ' + total; }
+      }
+
+      document.getElementById('gallery-prev').addEventListener('click', function() {
+        galleryCarouselIdx--;
+        updateGalleryCarousel();
+      });
+      document.getElementById('gallery-next').addEventListener('click', function() {
+        galleryCarouselIdx++;
+        updateGalleryCarousel();
+      });
 
       // --- Gallery Upload (cultivar detail page) ---
       var galleryUpload = document.getElementById('gallery-upload');
