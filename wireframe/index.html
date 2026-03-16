@@ -1002,7 +1002,7 @@
         <!-- Shared: 補足欄 (all types) -->
         <div class="form-group">
           <label class="form-label">補足欄</label>
-          <textarea class="form-textarea" placeholder="補足情報があれば記入してください..."></textarea>
+          <textarea id="sf-notes" class="form-textarea" placeholder="補足情報があれば記入してください..."></textarea>
         </div>
 
         <!-- Shared: 引用リンク (all types) -->
@@ -3813,7 +3813,7 @@
       var contributeGenus = document.querySelector('#page-contribute .form-select');
       var contributeName = document.getElementById('cultivar-name-input');
       var duplicateAlert = document.getElementById('duplicate-alert');
-      var contributeDesc = document.querySelector('#page-contribute .form-textarea'); // 補足欄
+      var contributeDesc = document.getElementById('sf-notes'); // 補足欄
       var contributeSourceInput = document.querySelector('#page-contribute input[type="url"]');
       var contributeSourceBtn = contributeSourceInput ? contributeSourceInput.parentElement.querySelector('.btn--secondary') : null;
       var contributeSourceList = document.querySelector('#page-contribute .source-list');
