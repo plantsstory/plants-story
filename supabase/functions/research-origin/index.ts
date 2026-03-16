@@ -29,6 +29,11 @@ interface BotanicalResult {
   publicationYear: string;
   publication: string;
   referenceCollation: string;
+  // Type data from IPNI HTML scraping
+  collectorTeam: string;
+  typeLocality: string;
+  typeRemarks: string;
+  typeDistribution: string;
 }
 
 // Step 1: Search POWO for accepted species
@@ -105,7 +110,7 @@ async function lookupPOWO(fqId: string): Promise<{ author: string; distributions
 }
 
 // Step 3: Try IPNI for publication year/name (supplemental)
-async function searchIPNI(genus: string, species: string): Promise<{ year: string; publication: string; collation: string } | null> {
+async function searchIPNI(genus: string, species: string): Promise<{ year: string; publication: string; collation: string; ipniId: string } | null> {
   const query = encodeURIComponent(`${genus} ${species}`);
   const url = `https://beta.ipni.org/api/1/search?q=${query}&perPage=20&cursor=*`;
 
@@ -128,10 +133,63 @@ async function searchIPNI(genus: string, species: string): Promise<{ year: strin
         year: match.publicationYear || "",
         publication: match.publication || "",
         collation: match.referenceCollation || "",
+        ipniId: match.id || "",
       };
     }
     return null;
   } catch {
+    return null;
+  }
+}
+
+// Step 4: Scrape IPNI HTML for type specimen data (Collector, Locality, Type Remarks)
+interface IpniTypeData {
+  collectorTeam: string;
+  locality: string;
+  typeRemarks: string;
+  typeDistribution: string;
+}
+
+async function scrapeIpniTypeData(ipniId: string): Promise<IpniTypeData | null> {
+  if (!ipniId) return null;
+  const url = `https://www.ipni.org/n/${ipniId}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const html = await res.text();
+
+    // Extract <dt>...</dt><dd>...</dd> pairs
+    const extractField = (fieldName: string): string => {
+      // Match <dt>fieldName</dt><dd>value</dd> (possibly with whitespace/newlines)
+      const re = new RegExp(`<dt>${fieldName}</dt>\\s*<dd>([^<]*(?:<[^/][^>]*>[^<]*)*)</dd>`, "i");
+      const m = html.match(re);
+      if (!m) return "";
+      // Strip HTML tags and decode entities
+      return m[1]
+        .replace(/<br\s*\/?>/gi, ", ")
+        .replace(/<[^>]+>/g, "")
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&#x27;/g, "'")
+        .replace(/&quot;/g, '"')
+        .trim();
+    };
+
+    const result: IpniTypeData = {
+      collectorTeam: extractField("Collector Team"),
+      locality: extractField("Locality"),
+      typeRemarks: extractField("Type Remarks"),
+      typeDistribution: extractField("Distribution Of Types"),
+    };
+
+    const hasData = result.collectorTeam || result.locality || result.typeRemarks;
+    if (!hasData) return null;
+
+    console.log(`[IPNI HTML] Type data scraped: collector="${result.collectorTeam}", locality="${result.locality}", remarks="${result.typeRemarks.substring(0, 80)}..."`);
+    return result;
+  } catch (e) {
+    console.log(`[IPNI HTML] Scrape failed:`, String(e));
     return null;
   }
 }
@@ -156,7 +214,13 @@ async function queryBotanicalDBs(genus: string, species: string): Promise<Botani
   // Try IPNI for publication details
   const ipni = await searchIPNI(genus, species);
   if (ipni) {
-    console.log(`[DB] IPNI found: ${ipni.year} ${ipni.publication} ${ipni.collation}`);
+    console.log(`[DB] IPNI found: ${ipni.year} ${ipni.publication} ${ipni.collation} (id: ${ipni.ipniId})`);
+  }
+
+  // Scrape IPNI HTML for type specimen data (Collector, Locality, Type Remarks)
+  let typeData: IpniTypeData | null = null;
+  if (ipni?.ipniId) {
+    typeData = await scrapeIpniTypeData(ipni.ipniId);
   }
 
   return {
@@ -167,6 +231,10 @@ async function queryBotanicalDBs(genus: string, species: string): Promise<Botani
     publicationYear: ipni?.year || "",
     publication: ipni?.publication || "",
     referenceCollation: ipni?.collation || "",
+    collectorTeam: typeData?.collectorTeam || "",
+    typeLocality: typeData?.locality || "",
+    typeRemarks: typeData?.typeRemarks || "",
+    typeDistribution: typeData?.typeDistribution || "",
   };
 }
 
@@ -512,6 +580,17 @@ function parseSpeciesName(cultivarName: string): { genus: string; species: strin
 function buildSpeciesStructuredPrompt(bot: BotanicalResult): string {
   const distribution = bot.nativeDistribution.join(", ") || "不明";
 
+  // Include IPNI type data if available
+  let typeDataSection = "";
+  if (bot.collectorTeam || bot.typeLocality || bot.typeRemarks) {
+    typeDataSection = `\n=== TYPE SPECIMEN DATA (from IPNI — use this as PRIMARY source) ===`;
+    if (bot.collectorTeam) typeDataSection += `\nCollector Team: ${bot.collectorTeam}`;
+    if (bot.typeLocality) typeDataSection += `\nLocality: ${bot.typeLocality}`;
+    if (bot.typeRemarks) typeDataSection += `\nType Remarks: ${bot.typeRemarks}`;
+    if (bot.typeDistribution) typeDataSection += `\nDistribution Of Types: ${bot.typeDistribution}`;
+    typeDataSection += "\n";
+  }
+
   return `You are a botanical researcher extracting structured data about a plant species.
 You are given VERIFIED data from IPNI and POWO (Kew Gardens). Your task is to supplement this with additional structured information from RELIABLE academic sources only.
 
@@ -522,7 +601,7 @@ Publication year: ${bot.publicationYear || "unknown"}
 Publication: ${bot.publication || "unknown"} ${bot.referenceCollation || ""}
 Family: Araceae
 Native distribution: ${distribution}
-
+${typeDataSection}
 === YOUR TASK ===
 Research and return structured data about this species. Use ONLY:
 - Peer-reviewed academic papers (Aroideana, Phytotaxa, Annals of the Missouri Botanical Garden, etc.)
@@ -535,18 +614,27 @@ NEVER use: nursery pages, Instagram, Reddit, Facebook, blogs, Yahoo Auctions, Me
 1. If information is unknown or uncertain, write "不明" (unknown). NEVER guess or speculate.
 2. NEVER write "believed to be", "thought to be", "possibly", "likely", or "presumed".
 3. collector = the person who FIRST COLLECTED the type specimen (not the describing author, unless they also collected it).
-4. type_locality = the specific location where the type specimen was collected (e.g., "Chocó, Colombia, 800m elevation").
+   If "Collector Team" is provided above, use THAT as the collector. Parse the collector name from the collector number (e.g., "T. B. Croat 94069" → collector is "T. B. Croat").
+4. type_locality = the specific location where the type specimen was collected.
+   If "Locality" is provided above, use THAT. If "sine loc." (without locality), write "不明".
+   If Type Remarks mention the original collection location, use that information.
 5. Do NOT include specific size measurements in notes (plants vary by growing conditions).
 6. notes should describe the plant's APPEARANCE: leaf shape, color, texture, venation pattern, petiole characteristics. Keep it engaging for plant enthusiasts.
+
+=== WRITING RULES FOR JAPANESE TEXT ===
+- Person names: Write in English, followed by katakana in parentheses. Example: "T. B. Croat (クロート)"
+- Species names: Write the scientific name in italic/English. Example: "Anthurium crystallinum"
+- Place/region names: Write in English, followed by katakana in parentheses. Example: "Chocó (チョコ), Colombia (コロンビア)"
+- For well-known place names, you may use the standard Japanese name: "Colombia" → "コロンビア", "Peru" → "ペルー", "Ecuador" → "エクアドル"
 
 === OUTPUT FORMAT ===
 Return ONLY valid JSON (no markdown, no code blocks):
 {
-  "collector": "タイプ標本の採取者名 (string, 不明なら \"不明\")",
+  "collector": "採取者名 — English (カタカナ) format. Example: T. B. Croat (クロート). 不明なら \"不明\"",
   "collection_year": "採取年 (number or null, 不明ならnull)",
-  "type_locality": "タイプ産地 — 初めて標本が採取された場所 (string, 不明なら \"不明\")",
-  "known_habitats": "生息環境の簡潔な記述 (例: 熱帯雲霧林、標高300-1000mの着生植物)",
-  "notes": "日本語の補足テキスト (100-200文字)。植物の外見的特徴（葉の形状・色・質感・葉脈パターン等）を記述。学名・人名・地名は英語のまま。",
+  "type_locality": "タイプ産地 — English (カタカナ) format. Example: Chocó (チョコ), Colombia (コロンビア). 不明なら \"不明\"",
+  "known_habitats": "生息環境の簡潔な記述 (例: 熱帯雲霧林、標高300-1000mの着生植物). 地名は English (カタカナ) で記述",
+  "notes": "日本語の補足テキスト (100-200文字)。植物の外見的特徴（葉の形状・色・質感・葉脈パターン等）を記述。人名・種名・地名は English (カタカナ) で記載。",
   "notes_en": "English supplementary text (80-150 words). Describe appearance: leaf shape, color, texture, venation, petiole."
 }`;
 }
@@ -600,6 +688,12 @@ Use ONLY information that is verified or directly stated in the user text. Do NO
 3. formula.parentA and formula.parentB should be the parent cultivar names (e.g., "A. crystallinum", "A. magnificum").
 4. notes should be a 1-2 sentence summary of key facts about this cultivar in Japanese.
 
+=== WRITING RULES FOR JAPANESE TEXT ===
+- Person names: Write in English, followed by katakana in parentheses. Example: "John Banta (バンタ)"
+- Species names: Write the scientific name in English. Example: "Anthurium crystallinum"
+- Place/region names: Write in English, followed by katakana in parentheses. Example: "Florida (フロリダ)"
+- For well-known place names, you may use the standard Japanese name: "Colombia" → "コロンビア", "Thailand" → "タイ"
+
 === OUTPUT FORMAT ===
 Return ONLY valid JSON (no markdown, no code blocks):
 {
@@ -608,7 +702,7 @@ Return ONLY valid JSON (no markdown, no code blocks):
     "parentA": "片親A (string or empty, 不明なら \\"\\")",
     "parentB": "片親B (string or empty, 不明なら \\"\\")"
   },
-  "notes": "日本語の補足テキスト (50-150文字)",
+  "notes": "日本語の補足テキスト (50-150文字). 人名・種名・地名は English (カタカナ) で記載",
   "notes_en": "English supplementary text (30-80 words)"
 }`;
 }
@@ -682,7 +776,14 @@ Return ONLY valid JSON (no markdown):
 - Do NOT include specific size measurements (e.g., "30-40cm", "1m tall"). Sizes vary greatly between individuals depending on growing conditions.
 - For unknown origins, be CONCISE: "由来は不明。" then describe the plant itself.
 - Do NOT write long apologies about lack of information. Just state it briefly and move on to describing the plant.
-- 日本語: 自然で読みやすい文章。「信頼できる情報源が見つからなかったため…」のような冗長な表現は避ける。`;
+- 日本語: 自然で読みやすい文章。「信頼できる情報源が見つからなかったため…」のような冗長な表現は避ける。
+
+=== WRITING RULES FOR JAPANESE TEXT ===
+- Person names: Write in English, followed by katakana in parentheses. Example: "T. B. Croat (クロート)"
+- Species names: Write the scientific name in English. Example: "Anthurium luxurians"
+- Place/region names: Write in English, followed by katakana in parentheses. Example: "Chocó (チョコ), Colombia (コロンビア)"
+- For well-known place names, you may use the standard Japanese name: "Colombia" → "コロンビア", "Peru" → "ペルー"
+- discoverer_or_breeder field: Use English name only (no katakana). Katakana is for description_jp text only.`;
 }
 
 // ============================================================
@@ -757,7 +858,14 @@ ${hasExternalData ? "- External data was found: set confidence higher (0.5-0.9) 
 - Even if origin is UNKNOWN, describe the plant's APPEARANCE (leaf shape, color, variegation pattern, growth habit).
 - Do NOT include specific size measurements. Sizes vary greatly between individuals.
 - For unknown origins, be CONCISE: "由来は不明。" then describe the plant itself.
-- 日本語: 自然で読みやすい文章。冗長な表現は避ける。`;
+- 日本語: 自然で読みやすい文章。冗長な表現は避ける。
+
+=== WRITING RULES FOR JAPANESE TEXT ===
+- Person names: Write in English, followed by katakana in parentheses. Example: "John Banta (バンタ)"
+- Species names: Write the scientific name in English. Example: "Anthurium crystallinum"
+- Place/region names: Write in English, followed by katakana in parentheses. Example: "Florida (フロリダ)"
+- For well-known place names, you may use the standard Japanese name: "Colombia" → "コロンビア", "Thailand" → "タイ"
+- discoverer_or_breeder field: Use English name only (no katakana). Katakana is for description_jp text only.`;
 }
 
 // ============================================================
@@ -834,7 +942,14 @@ ${hasExternalData ? "- External data was found: set confidence higher (0.5-0.9) 
 - Even if origin is UNKNOWN, describe the clone's APPEARANCE (leaf shape, color, variegation pattern, growth habit).
 - Do NOT include specific size measurements. Sizes vary greatly between individuals.
 - For unknown origins, be CONCISE: "由来は不明。" then describe the plant itself.
-- 日本語: 自然で読みやすい文章。冗長な表現は避ける。`;
+- 日本語: 自然で読みやすい文章。冗長な表現は避ける。
+
+=== WRITING RULES FOR JAPANESE TEXT ===
+- Person names: Write in English, followed by katakana in parentheses. Example: "John Banta (バンタ)"
+- Species names: Write the scientific name in English. Example: "Anthurium crystallinum"
+- Place/region names: Write in English, followed by katakana in parentheses. Example: "Florida (フロリダ)"
+- For well-known place names, you may use the standard Japanese name: "Colombia" → "コロンビア", "Thailand" → "タイ"
+- discoverer_or_breeder field: Use English name only (no katakana). Katakana is for description_jp text only.`;
 }
 
 // ============================================================
@@ -1115,10 +1230,10 @@ serve(async (req: Request) => {
             origin_type: "species",
             author_name: botResult.authors || "不明",
             publication_year: botResult.publicationYear ? parseInt(botResult.publicationYear) : null,
-            collector: aiStructured?.collector || "不明",
+            collector: aiStructured?.collector || (botResult.collectorTeam ? botResult.collectorTeam.replace(/\s+\d+$/, "") : "") || "不明",
             collection_year: aiStructured?.collection_year || null,
-            type_locality: aiStructured?.type_locality || botResult.nativeDistribution[0] || "不明",
-            known_habitats: aiStructured?.known_habitats || dist,
+            type_locality: aiStructured?.type_locality || (botResult.typeLocality && botResult.typeLocality !== "sine loc." ? botResult.typeLocality : "") || botResult.nativeDistribution[0] || "不明",
+            known_habitats: aiStructured?.known_habitats || (botResult.typeDistribution || dist),
             notes: bodyJp,
             citation_links: [
               { url: `https://www.ipni.org/n/${ipniId}`, label: "IPNI" },
