@@ -4332,9 +4332,11 @@
           aiAutofillBtn.textContent = '調査中...';
           if (aiAutofillStatus) aiAutofillStatus.textContent = 'IPNI/POWOデータベースを検索中...';
 
-          fetch(EDGE_FUNCTION_URL, {
+          var edgeFnUrl = 'https://jpgbehsrglsiwijglhjo.supabase.co/functions/v1/research-origin';
+          var anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
+          fetch(edgeFnUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + anonKey },
             body: JSON.stringify({ cultivar_name: fullName, genus: genus, type: 'species', preview: true })
           })
           .then(function(res) { return res.json(); })
