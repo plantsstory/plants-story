@@ -903,24 +903,7 @@
 }
 
 .gallery__upload {
-  order: 2;
-  width: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: var(--space-xs);
-  border: 2px dashed var(--color-light);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  min-height: 100px;
-  color: var(--color-gray);
-  font-size: var(--font-size-xs);
-  transition: border-color var(--transition);
-}
-
-.gallery__upload:hover {
-  border-color: var(--color-primary);
+  display: none;
 }
 
 @media (max-width: 480px) {
