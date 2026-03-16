@@ -33,6 +33,7 @@
       <a class="header__logo" data-nav="top" data-i18n="site_title">Plants Story</a>
       <div class="header__actions">
         <button class="header__lang" data-i18n="lang_toggle">EN / JP</button>
+        <button class="header__auth-btn" id="header-auth-btn" type="button" style="font-size:var(--font-size-xs);padding:var(--space-xs) var(--space-sm);border:1px solid rgba(255,255,255,0.3);border-radius:var(--radius-sm);background:transparent;color:rgba(255,255,255,0.8);cursor:pointer;white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis;">ゲスト</button>
         <button class="header__hamburger" id="hamburger" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
@@ -2013,38 +2014,39 @@
         var benefitsContent = document.getElementById('login-benefits-content');
         var loggedInInfo = document.getElementById('logged-in-info');
         var editKeyCard = document.getElementById('edit-key-card');
-        if (!benefitsContent) return;
-        if (window._currentUser) {
-          benefitsContent.style.display = 'none';
-          loggedInInfo.style.display = 'flex';
-          loggedInInfo.style.alignItems = 'center';
-          loggedInInfo.style.gap = 'var(--space-md)';
-          loggedInInfo.style.flexWrap = 'wrap';
-          document.getElementById('logged-in-email').textContent = window._currentUser.email || '';
-          if (editKeyCard) editKeyCard.style.display = 'none';
-        } else {
-          benefitsContent.style.display = 'flex';
-          loggedInInfo.style.display = 'none';
-          if (editKeyCard) editKeyCard.style.display = '';
+        var headerAuthBtn = document.getElementById('header-auth-btn');
+        // Update header auth button (always exists)
+        if (headerAuthBtn) {
+          if (window._currentUser) {
+            var email = window._currentUser.email || '';
+            var short = email.split('@')[0];
+            headerAuthBtn.textContent = short;
+            headerAuthBtn.title = email;
+          } else {
+            headerAuthBtn.textContent = 'ゲスト';
+            headerAuthBtn.title = 'クリックしてログイン';
+          }
+        }
+        // Update contribute page login card (may not exist on other pages)
+        if (benefitsContent) {
+          if (window._currentUser) {
+            benefitsContent.style.display = 'none';
+            loggedInInfo.style.display = 'flex';
+            loggedInInfo.style.alignItems = 'center';
+            loggedInInfo.style.gap = 'var(--space-md)';
+            loggedInInfo.style.flexWrap = 'wrap';
+            document.getElementById('logged-in-email').textContent = window._currentUser.email || '';
+            if (editKeyCard) editKeyCard.style.display = 'none';
+          } else {
+            benefitsContent.style.display = 'flex';
+            loggedInInfo.style.display = 'none';
+            if (editKeyCard) editKeyCard.style.display = '';
+          }
         }
       }
 
       if (supabase) {
-        // DEBUG: show auth state on page (temporary)
-        var _debugAuth = function(msg) {
-          var el = document.getElementById('auth-debug');
-          if (!el) {
-            el = document.createElement('div');
-            el.id = 'auth-debug';
-            el.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#333;color:#0f0;padding:8px;font-size:12px;z-index:99999;font-family:monospace;';
-            document.body.appendChild(el);
-          }
-          el.textContent = msg;
-        };
-        _debugAuth('URL: ' + window.location.href.substring(0, 120));
-
         supabase.auth.onAuthStateChange(function(event, session) {
-          _debugAuth('authChange: ' + event + ' | user: ' + (session ? session.user.email : 'none'));
           window._currentUser = session ? session.user : null;
           updateLoginUI();
           if (event === 'SIGNED_IN' && window.location.search.indexOf('code=') !== -1) {
@@ -2054,14 +2056,9 @@
         });
         supabase.auth.getSession().then(function(res) {
           if (res.data && res.data.session) {
-            _debugAuth('session found: ' + res.data.session.user.email);
             window._currentUser = res.data.session.user;
             updateLoginUI();
-          } else {
-            _debugAuth('no session | URL: ' + window.location.href.substring(0, 100));
           }
-        }).catch(function(err) {
-          _debugAuth('session error: ' + (err.message || err));
         });
       }
 
@@ -2087,6 +2084,27 @@
             window._currentUser = null;
             updateLoginUI();
           });
+        });
+      }
+
+      // Header auth button (login/logout from any page)
+      var headerAuthBtn = document.getElementById('header-auth-btn');
+      if (headerAuthBtn && supabase) {
+        headerAuthBtn.addEventListener('click', function() {
+          if (window._currentUser) {
+            supabase.auth.signOut().then(function() {
+              window._currentUser = null;
+              updateLoginUI();
+            });
+          } else {
+            supabase.auth.signInWithOAuth({
+              provider: 'google',
+              options: {
+                redirectTo: window.location.origin + window.location.pathname,
+                queryParams: { prompt: 'select_account' }
+              }
+            });
+          }
         });
       }
 
