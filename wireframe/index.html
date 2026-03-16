@@ -648,7 +648,10 @@
           <input type="password" id="detail-edit-key" class="form-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="編集キー" style="width:100px;padding:4px 8px;font-size:0.85rem;">
           <button class="btn btn--secondary btn--sm" id="detail-edit-btn">&#x270F; 編集</button>
         </div>
-        <button class="btn btn--sm" id="detail-delete-request-btn" style="margin-top:8px;color:#dc3545;border-color:#dc3545;border:1px solid #dc3545;background:transparent;font-size:0.8rem;cursor:pointer;">&#x1F5D1; 削除依頼</button>
+        <div class="flex gap-sm flex-align-center" style="margin-top:8px;">
+          <button class="btn btn--sm btn--secondary" id="detail-add-photo-btn" style="font-size:0.8rem;cursor:pointer;">&#x1F4F7; 画像追加</button>
+          <button class="btn btn--sm" id="detail-delete-request-btn" style="color:#dc3545;border-color:#dc3545;border:1px solid #dc3545;background:transparent;font-size:0.8rem;cursor:pointer;">&#x1F5D1; 削除依頼</button>
+        </div>
       </div>
 
       <!-- Image Gallery (Carousel) -->
@@ -2929,15 +2932,18 @@
         }
       }
 
-      // Hide "add origin" section for seedlings, reset form state on page change
+      // Hide "add origin" section and photo button for seedlings, reset form state on page change
+      var isSeedlingDetail = cData && cData._type === 'seedling';
       var addOriginSection = document.getElementById('add-origin-section');
       if (addOriginSection) {
-        addOriginSection.style.display = (cData && cData._type === 'seedling') ? 'none' : '';
+        addOriginSection.style.display = isSeedlingDetail ? 'none' : '';
         var addOriginToggle = document.getElementById('add-origin-toggle');
         var addOriginForm = document.getElementById('add-origin-form');
         if (addOriginToggle) addOriginToggle.style.display = 'block';
         if (addOriginForm) addOriginForm.style.display = 'none';
       }
+      var addPhotoBtn = document.getElementById('detail-add-photo-btn');
+      if (addPhotoBtn) addPhotoBtn.style.display = isSeedlingDetail ? 'none' : '';
 
       // Render origins dynamically
       renderOrigins(cultivarName);
@@ -5759,6 +5765,17 @@
       // --- Gallery Upload (cultivar detail page) ---
       var galleryUpload = document.getElementById('gallery-upload');
       var galleryInput = document.getElementById('gallery-file-input');
+
+      // Hide the in-carousel upload area (replaced by external button)
+      if (galleryUpload) galleryUpload.style.display = 'none';
+
+      // External "画像追加" button triggers the same file input
+      var detailAddPhotoBtn = document.getElementById('detail-add-photo-btn');
+      if (detailAddPhotoBtn && galleryInput) {
+        detailAddPhotoBtn.addEventListener('click', function() {
+          galleryInput.click();
+        });
+      }
 
       if (galleryUpload && galleryInput) {
         galleryUpload.addEventListener('click', function(e) {
