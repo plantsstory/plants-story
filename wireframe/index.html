@@ -4062,7 +4062,7 @@
                     '<button class="upload-preview__remove" data-image-id="' + img.id + '" data-storage-path="' + img.storage_path + '">&times;</button>' +
                   '</div>' +
                   '<div class="upload-preview__meta">' +
-                    '<input type="text" placeholder="補足（入手先等）" data-image-id="' + img.id + '" data-field="caption" value="' + (img.caption || '').replace(/"/g, '&quot;') + '">' +
+                    '<input type="text" placeholder="補足（日付等）" data-image-id="' + img.id + '" data-field="caption" value="' + (img.caption || '').replace(/"/g, '&quot;') + '">' +
                     '<input type="url" placeholder="リンクURL" data-image-id="' + img.id + '" data-field="link_url" value="' + (img.link_url || '').replace(/"/g, '&quot;') + '">' +
                   '</div>';
                 previewEl.appendChild(item);
@@ -5843,7 +5843,7 @@
           if (!cultivarName) return;
 
           // Prompt for caption and link
-          var caption = prompt('画像の補足（入手先、撮影日など）を入力してください（任意）：') || '';
+          var caption = prompt('画像の補足（日付等）を入力してください（任意）：') || '';
           var linkUrl = prompt('リンクURL（Instagram等）を入力してください（任意）：') || '';
 
           var sb = getSupabase();
@@ -5984,7 +5984,7 @@
                 '<button class="upload-preview__remove" data-idx="' + i + '">&times;</button>' +
               '</div>' +
               '<div class="upload-preview__meta">' +
-                '<input type="text" placeholder="補足（入手先等）" data-idx="' + i + '" data-field="caption" value="' + (contributeCaptions[i] || '').replace(/"/g, '&quot;') + '">' +
+                '<input type="text" placeholder="補足（日付等）" data-idx="' + i + '" data-field="caption" value="' + (contributeCaptions[i] || '').replace(/"/g, '&quot;') + '">' +
                 '<input type="url" placeholder="リンクURL" data-idx="' + i + '" data-field="link" value="' + (contributeLinkUrls[i] || '').replace(/"/g, '&quot;') + '">' +
               '</div>';
             contributePreview.appendChild(item);
