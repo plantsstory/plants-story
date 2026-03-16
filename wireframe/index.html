@@ -4982,11 +4982,16 @@
               }));
             }
           }).then(function() {
-            finishSubmit();
+            try {
+              finishSubmit();
+            } catch (finishErr) {
+              console.error('finishSubmit error:', finishErr);
+            }
             if (typeof window.loadCultivarThumbnails === 'function') {
               setTimeout(window.loadCultivarThumbnails, 500);
             }
           }).catch(function(err) {
+            console.error('Submit error details:', err);
             handleSubmitError('エラー: ' + (err.message || err));
           });
         });
