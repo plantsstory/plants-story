@@ -1210,7 +1210,7 @@
   <section id="page-privacy" class="page">
     <div class="container container--narrow legal-page">
       <h1 data-i18n="privacy_title">プライバシーポリシー</h1>
-      <p class="legal-date" data-i18n="privacy_updated">最終更新日: 2026年3月13日</p>
+      <p class="legal-date" data-i18n="privacy_updated">最終更新日: 2026年3月17日</p>
 
       <h2 data-i18n="privacy_1_title">1. はじめに</h2>
       <p data-i18n="privacy_1_body">Plants Story運営チーム（運営責任者: 久恒 佑太）は、ユーザーのプライバシーを尊重します。本ポリシーでは、本サービスで収集する情報とその取り扱いについて説明します。本サービスはアカウント登録を必要とせず、すべての投稿は匿名で行われます。</p>
@@ -1219,7 +1219,7 @@
       <p data-i18n="privacy_2_body">本サービスでは以下の情報を収集する場合があります：</p>
       <ul class="terms-list" data-i18n-list="privacy_2_list">
         <li>ユーザーが任意で提供する情報: 品種名、由来説明、交配式、情報元URL、アップロード画像（すべて匿名）</li>
-        <li>自動的に収集される情報: ブラウザの種類、言語設定、アクセスしたページ、IPアドレス（サーバーログ）</li>
+        <li>自動的に収集される情報: ブラウザの種類、言語設定、アクセスしたページ、IPアドレス（サーバーログおよび投稿時のデータベース記録。不正投稿防止のため最大180日間保存後、自動削除されます）</li>
         <li>ブラウザに保存されるデータ: 言語設定、ユーザーが追加した品種データ（localStorageを使用、端末内のみ）</li>
       </ul>
 
@@ -1238,6 +1238,7 @@
       <ul class="terms-list" data-i18n-list="privacy_5_list">
         <li>品種由来情報の表示と維持管理</li>
         <li>コミュニティ投票によるコンテンツの信頼性評価</li>
+        <li>不正投稿・荒らし行為の防止および対応（IPアドレスの一時的な記録）</li>
         <li>サービスおよびコンテンツの改善</li>
         <li>関連広告の配信</li>
         <li>アフィリエイトリンクを通じた収益化</li>
@@ -3560,12 +3561,12 @@
 
       // ---- Privacy Policy ----
       privacy_title: { jp: 'プライバシーポリシー', en: 'Privacy Policy' },
-      privacy_updated: { jp: '最終更新日: 2026年3月13日', en: 'Last Updated: March 13, 2026' },
+      privacy_updated: { jp: '最終更新日: 2026年3月17日', en: 'Last Updated: March 17, 2026' },
       privacy_1_title: { jp: '1. はじめに', en: '1. Introduction' },
       privacy_1_body: { jp: 'Plants Story運営チーム（運営責任者: 久恒 佑太）は、ユーザーのプライバシーを尊重します。本ポリシーでは、本サービスで収集する情報とその取り扱いについて説明します。本サービスはアカウント登録を必要とせず、すべての投稿は匿名で行われます。', en: 'The Plants Story team (operated by Yuta Hisatsune) respects user privacy. This policy explains what information is collected and how it is handled. The Service does not require account registration, and all contributions are made anonymously.' },
       privacy_2_title: { jp: '2. 収集する情報', en: '2. Information Collected' },
       privacy_2_body: { jp: '本サービスでは以下の情報を収集する場合があります：', en: 'The Service may collect the following information:' },
-      privacy_2_list: { jp: 'ユーザーが任意で提供する情報: 品種名、由来説明、交配式、情報元URL、アップロード画像（すべて匿名）\n自動的に収集される情報: ブラウザの種類、言語設定、アクセスしたページ、IPアドレス（サーバーログ）\nブラウザに保存されるデータ: 言語設定、ユーザーが追加した品種データ（localStorageを使用、端末内のみ）', en: 'Information you voluntarily provide: cultivar names, origin descriptions, breeding formulas, source URLs, uploaded images (all anonymous)\nAutomatically collected information: browser type, language preference, pages visited, IP address (server logs)\nData stored in your browser: language preference, user-added cultivar data (via localStorage, stored locally only)' },
+      privacy_2_list: { jp: 'ユーザーが任意で提供する情報: 品種名、由来説明、交配式、情報元URL、アップロード画像（すべて匿名）\n自動的に収集される情報: ブラウザの種類、言語設定、アクセスしたページ、IPアドレス（サーバーログおよび投稿時のデータベース記録。不正投稿防止のため最大180日間保存後、自動削除されます）\nブラウザに保存されるデータ: 言語設定、ユーザーが追加した品種データ（localStorageを使用、端末内のみ）', en: 'Information you voluntarily provide: cultivar names, origin descriptions, breeding formulas, source URLs, uploaded images (all anonymous)\nAutomatically collected information: browser type, language preference, pages visited, IP address (server logs and database records at time of submission, stored for up to 180 days for spam prevention, then automatically deleted)\nData stored in your browser: language preference, user-added cultivar data (via localStorage, stored locally only)' },
       privacy_3_title: { jp: '3. localStorageの使用', en: '3. Use of localStorage' },
       privacy_3_body: { jp: '本サービスはCookieではなくブラウザのlocalStorageを使用して、言語設定（日本語/英語）およびユーザーが追加した品種データをお使いの端末内に保存しています。このデータはサーバーには送信されず、お使いのブラウザ内にのみ存在します。ブラウザの設定からいつでも削除できます。', en: 'The Service uses browser localStorage (not cookies) to store your language preference (Japanese/English) and user-added cultivar data on your device. This data is not transmitted to our servers and exists only in your browser. You can clear it at any time through your browser settings.' },
       privacy_4_title: { jp: '4. Cookieとトラッキング', en: '4. Cookies and Tracking' },
@@ -3573,7 +3574,7 @@
       privacy_4_list: { jp: 'Google AdSense（導入予定）: パーソナライズド広告のためにCookieを使用します。Googleの広告設定からオプトアウトできます\nアフィリエイトリンク（楽天市場、Amazon、Yahoo!ショッピング）: リンクをクリックした際にトラッキングCookieが設定される場合があります', en: 'Google AdSense (planned): Uses cookies to serve personalized ads. You can opt out via Google\'s ad settings\nAffiliate links (Rakuten, Amazon, Yahoo! Shopping): Tracking cookies may be set when you click these links' },
       privacy_5_title: { jp: '5. 情報の利用目的', en: '5. Purpose of Data Use' },
       privacy_5_body: { jp: '収集した情報は以下の目的で使用します：', en: 'Collected information is used for the following purposes:' },
-      privacy_5_list: { jp: '品種由来情報の表示と維持管理\nコミュニティ投票によるコンテンツの信頼性評価\nサービスおよびコンテンツの改善\n関連広告の配信\nアフィリエイトリンクを通じた収益化', en: 'Displaying and maintaining cultivar origin information\nCommunity voting for content reliability evaluation\nImproving the Service and its content\nServing relevant advertisements\nMonetization through affiliate links' },
+      privacy_5_list: { jp: '品種由来情報の表示と維持管理\nコミュニティ投票によるコンテンツの信頼性評価\n不正投稿・荒らし行為の防止および対応（IPアドレスの一時的な記録）\nサービスおよびコンテンツの改善\n関連広告の配信\nアフィリエイトリンクを通じた収益化', en: 'Displaying and maintaining cultivar origin information\nCommunity voting for content reliability evaluation\nPrevention of spam and abuse (temporary recording of IP addresses)\nImproving the Service and its content\nServing relevant advertisements\nMonetization through affiliate links' },
       privacy_6_title: { jp: '6. 情報の共有', en: '6. Information Sharing' },
       privacy_6_body: { jp: 'ユーザーが投稿した品種情報は本サービス上で公開されます。運営チームは個人情報を第三者に販売しません。法律に基づく要請（法執行機関からの開示要求等）があった場合にのみ、情報を開示する場合があります。', en: 'User-submitted cultivar information is displayed publicly on the Service. The team does not sell personal information to third parties. Information may be disclosed only when required by law (such as law enforcement requests).' },
       privacy_7_title: { jp: '7. 画像に関する注意', en: '7. Image-Related Notices' },
