@@ -632,13 +632,10 @@
       </nav>
 
       <!-- Cultivar Header -->
-      <div class="flex flex-between flex-align-center flex-wrap gap-md mb-lg">
+      <div class="mb-lg">
         <div>
-          <div class="flex gap-sm flex-align-center">
-            <h1 style="font-size:var(--font-size-2xl);">Anthurium crystallinum</h1>
-            <button id="fav-btn" class="btn btn--sm btn--secondary" style="font-size:0.8rem;cursor:pointer;white-space:nowrap;" title="お気に入り">&#x2606; お気に入り追加</button>
-          </div>
-          <div class="flex gap-sm mt-sm flex-align-center">
+          <h1 style="font-size:var(--font-size-2xl);margin-bottom:var(--space-xs);">Anthurium crystallinum</h1>
+          <div class="flex gap-sm mt-sm flex-align-center flex-wrap">
             <span class="badge badge--species">原種 / Original Species</span>
             <span class="text-sm text-muted">Anthurium</span>
             <span class="text-sm text-muted" id="detail-created-at" style="margin-left:4px;"></span>
@@ -646,11 +643,12 @@
             <span class="text-sm" id="detail-poster-name" style="margin-left:4px;"></span>
           </div>
         </div>
-        <div class="flex gap-sm flex-align-center" id="edit-key-section">
-          <input type="password" id="detail-edit-key" class="form-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="編集キー" style="width:100px;padding:4px 8px;font-size:0.85rem;">
-          <button class="btn btn--secondary btn--sm" id="detail-edit-btn">&#x270F; 編集</button>
-        </div>
-        <div class="flex gap-sm flex-align-center" style="margin-top:8px;">
+        <div class="flex gap-sm flex-align-center flex-wrap" style="margin-top:var(--space-sm);">
+          <button id="fav-btn" class="btn btn--sm btn--secondary" style="font-size:0.8rem;cursor:pointer;white-space:nowrap;" title="お気に入り">&#x2606; お気に入り追加</button>
+          <div class="flex gap-sm flex-align-center" id="edit-key-section">
+            <input type="password" id="detail-edit-key" class="form-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="編集キー" style="width:100px;padding:4px 8px;font-size:0.85rem;">
+            <button class="btn btn--secondary btn--sm" id="detail-edit-btn" style="font-size:0.8rem;">&#x270F; 編集</button>
+          </div>
           <button class="btn btn--sm btn--secondary" id="detail-add-photo-btn" style="font-size:0.8rem;cursor:pointer;">&#x1F4F7; 画像追加</button>
           <button class="btn btn--sm" id="detail-delete-request-btn" style="color:#dc3545;border-color:#dc3545;border:1px solid #dc3545;background:transparent;font-size:0.8rem;cursor:pointer;">&#x1F5D1; 削除依頼</button>
         </div>
