@@ -636,7 +636,7 @@
         <div>
           <div class="flex gap-sm flex-align-center">
             <h1 style="font-size:var(--font-size-2xl);">Anthurium crystallinum</h1>
-            <button id="fav-btn" style="background:none;border:none;font-size:1.6rem;cursor:pointer;padding:4px;line-height:1;color:var(--color-gray);" title="お気に入り">&#x2606;</button>
+            <button id="fav-btn" class="btn btn--sm btn--secondary" style="font-size:0.8rem;cursor:pointer;white-space:nowrap;" title="お気に入り">&#x2606; お気に入り追加</button>
           </div>
           <div class="flex gap-sm mt-sm flex-align-center">
             <span class="badge badge--species">原種 / Original Species</span>
@@ -3133,8 +3133,16 @@
       var btn = document.getElementById('fav-btn');
       if (!btn) return;
       var fav = isFavorite(name);
-      btn.innerHTML = fav ? '&#x2605;' : '&#x2606;';
-      btn.style.color = fav ? '#f5c518' : 'var(--color-gray)';
+      btn.innerHTML = fav ? '&#x2605; お気に入り済み' : '&#x2606; お気に入り追加';
+      if (fav) {
+        btn.style.background = '#f5c518';
+        btn.style.color = '#fff';
+        btn.style.borderColor = '#f5c518';
+      } else {
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }
     }
 
     function updateHeaderFavIcon() {
@@ -4812,7 +4820,7 @@
         // Clear edit key and restore card/hints
         verifiedEditKey = null;
         var editKeyCard = document.getElementById('edit-key-card');
-        if (editKeyCard) editKeyCard.style.display = '';
+        if (editKeyCard) editKeyCard.style.display = window._currentUser ? 'none' : '';
         var editKeyInput = document.getElementById('edit-key-input');
         if (editKeyInput) editKeyInput.value = '';
         var editKeyHint = document.getElementById('edit-key-hint');
@@ -5530,6 +5538,12 @@
 
           // --- Helper: finish submit (add to UI, navigate, reset form) ---
           function finishSubmit() {
+            // Store user info for poster name display
+            if (window._currentUser) {
+              newEntry._userId = window._currentUser.id;
+              newEntry._posterName = (window._profileCache && window._profileCache[window._currentUser.id]) || window._currentUser.user_metadata && window._currentUser.user_metadata.full_name || window._currentUser.email || '名前未設定';
+              newEntry._type = type;
+            }
             cultivarData[fullName] = newEntry;
 
             // Add row to genus list
@@ -5569,6 +5583,9 @@
                 rowHtml += '</div>';
                 if (newEntry.formula) {
                   rowHtml += '<div class="text-sm text-muted mt-sm"><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + newEntry.formula.parentA + '</span><span class="formula-operator" style="font-size:0.875rem;">&times;</span><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + newEntry.formula.parentB + '</span></div>';
+                }
+                if (isSeedling && newEntry._userId && newEntry._posterName) {
+                  rowHtml += '<div class="text-xs" style="margin-top:2px;"><a href="#/profile/' + newEntry._userId + '" class="poster-link" style="color:var(--color-primary);text-decoration:none;font-size:0.75rem;" onclick="event.stopPropagation();">&#x1F464; ' + newEntry._posterName + '</a></div>';
                 }
                 rowHtml += '</div>';
                 row.innerHTML = rowHtml;
