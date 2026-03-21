@@ -3561,6 +3561,9 @@
         createdAtEl.textContent = '';
       }
 
+      // Determine if this is a seedling (used by multiple sections below)
+      var isSeedlingDetail = cData && cData._type === 'seedling';
+
       // Update creator name (seedlings only)
       var creatorNameEl = document.getElementById('detail-creator-name');
       if (creatorNameEl) {
@@ -3593,7 +3596,6 @@
       }
 
       // Hide "add origin" section and photo button for seedlings, reset form state on page change
-      var isSeedlingDetail = cData && cData._type === 'seedling';
       var addOriginSection = document.getElementById('add-origin-section');
       if (addOriginSection) {
         addOriginSection.style.display = isSeedlingDetail ? 'none' : '';
