@@ -33,8 +33,8 @@
       <a class="header__logo" data-nav="top" data-i18n="site_title">Plants Story</a>
       <div class="header__actions">
         <button class="header__lang" data-i18n="lang_toggle">EN / JP</button>
-        <a id="header-profile-btn" href="#" class="header__btn header__btn--desktop" style="display:none;">プロフィール</a>
-        <button class="header__auth-btn header__btn--desktop" id="header-auth-btn" type="button">ログイン</button>
+        <a id="header-profile-btn" href="#" class="header__btn" style="display:none;">プロフィール</a>
+        <button class="header__auth-btn header__btn" id="header-auth-btn" type="button">ログイン</button>
         <button class="header__hamburger" id="hamburger" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
@@ -2140,34 +2140,36 @@
         var navMypost = document.getElementById('nav-mypost');
         // Update header auth button and nav auth link
         var navAuth = document.getElementById('nav-auth');
-        if (headerAuthBtn) {
-          if (window._currentUser) {
-            headerAuthBtn.textContent = 'ログアウト';
-            headerAuthBtn.title = window._currentUser.email || '';
-            if (navAuth) navAuth.innerHTML = '&#x1F6AA; ログアウト';
-          } else {
-            headerAuthBtn.textContent = 'ログイン';
-            headerAuthBtn.title = 'Googleでログイン';
-            if (navAuth) navAuth.innerHTML = '&#x1F511; ログイン';
-          }
-        }
-        // Show/hide 投稿履歴 menu item
-        if (navMypost) {
-          navMypost.style.display = window._currentUser ? '' : 'none';
-        }
-        // Show/hide プロフィール menu item & header profile icon
         var navProfile = document.getElementById('nav-profile');
         var headerProfileBtn = document.getElementById('header-profile-btn');
         if (window._currentUser) {
+          // Logged in: show profile in header, hide login button in header, show logout in menu
           var profileUrl = '#/profile/' + window._currentUser.id;
-          if (navProfile) { navProfile.style.display = ''; navProfile.href = profileUrl; }
           if (headerProfileBtn) {
             headerProfileBtn.style.display = '';
             headerProfileBtn.href = profileUrl;
           }
+          if (headerAuthBtn) {
+            headerAuthBtn.textContent = 'ログアウト';
+            headerAuthBtn.title = window._currentUser.email || '';
+            headerAuthBtn.style.display = 'none';
+          }
+          if (navAuth) { navAuth.innerHTML = '&#x1F6AA; ログアウト'; navAuth.style.display = ''; }
+          if (navProfile) { navProfile.style.display = ''; navProfile.href = profileUrl; }
         } else {
-          if (navProfile) navProfile.style.display = 'none';
+          // Logged out: show login button in header, hide profile
           if (headerProfileBtn) headerProfileBtn.style.display = 'none';
+          if (headerAuthBtn) {
+            headerAuthBtn.textContent = 'ログイン';
+            headerAuthBtn.title = 'Googleでログイン';
+            headerAuthBtn.style.display = '';
+          }
+          if (navAuth) { navAuth.innerHTML = '&#x1F511; ログイン'; navAuth.style.display = ''; }
+          if (navProfile) navProfile.style.display = 'none';
+        }
+        // Show/hide 投稿履歴 menu item
+        if (navMypost) {
+          navMypost.style.display = window._currentUser ? '' : 'none';
         }
         // Update contribute page login card (may not exist on other pages)
         if (benefitsContent) {

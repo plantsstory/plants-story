@@ -51,8 +51,8 @@
   gap: var(--space-sm);
 }
 
-/* Header buttons (profile, auth) - shared style */
-.header__btn--desktop {
+/* Header buttons (profile, auth) */
+.header__btn {
   font-size: var(--font-size-xs);
   padding: var(--space-xs) var(--space-sm);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -64,10 +64,11 @@
   white-space: nowrap;
 }
 
-/* Hide profile/auth buttons on mobile, show in hamburger menu instead */
-@media (max-width: 767px) {
-  .header__btn--desktop {
-    display: none !important;
+/* On PC, always show logout button in header when logged in */
+@media (min-width: 768px) {
+  .header__auth-btn[style*="display: none"],
+  .header__auth-btn[style*="display:none"] {
+    display: inline-block !important;
   }
 }
 
