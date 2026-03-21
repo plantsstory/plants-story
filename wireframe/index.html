@@ -2190,8 +2190,16 @@
           window._currentUser = session ? session.user : null;
           updateLoginUI();
           if (event === 'SIGNED_IN' && window.location.search.indexOf('code=') !== -1) {
-            window.history.replaceState({}, '', window.location.pathname + '#/contribute');
-            if (typeof navigateTo === 'function') navigateTo('contribute');
+            var returnHash = localStorage.getItem('login_return_hash');
+            localStorage.removeItem('login_return_hash');
+            if (returnHash) {
+              window.history.replaceState({}, '', window.location.pathname + returnHash);
+              var route = returnHash.replace('#/', '').replace('#', '');
+              if (route && typeof navigateTo === 'function') navigateTo(route);
+            } else {
+              window.history.replaceState({}, '', window.location.pathname + '#/');
+              if (typeof navigateTo === 'function') navigateTo('');
+            }
           }
         });
         supabase.auth.getSession().then(function(res) {
@@ -2206,6 +2214,7 @@
       var googleLoginBtn = document.getElementById('google-login-btn');
       if (googleLoginBtn && supabase) {
         googleLoginBtn.addEventListener('click', function() {
+          localStorage.setItem('login_return_hash', window.location.hash || '');
           supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
@@ -2238,6 +2247,7 @@
               showToast('ログアウトしました');
             });
           } else {
+            localStorage.setItem('login_return_hash', window.location.hash || '');
             supabase.auth.signInWithOAuth({
               provider: 'google',
               options: {
