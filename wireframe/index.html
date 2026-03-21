@@ -6044,7 +6044,7 @@
       try {
         var sbAff = window._supabaseClient;
         if (!sbAff) throw new Error('No supabase client');
-        var result = await sbAff.from('affiliates').select('*').order('sort_order');
+        var result = await sbAff.from('affiliates').select('*').eq('is_published', true).order('sort_order');
         if (result.data && result.data.length > 0) {
           affiliateProducts = result.data.map(function(a) {
             return {
