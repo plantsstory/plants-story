@@ -2190,17 +2190,31 @@ function showAffiliateForm(data) {
       return;
     }
 
-    // Shift sort_order of existing items if conflict
-    var conflicting = allAffiliates.filter(function(a) {
-      return a.sort_order >= payload.sort_order && (!isEdit || a.id !== data.id);
-    }).sort(function(a, b) { return a.sort_order - b.sort_order; });
+    // Shift sort_order of other items when order changes
+    var oldOrder = isEdit ? (data.sort_order || 0) : null;
+    var newOrder = payload.sort_order;
+    var others = allAffiliates.filter(function(a) { return !isEdit || a.id !== data.id; });
 
-    if (conflicting.length > 0 && conflicting[0].sort_order === payload.sort_order) {
-      var nextOrder = payload.sort_order;
-      for (var i = 0; i < conflicting.length; i++) {
-        if (conflicting[i].sort_order !== nextOrder) break;
-        await sb.from('affiliates').update({ sort_order: nextOrder + 1 }).eq('id', conflicting[i].id);
-        nextOrder++;
+    if (isEdit && oldOrder !== newOrder) {
+      // Moving: shift items in between
+      if (newOrder > oldOrder) {
+        // Moved down (e.g. 3→6): items between old+1..new shift up by 1
+        var toShift = others.filter(function(a) { return a.sort_order > oldOrder && a.sort_order <= newOrder; });
+        for (var i = 0; i < toShift.length; i++) {
+          await sb.from('affiliates').update({ sort_order: toShift[i].sort_order - 1 }).eq('id', toShift[i].id);
+        }
+      } else {
+        // Moved up (e.g. 6→3): items between new..old-1 shift down by 1
+        var toShift = others.filter(function(a) { return a.sort_order >= newOrder && a.sort_order < oldOrder; });
+        for (var i = 0; i < toShift.length; i++) {
+          await sb.from('affiliates').update({ sort_order: toShift[i].sort_order + 1 }).eq('id', toShift[i].id);
+        }
+      }
+    } else if (!isEdit) {
+      // New item: shift items at newOrder and above down by 1
+      var toShift = others.filter(function(a) { return a.sort_order >= newOrder; });
+      for (var i = 0; i < toShift.length; i++) {
+        await sb.from('affiliates').update({ sort_order: toShift[i].sort_order + 1 }).eq('id', toShift[i].id);
       }
     }
 
