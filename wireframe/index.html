@@ -3265,20 +3265,36 @@
       }
       var data = cultivarData[resolvedName];
 
-      // Try to fetch latest data from Supabase (async update)
+      // Always fetch from Supabase to ensure latest data is shown
       var _sb = window._supabaseClient;
       if (_sb) {
-        _sb.from('cultivars').select('origins, ai_status').eq('cultivar_name', resolvedName).single()
-        .then(function(res) {
-          if (res.data && res.data.origins && res.data.origins.length > 0) {
-            var dbOrigin = res.data.origins[0];
-            // Only update if DB has better data (AI completed)
-            if (dbOrigin.trust > 0 && (!data || !data.origins || data.origins.length === 0 || data.origins[0].trust === 0)) {
-              if (cultivarData[resolvedName]) {
-                cultivarData[resolvedName].origins = res.data.origins;
-              }
-              renderOriginsInner(resolvedName, container);
+        // Try exact name first, then with [Seedling], then ilike for partial match
+        var fetchPromise = _sb.from('cultivars').select('cultivar_name, origins, ai_status, type, user_id, created_at').eq('cultivar_name', resolvedName).single();
+        fetchPromise.then(function(res) {
+          if (res.error && resolvedName.indexOf('[Seedling]') === -1) {
+            // Try with [Seedling] suffix
+            return _sb.from('cultivars').select('cultivar_name, origins, ai_status, type, user_id, created_at').eq('cultivar_name', resolvedName + ' [Seedling]').single();
+          }
+          return res;
+        }).then(function(res) {
+          if (res.error && resolvedName.indexOf('[Seedling]') === -1) {
+            // Try ilike as last resort
+            return _sb.from('cultivars').select('cultivar_name, origins, ai_status, type, user_id, created_at').ilike('cultivar_name', resolvedName + '%').limit(1).single();
+          }
+          return res;
+        }).then(function(res) {
+          if (res.data && res.data.origins) {
+            var dbKey = res.data.cultivar_name || resolvedName;
+            if (!cultivarData[dbKey]) {
+              cultivarData[dbKey] = { origins: res.data.origins, _type: res.data.type, _userId: res.data.user_id, _created_at: res.data.created_at };
+            } else {
+              cultivarData[dbKey].origins = res.data.origins;
             }
+            // Also fetch poster name if needed
+            if (res.data.user_id && window._profileCache && window._profileCache[res.data.user_id]) {
+              cultivarData[dbKey]._posterName = window._profileCache[res.data.user_id];
+            }
+            renderOriginsInner(dbKey, container);
           }
         });
       }
