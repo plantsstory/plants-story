@@ -33,6 +33,7 @@
       <a class="header__logo" data-nav="top" data-i18n="site_title">Plants Story</a>
       <div class="header__actions">
         <button class="header__lang" data-i18n="lang_toggle">EN / JP</button>
+        <a id="header-profile-btn" href="#" style="display:none;width:32px;height:32px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,0.4);flex-shrink:0;" title="プロフィール"><svg viewBox="0 0 32 32" width="32" height="32" xmlns="http://www.w3.org/2000/svg"><rect width="32" height="32" fill="rgba(255,255,255,0.15)"/><circle cx="16" cy="12" r="5.5" fill="rgba(255,255,255,0.6)"/><ellipse cx="16" cy="27" rx="9.5" ry="7" fill="rgba(255,255,255,0.6)"/></svg></a>
         <button class="header__auth-btn" id="header-auth-btn" type="button" style="font-size:var(--font-size-xs);padding:var(--space-xs) var(--space-sm);border:1px solid rgba(255,255,255,0.3);border-radius:var(--radius-sm);background:transparent;color:rgba(255,255,255,0.8);cursor:pointer;white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis;">ゲスト</button>
         <button class="header__hamburger" id="hamburger" aria-label="Menu">
           <span></span><span></span><span></span>
@@ -50,6 +51,7 @@
     <a href="#" data-nav="search" data-i18n="nav_search">Search</a>
     <a href="#" data-nav="favorites" data-i18n="nav_favorites">&#x2606; お気に入り</a>
     <a href="#" data-nav="mypost" id="nav-mypost" style="display:none;">&#x1F4DD; 投稿履歴</a>
+    <a href="#" id="nav-profile" style="display:none;" onclick="document.getElementById('mobileNav').classList.remove('open');">&#x1F464; プロフィール</a>
   </div>
 
   <!-- ========================================
@@ -1407,6 +1409,95 @@
     </div>
   </section>
 
+  <!-- ========================================
+       PAGE: PROFILE (public view)
+       ======================================== -->
+  <section id="page-profile" class="page">
+    <div class="container">
+      <!-- Profile Header Card -->
+      <div class="card" style="padding:var(--space-lg);">
+        <div class="profile-header">
+          <div class="profile-avatar" id="profile-avatar"></div>
+          <div class="profile-info">
+            <h1 class="profile-name" id="profile-display-name"></h1>
+            <p class="text-muted text-sm" id="profile-bio" style="margin-top:var(--space-xs);white-space:pre-wrap;"></p>
+            <div class="profile-sns" id="profile-sns-links"></div>
+            <div class="profile-stats" style="margin-top:var(--space-sm);">
+              <span class="text-sm">Seedling投稿数: <strong id="profile-post-count">0</strong></span>
+            </div>
+          </div>
+        </div>
+        <div id="profile-edit-link" style="display:none;margin-top:var(--space-md);">
+          <a href="#/profile/edit" class="btn btn--secondary btn--sm">プロフィールを編集</a>
+        </div>
+      </div>
+
+      <!-- My Seedlings section -->
+      <div style="margin-top:var(--space-xl);">
+        <h2 class="section-title">My Seedlings</h2>
+        <div class="search-bar" style="max-width:400px;margin-top:var(--space-md);margin-bottom:var(--space-md);">
+          <input type="text" class="search-bar__input" id="profile-post-search" placeholder="品種名で検索...">
+          <button class="search-bar__btn">&#x1F50D;</button>
+        </div>
+        <div id="profile-posts-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-md);"></div>
+        <div id="profile-posts-empty" style="display:none;text-align:center;padding:var(--space-xl);color:var(--color-gray);">
+          <p>まだ投稿がありません。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       PAGE: PROFILE EDIT
+       ======================================== -->
+  <section id="page-profile-edit" class="page">
+    <div class="container" style="max-width:600px;">
+      <h1 class="section-title">プロフィール編集</h1>
+
+      <div class="card" style="padding:var(--space-lg);margin-top:var(--space-md);">
+        <!-- Avatar -->
+        <div class="form-group" style="text-align:center;margin-bottom:var(--space-lg);">
+          <div class="profile-avatar profile-avatar--lg" id="edit-avatar-preview" style="margin:0 auto;"></div>
+          <input type="file" id="edit-avatar-input" accept="image/jpeg,image/png,image/webp" style="display:none;">
+          <button class="btn btn--secondary btn--sm" id="edit-avatar-btn" style="margin-top:var(--space-sm);">アバターを変更</button>
+        </div>
+
+        <!-- Display Name -->
+        <div class="form-group" style="margin-bottom:var(--space-md);">
+          <label class="form-label">表示名</label>
+          <input type="text" class="form-input" id="edit-display-name" maxlength="50" placeholder="ニックネーム">
+        </div>
+
+        <!-- Email (read-only) -->
+        <div class="form-group" style="margin-bottom:var(--space-md);">
+          <label class="form-label">メールアドレス</label>
+          <input type="email" class="form-input" id="edit-email" disabled style="background:var(--color-lighter);cursor:not-allowed;">
+        </div>
+
+        <!-- Bio -->
+        <div class="form-group" style="margin-bottom:var(--space-md);">
+          <label class="form-label">自己紹介</label>
+          <textarea class="form-textarea" id="edit-bio" rows="4" maxlength="500" placeholder="好きな植物のことなど..."></textarea>
+          <p class="form-hint"><span id="edit-bio-count">0</span>/500</p>
+        </div>
+
+        <!-- SNS Links -->
+        <div class="form-group" style="margin-bottom:var(--space-md);">
+          <label class="form-label">Instagram</label>
+          <input type="text" class="form-input" id="edit-sns-instagram" maxlength="100" placeholder="@username または URL">
+        </div>
+        <div class="form-group" style="margin-bottom:var(--space-md);">
+          <label class="form-label">X (Twitter)</label>
+          <input type="text" class="form-input" id="edit-sns-twitter" maxlength="100" placeholder="@username または URL">
+        </div>
+
+        <!-- Save & Logout -->
+        <button class="btn btn--primary" id="edit-profile-save" style="width:100%;">保存</button>
+        <button class="btn btn--secondary" id="edit-profile-logout" style="width:100%;margin-top:var(--space-sm);color:var(--color-danger);">ログアウト</button>
+      </div>
+    </div>
+  </section>
+
   <footer class="footer">
     <div class="container footer__inner">
       <div class="footer__donate">
@@ -1439,6 +1530,7 @@
     // Page navigation
     function showPage(pageId) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      // profile-edit maps to page-profile-edit
       const target = document.getElementById('page-' + pageId);
       if (target) {
         target.classList.add('active');
@@ -1474,6 +1566,8 @@
     function buildHash(page, options) {
       options = options || {};
       if (page === 'top') return '#/';
+      if (page === 'profile' && options.userId) return '#/profile/' + options.userId;
+      if (page === 'profile-edit') return '#/profile/edit';
       if (page === 'genus' && options.genus) return '#/' + options.genus.toLowerCase();
       if (page === 'cultivar' && options.cultivar) {
         // e.g. "Anthurium crystallinum" -> #/anthurium/crystallinum
@@ -1493,6 +1587,13 @@
 
       var segments = path.split('/').map(function(s) { return decodeURIComponent(s); });
       var first = segments[0].toLowerCase();
+
+      // Check profile routes
+      if (first === 'profile') {
+        if (segments[1] === 'edit') return { page: 'profile-edit' };
+        if (segments[1]) return { page: 'profile', userId: segments[1] };
+        return { page: 'top' };
+      }
 
       // Check if it's a genus
       if (knownGenera.indexOf(first) !== -1) {
@@ -1526,10 +1627,16 @@
         var parentRow = rowEl ? rowEl.closest('[data-nav]') : null;
         updateCultivarDetail(cultivarKey, parentRow);
       }
+      if (page === 'profile' && options.userId && typeof window.loadProfilePage === 'function') {
+        window.loadProfilePage(options.userId);
+      }
+      if (page === 'profile-edit' && typeof window.loadProfileEditPage === 'function') {
+        window.loadProfileEditPage();
+      }
 
       if (pushHistory !== false) {
         var hash = buildHash(page, options);
-        history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar }, '', hash);
+        history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar, userId: options.userId }, '', hash);
       }
     }
 
@@ -1551,7 +1658,7 @@
         navigateTo(state.page, state, false);
       }
       // Record initial state so back button works from first navigation
-      history.replaceState({ page: state.page, genus: state.genus, cultivar: state.cultivar }, '', buildHash(state.page, state));
+      history.replaceState({ page: state.page, genus: state.genus, cultivar: state.cultivar, userId: state.userId }, '', buildHash(state.page, state));
     })();
 
     // ---- Cultivar origin data ----
@@ -2037,18 +2144,35 @@
         // Update header auth button (always exists)
         if (headerAuthBtn) {
           if (window._currentUser) {
-            var email = window._currentUser.email || '';
-            var short = email.split('@')[0];
-            headerAuthBtn.textContent = short;
-            headerAuthBtn.title = email;
+            headerAuthBtn.textContent = 'ログアウト';
+            headerAuthBtn.title = window._currentUser.email || '';
           } else {
-            headerAuthBtn.textContent = 'ゲスト';
-            headerAuthBtn.title = 'クリックしてログイン';
+            headerAuthBtn.textContent = 'ログイン';
+            headerAuthBtn.title = 'Googleでログイン';
           }
         }
         // Show/hide 投稿履歴 menu item
         if (navMypost) {
           navMypost.style.display = window._currentUser ? '' : 'none';
+        }
+        // Show/hide プロフィール menu item & header profile icon
+        var navProfile = document.getElementById('nav-profile');
+        var headerProfileBtn = document.getElementById('header-profile-btn');
+        if (window._currentUser) {
+          var profileUrl = '#/profile/' + window._currentUser.id;
+          if (navProfile) { navProfile.style.display = ''; navProfile.href = profileUrl; }
+          if (headerProfileBtn) {
+            headerProfileBtn.style.display = '';
+            headerProfileBtn.href = profileUrl;
+            // Show Google avatar if available
+            var avatarUrl = window._currentUser.user_metadata && window._currentUser.user_metadata.avatar_url;
+            if (avatarUrl) {
+              headerProfileBtn.innerHTML = '<img src="' + avatarUrl + '" alt="profile" style="width:100%;height:100%;object-fit:cover;">';
+            }
+          }
+        } else {
+          if (navProfile) navProfile.style.display = 'none';
+          if (headerProfileBtn) headerProfileBtn.style.display = 'none';
         }
         // Update contribute page login card (may not exist on other pages)
         if (benefitsContent) {
@@ -2110,7 +2234,7 @@
         });
       }
 
-      // Header auth button (login/logout from any page)
+      // Header auth button (login/logout)
       var headerAuthBtn = document.getElementById('header-auth-btn');
       if (headerAuthBtn && supabase) {
         headerAuthBtn.addEventListener('click', function() {
@@ -2118,6 +2242,7 @@
             supabase.auth.signOut().then(function() {
               window._currentUser = null;
               updateLoginUI();
+              showToast('ログアウトしました');
             });
           } else {
             supabase.auth.signInWithOAuth({
@@ -2638,6 +2763,282 @@
       } else {
         restoreUserCultivars();
         setTimeout(pollPendingAIResearch, 2000);
+      }
+    })();
+
+    // ---- Profile page functions ----
+    (function() {
+      // Default avatar SVG
+      var defaultAvatarSvg = '<svg viewBox="0 0 80 80" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">' +
+        '<rect width="80" height="80" fill="#e8e8e8"/>' +
+        '<circle cx="40" cy="30" r="14" fill="#bbb"/>' +
+        '<ellipse cx="40" cy="68" rx="24" ry="18" fill="#bbb"/>' +
+        '</svg>';
+
+      function renderAvatar(el, url) {
+        if (!el) return;
+        if (url) {
+          el.innerHTML = '<img src="' + url + '" alt="avatar">';
+        } else {
+          el.innerHTML = defaultAvatarSvg;
+        }
+      }
+
+      function renderSnsLinks(el, profile) {
+        if (!el) return;
+        var html = '';
+        if (profile.sns_instagram) {
+          var igUrl = profile.sns_instagram.indexOf('http') === 0 ? profile.sns_instagram :
+            'https://www.instagram.com/' + profile.sns_instagram.replace(/^@/, '');
+          html += '<a href="' + igUrl + '" target="_blank" rel="noopener">&#x1F4F7; Instagram</a>';
+        }
+        if (profile.sns_twitter) {
+          var twUrl = profile.sns_twitter.indexOf('http') === 0 ? profile.sns_twitter :
+            'https://x.com/' + profile.sns_twitter.replace(/^@/, '');
+          html += '<a href="' + twUrl + '" target="_blank" rel="noopener">&#x1D54F; X</a>';
+        }
+        el.innerHTML = html;
+      }
+
+      // Store current profile userId for search
+      var _currentProfileUserId = null;
+
+      function loadProfilePosts(userId, searchQuery) {
+        var sb = window._supabaseClient;
+        var grid = document.getElementById('profile-posts-grid');
+        var emptyMsg = document.getElementById('profile-posts-empty');
+        if (!sb || !grid) return;
+
+        grid.innerHTML = '<p style="text-align:center;color:var(--color-gray);">読み込み中...</p>';
+
+        var query = sb.from('cultivars')
+          .select('id, genus, cultivar_name, type, created_at')
+          .eq('user_id', userId)
+          .eq('type', 'seedling')
+          .order('created_at', { ascending: false });
+
+        if (searchQuery) {
+          query = query.ilike('cultivar_name', '%' + searchQuery + '%');
+        }
+
+        query.then(function(res) {
+          grid.innerHTML = '';
+          if (res.error) {
+            grid.innerHTML = '<p style="color:red;">エラー: ' + res.error.message + '</p>';
+            return;
+          }
+          var rows = res.data || [];
+          var countEl = document.getElementById('profile-post-count');
+          if (countEl) countEl.textContent = rows.length;
+          if (rows.length === 0) {
+            if (emptyMsg) emptyMsg.style.display = '';
+            return;
+          }
+          if (emptyMsg) emptyMsg.style.display = 'none';
+
+          rows.forEach(function(row) {
+            var card = document.createElement('div');
+            card.className = 'card';
+            card.style.cssText = 'cursor:pointer;padding:var(--space-md);';
+            var displayName = row.cultivar_name.replace(' [Seedling]', '');
+            var date = row.created_at ? new Date(row.created_at).toLocaleDateString('ja-JP') : '';
+            card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+              '<div><span class="badge badge--seedling" style="font-size:0.7rem;padding:2px 6px;margin-right:6px;">seedling</span>' +
+              '<strong>' + displayName + '</strong></div>' +
+              '<span style="font-size:0.75rem;color:var(--color-gray);">' + date + '</span></div>';
+            card.addEventListener('click', function() {
+              location.hash = '#/' + row.genus.toLowerCase() + '/' + encodeURIComponent(displayName.replace(row.genus + ' ', ''));
+            });
+            grid.appendChild(card);
+          });
+        });
+      }
+
+      // Search input debounce
+      var profileSearchTimer;
+      var searchInput = document.getElementById('profile-post-search');
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          var q = this.value.trim();
+          clearTimeout(profileSearchTimer);
+          profileSearchTimer = setTimeout(function() {
+            if (_currentProfileUserId) loadProfilePosts(_currentProfileUserId, q);
+          }, 300);
+        });
+      }
+
+      // Load profile view page
+      window.loadProfilePage = function(userId) {
+        var sb = window._supabaseClient;
+        if (!sb) return;
+        _currentProfileUserId = userId;
+
+        // Reset search input
+        var searchEl = document.getElementById('profile-post-search');
+        if (searchEl) searchEl.value = '';
+
+        // Fetch profile
+        sb.from('profiles').select('*').eq('id', userId).single()
+          .then(function(res) {
+            if (res.error || !res.data) {
+              document.getElementById('profile-display-name').textContent = '名前未設定';
+              document.getElementById('profile-bio').textContent = '';
+              document.getElementById('profile-sns-links').innerHTML = '';
+              renderAvatar(document.getElementById('profile-avatar'), null);
+            } else {
+              var p = res.data;
+              document.getElementById('profile-display-name').textContent = p.display_name || '名前未設定';
+              document.getElementById('profile-bio').textContent = p.bio || '';
+              renderAvatar(document.getElementById('profile-avatar'), p.avatar_url);
+              renderSnsLinks(document.getElementById('profile-sns-links'), p);
+            }
+          });
+
+        // Show edit link only for own profile
+        var editLink = document.getElementById('profile-edit-link');
+        if (editLink) {
+          editLink.style.display = (window._currentUser && window._currentUser.id === userId) ? '' : 'none';
+        }
+
+        // Load seedling posts
+        loadProfilePosts(userId, '');
+      };
+
+      // Load profile edit page
+      window.loadProfileEditPage = function() {
+        if (!window._currentUser) {
+          showToast('ログインが必要です', true);
+          location.hash = '#/';
+          return;
+        }
+        var sb = window._supabaseClient;
+        var userId = window._currentUser.id;
+
+        document.getElementById('edit-email').value = window._currentUser.email || '';
+
+        // Bio character counter
+        var bioEl = document.getElementById('edit-bio');
+        var bioCountEl = document.getElementById('edit-bio-count');
+        if (bioEl && bioCountEl) {
+          bioEl.addEventListener('input', function() {
+            bioCountEl.textContent = this.value.length;
+          });
+        }
+
+        sb.from('profiles').select('*').eq('id', userId).single()
+          .then(function(res) {
+            if (res.data) {
+              document.getElementById('edit-display-name').value = res.data.display_name || '';
+              document.getElementById('edit-bio').value = res.data.bio || '';
+              document.getElementById('edit-sns-instagram').value = res.data.sns_instagram || '';
+              document.getElementById('edit-sns-twitter').value = res.data.sns_twitter || '';
+              renderAvatar(document.getElementById('edit-avatar-preview'), res.data.avatar_url);
+              if (bioCountEl) bioCountEl.textContent = (res.data.bio || '').length;
+              // Store current avatar URL for save
+              window._editAvatarUrl = res.data.avatar_url || '';
+            } else {
+              // No profile yet - use Google defaults
+              var meta = window._currentUser.user_metadata || {};
+              document.getElementById('edit-display-name').value = meta.full_name || '';
+              renderAvatar(document.getElementById('edit-avatar-preview'), meta.avatar_url || null);
+              window._editAvatarUrl = meta.avatar_url || '';
+            }
+          });
+      };
+
+      // Avatar upload button
+      var avatarBtn = document.getElementById('edit-avatar-btn');
+      var avatarInput = document.getElementById('edit-avatar-input');
+      if (avatarBtn && avatarInput) {
+        avatarBtn.addEventListener('click', function() {
+          avatarInput.click();
+        });
+        avatarInput.addEventListener('change', function() {
+          var file = this.files[0];
+          if (!file) return;
+          if (file.size > 5 * 1024 * 1024) {
+            showToast('画像サイズは5MB以下にしてください', true);
+            return;
+          }
+          var sb = window._supabaseClient;
+          if (!sb || !window._currentUser) return;
+
+          avatarBtn.textContent = 'アップロード中...';
+          avatarBtn.disabled = true;
+
+          window.compressImage(file).then(function(compressed) {
+            var path = 'avatars/' + window._currentUser.id + '/' + Date.now() + '.jpg';
+            return sb.storage.from('gallery-images').upload(path, compressed, {
+              contentType: 'image/jpeg',
+              upsert: true
+            }).then(function(res) {
+              if (res.error) throw res.error;
+              var publicUrl = sb.storage.from('gallery-images').getPublicUrl(path).data.publicUrl;
+              window._editAvatarUrl = publicUrl;
+              renderAvatar(document.getElementById('edit-avatar-preview'), publicUrl);
+              showToast('アバターをアップロードしました');
+            });
+          }).catch(function(err) {
+            showToast('アップロードに失敗しました: ' + (err.message || err), true);
+          }).finally(function() {
+            avatarBtn.textContent = 'アバターを変更';
+            avatarBtn.disabled = false;
+          });
+        });
+      }
+
+      // Save profile
+      var saveBtn = document.getElementById('edit-profile-save');
+      if (saveBtn) {
+        saveBtn.addEventListener('click', function() {
+          var sb = window._supabaseClient;
+          if (!sb || !window._currentUser) return;
+
+          saveBtn.textContent = '保存中...';
+          saveBtn.disabled = true;
+
+          sb.rpc('upsert_profile', {
+            p_display_name: document.getElementById('edit-display-name').value.trim(),
+            p_bio: document.getElementById('edit-bio').value.trim(),
+            p_sns_instagram: document.getElementById('edit-sns-instagram').value.trim(),
+            p_sns_twitter: document.getElementById('edit-sns-twitter').value.trim(),
+            p_avatar_url: window._editAvatarUrl || ''
+          }).then(function(res) {
+            if (res.error) {
+              showToast('保存に失敗しました: ' + res.error.message, true);
+            } else {
+              showToast('プロフィールを保存しました');
+              location.hash = '#/profile/' + window._currentUser.id;
+            }
+          }).finally(function() {
+            saveBtn.textContent = '保存';
+            saveBtn.disabled = false;
+          });
+        });
+      }
+
+      // Logout button on edit page
+      var logoutEditBtn = document.getElementById('edit-profile-logout');
+      if (logoutEditBtn) {
+        logoutEditBtn.addEventListener('click', function() {
+          var sb = window._supabaseClient;
+          if (sb) {
+            sb.auth.signOut().then(function() {
+              window._currentUser = null;
+              if (typeof updateLoginUI === 'function') updateLoginUI();
+              location.hash = '#/';
+              showToast('ログアウトしました');
+            });
+          }
+        });
+      }
+
+      // Handle initial route if page loaded on a profile URL
+      var initState = parseHash();
+      if (initState.page === 'profile' && initState.userId) {
+        window.loadProfilePage(initState.userId);
+      } else if (initState.page === 'profile-edit') {
+        window.loadProfileEditPage();
       }
     })();
 
