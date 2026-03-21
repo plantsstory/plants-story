@@ -3255,27 +3255,35 @@
     function renderOrigins(cultivarName) {
       var container = document.getElementById('origins-container');
       if (!container) return;
-      var data = cultivarData[cultivarName];
+      // Resolve seedling key: try exact, then with [Seedling] suffix
+      var resolvedName = cultivarData[cultivarName] ? cultivarName :
+        (cultivarData[cultivarName + ' [Seedling]'] ? cultivarName + ' [Seedling]' : cultivarName);
+      if (!cultivarData[resolvedName]) {
+        Object.keys(cultivarData).forEach(function(k) {
+          if (k.replace(' [Seedling]', '') === cultivarName) resolvedName = k;
+        });
+      }
+      var data = cultivarData[resolvedName];
 
       // Try to fetch latest data from Supabase (async update)
       var _sb = window._supabaseClient;
       if (_sb) {
-        _sb.from('cultivars').select('origins, ai_status').eq('cultivar_name', cultivarName).single()
+        _sb.from('cultivars').select('origins, ai_status').eq('cultivar_name', resolvedName).single()
         .then(function(res) {
           if (res.data && res.data.origins && res.data.origins.length > 0) {
             var dbOrigin = res.data.origins[0];
             // Only update if DB has better data (AI completed)
             if (dbOrigin.trust > 0 && (!data || !data.origins || data.origins.length === 0 || data.origins[0].trust === 0)) {
-              if (cultivarData[cultivarName]) {
-                cultivarData[cultivarName].origins = res.data.origins;
+              if (cultivarData[resolvedName]) {
+                cultivarData[resolvedName].origins = res.data.origins;
               }
-              renderOriginsInner(cultivarName, container);
+              renderOriginsInner(resolvedName, container);
             }
           }
         });
       }
 
-      renderOriginsInner(cultivarName, container);
+      renderOriginsInner(resolvedName, container);
     }
 
     // Render structured origin fields as HTML
@@ -3558,7 +3566,14 @@
 
       // Update created_at date
       var createdAtEl = document.getElementById('detail-created-at');
-      var cData = cultivarData[cultivarName];
+      // Try exact key, then seedling variant (with [Seedling] suffix)
+      var cData = cultivarData[cultivarName] || cultivarData[cultivarName + ' [Seedling]'];
+      if (!cData && cultivarName.indexOf(' [Seedling]') === -1) {
+        // Also try matching by display name (without [Seedling])
+        Object.keys(cultivarData).forEach(function(k) {
+          if (!cData && k.replace(' [Seedling]', '') === cultivarName) cData = cultivarData[k];
+        });
+      }
       if (createdAtEl && cData && cData._created_at) {
         var d = new Date(cData._created_at);
         createdAtEl.textContent = d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
