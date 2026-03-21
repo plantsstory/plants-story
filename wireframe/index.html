@@ -3564,10 +3564,10 @@
       // Determine if this is a seedling (used by multiple sections below)
       var isSeedlingDetail = cData && cData._type === 'seedling';
 
-      // Update creator name (seedlings only)
+      // Hide creator name next to title (shown in origins section instead)
       var creatorNameEl = document.getElementById('detail-creator-name');
       if (creatorNameEl) {
-        creatorNameEl.textContent = (cData && cData._creatorName) ? '作出者: ' + cData._creatorName : '';
+        creatorNameEl.textContent = '';
       }
 
       // Update poster name with profile link (seedlings only)
