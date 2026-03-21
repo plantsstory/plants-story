@@ -2302,6 +2302,7 @@
                 '<strong>' + displayName + '</strong></div>' +
                 '<span style="font-size:0.75rem;color:var(--color-gray);">' + date + '</span></div>';
               card.addEventListener('click', function() {
+                window._navigatingCultivarName = row.cultivar_name;
                 location.hash = '#/' + row.genus.toLowerCase() + '/' + encodeURIComponent(displayName.replace(row.genus + ' ', ''));
               });
               grid.appendChild(card);
@@ -2879,6 +2880,8 @@
               '<strong>' + displayName + '</strong></div>' +
               '<span style="font-size:0.75rem;color:var(--color-gray);">' + date + '</span></div>';
             card.addEventListener('click', function() {
+              // Store full DB cultivar_name for reliable detail page lookup
+              window._navigatingCultivarName = row.cultivar_name;
               location.hash = '#/' + row.genus.toLowerCase() + '/' + encodeURIComponent(displayName.replace(row.genus + ' ', ''));
             });
             grid.appendChild(card);
@@ -3277,12 +3280,30 @@
         return;
       }
 
-      // Always fetch directly from DB by display name (most reliable)
-      _sb.from('cultivars')
-        .select('cultivar_name, origins, ai_status, type, user_id, created_at')
-        .ilike('cultivar_name', displayName + '%')
-        .limit(1)
-        .then(function(res) {
+      // Use stored full DB name if available (from profile/mypost navigation)
+      var dbCultivarName = window._navigatingCultivarName || null;
+      window._navigatingCultivarName = null;
+
+      // Build query: use exact DB name if available, otherwise search by display name
+      var query;
+      if (dbCultivarName) {
+        query = _sb.from('cultivars')
+          .select('cultivar_name, origins, ai_status, type, user_id, created_at')
+          .eq('cultivar_name', dbCultivarName)
+          .limit(1);
+      } else {
+        // Try exact match first, then with [Seedling]
+        var namesToTry = [displayName];
+        if (displayName.indexOf('[Seedling]') === -1) namesToTry.push(displayName + ' [Seedling]');
+        // Also try original cultivarName if different
+        if (cultivarName !== displayName && namesToTry.indexOf(cultivarName) === -1) namesToTry.push(cultivarName);
+        query = _sb.from('cultivars')
+          .select('cultivar_name, origins, ai_status, type, user_id, created_at')
+          .in('cultivar_name', namesToTry)
+          .limit(1);
+      }
+
+      query.then(function(res) {
           var row = res.data && res.data[0];
           if (!row) {
             container.innerHTML = '<div class="text-center text-muted" style="padding:var(--space-xl);">この品種の由来情報はまだ登録されていません。</div>';
