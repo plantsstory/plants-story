@@ -2037,35 +2037,37 @@ function renderAffiliateList() {
   }
   var html = '';
   allAffiliates.forEach(function(a) {
-    html += '<div class="stat-card" style="position:relative;">';
-    html += '<div style="display:flex;gap:var(--space-md);align-items:flex-start;flex-wrap:wrap;">';
-    // Image preview
+    var isPub = a.is_published !== false;
+    var cardBorder = isPub ? '' : 'opacity:0.6;';
+    html += '<div class="stat-card" style="' + cardBorder + '">';
+    // Top row: image + info
+    html += '<div style="display:flex;gap:var(--space-md);align-items:flex-start;">';
     if (a.image) {
-      html += '<img src="' + escapeHtml(a.image) + '" style="width:80px;height:80px;object-fit:contain;border-radius:var(--radius-sm);background:#f5f5f5;flex-shrink:0;" alt="">';
+      html += '<img src="' + escapeHtml(a.image) + '" style="width:64px;height:64px;object-fit:contain;border-radius:var(--radius-sm);background:#f5f5f5;flex-shrink:0;" alt="">';
     } else {
-      html += '<div style="width:80px;height:80px;display:flex;align-items:center;justify-content:center;font-size:2rem;background:#f5f5f5;border-radius:var(--radius-sm);flex-shrink:0;">' + (a.icon || '🛒') + '</div>';
+      html += '<div style="width:64px;height:64px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:#f5f5f5;border-radius:var(--radius-sm);flex-shrink:0;">' + (a.icon || '🛒') + '</div>';
     }
-    // Info
-    html += '<div style="flex:1;min-width:200px;">';
-    html += '<div style="font-weight:700;font-size:var(--font-size-md);">' + escapeHtml(a.product_name) + '</div>';
-    html += '<div style="font-size:var(--font-size-sm);color:var(--color-gray);margin-top:2px;">' + escapeHtml(a.name) + (a.name_en ? ' / ' + escapeHtml(a.name_en) : '') + '</div>';
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<div style="font-weight:700;font-size:var(--font-size-md);word-break:break-word;">' + escapeHtml(a.product_name) + '</div>';
+    html += '<div style="font-size:var(--font-size-sm);color:var(--color-gray);margin-top:2px;">' + escapeHtml(a.name) + (a.name_en ? ' / ' + escapeHtml(a.name_en) : '') + ' ｜ 順序: ' + (a.sort_order || 0) + '</div>';
+    html += '</div>';
+    html += '</div>';
+    // Links row
     html += '<div style="display:flex;gap:var(--space-sm);margin-top:var(--space-sm);flex-wrap:wrap;">';
     if (a.amazon) html += '<a href="' + escapeHtml(a.amazon) + '" target="_blank" style="font-size:var(--font-size-xs);background:#FF9900;color:#fff;padding:2px 8px;border-radius:var(--radius-sm);text-decoration:none;">Amazon ↗</a>';
     if (a.rakuten) html += '<a href="' + escapeHtml(a.rakuten) + '" target="_blank" style="font-size:var(--font-size-xs);background:#BF0000;color:#fff;padding:2px 8px;border-radius:var(--radius-sm);text-decoration:none;">楽天 ↗</a>';
     if (a.yahoo) html += '<a href="' + escapeHtml(a.yahoo) + '" target="_blank" style="font-size:var(--font-size-xs);background:#FF0033;color:#fff;padding:2px 8px;border-radius:var(--radius-sm);text-decoration:none;">Yahoo! ↗</a>';
     html += '</div>';
-    html += '</div>';
-    // Actions
-    html += '<div style="display:flex;gap:var(--space-xs);flex-shrink:0;">';
+    // Actions row
+    html += '<div style="display:flex;gap:var(--space-xs);margin-top:var(--space-md);flex-wrap:wrap;align-items:center;">';
+    if (isPub) {
+      html += '<button class="btn btn-sm" style="background:#2d5016;color:#fff;font-size:var(--font-size-xs);padding:4px 12px;" onclick="toggleAffiliatePublish(' + a.id + ',true)">公開中</button>';
+    } else {
+      html += '<button class="btn btn-sm" style="background:#999;color:#fff;font-size:var(--font-size-xs);padding:4px 12px;" onclick="toggleAffiliatePublish(' + a.id + ',false)">非公開</button>';
+    }
     html += '<button class="btn btn-outline btn-sm" onclick="editAffiliate(' + a.id + ')">編集</button>';
     html += '<button class="btn btn-danger btn-sm" onclick="deleteAffiliate(' + a.id + ',\'' + escapeHtml(a.product_name).replace(/'/g, "\\'") + '\')">削除</button>';
     html += '</div>';
-    html += '</div>';
-    if (a.is_published !== false) {
-      html += '<button class="btn btn-sm" style="position:absolute;top:8px;right:12px;background:#2d5016;color:#fff;font-size:var(--font-size-xs);padding:3px 10px;" onclick="toggleAffiliatePublish(' + a.id + ',true)">公開中</button>';
-    } else {
-      html += '<button class="btn btn-sm" style="position:absolute;top:8px;right:12px;background:#999;color:#fff;font-size:var(--font-size-xs);padding:3px 10px;" onclick="toggleAffiliatePublish(' + a.id + ',false)">非公開</button>';
-    }
     html += '</div>';
   });
   container.innerHTML = html;
