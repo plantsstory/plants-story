@@ -2302,6 +2302,7 @@
                 '<strong>' + displayName + '</strong></div>' +
                 '<span style="font-size:0.75rem;color:var(--color-gray);">' + date + '</span></div>';
               card.addEventListener('click', function() {
+                window._navigatingCultivarId = row.id;
                 window._navigatingCultivarName = row.cultivar_name;
                 location.hash = '#/' + row.genus.toLowerCase() + '/' + encodeURIComponent(displayName.replace(row.genus + ' ', ''));
               });
@@ -2880,7 +2881,7 @@
               '<strong>' + displayName + '</strong></div>' +
               '<span style="font-size:0.75rem;color:var(--color-gray);">' + date + '</span></div>';
             card.addEventListener('click', function() {
-              // Store full DB cultivar_name for reliable detail page lookup
+              window._navigatingCultivarId = row.id;
               window._navigatingCultivarName = row.cultivar_name;
               location.hash = '#/' + row.genus.toLowerCase() + '/' + encodeURIComponent(displayName.replace(row.genus + ' ', ''));
             });
@@ -3280,22 +3281,27 @@
         return;
       }
 
-      // Use stored full DB name if available (from profile/mypost navigation)
+      // Use stored cultivar ID if available (most reliable - from profile/mypost navigation)
+      var dbCultivarId = window._navigatingCultivarId || null;
       var dbCultivarName = window._navigatingCultivarName || null;
+      window._navigatingCultivarId = null;
       window._navigatingCultivarName = null;
 
-      // Build query: use exact DB name if available, otherwise search by display name
+      // Build query: prefer ID, then exact name, then name variants
       var query;
-      if (dbCultivarName) {
+      if (dbCultivarId) {
+        query = _sb.from('cultivars')
+          .select('cultivar_name, origins, ai_status, type, user_id, created_at')
+          .eq('id', dbCultivarId)
+          .limit(1);
+      } else if (dbCultivarName) {
         query = _sb.from('cultivars')
           .select('cultivar_name, origins, ai_status, type, user_id, created_at')
           .eq('cultivar_name', dbCultivarName)
           .limit(1);
       } else {
-        // Try exact match first, then with [Seedling]
         var namesToTry = [displayName];
         if (displayName.indexOf('[Seedling]') === -1) namesToTry.push(displayName + ' [Seedling]');
-        // Also try original cultivarName if different
         if (cultivarName !== displayName && namesToTry.indexOf(cultivarName) === -1) namesToTry.push(cultivarName);
         query = _sb.from('cultivars')
           .select('cultivar_name, origins, ai_status, type, user_id, created_at')
