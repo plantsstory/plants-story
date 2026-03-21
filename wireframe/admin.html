@@ -2061,13 +2061,11 @@ function renderAffiliateList() {
     html += '<button class="btn btn-danger btn-sm" onclick="deleteAffiliate(' + a.id + ',\'' + escapeHtml(a.product_name).replace(/'/g, "\\'") + '\')">削除</button>';
     html += '</div>';
     html += '</div>';
-    var pubStyle = a.is_published !== false ? 'background:#2d5016;color:#fff;' : 'background:#999;color:#fff;';
-    var pubLabel = a.is_published !== false ? '公開' : '非公開';
-    html += '<div style="position:absolute;top:8px;right:12px;display:flex;align-items:center;gap:var(--space-sm);">';
-    html += '<span style="font-size:var(--font-size-xs);padding:2px 8px;border-radius:var(--radius-sm);' + pubStyle + '">' + pubLabel + '</span>';
-    html += '<button class="btn btn-outline btn-sm" style="font-size:10px;padding:2px 6px;" onclick="toggleAffiliatePublish(' + a.id + ',' + (a.is_published !== false) + ')">' + (a.is_published !== false ? '非公開にする' : '公開する') + '</button>';
-    html += '<span style="font-size:var(--font-size-xs);color:var(--color-gray);">順序: ' + (a.sort_order || 0) + '</span>';
-    html += '</div>';
+    if (a.is_published !== false) {
+      html += '<button class="btn btn-sm" style="position:absolute;top:8px;right:12px;background:#2d5016;color:#fff;font-size:var(--font-size-xs);padding:3px 10px;" onclick="toggleAffiliatePublish(' + a.id + ',true)">公開中</button>';
+    } else {
+      html += '<button class="btn btn-sm" style="position:absolute;top:8px;right:12px;background:#999;color:#fff;font-size:var(--font-size-xs);padding:3px 10px;" onclick="toggleAffiliatePublish(' + a.id + ',false)">非公開</button>';
+    }
     html += '</div>';
   });
   container.innerHTML = html;
