@@ -643,6 +643,7 @@
             <span class="text-sm text-muted">Anthurium</span>
             <span class="text-sm text-muted" id="detail-created-at" style="margin-left:4px;"></span>
             <span class="text-sm text-muted" id="detail-creator-name" style="margin-left:4px;"></span>
+            <span class="text-sm" id="detail-poster-name" style="margin-left:4px;"></span>
           </div>
         </div>
         <div class="flex gap-sm flex-align-center" id="edit-key-section">
@@ -2537,6 +2538,10 @@
         entry._type = meta.type;
         entry._created_at = meta.created_at || '';
         entry._userId = meta.user_id || null;
+        // Store poster display name from profile cache
+        if (meta.user_id && window._profileCache && window._profileCache[meta.user_id]) {
+          entry._posterName = window._profileCache[meta.user_id];
+        }
         // Extract creatorName from formula in origins
         if (entry.formula && entry.formula.creatorName) {
           entry._creatorName = entry.formula.creatorName;
@@ -2595,6 +2600,9 @@
         }
         if (isSeedling && entry._creatorName) {
           rowHtml += '<div class="text-xs text-muted" style="margin-top:2px;">作出者: ' + entry._creatorName + '</div>';
+        }
+        if (isSeedling && entry._userId && entry._posterName) {
+          rowHtml += '<div class="text-xs" style="margin-top:2px;"><a href="#/profile/' + entry._userId + '" class="poster-link" style="color:var(--color-primary);text-decoration:none;font-size:0.75rem;" onclick="event.stopPropagation();">&#x1F464; ' + entry._posterName + '</a></div>';
         }
         rowHtml += '</div>';
         row.innerHTML = rowHtml;
@@ -2670,11 +2678,29 @@
         refreshGenusUI();
         refreshRecentlyAdded();
 
+        // Profile cache for poster names
+        var _profileCache = {};
+        window._profileCache = _profileCache;
+
         // Then load from Supabase (async, authoritative source)
         if (supabase) {
           supabase.from('cultivars').select('*').then(function(res) {
             if (res.error || !res.data) return;
 
+            // Collect unique user_ids to fetch profiles
+            var userIds = [];
+            res.data.forEach(function(row) {
+              if (row.user_id && userIds.indexOf(row.user_id) === -1) userIds.push(row.user_id);
+            });
+
+            // Fetch all profiles for poster names, then build rows
+            var profilePromise = userIds.length > 0
+              ? supabase.from('profiles').select('id, display_name').in('id', userIds).then(function(pRes) {
+                  if (pRes.data) pRes.data.forEach(function(p) { _profileCache[p.id] = p.display_name || '名前未設定'; });
+                })
+              : Promise.resolve();
+
+            profilePromise.then(function() {
             // Clear ALL rows and in-memory data, then rebuild from DB
             ['anthurium', 'monstera', 'philodendron'].forEach(function(g) {
               var section = document.getElementById('genus-' + g);
@@ -2742,6 +2768,7 @@
                 localStorage.removeItem(STORAGE_KEY);
               }
             } catch(e) {}
+            }); // end profilePromise.then
           });
         }
       }
@@ -3522,6 +3549,16 @@
       var creatorNameEl = document.getElementById('detail-creator-name');
       if (creatorNameEl) {
         creatorNameEl.textContent = (cData && cData._creatorName) ? '作出者: ' + cData._creatorName : '';
+      }
+
+      // Update poster name with profile link (seedlings only)
+      var posterNameEl = document.getElementById('detail-poster-name');
+      if (posterNameEl) {
+        if (isSeedlingDetail && cData && cData._userId && cData._posterName) {
+          posterNameEl.innerHTML = '投稿者: <a href="#/profile/' + cData._userId + '" style="color:var(--color-primary);text-decoration:none;">' + cData._posterName + '</a>';
+        } else {
+          posterNameEl.innerHTML = '';
+        }
       }
 
       // Update breadcrumb
