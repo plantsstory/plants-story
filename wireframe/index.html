@@ -2270,7 +2270,7 @@
           var row = res.data && res.data[0];
           if (row) {
             var key = row.cultivar_name;
-            var entry = { origins: row.origins || [], _type: row.type, _userId: row.user_id, _created_at: row.created_at };
+            var entry = { origins: row.origins || [], _type: row.type, _userId: row.user_id, _created_at: row.created_at, _id: row.id };
             // Extract formula from origins
             (row.origins || []).forEach(function(o) {
               if (o && o._type === 'formula' && o.formula) entry.formula = o.formula;
@@ -2577,6 +2577,7 @@
         entry._type = meta.type;
         entry._created_at = meta.created_at || '';
         entry._userId = meta.user_id || null;
+        if (meta.id) entry._id = meta.id;
         // Store poster display name from profile cache
         if (meta.user_id && window._profileCache && window._profileCache[meta.user_id]) {
           entry._posterName = window._profileCache[meta.user_id];
@@ -2766,7 +2767,7 @@
                 formula: formula
               };
               var genus = row.genus || 'Anthurium';
-              var meta = { genus: genus, type: row.type || 'Hybrid', created_at: row.created_at || '', user_id: row.user_id || null };
+              var meta = { genus: genus, type: row.type || 'Hybrid', created_at: row.created_at || '', user_id: row.user_id || null, id: row.id };
               addCultivarRow(row.cultivar_name, entry, meta);
             });
             refreshGenusUI();
@@ -3324,11 +3325,12 @@
           var dbKey = row.cultivar_name;
           // Populate cultivarData from DB
           if (!cultivarData[dbKey]) {
-            cultivarData[dbKey] = { origins: row.origins || [], _type: row.type, _userId: row.user_id, _created_at: row.created_at };
+            cultivarData[dbKey] = { origins: row.origins || [], _type: row.type, _userId: row.user_id, _created_at: row.created_at, _id: row.id };
           } else {
             cultivarData[dbKey].origins = row.origins || [];
             if (!cultivarData[dbKey]._type) cultivarData[dbKey]._type = row.type;
             if (!cultivarData[dbKey]._userId) cultivarData[dbKey]._userId = row.user_id;
+            if (!cultivarData[dbKey]._id) cultivarData[dbKey]._id = row.id;
           }
           // Extract formula from origins
           extractFormula(cultivarData[dbKey]);
@@ -3635,6 +3637,18 @@
           if (!cData && k.replace(' [Seedling]', '') === cultivarName) cData = cultivarData[k];
         });
       }
+
+      // Store cultivar ID and DB name on the page for edit/delete buttons
+      var _cId = (cData && cData._id) ? cData._id : '';
+      var _cDbName = '';
+      if (cData) {
+        // Find the actual DB key (with [Seedling] if applicable)
+        Object.keys(cultivarData).forEach(function(k) {
+          if (cultivarData[k] === cData) _cDbName = k;
+        });
+      }
+      detailPage.setAttribute('data-cultivar-id', _cId);
+      detailPage.setAttribute('data-cultivar-dbname', _cDbName || cultivarName);
       if (createdAtEl && cData && cData._created_at) {
         var d = new Date(cData._created_at);
         createdAtEl.textContent = d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
@@ -3927,8 +3941,15 @@
         editBtn.disabled = true;
         editBtn.style.opacity = '0.5';
 
-        // Check if logged-in user owns this cultivar (skip edit key)
-        sbClient.from('cultivars').select('id, edit_key_hash, user_id').eq('cultivar_name', cultivarName).limit(1).then(function(res) {
+        // Use stored cultivar ID if available, otherwise search by name
+        var storedId = document.getElementById('page-cultivar').getAttribute('data-cultivar-id');
+        var query;
+        if (storedId) {
+          query = sbClient.from('cultivars').select('id, edit_key_hash, user_id').eq('id', storedId).limit(1);
+        } else {
+          query = sbClient.from('cultivars').select('id, edit_key_hash, user_id').eq('cultivar_name', cultivarName).limit(1);
+        }
+        query.then(function(res) {
           if (res.error) throw new Error(res.error.message);
           if (!res.data || res.data.length === 0) throw new Error('品種が見つかりません');
           var row = res.data[0];
@@ -7017,10 +7038,17 @@
       var cultivarName = h1 ? h1.textContent : '';
       if (!cultivarName) return;
 
-      // Get cultivar ID from Supabase
+      // Get cultivar ID - use stored ID first, fallback to name search
       var sbClient = window._supabaseClient;
       if (!sbClient) { showToast('データベース接続エラー', true); return; }
-      sbClient.from('cultivars').select('id').eq('cultivar_name', cultivarName).limit(1).then(function(res) {
+      var storedId = document.getElementById('page-cultivar').getAttribute('data-cultivar-id');
+      var query;
+      if (storedId) {
+        query = sbClient.from('cultivars').select('id').eq('id', storedId).limit(1);
+      } else {
+        query = sbClient.from('cultivars').select('id').eq('cultivar_name', cultivarName).limit(1);
+      }
+      query.then(function(res) {
         if (res.error || !res.data || res.data.length === 0) {
           showToast('品種が見つかりません', true);
           return;
