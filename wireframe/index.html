@@ -3268,35 +3268,44 @@
       // Always fetch from Supabase to ensure latest data is shown
       var _sb = window._supabaseClient;
       if (_sb) {
-        // Try exact name first, then with [Seedling], then ilike for partial match
-        var fetchPromise = _sb.from('cultivars').select('cultivar_name, origins, ai_status, type, user_id, created_at').eq('cultivar_name', resolvedName).single();
-        fetchPromise.then(function(res) {
-          if (res.error && resolvedName.indexOf('[Seedling]') === -1) {
-            // Try with [Seedling] suffix
-            return _sb.from('cultivars').select('cultivar_name, origins, ai_status, type, user_id, created_at').eq('cultivar_name', resolvedName + ' [Seedling]').single();
-          }
-          return res;
-        }).then(function(res) {
-          if (res.error && resolvedName.indexOf('[Seedling]') === -1) {
-            // Try ilike as last resort
-            return _sb.from('cultivars').select('cultivar_name, origins, ai_status, type, user_id, created_at').ilike('cultivar_name', resolvedName + '%').limit(1).single();
-          }
-          return res;
-        }).then(function(res) {
-          if (res.data && res.data.origins) {
-            var dbKey = res.data.cultivar_name || resolvedName;
-            if (!cultivarData[dbKey]) {
-              cultivarData[dbKey] = { origins: res.data.origins, _type: res.data.type, _userId: res.data.user_id, _created_at: res.data.created_at };
-            } else {
-              cultivarData[dbKey].origins = res.data.origins;
+        // Search with multiple possible names (exact, with [Seedling], ilike)
+        var namesToTry = [resolvedName];
+        if (resolvedName.indexOf('[Seedling]') === -1) {
+          namesToTry.push(resolvedName + ' [Seedling]');
+        }
+        _sb.from('cultivars')
+          .select('cultivar_name, origins, ai_status, type, user_id, created_at')
+          .in('cultivar_name', namesToTry)
+          .limit(1)
+          .then(function(res) {
+            if (res.error || !res.data || res.data.length === 0) {
+              // Last resort: ilike search
+              return _sb.from('cultivars')
+                .select('cultivar_name, origins, ai_status, type, user_id, created_at')
+                .ilike('cultivar_name', resolvedName.replace(' [Seedling]', '') + '%')
+                .limit(1);
             }
-            // Also fetch poster name if needed
-            if (res.data.user_id && window._profileCache && window._profileCache[res.data.user_id]) {
-              cultivarData[dbKey]._posterName = window._profileCache[res.data.user_id];
+            return res;
+          })
+          .then(function(res) {
+            var row = res.data && (Array.isArray(res.data) ? res.data[0] : res.data);
+            if (row && row.origins) {
+              var dbKey = row.cultivar_name;
+              if (!cultivarData[dbKey]) {
+                cultivarData[dbKey] = { origins: row.origins, _type: row.type, _userId: row.user_id, _created_at: row.created_at };
+              } else {
+                cultivarData[dbKey].origins = row.origins;
+                if (!cultivarData[dbKey]._type) cultivarData[dbKey]._type = row.type;
+                if (!cultivarData[dbKey]._userId) cultivarData[dbKey]._userId = row.user_id;
+              }
+              // Fetch poster name if needed
+              if (row.user_id && window._profileCache && window._profileCache[row.user_id]) {
+                cultivarData[dbKey]._posterName = window._profileCache[row.user_id];
+              }
+              renderOriginsInner(dbKey, container);
             }
-            renderOriginsInner(dbKey, container);
-          }
-        });
+          })
+          .catch(function(err) { console.warn('renderOrigins fetch error:', err); });
       }
 
       renderOriginsInner(resolvedName, container);
