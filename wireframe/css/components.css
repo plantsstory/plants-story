@@ -1644,7 +1644,7 @@
 
 .affiliate-banner__grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 12px;
   position: relative;
   z-index: 1;
