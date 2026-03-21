@@ -896,6 +896,12 @@ function editCultivar(id) {
   html += '</select>';
   if (isSeedling) {
     html += '<hr style="margin:var(--space-md) 0;">';
+    html += '<h3 style="font-size:1rem;margin-bottom:var(--space-sm);">交配情報</h3>';
+    html += '<label>交配式 (母株)</label><input type="text" id="edit-parentA" value="' + escapeHtml((formula && formula.parentA) || '') + '" placeholder="例: Anthurium crystallinum">';
+    html += '<label>交配式 (父株)</label><input type="text" id="edit-parentB" value="' + escapeHtml((formula && formula.parentB) || '') + '" placeholder="例: Anthurium magnificum">';
+    html += '<label>作出者</label><input type="text" id="edit-creatorName" value="' + escapeHtml((formula && formula.creatorName) || '') + '" placeholder="作出者名">';
+    html += '<label>播種日</label><input type="text" id="edit-sowingDate" value="' + escapeHtml((formula && formula.sowingDate) || '') + '" placeholder="例: 2025-01">';
+    html += '<hr style="margin:var(--space-md) 0;">';
     html += '<h3 style="font-size:1rem;margin-bottom:var(--space-sm);">親株画像</h3>';
     html += '<label>母株 (Mother) 画像</label>';
     if (formula && formula.motherPhoto) {
@@ -925,22 +931,40 @@ async function saveCultivar(id) {
   var type = document.getElementById('edit-type').value;
   if (!name) { toast('品種名を入力してください'); return; }
 
-  // Handle parent photo uploads for seedlings
+  // Handle seedling formula fields and parent photo uploads
   var c = allCultivars.find(function(x) { return x.id === id; });
   var updatedOrigins = null;
   if (type === 'seedling' && c) {
+    var parentAInput = document.getElementById('edit-parentA');
+    var parentBInput = document.getElementById('edit-parentB');
+    var creatorNameInput = document.getElementById('edit-creatorName');
+    var sowingDateInput = document.getElementById('edit-sowingDate');
     var motherInput = document.getElementById('edit-mother-photo');
     var fatherInput = document.getElementById('edit-father-photo');
     var motherFile = motherInput && motherInput.files[0];
     var fatherFile = fatherInput && fatherInput.files[0];
 
+    var parentA = parentAInput ? parentAInput.value.trim() : '';
+    var parentB = parentBInput ? parentBInput.value.trim() : '';
+    var creatorName = creatorNameInput ? creatorNameInput.value.trim() : '';
+    var sowingDate = sowingDateInput ? sowingDateInput.value.trim() : '';
+
+    // Always update formula fields if any seedling field is present
+    var origins = c.origins ? c.origins.slice() : [];
+    var formulaIdx = -1;
+    var formula = null;
+    origins.forEach(function(o, i) { if (o && o._type === 'formula') { formula = o.formula; formulaIdx = i; } });
+    if (!formula) formula = {};
+
+    // Update formula text fields
+    if (parentA) formula.parentA = parentA; else delete formula.parentA;
+    if (parentB) formula.parentB = parentB; else delete formula.parentB;
+    if (creatorName) formula.creatorName = creatorName; else delete formula.creatorName;
+    if (sowingDate) formula.sowingDate = sowingDate; else delete formula.sowingDate;
+
+    var needsOriginUpdate = true;
+
     if (motherFile || fatherFile) {
-      // Get existing origins and formula
-      var origins = c.origins ? c.origins.slice() : [];
-      var formulaIdx = -1;
-      var formula = null;
-      origins.forEach(function(o, i) { if (o && o._type === 'formula') { formula = o.formula; formulaIdx = i; } });
-      if (!formula) formula = {};
 
       // Upload photos (with compression)
       var safeName = name.replace(/[^a-zA-Z0-9]/g, '_');
@@ -960,6 +984,14 @@ async function saveCultivar(id) {
       }
 
       // Update formula in origins
+      if (formulaIdx >= 0) {
+        origins[formulaIdx].formula = formula;
+      } else {
+        origins.push({ _type: 'formula', formula: formula });
+      }
+      updatedOrigins = origins;
+    } else if (needsOriginUpdate) {
+      // No photo changes but formula text fields changed
       if (formulaIdx >= 0) {
         origins[formulaIdx].formula = formula;
       } else {
