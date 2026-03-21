@@ -2190,6 +2190,20 @@ function showAffiliateForm(data) {
       return;
     }
 
+    // Shift sort_order of existing items if conflict
+    var conflicting = allAffiliates.filter(function(a) {
+      return a.sort_order >= payload.sort_order && (!isEdit || a.id !== data.id);
+    }).sort(function(a, b) { return a.sort_order - b.sort_order; });
+
+    if (conflicting.length > 0 && conflicting[0].sort_order === payload.sort_order) {
+      var nextOrder = payload.sort_order;
+      for (var i = 0; i < conflicting.length; i++) {
+        if (conflicting[i].sort_order !== nextOrder) break;
+        await sb.from('affiliates').update({ sort_order: nextOrder + 1 }).eq('id', conflicting[i].id);
+        nextOrder++;
+      }
+    }
+
     var result;
     if (isEdit) {
       result = await sb.from('affiliates').update(payload).eq('id', data.id);
