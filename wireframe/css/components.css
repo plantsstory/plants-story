@@ -265,15 +265,32 @@
 }
 
 .genus-card__img {
-  width: 110px;
-  height: 110px;
+  width: 120px;
+  height: 120px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--color-lighter) 0%, #D4E7D9 100%);
   margin: 0 auto var(--space-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--font-size-3xl);
+  overflow: hidden;
+}
+
+.genus-card__img--anthurium {
+  background: linear-gradient(135deg, #2B3A35 0%, #1B4332 100%);
+}
+
+.genus-card__img--monstera {
+  background: linear-gradient(135deg, #2B3A35 0%, #1B4332 100%);
+}
+
+.genus-card__img--philodendron {
+  background: linear-gradient(135deg, #2B3A35 0%, #1B4332 100%);
+}
+
+.genus-card__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .genus-card__title {
