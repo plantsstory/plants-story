@@ -2090,6 +2090,15 @@ function showAffiliateForm(data) {
 
   html += '<hr style="border:none;border-top:1px solid var(--color-light);margin:var(--space-sm) 0;">';
   html += '<h4 style="font-size:var(--font-size-sm);color:var(--color-gray);">🔗 アフィリエイトURL</h4>';
+
+  // Rakuten HTML paste area
+  html += '<div style="background:var(--color-bg);border:2px dashed var(--color-light);border-radius:var(--radius-md);padding:var(--space-md);margin-bottom:var(--space-sm);">';
+  html += '<label style="font-size:var(--font-size-sm);font-weight:600;color:var(--color-primary);">📋 楽天HTMLを貼り付け（自動でURL＋画像を抽出）</label>';
+  html += '<textarea class="form-input" id="rakuten-html-paste" rows="3" placeholder="楽天アフィリエイトのHTMLコードをここに貼り付けてください..." style="margin-top:var(--space-xs);font-size:var(--font-size-xs);"></textarea>';
+  html += '<button type="button" class="btn btn-primary btn-sm" id="btn-parse-rakuten" style="margin-top:var(--space-xs);">抽出する</button>';
+  html += '<span id="rakuten-parse-result" style="font-size:var(--font-size-xs);margin-left:var(--space-sm);color:var(--color-gray);"></span>';
+  html += '</div>';
+
   html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">Amazon URL</label><input class="form-input" name="amazon" value="' + escapeHtml(data.amazon || '') + '" placeholder="https://amzn.to/..."></div>';
   html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">楽天 URL</label><textarea class="form-input" name="rakuten" rows="2" placeholder="https://hb.afl.rakuten.co.jp/...">' + escapeHtml(data.rakuten || '') + '</textarea></div>';
   html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">Yahoo URL</label><input class="form-input" name="yahoo" value="' + escapeHtml(data.yahoo || '') + '" placeholder="https://yahoo.jp/..."></div>';
@@ -2102,6 +2111,51 @@ function showAffiliateForm(data) {
   html += '</form>';
 
   showModal(html);
+
+  // Rakuten HTML parser
+  document.getElementById('btn-parse-rakuten').addEventListener('click', function() {
+    var rawHtml = document.getElementById('rakuten-html-paste').value.trim();
+    var resultEl = document.getElementById('rakuten-parse-result');
+    if (!rawHtml) { resultEl.textContent = '❌ HTMLを貼り付けてください'; resultEl.style.color = 'red'; return; }
+
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(rawHtml, 'text/html');
+
+    // Extract link URL (hb.afl.rakuten.co.jp)
+    var linkUrl = '';
+    var imgUrl = '';
+    var links = doc.querySelectorAll('a[href*="hb.afl.rakuten.co.jp"]');
+    if (links.length > 0) linkUrl = links[0].getAttribute('href');
+
+    // Extract image URL (hbb.afl.rakuten.co.jp)
+    var imgs = doc.querySelectorAll('img[src*="hbb.afl.rakuten.co.jp"]');
+    if (imgs.length > 0) imgUrl = imgs[0].getAttribute('src');
+
+    // Also try to extract from src attributes if img not found
+    if (!imgUrl) {
+      var allImgs = doc.querySelectorAll('img[src]');
+      for (var i = 0; i < allImgs.length; i++) {
+        var src = allImgs[i].getAttribute('src');
+        if (src && src.indexOf('rakuten') !== -1) { imgUrl = src; break; }
+      }
+    }
+
+    var form = document.getElementById('affiliate-form');
+    var filled = 0;
+    if (linkUrl) { form.rakuten.value = linkUrl; filled++; }
+    if (imgUrl) { form.image.value = imgUrl; filled++; }
+
+    if (filled === 2) {
+      resultEl.textContent = '✅ 楽天URL + 画像URLを抽出しました！';
+      resultEl.style.color = 'green';
+    } else if (filled === 1) {
+      resultEl.textContent = '⚠️ ' + (linkUrl ? 'リンクURL' : '画像URL') + 'のみ抽出しました';
+      resultEl.style.color = 'orange';
+    } else {
+      resultEl.textContent = '❌ URLを抽出できませんでした。HTMLを確認してください';
+      resultEl.style.color = 'red';
+    }
+  });
 
   document.getElementById('affiliate-form').addEventListener('submit', async function(e) {
     e.preventDefault();
