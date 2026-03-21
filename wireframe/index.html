@@ -6037,36 +6037,32 @@
     // ========================================
     // AFFILIATE LINKS
     // ========================================
-    var affiliateProducts = [
-      { name: '自動ミストスプレー', nameEn: 'Auto Mist Sprayer',
-        productName: '霧吹きスプレー 1L EasyPump', productNameEn: 'Mist Spray 1L EasyPump',
-        image: 'https://hbb.afl.rakuten.co.jp/hgb/51ddedb3.99449b0c.51ddedb4.4e65ef0f/?me_id=1205937&item_id=10048478&pc=https%3A%2F%2Fthumbnail.image.rakuten.co.jp%2F%400_mall%2Fe-kurashi%2Fcabinet%2Fmain-img%2F017%2Fmain-s1j71.jpg%3F_ex%3D128x128&s=128x128&t=picttext',
-        icon: '🌫️', badge: '', badgeEn: '',
-        rakuten: 'https://hb.afl.rakuten.co.jp/ichiba/51ddedb3.99449b0c.51ddedb4.4e65ef0f/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fe-kurashi%2Fs1j71%2F&link_type=picttext&ut=eyJwYWdlIjoiaXRlbSIsInR5cGUiOiJwaWN0dGV4dCIsInNpemUiOiI2NHg2NCIsIm5hbSI6MSwibmFtcCI6InJpZ2h0IiwiY29tIjoxLCJjb21wIjoiZG93biIsInByaWNlIjoxLCJib3IiOjEsImNvbCI6MSwiYmJ0biI6MSwicHJvZCI6MCwiYW1wIjpmYWxzZX0%3D',
-        amazon: 'https://amzn.to/4lvXyzJ',
-        yahoo: 'https://yahoo.jp/emnJPd' },
-      { name: '活力剤', nameEn: 'Plant Tonic',
-        productName: 'SUPERthrive 120ml', productNameEn: 'SUPERthrive 120ml',
-        image: 'https://hbb.afl.rakuten.co.jp/hgb/51dd831e.837c2978.51dd831f.625495f3/?me_id=1309279&item_id=10000665&pc=https%3A%2F%2Fthumbnail.image.rakuten.co.jp%2F%400_mall%2Fshizen-midori%2Fcabinet%2F06097639%2Fimgrc0072515745.jpg%3F_ex%3D128x128&s=128x128&t=picttext',
-        icon: '💧', badge: '', badgeEn: '',
-        rakuten: 'https://hb.afl.rakuten.co.jp/ichiba/51dd831e.837c2978.51dd831f.625495f3/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fshizen-midori%2F10000665%2F&link_type=picttext&ut=eyJwYWdlIjoiaXRlbSIsInR5cGUiOiJwaWN0dGV4dCIsInNpemUiOiI2NHg2NCIsIm5hbSI6MSwibmFtcCI6InJpZ2h0IiwiY29tIjoxLCJjb21wIjoiZG93biIsInByaWNlIjoxLCJib3IiOjEsImNvbCI6MSwiYmJ0biI6MSwicHJvZCI6MCwiYW1wIjpmYWxzZX0%3D',
-        amazon: 'https://amzn.asia/d/04vTWQvL',
-        yahoo: 'https://yahoo.jp/P6uRdw' },
-      { name: '用土・培養土', nameEn: 'Soil & Mix',
-        productName: '硬質 Premium 室内用土', productNameEn: 'Premium Indoor Soil Mix',
-        image: 'https://hbb.afl.rakuten.co.jp/hgb/51ddadd6.592101ce.51ddadd7.b054826c/?me_id=1285727&item_id=10121878&pc=https%3A%2F%2Fthumbnail.image.rakuten.co.jp%2F%400_mall%2Fplusys7022%2Fcabinet%2Fmomiyama02%2F8314211.jpg%3F_ex%3D128x128&s=128x128&t=picttext',
-        icon: '🌱', badge: '', badgeEn: '',
-        rakuten: 'https://hb.afl.rakuten.co.jp/ichiba/51ddadd6.592101ce.51ddadd7.b054826c/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fplusys7022%2F831421%2F&link_type=picttext&ut=eyJwYWdlIjoiaXRlbSIsInR5cGUiOiJwaWN0dGV4dCIsInNpemUiOiI2NHg2NCIsIm5hbSI6MSwibmFtcCI6InJpZ2h0IiwiY29tIjoxLCJjb21wIjoiZG93biIsInByaWNlIjoxLCJib3IiOjEsImNvbCI6MSwiYmJ0biI6MSwicHJvZCI6MCwiYW1wIjpmYWxzZX0%3D',
-        amazon: 'https://amzn.to/4lrlhRF',
-        yahoo: 'https://yahoo.jp/4NhWnuz' },
-      { name: '肥料', nameEn: 'Fertilizer',
-        productName: '緩効性肥料 中粒 1.1kg', productNameEn: 'Slow-Release Fertilizer 1.1kg',
-        image: 'https://hbb.afl.rakuten.co.jp/hgb/51de4d0b.50683493.51de4d0c.ec188041/?me_id=1343746&item_id=10163305&pc=https%3A%2F%2Fthumbnail.image.rakuten.co.jp%2F%400_mall%2Fkohnan-eshop%2Fcabinet%2Fgoods%2F202309%2Fs1%2F4977517012955.jpg%3F_ex%3D128x128&s=128x128&t=picttext',
-        icon: '🌿', badge: '', badgeEn: '',
-        rakuten: 'https://hb.afl.rakuten.co.jp/ichiba/51de4d0b.50683493.51de4d0c.ec188041/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fkohnan-eshop%2F4977517012955%2F&link_type=picttext&ut=eyJwYWdlIjoiaXRlbSIsInR5cGUiOiJwaWN0dGV4dCIsInNpemUiOiI2NHg2NCIsIm5hbSI6MSwibmFtcCI6InJpZ2h0IiwiY29tIjoxLCJjb21wIjoiZG93biIsInByaWNlIjoxLCJib3IiOjEsImNvbCI6MSwiYmJ0biI6MSwicHJvZCI6MCwiYW1wIjpmYWxzZX0%3D',
-        amazon: 'https://amzn.to/4biVKoV',
-        yahoo: 'https://yahoo.jp/S4_cwH' }
-    ];
+    var affiliateProducts = [];
+
+    // Load affiliates from Supabase
+    (async function() {
+      try {
+        var sbAff = window._supabaseClient;
+        if (!sbAff) throw new Error('No supabase client');
+        var result = await sbAff.from('affiliates').select('*').order('sort_order');
+        if (result.data && result.data.length > 0) {
+          affiliateProducts = result.data.map(function(a) {
+            return {
+              name: a.name, nameEn: a.name_en || a.name,
+              productName: a.product_name, productNameEn: a.product_name_en || a.product_name,
+              image: a.image || '', icon: a.icon || '🛒',
+              badge: a.badge || '', badgeEn: a.badge_en || '',
+              rakuten: a.rakuten || '', amazon: a.amazon || '', yahoo: a.yahoo || ''
+            };
+          });
+        }
+      } catch (e) { console.warn('Affiliate load error:', e); }
+      // Render after load
+      renderAffiliateBanner('top-affiliate-grid');
+      document.querySelectorAll('.genus-affiliate-grid').forEach(function(grid) {
+        renderAffiliateBanner(grid);
+      });
+    })();
 
     // Render affiliate cards in banner style
     function renderAffiliateBanner(containerOrId, options) {
@@ -6103,10 +6099,7 @@
       container.innerHTML = html;
     }
 
-    // Render on page load
-    renderAffiliateBanner('top-affiliate-grid');
-
-    // Add affiliate banner to all genus pages
+    // Add affiliate banner containers to all genus pages (data filled by async loader above)
     document.querySelectorAll('.genus-content').forEach(function(genusEl) {
       var section = document.createElement('div');
       section.className = 'affiliate-section mt-lg';
@@ -6116,7 +6109,6 @@
         '<p class="affiliate-notice" data-i18n="affiliate_notice">' + t('affiliate_notice') + '</p>' +
         '</div>';
       genusEl.appendChild(section);
-      renderAffiliateBanner(section.querySelector('.genus-affiliate-grid'));
     });
 
     // Hook into updateCultivarDetail
