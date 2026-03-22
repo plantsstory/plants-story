@@ -3282,14 +3282,17 @@
       var detailPage = document.getElementById('page-cultivar');
       if (!detailPage) return;
 
-      // Determine genus from the name
-      var genusName = 'Anthurium';
-      var genusKey = 'anthurium';
-      if (cultivarName.toLowerCase().startsWith('monstera')) {
-        genusName = 'Monstera'; genusKey = 'monstera';
-      } else if (cultivarName.toLowerCase().startsWith('philodendron')) {
-        genusName = 'Philodendron'; genusKey = 'philodendron';
-      }
+      // Determine genus from the name (dynamic, supports all genera)
+      var genusName = '';
+      var genusKey = '';
+      var _lowerName = cultivarName.toLowerCase();
+      (window._generaData || []).forEach(function(g) {
+        if (_lowerName.startsWith(g.slug)) {
+          genusName = g.name;
+          genusKey = g.slug;
+        }
+      });
+      if (!genusName) { genusName = 'Unknown'; genusKey = ''; }
 
       // Short name for breadcrumb
       var shortName = cultivarName.replace(' [Seedling]', '').replace(genusName + ' ', '').replace(/'/g, '');
@@ -3746,18 +3749,18 @@
       }
     })();
 
-    // ---- Genus search button click ----
-    document.querySelectorAll('.genus-content .search-bar__btn').forEach(function(btn) {
-      btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        var genusEl = this.closest('.genus-content');
-        var input = genusEl ? genusEl.querySelector('.search-bar__input') : null;
-        if (genusEl && input) {
-          filterGenusRows(genusEl, input.value);
-          paginateGenus(genusEl, 1);
-        }
-      });
+    // ---- Genus search button click (event delegation for dynamic content) ----
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.genus-content .search-bar__btn');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var genusEl = btn.closest('.genus-content');
+      var input = genusEl ? genusEl.querySelector('.search-bar__input') : null;
+      if (genusEl && input) {
+        filterGenusRows(genusEl, input.value);
+        paginateGenus(genusEl, 1);
+      }
     });
 
     // ---- Initialize pagination on load (deferred for dynamic genus content) ----
@@ -4929,7 +4932,7 @@
         contributeName.addEventListener('input', function() {
           var inputVal = this.value.trim().toLowerCase();
           if (inputVal.length < 1) { duplicateAlert.style.display = 'none'; return; }
-          var genus = contributeGenus ? contributeGenus.value : 'Anthurium';
+          var genus = contributeGenus ? contributeGenus.value : ((window._generaData && window._generaData[0]) ? window._generaData[0].name : '');
           var currentType = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
           currentType = currentType ? currentType.value : 'species';
           var exactKey;
