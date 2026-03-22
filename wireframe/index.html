@@ -45,9 +45,7 @@
   <!-- Mobile Nav -->
   <div class="mobile-nav" id="mobileNav">
     <a href="#" data-nav="top" data-i18n="nav_home">&#x1F3E0; Home</a>
-    <a href="#" data-nav="genus" data-genus="anthurium">&#x1F33F; Anthurium</a>
-    <a href="#" data-nav="genus" data-genus="monstera">&#x1F33F; Monstera</a>
-    <a href="#" data-nav="genus" data-genus="philodendron">&#x1F33F; Philodendron</a>
+    <span id="mobile-nav-genera"></span>
     <a href="#" data-nav="favorites" data-i18n="nav_favorites">&#x2606; お気に入り</a>
     <a href="#" data-nav="mypost" id="nav-mypost" style="display:none;">&#x1F4DD; 投稿履歴</a>
     <a href="#" id="nav-profile" style="display:none;" onclick="document.getElementById('mobileNav').classList.remove('open');">&#x1F464; プロフィール</a>
@@ -84,28 +82,8 @@
       <!-- Genus Cards -->
       <div class="mt-2xl">
         <h2 class="section-title text-center" data-i18n="browse_genus">属から探す</h2>
-        <div class="grid grid--3">
-          <div class="card genus-card card--clickable" data-nav="genus" data-genus="anthurium">
-            <div class="genus-card__img genus-card__img--anthurium">
-              <img src="images/anthurium.png" alt="Anthurium" class="genus-card__photo">
-            </div>
-            <div class="genus-card__title">Anthurium</div>
-            <div class="genus-card__count" data-i18n="cultivar_count">- 品種</div>
-          </div>
-          <div class="card genus-card card--clickable" data-nav="genus" data-genus="monstera">
-            <div class="genus-card__img genus-card__img--monstera">
-              <img src="images/monstera.png" alt="Monstera" class="genus-card__photo">
-            </div>
-            <div class="genus-card__title">Monstera</div>
-            <div class="genus-card__count" data-i18n="monstera_count">- 品種</div>
-          </div>
-          <div class="card genus-card card--clickable" data-nav="genus" data-genus="philodendron">
-            <div class="genus-card__img genus-card__img--philodendron">
-              <img src="images/philodendron.png" alt="Philodendron" class="genus-card__photo">
-            </div>
-            <div class="genus-card__title">Philodendron</div>
-            <div class="genus-card__count" data-i18n="philodendron_count">- 品種</div>
-          </div>
+        <div class="grid grid--3" id="genus-cards-grid">
+          <div class="text-center text-muted" style="grid-column:1/-1;">読み込み中...</div>
         </div>
         <div class="text-center mt-lg">
           <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="add_cultivar">+ 品種を追加</a>
@@ -166,451 +144,9 @@
   <section id="page-genus" class="page">
     <div class="container">
 
-      <!-- ===== Anthurium ===== -->
-      <div class="genus-content" id="genus-anthurium">
-        <h1 class="section-title">Anthurium</h1>
-        <p class="text-muted mb-lg">読み込み中...</p>
-
-        <div class="genus-tabs" id="genus-tabs-anthurium">
-          <button class="genus-tab active" data-tab="species-clones">&#x1F4D6; Species / Clones</button>
-          <button class="genus-tab" data-tab="seedlings">&#x1F331; My Seedlings</button>
-        </div>
-
-        <div data-genus-view="species-clones">
-        <div class="sort-bar">
-          <div class="search-bar" style="max-width:300px;margin:0;">
-            <input type="text" class="search-bar__input" placeholder="属内を検索..." data-i18n-placeholder="genus_search">
-            <button class="search-bar__btn">&#x1F50D;</button>
-          </div>
-          <div class="chips">
-            <span class="chip active" data-i18n="sort_name">名前順</span>
-            <span class="chip" data-i18n="sort_trust">信頼度順</span>
-            <span class="chip" data-i18n="sort_newest">新着順</span>
-          </div>
-          <a href="#" class="btn btn--primary btn--sm" data-nav="contribute" data-genus="Anthurium" data-i18n="add_cultivar" style="margin-left:auto;">+ 品種を追加</a>
-        </div>
-
-        <div class="card" style="padding:0;">
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Anthurium crystallinum</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 3件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:95%"></div></div><span class="trust__label">95%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Anthurium warocqueanum</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 2件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:88%"></div></div><span class="trust__label">88%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Anthurium 'Dark Mama'</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 4件</span>
-                <span class="badge badge--hybrid">Hybrid</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:72%"></div></div><span class="trust__label">72%</span></div>
-              </div>
-              <div class="text-sm text-muted mt-sm">
-                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">A. crystallinum</span>
-                <span class="formula-operator" style="font-size:0.875rem;">&times;</span>
-                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">A. warocqueanum</span>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Anthurium veitchii</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 1件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:83%"></div></div><span class="trust__label">83%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Anthurium 'Ace of Spades'</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 1件</span>
-                <span class="badge badge--hybrid">Hybrid</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--mid" style="width:55%"></div></div><span class="trust__label">55%</span></div>
-              </div>
-              <div class="text-sm text-muted mt-sm">交配式: 不明</div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Anthurium 'Queen of Hearts'</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 2件</span>
-                <span class="badge badge--clone">Clone</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--mid" style="width:61%"></div></div><span class="trust__label">61%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Anthurium clarinervium</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 3件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:89%"></div></div><span class="trust__label">89%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Anthurium magnificum</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 2件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:86%"></div></div><span class="trust__label">86%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Anthurium 'Forgetii'</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 1件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:79%"></div></div><span class="trust__label">79%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Anthurium 'Magnificum x Crystallinum'</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 2件</span>
-                <span class="badge badge--hybrid">Hybrid</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--mid" style="width:64%"></div></div><span class="trust__label">64%</span></div>
-              </div>
-              <div class="text-sm text-muted mt-sm">
-                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">A. magnificum</span>
-                <span class="formula-operator" style="font-size:0.875rem;">&times;</span>
-                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">A. crystallinum</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="pagination"></div>
-
-        <div class="ad-placeholder mt-lg">
-          <span class="ad-placeholder__label" data-i18n="ad_label">広告</span>
-          <div class="ad-placeholder__slot">Google AdSense</div>
-        </div>
-
-        </div><!-- /species-clones view -->
-
-        <div data-genus-view="seedlings" style="display:none;">
-          <div class="sort-bar">
-            <div class="search-bar" style="max-width:300px;margin:0;">
-              <input type="text" class="search-bar__input seedling-search" placeholder="実生を検索...">
-              <button class="search-bar__btn">&#x1F50D;</button>
-            </div>
-            <a href="#" class="btn btn--primary btn--sm" data-nav="contribute" data-genus="Anthurium" data-contribute-type="seedling" style="margin-left:auto;">+ 実生を追加</a>
-          </div>
-          <div class="card seedling-list" style="padding:0;">
-            <div class="text-center text-muted" style="padding:var(--space-xl);">まだ実生が登録されていません。</div>
-          </div>
-          <div class="pagination seedling-pagination"></div>
-        </div><!-- /seedlings view -->
-
-      </div>
-
-      <!-- ===== Monstera ===== -->
-      <div class="genus-content" id="genus-monstera" style="display:none;">
-        <h1 class="section-title">Monstera</h1>
-        <p class="text-muted mb-lg">読み込み中...</p>
-
-        <div class="sort-bar">
-          <div class="search-bar" style="max-width:300px;margin:0;">
-            <input type="text" class="search-bar__input" placeholder="属内を検索..." data-i18n-placeholder="genus_search">
-            <button class="search-bar__btn">&#x1F50D;</button>
-          </div>
-          <div class="chips">
-            <span class="chip active" data-i18n="sort_name">名前順</span>
-            <span class="chip" data-i18n="sort_trust">信頼度順</span>
-            <span class="chip" data-i18n="sort_newest">新着順</span>
-          </div>
-          <a href="#" class="btn btn--primary btn--sm" data-nav="contribute" data-genus="Monstera" data-i18n="add_cultivar" style="margin-left:auto;">+ 品種を追加</a>
-        </div>
-
-        <div class="card" style="padding:0;">
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><ellipse cx="24" cy="12" rx="2.5" ry="3.5" fill="#F5F7F2" opacity="0.6"/><ellipse cx="12" cy="24" rx="2" ry="3" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Monstera deliciosa</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 5件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:97%"></div></div><span class="trust__label">97%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><ellipse cx="24" cy="12" rx="2.5" ry="3.5" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Monstera adansonii</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 3件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:92%"></div></div><span class="trust__label">92%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Monstera deliciosa 'Thai Constellation'</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 6件</span>
-                <span class="badge badge--clone">Clone</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:85%"></div></div><span class="trust__label">85%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><ellipse cx="24" cy="12" rx="2.5" ry="3.5" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Monstera deliciosa 'Albo Variegata'</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 4件</span>
-                <span class="badge badge--clone">Clone</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:78%"></div></div><span class="trust__label">78%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Monstera obliqua</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 2件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:90%"></div></div><span class="trust__label">90%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><ellipse cx="24" cy="12" rx="2.5" ry="3.5" fill="#F5F7F2" opacity="0.6"/><ellipse cx="12" cy="24" rx="2" ry="3" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Monstera siltepecana</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 1件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--mid" style="width:65%"></div></div><span class="trust__label">65%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Monstera dubia</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 2件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:81%"></div></div><span class="trust__label">81%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><ellipse cx="24" cy="12" rx="2.5" ry="3.5" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Monstera standleyana</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 1件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:74%"></div></div><span class="trust__label">74%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><ellipse cx="20" cy="20" rx="14" ry="16" fill="#2D6A4F" opacity="0.3"/><ellipse cx="14" cy="14" rx="3" ry="4" fill="#F5F7F2" opacity="0.6"/><ellipse cx="24" cy="12" rx="2.5" ry="3.5" fill="#F5F7F2" opacity="0.6"/><ellipse cx="12" cy="24" rx="2" ry="3" fill="#F5F7F2" opacity="0.6"/><path d="M20 4V36" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Monstera deliciosa 'Aurea'</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 3件</span>
-                <span class="badge badge--clone">Clone</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--mid" style="width:68%"></div></div><span class="trust__label">68%</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="pagination"></div>
-
-        <div class="ad-placeholder mt-lg">
-          <span class="ad-placeholder__label" data-i18n="ad_label">広告</span>
-          <div class="ad-placeholder__slot">Google AdSense</div>
-        </div>
-
-      </div>
-
-      <!-- ===== Philodendron ===== -->
-      <div class="genus-content" id="genus-philodendron" style="display:none;">
-        <h1 class="section-title">Philodendron</h1>
-        <p class="text-muted mb-lg">読み込み中...</p>
-
-        <div class="sort-bar">
-          <div class="search-bar" style="max-width:300px;margin:0;">
-            <input type="text" class="search-bar__input" placeholder="属内を検索..." data-i18n-placeholder="genus_search">
-            <button class="search-bar__btn">&#x1F50D;</button>
-          </div>
-          <div class="chips">
-            <span class="chip active" data-i18n="sort_name">名前順</span>
-            <span class="chip" data-i18n="sort_trust">信頼度順</span>
-            <span class="chip" data-i18n="sort_newest">新着順</span>
-          </div>
-          <a href="#" class="btn btn--primary btn--sm" data-nav="contribute" data-genus="Philodendron" data-i18n="add_cultivar" style="margin-left:auto;">+ 品種を追加</a>
-        </div>
-
-        <div class="card" style="padding:0;">
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 10L13 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 10L27 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Philodendron gloriosum</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 4件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:94%"></div></div><span class="trust__label">94%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 14L14 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 14L26 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Philodendron melanochrysum</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 3件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:91%"></div></div><span class="trust__label">91%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 10L13 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 10L27 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Philodendron 'Glorious'</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 5件</span>
-                <span class="badge badge--hybrid">Hybrid</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:82%"></div></div><span class="trust__label">82%</span></div>
-              </div>
-              <div class="text-sm text-muted mt-sm">
-                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">P. gloriosum</span>
-                <span class="formula-operator" style="font-size:0.875rem;">&times;</span>
-                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">P. melanochrysum</span>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 14L14 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 14L26 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Philodendron verrucosum</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 2件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:87%"></div></div><span class="trust__label">87%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 10L13 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 10L27 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Philodendron 'El Choco Red'</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 3件</span>
-                <span class="badge badge--hybrid">Hybrid</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--mid" style="width:58%"></div></div><span class="trust__label">58%</span></div>
-              </div>
-              <div class="text-sm text-muted mt-sm">交配式: 不明</div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 14L14 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 14L26 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Philodendron 'Splendid'</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 2件</span>
-                <span class="badge badge--hybrid">Hybrid</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:76%"></div></div><span class="trust__label">76%</span></div>
-              </div>
-              <div class="text-sm text-muted mt-sm">
-                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">P. verrucosum</span>
-                <span class="formula-operator" style="font-size:0.875rem;">&times;</span>
-                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">P. melanochrysum</span>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 10L13 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 10L27 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Philodendron squamiferum</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 2件</span>
-                <span class="badge badge--species">原種</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:84%"></div></div><span class="trust__label">84%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 14L14 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 14L26 20" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Philodendron erubescens 'Pink Princess'</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 4件</span>
-                <span class="badge badge--clone">Clone</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--high" style="width:71%"></div></div><span class="trust__label">71%</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="cultivar-row" data-nav="cultivar">
-            <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 2C15 6 8 12 8 22C8 30 13 36 20 38C27 36 32 30 32 22C32 12 25 6 20 2Z" fill="#2D6A4F" opacity="0.3"/><path d="M20 2V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.3"/><path d="M20 10L13 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/><path d="M20 10L27 18" stroke="#1B4332" stroke-width="0.7" fill="none" opacity="0.25"/></svg></div>
-            <div class="cultivar-row__info">
-              <div class="cultivar-row__name">Philodendron 'Majestic'</div>
-              <div class="cultivar-row__meta">
-                <span>由来: 1件</span>
-                <span class="badge badge--hybrid">Hybrid</span>
-                <div class="trust"><div class="trust__bar"><div class="trust__fill trust--mid" style="width:52%"></div></div><span class="trust__label">52%</span></div>
-              </div>
-              <div class="text-sm text-muted mt-sm">
-                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">P. verrucosum</span>
-                <span class="formula-operator" style="font-size:0.875rem;">&times;</span>
-                <span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">P. sodiroi</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="pagination"></div>
-
-        <div class="ad-placeholder mt-lg">
-          <span class="ad-placeholder__label" data-i18n="ad_label">広告</span>
-          <div class="ad-placeholder__slot">Google AdSense</div>
-        </div>
-
+      <div id="genus-sections-container">
+        <!-- Genus content sections are dynamically generated from genera table -->
+        <div class="text-center text-muted" style="padding:var(--space-xl);">読み込み中...</div>
       </div>
 
     </div>
@@ -855,11 +391,8 @@
 
         <div class="form-group">
           <label class="form-label" data-i18n="label_genus">属</label>
-          <select class="form-select">
+          <select class="form-select" id="contribute-genus-select">
             <option value="" disabled selected data-i18n="select_genus_placeholder">-- 選択してください --</option>
-            <option>Anthurium</option>
-            <option>Monstera</option>
-            <option>Philodendron</option>
           </select>
         </div>
 
@@ -1557,7 +1090,7 @@
     // Known simple pages (no sub-parameters)
     var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'favorites', 'mypost'];
     // Known genus names for URL mapping
-    var knownGenera = ['anthurium', 'monstera', 'philodendron'];
+    var knownGenera = []; // Populated dynamically from genera table
 
     function buildHash(page, options) {
       options = options || {};
@@ -1647,15 +1180,27 @@
       navigateTo(state.page, state, false);
     });
 
-    // Handle initial route on page load
-    (function handleInitialRoute() {
+    // Handle initial route on page load (deferred until genera are loaded)
+    function handleInitialRoute() {
       var state = parseHash();
       if (state.page !== 'top') {
         navigateTo(state.page, state, false);
       }
       // Record initial state so back button works from first navigation
       history.replaceState({ page: state.page, genus: state.genus, cultivar: state.cultivar, userId: state.userId }, '', buildHash(state.page, state));
-    })();
+    }
+    // Wait for genera to load before routing (genera create the DOM targets)
+    if (window._generaLoaded) {
+      window._generaLoaded.then(handleInitialRoute);
+    } else {
+      // Fallback: genera may not be loaded yet, defer
+      var _checkGenera = setInterval(function() {
+        if (window._generaLoaded) {
+          clearInterval(_checkGenera);
+          window._generaLoaded.then(handleInitialRoute);
+        }
+      }, 50);
+    }
 
     // ---- Cultivar origin data ----
     // 信頼度基準:
@@ -2128,6 +1673,157 @@
         }
       } catch(e) { console.warn('Supabase init failed:', e); }
 
+      // --- Genera: load genus config from DB and generate DOM ---
+      window._generaData = [];
+      window._generaLoaded = null; // Will be set to a Promise
+
+      function loadGenera() {
+        if (!supabase) {
+          // Fallback: hardcoded genera if Supabase is not available
+          window._generaData = [
+            { name: 'Anthurium', slug: 'anthurium', display_order: 1, has_seedlings: true, card_image_path: 'anthurium.png' },
+            { name: 'Monstera', slug: 'monstera', display_order: 2, has_seedlings: false, card_image_path: 'monstera.png' },
+            { name: 'Philodendron', slug: 'philodendron', display_order: 3, has_seedlings: false, card_image_path: 'philodendron.png' }
+          ];
+          applyGeneraData();
+          return Promise.resolve();
+        }
+        return supabase.from('genera').select('*').order('display_order').then(function(res) {
+          if (res.error || !res.data || res.data.length === 0) {
+            console.warn('Failed to load genera, using fallback:', res.error);
+            window._generaData = [
+              { name: 'Anthurium', slug: 'anthurium', display_order: 1, has_seedlings: true, card_image_path: 'anthurium.png' },
+              { name: 'Monstera', slug: 'monstera', display_order: 2, has_seedlings: false, card_image_path: 'monstera.png' },
+              { name: 'Philodendron', slug: 'philodendron', display_order: 3, has_seedlings: false, card_image_path: 'philodendron.png' }
+            ];
+          } else {
+            window._generaData = res.data;
+          }
+          applyGeneraData();
+        });
+      }
+
+      function applyGeneraData() {
+        var data = window._generaData;
+        // Update routing arrays
+        knownGenera = data.map(function(g) { return g.slug; });
+        SEEDLING_GENERA = data.filter(function(g) { return g.has_seedlings; }).map(function(g) { return g.slug; });
+        window.SEEDLING_GENERA = SEEDLING_GENERA;
+        // Generate DOM
+        renderMobileNavGenera();
+        renderGenusCards();
+        renderGenusContentSections();
+        renderContributeGenusOptions();
+      }
+
+      function renderMobileNavGenera() {
+        var container = document.getElementById('mobile-nav-genera');
+        if (!container) return;
+        var html = '';
+        window._generaData.forEach(function(g) {
+          html += '<a href="#" data-nav="genus" data-genus="' + g.slug + '">&#x1F33F; ' + g.name + '</a>';
+        });
+        container.innerHTML = html;
+      }
+
+      function renderGenusCards() {
+        var grid = document.getElementById('genus-cards-grid');
+        if (!grid) return;
+        var html = '';
+        window._generaData.forEach(function(g) {
+          var imgSrc = g.card_image_path ? 'images/' + g.card_image_path : '';
+          html += '<div class="card genus-card card--clickable" data-nav="genus" data-genus="' + g.slug + '">';
+          html += '<div class="genus-card__img" style="background:#000;">';
+          if (imgSrc) html += '<img src="' + imgSrc + '" alt="' + g.name + '" class="genus-card__photo">';
+          html += '</div>';
+          html += '<div class="genus-card__title">' + g.name + '</div>';
+          html += '<div class="genus-card__count" data-genus-count="' + g.slug + '">- 品種</div>';
+          html += '</div>';
+        });
+        grid.innerHTML = html;
+      }
+
+      function renderGenusContentSections() {
+        var container = document.getElementById('genus-sections-container');
+        if (!container) return;
+        var html = '';
+        window._generaData.forEach(function(g, idx) {
+          var display = idx === 0 ? '' : ' style="display:none;"';
+          html += '<div class="genus-content" id="genus-' + g.slug + '"' + display + '>';
+          html += '<h1 class="section-title">' + g.name + '</h1>';
+          html += '<p class="text-muted mb-lg">読み込み中...</p>';
+
+          if (g.has_seedlings) {
+            // Pattern 1: with seedlings tab
+            html += '<div class="genus-tabs" id="genus-tabs-' + g.slug + '">';
+            html += '<button class="genus-tab active" data-tab="species-clones">&#x1F4D6; Species / Clones</button>';
+            html += '<button class="genus-tab" data-tab="seedlings">&#x1F331; My Seedlings</button>';
+            html += '</div>';
+          }
+
+          // Species/Clones view
+          if (g.has_seedlings) html += '<div data-genus-view="species-clones">';
+          html += '<div class="sort-bar">';
+          html += '<div class="search-bar" style="max-width:300px;margin:0;">';
+          html += '<input type="text" class="search-bar__input" placeholder="属内を検索..." data-i18n-placeholder="genus_search">';
+          html += '<button class="search-bar__btn">&#x1F50D;</button>';
+          html += '</div>';
+          html += '<div class="chips">';
+          html += '<span class="chip active" data-i18n="sort_name">名前順</span>';
+          html += '<span class="chip" data-i18n="sort_trust">信頼度順</span>';
+          html += '<span class="chip" data-i18n="sort_newest">新着順</span>';
+          html += '</div>';
+          html += '<a href="#" class="btn btn--primary btn--sm" data-nav="contribute" data-genus="' + g.name + '" data-i18n="add_cultivar" style="margin-left:auto;">+ 品種を追加</a>';
+          html += '</div>';
+
+          html += '<div class="card" style="padding:0;"></div>';
+          html += '<div class="pagination"></div>';
+
+          html += '<div class="ad-placeholder mt-lg">';
+          html += '<span class="ad-placeholder__label" data-i18n="ad_label">広告</span>';
+          html += '<div class="ad-placeholder__slot">Google AdSense</div>';
+          html += '</div>';
+
+          if (g.has_seedlings) html += '</div>';
+
+          if (g.has_seedlings) {
+            // Seedlings view
+            html += '<div data-genus-view="seedlings" style="display:none;">';
+            html += '<div class="sort-bar">';
+            html += '<div class="search-bar" style="max-width:300px;margin:0;">';
+            html += '<input type="text" class="search-bar__input seedling-search" placeholder="実生を検索...">';
+            html += '<button class="search-bar__btn">&#x1F50D;</button>';
+            html += '</div>';
+            html += '<a href="#" class="btn btn--primary btn--sm" data-nav="contribute" data-genus="' + g.name + '" data-contribute-type="seedling" style="margin-left:auto;">+ 実生を追加</a>';
+            html += '</div>';
+            html += '<div class="card seedling-list" style="padding:0;">';
+            html += '<div class="text-center text-muted" style="padding:var(--space-xl);">まだ実生が登録されていません。</div>';
+            html += '</div>';
+            html += '<div class="pagination seedling-pagination"></div>';
+            html += '</div>';
+          }
+
+          html += '</div>'; // close genus-content
+        });
+        container.innerHTML = html;
+
+      }
+
+      function renderContributeGenusOptions() {
+        var sel = document.getElementById('contribute-genus-select');
+        if (!sel) return;
+        // Keep the placeholder option
+        var placeholder = sel.querySelector('option[disabled]');
+        sel.innerHTML = '';
+        if (placeholder) sel.appendChild(placeholder);
+        window._generaData.forEach(function(g) {
+          var opt = document.createElement('option');
+          opt.value = g.name;
+          opt.textContent = g.name;
+          sel.appendChild(opt);
+        });
+      }
+
       // --- Auth: session management ---
       window._currentUser = null;
 
@@ -2568,7 +2264,7 @@
       }
 
       // Which genera have seedling tabs (exposed globally for contribute form)
-      var SEEDLING_GENERA = ['anthurium'];
+      var SEEDLING_GENERA = []; // Populated dynamically from genera table
       window.SEEDLING_GENERA = SEEDLING_GENERA;
 
       // Add a row to the genus list DOM
@@ -2651,7 +2347,8 @@
 
       // Update genus card counts and pagination
       function refreshGenusUI() {
-        ['anthurium', 'monstera', 'philodendron'].forEach(function(g) {
+        (window._generaData || []).forEach(function(gObj) {
+          var g = gObj.slug;
           var el = document.getElementById('genus-' + g);
           if (el) paginateGenus(el, 1);
           var card = document.querySelector('.genus-card[data-genus="' + g + '"]');
@@ -2742,8 +2439,8 @@
 
             profilePromise.then(function() {
             // Clear ALL rows and in-memory data, then rebuild from DB
-            ['anthurium', 'monstera', 'philodendron'].forEach(function(g) {
-              var section = document.getElementById('genus-' + g);
+            (window._generaData || []).forEach(function(gObj) {
+              var section = document.getElementById('genus-' + gObj.slug);
               if (section) {
                 var rows = section.querySelectorAll('.cultivar-row');
                 rows.forEach(function(row) { row.remove(); });
@@ -2813,15 +2510,17 @@
         }
       }
 
-      // Run after DOM is ready
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
+      // Run after DOM is ready — load genera first, then cultivars
+      function startApp() {
+        window._generaLoaded = loadGenera().then(function() {
           restoreUserCultivars();
-          setTimeout(pollPendingAIResearch, 2000); // Check for pending AI research
+          setTimeout(pollPendingAIResearch, 2000);
         });
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startApp);
       } else {
-        restoreUserCultivars();
-        setTimeout(pollPendingAIResearch, 2000);
+        startApp();
       }
     })();
 
@@ -4016,15 +3715,14 @@
       document.getElementById('mobileNav').classList.toggle('open');
     });
 
-    // ---- Genus search input listeners ----
-    document.querySelectorAll('.genus-content .search-bar__input').forEach(function(input) {
-      input.addEventListener('input', function() {
-        var genusEl = this.closest('.genus-content');
-        if (genusEl) {
-          filterGenusRows(genusEl, this.value);
-          paginateGenus(genusEl, 1);
-        }
-      });
+    // ---- Genus search input listeners (event delegation for dynamic content) ----
+    document.addEventListener('input', function(e) {
+      if (!e.target.matches('.genus-content .search-bar__input')) return;
+      var genusEl = e.target.closest('.genus-content');
+      if (genusEl) {
+        filterGenusRows(genusEl, e.target.value);
+        paginateGenus(genusEl, 1);
+      }
     });
 
     // ---- Top page global search ----
@@ -4062,20 +3760,18 @@
       });
     });
 
-    // ---- Initialize pagination on load ----
-    document.querySelectorAll('.genus-content').forEach(function(g) {
-      paginateGenus(g, 1);
-    });
+    // ---- Initialize pagination on load (deferred for dynamic genus content) ----
+    // Pagination is initialized after genera load via refreshGenusUI()
 
-    // Chip toggle
-    document.querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', function() {
-        const group = this.closest('.chips');
-        if (group) {
-          group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-        }
-        this.classList.add('active');
-      });
+    // Chip toggle (event delegation for dynamic content)
+    document.addEventListener('click', function(e) {
+      var chip = e.target.closest('.chip');
+      if (!chip) return;
+      var group = chip.closest('.chips');
+      if (group) {
+        group.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('active'); });
+      }
+      chip.classList.add('active');
     });
 
     // Vote button handler (persists to Supabase)
@@ -4678,10 +4374,10 @@
         var genus = '';
         var shortName = '';
         var type = data._type || 'species';
-        ['Anthurium', 'Monstera', 'Philodendron'].forEach(function(g) {
-          if (key.toLowerCase().startsWith(g.toLowerCase())) {
-            genus = g;
-            shortName = key.replace(g + ' ', '').replace(' [Seedling]', '').replace(/^'|'$/g, '');
+        (window._generaData || []).forEach(function(gObj) {
+          if (key.toLowerCase().startsWith(gObj.name.toLowerCase())) {
+            genus = gObj.name;
+            shortName = key.replace(gObj.name + ' ', '').replace(' [Seedling]', '').replace(/^'|'$/g, '');
           }
         });
 

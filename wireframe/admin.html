@@ -383,6 +383,7 @@
   <div class="admin-body">
     <nav class="admin-nav">
       <a href="#" data-section="dashboard" class="active">ダッシュボード</a>
+      <a href="#" data-section="genera">属管理</a>
       <a href="#" data-section="cultivars">品種管理</a>
       <a href="#" data-section="origins">由来管理</a>
       <a href="#" data-section="images">画像管理</a>
@@ -420,6 +421,30 @@
         <div id="genus-distribution" style="display:flex;gap:var(--space-sm);flex-wrap:wrap;"></div>
       </section>
 
+      <!-- ---- GENERA ---- -->
+      <section id="sec-genera" class="hidden">
+        <h2 class="section-title">属管理</h2>
+        <div class="toolbar">
+          <button class="btn btn-primary btn-sm" id="btn-add-genus">＋ 新しい属を追加</button>
+          <button class="btn btn-outline btn-sm" id="btn-refresh-genera">更新</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>属名</th>
+              <th>スラッグ</th>
+              <th>表示順</th>
+              <th>実生タブ</th>
+              <th>カード画像</th>
+              <th>品種数</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="genera-tbody"></tbody>
+        </table>
+      </section>
+
       <!-- ---- CULTIVARS ---- -->
       <section id="sec-cultivars" class="hidden">
         <h2 class="section-title">品種管理</h2>
@@ -427,9 +452,6 @@
           <input type="text" id="cultivar-search" placeholder="品種名で検索...">
           <select id="cultivar-genus-filter">
             <option value="">全属</option>
-            <option value="Anthurium">Anthurium</option>
-            <option value="Monstera">Monstera</option>
-            <option value="Philodendron">Philodendron</option>
           </select>
           <button class="btn btn-primary btn-sm" id="btn-refresh-cultivars">更新</button>
         </div>
@@ -758,6 +780,7 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
     this.classList.add('active');
     document.querySelectorAll('.admin-content > section').forEach(function(s) { s.classList.add('hidden'); });
     document.getElementById('sec-' + section).classList.remove('hidden');
+    if (section === 'genera') loadAdminGenera();
     if (section === 'origins') loadOrigins();
     if (section === 'affiliates') loadAffiliates();
     closeNav();
@@ -885,8 +908,8 @@ function editCultivar(id) {
   var html = '<h2>品種を編集</h2>';
   html += '<label>品種名</label><input type="text" id="edit-name" value="' + escapeHtml(c.cultivar_name) + '">';
   html += '<label>属</label><select id="edit-genus">';
-  ['Anthurium', 'Monstera', 'Philodendron'].forEach(function(g) {
-    html += '<option value="' + g + '"' + (c.genus === g ? ' selected' : '') + '>' + g + '</option>';
+  (window._adminGeneraData || []).forEach(function(gObj) {
+    html += '<option value="' + gObj.name + '"' + (c.genus === gObj.name ? ' selected' : '') + '>' + gObj.name + '</option>';
   });
   html += '</select>';
   html += '<label>タイプ</label><select id="edit-type">';
@@ -2300,6 +2323,241 @@ async function toggleAffiliatePublish(id, currentState) {
   toast(!currentState ? '公開しました' : '非公開にしました');
   loadAffiliates();
 }
+
+// ========================================
+// Genera Management
+// ========================================
+window._adminGeneraData = [];
+
+async function loadAdminGenera() {
+  var result = await sb.from('genera').select('*').order('display_order');
+  if (result.error) { toast('属データ取得エラー: ' + result.error.message); return; }
+  window._adminGeneraData = result.data || [];
+  renderGeneraTable();
+  populateGenusFilter();
+}
+
+function populateGenusFilter() {
+  var sel = document.getElementById('cultivar-genus-filter');
+  if (!sel) return;
+  var currentVal = sel.value;
+  sel.innerHTML = '<option value="">全属</option>';
+  (window._adminGeneraData || []).forEach(function(g) {
+    sel.innerHTML += '<option value="' + escapeHtml(g.name) + '">' + escapeHtml(g.name) + '</option>';
+  });
+  sel.value = currentVal;
+}
+
+function renderGeneraTable() {
+  var tbody = document.getElementById('genera-tbody');
+  if (!tbody) return;
+  var genera = window._adminGeneraData || [];
+
+  // Count cultivars per genus
+  var genusCounts = {};
+  allCultivars.forEach(function(c) {
+    var g = c.genus || 'Unknown';
+    genusCounts[g] = (genusCounts[g] || 0) + 1;
+  });
+
+  var html = '';
+  genera.forEach(function(g) {
+    var count = genusCounts[g.name] || 0;
+    var imgSrc = g.card_image_path ? 'images/' + g.card_image_path : '';
+    html += '<tr>';
+    html += '<td>' + g.id + '</td>';
+    html += '<td><strong>' + escapeHtml(g.name) + '</strong></td>';
+    html += '<td>' + escapeHtml(g.slug) + '</td>';
+    html += '<td>' + g.display_order + '</td>';
+    html += '<td>' + (g.has_seedlings ? '<span style="color:#4CAF50;font-weight:600;">ON</span>' : '<span style="color:var(--color-gray);">OFF</span>') + '</td>';
+    html += '<td>';
+    if (imgSrc) {
+      html += '<img src="' + imgSrc + '" style="width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid #ddd;">';
+    } else {
+      html += '<span style="color:var(--color-gray);font-size:0.8rem;">なし</span>';
+    }
+    html += '</td>';
+    html += '<td>' + count + '</td>';
+    html += '<td>';
+    html += '<button class="btn btn-outline btn-sm" onclick="openEditGenusModal(' + g.id + ')">編集</button> ';
+    html += '<button class="btn btn-outline btn-sm" style="color:var(--color-danger);" onclick="deleteGenus(' + g.id + ',\'' + escapeHtml(g.name) + '\',' + count + ')">削除</button>';
+    html += '</td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+function openAddGenusModal() {
+  var html = '<h2>新しい属を追加</h2>';
+  html += '<label>属名 <small style="color:var(--color-gray);">(例: Alocasia)</small></label>';
+  html += '<input type="text" id="genus-name" placeholder="属名（先頭大文字）">';
+  html += '<label>スラッグ <small style="color:var(--color-gray);">(URL用、自動生成)</small></label>';
+  html += '<input type="text" id="genus-slug" placeholder="自動生成されます" style="background:#f5f5f5;">';
+  html += '<label>表示順</label>';
+  var nextOrder = (window._adminGeneraData || []).length + 1;
+  html += '<input type="number" id="genus-order" value="' + nextOrder + '" min="1">';
+  html += '<label style="display:flex;align-items:center;gap:8px;margin-top:var(--space-sm);cursor:pointer;">';
+  html += '<input type="checkbox" id="genus-seedlings" style="width:auto;margin:0;"> My Seedlingsタブを有効にする（パターン1）';
+  html += '</label>';
+  html += '<label style="margin-top:var(--space-md);">カード画像</label>';
+  html += '<input type="file" id="genus-image" accept="image/jpeg,image/png">';
+  html += '<div class="modal-actions">';
+  html += '<button class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
+  html += '<button class="btn btn-primary" onclick="saveNewGenus()">追加</button>';
+  html += '</div>';
+  showModal(html);
+
+  // Auto-generate slug from name
+  document.getElementById('genus-name').addEventListener('input', function() {
+    document.getElementById('genus-slug').value = this.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  });
+}
+
+async function saveNewGenus() {
+  var name = document.getElementById('genus-name').value.trim();
+  var slug = document.getElementById('genus-slug').value.trim().toLowerCase();
+  var order = parseInt(document.getElementById('genus-order').value) || 1;
+  var hasSeedlings = document.getElementById('genus-seedlings').checked;
+  var imageFile = document.getElementById('genus-image').files[0];
+
+  if (!name) { toast('属名を入力してください'); return; }
+  if (!slug) { toast('スラッグを入力してください'); return; }
+
+  // Capitalize first letter of name
+  name = name.charAt(0).toUpperCase() + name.slice(1);
+
+  var cardImagePath = null;
+  if (imageFile) {
+    var compressed = await compressImage(imageFile, 600, 0.85);
+    var storagePath = slug + '.png';
+    var uploadResult = await sb.storage.from('genus-cards').upload(storagePath, compressed, { upsert: true });
+    if (uploadResult.error) { toast('画像アップロードエラー: ' + uploadResult.error.message); return; }
+    cardImagePath = storagePath;
+  }
+
+  var insertData = {
+    name: name,
+    slug: slug,
+    display_order: order,
+    has_seedlings: hasSeedlings,
+    card_image_path: cardImagePath
+  };
+
+  var result = await sb.from('genera').insert(insertData);
+  if (result.error) {
+    toast('追加エラー: ' + result.error.message);
+    return;
+  }
+
+  toast('属「' + name + '」を追加しました');
+  closeModal();
+  loadAdminGenera();
+}
+
+function openEditGenusModal(id) {
+  var g = (window._adminGeneraData || []).find(function(x) { return x.id === id; });
+  if (!g) { toast('属が見つかりません'); return; }
+
+  var html = '<h2>属を編集</h2>';
+  html += '<label>属名</label>';
+  html += '<input type="text" id="genus-name" value="' + escapeHtml(g.name) + '">';
+  html += '<label>スラッグ</label>';
+  html += '<input type="text" id="genus-slug" value="' + escapeHtml(g.slug) + '" style="background:#f5f5f5;" readonly>';
+  html += '<label>表示順</label>';
+  html += '<input type="number" id="genus-order" value="' + g.display_order + '" min="1">';
+  html += '<label style="display:flex;align-items:center;gap:8px;margin-top:var(--space-sm);cursor:pointer;">';
+  html += '<input type="checkbox" id="genus-seedlings" style="width:auto;margin:0;"' + (g.has_seedlings ? ' checked' : '') + '> My Seedlingsタブを有効にする（パターン1）';
+  html += '</label>';
+  html += '<label style="margin-top:var(--space-md);">カード画像</label>';
+  if (g.card_image_path) {
+    html += '<div style="margin-bottom:var(--space-sm);"><img src="images/' + g.card_image_path + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #ddd;"></div>';
+  }
+  html += '<input type="file" id="genus-image" accept="image/jpeg,image/png">';
+  html += '<small style="color:var(--color-gray);">新しい画像を選択すると差し替えられます</small>';
+  html += '<div class="modal-actions">';
+  html += '<button class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
+  html += '<button class="btn btn-primary" onclick="saveEditGenus(' + id + ')">保存</button>';
+  html += '</div>';
+  showModal(html);
+}
+
+async function saveEditGenus(id) {
+  var name = document.getElementById('genus-name').value.trim();
+  var order = parseInt(document.getElementById('genus-order').value) || 1;
+  var hasSeedlings = document.getElementById('genus-seedlings').checked;
+  var imageFile = document.getElementById('genus-image').files[0];
+
+  if (!name) { toast('属名を入力してください'); return; }
+  name = name.charAt(0).toUpperCase() + name.slice(1);
+
+  var g = (window._adminGeneraData || []).find(function(x) { return x.id === id; });
+  var updateData = {
+    name: name,
+    display_order: order,
+    has_seedlings: hasSeedlings,
+    updated_at: new Date().toISOString()
+  };
+
+  if (imageFile) {
+    var compressed = await compressImage(imageFile, 600, 0.85);
+    var storagePath = g.slug + '.png';
+    var uploadResult = await sb.storage.from('genus-cards').upload(storagePath, compressed, { upsert: true });
+    if (uploadResult.error) { toast('画像アップロードエラー: ' + uploadResult.error.message); return; }
+    updateData.card_image_path = storagePath;
+  }
+
+  var result = await sb.from('genera').update(updateData).eq('id', id);
+  if (result.error) {
+    toast('更新エラー: ' + result.error.message);
+    return;
+  }
+
+  // If name changed, update cultivars too
+  if (g && g.name !== name) {
+    var updateCultivars = await sb.from('cultivars').update({ genus: name }).eq('genus', g.name);
+    if (updateCultivars.error) {
+      toast('品種の属名更新に失敗: ' + updateCultivars.error.message);
+    }
+  }
+
+  toast('属「' + name + '」を更新しました');
+  closeModal();
+  loadAdminGenera();
+  loadAllCultivars();
+}
+
+async function deleteGenus(id, name, cultivarCount) {
+  if (cultivarCount > 0) {
+    toast('品種が' + cultivarCount + '件存在するため削除できません。先に品種を移動または削除してください。');
+    return;
+  }
+  if (!confirm('属「' + name + '」を削除しますか？')) return;
+
+  var result = await sb.from('genera').delete().eq('id', id);
+  if (result.error) {
+    toast('削除エラー: ' + result.error.message);
+    return;
+  }
+  toast('削除しました');
+  loadAdminGenera();
+}
+
+document.getElementById('btn-add-genus').addEventListener('click', function() {
+  openAddGenusModal();
+});
+
+document.getElementById('btn-refresh-genera').addEventListener('click', function() {
+  loadAdminGenera();
+});
+
+// Load genera on initial data load (for genus filter)
+(async function() {
+  var result = await sb.from('genera').select('*').order('display_order');
+  if (!result.error && result.data) {
+    window._adminGeneraData = result.data;
+    populateGenusFilter();
+  }
+})();
 </script>
 </body>
 </html>
