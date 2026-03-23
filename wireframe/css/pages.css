@@ -10,7 +10,7 @@
 
 .hero__title {
   font-family: var(--font-heading);
-  font-size: var(--font-size-3xl);
+  font-size: 3rem;
   letter-spacing: 0.04em;
   color: var(--color-white);
   position: relative;
@@ -67,7 +67,7 @@
 
 @media (min-width: 768px) {
   .hero__title {
-    font-size: 3.5rem;
+    font-size: 4rem;
   }
 }
 
