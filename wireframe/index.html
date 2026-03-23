@@ -2073,7 +2073,7 @@
               p_type: meta.type || 'Hybrid',
               p_origins: originsData,
               p_edit_key_hash: editKeyHash,
-              p_ai_status: isSeedling ? null : 'pending',
+              p_ai_status: (meta.type === 'species' && !window._aiAutofillUsed) ? 'pending' : (meta.type === 'species' ? 'completed' : null),
               p_created_ip: userIp,
               p_user_id: window._currentUser ? window._currentUser.id : null
             });
@@ -2093,8 +2093,9 @@
             try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
             saved[fullName] = { entry: entry, meta: meta };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-            // Trigger AI research (skip for seedlings only — always run for trust scoring)
-            if (!isSeedling) {
+            // Trigger AI research (species only, skip if AI autofill was already used)
+            var isSpecies = meta.type === 'species';
+            if (isSpecies && !window._aiAutofillUsed) {
               var insertedId = rpcResult && rpcResult.id;
               if (insertedId) {
                 var manualOrigins = (entry.origins || []).filter(function(o) {
@@ -2390,7 +2391,7 @@
           var badgeClass = item.type === 'species' ? 'badge--species' : (item.type === 'hybrid' ? 'badge--hybrid' : 'badge--clone');
           var badgeText = item.type === 'species' ? t('badge_species') : (item.type === 'hybrid' ? 'Hybrid' : 'Clone');
 
-          html += '<div class="card card--clickable" data-nav="cultivar">';
+          html += '<div class="card card--clickable" data-nav="cultivar" data-key="' + item.name.replace(/"/g, '&quot;') + '">';
           html += '<div class="recent-card__img">';
           html += '<svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
           html += '</div>';
@@ -2934,7 +2935,7 @@
           var trustPct = hasOrigins ? cData.origins.reduce(function(max, o) { return Math.max(max, o.trust || 0); }, 0) : 0;
           var trustClass = trustPct >= 70 ? 'trust--high' : (trustPct >= 40 ? 'trust--mid' : 'trust--low');
 
-          html += '<div class="card card--clickable" data-nav="cultivar" style="position:relative;">';
+          html += '<div class="card card--clickable" data-nav="cultivar" data-key="' + name.replace(/"/g, '&quot;') + '" style="position:relative;">';
 
           // Thumbnail or plant icon
           if (thumbMap[displayName] && baseUrl) {
@@ -3570,8 +3571,8 @@
         // If clicking a cultivar row, get key and update detail page
         if (page === 'cultivar') {
           var nameEl = navEl.querySelector('.cultivar-row__name');
-          if (nameEl) {
-            var cultivarKey = nameEl.getAttribute('data-key') || nameEl.textContent;
+          var cultivarKey = navEl.getAttribute('data-key') || (nameEl && (nameEl.getAttribute('data-key') || nameEl.textContent));
+          if (cultivarKey) {
             // Pass the row element so navigateTo can use badge info;
             // updateCultivarDetail is called inside navigateTo via popstate too
             updateCultivarDetail(cultivarKey, navEl);
@@ -4875,6 +4876,7 @@
                 });
                 renderContributeSources();
               }
+              window._aiAutofillUsed = true;
               if (aiAutofillStatus) aiAutofillStatus.textContent = '記入完了 — 内容を確認してください';
             } else {
               if (aiAutofillStatus) aiAutofillStatus.textContent = 'データが見つかりませんでした';
@@ -5435,6 +5437,7 @@
             contributeSources = [];
             renderContributeSources();
             if (duplicateAlert) duplicateAlert.style.display = 'none';
+            window._aiAutofillUsed = false;
             if (typeof window.resetContributeImages === 'function') window.resetContributeImages();
             motherPhotoFile = null; fatherPhotoFile = null;
             ['mother', 'father'].forEach(function(p) {
