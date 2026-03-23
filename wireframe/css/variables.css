@@ -22,7 +22,7 @@
   --color-trust-low: #BC4749;
 
   /* Typography */
-  --font-heading: "Cormorant Garamond", Georgia, serif;
+  --font-heading: "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
   --font-primary: "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "Fira Code", "Courier New", monospace;
   --font-size-xs: 0.75rem;
