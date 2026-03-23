@@ -4201,43 +4201,43 @@
     }
 
     // ========================================
-    // SORT FUNCTIONALITY
+    // SORT FUNCTIONALITY (event delegation for dynamic content)
     // ========================================
-    document.querySelectorAll('.genus-content .chip').forEach(function(chip) {
-      chip.addEventListener('click', function() {
-        var genusEl = this.closest('.genus-content');
-        if (!genusEl) return;
-        var container = genusEl.querySelector('.card[style*="padding:0"]');
-        if (!container) return;
+    document.addEventListener('click', function(e) {
+      var chip = e.target.closest('.genus-content .chips .chip');
+      if (!chip) return;
+      var genusEl = chip.closest('.genus-content');
+      if (!genusEl) return;
+      var container = genusEl.querySelector('.card[style*="padding:0"]');
+      if (!container) return;
 
-        var rows = Array.from(container.querySelectorAll('.cultivar-row'));
-        var sortType = this.textContent.trim();
+      var rows = Array.from(container.querySelectorAll('.cultivar-row'));
+      var sortType = chip.textContent.trim();
 
-        rows.sort(function(a, b) {
-          // By Name
-          if (sortType === '名前順' || sortType === 'By Name') {
-            var nameA = a.querySelector('.cultivar-row__name').textContent;
-            var nameB = b.querySelector('.cultivar-row__name').textContent;
-            return nameA.localeCompare(nameB);
-          }
-          // By Trust
-          if (sortType === '信頼度順' || sortType === 'By Trust') {
-            var trustA = parseInt(a.querySelector('.trust__label') ? a.querySelector('.trust__label').textContent : '0');
-            var trustB = parseInt(b.querySelector('.trust__label') ? b.querySelector('.trust__label').textContent : '0');
-            return trustB - trustA;
-          }
-          // By Newest (sort by created_at descending)
-          if (sortType === '新着順' || sortType === 'Newest') {
-            var dateA = a.getAttribute('data-created') || '';
-            var dateB = b.getAttribute('data-created') || '';
-            return dateB.localeCompare(dateA);
-          }
-          return 0;
-        });
-
-        rows.forEach(function(row) { container.appendChild(row); });
-        paginateGenus(genusEl, 1);
+      rows.sort(function(a, b) {
+        // By Name
+        if (sortType === '名前順' || sortType === 'By Name') {
+          var nameA = a.querySelector('.cultivar-row__name').textContent;
+          var nameB = b.querySelector('.cultivar-row__name').textContent;
+          return nameA.localeCompare(nameB);
+        }
+        // By Trust
+        if (sortType === '信頼度順' || sortType === 'By Trust') {
+          var trustA = parseInt(a.querySelector('.trust__label') ? a.querySelector('.trust__label').textContent : '0');
+          var trustB = parseInt(b.querySelector('.trust__label') ? b.querySelector('.trust__label').textContent : '0');
+          return trustB - trustA;
+        }
+        // By Newest (sort by created_at descending)
+        if (sortType === '新着順' || sortType === 'Newest') {
+          var dateA = a.getAttribute('data-created') || '';
+          var dateB = b.getAttribute('data-created') || '';
+          return dateB.localeCompare(dateA);
+        }
+        return 0;
       });
+
+      rows.forEach(function(row) { container.appendChild(row); });
+      paginateGenus(genusEl, 1);
     });
 
     // ========================================
