@@ -1,0 +1,2563 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plants Story - Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-primary);
+      background: var(--color-bg);
+      color: var(--color-black);
+      min-height: 100vh;
+    }
+
+    /* ---- Layout ---- */
+    .admin-header {
+      background: var(--color-primary-dark);
+      color: #fff;
+      padding: var(--space-md) var(--space-xl);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .admin-header h1 { font-family: var(--font-heading); font-size: var(--font-size-lg); }
+    .admin-header .user-info { font-size: var(--font-size-sm); opacity: 0.8; }
+    .admin-header button {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 6px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: var(--font-size-sm);
+    }
+    .admin-header button:hover { background: rgba(255,255,255,0.25); }
+
+    .admin-body { display: flex; min-height: calc(100vh - 56px); }
+
+    .admin-nav {
+      width: 220px;
+      background: var(--color-white);
+      border-right: 1px solid var(--color-light);
+      padding: var(--space-md) 0;
+      flex-shrink: 0;
+    }
+    .admin-nav a {
+      display: block;
+      padding: var(--space-sm) var(--space-lg);
+      color: var(--color-mid);
+      text-decoration: none;
+      font-size: var(--font-size-sm);
+      border-left: 3px solid transparent;
+      transition: var(--transition);
+    }
+    .admin-nav a:hover { background: var(--color-lighter); color: var(--color-primary); }
+    .admin-nav a.active {
+      color: var(--color-primary);
+      border-left-color: var(--color-primary);
+      background: var(--color-lighter);
+      font-weight: 700;
+    }
+
+    .admin-content {
+      flex: 1;
+      padding: var(--space-xl);
+      max-width: 1200px;
+      overflow-x: auto;
+    }
+
+    /* ---- Login ---- */
+    .login-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--color-bg);
+    }
+    .login-box {
+      background: var(--color-white);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: var(--space-2xl);
+      width: 100%;
+      max-width: 400px;
+    }
+    .login-box h1 {
+      font-family: var(--font-heading);
+      color: var(--color-primary);
+      margin-bottom: var(--space-lg);
+      text-align: center;
+    }
+    .login-box input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--color-light);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-base);
+      margin-bottom: var(--space-md);
+    }
+    .login-box input:focus { outline: none; border-color: var(--color-primary); }
+    .login-error {
+      color: var(--color-danger);
+      font-size: var(--font-size-sm);
+      margin-bottom: var(--space-md);
+      display: none;
+    }
+
+    /* ---- Buttons ---- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: var(--font-primary);
+    }
+    .btn-primary { background: var(--color-primary); color: #fff; }
+    .btn-primary:hover { background: var(--color-primary-dark); }
+    .btn-danger { background: var(--color-danger); color: #fff; }
+    .btn-danger:hover { opacity: 0.85; }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--color-light);
+      color: var(--color-mid);
+    }
+    .btn-outline:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .btn-sm { padding: 4px 10px; font-size: var(--font-size-xs); }
+    .btn-warning { background: var(--color-accent-warm); color: #fff; }
+
+    /* ---- Cards ---- */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+    .stat-card {
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-card .stat-value {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+    .stat-card .stat-label {
+      font-size: var(--font-size-sm);
+      color: var(--color-gray);
+      margin-top: var(--space-xs);
+    }
+
+    /* ---- Table ---- */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .data-table th, .data-table td {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: var(--font-size-sm);
+      border-bottom: 1px solid var(--color-lighter);
+    }
+    .data-table th {
+      background: var(--color-primary-dark);
+      color: #fff;
+      font-weight: 500;
+      font-size: var(--font-size-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .data-table tr:hover td { background: var(--color-bg); }
+    .data-table .actions { white-space: nowrap; }
+
+    /* ---- Modal ---- */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--color-white);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal h2 { font-family: var(--font-heading); margin-bottom: var(--space-lg); }
+    .modal label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      margin-bottom: var(--space-xs);
+      color: var(--color-mid);
+    }
+    .modal input, .modal textarea, .modal select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--color-light);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      margin-bottom: var(--space-md);
+      font-family: var(--font-primary);
+    }
+    .modal textarea { min-height: 80px; resize: vertical; }
+    .modal-actions { display: flex; gap: var(--space-sm); justify-content: flex-end; margin-top: var(--space-md); }
+
+    /* ---- Misc ---- */
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: var(--font-size-xl);
+      color: var(--color-primary);
+      margin-bottom: var(--space-lg);
+    }
+    .toolbar {
+      display: flex;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .toolbar input[type="text"] {
+      padding: 8px 12px;
+      border: 1px solid var(--color-light);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      width: 250px;
+    }
+    .toolbar select {
+      padding: 8px 12px;
+      border: 1px solid var(--color-light);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+    }
+    .badge-s { background: #8b5cf6; color: #fff; }
+    .badge-a { background: #3b82f6; color: #fff; }
+    .badge-b { background: #10b981; color: #fff; }
+    .badge-c { background: #f59e0b; color: #fff; }
+    .badge-d { background: #ef4444; color: #fff; }
+    .badge-ai { background: #f59e0b; color: #fff; }
+    .badge-user { background: var(--color-primary-light); color: #fff; }
+    .badge-completed { background: var(--color-primary-light); color: #fff; }
+    .badge-pending { background: var(--color-accent-warm); color: #fff; }
+    .badge-failed { background: var(--color-danger); color: #fff; }
+    .trust-bar {
+      display: inline-block;
+      width: 60px;
+      height: 8px;
+      background: var(--color-lighter);
+      border-radius: 4px;
+      overflow: hidden;
+      vertical-align: middle;
+    }
+    .trust-fill { height: 100%; border-radius: 4px; }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--color-primary);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      z-index: 300;
+      display: none;
+      font-size: var(--font-size-sm);
+    }
+    .toast.show { display: block; }
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--color-lighter);
+      border-radius: 3px;
+      overflow: hidden;
+      margin: var(--space-sm) 0;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--color-primary-light);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+    .hidden { display: none !important; }
+
+    /* ---- Hamburger button (mobile only) ---- */
+    .hamburger-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      line-height: 1;
+    }
+    .nav-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 199;
+    }
+    .nav-overlay.show { display: block; }
+
+    @media (max-width: 768px) {
+      .hamburger-btn { display: block; }
+      .admin-nav {
+        position: fixed;
+        top: 0;
+        left: -260px;
+        width: 250px;
+        height: 100vh;
+        z-index: 200;
+        transition: left 0.25s ease;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+        padding-top: var(--space-xl);
+      }
+      .admin-nav.open { left: 0; }
+      .admin-content { padding: var(--space-md); }
+      .admin-content table { font-size: var(--font-size-sm); }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="login-screen" class="login-container">
+  <div class="login-box">
+    <h1>Plants Story Admin</h1>
+    <div id="login-error" class="login-error"></div>
+    <input type="email" id="login-email" placeholder="メールアドレス" autocomplete="email">
+    <input type="password" id="login-password" placeholder="パスワード" autocomplete="current-password">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" id="btn-login">ログイン</button>
+  </div>
+</div>
+
+<!-- ============ ADMIN APP ============ -->
+<div id="admin-app" class="hidden">
+  <header class="admin-header">
+    <div style="display:flex;align-items:center;gap:var(--space-sm);">
+      <button class="hamburger-btn" id="hamburger-btn" aria-label="メニュー">☰</button>
+      <h1>Plants Story Admin</h1>
+    </div>
+    <div style="display:flex;align-items:center;gap:var(--space-md);">
+      <span class="user-info" id="admin-email"></span>
+      <button id="btn-logout">ログアウト</button>
+      <a href="index.html" style="color:#fff;font-size:var(--font-size-sm);text-decoration:none;opacity:0.7;">サイトへ</a>
+    </div>
+  </header>
+  <div class="admin-body">
+    <nav class="admin-nav">
+      <a href="#" data-section="dashboard" class="active">ダッシュボード</a>
+      <a href="#" data-section="genera">属管理</a>
+      <a href="#" data-section="cultivars">品種管理</a>
+      <a href="#" data-section="origins">由来管理</a>
+      <a href="#" data-section="images">画像管理</a>
+      <a href="#" data-section="delete-requests">削除依頼</a>
+      <a href="#" data-section="affiliates">アフィリエイト</a>
+      <a href="#" data-section="bulk">一括操作</a>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>
+    <main class="admin-content">
+
+      <!-- ---- DASHBOARD ---- -->
+      <section id="sec-dashboard">
+        <h2 class="section-title">ダッシュボード</h2>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-cultivars">-</div>
+            <div class="stat-label">品種数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-origins">-</div>
+            <div class="stat-label">由来数（合計）</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-avg-trust">-</div>
+            <div class="stat-label">平均信頼度</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-ai-pending">-</div>
+            <div class="stat-label">AIリサーチ待ち</div>
+          </div>
+        </div>
+        <h3 style="margin-bottom:var(--space-md);font-size:var(--font-size-base);">Tier分布</h3>
+        <div id="tier-distribution" style="display:flex;gap:var(--space-sm);margin-bottom:var(--space-xl);flex-wrap:wrap;"></div>
+        <h3 style="margin-bottom:var(--space-md);font-size:var(--font-size-base);">属別品種数</h3>
+        <div id="genus-distribution" style="display:flex;gap:var(--space-sm);flex-wrap:wrap;"></div>
+      </section>
+
+      <!-- ---- GENERA ---- -->
+      <section id="sec-genera" class="hidden">
+        <h2 class="section-title">属管理</h2>
+        <div class="toolbar">
+          <button class="btn btn-primary btn-sm" id="btn-add-genus">＋ 新しい属を追加</button>
+          <button class="btn btn-outline btn-sm" id="btn-refresh-genera">更新</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>属名</th>
+              <th>スラッグ</th>
+              <th>表示順</th>
+              <th>実生タブ</th>
+              <th>カード画像</th>
+              <th>品種数</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="genera-tbody"></tbody>
+        </table>
+      </section>
+
+      <!-- ---- CULTIVARS ---- -->
+      <section id="sec-cultivars" class="hidden">
+        <h2 class="section-title">品種管理</h2>
+        <div class="toolbar">
+          <input type="text" id="cultivar-search" placeholder="品種名で検索...">
+          <select id="cultivar-genus-filter">
+            <option value="">全属</option>
+          </select>
+          <button class="btn btn-primary btn-sm" id="btn-refresh-cultivars">更新</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>品種名</th>
+              <th>属</th>
+              <th>タイプ</th>
+              <th>由来数</th>
+              <th>AI状態</th>
+              <th>投稿IP</th>
+              <th>由来追加IP</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="cultivar-tbody"></tbody>
+        </table>
+      </section>
+
+      <!-- ---- ORIGINS ---- -->
+      <section id="sec-origins" class="hidden">
+        <h2 class="section-title">由来管理</h2>
+        <div class="toolbar" style="flex-wrap:wrap;gap:8px;">
+          <select id="origin-cultivar-select" style="width:350px;">
+            <option value="">すべての品種</option>
+          </select>
+          <select id="origin-type-filter" style="width:160px;">
+            <option value="">すべてのタイプ</option>
+            <option value="species">原種 (Species)</option>
+            <option value="clone">クローン (Clone)</option>
+            <option value="hybrid">交配種 (Hybrid)</option>
+            <option value="seedling">実生 (Seedling)</option>
+          </select>
+          <input type="text" id="origin-search" placeholder="検索..." style="width:200px;">
+        </div>
+        <div id="origins-list"></div>
+      </section>
+
+      <!-- ---- IMAGES ---- -->
+      <section id="sec-images" class="hidden">
+        <h2 class="section-title">画像管理</h2>
+        <div style="display:flex;gap:0;margin-bottom:var(--space-md);border-bottom:2px solid var(--color-light);">
+          <button class="btn btn-sm image-tab active" data-image-tab="gallery" style="border-radius:var(--radius-md) var(--radius-md) 0 0;border-bottom:2px solid var(--color-primary);margin-bottom:-2px;font-weight:600;">ギャラリー画像</button>
+          <button class="btn btn-sm image-tab" data-image-tab="formula" style="border-radius:var(--radius-md) var(--radius-md) 0 0;margin-bottom:-2px;opacity:0.6;">交配式画像（母/父）</button>
+        </div>
+        <div id="gallery-tab-content">
+          <div class="toolbar">
+            <input type="text" id="image-search" placeholder="品種名で検索...">
+            <label style="display:flex;align-items:center;gap:4px;font-size:var(--font-size-sm);cursor:pointer;">
+              <input type="checkbox" id="image-flag-filter"> Fake票が多い画像のみ
+            </label>
+            <button class="btn btn-primary btn-sm" id="btn-refresh-images">更新</button>
+          </div>
+          <div id="image-stats" style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);"></div>
+          <div id="image-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--space-md);"></div>
+        </div>
+        <div id="formula-tab-content" style="display:none;">
+          <div class="toolbar">
+            <input type="text" id="formula-image-search" placeholder="品種名で検索...">
+            <button class="btn btn-primary btn-sm" id="btn-refresh-formula-images">更新</button>
+          </div>
+          <div id="formula-image-stats" style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);"></div>
+          <div id="formula-image-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--space-md);"></div>
+        </div>
+      </section>
+
+      <!-- ---- DELETION REQUESTS ---- -->
+      <section id="sec-delete-requests" class="hidden">
+        <h2 class="section-title">削除依頼</h2>
+        <div style="display:flex;gap:0;margin-bottom:var(--space-md);border-bottom:2px solid var(--color-light);">
+          <button class="btn btn-sm dr-tab active" data-dr-tab="cultivar" style="border-radius:var(--radius-md) var(--radius-md) 0 0;border-bottom:2px solid var(--color-primary);margin-bottom:-2px;font-weight:600;">品種</button>
+          <button class="btn btn-sm dr-tab" data-dr-tab="image" style="border-radius:var(--radius-md) var(--radius-md) 0 0;margin-bottom:-2px;opacity:0.6;">画像</button>
+        </div>
+        <div id="dr-cultivar-content">
+          <div id="dr-cultivar-list" style="display:grid;gap:var(--space-md);"></div>
+          <p id="dr-cultivar-empty" style="color:var(--color-gray);font-size:var(--font-size-sm);">品種の削除依頼はありません</p>
+        </div>
+        <div id="dr-image-content" style="display:none;">
+          <div id="dr-image-list" style="display:grid;gap:var(--space-md);"></div>
+          <p id="dr-image-empty" style="color:var(--color-gray);font-size:var(--font-size-sm);">画像の削除依頼はありません</p>
+        </div>
+      </section>
+
+      <!-- ---- AFFILIATES ---- -->
+      <section id="sec-affiliates" class="hidden">
+        <h2 class="section-title">アフィリエイト管理</h2>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="btn-add-affiliate">＋ 新規追加</button>
+          <button class="btn btn-outline" id="btn-refresh-affiliates">更新</button>
+        </div>
+        <div id="affiliate-list" style="display:grid;gap:var(--space-md);margin-top:var(--space-md);"></div>
+      </section>
+
+      <!-- ---- BULK OPERATIONS ---- -->
+      <section id="sec-bulk" class="hidden">
+        <h2 class="section-title">一括操作</h2>
+
+        <div style="display:grid;gap:var(--space-lg);">
+          <!-- Bulk Image Compression -->
+          <div class="stat-card">
+            <h3 style="margin-bottom:var(--space-md);">画像一括圧縮</h3>
+            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">
+              既存画像をCanvas APIで再圧縮します。長辺2048px超はリサイズ、JPEG品質0.9で再エンコード。<br>
+              <strong>スキップ条件:</strong> 長辺2048px以下 かつ 500KB未満の画像はスキップします。
+            </p>
+            <div class="toolbar" style="margin-bottom:var(--space-md);">
+              <select id="compress-target">
+                <option value="gallery">ギャラリー画像</option>
+                <option value="parent">親写真（母/父）</option>
+                <option value="all">すべて</option>
+              </select>
+              <button class="btn btn-warning" id="btn-bulk-compress">圧縮実行</button>
+            </div>
+            <div id="compress-progress" class="hidden">
+              <div class="progress-bar"><div class="progress-fill" id="compress-progress-fill" style="width:0%"></div></div>
+              <div id="compress-progress-text" style="font-size:var(--font-size-sm);color:var(--color-gray);"></div>
+              <div id="compress-log" style="max-height:300px;overflow-y:auto;font-size:var(--font-size-xs);font-family:var(--font-mono);margin-top:var(--space-sm);background:var(--color-bg);padding:var(--space-sm);border-radius:var(--radius-sm);"></div>
+            </div>
+          </div>
+
+          <!-- Bulk Origin Migration -->
+          <div class="stat-card">
+            <h3 style="margin-bottom:var(--space-md);">由来データ構造化移行</h3>
+            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">
+              既存の由来データ（bodyテキスト）を構造化フィールド（structured.notes）に移行します。<br>
+              <strong>対象:</strong> structuredフィールドが未設定の由来のみ。既に構造化済みの由来はスキップします。<br>
+              また、レガシーフィールド（discoverer_or_breeder, native_region, discovery_year）も対応するstructuredフィールドに移行します。
+            </p>
+            <button class="btn btn-warning" id="btn-bulk-migrate">移行実行</button>
+            <div id="migrate-progress" class="hidden" style="margin-top:var(--space-md);">
+              <div class="progress-bar"><div class="progress-fill" id="migrate-progress-fill" style="width:0%"></div></div>
+              <div id="migrate-progress-text" style="font-size:var(--font-size-sm);color:var(--color-gray);"></div>
+              <div id="migrate-log" style="max-height:300px;overflow-y:auto;font-size:var(--font-size-xs);font-family:var(--font-mono);margin-top:var(--space-sm);background:var(--color-bg);padding:var(--space-sm);border-radius:var(--radius-sm);"></div>
+            </div>
+          </div>
+
+          <!-- Data Export -->
+          <div class="stat-card">
+            <h3 style="margin-bottom:var(--space-md);">データエクスポート</h3>
+            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">
+              全品種データをJSON形式でダウンロードします。
+            </p>
+            <button class="btn btn-primary" id="btn-export">JSONエクスポート</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============ MODAL ============ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- ============ TOAST ============ -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ========================================
+// Supabase Client
+// ========================================
+var SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
+var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+var allCultivars = [];
+var currentSession = null;
+
+// Compress image using Canvas API (preserves aspect ratio)
+function compressImage(file, maxLongSide, quality) {
+  maxLongSide = maxLongSide || 2048;
+  quality = quality || 0.9;
+  return new Promise(function(resolve, reject) {
+    var img = new Image();
+    img.onload = function() {
+      var w = img.width;
+      var h = img.height;
+      if (Math.max(w, h) > maxLongSide) {
+        if (w > h) { h = Math.round(h * maxLongSide / w); w = maxLongSide; }
+        else { w = Math.round(w * maxLongSide / h); h = maxLongSide; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob(function(blob) {
+        if (!blob) { reject(new Error('Compression failed')); return; }
+        resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = function() { reject(new Error('Failed to load image')); };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// ========================================
+// Utility
+// ========================================
+function toast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(function() { el.classList.remove('show'); }, 3000);
+}
+
+function showModal(html) {
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+}
+
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function tierBadge(tier) {
+  if (!tier) return '';
+  return '<span class="badge badge-' + tier.toLowerCase() + '">Tier ' + tier + '</span>';
+}
+
+function trustColor(trust) {
+  if (trust >= 70) return 'var(--color-trust-high)';
+  if (trust >= 40) return 'var(--color-trust-mid)';
+  return 'var(--color-trust-low)';
+}
+
+// ========================================
+// Auth
+// ========================================
+document.getElementById('btn-login').addEventListener('click', async function() {
+  var email = document.getElementById('login-email').value.trim();
+  var password = document.getElementById('login-password').value;
+  var errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+
+  if (!email || !password) {
+    errEl.textContent = 'メールとパスワードを入力してください';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  var result = await sb.auth.signInWithPassword({ email: email, password: password });
+  if (result.error) {
+    errEl.textContent = 'ログインに失敗しました: ' + result.error.message;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  var role = result.data.user && result.data.user.app_metadata && result.data.user.app_metadata.role;
+  if (role !== 'admin') {
+    await sb.auth.signOut();
+    errEl.textContent = '管理者権限がありません';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  currentSession = result.data.session;
+  enterAdmin(result.data.user);
+});
+
+document.getElementById('login-password').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('btn-login').click();
+});
+
+document.getElementById('btn-logout').addEventListener('click', async function() {
+  await sb.auth.signOut();
+  currentSession = null;
+  document.getElementById('admin-app').classList.add('hidden');
+  document.getElementById('login-screen').style.display = 'flex';
+});
+
+// Check existing session on load
+(async function() {
+  var result = await sb.auth.getSession();
+  if (result.data.session) {
+    var user = result.data.session.user;
+    var role = user && user.app_metadata && user.app_metadata.role;
+    if (role === 'admin') {
+      currentSession = result.data.session;
+      enterAdmin(user);
+    }
+  }
+})();
+
+function enterAdmin(user) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-app').classList.remove('hidden');
+  document.getElementById('admin-email').textContent = user.email;
+  loadDashboard();
+  loadAllCultivars();
+  // Cleanup IPs older than 180 days on admin login
+  sb.rpc('cleanup_old_ips').then(function(res) {
+    if (res.error) console.warn('IP cleanup error:', res.error.message);
+    else console.log('IP cleanup completed');
+  });
+}
+
+// ========================================
+// Navigation
+// ========================================
+// ---- Mobile nav toggle ----
+var navEl = document.querySelector('.admin-nav');
+var overlayEl = document.getElementById('nav-overlay');
+var hamburgerEl = document.getElementById('hamburger-btn');
+function closeNav() { navEl.classList.remove('open'); overlayEl.classList.remove('show'); }
+function openNav() { navEl.classList.add('open'); overlayEl.classList.add('show'); }
+hamburgerEl.addEventListener('click', function() { navEl.classList.contains('open') ? closeNav() : openNav(); });
+overlayEl.addEventListener('click', closeNav);
+
+document.querySelectorAll('.admin-nav a').forEach(function(link) {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    var section = this.getAttribute('data-section');
+    document.querySelectorAll('.admin-nav a').forEach(function(a) { a.classList.remove('active'); });
+    this.classList.add('active');
+    document.querySelectorAll('.admin-content > section').forEach(function(s) { s.classList.add('hidden'); });
+    document.getElementById('sec-' + section).classList.remove('hidden');
+    if (section === 'genera') loadAdminGenera();
+    if (section === 'origins') loadOrigins();
+    if (section === 'affiliates') loadAffiliates();
+    closeNav();
+  });
+});
+
+// ========================================
+// Load All Cultivars (shared data)
+// ========================================
+async function loadAllCultivars() {
+  var result = await sb.from('cultivars').select('*').order('id');
+  if (result.error) { toast('データ取得エラー'); return; }
+  allCultivars = result.data || [];
+  renderCultivarTable();
+  populateOriginSelect();
+  loadOrigins();
+}
+
+// ========================================
+// DASHBOARD
+// ========================================
+async function loadDashboard() {
+  var result = await sb.from('cultivars').select('*');
+  if (result.error) return;
+  var data = result.data || [];
+
+  document.getElementById('stat-cultivars').textContent = data.length;
+
+  var totalOrigins = 0;
+  var totalTrust = 0;
+  var trustCount = 0;
+  var pendingCount = 0;
+  var tierCounts = { S: 0, A: 0, B: 0, C: 0, D: 0 };
+  var genusCounts = {};
+
+  data.forEach(function(c) {
+    var origins = c.origins || [];
+    totalOrigins += origins.length;
+    origins.forEach(function(o) {
+      if (o.trust) { totalTrust += o.trust; trustCount++; }
+      if (o.source_tier && tierCounts.hasOwnProperty(o.source_tier)) {
+        tierCounts[o.source_tier]++;
+      }
+    });
+    if (c.ai_status === 'pending' || c.ai_status === 'researching') pendingCount++;
+    var g = c.genus || 'Unknown';
+    genusCounts[g] = (genusCounts[g] || 0) + 1;
+  });
+
+  document.getElementById('stat-origins').textContent = totalOrigins;
+  document.getElementById('stat-avg-trust').textContent = trustCount ? Math.round(totalTrust / trustCount) + '%' : '-';
+  document.getElementById('stat-ai-pending').textContent = pendingCount;
+
+  // Tier distribution
+  var tierHtml = '';
+  ['S', 'A', 'B', 'C', 'D'].forEach(function(t) {
+    tierHtml += '<div class="stat-card" style="padding:var(--space-md);text-align:center;min-width:80px;">';
+    tierHtml += tierBadge(t) + '<br>';
+    tierHtml += '<span style="font-size:var(--font-size-lg);font-weight:700;">' + tierCounts[t] + '</span>';
+    tierHtml += '</div>';
+  });
+  document.getElementById('tier-distribution').innerHTML = tierHtml;
+
+  // Genus distribution
+  var genusHtml = '';
+  Object.keys(genusCounts).sort().forEach(function(g) {
+    genusHtml += '<div class="stat-card" style="padding:var(--space-md);text-align:center;min-width:120px;">';
+    genusHtml += '<span style="font-size:var(--font-size-lg);font-weight:700;">' + genusCounts[g] + '</span><br>';
+    genusHtml += '<span style="font-size:var(--font-size-sm);color:var(--color-gray);">' + escapeHtml(g) + '</span>';
+    genusHtml += '</div>';
+  });
+  document.getElementById('genus-distribution').innerHTML = genusHtml;
+}
+
+// ========================================
+// CULTIVAR MANAGEMENT
+// ========================================
+function renderCultivarTable() {
+  var search = (document.getElementById('cultivar-search').value || '').toLowerCase();
+  var genusFilter = document.getElementById('cultivar-genus-filter').value;
+  var filtered = allCultivars.filter(function(c) {
+    if (search && c.cultivar_name.toLowerCase().indexOf(search) === -1) return false;
+    if (genusFilter && c.genus !== genusFilter) return false;
+    return true;
+  });
+
+  var html = '';
+  filtered.forEach(function(c) {
+    var originCount = (c.origins || []).length;
+    var statusClass = c.ai_status === 'completed' ? 'badge-completed' : (c.ai_status === 'failed' ? 'badge-failed' : 'badge-pending');
+    html += '<tr>';
+    html += '<td>' + c.id + '</td>';
+    html += '<td><strong>' + escapeHtml(c.cultivar_name) + '</strong></td>';
+    html += '<td>' + escapeHtml(c.genus) + '</td>';
+    html += '<td>' + escapeHtml(c.type) + '</td>';
+    html += '<td>' + originCount + '</td>';
+    html += '<td><span class="badge ' + statusClass + '">' + escapeHtml(c.ai_status || '-') + '</span></td>';
+    html += '<td style="font-size:0.75rem;color:var(--color-gray);font-family:monospace;">' + escapeHtml(c.created_ip || '-') + '</td>';
+    html += '<td style="font-size:0.75rem;color:var(--color-gray);font-family:monospace;">' + escapeHtml(c.origin_added_ip || '-') + '</td>';
+    html += '<td class="actions">';
+    html += '<button class="btn btn-outline btn-sm" onclick="editCultivar(' + c.id + ')">編集</button> ';
+    html += '<button class="btn btn-danger btn-sm" onclick="deleteCultivar(' + c.id + ',\'' + escapeHtml(c.cultivar_name).replace(/'/g,"\\'") + '\')">削除</button>';
+    html += '</td>';
+    html += '</tr>';
+  });
+  document.getElementById('cultivar-tbody').innerHTML = html || '<tr><td colspan="9" style="text-align:center;color:var(--color-gray);">データなし</td></tr>';
+}
+
+document.getElementById('cultivar-search').addEventListener('input', renderCultivarTable);
+document.getElementById('cultivar-genus-filter').addEventListener('change', renderCultivarTable);
+document.getElementById('btn-refresh-cultivars').addEventListener('click', function() {
+  loadAllCultivars();
+  toast('データを更新しました');
+});
+
+function editCultivar(id) {
+  var c = allCultivars.find(function(x) { return x.id === id; });
+  if (!c) return;
+  var isSeedling = c.type === 'seedling';
+  // Extract formula from origins if exists
+  var formula = null;
+  if (c.origins) {
+    c.origins.forEach(function(o) { if (o && o._type === 'formula') formula = o.formula; });
+  }
+  var html = '<h2>品種を編集</h2>';
+  html += '<label>品種名</label><input type="text" id="edit-name" value="' + escapeHtml(c.cultivar_name) + '">';
+  html += '<label>属</label><select id="edit-genus">';
+  (window._adminGeneraData || []).forEach(function(gObj) {
+    html += '<option value="' + gObj.name + '"' + (c.genus === gObj.name ? ' selected' : '') + '>' + gObj.name + '</option>';
+  });
+  html += '</select>';
+  html += '<label>タイプ</label><select id="edit-type">';
+  ['species', 'hybrid', 'clone', 'seedling'].forEach(function(t) {
+    html += '<option value="' + t + '"' + (c.type === t ? ' selected' : '') + '>' + t + '</option>';
+  });
+  html += '</select>';
+  if (isSeedling) {
+    html += '<hr style="margin:var(--space-md) 0;">';
+    html += '<h3 style="font-size:1rem;margin-bottom:var(--space-sm);">交配情報</h3>';
+    html += '<label>交配式 (母株)</label><input type="text" id="edit-parentA" value="' + escapeHtml((formula && formula.parentA) || '') + '" placeholder="例: Anthurium crystallinum">';
+    html += '<label>交配式 (父株)</label><input type="text" id="edit-parentB" value="' + escapeHtml((formula && formula.parentB) || '') + '" placeholder="例: Anthurium magnificum">';
+    html += '<label>作出者</label><input type="text" id="edit-creatorName" value="' + escapeHtml((formula && formula.creatorName) || '') + '" placeholder="作出者名">';
+    html += '<label>播種日</label><input type="text" id="edit-sowingDate" value="' + escapeHtml((formula && formula.sowingDate) || '') + '" placeholder="例: 2025-01">';
+    html += '<hr style="margin:var(--space-md) 0;">';
+    html += '<h3 style="font-size:1rem;margin-bottom:var(--space-sm);">親株画像</h3>';
+    html += '<label>母株 (Mother) 画像</label>';
+    if (formula && formula.motherPhoto) {
+      html += '<div id="edit-mother-preview" style="margin-bottom:var(--space-sm);"><img src="' + SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + formula.motherPhoto + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #ddd;"></div>';
+    } else {
+      html += '<div id="edit-mother-preview" style="margin-bottom:var(--space-sm);color:var(--color-gray);font-size:0.85rem;">未設定</div>';
+    }
+    html += '<input type="file" id="edit-mother-photo" accept="image/jpeg,image/png" style="margin-bottom:var(--space-md);">';
+    html += '<label>父株 (Father) 画像</label>';
+    if (formula && formula.fatherPhoto) {
+      html += '<div id="edit-father-preview" style="margin-bottom:var(--space-sm);"><img src="' + SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + formula.fatherPhoto + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #ddd;"></div>';
+    } else {
+      html += '<div id="edit-father-preview" style="margin-bottom:var(--space-sm);color:var(--color-gray);font-size:0.85rem;">未設定</div>';
+    }
+    html += '<input type="file" id="edit-father-photo" accept="image/jpeg,image/png" style="margin-bottom:var(--space-md);">';
+  }
+  html += '<div class="modal-actions">';
+  html += '<button class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
+  html += '<button class="btn btn-primary" onclick="saveCultivar(' + id + ')">保存</button>';
+  html += '</div>';
+  showModal(html);
+}
+
+async function saveCultivar(id) {
+  var name = document.getElementById('edit-name').value.trim();
+  var genus = document.getElementById('edit-genus').value;
+  var type = document.getElementById('edit-type').value;
+  if (!name) { toast('品種名を入力してください'); return; }
+
+  // Handle seedling formula fields and parent photo uploads
+  var c = allCultivars.find(function(x) { return x.id === id; });
+  var updatedOrigins = null;
+  if (type === 'seedling' && c) {
+    var parentAInput = document.getElementById('edit-parentA');
+    var parentBInput = document.getElementById('edit-parentB');
+    var creatorNameInput = document.getElementById('edit-creatorName');
+    var sowingDateInput = document.getElementById('edit-sowingDate');
+    var motherInput = document.getElementById('edit-mother-photo');
+    var fatherInput = document.getElementById('edit-father-photo');
+    var motherFile = motherInput && motherInput.files[0];
+    var fatherFile = fatherInput && fatherInput.files[0];
+
+    var parentA = parentAInput ? parentAInput.value.trim() : '';
+    var parentB = parentBInput ? parentBInput.value.trim() : '';
+    var creatorName = creatorNameInput ? creatorNameInput.value.trim() : '';
+    var sowingDate = sowingDateInput ? sowingDateInput.value.trim() : '';
+
+    // Always update formula fields if any seedling field is present
+    var origins = c.origins ? c.origins.slice() : [];
+    var formulaIdx = -1;
+    var formula = null;
+    origins.forEach(function(o, i) { if (o && o._type === 'formula') { formula = o.formula; formulaIdx = i; } });
+    if (!formula) formula = {};
+
+    // Update formula text fields
+    if (parentA) formula.parentA = parentA; else delete formula.parentA;
+    if (parentB) formula.parentB = parentB; else delete formula.parentB;
+    if (creatorName) formula.creatorName = creatorName; else delete formula.creatorName;
+    if (sowingDate) formula.sowingDate = sowingDate; else delete formula.sowingDate;
+
+    var needsOriginUpdate = true;
+
+    if (motherFile || fatherFile) {
+
+      // Upload photos (with compression)
+      var safeName = name.replace(/[^a-zA-Z0-9]/g, '_');
+      if (motherFile) {
+        var compressed = await compressImage(motherFile);
+        var path = 'seedling-parents/' + safeName + '/mother_' + Date.now() + '.jpg';
+        var res = await sb.storage.from('gallery-images').upload(path, compressed, { contentType: 'image/jpeg', upsert: true });
+        if (res.error) { toast('母株画像アップロードエラー: ' + res.error.message); return; }
+        formula.motherPhoto = path;
+      }
+      if (fatherFile) {
+        var compressed = await compressImage(fatherFile);
+        var path = 'seedling-parents/' + safeName + '/father_' + Date.now() + '.jpg';
+        var res = await sb.storage.from('gallery-images').upload(path, compressed, { contentType: 'image/jpeg', upsert: true });
+        if (res.error) { toast('父株画像アップロードエラー: ' + res.error.message); return; }
+        formula.fatherPhoto = path;
+      }
+
+      // Update formula in origins
+      if (formulaIdx >= 0) {
+        origins[formulaIdx].formula = formula;
+      } else {
+        origins.push({ _type: 'formula', formula: formula });
+      }
+      updatedOrigins = origins;
+    } else if (needsOriginUpdate) {
+      // No photo changes but formula text fields changed
+      if (formulaIdx >= 0) {
+        origins[formulaIdx].formula = formula;
+      } else {
+        origins.push({ _type: 'formula', formula: formula });
+      }
+      updatedOrigins = origins;
+    }
+  }
+
+  var updateData = {
+    cultivar_name: name, genus: genus, type: type, updated_at: new Date().toISOString()
+  };
+  if (updatedOrigins) updateData.origins = updatedOrigins;
+
+  var result = await sb.from('cultivars').update(updateData).eq('id', id);
+
+  if (result.error) { toast('更新エラー: ' + result.error.message); return; }
+  closeModal();
+  toast('品種を更新しました');
+  loadAllCultivars();
+  loadDashboard();
+}
+
+async function deleteCultivar(id, name) {
+  if (!confirm('「' + name + '」を削除しますか？この操作は取り消せません。')) return;
+  var result = await sb.from('cultivars').delete().eq('id', id);
+  if (result.error) { toast('削除エラー: ' + result.error.message); return; }
+  toast('品種を削除しました');
+  loadAllCultivars();
+  loadDashboard();
+}
+
+async function reresearchCultivar(id) {
+  var c = allCultivars.find(function(x) { return x.id === id; });
+  if (!c) return;
+  var actionLabel = (c.type === 'clone' || c.type === 'hybrid') ? 'AI検証' : 'AI由来リサーチ';
+  if (!confirm('「' + c.cultivar_name + '」の' + actionLabel + 'を再実行しますか？')) return;
+
+  toast(actionLabel + 'を開始...');
+  // For CLONE/hybrid, extract user text from existing origins for re-verification
+  var payload = { cultivar_id: c.id, cultivar_name: c.cultivar_name, genus: c.genus, type: c.type };
+  if (c.type === 'clone' || c.type === 'hybrid') {
+    var userOrigin = (c.origins || []).find(function(o) {
+      return o.source_type === 'user_verified' || o.source_type === 'manual' || (o.author && o.author.isAI === false);
+    });
+    if (userOrigin) {
+      payload.user_text = userOrigin.body || '';
+      payload.user_sources = (userOrigin.sources || []).map(function(s) { return s.url || s.text || ''; }).filter(Boolean);
+    }
+  }
+  try {
+    var res = await fetch(SUPABASE_URL + '/functions/v1/research-origin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify(payload)
+    });
+    var data = await res.json();
+    if (data.success) {
+      toast('リサーチ完了: ' + (data.origins_count || 0) + '件の由来');
+    } else {
+      toast('リサーチ失敗: ' + (data.error || 'Unknown'));
+    }
+  } catch (e) {
+    toast('エラー: ' + e.message);
+  }
+  loadAllCultivars();
+  loadDashboard();
+}
+
+// ========================================
+// ORIGIN MANAGEMENT
+// ========================================
+function populateOriginSelect() {
+  var sel = document.getElementById('origin-cultivar-select');
+  var html = '<option value="">すべての品種</option>';
+  allCultivars.forEach(function(c) {
+    if ((c.origins || []).length) {
+      html += '<option value="' + c.id + '">' + escapeHtml(c.cultivar_name) + ' (' + (c.origins || []).length + '件)</option>';
+    }
+  });
+  sel.innerHTML = html;
+}
+
+document.getElementById('origin-cultivar-select').addEventListener('change', loadOrigins);
+document.getElementById('origin-type-filter').addEventListener('change', loadOrigins);
+document.getElementById('origin-search').addEventListener('input', loadOrigins);
+
+function originTypeBadge(t) {
+  var map = { species: ['原種', '#1B4332'], clone: ['CLONE', '#4A235A'], hybrid: ['交配種', '#7B2D26'], seedling: ['実生', '#1A5276'] };
+  var m = map[t] || [t || '?', '#666'];
+  return '<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:0.65rem;font-weight:600;color:#fff;background:' + m[1] + ';">' + m[0] + '</span>';
+}
+
+function structuredSummaryHtml(s, cType) {
+  if (!s) return '<span style="color:#999;">構造化データなし</span>';
+  var parts = [];
+  if (cType === 'species') {
+    if (s.author_name) parts.push('<b>発表者:</b> ' + escapeHtml(s.author_name));
+    if (s.publication_year) parts.push('<b>発表年:</b> ' + s.publication_year);
+    if (s.collector) parts.push('<b>発見者:</b> ' + escapeHtml(s.collector));
+    if (s.collection_year) parts.push('<b>採取年:</b> ' + s.collection_year);
+    if (s.type_locality) parts.push('<b>採取地:</b> ' + escapeHtml(s.type_locality));
+    if (s.known_habitats) parts.push('<b>生息地:</b> ' + escapeHtml((s.known_habitats || '').substring(0, 40)));
+  } else if (cType === 'clone') {
+    if (s.namer) parts.push('<b>命名者:</b> ' + escapeHtml(s.namer));
+    if (s.naming_year) parts.push('<b>命名年:</b> ' + s.naming_year);
+    if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
+  } else if (cType === 'hybrid') {
+    if (s.breeder) parts.push('<b>作出者:</b> ' + escapeHtml(s.breeder));
+    if (s.naming_year) parts.push('<b>命名年:</b> ' + s.naming_year);
+    if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
+  } else if (cType === 'seedling') {
+    if (s.breeder) parts.push('<b>作出者:</b> ' + escapeHtml(s.breeder));
+    if (s.sowing_date) parts.push('<b>播種日:</b> ' + escapeHtml(s.sowing_date));
+    if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
+  }
+  if (s.notes) {
+    var notesShort = s.notes.substring(0, 30);
+    if (s.notes.length > 30) notesShort += '...';
+    parts.push('<b>補足:</b> ' + escapeHtml(notesShort));
+  }
+  if (s.citation_links && s.citation_links.length) {
+    parts.push('<b>引用:</b> ' + s.citation_links.length + '件');
+  }
+  if (!parts.length) return '<span style="color:#999;">データ未入力</span>';
+  return parts.join('<br>');
+}
+
+function loadOrigins() {
+  var filterId = parseInt(document.getElementById('origin-cultivar-select').value) || 0;
+  var filterType = document.getElementById('origin-type-filter').value;
+  var search = (document.getElementById('origin-search').value || '').toLowerCase();
+
+  var targets = allCultivars.filter(function(c) {
+    if (filterId && c.id !== filterId) return false;
+    if (filterType && (c.type || 'species') !== filterType) return false;
+    if (!c.origins || !c.origins.length) return false;
+    if (search) {
+      var match = (c.cultivar_name || '').toLowerCase().indexOf(search) >= 0
+        || (c.genus || '').toLowerCase().indexOf(search) >= 0
+        || (c.origins || []).some(function(o) {
+          var s = o.structured || {};
+          return (o.body || '').toLowerCase().indexOf(search) >= 0
+            || (o.source_name || '').toLowerCase().indexOf(search) >= 0
+            || (s.author_name || '').toLowerCase().indexOf(search) >= 0
+            || (s.breeder || '').toLowerCase().indexOf(search) >= 0
+            || (s.namer || '').toLowerCase().indexOf(search) >= 0
+            || (s.collector || '').toLowerCase().indexOf(search) >= 0;
+        });
+      if (!match) return false;
+    }
+    return true;
+  });
+
+  if (!targets.length) {
+    document.getElementById('origins-list').innerHTML = '<p style="color:var(--color-gray);margin-top:var(--space-md);">由来データなし</p>';
+    return;
+  }
+
+  var totalOrigins = targets.reduce(function(s, c) { return s + (c.origins || []).length; }, 0);
+  var html = '<p style="color:var(--color-gray);font-size:var(--font-size-sm);margin:var(--space-sm) 0;">' + targets.length + ' 品種 / ' + totalOrigins + ' 件の由来</p>';
+  html += '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table class="data-table" style="margin-top:var(--space-sm);min-width:1000px;">';
+  html += '<colgroup><col style="width:180px"><col style="width:30px"><col style="width:70px"><col style="width:100px"><col style="width:80px"><col style="width:340px"><col style="width:70px"><col style="width:100px"></colgroup>';
+  html += '<thead><tr><th>品種</th><th>#</th><th>タイプ</th><th>ソース</th><th>信頼度</th><th>構造化データ</th><th>著者</th><th>投票</th></tr></thead><tbody>';
+
+  targets.forEach(function(c) {
+    var cType = c.type || 'species';
+    var origins = c.origins || [];
+    origins.forEach(function(o, i) {
+      var authorLabel;
+      if (o.source_type === 'ipni_powo') {
+        authorLabel = '<span class="badge badge-s" style="font-size:0.65rem;">IPNI/Kew</span>';
+      } else if (o.source_type === 'user_verified') {
+        authorLabel = '<span class="badge" style="background:#2D6A4F;color:#fff;font-size:0.65rem;">AI検証済</span>';
+      } else if (o.author && o.author.isAI) {
+        authorLabel = '<span class="badge badge-ai">AI</span>';
+      } else {
+        authorLabel = '<span class="badge badge-user">User</span>';
+      }
+      var trustPct = o.trust || 0;
+      var tColor = trustColor(trustPct);
+      var s = o.structured || {};
+      var oType = s.origin_type || cType;
+
+      html += '<tr>';
+      html += '<td style="max-width:150px;font-size:var(--font-size-sm);vertical-align:top;border-right:2px solid var(--color-lighter);word-break:break-word;">';
+      if (i === 0) {
+        html += '<span style="font-weight:600;">' + escapeHtml(c.cultivar_name) + '</span>';
+      }
+      html += '<div style="display:flex;gap:3px;margin-top:' + (i === 0 ? '4px' : '0') + ';flex-wrap:wrap;">';
+      if (i === 0) {
+        html += '<button class="btn btn-outline btn-sm" style="font-size:0.65rem;" onclick="reresearchCultivar(' + c.id + ')" id="rr-btn-' + c.id + '">AI再調査</button>';
+      }
+      html += '<button class="btn btn-outline btn-sm" style="font-size:0.65rem;" onclick="editOrigin(' + c.id + ',' + i + ')">編集</button>';
+      html += '<button class="btn btn-danger btn-sm" style="font-size:0.65rem;" onclick="deleteOrigin(' + c.id + ',' + i + ')">削除</button>';
+      html += '</div>';
+      html += '</td>';
+      html += '<td>' + (i + 1) + '</td>';
+      html += '<td>' + originTypeBadge(oType) + '</td>';
+      html += '<td style="font-size:var(--font-size-xs);">' + tierBadge(o.source_tier) + ' ' + escapeHtml(o.source_name || '-') + '</td>';
+      html += '<td>';
+      html += '<div class="trust-bar"><div class="trust-fill" style="width:' + trustPct + '%;background:' + tColor + ';"></div></div> ';
+      html += trustPct + '%';
+      html += '</td>';
+      html += '<td style="font-size:var(--font-size-xs);line-height:1.5;">' + structuredSummaryHtml(s, oType) + '</td>';
+      html += '<td>' + authorLabel + '</td>';
+      var votes = o.votes || { agree: 0, disagree: 0 };
+      html += '<td style="white-space:nowrap;font-size:var(--font-size-xs);">&#x1F44D; ' + (votes.agree || 0) + ' / &#x1F44E; ' + (votes.disagree || 0) + '</td>';
+      html += '</tr>';
+    });
+  });
+
+  html += '</tbody></table></div>';
+  document.getElementById('origins-list').innerHTML = html;
+}
+
+function editOrigin(cultivarId, originIndex) {
+  var c = allCultivars.find(function(x) { return x.id === cultivarId; });
+  if (!c) return;
+  var o = c.origins[originIndex];
+  if (!o) return;
+  var s = o.structured || {};
+  var cType = c.type || 'species';
+
+  var html = '<h2 style="margin-bottom:4px;">由来を編集 (#' + (originIndex + 1) + ')</h2>';
+  html += '<div style="margin-bottom:12px;">' + originTypeBadge(cType) + ' <span style="font-size:0.85rem;color:#666;">' + escapeHtml(c.cultivar_name) + '</span></div>';
+
+  // Structured fields by type
+  html += '<div style="border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:12px;background:#f9f9f9;">';
+
+  if (cType === 'species') {
+    html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#1B4332;">記載情報</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div><label>発表者 (Author)</label><input type="text" id="edit-s-author-name" value="' + escapeHtml(s.author_name || '') + '" placeholder="例: Engl."></div>';
+    html += '<div><label>発表年</label><input type="number" id="edit-s-publication-year" value="' + (s.publication_year || '') + '" placeholder="例: 1898"></div>';
+    html += '</div>';
+    html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#1B4332;">採取情報</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div><label>発見者 (Collector)</label><input type="text" id="edit-s-collector" value="' + escapeHtml(s.collector || '') + '"></div>';
+    html += '<div><label>採取年</label><input type="number" id="edit-s-collection-year" value="' + (s.collection_year || '') + '"></div>';
+    html += '</div>';
+    html += '<label>採取地 (Type locality)</label><input type="text" id="edit-s-type-locality" value="' + escapeHtml(s.type_locality || '') + '">';
+    html += '<label>生息地</label><textarea id="edit-s-known-habitats" rows="2">' + escapeHtml(s.known_habitats || '') + '</textarea>';
+  } else if (cType === 'clone') {
+    html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#4A235A;">命名情報</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div><label>命名者</label><input type="text" id="edit-s-namer" value="' + escapeHtml(s.namer || '') + '"></div>';
+    html += '<div><label>命名年</label><input type="number" id="edit-s-naming-year" value="' + (s.naming_year || '') + '"></div>';
+    html += '</div>';
+    var sf = s.formula || {};
+    html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#4A235A;">交配式</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;">';
+    html += '<div><label>Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '"></div>';
+    html += '<span style="padding-bottom:8px;font-weight:bold;font-size:1.1rem;">×</span>';
+    html += '<div><label>Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '"></div>';
+    html += '</div>';
+  } else if (cType === 'hybrid') {
+    html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#7B2D26;">作出情報</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div><label>作出者 / ナーセリー</label><input type="text" id="edit-s-breeder" value="' + escapeHtml(s.breeder || '') + '"></div>';
+    html += '<div><label>命名年</label><input type="number" id="edit-s-naming-year" value="' + (s.naming_year || '') + '"></div>';
+    html += '</div>';
+    var sf = s.formula || {};
+    html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#7B2D26;">交配式</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;">';
+    html += '<div><label>Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '"></div>';
+    html += '<span style="padding-bottom:8px;font-weight:bold;font-size:1.1rem;">×</span>';
+    html += '<div><label>Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '"></div>';
+    html += '</div>';
+  } else if (cType === 'seedling') {
+    html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#1A5276;">作出情報</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div><label>作出者</label><input type="text" id="edit-s-breeder" value="' + escapeHtml(s.breeder || '') + '"></div>';
+    html += '<div><label>播種日</label><input type="date" id="edit-s-sowing-date" value="' + escapeHtml(s.sowing_date || '') + '"></div>';
+    html += '</div>';
+    var sf = s.formula || {};
+    html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#1A5276;">交配式</h3>';
+    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;">';
+    html += '<div><label>Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '"></div>';
+    html += '<span style="padding-bottom:8px;font-weight:bold;font-size:1.1rem;">×</span>';
+    html += '<div><label>Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '"></div>';
+    html += '</div>';
+  }
+
+  html += '<hr style="margin:12px 0;border:none;border-top:1px solid #ddd;">';
+  html += '<label>補足欄 (notes)</label><textarea id="edit-s-notes" rows="3">' + escapeHtml(s.notes || '') + '</textarea>';
+
+  var citationLinks = (s.citation_links || []).map(function(l) { return typeof l === 'string' ? l : l.url; }).join('\n');
+  html += '<label>引用リンク (1行1URL)</label><textarea id="edit-s-citations" rows="3" style="font-family:monospace;font-size:0.8rem;">' + escapeHtml(citationLinks) + '</textarea>';
+  html += '</div>';
+
+  // Legacy fields
+  html += '<details style="margin-bottom:12px;"><summary style="cursor:pointer;font-size:0.85rem;color:#666;">レガシーフィールド</summary>';
+  html += '<label>本文（日本語）</label><textarea id="edit-body">' + escapeHtml(o.body || '') + '</textarea>';
+  html += '<label>本文（英語）</label><textarea id="edit-body-en">' + escapeHtml(o.body_en || '') + '</textarea>';
+  html += '<label>信頼度 (0-100)</label><input type="number" id="edit-trust" min="0" max="100" value="' + (o.trust || 0) + '">';
+  html += '<label>ソース名</label><input type="text" id="edit-source-name" value="' + escapeHtml(o.source_name || '') + '">';
+  html += '<label>ソースURL</label><input type="text" id="edit-source-url" value="' + escapeHtml(o.source_url || '') + '">';
+  html += '<label>ソースTier</label><select id="edit-source-tier">';
+  ['S', 'A', 'B', 'C', 'D'].forEach(function(t) {
+    html += '<option value="' + t + '"' + (o.source_tier === t ? ' selected' : '') + '>' + t + '</option>';
+  });
+  html += '</select>';
+  html += '<label>発見者/作出者</label><input type="text" id="edit-discoverer" value="' + escapeHtml(o.discoverer_or_breeder || '') + '">';
+  html += '<label>発見年</label><input type="number" id="edit-year" value="' + (o.discovery_year || '') + '">';
+  html += '<label>自生地域</label><input type="text" id="edit-region" value="' + escapeHtml(o.native_region || '') + '">';
+  var sourcesJson = JSON.stringify(o.sources || []);
+  html += '<label>リンク一覧 (JSON)</label><textarea id="edit-sources" style="font-family:var(--font-mono);font-size:var(--font-size-xs);">' + escapeHtml(sourcesJson) + '</textarea>';
+  html += '</details>';
+
+  html += '<div class="modal-actions">';
+  html += '<button class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
+  html += '<button class="btn btn-primary" onclick="saveOrigin(' + cultivarId + ',' + originIndex + ')">保存</button>';
+  html += '</div>';
+  showModal(html);
+}
+
+async function saveOrigin(cultivarId, originIndex) {
+  var c = allCultivars.find(function(x) { return x.id === cultivarId; });
+  if (!c) return;
+  var origins = JSON.parse(JSON.stringify(c.origins || []));
+  var o = origins[originIndex];
+  if (!o) return;
+  var cType = c.type || 'species';
+
+  // Save structured data
+  var s = o.structured || { origin_type: cType };
+  s.origin_type = cType;
+
+  if (cType === 'species') {
+    var v;
+    v = document.getElementById('edit-s-author-name'); if (v) s.author_name = v.value.trim();
+    v = document.getElementById('edit-s-publication-year'); if (v) s.publication_year = parseInt(v.value) || null;
+    v = document.getElementById('edit-s-collector'); if (v) s.collector = v.value.trim();
+    v = document.getElementById('edit-s-collection-year'); if (v) s.collection_year = parseInt(v.value) || null;
+    v = document.getElementById('edit-s-type-locality'); if (v) s.type_locality = v.value.trim();
+    v = document.getElementById('edit-s-known-habitats'); if (v) s.known_habitats = v.value.trim();
+  } else if (cType === 'clone') {
+    var v;
+    v = document.getElementById('edit-s-namer'); if (v) s.namer = v.value.trim();
+    v = document.getElementById('edit-s-naming-year'); if (v) s.naming_year = parseInt(v.value) || null;
+    var pA = document.getElementById('edit-s-parentA'), pB = document.getElementById('edit-s-parentB');
+    if (pA && pB && (pA.value.trim() || pB.value.trim())) {
+      s.formula = { parentA: pA.value.trim(), parentB: pB.value.trim() };
+    }
+  } else if (cType === 'hybrid') {
+    var v;
+    v = document.getElementById('edit-s-breeder'); if (v) s.breeder = v.value.trim();
+    v = document.getElementById('edit-s-naming-year'); if (v) s.naming_year = parseInt(v.value) || null;
+    var pA = document.getElementById('edit-s-parentA'), pB = document.getElementById('edit-s-parentB');
+    if (pA && pB && (pA.value.trim() || pB.value.trim())) {
+      s.formula = { parentA: pA.value.trim(), parentB: pB.value.trim() };
+    }
+  } else if (cType === 'seedling') {
+    var v;
+    v = document.getElementById('edit-s-breeder'); if (v) s.breeder = v.value.trim();
+    v = document.getElementById('edit-s-sowing-date'); if (v) s.sowing_date = v.value;
+    var pA = document.getElementById('edit-s-parentA'), pB = document.getElementById('edit-s-parentB');
+    if (pA && pB && (pA.value.trim() || pB.value.trim())) {
+      s.formula = { parentA: pA.value.trim(), parentB: pB.value.trim() };
+    }
+  }
+
+  var notesEl = document.getElementById('edit-s-notes');
+  if (notesEl) s.notes = notesEl.value.trim();
+
+  var citationsEl = document.getElementById('edit-s-citations');
+  if (citationsEl) {
+    s.citation_links = citationsEl.value.split('\n').filter(function(u) { return u.trim(); }).map(function(u) { return { url: u.trim() }; });
+  }
+
+  o.structured = s;
+
+  // Legacy fields
+  o.body = document.getElementById('edit-body').value;
+  o.body_en = document.getElementById('edit-body-en').value;
+  o.trust = parseInt(document.getElementById('edit-trust').value) || 0;
+  o.trustClass = o.trust >= 70 ? 'trust--high' : (o.trust >= 40 ? 'trust--mid' : 'trust--low');
+  o.source_name = document.getElementById('edit-source-name').value;
+  o.source_url = document.getElementById('edit-source-url').value;
+  o.source_tier = document.getElementById('edit-source-tier').value;
+  o.discoverer_or_breeder = document.getElementById('edit-discoverer').value;
+  o.discovery_year = parseInt(document.getElementById('edit-year').value) || null;
+  o.native_region = document.getElementById('edit-region').value;
+
+  try {
+    var sourcesStr = document.getElementById('edit-sources').value;
+    o.sources = JSON.parse(sourcesStr);
+  } catch (e) { /* keep existing */ }
+
+  var result = await sb.from('cultivars').update({
+    origins: origins, updated_at: new Date().toISOString()
+  }).eq('id', cultivarId);
+
+  if (result.error) { toast('更新エラー: ' + result.error.message); return; }
+  closeModal();
+  toast('由来を更新しました');
+  await loadAllCultivars();
+  loadOrigins();
+}
+
+async function deleteOrigin(cultivarId, originIndex) {
+  var c = allCultivars.find(function(x) { return x.id === cultivarId; });
+  if (!c) return;
+  var o = c.origins[originIndex];
+  var bodyPreview = (o.body || '').substring(0, 40);
+  if (!confirm('由来 #' + (originIndex + 1) + '「' + bodyPreview + '...」を削除しますか？')) return;
+
+  var origins = JSON.parse(JSON.stringify(c.origins || []));
+  origins.splice(originIndex, 1);
+
+  var result = await sb.from('cultivars').update({
+    origins: origins, updated_at: new Date().toISOString()
+  }).eq('id', cultivarId);
+
+  if (result.error) { toast('削除エラー: ' + result.error.message); return; }
+  toast('由来を削除しました');
+  await loadAllCultivars();
+  loadOrigins();
+  loadDashboard();
+}
+
+// ========================================
+// BULK OPERATIONS
+// ========================================
+// ========================================
+// BULK ORIGIN MIGRATION
+// ========================================
+document.getElementById('btn-bulk-migrate').addEventListener('click', async function() {
+  var btn = this;
+  if (!confirm('既存の由来データを構造化フィールドに移行しますか？\nstructured未設定の由来のみが対象です。')) return;
+
+  btn.disabled = true;
+  var progressEl = document.getElementById('migrate-progress');
+  var fillEl = document.getElementById('migrate-progress-fill');
+  var textEl = document.getElementById('migrate-progress-text');
+  var logEl = document.getElementById('migrate-log');
+  progressEl.classList.remove('hidden');
+  fillEl.style.width = '0%';
+  logEl.innerHTML = '';
+  var stats = { total: 0, migrated: 0, skipped: 0, error: 0 };
+
+  function log(msg) {
+    logEl.innerHTML += msg + '<br>';
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  var res = await sb.from('cultivars').select('id, cultivar_name, type, origins');
+  if (res.error) {
+    log('[ERROR] データ取得失敗: ' + res.error.message);
+    btn.disabled = false;
+    return;
+  }
+
+  var cultivars = res.data.filter(function(c) { return c.origins && c.origins.length > 0; });
+  log('対象品種: ' + cultivars.length + '件');
+
+  for (var i = 0; i < cultivars.length; i++) {
+    var c = cultivars[i];
+    var pct = Math.round(((i + 1) / cultivars.length) * 100);
+    fillEl.style.width = pct + '%';
+    textEl.textContent = (i + 1) + ' / ' + cultivars.length + ' (' + pct + '%)';
+
+    var origins = JSON.parse(JSON.stringify(c.origins));
+    var changed = false;
+    var cType = c.type || 'species';
+
+    for (var j = 0; j < origins.length; j++) {
+      var o = origins[j];
+      stats.total++;
+
+      // Skip formula-type origins and already-structured origins
+      if (o._type === 'formula') { stats.skipped++; continue; }
+      if (o.structured) { stats.skipped++; continue; }
+
+      // Build structured from legacy fields
+      var s = { origin_type: cType };
+
+      if (cType === 'species') {
+        if (o.discoverer_or_breeder) s.collector = o.discoverer_or_breeder;
+        if (o.discovery_year) s.collection_year = o.discovery_year;
+        if (o.native_region) s.known_habitats = o.native_region;
+      } else if (cType === 'clone') {
+        if (o.discoverer_or_breeder) s.namer = o.discoverer_or_breeder;
+        if (o.discovery_year) s.naming_year = o.discovery_year;
+      } else if (cType === 'hybrid') {
+        if (o.discoverer_or_breeder) s.breeder = o.discoverer_or_breeder;
+        if (o.discovery_year) s.naming_year = o.discovery_year;
+      } else if (cType === 'seedling') {
+        if (o.discoverer_or_breeder) s.breeder = o.discoverer_or_breeder;
+      }
+
+      // Move body to notes
+      if (o.body) s.notes = o.body;
+
+      // Extract formula from formula-type origins in same cultivar
+      var formulaOrigin = origins.find(function(fo) { return fo._type === 'formula' && fo.formula; });
+      if (formulaOrigin && formulaOrigin.formula) {
+        s.formula = {
+          parentA: formulaOrigin.formula.parentA || '',
+          parentB: formulaOrigin.formula.parentB || ''
+        };
+      }
+
+      // Extract citation links from sources
+      if (o.sources && o.sources.length > 0) {
+        s.citation_links = o.sources.filter(function(src) { return src.url; }).map(function(src) { return { url: src.url, label: src.name || '' }; });
+      }
+
+      o.structured = s;
+      changed = true;
+      stats.migrated++;
+    }
+
+    if (changed) {
+      var upd = await sb.from('cultivars').update({
+        origins: origins, updated_at: new Date().toISOString()
+      }).eq('id', c.id);
+
+      if (upd.error) {
+        log('[ERROR] ' + c.cultivar_name + ': ' + upd.error.message);
+        stats.error++;
+      } else {
+        log('[OK] ' + c.cultivar_name + ' (' + cType + ')');
+      }
+    } else {
+      log('[SKIP] ' + c.cultivar_name + ' (全て構造化済み)');
+    }
+  }
+
+  log('---');
+  log('完了: 移行=' + stats.migrated + ', スキップ=' + stats.skipped + ', エラー=' + stats.error + ' / 合計=' + stats.total);
+  textEl.textContent = '完了 — 移行: ' + stats.migrated + '件, スキップ: ' + stats.skipped + '件';
+  btn.disabled = false;
+  await loadAllCultivars();
+  loadOrigins();
+});
+
+document.getElementById('btn-export').addEventListener('click', async function() {
+  var result = await sb.from('cultivars').select('*').order('id');
+  if (result.error) { toast('エクスポートエラー'); return; }
+
+  var blob = new Blob([JSON.stringify(result.data, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'plants-story-export-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('エクスポート完了');
+});
+
+// ========================================
+// BULK IMAGE COMPRESSION
+// ========================================
+document.getElementById('btn-bulk-compress').addEventListener('click', async function() {
+  var btn = this;
+  var target = document.getElementById('compress-target').value;
+  var progressEl = document.getElementById('compress-progress');
+  var fillEl = document.getElementById('compress-progress-fill');
+  var textEl = document.getElementById('compress-progress-text');
+  var logEl = document.getElementById('compress-log');
+
+  btn.disabled = true;
+  progressEl.classList.remove('hidden');
+  fillEl.style.width = '0%';
+  logEl.innerHTML = '';
+  var stats = { total: 0, compressed: 0, skipped: 0, error: 0, savedBytes: 0 };
+
+  function log(msg) {
+    logEl.innerHTML += msg + '<br>';
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  // Collect image list
+  var images = [];
+  if (target === 'gallery' || target === 'all') {
+    var res = await sb.from('cultivar_images').select('id, storage_path, cultivar_name');
+    if (res.data) images = images.concat(res.data.map(function(r) { return { type: 'gallery', id: r.id, path: r.storage_path, name: r.cultivar_name }; }));
+  }
+  if (target === 'parent' || target === 'all') {
+    var res2 = await sb.from('cultivars').select('id, cultivar_name, origins');
+    if (res2.data) {
+      res2.data.forEach(function(c) {
+        if (!c.origins) return;
+        c.origins.forEach(function(o) {
+          if (o && o._type === 'formula' && o.formula) {
+            if (o.formula.motherPhoto) images.push({ type: 'parent', cultivarId: c.id, path: o.formula.motherPhoto, name: c.cultivar_name, role: 'mother', origins: c.origins });
+            if (o.formula.fatherPhoto) images.push({ type: 'parent', cultivarId: c.id, path: o.formula.fatherPhoto, name: c.cultivar_name, role: 'father', origins: c.origins });
+          }
+        });
+      });
+    }
+  }
+
+  stats.total = images.length;
+  log('対象画像: ' + stats.total + '件');
+  if (stats.total === 0) {
+    textEl.textContent = '対象画像がありません';
+    btn.disabled = false;
+    return;
+  }
+
+  for (var i = 0; i < images.length; i++) {
+    var img = images[i];
+    var pct = Math.round(((i + 1) / images.length) * 100);
+    fillEl.style.width = pct + '%';
+    textEl.textContent = (i + 1) + ' / ' + images.length + ' (' + pct + '%)';
+
+    try {
+      // Download original image
+      var publicUrl = SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + img.path;
+      var resp = await fetch(publicUrl);
+      if (!resp.ok) { log('[ERROR] ' + img.name + ' (' + img.path + '): ダウンロード失敗'); stats.error++; continue; }
+      var originalBlob = await resp.blob();
+      var originalSize = originalBlob.size;
+
+      // Check dimensions to decide skip
+      var shouldSkip = await new Promise(function(resolve) {
+        var testImg = new Image();
+        testImg.onload = function() {
+          var longSide = Math.max(testImg.width, testImg.height);
+          // Skip if long side <= 2048 AND size < 500KB
+          resolve(longSide <= 2048 && originalSize < 500 * 1024);
+        };
+        testImg.onerror = function() { resolve(false); };
+        testImg.src = URL.createObjectURL(originalBlob);
+      });
+
+      if (shouldSkip) {
+        log('[SKIP] ' + img.name + ' (' + Math.round(originalSize / 1024) + 'KB, 条件内)');
+        stats.skipped++;
+        continue;
+      }
+
+      // Compress
+      var originalFile = new File([originalBlob], img.path.split('/').pop() || 'image.jpg', { type: originalBlob.type });
+      var compressed = await compressImage(originalFile);
+      var savedKB = Math.round((originalSize - compressed.size) / 1024);
+
+      // Upload (overwrite)
+      var upRes = await sb.storage.from('gallery-images').upload(img.path, compressed, { contentType: 'image/jpeg', upsert: true });
+      if (upRes.error) { log('[ERROR] ' + img.name + ': アップロード失敗 - ' + upRes.error.message); stats.error++; continue; }
+
+      stats.compressed++;
+      stats.savedBytes += (originalSize - compressed.size);
+      log('[OK] ' + img.name + ': ' + Math.round(originalSize / 1024) + 'KB → ' + Math.round(compressed.size / 1024) + 'KB (' + (savedKB > 0 ? '-' + savedKB + 'KB' : '+' + Math.abs(savedKB) + 'KB') + ')');
+    } catch (e) {
+      log('[ERROR] ' + img.name + ': ' + e.message);
+      stats.error++;
+    }
+  }
+
+  var totalSavedMB = (stats.savedBytes / (1024 * 1024)).toFixed(1);
+  textEl.textContent = '完了! 圧縮: ' + stats.compressed + ' / スキップ: ' + stats.skipped + ' / エラー: ' + stats.error + ' / 削減: ' + totalSavedMB + 'MB';
+  log('--- 完了 ---');
+  btn.disabled = false;
+});
+
+// ========================================
+// IMAGE MANAGEMENT
+// ========================================
+var allImages = [];
+
+async function loadImages() {
+  var result = await sb.from('cultivar_images').select('*').order('created_at', { ascending: false });
+  if (result.error) { toast('画像取得エラー'); return; }
+  allImages = result.data || [];
+  renderImageGrid();
+}
+
+function getImageUrl(storagePath) {
+  return SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + storagePath;
+}
+
+function renderImageGrid() {
+  var grid = document.getElementById('image-grid');
+  var statsEl = document.getElementById('image-stats');
+  var search = (document.getElementById('image-search').value || '').toLowerCase().trim();
+  var flagOnly = document.getElementById('image-flag-filter').checked;
+
+  var filtered = allImages.filter(function(img) {
+    if (search && !(img.cultivar_name || '').toLowerCase().includes(search)) return false;
+    if (flagOnly && (img.fake_votes || 0) <= (img.real_votes || 0)) return false;
+    return true;
+  });
+
+  statsEl.textContent = filtered.length + ' / ' + allImages.length + ' 画像';
+  grid.innerHTML = '';
+
+  filtered.forEach(function(img) {
+    var card = document.createElement('div');
+    card.style.cssText = 'background:var(--color-white);border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--color-light);';
+    var fakeHigh = (img.fake_votes || 0) > (img.real_votes || 0);
+    card.innerHTML =
+      '<div style="position:relative;">' +
+        '<img src="' + getImageUrl(img.storage_path) + '" style="width:100%;height:160px;object-fit:cover;display:block;" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22160%22><rect fill=%22%23eee%22 width=%22200%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23999%22>Error</text></svg>\'">' +
+        (fakeHigh ? '<span style="position:absolute;top:4px;right:4px;background:#c62828;color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;">Fake多</span>' : '') +
+      '</div>' +
+      '<div style="padding:8px;font-size:var(--font-size-sm);">' +
+        '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(img.cultivar_name || '') + '">' + escapeHtml(img.cultivar_name || '不明') + '</div>' +
+        '<div style="display:flex;gap:8px;margin:4px 0;color:var(--color-gray);">' +
+          '<span>Real: ' + (img.real_votes || 0) + '</span>' +
+          '<span>Fake: ' + (img.fake_votes || 0) + '</span>' +
+        '</div>' +
+        '<div style="color:var(--color-gray);font-size:0.75rem;">' + (img.created_at ? new Date(img.created_at).toLocaleDateString('ja') : '') + '</div>' +
+        '<div style="color:var(--color-gray);font-size:0.7rem;font-family:monospace;">IP: ' + escapeHtml(img.created_ip || '-') + '</div>' +
+        '<button class="btn btn-sm" style="margin-top:6px;color:#c62828;border-color:#c62828;width:100%;" data-delete-image="' + img.id + '" data-storage-path="' + escapeHtml(img.storage_path) + '">削除</button>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+}
+
+document.getElementById('btn-refresh-images').addEventListener('click', loadImages);
+document.getElementById('image-search').addEventListener('input', renderImageGrid);
+document.getElementById('image-flag-filter').addEventListener('change', renderImageGrid);
+
+// Delete image handler
+document.getElementById('image-grid').addEventListener('click', async function(e) {
+  var btn = e.target.closest('[data-delete-image]');
+  if (!btn) return;
+  var imageId = btn.getAttribute('data-delete-image');
+  var storagePath = btn.getAttribute('data-storage-path');
+  if (!confirm('この画像を削除しますか？')) return;
+
+  btn.disabled = true;
+  btn.textContent = '削除中...';
+  try {
+    // Try storage deletion (non-critical if fails)
+    var storageRes = await sb.storage.from('gallery-images').remove([storagePath]);
+    if (storageRes.error) console.warn('Storage delete warning:', storageRes.error.message);
+
+    // DB deletion via Supabase client
+    var dbRes = await sb.from('cultivar_images').delete().eq('id', imageId);
+    if (dbRes.error) {
+      console.warn('Client delete failed:', dbRes.error.message, '- trying REST API...');
+      // Fallback: REST API with return=representation to check if rows were deleted
+      var fetchRes = await fetch(SUPABASE_URL + '/rest/v1/cultivar_images?id=eq.' + imageId, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Prefer': 'return=representation'
+        }
+      });
+      if (!fetchRes.ok) {
+        var errText = await fetchRes.text();
+        throw new Error('削除失敗 (' + fetchRes.status + '): ' + errText);
+      }
+      var deleted = await fetchRes.json();
+      if (!deleted || deleted.length === 0) {
+        throw new Error('RLSポリシーにより削除が拒否されました。Supabaseダッシュボードでcultvar_imagesテーブルのDELETEポリシーを追加してください。');
+      }
+    }
+    allImages = allImages.filter(function(img) { return String(img.id) !== String(imageId); });
+    renderImageGrid();
+    toast('画像を削除しました');
+  } catch (err) {
+    console.error('Image delete error:', err);
+    toast('削除エラー: ' + (err.message || err));
+    btn.disabled = false;
+    btn.textContent = '削除';
+  }
+});
+
+// ========================================
+// IMAGE TAB SWITCHING
+// ========================================
+document.querySelectorAll('.image-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.image-tab').forEach(function(t) {
+      t.classList.remove('active');
+      t.style.borderBottom = 'none';
+      t.style.opacity = '0.6';
+      t.style.fontWeight = 'normal';
+    });
+    this.classList.add('active');
+    this.style.borderBottom = '2px solid var(--color-primary)';
+    this.style.opacity = '1';
+    this.style.fontWeight = '600';
+    var which = this.getAttribute('data-image-tab');
+    document.getElementById('gallery-tab-content').style.display = which === 'gallery' ? '' : 'none';
+    document.getElementById('formula-tab-content').style.display = which === 'formula' ? '' : 'none';
+    if (which === 'formula' && allFormulaImages.length === 0) loadFormulaImages();
+  });
+});
+
+// ========================================
+// FORMULA (PARENT) IMAGE MANAGEMENT
+// ========================================
+var allFormulaImages = [];
+
+async function loadFormulaImages() {
+  var result = await sb.from('cultivars').select('id, cultivar_name, origins').eq('type', 'seedling');
+  if (result.error) { toast('交配式画像の取得エラー'); return; }
+  allFormulaImages = [];
+  (result.data || []).forEach(function(c) {
+    if (!c.origins || !Array.isArray(c.origins)) return;
+    var formula = null;
+    c.origins.forEach(function(o) { if (o && o._type === 'formula') formula = o.formula; });
+    if (!formula) return;
+    if (formula.motherPhoto) {
+      allFormulaImages.push({ cultivarId: c.id, cultivarName: c.cultivar_name, role: 'mother', storagePath: formula.motherPhoto });
+    }
+    if (formula.fatherPhoto) {
+      allFormulaImages.push({ cultivarId: c.id, cultivarName: c.cultivar_name, role: 'father', storagePath: formula.fatherPhoto });
+    }
+  });
+  renderFormulaImageGrid();
+}
+
+function renderFormulaImageGrid() {
+  var grid = document.getElementById('formula-image-grid');
+  var statsEl = document.getElementById('formula-image-stats');
+  var search = (document.getElementById('formula-image-search').value || '').toLowerCase().trim();
+
+  var filtered = allFormulaImages.filter(function(img) {
+    if (search && !(img.cultivarName || '').toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  statsEl.textContent = filtered.length + ' / ' + allFormulaImages.length + ' 交配式画像';
+  grid.innerHTML = '';
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--color-gray);padding:var(--space-xl);">交配式画像がありません</div>';
+    return;
+  }
+
+  filtered.forEach(function(img) {
+    var card = document.createElement('div');
+    card.style.cssText = 'background:var(--color-white);border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--color-light);';
+    var roleLabel = img.role === 'mother' ? 'Mother（母）' : 'Father（父）';
+    var roleColor = img.role === 'mother' ? '#e91e63' : '#1976d2';
+    card.innerHTML =
+      '<div style="position:relative;">' +
+        '<img src="' + getImageUrl(img.storagePath) + '" style="width:100%;height:160px;object-fit:cover;display:block;" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22160%22><rect fill=%22%23eee%22 width=%22200%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23999%22>Error</text></svg>\'">' +
+        '<span style="position:absolute;top:4px;right:4px;background:' + roleColor + ';color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;">' + roleLabel + '</span>' +
+      '</div>' +
+      '<div style="padding:8px;font-size:var(--font-size-sm);">' +
+        '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(img.cultivarName || '') + '">' + escapeHtml(img.cultivarName || '不明') + '</div>' +
+        '<div style="color:var(--color-gray);font-size:0.75rem;margin:4px 0;">Storage: ' + escapeHtml(img.storagePath.split('/').pop()) + '</div>' +
+        '<button class="btn btn-sm" style="margin-top:6px;color:#c62828;border-color:#c62828;width:100%;" data-delete-formula-image data-cultivar-id="' + img.cultivarId + '" data-role="' + img.role + '" data-storage-path="' + escapeHtml(img.storagePath) + '">削除</button>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+}
+
+document.getElementById('btn-refresh-formula-images').addEventListener('click', loadFormulaImages);
+document.getElementById('formula-image-search').addEventListener('input', renderFormulaImageGrid);
+
+// Delete formula image handler
+document.getElementById('formula-image-grid').addEventListener('click', async function(e) {
+  var btn = e.target.closest('[data-delete-formula-image]');
+  if (!btn) return;
+  var cultivarId = btn.getAttribute('data-cultivar-id');
+  var role = btn.getAttribute('data-role');
+  var storagePath = btn.getAttribute('data-storage-path');
+  if (!confirm('この交配式画像（' + (role === 'mother' ? '母' : '父') + '）を削除しますか？')) return;
+
+  btn.disabled = true;
+  btn.textContent = '削除中...';
+  try {
+    // Delete from storage
+    var storageRes = await sb.storage.from('gallery-images').remove([storagePath]);
+    if (storageRes.error) console.warn('Storage delete warning:', storageRes.error.message);
+
+    // Get current cultivar origins and update formula
+    var getRes = await sb.from('cultivars').select('origins').eq('id', cultivarId).single();
+    if (getRes.error) throw new Error('品種データ取得エラー: ' + getRes.error.message);
+    var origins = getRes.data.origins || [];
+    origins.forEach(function(o) {
+      if (o && o._type === 'formula' && o.formula) {
+        if (role === 'mother') o.formula.motherPhoto = null;
+        if (role === 'father') o.formula.fatherPhoto = null;
+      }
+    });
+    var upRes = await sb.from('cultivars').update({ origins: origins }).eq('id', cultivarId);
+    if (upRes.error) throw new Error('DB更新エラー: ' + upRes.error.message);
+
+    allFormulaImages = allFormulaImages.filter(function(img) {
+      return !(String(img.cultivarId) === String(cultivarId) && img.role === role);
+    });
+    renderFormulaImageGrid();
+    toast('交配式画像を削除しました');
+  } catch (err) {
+    console.error('Formula image delete error:', err);
+    toast('削除エラー: ' + (err.message || err));
+    btn.disabled = false;
+    btn.textContent = '削除';
+  }
+});
+
+// Load images when section is shown
+document.querySelectorAll('.admin-nav a').forEach(function(link) {
+  link.addEventListener('click', function() {
+    if (this.getAttribute('data-section') === 'images') loadImages();
+    if (this.getAttribute('data-section') === 'delete-requests') loadDeletionRequests();
+  });
+});
+
+// ========================================
+// Deletion Requests
+// ========================================
+var reasonLabels = {
+  duplicate: '重複している品種',
+  wrong_info: '誤った情報',
+  created_by_mistake: '間違えて作成した',
+  spam: 'スパム・不適切な内容',
+  irrelevant: '無関係な画像',
+  inappropriate: '不適切な画像',
+  copyright: '著作権侵害の可能性',
+  uploaded_by_mistake: '間違えてアップロードした',
+  other: 'その他'
+};
+
+// Tab switching
+document.querySelectorAll('.dr-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.dr-tab').forEach(function(t) {
+      t.classList.remove('active');
+      t.style.borderBottom = 'none';
+      t.style.fontWeight = 'normal';
+      t.style.opacity = '0.6';
+    });
+    this.classList.add('active');
+    this.style.borderBottom = '2px solid var(--color-primary)';
+    this.style.fontWeight = '600';
+    this.style.opacity = '1';
+    var tabName = this.getAttribute('data-dr-tab');
+    document.getElementById('dr-cultivar-content').style.display = tabName === 'cultivar' ? '' : 'none';
+    document.getElementById('dr-image-content').style.display = tabName === 'image' ? '' : 'none';
+  });
+});
+
+async function loadDeletionRequests() {
+  var result = await sb.from('deletion_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+  if (result.error) { toast('削除依頼の取得エラー: ' + result.error.message); return; }
+  var requests = result.data || [];
+
+  var cultivarRequests = requests.filter(function(r) { return r.target_type === 'cultivar'; });
+  var imageRequests = requests.filter(function(r) { return r.target_type === 'image'; });
+
+  renderDeletionList('dr-cultivar-list', 'dr-cultivar-empty', cultivarRequests, 'cultivar');
+  renderDeletionList('dr-image-list', 'dr-image-empty', imageRequests, 'image');
+}
+
+function renderDeletionList(listId, emptyId, requests, type) {
+  var listEl = document.getElementById(listId);
+  var emptyEl = document.getElementById(emptyId);
+  listEl.innerHTML = '';
+  emptyEl.style.display = requests.length === 0 ? '' : 'none';
+
+  requests.forEach(function(req) {
+    var card = document.createElement('div');
+    card.style.cssText = 'background:var(--color-white);border:1px solid var(--color-light);border-radius:var(--radius-md);padding:var(--space-md);';
+    var reasonText = reasonLabels[req.reason] || req.reason;
+    if (req.reason === 'other' && req.reason_detail) {
+      reasonText += ': ' + req.reason_detail;
+    }
+    var dateStr = new Date(req.created_at).toLocaleString('ja-JP');
+
+    var html = '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-md);">';
+    html += '<div>';
+    html += '<div style="font-weight:600;margin-bottom:4px;">' + escapeHtml(req.target_name || 'ID: ' + req.target_id) + '</div>';
+    html += '<div style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:4px;">理由: ' + escapeHtml(reasonText) + '</div>';
+    html += '<div style="font-size:var(--font-size-xs);color:var(--color-gray);">' + dateStr + '</div>';
+    html += '</div>';
+    html += '<div style="display:flex;gap:var(--space-sm);flex-shrink:0;">';
+    html += '<button class="btn btn-sm" style="background:#dc3545;color:#fff;border:none;" data-dr-approve="' + req.id + '" data-dr-type="' + type + '" data-dr-target="' + req.target_id + '" data-dr-name="' + escapeHtml(req.target_name || '') + '">承認(削除)</button>';
+    html += '<button class="btn btn-sm" style="background:var(--color-gray);color:#fff;border:none;" data-dr-reject="' + req.id + '">却下</button>';
+    html += '</div></div>';
+    card.innerHTML = html;
+    listEl.appendChild(card);
+  });
+}
+
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Handle approve/reject clicks
+document.getElementById('sec-delete-requests').addEventListener('click', async function(e) {
+  var approveBtn = e.target.closest('[data-dr-approve]');
+  var rejectBtn = e.target.closest('[data-dr-reject]');
+
+  if (approveBtn) {
+    var reqId = parseInt(approveBtn.getAttribute('data-dr-approve'));
+    var drType = approveBtn.getAttribute('data-dr-type');
+    var targetId = approveBtn.getAttribute('data-dr-target');
+    var targetName = approveBtn.getAttribute('data-dr-name');
+
+    if (!confirm('「' + (targetName || 'ID:' + targetId) + '」を削除しますか？')) return;
+
+    approveBtn.disabled = true;
+    approveBtn.textContent = '処理中...';
+
+    try {
+      // Delete the target
+      if (drType === 'cultivar') {
+        var delResult = await sb.from('cultivars').delete().eq('id', targetId);
+        if (delResult.error) throw new Error(delResult.error.message);
+      } else if (drType === 'image') {
+        // Get image info first for storage path
+        var imgResult = await sb.from('cultivar_images').select('storage_path').eq('id', targetId).limit(1);
+        if (imgResult.data && imgResult.data.length > 0 && imgResult.data[0].storage_path) {
+          await sb.storage.from('gallery-images').remove([imgResult.data[0].storage_path]);
+        }
+        var delResult = await sb.from('cultivar_images').delete().eq('id', targetId);
+        if (delResult.error) {
+          // Fallback: REST API delete (same as existing image delete handler)
+          var fetchRes = await fetch(SUPABASE_URL + '/rest/v1/cultivar_images?id=eq.' + targetId, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+              'Prefer': 'return=representation'
+            }
+          });
+          if (!fetchRes.ok) {
+            var errText = await fetchRes.text();
+            throw new Error('画像削除失敗 (' + fetchRes.status + '): ' + errText);
+          }
+        }
+      }
+
+      // Update request status
+      await sb.from('deletion_requests').update({ status: 'approved', resolved_at: new Date().toISOString() }).eq('id', reqId);
+      toast('削除しました');
+      loadDeletionRequests();
+    } catch (err) {
+      toast('エラー: ' + err.message);
+      approveBtn.disabled = false;
+      approveBtn.textContent = '承認(削除)';
+    }
+  }
+
+  if (rejectBtn) {
+    var reqId = parseInt(rejectBtn.getAttribute('data-dr-reject'));
+    rejectBtn.disabled = true;
+    rejectBtn.textContent = '処理中...';
+    try {
+      await sb.from('deletion_requests').update({ status: 'rejected', resolved_at: new Date().toISOString() }).eq('id', reqId);
+      toast('却下しました');
+      loadDeletionRequests();
+    } catch (err) {
+      toast('エラー: ' + err.message);
+      rejectBtn.disabled = false;
+      rejectBtn.textContent = '却下';
+    }
+  }
+});
+
+// ========================================
+// AFFILIATES MANAGEMENT
+// ========================================
+var allAffiliates = [];
+
+async function loadAffiliates() {
+  var result = await sb.from('affiliates').select('*').order('sort_order');
+  if (result.error) { toast('アフィリエイト取得エラー'); return; }
+  allAffiliates = result.data || [];
+  renderAffiliateList();
+}
+
+function renderAffiliateList() {
+  var container = document.getElementById('affiliate-list');
+  if (!allAffiliates.length) {
+    container.innerHTML = '<p style="color:var(--color-gray);padding:var(--space-lg);text-align:center;">アフィリエイト商品がありません</p>';
+    return;
+  }
+  var html = '';
+  allAffiliates.forEach(function(a) {
+    var isPub = a.is_published !== false;
+    var cardBorder = isPub ? '' : 'opacity:0.6;';
+    html += '<div class="stat-card" style="' + cardBorder + '">';
+    // Top row: image + info
+    html += '<div style="display:flex;gap:var(--space-md);align-items:flex-start;">';
+    if (a.image) {
+      html += '<img src="' + escapeHtml(a.image) + '" style="width:64px;height:64px;object-fit:contain;border-radius:var(--radius-sm);background:#f5f5f5;flex-shrink:0;" alt="">';
+    } else {
+      html += '<div style="width:64px;height:64px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:#f5f5f5;border-radius:var(--radius-sm);flex-shrink:0;">' + (a.icon || '🛒') + '</div>';
+    }
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<div style="font-weight:700;font-size:var(--font-size-md);word-break:break-word;">' + escapeHtml(a.product_name) + '</div>';
+    html += '<div style="font-size:var(--font-size-sm);color:var(--color-gray);margin-top:2px;">' + escapeHtml(a.name) + (a.name_en ? ' / ' + escapeHtml(a.name_en) : '') + ' ｜ 順序: ' + (a.sort_order || 0) + '</div>';
+    html += '</div>';
+    html += '</div>';
+    // Links row
+    html += '<div style="display:flex;gap:var(--space-sm);margin-top:var(--space-sm);flex-wrap:wrap;">';
+    if (a.amazon) html += '<a href="' + escapeHtml(a.amazon) + '" target="_blank" style="font-size:var(--font-size-xs);background:#FF9900;color:#fff;padding:2px 8px;border-radius:var(--radius-sm);text-decoration:none;">Amazon ↗</a>';
+    if (a.rakuten) html += '<a href="' + escapeHtml(a.rakuten) + '" target="_blank" style="font-size:var(--font-size-xs);background:#BF0000;color:#fff;padding:2px 8px;border-radius:var(--radius-sm);text-decoration:none;">楽天 ↗</a>';
+    if (a.yahoo) html += '<a href="' + escapeHtml(a.yahoo) + '" target="_blank" style="font-size:var(--font-size-xs);background:#FF0033;color:#fff;padding:2px 8px;border-radius:var(--radius-sm);text-decoration:none;">Yahoo! ↗</a>';
+    html += '</div>';
+    // Actions row
+    html += '<div style="display:flex;gap:var(--space-xs);margin-top:var(--space-md);flex-wrap:wrap;align-items:center;">';
+    if (isPub) {
+      html += '<button class="btn btn-sm" style="background:#2d5016;color:#fff;font-size:var(--font-size-xs);padding:4px 12px;" onclick="toggleAffiliatePublish(' + a.id + ',true)">公開中</button>';
+    } else {
+      html += '<button class="btn btn-sm" style="background:#999;color:#fff;font-size:var(--font-size-xs);padding:4px 12px;" onclick="toggleAffiliatePublish(' + a.id + ',false)">非公開</button>';
+    }
+    html += '<button class="btn btn-outline btn-sm" onclick="editAffiliate(' + a.id + ')">編集</button>';
+    html += '<button class="btn btn-danger btn-sm" onclick="deleteAffiliate(' + a.id + ',\'' + escapeHtml(a.product_name).replace(/'/g, "\\'") + '\')">削除</button>';
+    html += '</div>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function showAffiliateForm(data) {
+  data = data || {};
+  var isEdit = !!data.id;
+  var title = isEdit ? 'アフィリエイト編集' : 'アフィリエイト新規追加';
+  var html = '<h3 style="margin-bottom:var(--space-md);">' + title + '</h3>';
+  html += '<form id="affiliate-form" style="display:grid;gap:var(--space-sm);">';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-sm);">';
+  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">カテゴリ名（日本語）*</label><input class="form-input" name="name" value="' + escapeHtml(data.name || '') + '" required></div>';
+  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">カテゴリ名（英語）</label><input class="form-input" name="name_en" value="' + escapeHtml(data.name_en || '') + '"></div>';
+  html += '</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-sm);">';
+  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">商品名（日本語）*</label><input class="form-input" name="product_name" value="' + escapeHtml(data.product_name || '') + '" required></div>';
+  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">商品名（英語）</label><input class="form-input" name="product_name_en" value="' + escapeHtml(data.product_name_en || '') + '"></div>';
+  html += '</div>';
+  html += '<div style="display:grid;grid-template-columns:3fr 1fr 1fr;gap:var(--space-sm);">';
+  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">アイコン（絵文字）</label><input class="form-input" name="icon" value="' + escapeHtml(data.icon || '🛒') + '"></div>';
+  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">バッジ（日）</label><input class="form-input" name="badge" value="' + escapeHtml(data.badge || '') + '"></div>';
+  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">バッジ（英）</label><input class="form-input" name="badge_en" value="' + escapeHtml(data.badge_en || '') + '"></div>';
+  html += '</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-sm);">';
+  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">表示順</label><input class="form-input" name="sort_order" type="number" value="' + (data.sort_order || 0) + '"></div>';
+  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">公開状態</label><select class="form-input" name="is_published"><option value="true"' + (data.is_published !== false ? ' selected' : '') + '>公開</option><option value="false"' + (data.is_published === false ? ' selected' : '') + '>非公開</option></select></div>';
+  html += '</div>';
+
+  html += '<hr style="border:none;border-top:1px solid var(--color-light);margin:var(--space-sm) 0;">';
+  html += '<h4 style="font-size:var(--font-size-sm);color:var(--color-gray);">🔗 アフィリエイトURL</h4>';
+
+  // Rakuten HTML paste area
+  html += '<div style="background:var(--color-bg);border:2px dashed var(--color-light);border-radius:var(--radius-md);padding:var(--space-md);margin-bottom:var(--space-sm);">';
+  html += '<label style="font-size:var(--font-size-sm);font-weight:600;color:var(--color-primary);">📋 楽天HTMLを貼り付け（自動でURL＋画像を抽出）</label>';
+  html += '<textarea class="form-input" id="rakuten-html-paste" rows="3" placeholder="楽天アフィリエイトのHTMLコードをここに貼り付けてください..." style="margin-top:var(--space-xs);font-size:var(--font-size-xs);"></textarea>';
+  html += '<button type="button" class="btn btn-primary btn-sm" id="btn-parse-rakuten" style="margin-top:var(--space-xs);">抽出する</button>';
+  html += '<span id="rakuten-parse-result" style="font-size:var(--font-size-xs);margin-left:var(--space-sm);color:var(--color-gray);"></span>';
+  html += '</div>';
+
+  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">Amazon URL</label><input class="form-input" name="amazon" value="' + escapeHtml(data.amazon || '') + '" placeholder="https://amzn.to/..."></div>';
+  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">楽天 URL</label><textarea class="form-input" name="rakuten" rows="2" placeholder="https://hb.afl.rakuten.co.jp/...">' + escapeHtml(data.rakuten || '') + '</textarea></div>';
+  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">Yahoo URL</label><input class="form-input" name="yahoo" value="' + escapeHtml(data.yahoo || '') + '" placeholder="https://yahoo.jp/..."></div>';
+  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">商品画像URL（楽天画像など）</label><textarea class="form-input" name="image" rows="2" placeholder="https://hbb.afl.rakuten.co.jp/...">' + escapeHtml(data.image || '') + '</textarea></div>';
+
+  html += '<div style="display:flex;gap:var(--space-sm);justify-content:flex-end;margin-top:var(--space-md);">';
+  html += '<button type="button" class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
+  html += '<button type="submit" class="btn btn-primary">' + (isEdit ? '更新' : '追加') + '</button>';
+  html += '</div>';
+  html += '</form>';
+
+  showModal(html);
+
+  // Rakuten HTML parser
+  document.getElementById('btn-parse-rakuten').addEventListener('click', function() {
+    var rawHtml = document.getElementById('rakuten-html-paste').value.trim();
+    var resultEl = document.getElementById('rakuten-parse-result');
+    if (!rawHtml) { resultEl.textContent = '❌ HTMLを貼り付けてください'; resultEl.style.color = 'red'; return; }
+
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(rawHtml, 'text/html');
+
+    // Extract link URL (hb.afl.rakuten.co.jp)
+    var linkUrl = '';
+    var imgUrl = '';
+    var links = doc.querySelectorAll('a[href*="hb.afl.rakuten.co.jp"]');
+    if (links.length > 0) linkUrl = links[0].getAttribute('href');
+
+    // Extract image URL (hbb.afl.rakuten.co.jp)
+    var imgs = doc.querySelectorAll('img[src*="hbb.afl.rakuten.co.jp"]');
+    if (imgs.length > 0) imgUrl = imgs[0].getAttribute('src');
+
+    // Also try to extract from src attributes if img not found
+    if (!imgUrl) {
+      var allImgs = doc.querySelectorAll('img[src]');
+      for (var i = 0; i < allImgs.length; i++) {
+        var src = allImgs[i].getAttribute('src');
+        if (src && src.indexOf('rakuten') !== -1) { imgUrl = src; break; }
+      }
+    }
+
+    var form = document.getElementById('affiliate-form');
+    var filled = 0;
+    if (linkUrl) { form.rakuten.value = linkUrl; filled++; }
+    if (imgUrl) { form.image.value = imgUrl; filled++; }
+
+    if (filled === 2) {
+      resultEl.textContent = '✅ 楽天URL + 画像URLを抽出しました！';
+      resultEl.style.color = 'green';
+    } else if (filled === 1) {
+      resultEl.textContent = '⚠️ ' + (linkUrl ? 'リンクURL' : '画像URL') + 'のみ抽出しました';
+      resultEl.style.color = 'orange';
+    } else {
+      resultEl.textContent = '❌ URLを抽出できませんでした。HTMLを確認してください';
+      resultEl.style.color = 'red';
+    }
+  });
+
+  document.getElementById('affiliate-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var form = e.target;
+    var payload = {
+      name: form.name.value.trim(),
+      name_en: form.name_en.value.trim(),
+      product_name: form.product_name.value.trim(),
+      product_name_en: form.product_name_en.value.trim(),
+      icon: form.icon.value.trim() || '🛒',
+      badge: form.badge.value.trim(),
+      badge_en: form.badge_en.value.trim(),
+      sort_order: parseInt(form.sort_order.value) || 0,
+      is_published: form.is_published.value === 'true',
+      amazon: form.amazon.value.trim(),
+      rakuten: form.rakuten.value.trim(),
+      yahoo: form.yahoo.value.trim(),
+      image: form.image.value.trim()
+    };
+
+    if (!payload.name || !payload.product_name) {
+      toast('カテゴリ名と商品名は必須です');
+      return;
+    }
+
+    // Shift sort_order of other items when order changes
+    var oldOrder = isEdit ? (data.sort_order || 0) : null;
+    var newOrder = payload.sort_order;
+    var others = allAffiliates.filter(function(a) { return !isEdit || a.id !== data.id; });
+
+    if (isEdit && oldOrder !== newOrder) {
+      // Moving: shift items in between
+      if (newOrder > oldOrder) {
+        // Moved down (e.g. 3→6): items between old+1..new shift up by 1
+        var toShift = others.filter(function(a) { return a.sort_order > oldOrder && a.sort_order <= newOrder; });
+        for (var i = 0; i < toShift.length; i++) {
+          await sb.from('affiliates').update({ sort_order: toShift[i].sort_order - 1 }).eq('id', toShift[i].id);
+        }
+      } else {
+        // Moved up (e.g. 6→3): items between new..old-1 shift down by 1
+        var toShift = others.filter(function(a) { return a.sort_order >= newOrder && a.sort_order < oldOrder; });
+        for (var i = 0; i < toShift.length; i++) {
+          await sb.from('affiliates').update({ sort_order: toShift[i].sort_order + 1 }).eq('id', toShift[i].id);
+        }
+      }
+    } else if (!isEdit) {
+      // New item: shift items at newOrder and above down by 1
+      var toShift = others.filter(function(a) { return a.sort_order >= newOrder; });
+      for (var i = 0; i < toShift.length; i++) {
+        await sb.from('affiliates').update({ sort_order: toShift[i].sort_order + 1 }).eq('id', toShift[i].id);
+      }
+    }
+
+    var result;
+    if (isEdit) {
+      result = await sb.from('affiliates').update(payload).eq('id', data.id);
+    } else {
+      result = await sb.from('affiliates').insert(payload);
+    }
+
+    if (result.error) {
+      toast('保存エラー: ' + result.error.message);
+      return;
+    }
+
+    toast(isEdit ? '更新しました' : '追加しました');
+    closeModal();
+    loadAffiliates();
+  });
+}
+
+function editAffiliate(id) {
+  var item = allAffiliates.find(function(a) { return a.id === id; });
+  if (!item) { toast('データが見つかりません'); return; }
+  showAffiliateForm(item);
+}
+
+async function deleteAffiliate(id, name) {
+  if (!confirm('「' + name + '」を削除しますか？')) return;
+  var result = await sb.from('affiliates').delete().eq('id', id);
+  if (result.error) {
+    toast('削除エラー: ' + result.error.message);
+    return;
+  }
+  toast('削除しました');
+  loadAffiliates();
+}
+
+document.getElementById('btn-add-affiliate').addEventListener('click', function() {
+  var nextOrder = allAffiliates.length > 0 ? Math.max.apply(null, allAffiliates.map(function(a) { return a.sort_order || 0; })) + 1 : 1;
+  showAffiliateForm({ sort_order: nextOrder });
+});
+
+document.getElementById('btn-refresh-affiliates').addEventListener('click', function() {
+  loadAffiliates();
+});
+
+async function toggleAffiliatePublish(id, currentState) {
+  var result = await sb.from('affiliates').update({ is_published: !currentState }).eq('id', id);
+  if (result.error) { toast('更新エラー: ' + result.error.message); return; }
+  toast(!currentState ? '公開しました' : '非公開にしました');
+  loadAffiliates();
+}
+
+// ========================================
+// Genera Management
+// ========================================
+window._adminGeneraData = [];
+
+async function loadAdminGenera() {
+  var result = await sb.from('genera').select('*').order('display_order');
+  if (result.error) { toast('属データ取得エラー: ' + result.error.message); return; }
+  window._adminGeneraData = result.data || [];
+  renderGeneraTable();
+  populateGenusFilter();
+}
+
+function populateGenusFilter() {
+  var sel = document.getElementById('cultivar-genus-filter');
+  if (!sel) return;
+  var currentVal = sel.value;
+  sel.innerHTML = '<option value="">全属</option>';
+  (window._adminGeneraData || []).forEach(function(g) {
+    sel.innerHTML += '<option value="' + escapeHtml(g.name) + '">' + escapeHtml(g.name) + '</option>';
+  });
+  sel.value = currentVal;
+}
+
+function renderGeneraTable() {
+  var tbody = document.getElementById('genera-tbody');
+  if (!tbody) return;
+  var genera = window._adminGeneraData || [];
+
+  // Count cultivars per genus
+  var genusCounts = {};
+  allCultivars.forEach(function(c) {
+    var g = c.genus || 'Unknown';
+    genusCounts[g] = (genusCounts[g] || 0) + 1;
+  });
+
+  var html = '';
+  genera.forEach(function(g) {
+    var count = genusCounts[g.name] || 0;
+    var imgSrc = g.card_image_path ? 'images/' + g.card_image_path : '';
+    html += '<tr>';
+    html += '<td>' + g.id + '</td>';
+    html += '<td><strong>' + escapeHtml(g.name) + '</strong></td>';
+    html += '<td>' + escapeHtml(g.slug) + '</td>';
+    html += '<td>' + g.display_order + '</td>';
+    html += '<td>' + (g.has_seedlings ? '<span style="color:#4CAF50;font-weight:600;">ON</span>' : '<span style="color:var(--color-gray);">OFF</span>') + '</td>';
+    html += '<td>';
+    if (imgSrc) {
+      html += '<img src="' + imgSrc + '" style="width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid #ddd;">';
+    } else {
+      html += '<span style="color:var(--color-gray);font-size:0.8rem;">なし</span>';
+    }
+    html += '</td>';
+    html += '<td>' + count + '</td>';
+    html += '<td>';
+    html += '<button class="btn btn-outline btn-sm" onclick="openEditGenusModal(' + g.id + ')">編集</button> ';
+    html += '<button class="btn btn-outline btn-sm" style="color:var(--color-danger);" onclick="deleteGenus(' + g.id + ',\'' + escapeHtml(g.name) + '\',' + count + ')">削除</button>';
+    html += '</td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+function openAddGenusModal() {
+  var html = '<h2>新しい属を追加</h2>';
+  html += '<label>属名 <small style="color:var(--color-gray);">(例: Alocasia)</small></label>';
+  html += '<input type="text" id="genus-name" placeholder="属名（先頭大文字）">';
+  html += '<label>スラッグ <small style="color:var(--color-gray);">(URL用、自動生成)</small></label>';
+  html += '<input type="text" id="genus-slug" placeholder="自動生成されます" style="background:#f5f5f5;">';
+  html += '<label>表示順</label>';
+  var nextOrder = (window._adminGeneraData || []).length + 1;
+  html += '<input type="number" id="genus-order" value="' + nextOrder + '" min="1">';
+  html += '<label style="display:flex;align-items:center;gap:8px;margin-top:var(--space-sm);cursor:pointer;">';
+  html += '<input type="checkbox" id="genus-seedlings" style="width:auto;margin:0;"> My Seedlingsタブを有効にする（パターン1）';
+  html += '</label>';
+  html += '<label style="margin-top:var(--space-md);">カード画像</label>';
+  html += '<input type="file" id="genus-image" accept="image/jpeg,image/png">';
+  html += '<div class="modal-actions">';
+  html += '<button class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
+  html += '<button class="btn btn-primary" onclick="saveNewGenus()">追加</button>';
+  html += '</div>';
+  showModal(html);
+
+  // Auto-generate slug from name
+  document.getElementById('genus-name').addEventListener('input', function() {
+    document.getElementById('genus-slug').value = this.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  });
+}
+
+async function saveNewGenus() {
+  var name = document.getElementById('genus-name').value.trim();
+  var slug = document.getElementById('genus-slug').value.trim().toLowerCase();
+  var order = parseInt(document.getElementById('genus-order').value) || 1;
+  var hasSeedlings = document.getElementById('genus-seedlings').checked;
+  var imageFile = document.getElementById('genus-image').files[0];
+
+  if (!name) { toast('属名を入力してください'); return; }
+  if (!slug) { toast('スラッグを入力してください'); return; }
+
+  // Capitalize first letter of name
+  name = name.charAt(0).toUpperCase() + name.slice(1);
+
+  var cardImagePath = null;
+  if (imageFile) {
+    var compressed = await compressImage(imageFile, 600, 0.85);
+    var storagePath = slug + '.png';
+    var uploadResult = await sb.storage.from('genus-cards').upload(storagePath, compressed, { upsert: true });
+    if (uploadResult.error) { toast('画像アップロードエラー: ' + uploadResult.error.message); return; }
+    cardImagePath = storagePath;
+  }
+
+  var insertData = {
+    name: name,
+    slug: slug,
+    display_order: order,
+    has_seedlings: hasSeedlings,
+    card_image_path: cardImagePath
+  };
+
+  var result = await sb.from('genera').insert(insertData);
+  if (result.error) {
+    toast('追加エラー: ' + result.error.message);
+    return;
+  }
+
+  toast('属「' + name + '」を追加しました');
+  closeModal();
+  loadAdminGenera();
+}
+
+function openEditGenusModal(id) {
+  var g = (window._adminGeneraData || []).find(function(x) { return x.id === id; });
+  if (!g) { toast('属が見つかりません'); return; }
+
+  var html = '<h2>属を編集</h2>';
+  html += '<label>属名</label>';
+  html += '<input type="text" id="genus-name" value="' + escapeHtml(g.name) + '">';
+  html += '<label>スラッグ</label>';
+  html += '<input type="text" id="genus-slug" value="' + escapeHtml(g.slug) + '" style="background:#f5f5f5;" readonly>';
+  html += '<label>表示順</label>';
+  html += '<input type="number" id="genus-order" value="' + g.display_order + '" min="1">';
+  html += '<label style="display:flex;align-items:center;gap:8px;margin-top:var(--space-sm);cursor:pointer;">';
+  html += '<input type="checkbox" id="genus-seedlings" style="width:auto;margin:0;"' + (g.has_seedlings ? ' checked' : '') + '> My Seedlingsタブを有効にする（パターン1）';
+  html += '</label>';
+  html += '<label style="margin-top:var(--space-md);">カード画像</label>';
+  if (g.card_image_path) {
+    html += '<div style="margin-bottom:var(--space-sm);"><img src="images/' + g.card_image_path + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #ddd;"></div>';
+  }
+  html += '<input type="file" id="genus-image" accept="image/jpeg,image/png">';
+  html += '<small style="color:var(--color-gray);">新しい画像を選択すると差し替えられます</small>';
+  html += '<div class="modal-actions">';
+  html += '<button class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
+  html += '<button class="btn btn-primary" onclick="saveEditGenus(' + id + ')">保存</button>';
+  html += '</div>';
+  showModal(html);
+}
+
+async function saveEditGenus(id) {
+  var name = document.getElementById('genus-name').value.trim();
+  var order = parseInt(document.getElementById('genus-order').value) || 1;
+  var hasSeedlings = document.getElementById('genus-seedlings').checked;
+  var imageFile = document.getElementById('genus-image').files[0];
+
+  if (!name) { toast('属名を入力してください'); return; }
+  name = name.charAt(0).toUpperCase() + name.slice(1);
+
+  var g = (window._adminGeneraData || []).find(function(x) { return x.id === id; });
+  var updateData = {
+    name: name,
+    display_order: order,
+    has_seedlings: hasSeedlings,
+    updated_at: new Date().toISOString()
+  };
+
+  if (imageFile) {
+    var compressed = await compressImage(imageFile, 600, 0.85);
+    var storagePath = g.slug + '.png';
+    var uploadResult = await sb.storage.from('genus-cards').upload(storagePath, compressed, { upsert: true });
+    if (uploadResult.error) { toast('画像アップロードエラー: ' + uploadResult.error.message); return; }
+    updateData.card_image_path = storagePath;
+  }
+
+  var result = await sb.from('genera').update(updateData).eq('id', id);
+  if (result.error) {
+    toast('更新エラー: ' + result.error.message);
+    return;
+  }
+
+  // If name changed, update cultivars too
+  if (g && g.name !== name) {
+    var updateCultivars = await sb.from('cultivars').update({ genus: name }).eq('genus', g.name);
+    if (updateCultivars.error) {
+      toast('品種の属名更新に失敗: ' + updateCultivars.error.message);
+    }
+  }
+
+  toast('属「' + name + '」を更新しました');
+  closeModal();
+  loadAdminGenera();
+  loadAllCultivars();
+}
+
+async function deleteGenus(id, name, cultivarCount) {
+  if (cultivarCount > 0) {
+    toast('品種が' + cultivarCount + '件存在するため削除できません。先に品種を移動または削除してください。');
+    return;
+  }
+  if (!confirm('属「' + name + '」を削除しますか？')) return;
+
+  var result = await sb.from('genera').delete().eq('id', id);
+  if (result.error) {
+    toast('削除エラー: ' + result.error.message);
+    return;
+  }
+  toast('削除しました');
+  loadAdminGenera();
+}
+
+document.getElementById('btn-add-genus').addEventListener('click', function() {
+  openAddGenusModal();
+});
+
+document.getElementById('btn-refresh-genera').addEventListener('click', function() {
+  loadAdminGenera();
+});
+
+// Load genera on initial data load (for genus filter)
+(async function() {
+  var result = await sb.from('genera').select('*').order('display_order');
+  if (!result.error && result.data) {
+    window._adminGeneraData = result.data;
+    populateGenusFilter();
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+node_modules/
+.env
+*.log
+
+# Temporary scripts
+fix_*.mjs
+check_*.mjs
+test_*.mjs
+cleanup_*.mjs
+reset_origins.mjs
+verify_results.mjs
+
+# Supabase temp files
+supabase/.temp/
+
+# Private notes
+ログイン情報メモ.txt
