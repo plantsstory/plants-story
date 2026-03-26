@@ -1239,7 +1239,7 @@ serve(async (req: Request) => {
               collection_year: aiStructured?.collection_year || null,
               type_locality: known(aiStructured?.type_locality) || ipniLocality || botResult.nativeDistribution[0] || "不明",
               known_habitats: botResult.typeDistribution || dist || "不明",
-              notes: bodyJp,
+              notes: "",
               citation_links: [
                 { url: `https://www.ipni.org/n/${ipniId}`, label: "IPNI" },
                 { url: `https://powo.science.kew.org/taxon/${botResult.fqId}`, label: "POWO (Kew)" },
@@ -1625,7 +1625,7 @@ serve(async (req: Request) => {
             const citLinks = origin.source_url
               ? [{ url: origin.source_url, label: origin.source_name || origin.source_url }]
               : [];
-            const structuredEntry: any = { origin_type: plantType, notes: bodyJp, citation_links: citLinks };
+            const structuredEntry: any = { origin_type: plantType, notes: plantType === "species" ? "" : bodyJp, citation_links: citLinks };
 
             if (plantType === "species") {
               structuredEntry.author_name = origin.discoverer_or_breeder || "不明";
@@ -1714,7 +1714,7 @@ serve(async (req: Request) => {
         first_description: null,
         structured: (function() {
           const pt = plantType || "species";
-          const base: any = { origin_type: pt, notes: placeholderBodyJp, citation_links: [] };
+          const base: any = { origin_type: pt, notes: pt === "species" ? "" : placeholderBodyJp, citation_links: [] };
           if (pt === "species") {
             base.author_name = "不明"; base.publication_year = null;
             base.collector = "不明"; base.collection_year = null;
