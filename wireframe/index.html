@@ -74,7 +74,7 @@
           Discover the origins of your favorite plants
         </p>
         <div class="search-bar mt-lg">
-          <input type="text" class="search-bar__input" placeholder="品種名を検索... / Search cultivar..." data-i18n-placeholder="search_placeholder">
+          <input type="text" class="search-bar__input" placeholder="品種名・ユーザー名を検索..." data-i18n-placeholder="search_placeholder">
           <button class="search-bar__btn" data-nav="search">&#x1F50D;</button>
         </div>
       </div>
@@ -598,87 +598,34 @@
   <section id="page-search" class="page">
     <div class="container">
 
-      <h1 class="section-title" data-i18n="search_results">
+      <h1 class="section-title" id="search-title">
         "crystallinum" の検索結果
       </h1>
-      <p class="text-muted mb-lg">23件の結果</p>
+      <p class="text-muted mb-lg" id="search-summary">23件の結果</p>
 
-      <!-- Filter chips -->
-      <div class="chips mb-lg">
-        <span class="chip active" data-i18n="filter_all">すべて</span>
-        <span class="chip">Anthurium</span>
-        <span class="chip">Monstera</span>
-        <span class="chip">Philodendron</span>
+      <!-- User Results (shown only when users match) -->
+      <div id="search-user-results" style="display:none;margin-bottom:var(--space-xl);">
+        <h2 style="font-size:1rem;font-weight:600;margin-bottom:var(--space-sm);color:var(--color-dark);">ユーザー</h2>
+        <div id="search-user-list" class="card" style="padding:0;"></div>
       </div>
 
-      <!-- Results -->
-      <div class="card" style="padding:0;">
-        <div class="cultivar-row" data-nav="cultivar">
-          <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
-          <div class="cultivar-row__info">
-            <div class="cultivar-row__name">Anthurium crystallinum</div>
-            <div class="cultivar-row__meta">
-              <span>Anthurium</span>
-              <span class="badge badge--species">原種</span>
-              <span>由来: 3件</span>
-              <div class="trust">
-                <div class="trust__bar"><div class="trust__fill trust--high" style="width:95%"></div></div>
-                <span class="trust__label">95%</span>
-              </div>
-            </div>
-          </div>
+      <!-- Cultivar Results -->
+      <div id="search-cultivar-results">
+        <h2 style="font-size:1rem;font-weight:600;margin-bottom:var(--space-sm);color:var(--color-dark);">品種</h2>
+        <!-- Filter chips -->
+        <div class="chips mb-lg" id="search-chips">
+          <span class="chip active" data-i18n="filter_all">すべて</span>
+          <span class="chip">Anthurium</span>
+          <span class="chip">Monstera</span>
+          <span class="chip">Philodendron</span>
         </div>
 
-        <div class="cultivar-row" data-nav="cultivar">
-          <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>
-          <div class="cultivar-row__info">
-            <div class="cultivar-row__name">Anthurium crystallinum x warocqueanum</div>
-            <div class="cultivar-row__meta">
-              <span>Anthurium</span>
-              <span class="badge badge--hybrid">Hybrid</span>
-              <span>由来: 1件</span>
-              <div class="trust">
-                <div class="trust__bar"><div class="trust__fill trust--mid" style="width:67%"></div></div>
-                <span class="trust__label">67%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="cultivar-row" data-nav="cultivar">
-          <div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 3C12 3 5 10 7 22C9 32 16 38 20 38C24 38 31 32 33 22C35 10 28 3 20 3Z" fill="#52B788" opacity="0.3"/><path d="M20 3V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.35"/></svg></div>
-          <div class="cultivar-row__info">
-            <div class="cultivar-row__name">Philodendron 'Crystal Queen'</div>
-            <div class="cultivar-row__meta">
-              <span>Philodendron</span>
-              <span class="badge badge--clone">Clone</span>
-              <span>由来: 2件</span>
-              <div class="trust">
-                <div class="trust__bar"><div class="trust__fill trust--mid" style="width:54%"></div></div>
-                <span class="trust__label">54%</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div id="search-cultivar-list" class="card" style="padding:0;"></div>
       </div>
 
       <!-- Pagination -->
       <div class="pagination">
-        <a class="page-link">&laquo;</a>
         <a class="page-link active">1</a>
-        <a class="page-link">2</a>
-        <a class="page-link">3</a>
-        <a class="page-link">&raquo;</a>
-      </div>
-
-      <!-- User Search Section -->
-      <div id="user-search-section" style="margin-top:var(--space-xl);">
-        <h2 class="section-title">ユーザー検索</h2>
-        <div class="search-bar" style="max-width:400px;margin-top:var(--space-md);margin-bottom:var(--space-md);">
-          <input type="text" class="search-bar__input" id="user-search-input" placeholder="ユーザー名または表示名で検索...">
-          <button class="search-bar__btn" id="user-search-btn">&#x1F50D;</button>
-        </div>
-        <div id="user-search-results"></div>
       </div>
 
     </div>
@@ -3600,36 +3547,86 @@
       var q = query.toLowerCase().trim();
       if (!q) return;
 
-      // Collect all cultivar names from all genus sections
-      var results = [];
+      // -- Cultivar search (DOM-based) --
+      var cultivarResults = [];
       document.querySelectorAll('.genus-content .cultivar-row').forEach(function(row) {
         var nameEl = row.querySelector('.cultivar-row__name');
         if (nameEl && nameEl.textContent.toLowerCase().includes(q)) {
-          results.push(row.cloneNode(true));
+          cultivarResults.push(row.cloneNode(true));
         }
       });
 
-      // Update search results page
-      var searchPage = document.getElementById('page-search');
-      var title = searchPage.querySelector('.section-title');
+      // Update title
+      var title = document.getElementById('search-title');
       if (title) title.textContent = '"' + query + '" の検索結果';
-      var count = searchPage.querySelector('.text-muted.mb-lg');
-      if (count) count.textContent = results.length + '件の結果';
 
-      var resultCard = searchPage.querySelector('.card');
-      if (resultCard) {
-        resultCard.innerHTML = '';
-        if (results.length === 0) {
-          resultCard.innerHTML = '<div style="padding:var(--space-xl);text-align:center;" class="text-muted">該当する品種が見つかりませんでした</div>';
+      // Update cultivar results
+      var cultivarList = document.getElementById('search-cultivar-list');
+      if (cultivarList) {
+        cultivarList.innerHTML = '';
+        if (cultivarResults.length === 0) {
+          cultivarList.innerHTML = '<div style="padding:var(--space-xl);text-align:center;" class="text-muted">該当する品種が見つかりませんでした</div>';
         } else {
-          results.forEach(function(r) { resultCard.appendChild(r); });
+          cultivarResults.forEach(function(r) { cultivarList.appendChild(r); });
         }
       }
 
-      // Update search page pagination
-      var searchPag = searchPage.querySelector('.pagination');
+      // Update pagination
+      var searchPag = document.querySelector('#page-search .pagination');
       if (searchPag) {
         searchPag.innerHTML = '<a class="page-link active">1</a>';
+      }
+
+      // -- User search (Supabase RPC) --
+      var userSection = document.getElementById('search-user-results');
+      var userList = document.getElementById('search-user-list');
+      var summary = document.getElementById('search-summary');
+
+      // Show cultivar count immediately
+      if (summary) summary.textContent = '品種 ' + cultivarResults.length + '件';
+
+      // Hide user section initially
+      if (userSection) userSection.style.display = 'none';
+
+      var sb = window._supabaseClient;
+      if (sb) {
+        sb.rpc('search_profiles', { p_query: q, p_limit: 10 }).then(function(res) {
+          if (res.error || !res.data || res.data.length === 0) {
+            if (userSection) userSection.style.display = 'none';
+            return;
+          }
+          var users = res.data;
+          // Update summary with both counts
+          if (summary) summary.textContent = '品種 ' + cultivarResults.length + '件 / ユーザー ' + users.length + '件';
+
+          // Render user results
+          var html = '';
+          users.forEach(function(u) {
+            var profileUrl = u.username ? '#/profile/@' + u.username : '#/profile/' + u.id;
+            var avatarHtml = '';
+            if (u.avatar_url) {
+              avatarHtml = '<img src="' + u.avatar_url + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover;" alt="">';
+            } else {
+              avatarHtml = '<div style="width:40px;height:40px;border-radius:50%;background:var(--color-lighter);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:18px;">' + (u.display_name ? u.display_name.charAt(0).toUpperCase() : '?') + '</div>';
+            }
+            html += '<a href="' + profileUrl + '" style="display:flex;align-items:center;gap:var(--space-sm);padding:var(--space-sm) var(--space-md);border-bottom:1px solid var(--color-lighter);text-decoration:none;color:inherit;cursor:pointer;">';
+            html += avatarHtml;
+            html += '<div style="flex:1;min-width:0;">';
+            html += '<div style="font-weight:600;">' + (u.display_name || '名前未設定') + '</div>';
+            if (u.username) {
+              html += '<div style="font-size:0.85rem;color:var(--color-gray);">@' + u.username + '</div>';
+            }
+            if (u.bio) {
+              var bioShort = u.bio.length > 60 ? u.bio.substring(0, 60) + '...' : u.bio;
+              html += '<div style="font-size:0.8rem;color:var(--color-gray);margin-top:2px;">' + bioShort + '</div>';
+            }
+            html += '</div>';
+            html += '<div style="font-size:0.8rem;color:var(--color-gray);white-space:nowrap;">' + u.post_count + ' 投稿</div>';
+            html += '</a>';
+          });
+          if (userList) userList.innerHTML = html;
+          if (userSection) userSection.style.display = '';
+        });
       }
 
       navigateTo('search', {});
@@ -4358,10 +4355,10 @@
     // ========================================
     // SEARCH PAGE GENUS FILTER CHIPS
     // ========================================
-    document.querySelectorAll('#page-search .chip').forEach(function(chip) {
+    document.querySelectorAll('#search-chips .chip').forEach(function(chip) {
       chip.addEventListener('click', function() {
         var filterText = this.textContent.trim();
-        var resultCard = document.querySelector('#page-search .card');
+        var resultCard = document.getElementById('search-cultivar-list');
         if (!resultCard) return;
         var rows = resultCard.querySelectorAll('.cultivar-row');
         rows.forEach(function(row) {
@@ -4378,80 +4375,6 @@
         });
       });
     });
-
-    // ========================================
-    // USER SEARCH
-    // ========================================
-    (function() {
-      var userSearchInput = document.getElementById('user-search-input');
-      var userSearchResults = document.getElementById('user-search-results');
-      var userSearchBtn = document.getElementById('user-search-btn');
-      if (!userSearchInput || !userSearchResults) return;
-
-      var _searchTimer = null;
-
-      function doUserSearch() {
-        var query = userSearchInput.value.trim();
-        if (!query) {
-          userSearchResults.innerHTML = '';
-          return;
-        }
-        var sb = window._supabaseClient;
-        if (!sb) return;
-
-        sb.rpc('search_profiles', { p_query: query, p_limit: 20 }).then(function(res) {
-          if (res.error || !res.data || res.data.length === 0) {
-            userSearchResults.innerHTML = '<div class="card" style="padding:var(--space-lg);text-align:center;" class="text-muted">ユーザーが見つかりませんでした</div>';
-            return;
-          }
-          var html = '<div class="card" style="padding:0;">';
-          res.data.forEach(function(u) {
-            var profileUrl = u.username ? '#/profile/@' + u.username : '#/profile/' + u.id;
-            var avatarHtml = '';
-            if (u.avatar_url) {
-              avatarHtml = '<img src="' + u.avatar_url + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover;" alt="">';
-            } else {
-              avatarHtml = '<div style="width:40px;height:40px;border-radius:50%;background:var(--color-lighter);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:18px;">' + (u.display_name ? u.display_name.charAt(0).toUpperCase() : '?') + '</div>';
-            }
-            html += '<a href="' + profileUrl + '" style="display:flex;align-items:center;gap:var(--space-sm);padding:var(--space-sm) var(--space-md);border-bottom:1px solid var(--color-lighter);text-decoration:none;color:inherit;cursor:pointer;" class="user-search-row">';
-            html += avatarHtml;
-            html += '<div style="flex:1;min-width:0;">';
-            html += '<div style="font-weight:600;">' + (u.display_name || '名前未設定') + '</div>';
-            if (u.username) {
-              html += '<div style="font-size:0.85rem;color:var(--color-gray);">@' + u.username + '</div>';
-            }
-            if (u.bio) {
-              var bioShort = u.bio.length > 60 ? u.bio.substring(0, 60) + '...' : u.bio;
-              html += '<div style="font-size:0.8rem;color:var(--color-gray);margin-top:2px;">' + bioShort + '</div>';
-            }
-            html += '</div>';
-            html += '<div style="font-size:0.8rem;color:var(--color-gray);white-space:nowrap;">' + u.post_count + ' 投稿</div>';
-            html += '</a>';
-          });
-          html += '</div>';
-          userSearchResults.innerHTML = html;
-        });
-      }
-
-      userSearchInput.addEventListener('input', function() {
-        clearTimeout(_searchTimer);
-        _searchTimer = setTimeout(doUserSearch, 300);
-      });
-
-      if (userSearchBtn) {
-        userSearchBtn.addEventListener('click', function() {
-          clearTimeout(_searchTimer);
-          doUserSearch();
-        });
-      }
-
-      userSearchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-          clearTimeout(_searchTimer);
-          doUserSearch();
-        }
-      });
-    })();
 
     // ========================================
     // CONTRIBUTE FORM - Full functionality
