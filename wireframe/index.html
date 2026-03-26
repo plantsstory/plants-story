@@ -5981,35 +5981,13 @@
       }
     };
 
-    // Override globalSearch to use t()
+    // Override globalSearch to use t() — delegates to _origGlobalSearch for full logic
     var _origGlobalSearch = globalSearch;
     globalSearch = function(query) {
-      var q = query.toLowerCase().trim();
-      if (!q) return;
-      var results = [];
-      document.querySelectorAll('.genus-content .cultivar-row').forEach(function(row) {
-        var nameEl = row.querySelector('.cultivar-row__name');
-        if (nameEl && nameEl.textContent.toLowerCase().includes(q)) {
-          results.push(row.cloneNode(true));
-        }
-      });
-      var searchPage = document.getElementById('page-search');
-      var title = searchPage.querySelector('.section-title');
+      _origGlobalSearch(query);
+      // Apply translated title after original function sets it
+      var title = document.getElementById('search-title');
       if (title) title.textContent = t('search_title_tpl').replace('{q}', query);
-      var count = searchPage.querySelector('.text-muted.mb-lg');
-      if (count) count.textContent = t('results_count').replace('{n}', results.length);
-      var resultCard = searchPage.querySelector('.card');
-      if (resultCard) {
-        resultCard.innerHTML = '';
-        if (results.length === 0) {
-          resultCard.innerHTML = '<div style="padding:var(--space-xl);text-align:center;" class="text-muted">' + t('no_results') + '</div>';
-        } else {
-          results.forEach(function(r) { resultCard.appendChild(r); });
-        }
-      }
-      var searchPag = searchPage.querySelector('.pagination');
-      if (searchPag) searchPag.innerHTML = '<a class="page-link active">1</a>';
-      navigateTo('search', {});
     };
 
     // Re-initialize pagination with translated text
