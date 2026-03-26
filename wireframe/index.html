@@ -614,10 +614,7 @@
         <h2 style="font-size:1rem;font-weight:600;margin-bottom:var(--space-sm);color:var(--color-dark);">品種</h2>
         <!-- Filter chips -->
         <div class="chips mb-lg" id="search-chips">
-          <span class="chip active" data-i18n="filter_all">すべて</span>
-          <span class="chip">Anthurium</span>
-          <span class="chip">Monstera</span>
-          <span class="chip">Philodendron</span>
+          <span class="chip active" data-genus="all" data-i18n="filter_all">すべて</span>
         </div>
 
         <div id="search-cultivar-list" class="card" style="padding:0;"></div>
@@ -1701,6 +1698,17 @@
         renderGenusCards();
         renderGenusContentSections();
         renderContributeGenusOptions();
+        renderSearchChips();
+      }
+
+      function renderSearchChips() {
+        var container = document.getElementById('search-chips');
+        if (!container) return;
+        var html = '<span class="chip active" data-genus="all" data-i18n="filter_all">すべて</span>';
+        window._generaData.forEach(function(g) {
+          html += '<span class="chip" data-genus="' + g.slug + '">' + g.name + '</span>';
+        });
+        container.innerHTML = html;
       }
 
       function renderMobileNavGenera() {
@@ -2299,6 +2307,7 @@
         var row = document.createElement('div');
         row.className = 'cultivar-row';
         row.setAttribute('data-nav', 'cultivar');
+        row.setAttribute('data-genus', meta.genus.toLowerCase());
         if (meta.created_at) row.setAttribute('data-created', meta.created_at);
         var badgeClass = meta.type === 'species' ? 'badge--species' : (meta.type === 'hybrid' ? 'badge--hybrid' : (meta.type === 'seedling' ? 'badge--seedling' : 'badge--clone'));
         var badgeText = meta.type === 'species' ? t('badge_species') : (meta.type === 'hybrid' ? 'Hybrid' : (meta.type === 'seedling' ? 'Seedling' : 'Clone'));
@@ -3552,7 +3561,14 @@
       document.querySelectorAll('.genus-content .cultivar-row').forEach(function(row) {
         var nameEl = row.querySelector('.cultivar-row__name');
         if (nameEl && nameEl.textContent.toLowerCase().includes(q)) {
-          cultivarResults.push(row.cloneNode(true));
+          var clone = row.cloneNode(true);
+          if (!clone.getAttribute('data-genus')) {
+            var genusSection = row.closest('.genus-content');
+            if (genusSection) {
+              clone.setAttribute('data-genus', genusSection.id.replace('genus-', ''));
+            }
+          }
+          cultivarResults.push(clone);
         }
       });
 
@@ -3591,7 +3607,12 @@
       var sb = window._supabaseClient;
       if (sb) {
         sb.rpc('search_profiles', { p_query: q, p_limit: 10 }).then(function(res) {
-          if (res.error || !res.data || res.data.length === 0) {
+          if (res.error) {
+            console.error('search_profiles RPC error:', res.error);
+            if (userSection) userSection.style.display = 'none';
+            return;
+          }
+          if (!res.data || res.data.length === 0) {
             if (userSection) userSection.style.display = 'none';
             return;
           }
@@ -3626,6 +3647,9 @@
           });
           if (userList) userList.innerHTML = html;
           if (userSection) userSection.style.display = '';
+        }).catch(function(err) {
+          console.error('search_profiles exception:', err);
+          if (userSection) userSection.style.display = 'none';
         });
       }
 
@@ -4355,24 +4379,23 @@
     // ========================================
     // SEARCH PAGE GENUS FILTER CHIPS
     // ========================================
-    document.querySelectorAll('#search-chips .chip').forEach(function(chip) {
-      chip.addEventListener('click', function() {
-        var filterText = this.textContent.trim();
-        var resultCard = document.getElementById('search-cultivar-list');
-        if (!resultCard) return;
-        var rows = resultCard.querySelectorAll('.cultivar-row');
-        rows.forEach(function(row) {
-          if (filterText === 'すべて' || filterText === 'All') {
-            row.style.display = '';
-          } else {
-            var name = row.querySelector('.cultivar-row__name');
-            if (name && name.textContent.toLowerCase().includes(filterText.toLowerCase())) {
-              row.style.display = '';
-            } else {
-              row.style.display = 'none';
-            }
-          }
-        });
+    document.addEventListener('click', function(e) {
+      var chip = e.target.closest('#search-chips .chip');
+      if (!chip) return;
+      var genusFilter = chip.getAttribute('data-genus');
+      var resultCard = document.getElementById('search-cultivar-list');
+      if (!resultCard) return;
+      // Update active state
+      document.querySelectorAll('#search-chips .chip').forEach(function(c) { c.classList.remove('active'); });
+      chip.classList.add('active');
+      // Filter rows
+      var rows = resultCard.querySelectorAll('.cultivar-row');
+      rows.forEach(function(row) {
+        if (!genusFilter || genusFilter === 'all') {
+          row.style.display = '';
+        } else {
+          row.style.display = (row.getAttribute('data-genus') === genusFilter) ? '' : 'none';
+        }
       });
     });
 
