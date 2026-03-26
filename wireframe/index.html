@@ -3606,10 +3606,8 @@
       if (userSection) userSection.style.display = 'none';
 
       var sb = window._supabaseClient;
-      console.log('[search] sb exists:', !!sb, 'query:', q);
       if (sb) {
         sb.rpc('search_profiles', { p_query: q, p_limit: 10 }).then(function(res) {
-          console.log('[search] RPC result:', res.data, 'error:', res.error);
           if (res.error) {
             console.error('search_profiles RPC error:', res.error);
             if (userSection) userSection.style.display = 'none';
@@ -3649,7 +3647,6 @@
             html += '</a>';
           });
           if (userList) userList.innerHTML = html;
-          console.log('[search] showing user section, users:', users.length);
           if (userSection) userSection.style.display = '';
         }).catch(function(err) {
           console.error('search_profiles exception:', err);
