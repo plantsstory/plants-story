@@ -3562,6 +3562,7 @@
         var nameEl = row.querySelector('.cultivar-row__name');
         if (nameEl && nameEl.textContent.toLowerCase().includes(q)) {
           var clone = row.cloneNode(true);
+          clone.style.display = '';
           if (!clone.getAttribute('data-genus')) {
             var genusSection = row.closest('.genus-content');
             if (genusSection) {
