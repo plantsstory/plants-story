@@ -671,6 +671,16 @@
         <a class="page-link">&raquo;</a>
       </div>
 
+      <!-- User Search Section -->
+      <div id="user-search-section" style="margin-top:var(--space-xl);">
+        <h2 class="section-title">ユーザー検索</h2>
+        <div class="search-bar" style="max-width:400px;margin-top:var(--space-md);margin-bottom:var(--space-md);">
+          <input type="text" class="search-bar__input" id="user-search-input" placeholder="ユーザー名または表示名で検索...">
+          <button class="search-bar__btn" id="user-search-btn">&#x1F50D;</button>
+        </div>
+        <div id="user-search-results"></div>
+      </div>
+
     </div>
   </section>
 
@@ -949,6 +959,7 @@
           <div class="profile-avatar" id="profile-avatar"></div>
           <div class="profile-info">
             <h1 class="profile-name" id="profile-display-name"></h1>
+            <p class="text-muted text-sm" id="profile-username" style="margin-top:2px;"></p>
             <p class="text-muted text-sm" id="profile-bio" style="margin-top:var(--space-xs);white-space:pre-wrap;"></p>
             <div class="profile-sns" id="profile-sns-links"></div>
             <div class="profile-stats" style="margin-top:var(--space-sm);">
@@ -995,6 +1006,17 @@
         <div class="form-group" style="margin-bottom:var(--space-md);">
           <label class="form-label">表示名</label>
           <input type="text" class="form-input" id="edit-display-name" maxlength="50" placeholder="ニックネーム">
+        </div>
+
+        <!-- Username (optional) -->
+        <div class="form-group" style="margin-bottom:var(--space-md);">
+          <label class="form-label">ユーザー名（任意）</label>
+          <div style="position:relative;">
+            <input type="text" class="form-input" id="edit-username" maxlength="20" placeholder="英数字と_のみ、3〜20文字" style="padding-left:24px;">
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--color-gray);font-size:14px;">@</span>
+            <span id="edit-username-status" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:14px;"></span>
+          </div>
+          <p class="form-hint" id="edit-username-hint">設定するとプロフィールURLが短くなります</p>
         </div>
 
         <!-- Email (read-only) -->
@@ -1095,6 +1117,7 @@
     function buildHash(page, options) {
       options = options || {};
       if (page === 'top') return '#/';
+      if (page === 'profile' && options.username) return '#/profile/@' + options.username;
       if (page === 'profile' && options.userId) return '#/profile/' + options.userId;
       if (page === 'profile-edit') return '#/profile/edit';
       if (page === 'genus' && options.genus) return '#/' + options.genus.toLowerCase();
@@ -1120,6 +1143,9 @@
       // Check profile routes
       if (first === 'profile') {
         if (segments[1] === 'edit') return { page: 'profile-edit' };
+        if (segments[1] && segments[1].charAt(0) === '@') {
+          return { page: 'profile', username: segments[1].slice(1) };
+        }
         if (segments[1]) return { page: 'profile', userId: segments[1] };
         return { page: 'top' };
       }
@@ -1156,7 +1182,21 @@
         var parentRow = rowEl ? rowEl.closest('[data-nav]') : null;
         updateCultivarDetail(cultivarKey, parentRow);
       }
-      if (page === 'profile' && options.userId && typeof window.loadProfilePage === 'function') {
+      if (page === 'profile' && options.username && !options.userId && typeof window.loadProfilePage === 'function') {
+        // Resolve @username to UUID then load
+        var sb = window._supabaseClient;
+        if (sb) {
+          sb.rpc('resolve_username', { p_username: options.username }).then(function(res) {
+            if (res.data) {
+              options.userId = res.data;
+              window.loadProfilePage(res.data);
+            } else {
+              showToast('ユーザーが見つかりませんでした', true);
+              location.hash = '#/';
+            }
+          });
+        }
+      } else if (page === 'profile' && options.userId && typeof window.loadProfilePage === 'function') {
         window.loadProfilePage(options.userId);
       }
       if (page === 'profile-edit' && typeof window.loadProfileEditPage === 'function') {
@@ -1165,7 +1205,7 @@
 
       if (pushHistory !== false) {
         var hash = buildHash(page, options);
-        history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar, userId: options.userId }, '', hash);
+        history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar, userId: options.userId, username: options.username }, '', hash);
       }
     }
 
@@ -2641,15 +2681,19 @@
           .then(function(res) {
             if (res.error || !res.data) {
               document.getElementById('profile-display-name').textContent = '名前未設定';
+              document.getElementById('profile-username').textContent = '';
               document.getElementById('profile-bio').textContent = '';
               document.getElementById('profile-sns-links').innerHTML = '';
               renderAvatar(document.getElementById('profile-avatar'), null);
             } else {
               var p = res.data;
               document.getElementById('profile-display-name').textContent = p.display_name || '名前未設定';
+              document.getElementById('profile-username').textContent = p.username ? '@' + p.username : '';
               document.getElementById('profile-bio').textContent = p.bio || '';
               renderAvatar(document.getElementById('profile-avatar'), p.avatar_url);
               renderSnsLinks(document.getElementById('profile-sns-links'), p);
+              // Store username for share URL
+              window._currentProfileUsername = p.username || null;
             }
           });
 
@@ -2688,6 +2732,7 @@
           .then(function(res) {
             if (res.data) {
               document.getElementById('edit-display-name').value = res.data.display_name || '';
+              document.getElementById('edit-username').value = res.data.username || '';
               document.getElementById('edit-bio').value = res.data.bio || '';
               document.getElementById('edit-sns-instagram').value = res.data.sns_instagram || '';
               document.getElementById('edit-sns-twitter').value = res.data.sns_twitter || '';
@@ -2695,14 +2740,51 @@
               if (bioCountEl) bioCountEl.textContent = (res.data.bio || '').length;
               // Store current avatar URL for save
               window._editAvatarUrl = res.data.avatar_url || '';
+              window._editOriginalUsername = res.data.username || '';
             } else {
               // No profile yet - use Google defaults
               var meta = window._currentUser.user_metadata || {};
               document.getElementById('edit-display-name').value = meta.full_name || '';
               renderAvatar(document.getElementById('edit-avatar-preview'), meta.avatar_url || null);
               window._editAvatarUrl = meta.avatar_url || '';
+              window._editOriginalUsername = '';
             }
           });
+
+        // Username availability check with debounce
+        var usernameInput = document.getElementById('edit-username');
+        var usernameStatus = document.getElementById('edit-username-status');
+        var usernameHint = document.getElementById('edit-username-hint');
+        var _usernameTimer = null;
+        if (usernameInput) {
+          usernameInput.addEventListener('input', function() {
+            var val = usernameInput.value.trim();
+            clearTimeout(_usernameTimer);
+            usernameStatus.textContent = '';
+            usernameHint.textContent = '設定するとプロフィールURLが短くなります';
+            usernameHint.style.color = '';
+
+            if (!val) return;
+
+            _usernameTimer = setTimeout(function() {
+              sb.rpc('check_username_available', { p_username: val }).then(function(res) {
+                if (res.error) return;
+                var d = res.data;
+                if (d.available) {
+                  usernameStatus.textContent = '\u2714';
+                  usernameStatus.style.color = '#2D6A4F';
+                  usernameHint.textContent = 'このユーザー名は使用できます';
+                  usernameHint.style.color = '#2D6A4F';
+                } else {
+                  usernameStatus.textContent = '\u2718';
+                  usernameStatus.style.color = '#dc3545';
+                  usernameHint.textContent = d.reason || 'このユーザー名は使用できません';
+                  usernameHint.style.color = '#dc3545';
+                }
+              });
+            }, 300);
+          });
+        }
       };
 
       // Avatar upload button
@@ -2756,18 +2838,27 @@
           saveBtn.textContent = '保存中...';
           saveBtn.disabled = true;
 
+          var usernameVal = document.getElementById('edit-username').value.trim() || null;
           sb.rpc('upsert_profile', {
             p_display_name: document.getElementById('edit-display-name').value.trim(),
             p_bio: document.getElementById('edit-bio').value.trim(),
             p_sns_instagram: document.getElementById('edit-sns-instagram').value.trim(),
             p_sns_twitter: document.getElementById('edit-sns-twitter').value.trim(),
-            p_avatar_url: window._editAvatarUrl || ''
+            p_avatar_url: window._editAvatarUrl || '',
+            p_username: usernameVal
           }).then(function(res) {
             if (res.error) {
               showToast('保存に失敗しました: ' + res.error.message, true);
+            } else if (res.data && res.data.success === false) {
+              showToast(res.data.error || '保存に失敗しました', true);
             } else {
               showToast('プロフィールを保存しました');
-              location.hash = '#/profile/' + window._currentUser.id;
+              // Use @username URL if available
+              if (usernameVal) {
+                location.hash = '#/profile/@' + usernameVal;
+              } else {
+                location.hash = '#/profile/' + window._currentUser.id;
+              }
             }
           }).finally(function() {
             saveBtn.textContent = '保存';
@@ -4287,6 +4378,80 @@
         });
       });
     });
+
+    // ========================================
+    // USER SEARCH
+    // ========================================
+    (function() {
+      var userSearchInput = document.getElementById('user-search-input');
+      var userSearchResults = document.getElementById('user-search-results');
+      var userSearchBtn = document.getElementById('user-search-btn');
+      if (!userSearchInput || !userSearchResults) return;
+
+      var _searchTimer = null;
+
+      function doUserSearch() {
+        var query = userSearchInput.value.trim();
+        if (!query) {
+          userSearchResults.innerHTML = '';
+          return;
+        }
+        var sb = window._supabaseClient;
+        if (!sb) return;
+
+        sb.rpc('search_profiles', { p_query: query, p_limit: 20 }).then(function(res) {
+          if (res.error || !res.data || res.data.length === 0) {
+            userSearchResults.innerHTML = '<div class="card" style="padding:var(--space-lg);text-align:center;" class="text-muted">ユーザーが見つかりませんでした</div>';
+            return;
+          }
+          var html = '<div class="card" style="padding:0;">';
+          res.data.forEach(function(u) {
+            var profileUrl = u.username ? '#/profile/@' + u.username : '#/profile/' + u.id;
+            var avatarHtml = '';
+            if (u.avatar_url) {
+              avatarHtml = '<img src="' + u.avatar_url + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover;" alt="">';
+            } else {
+              avatarHtml = '<div style="width:40px;height:40px;border-radius:50%;background:var(--color-lighter);display:flex;align-items:center;justify-content:center;color:var(--color-gray);font-size:18px;">' + (u.display_name ? u.display_name.charAt(0).toUpperCase() : '?') + '</div>';
+            }
+            html += '<a href="' + profileUrl + '" style="display:flex;align-items:center;gap:var(--space-sm);padding:var(--space-sm) var(--space-md);border-bottom:1px solid var(--color-lighter);text-decoration:none;color:inherit;cursor:pointer;" class="user-search-row">';
+            html += avatarHtml;
+            html += '<div style="flex:1;min-width:0;">';
+            html += '<div style="font-weight:600;">' + (u.display_name || '名前未設定') + '</div>';
+            if (u.username) {
+              html += '<div style="font-size:0.85rem;color:var(--color-gray);">@' + u.username + '</div>';
+            }
+            if (u.bio) {
+              var bioShort = u.bio.length > 60 ? u.bio.substring(0, 60) + '...' : u.bio;
+              html += '<div style="font-size:0.8rem;color:var(--color-gray);margin-top:2px;">' + bioShort + '</div>';
+            }
+            html += '</div>';
+            html += '<div style="font-size:0.8rem;color:var(--color-gray);white-space:nowrap;">' + u.post_count + ' 投稿</div>';
+            html += '</a>';
+          });
+          html += '</div>';
+          userSearchResults.innerHTML = html;
+        });
+      }
+
+      userSearchInput.addEventListener('input', function() {
+        clearTimeout(_searchTimer);
+        _searchTimer = setTimeout(doUserSearch, 300);
+      });
+
+      if (userSearchBtn) {
+        userSearchBtn.addEventListener('click', function() {
+          clearTimeout(_searchTimer);
+          doUserSearch();
+        });
+      }
+
+      userSearchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          clearTimeout(_searchTimer);
+          doUserSearch();
+        }
+      });
+    })();
 
     // ========================================
     // CONTRIBUTE FORM - Full functionality
