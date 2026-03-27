@@ -2079,7 +2079,7 @@
               p_type: meta.type || 'Hybrid',
               p_origins: originsData,
               p_edit_key_hash: editKeyHash,
-              p_ai_status: (meta.type === 'species' && !window._aiAutofillUsed) ? 'pending' : (meta.type === 'species' ? 'completed' : null),
+              p_ai_status: meta.type === 'species' ? 'completed' : null,
               p_created_ip: userIp,
               p_user_id: window._currentUser ? window._currentUser.id : null
             });
@@ -2099,15 +2099,15 @@
             try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
             saved[fullName] = { entry: entry, meta: meta };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-            // Trigger AI research (species only, skip if AI autofill was already used)
+            // Trigger AI research for non-species types only
+            // Species uses the AI auto-fill button before registration instead
             var isSpecies = meta.type === 'species';
-            if (isSpecies && !window._aiAutofillUsed) {
+            if (!isSpecies) {
               var insertedId = rpcResult && rpcResult.id;
               if (insertedId) {
                 var manualOrigins = (entry.origins || []).filter(function(o) {
                   return o.source_type === 'manual' || (o.author && o.author.isAI === false);
                 });
-                // Extract user text and sources for CLONE/hybrid verification
                 var userText = '';
                 var userSources = [];
                 if (manualOrigins.length > 0) {
@@ -5454,14 +5454,26 @@
               author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
               votes: { agree: 0, disagree: 0 }
             };
-          } else if (!isSeedling) {
-            // AI will fill in later (not for seedlings)
+          } else if (!isSeedling && type !== 'species') {
+            // AI will fill in later (not for seedlings or species)
+            // Species uses the AI auto-fill button before registration
             var origin = {
               trust: 0, trustClass: 'trust--low',
               body: t('ai_pending_origin'),
               structured: structured,
               sources: [],
               author: { isAI: true, name: 'AI (Pending)', date: new Date().toISOString().slice(0, 10) },
+              votes: { agree: 0, disagree: 0 }
+            };
+          } else if (type === 'species') {
+            // Species with no structured content: create empty manual origin
+            var origin = {
+              trust: 30, trustClass: 'trust--low',
+              body: '',
+              structured: structured,
+              source_type: 'manual',
+              sources: [],
+              author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
               votes: { agree: 0, disagree: 0 }
             };
           } else {
