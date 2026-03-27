@@ -1008,6 +1008,26 @@
   color: var(--color-gray);
 }
 
+.clone-caption-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.clone-caption-group select {
+  width: 100%;
+  font-size: 11px;
+  padding: 3px 6px;
+  border: 1px solid var(--color-light);
+  border-radius: var(--radius-sm);
+  box-sizing: border-box;
+}
+
+.clone-caption-group .clone-caption-other {
+  width: 100%;
+}
+
 .gallery__delete {
   display: block;
   text-align: center;

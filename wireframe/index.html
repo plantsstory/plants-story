@@ -455,7 +455,7 @@
           <div class="upload-area__hint">最大3枚, JPG/PNG, 各20MB以下（自動圧縮）</div>
         </div>
         <div class="upload-preview" id="contribute-preview"></div>
-        <p id="clone-image-hint" class="text-sm text-muted" style="display:none; margin-top:var(--space-sm);">※ 画像にselfやF個体を載せる場合は、画像の補足欄に正式名称を必ず表記してください。</p>
+        <p id="clone-image-hint" class="text-sm text-muted" style="display:none; margin-top:var(--space-sm);">※ 画像投稿はself等も記載可能。選択と株を記載したSNSリンクがあれば記入してください。</p>
       </div>
 
       <!-- Origin story — structured fields per type -->
@@ -4943,11 +4943,10 @@
         // Show/hide clone image hint
         var cloneImageHint = document.getElementById('clone-image-hint');
         if (cloneImageHint) cloneImageHint.style.display = type === 'clone' ? '' : 'none';
-        // Update caption placeholders in image preview based on type
-        var captionPh = type === 'clone' ? '補足(日付等) self等の場合はこちらへ記入' : '補足（日付等）';
-        document.querySelectorAll('#contribute-preview input[data-field="caption"]').forEach(function(el) {
-          el.placeholder = captionPh;
-        });
+        // Re-render image preview to switch between clone select UI and normal text input
+        if (typeof renderContributePreview === 'function' && document.getElementById('contribute-preview') && document.getElementById('contribute-preview').children.length > 0) {
+          renderContributePreview();
+        }
         // Show/hide species subcategory chips and reset to default when switching back
         var subcatContainer = document.getElementById('species-subcategory');
         if (subcatContainer) {
@@ -6656,19 +6655,42 @@
         function renderContributePreview() {
           contributePreview.innerHTML = '';
           var checkedType = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
-          var captionPlaceholder = (checkedType && checkedType.value === 'clone')
-            ? '補足(日付等) self等の場合はこちらへ記入'
-            : '補足（日付等）';
+          var isClone = checkedType && checkedType.value === 'clone';
           contributeImages.forEach(function(src, i) {
             var item = document.createElement('div');
             item.className = 'upload-preview__item';
+            var captionVal = (contributeCaptions[i] || '').replace(/"/g, '&quot;');
+            var captionHtml;
+            if (isClone) {
+              var selVal = 'Clone';
+              var otherVal = '';
+              // Parse existing caption: if it matches a preset, select it; otherwise "その他"
+              if (captionVal === 'Clone' || captionVal === 'self' || captionVal === 'sib') {
+                selVal = captionVal;
+              } else if (captionVal) {
+                selVal = 'other';
+                otherVal = captionVal;
+              }
+              captionHtml =
+                '<div class="clone-caption-group" data-idx="' + i + '">' +
+                  '<select class="form-input clone-caption-select" data-idx="' + i + '" data-field="caption-select">' +
+                    '<option value="Clone"' + (selVal === 'Clone' ? ' selected' : '') + '>Clone</option>' +
+                    '<option value="self"' + (selVal === 'self' ? ' selected' : '') + '>self</option>' +
+                    '<option value="sib"' + (selVal === 'sib' ? ' selected' : '') + '>sib</option>' +
+                    '<option value="other"' + (selVal === 'other' ? ' selected' : '') + '>その他</option>' +
+                  '</select>' +
+                  '<input type="text" class="form-input clone-caption-other" placeholder="例) F2" data-idx="' + i + '" data-field="caption-other" value="' + otherVal + '" style="' + (selVal === 'other' ? '' : 'display:none;') + '">' +
+                '</div>';
+            } else {
+              captionHtml = '<input type="text" placeholder="補足（日付等）" data-idx="' + i + '" data-field="caption" value="' + captionVal + '">';
+            }
             item.innerHTML =
               '<div class="upload-preview__img-wrap">' +
                 '<img class="upload-preview__img" src="' + src + '" data-idx="' + i + '" title="クリックで画像を変更">' +
                 '<button class="upload-preview__remove" data-idx="' + i + '">&times;</button>' +
               '</div>' +
               '<div class="upload-preview__meta">' +
-                '<input type="text" placeholder="' + captionPlaceholder + '" data-idx="' + i + '" data-field="caption" value="' + (contributeCaptions[i] || '').replace(/"/g, '&quot;') + '">' +
+                captionHtml +
                 '<input type="url" placeholder="リンクURL" data-idx="' + i + '" data-field="link" value="' + (contributeLinkUrls[i] || '').replace(/"/g, '&quot;') + '">' +
               '</div>';
             contributePreview.appendChild(item);
@@ -6699,7 +6721,22 @@
               var idx = parseInt(this.getAttribute('data-idx'));
               var field = this.getAttribute('data-field');
               if (field === 'caption') contributeCaptions[idx] = this.value;
+              else if (field === 'caption-other') contributeCaptions[idx] = this.value;
               else if (field === 'link') contributeLinkUrls[idx] = this.value;
+            });
+          });
+          // Attach clone caption select handlers
+          contributePreview.querySelectorAll('.clone-caption-select').forEach(function(sel) {
+            sel.addEventListener('change', function() {
+              var idx = parseInt(this.getAttribute('data-idx'));
+              var otherInput = this.parentNode.querySelector('.clone-caption-other');
+              if (this.value === 'other') {
+                otherInput.style.display = '';
+                contributeCaptions[idx] = otherInput.value || '';
+              } else {
+                otherInput.style.display = 'none';
+                contributeCaptions[idx] = this.value;
+              }
             });
           });
         }
