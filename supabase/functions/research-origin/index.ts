@@ -1089,6 +1089,14 @@ serve(async (req: Request) => {
       );
     }
 
+    // Skip post-registration AI research for species (only allow preview mode for auto-fill button)
+    if (type === "species" && !preview) {
+      return new Response(
+        JSON.stringify({ success: false, reason: "Species uses pre-registration auto-fill only" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);

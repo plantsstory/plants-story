@@ -418,12 +418,12 @@
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="hybrid">
               <span data-i18n="type_hybrid">ハイブリッド (Hybrid)</span>
-              <span class="type-hint" data-hint="特定の親株を使用した交配式につく品種名">?<span class="type-hint__popup">特定の親株を使用した交配式につく品種名</span></span>
+              <span class="type-hint" data-hint="交配式につく品種名（例: 特定の親で作られたF1の不特定多数の選抜個体につく名前）">?<span class="type-hint__popup">交配式につく品種名（例: 特定の親で作られたF1の不特定多数の選抜個体につく名前）</span></span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="clone">
               <span data-i18n="type_clone">クローン (Clone)</span>
-              <span class="type-hint" data-hint="特定の個体についた品種名">?<span class="type-hint__popup">特定の個体についた品種名</span></span>
+              <span class="type-hint" data-hint="特定の個体についた品種名（selfやF個体の画像掲載可。その場合は補足欄に正式名称を記入）">?<span class="type-hint__popup">特定の個体についた品種名（selfやF個体の画像掲載可。その場合は補足欄に正式名称を記入）</span></span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="seedling">
@@ -455,7 +455,7 @@
           <div class="upload-area__hint">最大3枚, JPG/PNG, 各20MB以下（自動圧縮）</div>
         </div>
         <div class="upload-preview" id="contribute-preview"></div>
-        <p id="clone-image-hint" class="text-sm text-muted" style="display:none; margin-top:var(--space-sm);">※ self交配等の画像を掲載する場合は、補足欄に正式名称（元の品種名）を、リンク欄にその株の詳細がわかるURLを記入してください</p>
+        <p id="clone-image-hint" class="text-sm text-muted" style="display:none; margin-top:var(--space-sm);">※ 画像にselfやF個体を載せる場合は、画像の補足欄に正式名称を必ず表記してください。</p>
       </div>
 
       <!-- Origin story — structured fields per type -->
@@ -4943,6 +4943,11 @@
         // Show/hide clone image hint
         var cloneImageHint = document.getElementById('clone-image-hint');
         if (cloneImageHint) cloneImageHint.style.display = type === 'clone' ? '' : 'none';
+        // Update caption placeholders in image preview based on type
+        var captionPh = type === 'clone' ? '補足(日付等) self等の場合はこちらへ記入' : '補足（日付等）';
+        document.querySelectorAll('#contribute-preview input[data-field="caption"]').forEach(function(el) {
+          el.placeholder = captionPh;
+        });
         // Show/hide species subcategory chips and reset to default when switching back
         var subcatContainer = document.getElementById('species-subcategory');
         if (subcatContainer) {
@@ -6650,6 +6655,10 @@
 
         function renderContributePreview() {
           contributePreview.innerHTML = '';
+          var checkedType = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
+          var captionPlaceholder = (checkedType && checkedType.value === 'clone')
+            ? '補足(日付等) self等の場合はこちらへ記入'
+            : '補足（日付等）';
           contributeImages.forEach(function(src, i) {
             var item = document.createElement('div');
             item.className = 'upload-preview__item';
@@ -6659,7 +6668,7 @@
                 '<button class="upload-preview__remove" data-idx="' + i + '">&times;</button>' +
               '</div>' +
               '<div class="upload-preview__meta">' +
-                '<input type="text" placeholder="補足（日付等）" data-idx="' + i + '" data-field="caption" value="' + (contributeCaptions[i] || '').replace(/"/g, '&quot;') + '">' +
+                '<input type="text" placeholder="' + captionPlaceholder + '" data-idx="' + i + '" data-field="caption" value="' + (contributeCaptions[i] || '').replace(/"/g, '&quot;') + '">' +
                 '<input type="url" placeholder="リンクURL" data-idx="' + i + '" data-field="link" value="' + (contributeLinkUrls[i] || '').replace(/"/g, '&quot;') + '">' +
               '</div>';
             contributePreview.appendChild(item);
