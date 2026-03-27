@@ -1275,6 +1275,76 @@
 }
 
 /* ========================================
+   TYPE HINT TOOLTIP (Registration page)
+   ======================================== */
+.type-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  margin-left: 4px;
+  position: relative;
+  vertical-align: middle;
+  user-select: none;
+  flex-shrink: 0;
+}
+.type-hint:hover,
+.type-hint.active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.type-hint__popup {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  line-height: 1.4;
+}
+/* Small arrow below popup */
+.type-hint__popup::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #333;
+}
+.type-hint:hover .type-hint__popup,
+.type-hint.active .type-hint__popup {
+  opacity: 1;
+}
+/* Prevent popup from being clipped on small screens */
+@media (max-width: 480px) {
+  .type-hint__popup {
+    left: 0;
+    transform: none;
+  }
+  .type-hint__popup::after {
+    left: 9px;
+    transform: none;
+  }
+}
+
+/* ========================================
    SORT BAR
    ======================================== */
 .sort-bar {

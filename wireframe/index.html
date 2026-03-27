@@ -413,18 +413,22 @@
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="species" checked>
               <span data-i18n="type_species">原種 (Original species)</span>
+              <span class="type-hint" data-hint="学術的に記載された種と未記載種等も含む">?<span class="type-hint__popup">学術的に記載された種と未記載種等も含む</span></span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="hybrid">
               <span data-i18n="type_hybrid">ハイブリッド (Hybrid)</span>
+              <span class="type-hint" data-hint="特定の親株を使用した交配式につく品種名">?<span class="type-hint__popup">特定の親株を使用した交配式につく品種名</span></span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="clone">
               <span data-i18n="type_clone">クローン (Clone)</span>
+              <span class="type-hint" data-hint="特定の個体についた品種名">?<span class="type-hint__popup">特定の個体についた品種名</span></span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="seedling">
               <span data-i18n="type_seedling">実生 (Seedling)</span>
+              <span class="type-hint" data-hint="趣味家の播種記録公開用">?<span class="type-hint__popup">趣味家の播種記録公開用</span></span>
             </label>
           </div>
           <!-- Species sub-category chips (shown only when species is selected) -->
@@ -4970,6 +4974,25 @@
           if (c.getAttribute('data-subcategory') === value) c.classList.add('active');
         });
       }
+
+      // Type-hint tooltips: mobile tap support & prevent radio toggle
+      document.querySelectorAll('.type-hint').forEach(function(hint) {
+        hint.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          // Close other open hints
+          document.querySelectorAll('.type-hint.active').forEach(function(h) {
+            if (h !== hint) h.classList.remove('active');
+          });
+          hint.classList.toggle('active');
+        });
+      });
+      // Close hints when tapping elsewhere
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.type-hint')) {
+          document.querySelectorAll('.type-hint.active').forEach(function(h) { h.classList.remove('active'); });
+        }
+      });
 
       // AI auto-fill: show/hide button when name changes
       if (contributeName) {
