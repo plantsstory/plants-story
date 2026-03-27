@@ -1356,19 +1356,17 @@
 /* Prevent popup from being clipped on small screens */
 @media (max-width: 480px) {
   .type-hint__popup {
-    position: fixed;
-    bottom: auto;
-    left: 16px;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
     white-space: normal;
-    width: auto;
     min-width: 0;
+    width: calc(100vw - 64px);
+    max-width: 300px;
+    left: 50%;
+    transform: translateX(-50%);
     text-align: left;
   }
   .type-hint__popup::after {
-    display: none;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
 
