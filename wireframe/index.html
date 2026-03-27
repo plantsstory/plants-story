@@ -427,6 +427,17 @@
               <span data-i18n="type_seedling">実生 (Seedling)</span>
             </label>
           </div>
+          <!-- Species sub-category chips (shown only when species is selected) -->
+          <div id="species-subcategory" class="species-subcategory" style="display:none;">
+            <label class="form-label text-sm" style="margin-bottom:var(--space-xs);">分類詳細</label>
+            <div class="chips">
+              <span class="chip active" data-subcategory="species">原種</span>
+              <span class="chip" data-subcategory="sp">sp.</span>
+              <span class="chip" data-subcategory="ssp">ssp.</span>
+              <span class="chip" data-subcategory="cf">cf.</span>
+              <span class="chip" data-subcategory="aff">aff.</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -3100,6 +3111,11 @@
     function renderStructuredOrigin(s) {
       var h = '';
       if (s.origin_type === 'species') {
+        // 分類詳細（サブカテゴリ）
+        if (s.species_subcategory && s.species_subcategory !== 'species') {
+          var subLabels = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
+          h += '<div class="structured-field"><span class="structured-field__label">分類</span><span class="structured-field__value" style="font-style:italic;">' + (subLabels[s.species_subcategory] || s.species_subcategory) + '</span></div>';
+        }
         // 記載情報
         var hasPublication = s.species_name || s.author_name || s.publication_year;
         if (hasPublication) {
@@ -4544,6 +4560,7 @@
         if (editStructured) {
           if (type === 'species') {
             var v;
+            if (editStructured.species_subcategory) setSubcategory(editStructured.species_subcategory);
             v = document.getElementById('sf-author-name'); if (v) v.value = editStructured.author_name || '';
             v = document.getElementById('sf-publication-year'); if (v) v.value = editStructured.publication_year || '';
             v = document.getElementById('sf-collector'); if (v) v.value = editStructured.collector || '';
@@ -4918,6 +4935,9 @@
         if (cloneFields) cloneFields.style.display = type === 'clone' ? '' : 'none';
         if (hybridFields) hybridFields.style.display = type === 'hybrid' ? '' : 'none';
         if (seedlingFields) seedlingFields.style.display = type === 'seedling' ? '' : 'none';
+        // Show/hide species subcategory chips
+        var subcatContainer = document.getElementById('species-subcategory');
+        if (subcatContainer) subcatContainer.style.display = type === 'species' ? '' : 'none';
         if (originAiHint) {
           if (type === 'species') { originAiHint.textContent = 'AIが自動で由来を調査します'; originAiHint.style.display = ''; }
           else if (type === 'seedling') { originAiHint.style.display = 'none'; }
@@ -4933,6 +4953,20 @@
       // Initialize: show species fields by default
       var activeType = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
       showTypeFields(activeType ? activeType.value : 'species');
+
+      // Helper: get selected species subcategory
+      function getSelectedSubcategory() {
+        var active = document.querySelector('#species-subcategory .chip.active');
+        return active ? active.getAttribute('data-subcategory') : 'species';
+      }
+
+      // Helper: set species subcategory chip
+      function setSubcategory(value) {
+        document.querySelectorAll('#species-subcategory .chip').forEach(function(c) {
+          c.classList.remove('active');
+          if (c.getAttribute('data-subcategory') === value) c.classList.add('active');
+        });
+      }
 
       // AI auto-fill: show/hide button when name changes
       if (contributeName) {
@@ -5122,6 +5156,7 @@
             var f = getActiveFormula(type);
             if (type === 'species') {
               var v;
+              s.species_subcategory = getSelectedSubcategory();
               v = document.getElementById('sf-author-name'); if (v) s.author_name = v.value.trim();
               v = document.getElementById('sf-publication-year'); if (v && v.value) s.publication_year = parseInt(v.value) || null;
               v = document.getElementById('sf-collector'); if (v) s.collector = v.value.trim();
@@ -5166,6 +5201,10 @@
           function generateBodyFromStructured(s) {
             var parts = [];
             if (s.origin_type === 'species') {
+              if (s.species_subcategory && s.species_subcategory !== 'species') {
+                var subLabels = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
+                parts.push('分類: ' + (subLabels[s.species_subcategory] || s.species_subcategory));
+              }
               if (s.author_name) parts.push('発表者: ' + s.author_name + (s.publication_year ? ' (' + s.publication_year + ')' : ''));
               if (s.collector) parts.push('発見者: ' + s.collector + (s.collection_year ? ' (' + s.collection_year + ')' : ''));
               if (s.type_locality) parts.push('採取地: ' + s.type_locality);

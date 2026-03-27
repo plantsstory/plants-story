@@ -1173,6 +1173,12 @@
   font-size: var(--font-size-sm);
 }
 
+/* Species sub-category chips */
+.species-subcategory {
+  margin: var(--space-sm) 0 0 var(--space-lg);
+  transition: all 0.2s ease;
+}
+
 /* ========================================
    BREADCRUMB
    ======================================== */
