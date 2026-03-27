@@ -575,11 +575,13 @@
         <div class="form-group">
           <label class="form-label">補足欄</label>
           <textarea id="sf-notes" class="form-textarea" placeholder="補足情報があれば記入してください..."></textarea>
+          <p id="clone-notes-hint" class="form-hint text-sm text-muted" style="display:none; margin-top:var(--space-xs);">※ self交配等の画像を掲載する場合は、こちらに正式名称（元の品種名）を記入してください</p>
         </div>
 
         <!-- Shared: 引用リンク (all types) -->
         <div class="form-group">
           <label class="form-label" data-i18n="label_sources">引用リンク</label>
+          <p id="clone-link-hint" class="form-hint text-sm text-muted" style="display:none; margin-bottom:var(--space-xs);">※ self等の詳細がわかるリンクがあれば記載をお願いします</p>
           <div class="flex gap-sm mb-sm">
             <input type="url" class="form-input" placeholder="https://..." style="flex:1;">
             <button class="btn btn--secondary">+ 追加</button>
@@ -4939,6 +4941,11 @@
         if (cloneFields) cloneFields.style.display = type === 'clone' ? '' : 'none';
         if (hybridFields) hybridFields.style.display = type === 'hybrid' ? '' : 'none';
         if (seedlingFields) seedlingFields.style.display = type === 'seedling' ? '' : 'none';
+        // Show/hide clone-specific hints on shared fields
+        var cloneNotesHint = document.getElementById('clone-notes-hint');
+        var cloneLinkHint = document.getElementById('clone-link-hint');
+        if (cloneNotesHint) cloneNotesHint.style.display = type === 'clone' ? '' : 'none';
+        if (cloneLinkHint) cloneLinkHint.style.display = type === 'clone' ? '' : 'none';
         // Show/hide species subcategory chips and reset to default when switching back
         var subcatContainer = document.getElementById('species-subcategory');
         if (subcatContainer) {
