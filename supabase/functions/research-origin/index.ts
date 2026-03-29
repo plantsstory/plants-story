@@ -1555,6 +1555,13 @@ serve(async (req: Request) => {
           }
         }
 
+        // Clear manualOrigins to prevent duplication — the verified/fallback entry
+        // already contains the user text, so merging manualOrigins would duplicate it.
+        if (originEntries.length > 0) {
+          console.log(`[Verify] Clearing ${manualOrigins.length} manual origins to prevent duplication`);
+          manualOrigins = [];
+        }
+
       // ---- Species fallback: AI generation (unchanged) ----
       } else {
         console.log(`[Research] AI research for: ${cultivar_name} (type: ${plantType})`);
