@@ -1610,6 +1610,35 @@
   background: var(--color-danger);
 }
 
+.upload-preview__move {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.upload-preview__move-btn {
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-full);
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition);
+}
+
+.upload-preview__move-btn:hover {
+  background: var(--color-primary);
+}
+
 .upload-area--dragover {
   border-color: var(--color-primary) !important;
   background: rgba(82, 183, 136, 0.08);

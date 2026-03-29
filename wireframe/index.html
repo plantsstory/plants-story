@@ -4697,62 +4697,102 @@
         var _sbForGallery = window._supabaseClient;
         if (_sbForGallery) {
           _sbForGallery.from('cultivar_images')
-            .select('id, storage_path, caption, link_url')
+            .select('id, storage_path, caption, link_url, display_order')
             .eq('cultivar_name', editDisplayName)
+            .order('display_order', { ascending: true })
             .order('created_at', { ascending: true })
             .then(function(res) {
               if (res.error || !res.data || res.data.length === 0) return;
-              var previewEl = document.getElementById('contribute-preview');
-              if (!previewEl) return;
-              previewEl.innerHTML = '';
-              res.data.forEach(function(img) {
-                var url = _sbForGallery.storage.from('gallery-images').getPublicUrl(img.storage_path).data.publicUrl;
-                var item = document.createElement('div');
-                item.className = 'upload-preview__item';
-                item.setAttribute('data-image-id', img.id);
-                item.setAttribute('data-storage-path', img.storage_path);
-                item.innerHTML =
-                  '<div class="upload-preview__img-wrap">' +
-                    '<img class="upload-preview__img" src="' + url + '" title="登録済み画像">' +
-                    '<button class="upload-preview__remove" data-image-id="' + img.id + '" data-storage-path="' + img.storage_path + '">&times;</button>' +
-                  '</div>' +
-                  '<div class="upload-preview__meta">' +
-                    '<input type="text" placeholder="補足（日付等）" data-image-id="' + img.id + '" data-field="caption" value="' + (img.caption || '').replace(/"/g, '&quot;') + '">' +
-                    '<input type="url" placeholder="リンクURL" data-image-id="' + img.id + '" data-field="link_url" value="' + (img.link_url || '').replace(/"/g, '&quot;') + '">' +
-                  '</div>';
-                previewEl.appendChild(item);
-              });
-              // Attach × handlers to delete from DB
-              previewEl.querySelectorAll('.upload-preview__remove').forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
-                  e.stopPropagation();
-                  var imageId = this.getAttribute('data-image-id');
-                  var storagePath = this.getAttribute('data-storage-path');
-                  var itemEl = this.closest('.upload-preview__item');
-                  if (!confirm('この画像を削除しますか？')) return;
-                  _sbForGallery.storage.from('gallery-images').remove([storagePath]).then(function() {
-                    return _sbForGallery.from('cultivar_images').delete().eq('id', imageId);
-                  }).then(function() {
-                    itemEl.remove();
-                    showToast('画像を削除しました');
-                  }).catch(function(err) {
-                    showToast('画像削除エラー: ' + (err.message || err), true);
+              var editImages = res.data;
+
+              function renderEditImagePreviews() {
+                var previewEl = document.getElementById('contribute-preview');
+                if (!previewEl) return;
+                previewEl.innerHTML = '';
+                editImages.forEach(function(img, idx) {
+                  var url = _sbForGallery.storage.from('gallery-images').getPublicUrl(img.storage_path).data.publicUrl;
+                  var item = document.createElement('div');
+                  item.className = 'upload-preview__item';
+                  item.setAttribute('data-image-id', img.id);
+                  item.setAttribute('data-storage-path', img.storage_path);
+                  var moveHtml = '';
+                  if (editImages.length > 1) {
+                    moveHtml = '<div class="upload-preview__move">';
+                    if (idx > 0) moveHtml += '<button class="upload-preview__move-btn" data-idx="' + idx + '" data-dir="left" title="左へ移動">&#9664;</button>';
+                    if (idx < editImages.length - 1) moveHtml += '<button class="upload-preview__move-btn" data-idx="' + idx + '" data-dir="right" title="右へ移動">&#9654;</button>';
+                    moveHtml += '</div>';
+                  }
+                  item.innerHTML =
+                    '<div class="upload-preview__img-wrap">' +
+                      '<img class="upload-preview__img" src="' + url + '" title="登録済み画像">' +
+                      '<button class="upload-preview__remove" data-image-id="' + img.id + '" data-storage-path="' + img.storage_path + '" data-idx="' + idx + '">&times;</button>' +
+                      moveHtml +
+                    '</div>' +
+                    '<div class="upload-preview__meta">' +
+                      '<input type="text" placeholder="補足（日付等）" data-image-id="' + img.id + '" data-field="caption" value="' + (img.caption || '').replace(/"/g, '&quot;') + '">' +
+                      '<input type="url" placeholder="リンクURL" data-image-id="' + img.id + '" data-field="link_url" value="' + (img.link_url || '').replace(/"/g, '&quot;') + '">' +
+                    '</div>';
+                  previewEl.appendChild(item);
+                });
+                // Attach × handlers to delete from DB
+                previewEl.querySelectorAll('.upload-preview__remove').forEach(function(btn) {
+                  btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    var imageId = this.getAttribute('data-image-id');
+                    var storagePath = this.getAttribute('data-storage-path');
+                    var idx = parseInt(this.getAttribute('data-idx'));
+                    if (!confirm('この画像を削除しますか？')) return;
+                    _sbForGallery.storage.from('gallery-images').remove([storagePath]).then(function() {
+                      return _sbForGallery.from('cultivar_images').delete().eq('id', imageId);
+                    }).then(function() {
+                      editImages.splice(idx, 1);
+                      renderEditImagePreviews();
+                      showToast('画像を削除しました');
+                    }).catch(function(err) {
+                      showToast('画像削除エラー: ' + (err.message || err), true);
+                    });
                   });
                 });
-              });
-              // Attach caption/link save handlers (save on blur)
-              previewEl.querySelectorAll('.upload-preview__meta input').forEach(function(inp) {
-                inp.addEventListener('blur', function() {
-                  var imageId = this.getAttribute('data-image-id');
-                  var field = this.getAttribute('data-field');
-                  var val = this.value.trim();
-                  var updates = {};
-                  updates[field] = val || null;
-                  _sbForGallery.from('cultivar_images').update(updates).eq('id', imageId).then(function(res) {
-                    if (res.error) console.warn('Failed to update image ' + field + ':', res.error);
+                // Attach caption/link save handlers (save on blur)
+                previewEl.querySelectorAll('.upload-preview__meta input').forEach(function(inp) {
+                  inp.addEventListener('blur', function() {
+                    var imageId = this.getAttribute('data-image-id');
+                    var field = this.getAttribute('data-field');
+                    var val = this.value.trim();
+                    var updates = {};
+                    updates[field] = val || null;
+                    _sbForGallery.from('cultivar_images').update(updates).eq('id', imageId).then(function(res) {
+                      if (res.error) console.warn('Failed to update image ' + field + ':', res.error);
+                    });
                   });
                 });
-              });
+                // Attach move button handlers
+                previewEl.querySelectorAll('.upload-preview__move-btn').forEach(function(btn) {
+                  btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    var idx = parseInt(this.getAttribute('data-idx'));
+                    var dir = this.getAttribute('data-dir');
+                    var target = dir === 'left' ? idx - 1 : idx + 1;
+                    if (target < 0 || target >= editImages.length) return;
+                    // Swap in local array
+                    var temp = editImages[idx];
+                    editImages[idx] = editImages[target];
+                    editImages[target] = temp;
+                    // Update display_order in DB for both
+                    Promise.all([
+                      _sbForGallery.from('cultivar_images').update({ display_order: idx }).eq('id', editImages[idx].id),
+                      _sbForGallery.from('cultivar_images').update({ display_order: target }).eq('id', editImages[target].id)
+                    ]).then(function() {
+                      renderEditImagePreviews();
+                    }).catch(function(err) {
+                      console.warn('Failed to update display_order:', err);
+                      renderEditImagePreviews();
+                    });
+                  });
+                });
+              }
+
+              renderEditImagePreviews();
             });
         }
 
@@ -5747,7 +5787,7 @@
             // Upload gallery images after DB record exists
             if (galleryFiles.length > 0 && typeof window.uploadGalleryImage === 'function') {
               return Promise.all(galleryFiles.map(function(file, fi) {
-                return window.uploadGalleryImage(file, galleryName, galleryCaptions[fi] || '', galleryLinkUrls[fi] || '').catch(function(err) {
+                return window.uploadGalleryImage(file, galleryName, galleryCaptions[fi] || '', galleryLinkUrls[fi] || '', fi).catch(function(err) {
                   console.warn('Gallery image upload failed:', file.name, err);
                   return null;
                 });
@@ -6307,7 +6347,7 @@
         return getSupabaseUrl() + '/storage/v1/object/public/' + BUCKET_NAME + '/' + storagePath;
       }
 
-      function uploadToSupabase(file, cultivarName, caption, linkUrl) {
+      function uploadToSupabase(file, cultivarName, caption, linkUrl, displayOrder) {
         var sb = getSupabase();
         if (!sb) return Promise.reject('No Supabase');
         var safeName = cultivarName.replace(/[^a-zA-Z0-9_' -]/g, '_');
@@ -6328,6 +6368,7 @@
             if (caption) row.caption = caption;
             if (linkUrl) row.link_url = linkUrl;
             if (userIp) row.created_ip = userIp;
+            if (typeof displayOrder === 'number') row.display_order = displayOrder;
             return sb.from('cultivar_images').insert(row).select().then(function(dbRes) {
               if (dbRes.error) throw dbRes.error;
               return dbRes.data[0];
@@ -6344,6 +6385,7 @@
         return sb.from('cultivar_images')
           .select('*')
           .eq('cultivar_name', cultivarName)
+          .order('display_order', { ascending: true })
           .order('created_at', { ascending: true })
           .then(function(res) {
             if (res.error) throw res.error;
@@ -6726,10 +6768,18 @@
             } else {
               captionHtml = '<input type="text" placeholder="補足（日付等）" data-idx="' + i + '" data-field="caption" value="' + captionVal + '">';
             }
+            var moveHtml = '';
+            if (contributeImages.length > 1) {
+              moveHtml = '<div class="upload-preview__move">';
+              if (i > 0) moveHtml += '<button class="upload-preview__move-btn" data-idx="' + i + '" data-dir="left" title="左へ移動">&#9664;</button>';
+              if (i < contributeImages.length - 1) moveHtml += '<button class="upload-preview__move-btn" data-idx="' + i + '" data-dir="right" title="右へ移動">&#9654;</button>';
+              moveHtml += '</div>';
+            }
             item.innerHTML =
               '<div class="upload-preview__img-wrap">' +
                 '<img class="upload-preview__img" src="' + src + '" data-idx="' + i + '" title="クリックで画像を変更">' +
                 '<button class="upload-preview__remove" data-idx="' + i + '">&times;</button>' +
+                moveHtml +
               '</div>' +
               '<div class="upload-preview__meta">' +
                 captionHtml +
@@ -6779,6 +6829,22 @@
                 otherInput.style.display = 'none';
                 contributeCaptions[idx] = this.value;
               }
+            });
+          });
+          // Attach move button handlers (swap adjacent images)
+          contributePreview.querySelectorAll('.upload-preview__move-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              var idx = parseInt(this.getAttribute('data-idx'));
+              var dir = this.getAttribute('data-dir');
+              var target = dir === 'left' ? idx - 1 : idx + 1;
+              if (target < 0 || target >= contributeImages.length) return;
+              // Swap all 4 arrays
+              [contributeImages[idx], contributeImages[target]] = [contributeImages[target], contributeImages[idx]];
+              [contributeFiles[idx], contributeFiles[target]] = [contributeFiles[target], contributeFiles[idx]];
+              [contributeCaptions[idx], contributeCaptions[target]] = [contributeCaptions[target], contributeCaptions[idx]];
+              [contributeLinkUrls[idx], contributeLinkUrls[target]] = [contributeLinkUrls[target], contributeLinkUrls[idx]];
+              renderContributePreview();
             });
           });
         }
