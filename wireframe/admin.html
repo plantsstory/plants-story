@@ -1102,16 +1102,26 @@ document.getElementById('origin-cultivar-select').addEventListener('change', loa
 document.getElementById('origin-type-filter').addEventListener('change', loadOrigins);
 document.getElementById('origin-search').addEventListener('input', loadOrigins);
 
-function originTypeBadge(t) {
+function originTypeBadge(t, structured) {
   var map = { species: ['原種', '#1B4332'], clone: ['CLONE', '#4A235A'], hybrid: ['交配種', '#7B2D26'], seedling: ['実生', '#1A5276'] };
   var m = map[t] || [t || '?', '#666'];
-  return '<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:0.65rem;font-weight:600;color:#fff;background:' + m[1] + ';">' + m[0] + '</span>';
+  var label = m[0];
+  // Show species subcategory if available
+  if (t === 'species' && structured && structured.species_subcategory && structured.species_subcategory !== 'species') {
+    var subMap = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
+    label += ' (' + (subMap[structured.species_subcategory] || structured.species_subcategory) + ')';
+  }
+  return '<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:0.65rem;font-weight:600;color:#fff;background:' + m[1] + ';">' + label + '</span>';
 }
 
 function structuredSummaryHtml(s, cType) {
   if (!s) return '<span style="color:#999;">構造化データなし</span>';
   var parts = [];
   if (cType === 'species') {
+    if (s.species_subcategory && s.species_subcategory !== 'species') {
+      var subLabels = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
+      parts.push('<b>分類:</b> ' + (subLabels[s.species_subcategory] || s.species_subcategory));
+    }
     if (s.author_name) parts.push('<b>発表者:</b> ' + escapeHtml(s.author_name));
     if (s.publication_year) parts.push('<b>発表年:</b> ' + s.publication_year);
     if (s.collector) parts.push('<b>発見者:</b> ' + escapeHtml(s.collector));
@@ -1213,7 +1223,7 @@ function loadOrigins() {
       html += '</div>';
       html += '</td>';
       html += '<td>' + (i + 1) + '</td>';
-      html += '<td>' + originTypeBadge(oType) + '</td>';
+      html += '<td>' + originTypeBadge(oType, o.structured) + '</td>';
       html += '<td style="font-size:var(--font-size-xs);">' + tierBadge(o.source_tier) + ' ' + escapeHtml(o.source_name || '-') + '</td>';
       html += '<td>';
       html += '<div class="trust-bar"><div class="trust-fill" style="width:' + trustPct + '%;background:' + tColor + ';"></div></div> ';
@@ -1240,7 +1250,7 @@ function editOrigin(cultivarId, originIndex) {
   var cType = c.type || 'species';
 
   var html = '<h2 style="margin-bottom:4px;">由来を編集 (#' + (originIndex + 1) + ')</h2>';
-  html += '<div style="margin-bottom:12px;">' + originTypeBadge(cType) + ' <span style="font-size:0.85rem;color:#666;">' + escapeHtml(c.cultivar_name) + '</span></div>';
+  html += '<div style="margin-bottom:12px;">' + originTypeBadge(cType, s) + ' <span style="font-size:0.85rem;color:#666;">' + escapeHtml(c.cultivar_name) + '</span></div>';
 
   // Structured fields by type
   html += '<div style="border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:12px;background:#f9f9f9;">';

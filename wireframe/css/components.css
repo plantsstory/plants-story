@@ -1008,6 +1008,26 @@
   color: var(--color-gray);
 }
 
+.clone-caption-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.clone-caption-group select {
+  width: 100%;
+  font-size: 11px;
+  padding: 3px 6px;
+  border: 1px solid var(--color-light);
+  border-radius: var(--radius-sm);
+  box-sizing: border-box;
+}
+
+.clone-caption-group .clone-caption-other {
+  width: 100%;
+}
+
 .gallery__delete {
   display: block;
   text-align: center;
@@ -1173,6 +1193,12 @@
   font-size: var(--font-size-sm);
 }
 
+/* Species sub-category chips */
+.species-subcategory {
+  margin: var(--space-sm) 0 0 var(--space-lg);
+  transition: all 0.2s ease;
+}
+
 /* ========================================
    BREADCRUMB
    ======================================== */
@@ -1266,6 +1292,87 @@
   background: var(--color-primary);
   color: var(--color-white);
   border-color: var(--color-primary);
+}
+
+.filter-chips {
+  border-left: 1px solid var(--color-light);
+  padding-left: var(--space-md);
+}
+
+/* ========================================
+   TYPE HINT TOOLTIP (Registration page)
+   ======================================== */
+.type-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-text-muted);
+  background: transparent;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  margin-left: 4px;
+  position: relative;
+  vertical-align: middle;
+  user-select: none;
+  flex-shrink: 0;
+}
+.type-hint:hover,
+.type-hint.active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.type-hint__popup {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  line-height: 1.4;
+}
+/* Small arrow below popup */
+.type-hint__popup::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #333;
+}
+.type-hint:hover .type-hint__popup,
+.type-hint.active .type-hint__popup {
+  opacity: 1;
+}
+/* Prevent popup from being clipped on small screens */
+@media (max-width: 480px) {
+  .type-hint__popup {
+    white-space: normal;
+    min-width: 0;
+    width: calc(100vw - 64px);
+    max-width: 300px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: left;
+  }
+  .type-hint__popup::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }
 
 /* ========================================

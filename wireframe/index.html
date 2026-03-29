@@ -413,19 +413,34 @@
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="species" checked>
               <span data-i18n="type_species">原種 (Original species)</span>
+              <span class="type-hint" data-hint="学術的に記載された種と未記載種等も含む">?<span class="type-hint__popup">学術的に記載された種と未記載種等も含む</span></span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="hybrid">
               <span data-i18n="type_hybrid">ハイブリッド (Hybrid)</span>
+              <span class="type-hint" data-hint="交配式につく品種名（例: 特定の親で作られたF1の不特定多数の選抜個体につく名前）">?<span class="type-hint__popup">交配式につく品種名（例: 特定の親で作られたF1の不特定多数の選抜個体につく名前）</span></span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="clone">
               <span data-i18n="type_clone">クローン (Clone)</span>
+              <span class="type-hint" data-hint="特定の個体についた品種名（selfやF個体等の画像掲載可能）">?<span class="type-hint__popup">特定の個体についた品種名（selfやF個体等の画像掲載可能）</span></span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="seedling">
               <span data-i18n="type_seedling">実生 (Seedling)</span>
+              <span class="type-hint" data-hint="趣味家の播種記録公開用">?<span class="type-hint__popup">趣味家の播種記録公開用</span></span>
             </label>
+          </div>
+          <!-- Species sub-category chips (shown only when species is selected) -->
+          <div id="species-subcategory" class="species-subcategory" style="display:none;">
+            <label class="form-label text-sm" style="margin-bottom:var(--space-xs);">分類詳細</label>
+            <div class="chips">
+              <span class="chip active" data-subcategory="species">原種</span>
+              <span class="chip" data-subcategory="sp">sp.</span>
+              <span class="chip" data-subcategory="ssp">ssp.</span>
+              <span class="chip" data-subcategory="cf">cf.</span>
+              <span class="chip" data-subcategory="aff">aff.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -440,6 +455,7 @@
           <div class="upload-area__hint">最大3枚, JPG/PNG, 各20MB以下（自動圧縮）</div>
         </div>
         <div class="upload-preview" id="contribute-preview"></div>
+        <p id="clone-image-hint" class="text-sm text-muted" style="display:none; margin-top:var(--space-sm);">※ 画像投稿はself等も記載可能。選択と株を記載したSNSリンクがあれば記入してください。</p>
       </div>
 
       <!-- Origin story — structured fields per type -->
@@ -1768,6 +1784,12 @@
           html += '<span class="chip" data-i18n="sort_trust">信頼度順</span>';
           html += '<span class="chip" data-i18n="sort_newest">新着順</span>';
           html += '</div>';
+          html += '<div class="chips filter-chips">';
+          html += '<span class="chip filter-chip active" data-filter-type="all" data-i18n="filter_all_type">すべて</span>';
+          html += '<span class="chip filter-chip" data-filter-type="species" data-i18n="filter_species">原種</span>';
+          html += '<span class="chip filter-chip" data-filter-type="hybrid" data-i18n="filter_hybrid">Hybrid</span>';
+          html += '<span class="chip filter-chip" data-filter-type="clone" data-i18n="filter_clone">Clone</span>';
+          html += '</div>';
           html += '<a href="#" class="btn btn--primary btn--sm" data-nav="contribute" data-genus="' + g.name + '" data-i18n="add_cultivar" style="margin-left:auto;">+ 品種を追加</a>';
           html += '</div>';
 
@@ -2068,7 +2090,7 @@
               p_type: meta.type || 'Hybrid',
               p_origins: originsData,
               p_edit_key_hash: editKeyHash,
-              p_ai_status: (meta.type === 'species' && !window._aiAutofillUsed) ? 'pending' : (meta.type === 'species' ? 'completed' : null),
+              p_ai_status: meta.type === 'species' ? 'completed' : null,
               p_created_ip: userIp,
               p_user_id: window._currentUser ? window._currentUser.id : null
             });
@@ -2088,15 +2110,15 @@
             try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
             saved[fullName] = { entry: entry, meta: meta };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-            // Trigger AI research (species only, skip if AI autofill was already used)
+            // Trigger AI research for non-species types only
+            // Species uses the AI auto-fill button before registration instead
             var isSpecies = meta.type === 'species';
-            if (isSpecies && !window._aiAutofillUsed) {
+            if (!isSpecies) {
               var insertedId = rpcResult && rpcResult.id;
               if (insertedId) {
                 var manualOrigins = (entry.origins || []).filter(function(o) {
                   return o.source_type === 'manual' || (o.author && o.author.isAI === false);
                 });
-                // Extract user text and sources for CLONE/hybrid verification
                 var userText = '';
                 var userSources = [];
                 if (manualOrigins.length > 0) {
@@ -2308,6 +2330,7 @@
         row.className = 'cultivar-row';
         row.setAttribute('data-nav', 'cultivar');
         row.setAttribute('data-genus', meta.genus.toLowerCase());
+        row.setAttribute('data-type', meta.type);
         if (meta.created_at) row.setAttribute('data-created', meta.created_at);
         var badgeClass = meta.type === 'species' ? 'badge--species' : (meta.type === 'hybrid' ? 'badge--hybrid' : (meta.type === 'seedling' ? 'badge--seedling' : 'badge--clone'));
         var badgeText = meta.type === 'species' ? t('badge_species') : (meta.type === 'hybrid' ? 'Hybrid' : (meta.type === 'seedling' ? 'Seedling' : 'Clone'));
@@ -3100,6 +3123,11 @@
     function renderStructuredOrigin(s) {
       var h = '';
       if (s.origin_type === 'species') {
+        // 分類詳細（サブカテゴリ）
+        if (s.species_subcategory && s.species_subcategory !== 'species') {
+          var subLabels = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
+          h += '<div class="structured-field"><span class="structured-field__label">分類</span><span class="structured-field__value" style="font-style:italic;">' + (subLabels[s.species_subcategory] || s.species_subcategory) + '</span></div>';
+        }
         // 記載情報
         var hasPublication = s.species_name || s.author_name || s.publication_year;
         if (hasPublication) {
@@ -3479,11 +3507,16 @@
       var scope = getActiveView(genusEl);
       var rows = scope.querySelectorAll('.cultivar-row');
       var q = query.toLowerCase().trim();
+      // Get active type filter
+      var activeFilterChip = scope.querySelector('.filter-chip.active');
+      var filterType = activeFilterChip ? activeFilterChip.getAttribute('data-filter-type') : 'all';
       rows.forEach(function(row) {
         var name = row.querySelector('.cultivar-row__name');
         var nameMatch = name && name.textContent.toLowerCase().includes(q);
         var creatorMatch = row.textContent.toLowerCase().includes(q);
-        if (!q || nameMatch || creatorMatch) {
+        var textMatch = !q || nameMatch || creatorMatch;
+        var typeMatch = filterType === 'all' || row.getAttribute('data-type') === filterType;
+        if (textMatch && typeMatch) {
           row.removeAttribute('data-filtered');
         } else {
           row.setAttribute('data-filtered', 'true');
@@ -3819,10 +3852,14 @@
       genusContent.querySelectorAll('[data-genus-view]').forEach(function(v) {
         v.style.display = v.getAttribute('data-genus-view') === view ? '' : 'none';
       });
-      // Reset search and re-paginate for the newly active view
+      // Reset search, type filter, and re-paginate for the newly active view
       var activeView = getActiveView(genusContent);
       var searchInput = activeView.querySelector('.search-bar__input');
       if (searchInput) searchInput.value = '';
+      var filterChips = activeView.querySelectorAll('.filter-chip');
+      filterChips.forEach(function(c) { c.classList.remove('active'); });
+      var allChip = activeView.querySelector('.filter-chip[data-filter-type="all"]');
+      if (allChip) allChip.classList.add('active');
       filterGenusRows(genusContent, '');
       paginateGenus(genusContent, 1);
     });
@@ -4014,6 +4051,10 @@
       sort_name: { jp: '名前順', en: 'By Name' },
       sort_trust: { jp: '信頼度順', en: 'By Trust' },
       sort_newest: { jp: '新着順', en: 'Newest' },
+      filter_all_type: { jp: 'すべて', en: 'All' },
+      filter_species: { jp: '原種', en: 'Species' },
+      filter_hybrid: { jp: 'Hybrid', en: 'Hybrid' },
+      filter_clone: { jp: 'Clone', en: 'Clone' },
       add_cultivar: { jp: '+ 品種を追加', en: '+ Add Cultivar' },
       edit: { jp: '✏️ 編集', en: '✏️ Edit' },
       images: { jp: '画像', en: 'Images' },
@@ -4318,7 +4359,7 @@
     // ========================================
     document.addEventListener('click', function(e) {
       var chip = e.target.closest('.genus-content .chips .chip');
-      if (!chip) return;
+      if (!chip || chip.classList.contains('filter-chip')) return;
       var genusEl = chip.closest('.genus-content');
       if (!genusEl) return;
       var container = genusEl.querySelector('.card[style*="padding:0"]');
@@ -4350,6 +4391,27 @@
       });
 
       rows.forEach(function(row) { container.appendChild(row); });
+      paginateGenus(genusEl, 1);
+    });
+
+    // ========================================
+    // TYPE FILTER FUNCTIONALITY
+    // ========================================
+    document.addEventListener('click', function(e) {
+      var chip = e.target.closest('.genus-content .filter-chip');
+      if (!chip) return;
+      var genusEl = chip.closest('.genus-content');
+      if (!genusEl) return;
+      // Toggle active state within filter chips group
+      var filterChips = chip.closest('.filter-chips');
+      if (filterChips) {
+        filterChips.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
+      }
+      chip.classList.add('active');
+      // Re-apply text search + type filter
+      var searchInput = genusEl.querySelector('.search-bar__input');
+      var query = searchInput ? searchInput.value : '';
+      filterGenusRows(genusEl, query);
       paginateGenus(genusEl, 1);
     });
 
@@ -4544,6 +4606,7 @@
         if (editStructured) {
           if (type === 'species') {
             var v;
+            if (editStructured.species_subcategory) setSubcategory(editStructured.species_subcategory);
             v = document.getElementById('sf-author-name'); if (v) v.value = editStructured.author_name || '';
             v = document.getElementById('sf-publication-year'); if (v) v.value = editStructured.publication_year || '';
             v = document.getElementById('sf-collector'); if (v) v.value = editStructured.collector || '';
@@ -4918,6 +4981,19 @@
         if (cloneFields) cloneFields.style.display = type === 'clone' ? '' : 'none';
         if (hybridFields) hybridFields.style.display = type === 'hybrid' ? '' : 'none';
         if (seedlingFields) seedlingFields.style.display = type === 'seedling' ? '' : 'none';
+        // Show/hide clone image hint
+        var cloneImageHint = document.getElementById('clone-image-hint');
+        if (cloneImageHint) cloneImageHint.style.display = type === 'clone' ? '' : 'none';
+        // Re-render image preview to switch between clone select UI and normal text input
+        if (typeof renderContributePreview === 'function' && document.getElementById('contribute-preview') && document.getElementById('contribute-preview').children.length > 0) {
+          renderContributePreview();
+        }
+        // Show/hide species subcategory chips and reset to default when switching back
+        var subcatContainer = document.getElementById('species-subcategory');
+        if (subcatContainer) {
+          subcatContainer.style.display = type === 'species' ? '' : 'none';
+          if (type === 'species') setSubcategory('species');
+        }
         if (originAiHint) {
           if (type === 'species') { originAiHint.textContent = 'AIが自動で由来を調査します'; originAiHint.style.display = ''; }
           else if (type === 'seedling') { originAiHint.style.display = 'none'; }
@@ -4933,6 +5009,39 @@
       // Initialize: show species fields by default
       var activeType = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
       showTypeFields(activeType ? activeType.value : 'species');
+
+      // Helper: get selected species subcategory
+      function getSelectedSubcategory() {
+        var active = document.querySelector('#species-subcategory .chip.active');
+        return active ? active.getAttribute('data-subcategory') : 'species';
+      }
+
+      // Helper: set species subcategory chip
+      function setSubcategory(value) {
+        document.querySelectorAll('#species-subcategory .chip').forEach(function(c) {
+          c.classList.remove('active');
+          if (c.getAttribute('data-subcategory') === value) c.classList.add('active');
+        });
+      }
+
+      // Type-hint tooltips: mobile tap support & prevent radio toggle
+      document.querySelectorAll('.type-hint').forEach(function(hint) {
+        hint.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          // Close other open hints
+          document.querySelectorAll('.type-hint.active').forEach(function(h) {
+            if (h !== hint) h.classList.remove('active');
+          });
+          hint.classList.toggle('active');
+        });
+      });
+      // Close hints when tapping elsewhere
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.type-hint')) {
+          document.querySelectorAll('.type-hint.active').forEach(function(h) { h.classList.remove('active'); });
+        }
+      });
 
       // AI auto-fill: show/hide button when name changes
       if (contributeName) {
@@ -5122,6 +5231,7 @@
             var f = getActiveFormula(type);
             if (type === 'species') {
               var v;
+              s.species_subcategory = getSelectedSubcategory();
               v = document.getElementById('sf-author-name'); if (v) s.author_name = v.value.trim();
               v = document.getElementById('sf-publication-year'); if (v && v.value) s.publication_year = parseInt(v.value) || null;
               v = document.getElementById('sf-collector'); if (v) s.collector = v.value.trim();
@@ -5166,6 +5276,10 @@
           function generateBodyFromStructured(s) {
             var parts = [];
             if (s.origin_type === 'species') {
+              if (s.species_subcategory && s.species_subcategory !== 'species') {
+                var subLabels = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
+                parts.push('分類: ' + (subLabels[s.species_subcategory] || s.species_subcategory));
+              }
               if (s.author_name) parts.push('発表者: ' + s.author_name + (s.publication_year ? ' (' + s.publication_year + ')' : ''));
               if (s.collector) parts.push('発見者: ' + s.collector + (s.collection_year ? ' (' + s.collection_year + ')' : ''));
               if (s.type_locality) parts.push('採取地: ' + s.type_locality);
@@ -5412,14 +5526,26 @@
               author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
               votes: { agree: 0, disagree: 0 }
             };
-          } else if (!isSeedling) {
-            // AI will fill in later (not for seedlings)
+          } else if (!isSeedling && type !== 'species') {
+            // AI will fill in later (not for seedlings or species)
+            // Species uses the AI auto-fill button before registration
             var origin = {
               trust: 0, trustClass: 'trust--low',
               body: t('ai_pending_origin'),
               structured: structured,
               sources: [],
               author: { isAI: true, name: 'AI (Pending)', date: new Date().toISOString().slice(0, 10) },
+              votes: { agree: 0, disagree: 0 }
+            };
+          } else if (type === 'species') {
+            // Species with no structured content: create empty manual origin
+            var origin = {
+              trust: 30, trustClass: 'trust--low',
+              body: '',
+              structured: structured,
+              source_type: 'manual',
+              sources: [],
+              author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
               votes: { agree: 0, disagree: 0 }
             };
           } else {
@@ -5477,6 +5603,7 @@
                 var row = document.createElement('div');
                 row.className = 'cultivar-row';
                 row.setAttribute('data-nav', 'cultivar');
+                row.setAttribute('data-type', type);
                 var badgeClass = type === 'species' ? 'badge--species' : (type === 'hybrid' ? 'badge--hybrid' : (type === 'seedling' ? 'badge--seedling' : 'badge--clone'));
                 var badgeText = type === 'species' ? t('badge_species') : (type === 'hybrid' ? 'Hybrid' : (type === 'seedling' ? 'Seedling' : 'Clone'));
                 var rowHtml = '<div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>';
@@ -6569,16 +6696,43 @@
 
         function renderContributePreview() {
           contributePreview.innerHTML = '';
+          var checkedType = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
+          var isClone = checkedType && checkedType.value === 'clone';
           contributeImages.forEach(function(src, i) {
             var item = document.createElement('div');
             item.className = 'upload-preview__item';
+            var captionVal = (contributeCaptions[i] || '').replace(/"/g, '&quot;');
+            var captionHtml;
+            if (isClone) {
+              var selVal = 'Clone';
+              var otherVal = '';
+              // Parse existing caption: if it matches a preset, select it; otherwise "その他"
+              if (captionVal === 'Clone' || captionVal === 'self' || captionVal === 'sib') {
+                selVal = captionVal;
+              } else if (captionVal) {
+                selVal = 'other';
+                otherVal = captionVal;
+              }
+              captionHtml =
+                '<div class="clone-caption-group" data-idx="' + i + '">' +
+                  '<select class="form-input clone-caption-select" data-idx="' + i + '" data-field="caption-select">' +
+                    '<option value="Clone"' + (selVal === 'Clone' ? ' selected' : '') + '>Clone</option>' +
+                    '<option value="self"' + (selVal === 'self' ? ' selected' : '') + '>self</option>' +
+                    '<option value="sib"' + (selVal === 'sib' ? ' selected' : '') + '>sib</option>' +
+                    '<option value="other"' + (selVal === 'other' ? ' selected' : '') + '>その他</option>' +
+                  '</select>' +
+                  '<input type="text" class="form-input clone-caption-other" placeholder="例) F2" data-idx="' + i + '" data-field="caption-other" value="' + otherVal + '" style="' + (selVal === 'other' ? '' : 'display:none;') + '">' +
+                '</div>';
+            } else {
+              captionHtml = '<input type="text" placeholder="補足（日付等）" data-idx="' + i + '" data-field="caption" value="' + captionVal + '">';
+            }
             item.innerHTML =
               '<div class="upload-preview__img-wrap">' +
                 '<img class="upload-preview__img" src="' + src + '" data-idx="' + i + '" title="クリックで画像を変更">' +
                 '<button class="upload-preview__remove" data-idx="' + i + '">&times;</button>' +
               '</div>' +
               '<div class="upload-preview__meta">' +
-                '<input type="text" placeholder="補足（日付等）" data-idx="' + i + '" data-field="caption" value="' + (contributeCaptions[i] || '').replace(/"/g, '&quot;') + '">' +
+                captionHtml +
                 '<input type="url" placeholder="リンクURL" data-idx="' + i + '" data-field="link" value="' + (contributeLinkUrls[i] || '').replace(/"/g, '&quot;') + '">' +
               '</div>';
             contributePreview.appendChild(item);
@@ -6609,7 +6763,22 @@
               var idx = parseInt(this.getAttribute('data-idx'));
               var field = this.getAttribute('data-field');
               if (field === 'caption') contributeCaptions[idx] = this.value;
+              else if (field === 'caption-other') contributeCaptions[idx] = this.value;
               else if (field === 'link') contributeLinkUrls[idx] = this.value;
+            });
+          });
+          // Attach clone caption select handlers
+          contributePreview.querySelectorAll('.clone-caption-select').forEach(function(sel) {
+            sel.addEventListener('change', function() {
+              var idx = parseInt(this.getAttribute('data-idx'));
+              var otherInput = this.parentNode.querySelector('.clone-caption-other');
+              if (this.value === 'other') {
+                otherInput.style.display = '';
+                contributeCaptions[idx] = otherInput.value || '';
+              } else {
+                otherInput.style.display = 'none';
+                contributeCaptions[idx] = this.value;
+              }
             });
           });
         }
