@@ -5164,9 +5164,10 @@
         });
       });
 
-      // Exact-match duplicate detection only
+      // Exact-match duplicate detection only (skip in edit mode)
       if (contributeName && duplicateAlert) {
         contributeName.addEventListener('input', function() {
+          if (editMode) { duplicateAlert.style.display = 'none'; return; }
           var inputVal = this.value.trim().toLowerCase();
           if (inputVal.length < 1) { duplicateAlert.style.display = 'none'; return; }
           var genus = contributeGenus ? contributeGenus.value : ((window._generaData && window._generaData[0]) ? window._generaData[0].name : '');
@@ -5236,9 +5237,14 @@
             fullName = genus + " '" + name + "'";
           }
 
-          // Check duplicate (skip in edit mode unless name changed to an existing one)
+          // Check duplicate (skip in edit mode unless name changed to a *different* existing one)
           if (!editMode && cultivarData[fullName]) { showToast(t('error_duplicate'), true); return; }
-          if (editMode && fullName !== editCultivarKey && cultivarData[fullName]) { showToast(t('error_duplicate'), true); return; }
+          if (editMode) {
+            // Normalize both names for comparison (strip quotes/whitespace differences)
+            var normFull = fullName.replace(/'+/g, "'").trim();
+            var normKey = (editCultivarKey || '').replace(/'+/g, "'").trim();
+            if (normFull !== normKey && cultivarData[fullName]) { showToast(t('error_duplicate'), true); return; }
+          }
 
           // ---- Build structured data from form fields ----
           function buildStructuredFromForm(type) {
