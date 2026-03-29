@@ -4139,7 +4139,7 @@
       donate_btn: { jp: '☕ サイトを応援する', en: '☕ Support This Site' },
       upload_error_type: { jp: 'JPGまたはPNG画像のみアップロードできます', en: 'Only JPG or PNG images can be uploaded' },
       upload_error_size: { jp: 'ファイルサイズは20MB以下にしてください', en: 'File size must be 20MB or less' },
-      upload_error_max: { jp: '最大3枚までアップロードできます', en: 'Maximum 3 images can be uploaded' },
+      upload_error_max: { jp: '最大10枚までアップロードできます', en: 'Maximum 10 images can be uploaded' },
       ai_pending_origin: { jp: 'AIによる由来情報の生成待ちです', en: 'Awaiting AI-generated origin information' },
       ai_pending_badge: { jp: 'AI生成待ち', en: 'AI Pending' },
 
@@ -6720,7 +6720,7 @@
 
         function addContributeImage(file) {
           var existingDbCount = contributePreview.querySelectorAll('.upload-preview__item[data-image-id]').length;
-          if (contributeImages.length + existingDbCount >= 3) {
+          if (contributeImages.length + existingDbCount >= 10) {
             showToast(t('upload_error_max'), true);
             return;
           }
