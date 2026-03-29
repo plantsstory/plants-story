@@ -4715,18 +4715,10 @@
                   item.className = 'upload-preview__item';
                   item.setAttribute('data-image-id', img.id);
                   item.setAttribute('data-storage-path', img.storage_path);
-                  var moveHtml = '';
-                  if (editImages.length > 1) {
-                    moveHtml = '<div class="upload-preview__move">';
-                    if (idx > 0) moveHtml += '<button class="upload-preview__move-btn" data-idx="' + idx + '" data-dir="left" title="左へ移動">&#9664;</button>';
-                    if (idx < editImages.length - 1) moveHtml += '<button class="upload-preview__move-btn" data-idx="' + idx + '" data-dir="right" title="右へ移動">&#9654;</button>';
-                    moveHtml += '</div>';
-                  }
                   item.innerHTML =
                     '<div class="upload-preview__img-wrap">' +
                       '<img class="upload-preview__img" src="' + url + '" title="登録済み画像">' +
                       '<button class="upload-preview__remove" data-image-id="' + img.id + '" data-storage-path="' + img.storage_path + '" data-idx="' + idx + '">&times;</button>' +
-                      moveHtml +
                     '</div>' +
                     '<div class="upload-preview__meta">' +
                       '<input type="text" placeholder="補足（日付等）" data-image-id="' + img.id + '" data-field="caption" value="' + (img.caption || '').replace(/"/g, '&quot;') + '">' +
@@ -4766,30 +4758,10 @@
                     });
                   });
                 });
-                // Attach move button handlers
-                previewEl.querySelectorAll('.upload-preview__move-btn').forEach(function(btn) {
-                  btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    var idx = parseInt(this.getAttribute('data-idx'));
-                    var dir = this.getAttribute('data-dir');
-                    var target = dir === 'left' ? idx - 1 : idx + 1;
-                    if (target < 0 || target >= editImages.length) return;
-                    // Swap in local array
-                    var temp = editImages[idx];
-                    editImages[idx] = editImages[target];
-                    editImages[target] = temp;
-                    // Update display_order in DB for both
-                    Promise.all([
-                      _sbForGallery.from('cultivar_images').update({ display_order: idx }).eq('id', editImages[idx].id),
-                      _sbForGallery.from('cultivar_images').update({ display_order: target }).eq('id', editImages[target].id)
-                    ]).then(function() {
-                      renderEditImagePreviews();
-                    }).catch(function(err) {
-                      console.warn('Failed to update display_order:', err);
-                      renderEditImagePreviews();
-                    });
-                  });
-                });
+                // Attach unified move buttons (function defined in gallery IIFE, exposed on window)
+                if (typeof window.attachUnifiedMoveButtons === 'function') {
+                  window.attachUnifiedMoveButtons(previewEl);
+                }
               }
 
               renderEditImagePreviews();
@@ -6737,6 +6709,88 @@
           reader.readAsDataURL(file);
         }
 
+        // Unified move buttons: works across both DB images and new images
+        // Exposed on window so renderEditImagePreviews (defined earlier) can also call it
+        window.attachUnifiedMoveButtons = attachUnifiedMoveButtons;
+        function attachUnifiedMoveButtons(container) {
+          var allItems = Array.from(container.querySelectorAll('.upload-preview__item'));
+          if (allItems.length < 2) return;
+          allItems.forEach(function(item, pos) {
+            // Remove any existing move div
+            var oldMove = item.querySelector('.upload-preview__move');
+            if (oldMove) oldMove.remove();
+            var moveDiv = document.createElement('div');
+            moveDiv.className = 'upload-preview__move';
+            if (pos > 0) {
+              var leftBtn = document.createElement('button');
+              leftBtn.className = 'upload-preview__move-btn';
+              leftBtn.setAttribute('data-pos', pos);
+              leftBtn.setAttribute('data-dir', 'left');
+              leftBtn.title = '左へ移動';
+              leftBtn.innerHTML = '&#9664;';
+              moveDiv.appendChild(leftBtn);
+            }
+            if (pos < allItems.length - 1) {
+              var rightBtn = document.createElement('button');
+              rightBtn.className = 'upload-preview__move-btn';
+              rightBtn.setAttribute('data-pos', pos);
+              rightBtn.setAttribute('data-dir', 'right');
+              rightBtn.title = '右へ移動';
+              rightBtn.innerHTML = '&#9654;';
+              moveDiv.appendChild(rightBtn);
+            }
+            var imgWrap = item.querySelector('.upload-preview__img-wrap');
+            if (imgWrap) imgWrap.appendChild(moveDiv);
+          });
+          // Attach click handlers
+          container.querySelectorAll('.upload-preview__move-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              var pos = parseInt(this.getAttribute('data-pos'));
+              var dir = this.getAttribute('data-dir');
+              var targetPos = dir === 'left' ? pos - 1 : pos + 1;
+              var items = Array.from(container.querySelectorAll('.upload-preview__item'));
+              if (targetPos < 0 || targetPos >= items.length) return;
+              var itemA = items[pos];
+              var itemB = items[targetPos];
+              var isDbA = itemA.hasAttribute('data-image-id');
+              var isDbB = itemB.hasAttribute('data-image-id');
+
+              // Swap DOM positions
+              if (dir === 'left') {
+                container.insertBefore(itemA, itemB);
+              } else {
+                container.insertBefore(itemB, itemA);
+              }
+
+              // Sync underlying data
+              // For DB images: update display_order
+              var sb = window._supabaseClient;
+              if (isDbA && sb) {
+                sb.from('cultivar_images').update({ display_order: targetPos }).eq('id', itemA.getAttribute('data-image-id'));
+              }
+              if (isDbB && sb) {
+                sb.from('cultivar_images').update({ display_order: pos }).eq('id', itemB.getAttribute('data-image-id'));
+              }
+              // For new images: swap in contribute arrays
+              if (!isDbA && !isDbB) {
+                // Both are new images — count DB items to compute array indices
+                var dbCount = container.querySelectorAll('.upload-preview__item[data-image-id]').length;
+                var idxA = pos - dbCount;
+                var idxB = targetPos - dbCount;
+                if (idxA >= 0 && idxB >= 0 && idxA < contributeImages.length && idxB < contributeImages.length) {
+                  [contributeImages[idxA], contributeImages[idxB]] = [contributeImages[idxB], contributeImages[idxA]];
+                  [contributeFiles[idxA], contributeFiles[idxB]] = [contributeFiles[idxB], contributeFiles[idxA]];
+                  [contributeCaptions[idxA], contributeCaptions[idxB]] = [contributeCaptions[idxB], contributeCaptions[idxA]];
+                  [contributeLinkUrls[idxA], contributeLinkUrls[idxB]] = [contributeLinkUrls[idxB], contributeLinkUrls[idxA]];
+                }
+              }
+              // Re-attach move buttons with updated positions
+              attachUnifiedMoveButtons(container);
+            });
+          });
+        }
+
         function renderContributePreview() {
           // Preserve existing DB images (rendered by renderEditImagePreviews) before clearing
           var existingDbItems = Array.from(contributePreview.querySelectorAll('.upload-preview__item[data-image-id]'));
@@ -6773,18 +6827,10 @@
             } else {
               captionHtml = '<input type="text" placeholder="補足（日付等）" data-idx="' + i + '" data-field="caption" value="' + captionVal + '">';
             }
-            var moveHtml = '';
-            if (contributeImages.length > 1) {
-              moveHtml = '<div class="upload-preview__move">';
-              if (i > 0) moveHtml += '<button class="upload-preview__move-btn" data-idx="' + i + '" data-dir="left" title="左へ移動">&#9664;</button>';
-              if (i < contributeImages.length - 1) moveHtml += '<button class="upload-preview__move-btn" data-idx="' + i + '" data-dir="right" title="右へ移動">&#9654;</button>';
-              moveHtml += '</div>';
-            }
             item.innerHTML =
               '<div class="upload-preview__img-wrap">' +
                 '<img class="upload-preview__img" src="' + src + '" data-idx="' + i + '" title="クリックで画像を変更">' +
                 '<button class="upload-preview__remove" data-idx="' + i + '">&times;</button>' +
-                moveHtml +
               '</div>' +
               '<div class="upload-preview__meta">' +
                 captionHtml +
@@ -6836,22 +6882,8 @@
               }
             });
           });
-          // Attach move button handlers (swap adjacent images)
-          contributePreview.querySelectorAll('.upload-preview__move-btn').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-              e.stopPropagation();
-              var idx = parseInt(this.getAttribute('data-idx'));
-              var dir = this.getAttribute('data-dir');
-              var target = dir === 'left' ? idx - 1 : idx + 1;
-              if (target < 0 || target >= contributeImages.length) return;
-              // Swap all 4 arrays
-              [contributeImages[idx], contributeImages[target]] = [contributeImages[target], contributeImages[idx]];
-              [contributeFiles[idx], contributeFiles[target]] = [contributeFiles[target], contributeFiles[idx]];
-              [contributeCaptions[idx], contributeCaptions[target]] = [contributeCaptions[target], contributeCaptions[idx]];
-              [contributeLinkUrls[idx], contributeLinkUrls[target]] = [contributeLinkUrls[target], contributeLinkUrls[idx]];
-              renderContributePreview();
-            });
-          });
+          // Attach unified move buttons across all images (DB + new)
+          attachUnifiedMoveButtons(contributePreview);
         }
 
         // Expose for form reset
