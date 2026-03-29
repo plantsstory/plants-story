@@ -1784,6 +1784,12 @@
           html += '<span class="chip" data-i18n="sort_trust">信頼度順</span>';
           html += '<span class="chip" data-i18n="sort_newest">新着順</span>';
           html += '</div>';
+          html += '<div class="chips filter-chips">';
+          html += '<span class="chip filter-chip active" data-filter-type="all" data-i18n="filter_all_type">すべて</span>';
+          html += '<span class="chip filter-chip" data-filter-type="species" data-i18n="filter_species">原種</span>';
+          html += '<span class="chip filter-chip" data-filter-type="hybrid" data-i18n="filter_hybrid">Hybrid</span>';
+          html += '<span class="chip filter-chip" data-filter-type="clone" data-i18n="filter_clone">Clone</span>';
+          html += '</div>';
           html += '<a href="#" class="btn btn--primary btn--sm" data-nav="contribute" data-genus="' + g.name + '" data-i18n="add_cultivar" style="margin-left:auto;">+ 品種を追加</a>';
           html += '</div>';
 
@@ -2324,6 +2330,7 @@
         row.className = 'cultivar-row';
         row.setAttribute('data-nav', 'cultivar');
         row.setAttribute('data-genus', meta.genus.toLowerCase());
+        row.setAttribute('data-type', meta.type);
         if (meta.created_at) row.setAttribute('data-created', meta.created_at);
         var badgeClass = meta.type === 'species' ? 'badge--species' : (meta.type === 'hybrid' ? 'badge--hybrid' : (meta.type === 'seedling' ? 'badge--seedling' : 'badge--clone'));
         var badgeText = meta.type === 'species' ? t('badge_species') : (meta.type === 'hybrid' ? 'Hybrid' : (meta.type === 'seedling' ? 'Seedling' : 'Clone'));
@@ -3500,11 +3507,16 @@
       var scope = getActiveView(genusEl);
       var rows = scope.querySelectorAll('.cultivar-row');
       var q = query.toLowerCase().trim();
+      // Get active type filter
+      var activeFilterChip = scope.querySelector('.filter-chip.active');
+      var filterType = activeFilterChip ? activeFilterChip.getAttribute('data-filter-type') : 'all';
       rows.forEach(function(row) {
         var name = row.querySelector('.cultivar-row__name');
         var nameMatch = name && name.textContent.toLowerCase().includes(q);
         var creatorMatch = row.textContent.toLowerCase().includes(q);
-        if (!q || nameMatch || creatorMatch) {
+        var textMatch = !q || nameMatch || creatorMatch;
+        var typeMatch = filterType === 'all' || row.getAttribute('data-type') === filterType;
+        if (textMatch && typeMatch) {
           row.removeAttribute('data-filtered');
         } else {
           row.setAttribute('data-filtered', 'true');
@@ -3840,10 +3852,14 @@
       genusContent.querySelectorAll('[data-genus-view]').forEach(function(v) {
         v.style.display = v.getAttribute('data-genus-view') === view ? '' : 'none';
       });
-      // Reset search and re-paginate for the newly active view
+      // Reset search, type filter, and re-paginate for the newly active view
       var activeView = getActiveView(genusContent);
       var searchInput = activeView.querySelector('.search-bar__input');
       if (searchInput) searchInput.value = '';
+      var filterChips = activeView.querySelectorAll('.filter-chip');
+      filterChips.forEach(function(c) { c.classList.remove('active'); });
+      var allChip = activeView.querySelector('.filter-chip[data-filter-type="all"]');
+      if (allChip) allChip.classList.add('active');
       filterGenusRows(genusContent, '');
       paginateGenus(genusContent, 1);
     });
@@ -4035,6 +4051,10 @@
       sort_name: { jp: '名前順', en: 'By Name' },
       sort_trust: { jp: '信頼度順', en: 'By Trust' },
       sort_newest: { jp: '新着順', en: 'Newest' },
+      filter_all_type: { jp: 'すべて', en: 'All' },
+      filter_species: { jp: '原種', en: 'Species' },
+      filter_hybrid: { jp: 'Hybrid', en: 'Hybrid' },
+      filter_clone: { jp: 'Clone', en: 'Clone' },
       add_cultivar: { jp: '+ 品種を追加', en: '+ Add Cultivar' },
       edit: { jp: '✏️ 編集', en: '✏️ Edit' },
       images: { jp: '画像', en: 'Images' },
@@ -4339,7 +4359,7 @@
     // ========================================
     document.addEventListener('click', function(e) {
       var chip = e.target.closest('.genus-content .chips .chip');
-      if (!chip) return;
+      if (!chip || chip.classList.contains('filter-chip')) return;
       var genusEl = chip.closest('.genus-content');
       if (!genusEl) return;
       var container = genusEl.querySelector('.card[style*="padding:0"]');
@@ -4371,6 +4391,27 @@
       });
 
       rows.forEach(function(row) { container.appendChild(row); });
+      paginateGenus(genusEl, 1);
+    });
+
+    // ========================================
+    // TYPE FILTER FUNCTIONALITY
+    // ========================================
+    document.addEventListener('click', function(e) {
+      var chip = e.target.closest('.genus-content .filter-chip');
+      if (!chip) return;
+      var genusEl = chip.closest('.genus-content');
+      if (!genusEl) return;
+      // Toggle active state within filter chips group
+      var filterChips = chip.closest('.filter-chips');
+      if (filterChips) {
+        filterChips.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
+      }
+      chip.classList.add('active');
+      // Re-apply text search + type filter
+      var searchInput = genusEl.querySelector('.search-bar__input');
+      var query = searchInput ? searchInput.value : '';
+      filterGenusRows(genusEl, query);
       paginateGenus(genusEl, 1);
     });
 
@@ -5562,6 +5603,7 @@
                 var row = document.createElement('div');
                 row.className = 'cultivar-row';
                 row.setAttribute('data-nav', 'cultivar');
+                row.setAttribute('data-type', type);
                 var badgeClass = type === 'species' ? 'badge--species' : (type === 'hybrid' ? 'badge--hybrid' : (type === 'seedling' ? 'badge--seedling' : 'badge--clone'));
                 var badgeText = type === 'species' ? t('badge_species') : (type === 'hybrid' ? 'Hybrid' : (type === 'seedling' ? 'Seedling' : 'Clone'));
                 var rowHtml = '<div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>';
