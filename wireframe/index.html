@@ -6719,7 +6719,8 @@
         });
 
         function addContributeImage(file) {
-          if (contributeImages.length >= 3) {
+          var existingDbCount = contributePreview.querySelectorAll('.upload-preview__item[data-image-id]').length;
+          if (contributeImages.length + existingDbCount >= 3) {
             showToast(t('upload_error_max'), true);
             return;
           }
@@ -6737,7 +6738,11 @@
         }
 
         function renderContributePreview() {
+          // Preserve existing DB images (rendered by renderEditImagePreviews) before clearing
+          var existingDbItems = Array.from(contributePreview.querySelectorAll('.upload-preview__item[data-image-id]'));
           contributePreview.innerHTML = '';
+          // Re-append existing DB images first
+          existingDbItems.forEach(function(el) { contributePreview.appendChild(el); });
           var checkedType = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
           var isClone = checkedType && checkedType.value === 'clone';
           contributeImages.forEach(function(src, i) {
