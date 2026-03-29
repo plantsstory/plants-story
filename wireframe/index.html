@@ -3373,7 +3373,7 @@
       // Short name for breadcrumb
       var shortName = cultivarName.replace(' [Seedling]', '').replace(genusName + ' ', '').replace(/'/g, '');
 
-      // Get badge info from row
+      // Get badge info from row, or fallback to cultivarData._type
       var badgeEl = rowEl ? rowEl.querySelector('.badge') : null;
       var badgeClass = 'badge--species';
       var badgeText = '原種 / Original Species';
@@ -3384,6 +3384,19 @@
           badgeClass = 'badge--clone'; badgeText = 'Clone';
         } else if (badgeEl.classList.contains('badge--seedling')) {
           badgeClass = 'badge--seedling'; badgeText = 'Seedling';
+        }
+      } else {
+        // No row element (e.g. direct navigation from profile) — detect type from cultivarData
+        var _tempData = cultivarData[cultivarName] || cultivarData[cultivarName + ' [Seedling]'];
+        if (!_tempData) {
+          Object.keys(cultivarData).forEach(function(k) {
+            if (!_tempData && k.replace(' [Seedling]', '') === cultivarName) _tempData = cultivarData[k];
+          });
+        }
+        if (_tempData && _tempData._type) {
+          if (_tempData._type === 'hybrid') { badgeClass = 'badge--hybrid'; badgeText = 'Hybrid'; }
+          else if (_tempData._type === 'clone') { badgeClass = 'badge--clone'; badgeText = 'Clone'; }
+          else if (_tempData._type === 'seedling') { badgeClass = 'badge--seedling'; badgeText = 'Seedling'; }
         }
       }
 
@@ -4540,6 +4553,17 @@
           });
         }
         if (!data || !key) return;
+        // If this is a seedling, ensure key includes [Seedling] suffix (DB stores it that way)
+        if (data._type === 'seedling' && key.indexOf('[Seedling]') === -1) {
+          var seedlingKey = key + ' [Seedling]';
+          if (cultivarData[seedlingKey]) {
+            key = seedlingKey;
+          } else {
+            // Also register under the [Seedling] key for consistency
+            cultivarData[seedlingKey] = data;
+            key = seedlingKey;
+          }
+        }
 
         editMode = true;
         editCultivarKey = key;
