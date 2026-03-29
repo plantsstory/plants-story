@@ -3731,12 +3731,15 @@
           navOptions.genus = genus.toLowerCase();
         }
 
+        // If navigating to contribute in edit mode, set _editFlow to prevent exitEditMode
+        var isEditNav = page === 'contribute' && navEl.getAttribute('data-edit') === 'true';
+        if (isEditNav) navOptions._editFlow = true;
+
         navigateTo(page, navOptions);
 
         // Pre-select genus if coming from genus page, otherwise reset to placeholder
         if (page === 'contribute') {
-          var isEditMode = navEl.getAttribute('data-edit') === 'true';
-          if (isEditMode) {
+          if (isEditNav) {
             // Get current cultivar name from the detail page h1
             var detailH1 = document.querySelector('#page-cultivar h1');
             var editCultivarName = detailH1 ? detailH1.textContent : '';
