@@ -5504,8 +5504,9 @@
               return updatePromise.then(function() {
                 // Upload gallery images if any (use same uploadGalleryImage as new registration)
                 if (editGalleryFiles.length > 0 && typeof window.uploadGalleryImage === 'function') {
+                  var existingDbCount = document.querySelectorAll('#contribute-preview .upload-preview__item[data-image-id]').length;
                   return Promise.all(editGalleryFiles.map(function(file, fi) {
-                    return window.uploadGalleryImage(file, editGalleryName, editGalleryCaptions[fi] || '', editGalleryLinkUrls[fi] || '').catch(function(err) {
+                    return window.uploadGalleryImage(file, editGalleryName, editGalleryCaptions[fi] || '', editGalleryLinkUrls[fi] || '', existingDbCount + fi).catch(function(err) {
                       console.warn('Gallery image upload failed:', file.name, err);
                       return null;
                     });
@@ -6804,17 +6805,21 @@
               }
 
               // Sync underlying data
-              // For DB images: update display_order
               var sb = window._supabaseClient;
-              if (isDbA && sb) {
-                sb.from('cultivar_images').update({ display_order: targetPos }).eq('id', itemA.getAttribute('data-image-id'));
+
+              // Update display_order for ALL DB images to match current DOM order
+              if (sb) {
+                var allAfterSwap = Array.from(container.querySelectorAll('.upload-preview__item'));
+                allAfterSwap.forEach(function(el, i) {
+                  if (el.hasAttribute('data-image-id')) {
+                    sb.from('cultivar_images').update({ display_order: i }).eq('id', el.getAttribute('data-image-id'))
+                      .then(function(res) { if (res.error) console.warn('display_order update failed:', res.error); });
+                  }
+                });
               }
-              if (isDbB && sb) {
-                sb.from('cultivar_images').update({ display_order: pos }).eq('id', itemB.getAttribute('data-image-id'));
-              }
+
               // For new images: swap in contribute arrays
               if (!isDbA && !isDbB) {
-                // Both are new images — count DB items to compute array indices
                 var dbCount = container.querySelectorAll('.upload-preview__item[data-image-id]').length;
                 var idxA = pos - dbCount;
                 var idxB = targetPos - dbCount;
