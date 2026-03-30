@@ -652,81 +652,86 @@
 /* ========================================
    VOTE BUTTONS — Cleaner
    ======================================== */
+/* ========================================
+   UNIFIED VOTE BUTTONS (Image & Origin)
+   ======================================== */
 .vote-group {
   display: flex;
   gap: var(--space-sm);
 }
 
 .vote-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: var(--space-xs);
-  padding: 6px 14px;
-  border: 1.5px solid var(--color-light);
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-sm);
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-light);
   background: var(--color-white);
   cursor: pointer;
   transition: all var(--transition);
+  color: var(--color-gray);
 }
 
 .vote-btn:hover {
   border-color: var(--color-primary);
+  background: var(--color-lighter);
+  color: var(--color-primary);
 }
 
-.vote-btn--agree:hover {
+.vote-btn--down:hover {
+  border-color: var(--color-danger);
+  background: var(--color-lighter);
+  color: var(--color-danger);
+}
+
+.vote-btn--active {
+  background: #e8f5e9;
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
 
-.vote-btn--disagree:hover {
+.vote-btn--active-down {
+  background: #fce4ec;
   border-color: var(--color-danger);
   color: var(--color-danger);
 }
 
-.vote-btn.voted {
-  background: var(--color-primary);
+.vote-btn:active {
+  transform: scale(0.93);
+}
+
+.vote-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.vote-btn__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--color-gray);
   color: var(--color-white);
-  border-color: var(--color-primary);
-}
-
-.vote-btn__count {
+  font-size: 0.6rem;
   font-weight: 700;
-}
-
-/* ========================================
-   IMAGE AUTHENTICITY VOTE
-   ======================================== */
-.auth-vote {
-  display: flex;
-  gap: var(--space-xs);
-  margin-top: var(--space-sm);
-}
-
-.auth-btn {
-  flex: 1;
-  padding: var(--space-xs) var(--space-sm);
-  text-align: center;
-  border: 1px solid var(--color-light);
+  min-width: 16px;
+  height: 16px;
   border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
-  cursor: pointer;
-  background: var(--color-white);
-  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
 }
 
-.auth-btn:hover {
-  border-color: var(--color-primary);
-}
-
-.auth-btn--active {
-  border-color: var(--color-primary);
+.vote-btn--active .vote-btn__badge {
   background: var(--color-primary);
-  color: var(--color-white);
 }
 
-.auth-btn__count {
-  font-weight: 700;
+.vote-btn--active-down .vote-btn__badge {
+  background: var(--color-danger);
 }
 
 /* ========================================
