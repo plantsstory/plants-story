@@ -5366,11 +5366,18 @@
               if (o._type === 'formula') return o;
               if (!foundOrigin) {
                 foundOrigin = true;
-                return Object.assign({}, o, {
+                var hasUserInput = autoBody || (structured.notes && structured.notes.trim());
+                var updatedOrigin = Object.assign({}, o, {
                   body: autoBody || o.body,
                   structured: structured,
                   sources: updatedSources.length > 0 ? updatedSources : o.sources
                 });
+                // ユーザーが内容を入力した場合、manualとしてマーク（AI再調査時の上書き防止）
+                if (hasUserInput) {
+                  updatedOrigin.source_type = 'manual';
+                  updatedOrigin.author = { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) };
+                }
+                return updatedOrigin;
               }
               return o;
             });
