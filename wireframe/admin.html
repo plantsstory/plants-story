@@ -1730,6 +1730,12 @@ function renderImageGrid() {
           '<span>Real: ' + (img.real_votes || 0) + '</span>' +
           '<span>Fake: ' + (img.fake_votes || 0) + '</span>' +
         '</div>' +
+        '<div style="margin:4px 0;">' +
+          '<input type="text" placeholder="補足（日付等）" value="' + escapeHtml(img.caption || '') + '" data-img-field="caption" data-img-id="' + img.id + '" style="width:100%;font-size:0.75rem;padding:3px 6px;border:1px solid var(--color-light);border-radius:4px;box-sizing:border-box;">' +
+        '</div>' +
+        '<div style="margin:4px 0;">' +
+          '<input type="url" placeholder="リンクURL" value="' + escapeHtml(img.link_url || '') + '" data-img-field="link_url" data-img-id="' + img.id + '" style="width:100%;font-size:0.75rem;padding:3px 6px;border:1px solid var(--color-light);border-radius:4px;box-sizing:border-box;">' +
+        '</div>' +
         '<div style="color:var(--color-gray);font-size:0.75rem;">' + (img.created_at ? new Date(img.created_at).toLocaleDateString('ja') : '') + '</div>' +
         '<div style="color:var(--color-gray);font-size:0.7rem;font-family:monospace;">IP: ' + escapeHtml(img.created_ip || '-') + '</div>' +
         '<button class="btn btn-sm" style="margin-top:6px;color:#c62828;border-color:#c62828;width:100%;" data-delete-image="' + img.id + '" data-storage-path="' + escapeHtml(img.storage_path) + '">削除</button>' +
@@ -1788,6 +1794,29 @@ document.getElementById('image-grid').addEventListener('click', async function(e
     toast('削除エラー: ' + (err.message || err));
     btn.disabled = false;
     btn.textContent = '削除';
+  }
+});
+
+// Save caption/link_url on blur
+document.getElementById('image-grid').addEventListener('focusout', async function(e) {
+  var inp = e.target.closest('[data-img-field]');
+  if (!inp) return;
+  var field = inp.getAttribute('data-img-field');
+  var imageId = inp.getAttribute('data-img-id');
+  var val = inp.value.trim() || null;
+  // Update local data
+  var imgObj = allImages.find(function(i) { return String(i.id) === String(imageId); });
+  if (imgObj && imgObj[field] === val) return; // no change
+  if (imgObj) imgObj[field] = val;
+  var updates = {};
+  updates[field] = val;
+  var res = await sb.from('cultivar_images').update(updates).eq('id', imageId);
+  if (res.error) {
+    toast(field + ' 保存エラー: ' + res.error.message);
+    inp.style.borderColor = '#c62828';
+  } else {
+    inp.style.borderColor = '#4caf50';
+    setTimeout(function() { inp.style.borderColor = ''; }, 1500);
   }
 });
 
