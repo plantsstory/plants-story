@@ -3492,6 +3492,22 @@
       var addPhotoBtn = document.getElementById('detail-add-photo-btn');
       if (addPhotoBtn) addPhotoBtn.style.display = isSeedlingDetail ? 'none' : '';
 
+      // Disable empty state glass card click for seedlings
+      var emptyGlassEl = document.querySelector('.gallery__empty-glass');
+      if (emptyGlassEl) {
+        if (isSeedlingDetail) {
+          emptyGlassEl.style.pointerEvents = 'none';
+          emptyGlassEl.style.cursor = 'default';
+          var emptyText = emptyGlassEl.querySelector('.gallery__empty-text');
+          if (emptyText) emptyText.textContent = '画像はまだありません';
+        } else {
+          emptyGlassEl.style.pointerEvents = '';
+          emptyGlassEl.style.cursor = '';
+          var emptyText = emptyGlassEl.querySelector('.gallery__empty-text');
+          if (emptyText) emptyText.textContent = '画像を投稿';
+        }
+      }
+
       // If logged-in user owns this cultivar, hide edit key input
       var editKeySection = document.getElementById('edit-key-section');
       var detailEditKeyInput = document.getElementById('detail-edit-key');
@@ -6597,6 +6613,14 @@
       var detailAddPhotoBtn = document.getElementById('detail-add-photo-btn');
       if (detailAddPhotoBtn && galleryInput) {
         detailAddPhotoBtn.addEventListener('click', function() {
+          galleryInput.click();
+        });
+      }
+
+      // Empty state glass card click → trigger file upload (non-seedling only)
+      var emptyGlass = document.querySelector('.gallery__empty-glass');
+      if (emptyGlass && galleryInput) {
+        emptyGlass.addEventListener('click', function() {
           galleryInput.click();
         });
       }
