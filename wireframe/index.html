@@ -2346,7 +2346,6 @@
 
       // Trigger AI research for a cultivar
       function triggerAIResearch(cultivarId, genus, cultivarName, type, manualOrigins, userText, userSources) {
-        console.log('Triggering AI research for:', cultivarName);
         var payload = {
           cultivar_id: cultivarId,
           genus: genus,
@@ -2373,7 +2372,6 @@
           body: JSON.stringify(payload)
         }).then(function(res) { return res.json(); })
         .then(function(data) {
-          console.log('AI research result:', data);
           if (data.success) {
             // Refresh the cultivar data from DB
             refreshCultivarFromDB(cultivarId, cultivarName);
