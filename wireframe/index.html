@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/utilities.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Varela+Round&family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -33,7 +34,7 @@
       <a class="header__logo" data-nav="top">ひなたぼっこぷらんつ<br><span class="header__logo-sub">- Plants Story -</span></a>
       <div class="header__actions">
         <button class="header__lang" data-i18n="lang_toggle">EN / JP</button>
-        <a id="header-profile-btn" href="#" class="header__btn" style="display:none;">プロフィール</a>
+        <a id="header-profile-btn" href="#" class="header__btn d-none">プロフィール</a>
         <button class="header__auth-btn header__btn" id="header-auth-btn" type="button">ログイン</button>
         <button class="header__hamburger" id="hamburger" aria-label="Menu">
           <span></span><span></span><span></span>
@@ -47,9 +48,9 @@
     <a href="#" data-nav="top" data-i18n="nav_home">&#x1F3E0; Home</a>
     <span id="mobile-nav-genera"></span>
     <a href="#" data-nav="favorites" data-i18n="nav_favorites">&#x2606; お気に入り</a>
-    <a href="#" data-nav="mypost" id="nav-mypost" style="display:none;">&#x1F4DD; 投稿履歴</a>
-    <a href="#" id="nav-profile" style="display:none;" onclick="document.getElementById('mobileNav').classList.remove('open');">&#x1F464; プロフィール</a>
-    <div style="border-top:1px solid rgba(255,255,255,0.15);margin-top:var(--space-sm);padding-top:var(--space-sm);">
+    <a href="#" data-nav="mypost" id="nav-mypost" class="d-none">&#x1F4DD; 投稿履歴</a>
+    <a href="#" id="nav-profile" class="d-none" onclick="document.getElementById('mobileNav').classList.remove('open');">&#x1F464; プロフィール</a>
+    <div class="mt-sm" style="border-top:1px solid rgba(255,255,255,0.15);padding-top:var(--space-sm);">
       <a href="#" id="nav-auth" onclick="event.preventDefault();document.getElementById('header-auth-btn').click();document.getElementById('mobileNav').classList.remove('open');">&#x1F511; ログイン</a>
     </div>
   </div>
@@ -83,7 +84,7 @@
       <div class="mt-2xl">
         <h2 class="section-title text-center" data-i18n="browse_genus">属から探す</h2>
         <div class="grid grid--3" id="genus-cards-grid">
-          <div class="text-center text-muted" style="grid-column:1/-1;">読み込み中...</div>
+          <div class="text-center text-muted grid-full">読み込み中...</div>
         </div>
         <div class="text-center mt-lg">
           <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="add_cultivar">+ 品種を追加</a>
@@ -94,7 +95,7 @@
       <div class="mt-2xl">
         <h2 class="section-title" data-i18n="recently_added">最近追加された品種</h2>
         <div class="grid grid--3" id="recently-added-grid">
-          <div class="text-center text-muted" style="grid-column:1/-1;padding:var(--space-xl);">読み込み中...</div>
+          <div class="text-center text-muted grid-full p-xl">読み込み中...</div>
         </div>
       </div>
 
@@ -146,7 +147,7 @@
 
       <div id="genus-sections-container">
         <!-- Genus content sections are dynamically generated from genera table -->
-        <div class="text-center text-muted" style="padding:var(--space-xl);">読み込み中...</div>
+        <div class="text-center text-muted p-xl">読み込み中...</div>
       </div>
 
     </div>
@@ -179,14 +180,14 @@
             <span class="text-sm" id="detail-poster-name" style="margin-left:4px;"></span>
           </div>
         </div>
-        <div class="flex gap-sm flex-align-center flex-wrap" style="margin-top:var(--space-sm);">
-          <button id="fav-btn" class="btn btn--sm btn--secondary" style="font-size:0.8rem;cursor:pointer;white-space:nowrap;" title="お気に入り">&#x2606; お気に入り追加</button>
+        <div class="flex gap-sm flex-align-center flex-wrap mt-sm">
+          <button id="fav-btn" class="btn btn--sm btn--secondary cursor-pointer" style="font-size:0.8rem;white-space:nowrap;" title="お気に入り">&#x2606; お気に入り追加</button>
           <div class="flex gap-sm flex-align-center" id="edit-key-section">
             <input type="password" id="detail-edit-key" class="form-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="編集キー" style="width:100px;padding:4px 8px;font-size:0.85rem;">
             <button class="btn btn--secondary btn--sm" id="detail-edit-btn" style="font-size:0.8rem;">&#x270F; 編集</button>
           </div>
-          <button class="btn btn--sm btn--secondary" id="detail-add-photo-btn" style="font-size:0.8rem;cursor:pointer;">&#x1F4F7; 画像追加</button>
-          <button class="btn btn--sm" id="detail-delete-request-btn" style="color:#dc3545;border-color:#dc3545;border:1px solid #dc3545;background:transparent;font-size:0.8rem;cursor:pointer;">&#x1F5D1; 削除依頼</button>
+          <button class="btn btn--sm btn--secondary cursor-pointer" id="detail-add-photo-btn" style="font-size:0.8rem;">&#x1F4F7; 画像追加</button>
+          <button class="btn btn--sm cursor-pointer" id="detail-delete-request-btn" style="color:#dc3545;border-color:#dc3545;border:1px solid #dc3545;background:transparent;font-size:0.8rem;">&#x1F5D1; 削除依頼</button>
         </div>
       </div>
 
@@ -194,7 +195,7 @@
       <div class="mb-lg">
         <h2 class="section-title" data-i18n="images">画像</h2>
         <div class="gallery-carousel" id="gallery-carousel">
-          <button class="gallery-carousel__arrow gallery-carousel__arrow--left" id="gallery-prev" style="display:none;">&#x2039;</button>
+          <button class="gallery-carousel__arrow gallery-carousel__arrow--left d-none" id="gallery-prev">&#x2039;</button>
           <div class="gallery-carousel__viewport">
             <div class="gallery">
               <div class="gallery__empty">
@@ -207,16 +208,16 @@
                 </div>
               </div>
               <div class="gallery__upload" id="gallery-upload">
-                <input type="file" id="gallery-file-input" accept="image/jpeg,image/png" style="display:none">
+                <input type="file" id="gallery-file-input" accept="image/jpeg,image/png" class="d-none">
                 <div class="upload-area__icon">&#x2B06;</div>
                 <div class="upload-area__text" data-i18n="upload_image">画像をアップロード</div>
                 <div class="upload-area__hint">JPG/PNG, 20MB以下（自動圧縮）</div>
               </div>
             </div>
           </div>
-          <button class="gallery-carousel__arrow gallery-carousel__arrow--right" id="gallery-next" style="display:none;">&#x203A;</button>
+          <button class="gallery-carousel__arrow gallery-carousel__arrow--right d-none" id="gallery-next">&#x203A;</button>
         </div>
-        <div class="gallery-carousel__counter" id="gallery-counter" style="display:none;"></div>
+        <div class="gallery-carousel__counter d-none" id="gallery-counter"></div>
         <p class="text-xs text-gray mt-sm" data-i18n="image_policy">
           ※ Fake投票が多い画像は自動削除されます。削除依頼は即時対応します。
         </p>
@@ -235,11 +236,11 @@
           </div>
 
           <!-- Inline origin form (hidden by default) -->
-          <div id="add-origin-form" style="display:none;">
+          <div id="add-origin-form" class="d-none">
             <h3 class="text-lg font-bold mb-md" data-i18n="add_origin_title">由来を追加</h3>
 
             <!-- Species inline fields -->
-            <div id="ao-species-fields" style="display:none;">
+            <div id="ao-species-fields" class="d-none">
               <div class="structured-fieldset">
                 <div class="structured-fieldset__legend">記載情報</div>
                 <div class="structured-form-grid">
@@ -259,7 +260,7 @@
             </div>
 
             <!-- Clone inline fields -->
-            <div id="ao-clone-fields" style="display:none;">
+            <div id="ao-clone-fields" class="d-none">
               <div class="structured-form-grid">
                 <div class="form-group"><label class="form-label">名付けた人物</label><input type="text" id="ao-clone-namer" class="form-input"></div>
                 <div class="form-group"><label class="form-label">名付けた年</label><input type="number" id="ao-clone-naming-year" class="form-input"></div>
@@ -267,15 +268,15 @@
               <div class="form-group">
                 <label class="form-label">交配式</label>
                 <div class="formula-box">
-                  <input type="text" class="form-input" id="ao-clone-parentA" placeholder="Parent A" style="flex:1;">
+                  <input type="text" class="form-input flex-1" id="ao-clone-parentA" placeholder="Parent A">
                   <span class="formula-operator">&times;</span>
-                  <input type="text" class="form-input" id="ao-clone-parentB" placeholder="Parent B" style="flex:1;">
+                  <input type="text" class="form-input flex-1" id="ao-clone-parentB" placeholder="Parent B">
                 </div>
               </div>
             </div>
 
             <!-- Hybrid inline fields -->
-            <div id="ao-hybrid-fields" style="display:none;">
+            <div id="ao-hybrid-fields" class="d-none">
               <div class="structured-form-grid">
                 <div class="form-group"><label class="form-label">作出者</label><input type="text" id="ao-hybrid-breeder" class="form-input"></div>
                 <div class="form-group"><label class="form-label">名付けた年</label><input type="number" id="ao-hybrid-naming-year" class="form-input"></div>
@@ -283,15 +284,15 @@
               <div class="form-group">
                 <label class="form-label">交配式</label>
                 <div class="formula-box">
-                  <input type="text" class="form-input" id="ao-hybrid-parentA" placeholder="Parent A" style="flex:1;">
+                  <input type="text" class="form-input flex-1" id="ao-hybrid-parentA" placeholder="Parent A">
                   <span class="formula-operator">&times;</span>
-                  <input type="text" class="form-input" id="ao-hybrid-parentB" placeholder="Parent B" style="flex:1;">
+                  <input type="text" class="form-input flex-1" id="ao-hybrid-parentB" placeholder="Parent B">
                 </div>
               </div>
             </div>
 
             <!-- Seedling inline fields -->
-            <div id="ao-seedling-fields" style="display:none;">
+            <div id="ao-seedling-fields" class="d-none">
               <div class="structured-form-grid">
                 <div class="form-group"><label class="form-label">作出者</label><input type="text" id="ao-seedling-breeder" class="form-input"></div>
                 <div class="form-group"><label class="form-label">播種日</label><input type="date" id="ao-sowing-date" class="form-input"></div>
@@ -299,9 +300,9 @@
               <div class="form-group">
                 <label class="form-label">交配式</label>
                 <div class="formula-box">
-                  <input type="text" class="form-input" id="ao-seedling-parentA" placeholder="Parent A" style="flex:1;">
+                  <input type="text" class="form-input flex-1" id="ao-seedling-parentA" placeholder="Parent A">
                   <span class="formula-operator">&times;</span>
-                  <input type="text" class="form-input" id="ao-seedling-parentB" placeholder="Parent B" style="flex:1;">
+                  <input type="text" class="form-input flex-1" id="ao-seedling-parentB" placeholder="Parent B">
                 </div>
               </div>
             </div>
@@ -316,7 +317,7 @@
             <div class="form-group">
               <label class="form-label" data-i18n="label_sources">引用リンク</label>
               <div class="flex gap-sm mb-sm">
-                <input type="url" class="form-input" placeholder="https://..." style="flex:1;">
+                <input type="url" class="form-input flex-1" placeholder="https://...">
                 <button class="btn btn--secondary">+ 追加</button>
               </div>
             </div>
@@ -362,10 +363,10 @@
 
       <!-- Login benefits card -->
       <div id="login-benefits-card" class="card mb-lg" style="background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border:1px solid #c8e6c9;">
-        <div id="login-benefits-content" style="display:flex;align-items:center;gap:var(--space-md);flex-wrap:wrap;">
-          <div style="flex:1;min-width:200px;">
+        <div id="login-benefits-content" class="flex-center-md flex-wrap">
+          <div class="flex-1" style="min-width:200px;">
             <h3 style="margin:0 0 var(--space-xs);font-size:var(--font-size-base);">Googleでログインすると</h3>
-            <ul style="margin:0;padding-left:1.2em;font-size:var(--font-size-sm);color:var(--color-gray);">
+            <ul class="desc-text" style="margin:0;padding-left:1.2em;">
               <li>編集キーなしでいつでも投稿を編集可能</li>
               <li>自分の投稿履歴を確認できます</li>
             </ul>
@@ -375,10 +376,10 @@
             Googleでログイン
           </button>
         </div>
-        <div id="logged-in-info" style="display:none;">
-          <div style="flex:1;min-width:200px;">
+        <div id="logged-in-info" class="d-none">
+          <div class="flex-1" style="min-width:200px;">
             <p style="margin:0;font-size:var(--font-size-sm);">ログイン中: <strong id="logged-in-email"></strong></p>
-            <p style="margin:var(--space-xs) 0 0;font-size:var(--font-size-sm);color:var(--color-gray);">編集キーなしで投稿を編集できます</p>
+            <p class="desc-text mt-xs" style="margin-bottom:0;">編集キーなしで投稿を編集できます</p>
           </div>
           <button class="btn btn--outline" id="logout-btn" type="button" style="white-space:nowrap;">ログアウト</button>
         </div>
@@ -399,7 +400,7 @@
           <label class="form-label" data-i18n="label_name">品種名</label>
           <input type="text" class="form-input" id="cultivar-name-input" placeholder="例: crystallinum, 'Dark Mama'">
           <!-- Duplicate name alert (hidden by default, shown via JS) -->
-          <div class="duplicate-alert" id="duplicate-alert" style="display:none;margin-top:var(--space-sm);padding:var(--space-md);background:var(--color-lighter);border:2px solid var(--color-dark);border-radius:var(--radius-md);">
+          <div class="duplicate-alert d-none mt-sm p-md" id="duplicate-alert" style="background:var(--color-lighter);border:2px solid var(--color-dark);border-radius:var(--radius-md);">
             <p class="text-sm font-bold mb-sm" data-i18n="duplicate_found">この品種は既に登録されています</p>
             <p class="text-sm text-muted mb-sm">「Anthurium crystallinum」は既に登録済みです。由来を追加する場合は品種ページから行えます。</p>
             <a href="#" class="btn btn--primary btn--sm" data-nav="cultivar" data-i18n="go_to_page">品種ページへ移動</a>
@@ -431,8 +432,8 @@
             </label>
           </div>
           <!-- Species sub-category chips (shown only when species is selected) -->
-          <div id="species-subcategory" class="species-subcategory" style="display:none;">
-            <label class="form-label text-sm" style="margin-bottom:var(--space-xs);">分類詳細</label>
+          <div id="species-subcategory" class="species-subcategory d-none">
+            <label class="form-label text-sm mb-xs">分類詳細</label>
             <div class="chips">
               <span class="chip active" data-subcategory="species">原種</span>
               <span class="chip" data-subcategory="sp">sp.</span>
@@ -448,28 +449,28 @@
       <div class="card mb-lg">
         <h2 class="text-lg font-bold mb-md" data-i18n="image_upload">画像アップロード</h2>
         <div class="upload-area" id="contribute-upload-area">
-          <input type="file" id="contribute-file-input" accept="image/jpeg,image/png" multiple style="display:none">
+          <input type="file" id="contribute-file-input" accept="image/jpeg,image/png" multiple class="d-none">
           <div class="upload-area__icon">&#x1F4F7;</div>
           <div class="upload-area__text" data-i18n="drag_drop">ドラッグ&ドロップ または クリック</div>
           <div class="upload-area__hint">最大3枚, JPG/PNG, 各20MB以下（自動圧縮）</div>
         </div>
         <div class="upload-preview" id="contribute-preview"></div>
-        <p id="clone-image-hint" class="text-sm text-muted" style="display:none; margin-top:var(--space-sm);">※ 画像投稿はself等も記載可能。選択と株を記載したSNSリンクがあれば記入してください。</p>
+        <p id="clone-image-hint" class="text-sm text-muted d-none mt-sm">※ 画像投稿はself等も記載可能。選択と株を記載したSNSリンクがあれば記入してください。</p>
       </div>
 
       <!-- Origin story — structured fields per type -->
       <div class="card mb-lg" id="origin-card">
         <h2 class="text-lg font-bold mb-md" data-i18n="origin_story">由来</h2>
-        <p class="form-hint" id="origin-ai-hint" style="display:none;"></p>
+        <p class="form-hint d-none" id="origin-ai-hint"></p>
 
         <!-- AI auto-fill button (shown for species when name is entered) -->
-        <div id="ai-autofill-container" style="display:none; margin-bottom:var(--space-md);">
+        <div id="ai-autofill-container" class="d-none mb-md">
           <button class="btn btn--secondary" id="ai-autofill-btn" type="button">AI自動記入</button>
-          <span id="ai-autofill-status" class="text-sm text-muted" style="margin-left:var(--space-sm);"></span>
+          <span id="ai-autofill-status" class="text-sm text-muted ml-xs"></span>
         </div>
 
         <!-- ① Species fields -->
-        <div id="species-fields" style="display:none;">
+        <div id="species-fields" class="d-none">
           <div class="structured-fieldset">
             <div class="structured-fieldset__legend">記載情報</div>
             <div class="structured-form-grid">
@@ -489,7 +490,7 @@
         </div>
 
         <!-- ② Clone fields -->
-        <div id="clone-fields" style="display:none;">
+        <div id="clone-fields" class="d-none">
           <div class="structured-form-grid">
             <div class="form-group"><label class="form-label">名付けた人物</label><input type="text" id="sf-clone-namer" class="form-input" placeholder="例: John Doe"></div>
             <div class="form-group"><label class="form-label">名付けた年</label><input type="number" id="sf-clone-naming-year" class="form-input" placeholder="例: 2020" min="1900" max="2100"></div>
@@ -501,15 +502,15 @@
               <span data-i18n="formula_unknown">交配式が不明</span>
             </label>
             <div class="formula-box" id="formula-inputs">
-              <input type="text" class="form-input" placeholder="Parent A" style="flex:1;">
+              <input type="text" class="form-input flex-1" placeholder="Parent A">
               <span class="formula-operator">&times;</span>
-              <input type="text" class="form-input" placeholder="Parent B" style="flex:1;">
+              <input type="text" class="form-input flex-1" placeholder="Parent B">
             </div>
           </div>
         </div>
 
         <!-- ③ Hybrid fields -->
-        <div id="hybrid-fields" style="display:none;">
+        <div id="hybrid-fields" class="d-none">
           <div class="structured-form-grid">
             <div class="form-group"><label class="form-label">作出者 / ナーセリー</label><input type="text" id="sf-hybrid-breeder" class="form-input" placeholder="例: Ecuagenera"></div>
             <div class="form-group"><label class="form-label">名付けた年</label><input type="number" id="sf-hybrid-naming-year" class="form-input" placeholder="例: 2022" min="1900" max="2100"></div>
@@ -517,15 +518,15 @@
           <div class="form-group">
             <label class="form-label">交配式 <span class="text-gray text-xs" style="color:#dc3545;">※必須</span></label>
             <div class="formula-box" id="hybrid-formula-inputs">
-              <input type="text" class="form-input" placeholder="Parent A (母)" style="flex:1;">
+              <input type="text" class="form-input flex-1" placeholder="Parent A (母)">
               <span class="formula-operator">&times;</span>
-              <input type="text" class="form-input" placeholder="Parent B (父)" style="flex:1;">
+              <input type="text" class="form-input flex-1" placeholder="Parent B (父)">
             </div>
           </div>
         </div>
 
         <!-- ④ Seedling fields -->
-        <div id="seedling-fields" style="display:none;">
+        <div id="seedling-fields" class="d-none">
           <div class="structured-form-grid">
             <div class="form-group"><label class="form-label">作出者 (Creator/Breeder)</label><input type="text" id="creator-name-input" class="form-input" placeholder="例: 山田太郎"></div>
             <div class="form-group"><label class="form-label">播種した日付</label><input type="date" id="sf-sowing-date" class="form-input"></div>
@@ -537,35 +538,35 @@
               <span>交配式が不明</span>
             </label>
             <div class="formula-box" id="seedling-formula-inputs">
-              <input type="text" class="form-input" placeholder="Parent A (母)" style="flex:1;">
+              <input type="text" class="form-input flex-1" placeholder="Parent A (母)">
               <span class="formula-operator">&times;</span>
-              <input type="text" class="form-input" placeholder="Parent B (父)" style="flex:1;">
+              <input type="text" class="form-input flex-1" placeholder="Parent B (父)">
             </div>
           </div>
           <!-- Parent photos -->
           <div class="form-group" id="parent-photos-section">
             <label class="form-label">交配親の写真</label>
-            <div style="display:flex;gap:var(--space-lg);align-items:flex-start;">
-              <div style="flex:1;text-align:center;">
+            <div class="d-flex gap-lg items-start">
+              <div class="flex-1 text-center">
                 <div class="text-sm font-bold mb-sm">Mother (母)</div>
                 <div class="upload-area upload-area--small" id="mother-upload">
-                  <input type="file" id="mother-photo-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+                  <input type="file" id="mother-photo-input" accept="image/jpeg,image/png,image/webp" class="d-none">
                   <div class="upload-area__icon">&#x1F4F7;</div>
                   <div class="upload-area__text text-xs">写真をアップロード</div>
                 </div>
-                <div id="mother-preview" style="margin-top:var(--space-sm);"></div>
+                <div id="mother-preview" class="mt-sm"></div>
               </div>
-              <div style="display:flex;align-items:center;padding-top:2rem;">
+              <div class="d-flex items-center" style="padding-top:2rem;">
                 <span class="formula-operator" style="font-size:1.5rem;">&times;</span>
               </div>
-              <div style="flex:1;text-align:center;">
+              <div class="flex-1 text-center">
                 <div class="text-sm font-bold mb-sm">Father (父)</div>
                 <div class="upload-area upload-area--small" id="father-upload">
-                  <input type="file" id="father-photo-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+                  <input type="file" id="father-photo-input" accept="image/jpeg,image/png,image/webp" class="d-none">
                   <div class="upload-area__icon">&#x1F4F7;</div>
                   <div class="upload-area__text text-xs">写真をアップロード</div>
                 </div>
-                <div id="father-preview" style="margin-top:var(--space-sm);"></div>
+                <div id="father-preview" class="mt-sm"></div>
               </div>
             </div>
           </div>
@@ -581,7 +582,7 @@
         <div class="form-group">
           <label class="form-label" data-i18n="label_sources">引用リンク</label>
           <div class="flex gap-sm mb-sm">
-            <input type="url" class="form-input" placeholder="https://..." style="flex:1;">
+            <input type="url" class="form-input flex-1" placeholder="https://...">
             <button class="btn btn--secondary">+ 追加</button>
           </div>
           <div class="source-list"></div>
@@ -595,14 +596,14 @@
           <label class="form-label" data-i18n="label_edit_key">4桁の編集キー</label>
           <input type="password" id="edit-key-input" class="form-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="4桁の数字" style="max-width:200px;">
           <p class="form-hint" id="edit-key-hint" data-i18n="edit_key_hint">編集する時に必要な4ケタのパスワードです。</p>
-          <p class="form-hint" id="edit-key-hint-edit" style="display:none;" data-i18n="edit_key_hint_edit">正しいキーを入力すると品種名・タイプも変更できます。</p>
+          <p class="form-hint d-none" id="edit-key-hint-edit" data-i18n="edit_key_hint_edit">正しいキーを入力すると品種名・タイプも変更できます。</p>
         </div>
       </div>
 
       <!-- Submit -->
       <button class="btn btn--primary btn--block" id="contribute-submit-btn" data-i18n="btn_submit">&#x1F4E4; 投稿する</button>
 
-      <button class="btn btn--block" id="edit-delete-btn" style="display:none;margin-top:12px;background:transparent;color:#dc3545;border:1px solid #dc3545;cursor:pointer;">&#x1F5D1; この品種を削除</button>
+      <button class="btn btn--block d-none cursor-pointer" id="edit-delete-btn" style="margin-top:12px;background:transparent;color:#dc3545;border:1px solid #dc3545;">&#x1F5D1; この品種を削除</button>
 
     </div>
   </section>
@@ -619,14 +620,14 @@
       <p class="text-muted mb-lg" id="search-summary">23件の結果</p>
 
       <!-- User Results (shown only when users match) -->
-      <div id="search-user-results" style="display:none;margin-bottom:var(--space-xl);">
-        <h2 style="font-size:1rem;font-weight:600;margin-bottom:var(--space-sm);color:var(--color-dark);">ユーザー</h2>
-        <div id="search-user-list" class="card" style="padding:0;"></div>
+      <div id="search-user-results" class="d-none mb-xl">
+        <h2 class="section-heading">ユーザー</h2>
+        <div id="search-user-list" class="card" style="padding:0"></div>
       </div>
 
       <!-- Cultivar Results -->
       <div id="search-cultivar-results">
-        <h2 style="font-size:1rem;font-weight:600;margin-bottom:var(--space-sm);color:var(--color-dark);">品種</h2>
+        <h2 class="section-heading">品種</h2>
         <!-- Filter chips -->
         <div class="chips mb-lg" id="search-chips">
           <span class="chip active" data-genus="all" data-i18n="filter_all">すべて</span>
@@ -923,7 +924,7 @@
     <div class="container">
       <h1 class="section-title" data-i18n="favorites_title">お気に入り</h1>
       <p class="text-muted mb-lg" data-i18n="favorites_desc">ブックマークした品種の一覧です。</p>
-      <div id="favorites-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-md);"></div>
+      <div id="favorites-grid" class="card-grid"></div>
     </div>
   </section>
 
@@ -931,11 +932,11 @@
     <div class="container">
       <h1 class="section-title">投稿履歴</h1>
       <p class="text-muted mb-lg">あなたが投稿した品種の一覧です。</p>
-      <div id="mypost-login-msg" style="display:none;text-align:center;padding:var(--space-xl);color:var(--color-gray);">
+      <div id="mypost-login-msg" class="d-none text-center p-xl" style="color:var(--color-gray);">
         <p>ログインすると投稿履歴を確認できます。</p>
       </div>
-      <div id="mypost-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-md);"></div>
-      <div id="mypost-empty" style="display:none;text-align:center;padding:var(--space-xl);color:var(--color-gray);">
+      <div id="mypost-grid" class="card-grid"></div>
+      <div id="mypost-empty" class="d-none text-center p-xl" style="color:var(--color-gray);">
         <p>まだ投稿がありません。</p>
       </div>
     </div>
@@ -947,41 +948,41 @@
   <section id="page-profile" class="page">
     <div class="container">
       <!-- Profile Header Card -->
-      <div class="card" style="padding:var(--space-lg);">
+      <div class="card p-lg">
         <div class="profile-header">
           <div class="profile-avatar" id="profile-avatar"></div>
           <div class="profile-info">
             <div class="profile-name-row">
               <h1 class="profile-name" id="profile-display-name"></h1>
-              <span class="profile-sub-badge" id="profile-sub-badge" style="display:none;"></span>
+              <span class="profile-sub-badge d-none" id="profile-sub-badge"></span>
             </div>
             <p class="text-muted text-sm" id="profile-username" style="margin-top:2px;"></p>
-            <p class="text-muted text-sm" id="profile-bio" style="margin-top:var(--space-xs);white-space:pre-wrap;"></p>
+            <p class="text-muted text-sm mt-xs" id="profile-bio" style="white-space:pre-wrap;"></p>
             <div class="profile-sns" id="profile-sns-links"></div>
-            <div class="profile-stats" style="margin-top:var(--space-sm);">
+            <div class="profile-stats mt-sm">
               <span class="text-sm">Seedling投稿数: <strong id="profile-post-count">0</strong></span>
             </div>
           </div>
         </div>
-        <div id="profile-edit-link" style="display:none;margin-top:var(--space-md);">
+        <div id="profile-edit-link" class="d-none mt-md">
           <a href="#/profile/edit" class="btn btn--secondary btn--sm">プロフィールを編集</a>
         </div>
       </div>
 
       <!-- Subscription Status -->
-      <div id="profile-subscription-section" class="card" style="padding:var(--space-md);margin-top:var(--space-md);display:none;">
+      <div id="profile-subscription-section" class="card d-none p-md mt-md">
         <div id="profile-subscription-content"></div>
       </div>
 
       <!-- My Seedlings section -->
-      <div style="margin-top:var(--space-xl);">
+      <div class="mt-xl">
         <h2 class="section-title">My Seedlings</h2>
-        <div class="search-bar" style="max-width:400px;margin-top:var(--space-md);margin-bottom:var(--space-md);">
+        <div class="search-bar mt-md mb-md" style="max-width:400px;">
           <input type="text" class="search-bar__input" id="profile-post-search" placeholder="品種名で検索...">
           <button class="search-bar__btn">&#x1F50D;</button>
         </div>
-        <div id="profile-posts-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-md);"></div>
-        <div id="profile-posts-empty" style="display:none;text-align:center;padding:var(--space-xl);color:var(--color-gray);">
+        <div id="profile-posts-grid" class="card-grid"></div>
+        <div id="profile-posts-empty" class="d-none text-center p-xl" style="color:var(--color-gray);">
           <p>まだ投稿がありません。</p>
         </div>
       </div>
@@ -995,22 +996,22 @@
     <div class="container" style="max-width:600px;">
       <h1 class="section-title">プロフィール編集</h1>
 
-      <div class="card" style="padding:var(--space-lg);margin-top:var(--space-md);">
+      <div class="card p-lg mt-md">
         <!-- Avatar -->
-        <div class="form-group" style="text-align:center;margin-bottom:var(--space-lg);">
+        <div class="form-group text-center mb-lg">
           <div class="profile-avatar profile-avatar--lg" id="edit-avatar-preview" style="margin:0 auto;"></div>
-          <input type="file" id="edit-avatar-input" accept="image/jpeg,image/png,image/webp" style="display:none;">
-          <button class="btn btn--secondary btn--sm" id="edit-avatar-btn" style="margin-top:var(--space-sm);">アバターを変更</button>
+          <input type="file" id="edit-avatar-input" accept="image/jpeg,image/png,image/webp" class="d-none">
+          <button class="btn btn--secondary btn--sm mt-sm" id="edit-avatar-btn">アバターを変更</button>
         </div>
 
         <!-- Display Name -->
-        <div class="form-group" style="margin-bottom:var(--space-md);">
+        <div class="form-group mb-md">
           <label class="form-label">表示名</label>
           <input type="text" class="form-input" id="edit-display-name" maxlength="50" placeholder="ニックネーム">
         </div>
 
         <!-- Username (optional) -->
-        <div class="form-group" style="margin-bottom:var(--space-md);">
+        <div class="form-group mb-md">
           <label class="form-label">ユーザー名（任意）</label>
           <div style="position:relative;">
             <input type="text" class="form-input" id="edit-username" maxlength="20" placeholder="英数字と_のみ、3〜20文字" style="padding-left:24px;">
@@ -1021,40 +1022,40 @@
         </div>
 
         <!-- Email (read-only) -->
-        <div class="form-group" style="margin-bottom:var(--space-md);">
+        <div class="form-group mb-md">
           <label class="form-label">メールアドレス</label>
           <input type="email" class="form-input" id="edit-email" disabled style="background:var(--color-lighter);cursor:not-allowed;">
         </div>
 
         <!-- Bio -->
-        <div class="form-group" style="margin-bottom:var(--space-md);">
+        <div class="form-group mb-md">
           <label class="form-label">自己紹介</label>
           <textarea class="form-textarea" id="edit-bio" rows="4" maxlength="500" placeholder="好きな植物のことなど..."></textarea>
           <p class="form-hint"><span id="edit-bio-count">0</span>/500</p>
         </div>
 
         <!-- SNS Links -->
-        <div class="form-group" style="margin-bottom:var(--space-md);">
+        <div class="form-group mb-md">
           <label class="form-label">Instagram</label>
           <input type="text" class="form-input" id="edit-sns-instagram" maxlength="100" placeholder="@username または URL">
         </div>
-        <div class="form-group" style="margin-bottom:var(--space-md);">
+        <div class="form-group mb-md">
           <label class="form-label">X (Twitter)</label>
           <input type="text" class="form-input" id="edit-sns-twitter" maxlength="100" placeholder="@username または URL">
         </div>
 
         <!-- Subscription Management -->
-        <div id="subscription-section" style="margin-top:var(--space-lg);padding-top:var(--space-lg);border-top:1px solid var(--color-light);">
+        <div id="subscription-section" class="mt-lg" style="padding-top:var(--space-lg);border-top:1px solid var(--color-light);">
           <label class="form-label" style="font-size:var(--font-size-base);font-weight:700;margin-bottom:var(--space-sm);">サブスクリプション</label>
-          <div id="subscription-status" class="card" style="padding:var(--space-md);margin-bottom:var(--space-md);">
+          <div id="subscription-status" class="card p-md mb-md">
             <div id="sub-status-text" class="text-sm text-muted">読み込み中...</div>
           </div>
           <div id="sub-actions"></div>
         </div>
 
         <!-- Save & Logout -->
-        <button class="btn btn--primary" id="edit-profile-save" style="width:100%;margin-top:var(--space-lg);">保存</button>
-        <button class="btn btn--secondary" id="edit-profile-logout" style="width:100%;margin-top:var(--space-sm);color:var(--color-danger);">ログアウト</button>
+        <button class="btn btn--primary w-full mt-lg" id="edit-profile-save">保存</button>
+        <button class="btn btn--secondary w-full mt-sm text-danger" id="edit-profile-logout">ログアウト</button>
       </div>
     </div>
   </section>
@@ -1062,7 +1063,7 @@
   <!-- ========================================
        PAYWALL MODAL
        ======================================== -->
-  <div id="paywall-modal" class="paywall-modal" style="display:none;">
+  <div id="paywall-modal" class="paywall-modal d-none">
     <div class="paywall-modal__backdrop" onclick="hidePaywallModal()"></div>
     <div class="paywall-modal__content">
       <button class="paywall-modal__close" onclick="hidePaywallModal()">&times;</button>
