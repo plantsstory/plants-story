@@ -2313,8 +2313,7 @@ function renderUsersPagination(total) {
 }
 
 function grantSubscription(userId) {
-  if (!confirm('このユーザーにサブスクリプションを無料付与しますか？')) return;
-  showToast('処理中...');
+  showToast('付与処理中...');
   sb.rpc('admin_grant_subscription', { p_user_id: userId }).then(function(res) {
     if (res.error) { showToast('エラー: ' + res.error.message); return; }
     showToast('サブスクリプションを付与しました');
@@ -2325,8 +2324,7 @@ function grantSubscription(userId) {
 }
 
 function revokeSubscription(userId) {
-  if (!confirm('このユーザーの無料付与を取り消しますか？')) return;
-  showToast('処理中...');
+  showToast('取消処理中...');
   sb.rpc('admin_revoke_subscription', { p_user_id: userId }).then(function(res) {
     if (res.error) { showToast('エラー: ' + res.error.message); return; }
     showToast('付与を取り消しました');
