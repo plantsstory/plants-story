@@ -14,6 +14,9 @@
   <meta name="twitter:title" content="ひなたぼっこぷらんつ - Plants Story">
   <meta name="twitter:description" content="アロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォーム">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M16 2C11 0 5 3 4 10C3 17 10 24 16 28C22 24 29 17 28 10C27 3 21 0 16 2Z' fill='%231B4332'/></svg>" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1B4332">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/layout.css">
@@ -7412,5 +7415,12 @@
     </div>
   </dialog>
 
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js').catch(function() {});
+  });
+}
+</script>
 </body>
 </html>
