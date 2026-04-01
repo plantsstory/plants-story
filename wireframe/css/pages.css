@@ -19,6 +19,7 @@
 }
 
 .hero__title-sub {
+  font-family: var(--font-heading-en);
   font-size: 1.2rem;
   font-weight: 400;
   letter-spacing: 0.08em;

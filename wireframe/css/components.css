@@ -28,6 +28,7 @@
 }
 
 .header__logo-sub {
+  font-family: var(--font-heading-en);
   font-size: 0.7rem;
   font-weight: 400;
   letter-spacing: 0.08em;
