@@ -2507,8 +2507,7 @@
         var seedlingAccess = isSeedling ? canAccessSeedling(entry) : 'full';
         var locked = isSeedling && seedlingAccess === 'locked';
         var cls = 'cultivar-row' + (locked ? ' cultivar-row--locked' : '');
-        var badgeClass = meta.type === 'species' ? 'badge--species' : (meta.type === 'hybrid' ? 'badge--hybrid' : (meta.type === 'seedling' ? 'badge--seedling' : 'badge--clone'));
-        var badgeText = meta.type === 'species' ? getSpeciesBadgeText(fullName) : (meta.type === 'hybrid' ? 'Hybrid' : (meta.type === 'seedling' ? 'Seedling' : 'Clone'));
+        var bi = getBadgeInfo(meta.type, fullName);
         var hasDesc = entry.origins.length > 0 && entry.origins[0].trust > 0;
         var originCount = hasDesc ? entry.origins.length : 0;
         var trustPct = hasDesc ? entry.origins[0].trust : 0;
@@ -2525,7 +2524,7 @@
         h += '<div class="cultivar-row__name" data-key="' + fullName.replace(/"/g, '&quot;') + '">' + displayName + '</div>';
         h += '<div class="cultivar-row__meta">';
         if (!isSeedling) h += '<span>' + t('origin_prefix') + originCount + t('origin_count_suffix') + '</span>';
-        h += '<span class="badge ' + badgeClass + '">' + badgeText + '</span>';
+        h += '<span class="badge ' + bi.cls + '">' + bi.txt + '</span>';
         if (locked) h += '<span class="badge badge--locked"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>';
         if (!isSeedling && !hasDesc) h += '<span class="badge badge--ai">' + t('ai_pending_badge') + '</span>';
         if (!isSeedling) h += '<div class="trust"><div class="trust__bar"><div class="trust__fill trust--low" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + (hasDesc ? trustPct + '%' : '-') + '</span></div>';
@@ -2584,16 +2583,15 @@
           var genus = displayName.split(' ')[0];
           var hasOrigins = item.origins.length > 0 && item.origins[0].trust > 0;
           var trustPct = hasOrigins ? item.origins.reduce(function(max, o) { return Math.max(max, o.trust || 0); }, 0) : 0;
-          var trustClass = trustPct >= 70 ? 'trust--high' : (trustPct >= 40 ? 'trust--mid' : 'trust--low');
-          var badgeClass = item.type === 'species' ? 'badge--species' : (item.type === 'hybrid' ? 'badge--hybrid' : 'badge--clone');
-          var badgeText = item.type === 'species' ? getSpeciesBadgeText(item.name) : (item.type === 'hybrid' ? 'Hybrid' : 'Clone');
+          var trustClass = getTrustClass(trustPct);
+          var bi = getBadgeInfo(item.type, item.name);
 
           html += '<div class="card card--clickable" data-nav="cultivar" data-key="' + item.name.replace(/"/g, '&quot;') + '">';
           html += '<div class="recent-card__img">';
           html += '<svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
           html += '</div>';
           html += '<div class="font-bold">' + displayName + '</div>';
-          html += '<div class="text-sm text-muted">' + genus + ' <span class="badge ' + badgeClass + '" style="font-size:0.65rem;padding:1px 6px;">' + badgeText + '</span></div>';
+          html += '<div class="text-sm text-muted">' + genus + ' <span class="badge ' + bi.cls + '" style="font-size:0.65rem;padding:1px 6px;">' + bi.txt + '</span></div>';
           if (hasOrigins) {
             html += '<div class="trust mt-sm"><div class="trust__bar"><div class="trust__fill ' + trustClass + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + trustPct + '%</span></div>';
           }
@@ -3289,11 +3287,10 @@
           var displayName = name.replace(' [Seedling]', '');
           var genus = displayName.split(' ')[0];
           var type = cData._type || 'species';
-          var badgeClass = type === 'species' ? 'badge--species' : (type === 'hybrid' ? 'badge--hybrid' : (type === 'clone' ? 'badge--clone' : 'badge--seedling'));
-          var badgeText = type === 'species' ? getSpeciesBadgeText(name) : (type === 'hybrid' ? 'Hybrid' : (type === 'clone' ? 'Clone' : 'Seedling'));
+          var bi = getBadgeInfo(type, name);
           var hasOrigins = cData.origins && cData.origins.length > 0 && cData.origins[0].trust > 0;
           var trustPct = hasOrigins ? cData.origins.reduce(function(max, o) { return Math.max(max, o.trust || 0); }, 0) : 0;
-          var trustClass = trustPct >= 70 ? 'trust--high' : (trustPct >= 40 ? 'trust--mid' : 'trust--low');
+          var trustClass = getTrustClass(trustPct);
 
           html += '<div class="card card--clickable" data-nav="cultivar" data-key="' + name.replace(/"/g, '&quot;') + '" style="position:relative;">';
 
@@ -3309,7 +3306,7 @@
 
           html += '<div style="padding:var(--space-sm);">';
           html += '<div class="font-bold">' + displayName + '</div>';
-          html += '<div class="text-sm text-muted">' + genus + ' <span class="badge ' + badgeClass + '" style="font-size:0.65rem;padding:1px 6px;">' + badgeText + '</span></div>';
+          html += '<div class="text-sm text-muted">' + genus + ' <span class="badge ' + bi.cls + '" style="font-size:0.65rem;padding:1px 6px;">' + bi.txt + '</span></div>';
           if (hasOrigins) {
             html += '<div class="trust mt-sm"><div class="trust__bar"><div class="trust__fill ' + trustClass + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + trustPct + '%</span></div>';
           }
@@ -3345,6 +3342,35 @@
       data.origins.forEach(function(o) {
         if (o && o._type === 'formula' && o.formula) data.formula = o.formula;
       });
+    }
+
+    // ---- Shared helpers (used by buildRowHtml, renderOrigins, detail page, etc.) ----
+    function getBadgeInfo(type, name) {
+      var cls = type === 'species' ? 'badge--species' : (type === 'hybrid' ? 'badge--hybrid' : (type === 'seedling' ? 'badge--seedling' : 'badge--clone'));
+      var txt = type === 'species' ? getSpeciesBadgeText(name) : (type === 'hybrid' ? 'Hybrid' : (type === 'seedling' ? 'Seedling' : 'Clone'));
+      return { cls: cls, txt: txt };
+    }
+    window.getBadgeInfo = getBadgeInfo;
+
+    function getTrustClass(pct) {
+      return pct >= 70 ? 'trust--high' : (pct >= 40 ? 'trust--mid' : 'trust--low');
+    }
+
+    var TIER_COLORS = { S: '#8b5cf6', A: '#3b82f6', B: '#10b981', C: '#f59e0b', D: '#ef4444' };
+    function renderTierBadge(tier, name, labelJp) {
+      var color = TIER_COLORS[tier] || '#6b7280';
+      var h = '<div class="origin-card__source-item" style="margin-bottom:4px;">';
+      h += '<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:0.75rem;font-weight:bold;color:#fff;background:' + color + ';">Tier ' + tier + '</span> ';
+      h += '<span style="font-weight:600;">' + name + '</span>';
+      if (labelJp) h += ' <span class="text-gray" style="font-size:0.8rem;">(' + labelJp + ')</span>';
+      h += '</div>';
+      return h;
+    }
+
+    function renderVoteButtons(i, votes) {
+      var h = '<button class="vote-btn" data-origin-idx="' + i + '" data-vote="agree"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88L14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88z"/></svg><span class="vote-btn__badge">' + (votes ? votes.agree : 0) + '</span></button>';
+      h += '<button class="vote-btn vote-btn--down" data-origin-idx="' + i + '" data-vote="disagree"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12L10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88z"/></svg><span class="vote-btn__badge">' + (votes ? votes.disagree : 0) + '</span></button>';
+      return h;
     }
 
     function renderOrigins(cultivarName) {
@@ -3500,28 +3526,23 @@
       var isSeedling = data && data._type === 'seedling';
       var _sb = window._supabaseClient;
       if (!data || !data.origins || data.origins.length === 0) {
-        container.innerHTML = '<div class="text-center text-muted" style="padding:var(--space-xl);">' + (isSeedling ? 'この実生の説明はまだ登録されていません。' : 'この品種の由来情報はまだ登録されていません。') + '</div>';
+        container.innerHTML = '<div class="text-center text-muted" style="padding:var(--space-xl);">' + t('no_origin_data') + '</div>';
         if (data && data.formula) {
           container.innerHTML = buildFormulaHtml(data, isSeedling, _sb) + container.innerHTML;
         }
         return;
       }
 
-      // Sort by trust descending
       var origins = data.origins.slice().sort(function(a, b) { return b.trust - a.trust; });
       var html = '';
-
-      // Show formula if exists (with parent photos for seedlings)
       if (data.formula) {
         html += buildFormulaHtml(data, isSeedling, _sb);
       }
 
       origins.forEach(function(origin, i) {
-        var trustLevel = origin.trust >= 70 ? 'trust--high' : (origin.trust >= 40 ? 'trust--mid' : 'trust--low');
+        var trustLevel = getTrustClass(origin.trust);
         html += '<div class="origin-card">';
-
         if (!isSeedling) {
-          // Header with rank and trust (not for seedlings)
           html += '<div class="origin-card__header">';
           html += '<span class="origin-card__rank">#' + (i + 1) + '</span>';
           html += '<div class="trust trust--lg" style="flex:1;margin-left:var(--space-md);">';
@@ -3529,78 +3550,55 @@
           html += '<span class="trust__label">' + origin.trust + '%</span>';
           html += '</div></div>';
         }
-
-        // Body — structured or freeform
         if (origin.structured) {
           html += '<div class="origin-card__body">' + renderStructuredOrigin(origin.structured) + '</div>';
         } else {
           html += '<div class="origin-card__body"><p>' + origin.body + '</p></div>';
         }
-
-        // Verification details (user_verified origins)
+        // Verification details
         if (origin.source_type === 'user_verified' && origin.verification) {
           var v = origin.verification;
           var vid = 'verify-detail-' + i;
           html += '<div class="verification-details">';
-          html += '<button class="verification-toggle" onclick="var el=document.getElementById(\'' + vid + '\');el.style.display=el.style.display===\'none\'?\'block\':\'none\';this.textContent=el.style.display===\'none\'?\'\\u691c\\u8a3c\\u8a73\\u7d30 \\u25BC\':\'\\u691c\\u8a3c\\u8a73\\u7d30 \\u25B2\'">検証詳細 &#x25BC;</button>';
+          html += '<button class="verification-toggle" onclick="var el=document.getElementById(\'' + vid + '\');el.style.display=el.style.display===\'none\'?\'block\':\'none\';">検証詳細</button>';
           html += '<div id="' + vid + '" style="display:none;margin-top:8px;">';
-          // Verification summary
-          if (v.summary_jp) {
-            html += '<div class="text-sm" style="margin-bottom:8px;font-style:italic;">' + v.summary_jp + '</div>';
-          }
-          // Individual claims
+          if (v.summary_jp) html += '<div class="text-sm" style="margin-bottom:8px;font-style:italic;">' + v.summary_jp + '</div>';
           if (v.claims && v.claims.length > 0) {
             v.claims.forEach(function(c) {
-              var statusIcon = '?';
-              var statusClass = 'claim--unverifiable';
-              if (c.status === 'verified') { statusIcon = '\\u2713'; statusClass = 'claim--verified'; }
-              else if (c.status === 'partially_verified') { statusIcon = '~'; statusClass = 'claim--partial'; }
-              else if (c.status === 'contradicted') { statusIcon = '\\u26A0'; statusClass = 'claim--contradicted'; }
-              html += '<div class="claim ' + statusClass + '">' + statusIcon + ' ' + c.claim;
+              var si = '?', sc = 'claim--unverifiable';
+              if (c.status === 'verified') { si = '\u2713'; sc = 'claim--verified'; }
+              else if (c.status === 'partially_verified') { si = '~'; sc = 'claim--partial'; }
+              else if (c.status === 'contradicted') { si = '\u26A0'; sc = 'claim--contradicted'; }
+              html += '<div class="claim ' + sc + '">' + si + ' ' + c.claim;
               if (c.source) html += ' <span class="text-gray text-xs">(' + c.source + ')</span>';
               html += '</div>';
             });
           }
-          // Warnings
           if (v.warnings && v.warnings.length > 0) {
-            v.warnings.forEach(function(w) {
-              html += '<div class="verification-warnings">&#x26A0; ' + w + '</div>';
-            });
+            v.warnings.forEach(function(w) { html += '<div class="verification-warnings">&#x26A0; ' + w + '</div>'; });
           }
-          // AI-found sources
           if (v.found_sources && v.found_sources.length > 0) {
-            html += '<div class="text-sm font-bold" style="margin-top:8px;">AI\u304c\u767a\u898b\u3057\u305f\u30ea\u30f3\u30af:</div>';
+            html += '<div class="text-sm font-bold" style="margin-top:8px;">AIが発見したリンク:</div>';
             v.found_sources.forEach(function(fs) {
-              var reliabilityColor = fs.reliability === 'high' ? '#2D6A4F' : fs.reliability === 'medium' ? '#D4A373' : '#6c757d';
-              html += '<div class="found-source"><a href="' + fs.url + '" target="_blank" rel="noopener">' + (fs.label || fs.url) + '</a>';
-              html += ' <span style="font-size:0.75rem;color:' + reliabilityColor + ';">(' + fs.reliability + ')</span></div>';
+              var rc = fs.reliability === 'high' ? '#2D6A4F' : fs.reliability === 'medium' ? '#D4A373' : '#6c757d';
+              html += '<div class="found-source"><a href="' + fs.url + '" target="_blank" rel="noopener">' + (fs.label || fs.url) + '</a> <span style="font-size:0.75rem;color:' + rc + ';">(' + fs.reliability + ')</span></div>';
             });
           }
           html += '</div></div>';
         }
-
         // Sources
         html += '<div class="origin-card__sources">';
-        html += '<div class="text-sm font-bold mb-sm">情報元:</div>';
-        // Show source tier badge + source name
+        html += '<div class="text-sm font-bold mb-sm">' + t('source_label') + '</div>';
         if (origin.source_tier && origin.source_name) {
-          var tierColors = { S: '#8b5cf6', A: '#3b82f6', B: '#10b981', C: '#f59e0b', D: '#ef4444' };
-          var tierColor = tierColors[origin.source_tier] || '#6b7280';
-          html += '<div class="origin-card__source-item" style="margin-bottom:4px;">';
-          html += '<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:0.75rem;font-weight:bold;color:#fff;background:' + tierColor + ';">Tier ' + origin.source_tier + '</span> ';
-          html += '<span style="font-weight:600;">' + origin.source_name + '</span>';
-          if (origin.source_tier_label_jp) html += ' <span class="text-gray" style="font-size:0.8rem;">(' + origin.source_tier_label_jp + ')</span>';
-          html += '</div>';
+          html += renderTierBadge(origin.source_tier, origin.source_name, origin.source_tier_label_jp);
         }
-        // Show source links
         var srcList = origin.sources || [];
         srcList.forEach(function(src) {
           var icon = src.icon || '&#x1F310;';
           var text = src.text || src.label || src.url || '';
           var href = src.url || '#';
           if (!text) return;
-          html += '<div class="origin-card__source-item">';
-          html += '<span class="source-link__icon">' + icon + '</span>';
+          html += '<div class="origin-card__source-item"><span class="source-link__icon">' + icon + '</span>';
           if (href && href !== '#') {
             html += '<a href="' + href + '" target="_blank" rel="noopener">' + text + '</a>';
           } else {
@@ -3609,34 +3607,25 @@
           html += '</div>';
         });
         if (!srcList.length && origin.source_url) {
-          html += '<div class="origin-card__source-item">';
-          html += '<span class="source-link__icon">&#x1F310;</span>';
-          html += '<a href="' + origin.source_url + '" target="_blank" rel="noopener">' + origin.source_url + '</a>';
-          html += '</div>';
+          html += '<div class="origin-card__source-item"><span class="source-link__icon">&#x1F310;</span>';
+          html += '<a href="' + origin.source_url + '" target="_blank" rel="noopener">' + origin.source_url + '</a></div>';
         }
         html += '</div>';
-
         // Footer
-        html += '<div class="origin-card__footer">';
-        html += '<div class="origin-card__author">';
+        html += '<div class="origin-card__footer"><div class="origin-card__author">';
         if (origin.source_type === 'ipni_powo') {
           html += '<span class="badge badge--ai" style="background:#8b5cf6;">&#x1F4DA; IPNI/Kew</span>';
         } else if (origin.source_type === 'user_verified') {
-          html += '<span class="badge badge--verified">&#x2705; AI&#x691C;&#x8A3C;&#x6E08;</span>';
+          html += '<span class="badge badge--verified">&#x2705; AI検証済</span>';
         } else if (origin.author && origin.author.isAI) {
           html += '<span class="badge badge--ai">&#x1F916; AI</span>';
         } else {
-          html += '<span>&#x1F464;</span>';
-          html += '<span>' + (origin.author ? origin.author.name : 'User') + '</span>';
+          html += '<span>&#x1F464;</span><span>' + (origin.author ? origin.author.name : 'User') + '</span>';
         }
         html += '<span class="text-gray">' + (origin.author ? origin.author.date : '') + '</span>';
-        html += '</div>';
-        html += '<div class="vote-group">';
-        html += '<button class="vote-btn" data-origin-idx="' + i + '" data-vote="agree"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88L14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88z"/></svg><span class="vote-btn__badge">' + (origin.votes ? origin.votes.agree : 0) + '</span></button>';
-        html += '<button class="vote-btn vote-btn--down" data-origin-idx="' + i + '" data-vote="disagree"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12L10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88z"/></svg><span class="vote-btn__badge">' + (origin.votes ? origin.votes.disagree : 0) + '</span></button>';
-        html += '</div>';
-        html += '</div>';
-
+        html += '</div><div class="vote-group">';
+        html += renderVoteButtons(i, origin.votes);
+        html += '</div></div>';
         html += '</div>';
       });
 
@@ -3664,32 +3653,22 @@
       var shortName = cultivarName.replace(' [Seedling]', '').replace(genusName + ' ', '').replace(/'/g, '');
 
       // Get badge info from row, or fallback to cultivarData._type
+      var detectedType = 'species';
       var badgeEl = rowEl ? rowEl.querySelector('.badge') : null;
-      var badgeClass = 'badge--species';
-      var badgeText = getSpeciesBadgeText(cultivarName);
       if (badgeEl) {
-        if (badgeEl.classList.contains('badge--hybrid')) {
-          badgeClass = 'badge--hybrid'; badgeText = 'Hybrid';
-        } else if (badgeEl.classList.contains('badge--clone')) {
-          badgeClass = 'badge--clone'; badgeText = 'Clone';
-        } else if (badgeEl.classList.contains('badge--seedling')) {
-          badgeClass = 'badge--seedling'; badgeText = 'Seedling';
-        }
+        if (badgeEl.classList.contains('badge--hybrid')) detectedType = 'hybrid';
+        else if (badgeEl.classList.contains('badge--clone')) detectedType = 'clone';
+        else if (badgeEl.classList.contains('badge--seedling')) detectedType = 'seedling';
       } else {
-        // No row element (e.g. direct navigation from profile) — detect type from cultivarData
         var _tempData = cultivarData[cultivarName] || cultivarData[cultivarName + ' [Seedling]'];
         if (!_tempData) {
           Object.keys(cultivarData).forEach(function(k) {
             if (!_tempData && k.replace(' [Seedling]', '') === cultivarName) _tempData = cultivarData[k];
           });
         }
-        if (_tempData && _tempData._type) {
-          if (_tempData._type === 'hybrid') { badgeClass = 'badge--hybrid'; badgeText = 'Hybrid'; }
-          else if (_tempData._type === 'clone') { badgeClass = 'badge--clone'; badgeText = 'Clone'; }
-          else if (_tempData._type === 'seedling') { badgeClass = 'badge--seedling'; badgeText = 'Seedling'; }
-          else { badgeText = getSpeciesBadgeText(cultivarName); }
-        }
+        if (_tempData && _tempData._type) detectedType = _tempData._type;
       }
+      var bi = getBadgeInfo(detectedType, cultivarName);
 
       // Update title
       var h1 = detailPage.querySelector('h1');
@@ -3701,8 +3680,8 @@
       // Update badge
       var detailBadge = detailPage.querySelector('.badge');
       if (detailBadge) {
-        detailBadge.className = 'badge ' + badgeClass;
-        detailBadge.textContent = badgeText;
+        detailBadge.className = 'badge ' + bi.cls;
+        detailBadge.textContent = bi.txt;
       }
 
       // Update genus label next to badge
@@ -6161,129 +6140,7 @@
     })();
 
     // ========================================
-    // UPDATE renderOrigins and paginateGenus to use t()
-    // ========================================
-    // Override renderOrigins to use translation keys
-    var _origRenderOrigins = renderOrigins;
-    renderOrigins = function(cultivarName) {
-      var container = document.getElementById('origins-container');
-      if (!container) return;
-      var data = cultivarData[cultivarName];
-      if (!data || !data.origins) {
-        container.innerHTML = '<div class="text-center text-muted" style="padding:var(--space-xl);">' + t('no_origin_data') + '</div>';
-        return;
-      }
-      var origins = data.origins.slice().sort(function(a, b) { return b.trust - a.trust; });
-      var html = '';
-      var isSeedling = data && data._type === 'seedling';
-      var _sb = window._supabaseClient;
-      if (data.formula) {
-        html += buildFormulaHtml(data, isSeedling, _sb);
-      }
-      origins.forEach(function(origin, i) {
-        var trustLevel = origin.trust >= 70 ? 'trust--high' : (origin.trust >= 40 ? 'trust--mid' : 'trust--low');
-        html += '<div class="origin-card">';
-        if (!isSeedling) {
-        html += '<div class="origin-card__header">';
-        html += '<span class="origin-card__rank">#' + (i + 1) + '</span>';
-        html += '<div class="trust trust--lg" style="flex:1;margin-left:var(--space-md);">';
-        html += '<div class="trust__bar"><div class="trust__fill ' + trustLevel + '" style="width:' + origin.trust + '%"></div></div>';
-        html += '<span class="trust__label">' + origin.trust + '%</span>';
-        html += '</div></div>';
-        }
-        if (origin.structured) {
-          html += '<div class="origin-card__body">' + renderStructuredOrigin(origin.structured) + '</div>';
-        } else {
-          html += '<div class="origin-card__body"><p>' + origin.body + '</p></div>';
-        }
-        html += '<div class="origin-card__sources">';
-        html += '<div class="text-sm font-bold mb-sm">' + t('source_label') + '</div>';
-        if (origin.source_tier && origin.source_name) {
-          var tierColors2 = { S: '#8b5cf6', A: '#3b82f6', B: '#10b981', C: '#f59e0b', D: '#ef4444' };
-          var tc2 = tierColors2[origin.source_tier] || '#6b7280';
-          html += '<div class="origin-card__source-item" style="margin-bottom:4px;">';
-          html += '<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:0.75rem;font-weight:bold;color:#fff;background:' + tc2 + ';">Tier ' + origin.source_tier + '</span> ';
-          html += '<span style="font-weight:600;">' + origin.source_name + '</span>';
-          if (origin.source_tier_label_jp) html += ' <span class="text-gray" style="font-size:0.8rem;">(' + origin.source_tier_label_jp + ')</span>';
-          html += '</div>';
-        }
-        var srcList2 = origin.sources || [];
-        srcList2.forEach(function(src) {
-          var icon = src.icon || '&#x1F310;';
-          var text = src.text || src.label || src.url || '';
-          var href = src.url || '#';
-          if (!text) return;
-          html += '<div class="origin-card__source-item">';
-          html += '<span class="source-link__icon">' + icon + '</span>';
-          if (href && href !== '#') {
-            html += '<a href="' + href + '" target="_blank" rel="noopener">' + text + '</a>';
-          } else {
-            html += '<span>' + text + '</span>';
-          }
-          html += '</div>';
-        });
-        if (!srcList2.length && origin.source_url) {
-          html += '<div class="origin-card__source-item">';
-          html += '<span class="source-link__icon">&#x1F310;</span>';
-          html += '<a href="' + origin.source_url + '" target="_blank" rel="noopener">' + origin.source_url + '</a>';
-          html += '</div>';
-        }
-        html += '</div>';
-        // Verification details (user_verified origins) - i18n version
-        if (origin.source_type === 'user_verified' && origin.verification) {
-          var v = origin.verification;
-          var vid = 'verify-detail-i18n-' + i;
-          html += '<div class="verification-details">';
-          html += '<button class="verification-toggle" onclick="var el=document.getElementById(\'' + vid + '\');el.style.display=el.style.display===\'none\'?\'block\':\'none\';">検証詳細</button>';
-          html += '<div id="' + vid + '" style="display:none;margin-top:8px;">';
-          if (v.summary_jp) html += '<div class="text-sm" style="margin-bottom:8px;font-style:italic;">' + v.summary_jp + '</div>';
-          if (v.claims && v.claims.length > 0) {
-            v.claims.forEach(function(c) {
-              var si = '?', sc = 'claim--unverifiable';
-              if (c.status === 'verified') { si = '\\u2713'; sc = 'claim--verified'; }
-              else if (c.status === 'partially_verified') { si = '~'; sc = 'claim--partial'; }
-              else if (c.status === 'contradicted') { si = '\\u26A0'; sc = 'claim--contradicted'; }
-              html += '<div class="claim ' + sc + '">' + si + ' ' + c.claim;
-              if (c.source) html += ' <span class="text-gray text-xs">(' + c.source + ')</span>';
-              html += '</div>';
-            });
-          }
-          if (v.warnings && v.warnings.length > 0) {
-            v.warnings.forEach(function(w) { html += '<div class="verification-warnings">&#x26A0; ' + w + '</div>'; });
-          }
-          if (v.found_sources && v.found_sources.length > 0) {
-            html += '<div class="text-sm font-bold" style="margin-top:8px;">AI\u304c\u767a\u898b\u3057\u305f\u30ea\u30f3\u30af:</div>';
-            v.found_sources.forEach(function(fs) {
-              var rc = fs.reliability === 'high' ? '#2D6A4F' : fs.reliability === 'medium' ? '#D4A373' : '#6c757d';
-              html += '<div class="found-source"><a href="' + fs.url + '" target="_blank" rel="noopener">' + (fs.label || fs.url) + '</a> <span style="font-size:0.75rem;color:' + rc + ';">(' + fs.reliability + ')</span></div>';
-            });
-          }
-          html += '</div></div>';
-        }
-        html += '<div class="origin-card__footer">';
-        html += '<div class="origin-card__author">';
-        if (origin.source_type === 'ipni_powo') {
-          html += '<span class="badge badge--ai" style="background:#8b5cf6;">&#x1F4DA; IPNI/Kew</span>';
-        } else if (origin.source_type === 'user_verified') {
-          html += '<span class="badge badge--verified">&#x2705; AI&#x691C;&#x8A3C;&#x6E08;</span>';
-        } else if (origin.author && origin.author.isAI) {
-          html += '<span class="badge badge--ai">&#x1F916; AI</span>';
-        } else {
-          html += '<span>&#x1F464;</span>';
-          html += '<span>' + (origin.author ? origin.author.name : 'User') + '</span>';
-        }
-        html += '<span class="text-gray">' + (origin.author ? origin.author.date : '') + '</span>';
-        html += '</div>';
-        html += '<div class="vote-group">';
-        html += '<button class="vote-btn" data-origin-idx="' + i + '" data-vote="agree"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88L14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88z"/></svg><span class="vote-btn__badge">' + (origin.votes ? origin.votes.agree : 0) + '</span></button>';
-        html += '<button class="vote-btn vote-btn--down" data-origin-idx="' + i + '" data-vote="disagree"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12L10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88z"/></svg><span class="vote-btn__badge">' + (origin.votes ? origin.votes.disagree : 0) + '</span></button>';
-        html += '</div>';
-        html += '</div>';
-        html += '</div>';
-      });
-      container.innerHTML = html;
-    };
-
+    // UPDATE paginateGenus to use t()
     // Override paginateGenus count text to use t()
     var _origPaginate = paginateGenus;
     paginateGenus = function(genusEl, page) {
