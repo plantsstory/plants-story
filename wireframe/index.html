@@ -10,9 +10,11 @@
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ja_JP">
   <meta property="og:site_name" content="ひなたぼっこぷらんつ - Plants Story">
+  <meta property="og:image" content="">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="ひなたぼっこぷらんつ - Plants Story">
   <meta name="twitter:description" content="アロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォーム">
+  <meta name="twitter:image" content="">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M16 2C11 0 5 3 4 10C3 17 10 24 16 28C22 24 29 17 28 10C27 3 21 0 16 2Z' fill='%231B4332'/></svg>" type="image/svg+xml">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1B4332">
@@ -1165,6 +1167,7 @@
       var desc = opts.description || _defaultDesc;
       var path = opts.path || '';
       var url = _siteBase + (path ? '#/' + path : '');
+      var image = opts.image || '';
       document.title = title;
       var metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) metaDesc.setAttribute('content', desc);
@@ -1172,10 +1175,14 @@
       if (ogTitle) ogTitle.setAttribute('content', title);
       var ogDesc = document.querySelector('meta[property="og:description"]');
       if (ogDesc) ogDesc.setAttribute('content', desc);
+      var ogImage = document.querySelector('meta[property="og:image"]');
+      if (ogImage) ogImage.setAttribute('content', image);
       var twTitle = document.querySelector('meta[name="twitter:title"]');
       if (twTitle) twTitle.setAttribute('content', title);
       var twDesc = document.querySelector('meta[name="twitter:description"]');
       if (twDesc) twDesc.setAttribute('content', desc);
+      var twImage = document.querySelector('meta[name="twitter:image"]');
+      if (twImage) twImage.setAttribute('content', image);
       var canonical = document.getElementById('canonical-link');
       if (canonical) canonical.setAttribute('href', url);
     }
@@ -3943,10 +3950,14 @@
       // Update SEO meta tags
       var typeLabel = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: 'Seedling' }[detectedType] || '';
       var metaDesc = displayName + ' (' + genusName + ' ' + typeLabel + ') の由来・歴史情報 - ひなたぼっこぷらんつ';
+      var ogImageUrl = window._SUPABASE_URL
+        ? window._SUPABASE_URL + '/functions/v1/og-image?name=' + encodeURIComponent(displayName) + '&genus=' + encodeURIComponent(genusName) + '&type=' + encodeURIComponent(detectedType)
+        : '';
       updateMeta({
         title: displayName + ' - ' + genusName + ' | ' + _defaultTitle,
         description: metaDesc,
-        path: 'cultivar/' + encodeURIComponent(displayName)
+        path: 'cultivar/' + encodeURIComponent(displayName),
+        image: ogImageUrl
       });
       updateCultivarJsonLd(displayName, genusName, detectedType, metaDesc);
 
