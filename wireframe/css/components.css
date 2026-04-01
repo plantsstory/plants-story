@@ -323,6 +323,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  background: #000;
 }
 
 .genus-card__img--anthurium {
@@ -514,6 +515,11 @@
   background: var(--color-lighter);
   border-color: var(--color-light);
   color: var(--color-mid);
+}
+
+.badge--research {
+  background: #8b5cf6;
+  color: #fff;
 }
 
 .badge--verified {
@@ -993,6 +999,13 @@
 .gallery__img {
   position: relative;
   cursor: pointer;
+}
+
+.gallery__img-full {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--radius-md);
 }
 
 .gallery__overlay {
