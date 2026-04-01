@@ -1992,6 +1992,7 @@
           window._currentUser = session ? session.user : null;
           updateLoginUI();
           checkSubscription();
+          if (session && typeof syncFavoritesFromServer === 'function') syncFavoritesFromServer();
           if (event === 'SIGNED_IN' && window.location.search.indexOf('code=') !== -1) {
             var returnHash = localStorage.getItem('login_return_hash');
             localStorage.removeItem('login_return_hash');
@@ -2010,6 +2011,7 @@
             window._currentUser = res.data.session.user;
             updateLoginUI();
             checkSubscription();
+            if (typeof syncFavoritesFromServer === 'function') syncFavoritesFromServer();
           }
         });
       }
@@ -3265,7 +3267,7 @@
     }
     window.loadCultivarThumbnails = loadCultivarThumbnails;
 
-    // ---- Favorites (localStorage-based bookmarks) ----
+    // ---- Favorites (localStorage + Supabase sync for logged-in users) ----
     var FAV_KEY = 'plants-story-favorites';
 
     function getFavorites() {
@@ -3289,8 +3291,58 @@
       localStorage.setItem(FAV_KEY, JSON.stringify(favs));
       updateFavBtn(name);
       updateHeaderFavIcon();
+
+      // Sync to Supabase if logged in
+      var sb = window._supabaseClient;
+      var user = window._currentUser;
+      if (sb && user) {
+        if (added) {
+          sb.from('favorites').upsert({ user_id: user.id, cultivar_name: name }, { onConflict: 'user_id,cultivar_name' }).then(function() {});
+        } else {
+          sb.from('favorites').delete().eq('user_id', user.id).eq('cultivar_name', name).then(function() {});
+        }
+      }
       return added;
     }
+
+    // Sync favorites from Supabase on login (merge with localStorage)
+    function syncFavoritesFromServer() {
+      var sb = window._supabaseClient;
+      var user = window._currentUser;
+      if (!sb || !user) return;
+      sb.from('favorites').select('cultivar_name, created_at').eq('user_id', user.id).then(function(res) {
+        if (res.error || !res.data) return;
+        var localFavs = getFavorites();
+        var changed = false;
+
+        // Merge server favorites into local
+        res.data.forEach(function(row) {
+          if (!localFavs[row.cultivar_name]) {
+            localFavs[row.cultivar_name] = new Date(row.created_at).getTime();
+            changed = true;
+          }
+        });
+
+        // Upload local-only favorites to server
+        var serverNames = {};
+        res.data.forEach(function(row) { serverNames[row.cultivar_name] = true; });
+        var toUpload = [];
+        Object.keys(localFavs).forEach(function(name) {
+          if (!serverNames[name]) {
+            toUpload.push({ user_id: user.id, cultivar_name: name });
+          }
+        });
+        if (toUpload.length > 0) {
+          sb.from('favorites').upsert(toUpload, { onConflict: 'user_id,cultivar_name' }).then(function() {});
+        }
+
+        if (changed) {
+          localStorage.setItem(FAV_KEY, JSON.stringify(localFavs));
+          updateHeaderFavIcon();
+        }
+      });
+    }
+    window.syncFavoritesFromServer = syncFavoritesFromServer;
 
     function updateFavBtn(name) {
       var btn = document.getElementById('fav-btn');
