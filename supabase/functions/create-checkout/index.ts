@@ -72,10 +72,12 @@ serve(async (req: Request) => {
     }
 
     // 4. Determine redirect URLs
-    const origin = req.headers.get("origin") || req.headers.get("referer") || "";
-    const baseUrl = origin.replace(/\/$/, "");
-    const successUrl = baseUrl + "#/profile-edit?subscription=success";
-    const cancelUrl = baseUrl + "#/profile-edit?subscription=canceled";
+    // Use referer to get the full page URL (including path for GitHub Pages)
+    const referer = req.headers.get("referer") || req.headers.get("origin") || "";
+    // Strip any existing hash/query from referer to get the base page URL
+    const baseUrl = referer.replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/$/, "");
+    const successUrl = baseUrl + "?subscription=success#/profile-edit";
+    const cancelUrl = baseUrl + "?subscription=canceled#/profile-edit";
 
     // 5. Create Checkout Session
     const session = await stripe.checkout.sessions.create({

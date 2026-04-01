@@ -56,8 +56,8 @@ serve(async (req: Request) => {
       apiVersion: "2023-10-16",
     });
 
-    const origin = req.headers.get("origin") || req.headers.get("referer") || "";
-    const returnUrl = origin.replace(/\/$/, "") + "#/profile-edit";
+    const referer = req.headers.get("referer") || req.headers.get("origin") || "";
+    const returnUrl = referer.replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/$/, "") + "#/profile-edit";
 
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,

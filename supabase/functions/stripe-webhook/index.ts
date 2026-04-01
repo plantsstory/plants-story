@@ -24,10 +24,15 @@ serve(async (req: Request) => {
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SIGNING_SECRET")!;
     let event: Stripe.Event;
     try {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      // Stripe SDK on Deno uses async constructEventAsync
+      event = await stripe.webhooks.constructEventAsync(
+        body,
+        signature,
+        webhookSecret
+      );
     } catch (err) {
       console.error("Webhook signature verification failed:", err.message);
-      return new Response("Invalid signature", { status: 400 });
+      return new Response("Invalid signature: " + err.message, { status: 400 });
     }
 
     // 2. Initialize Supabase with service_role (bypasses RLS)
