@@ -77,6 +77,27 @@
 .stack-sm { display: flex; flex-direction: column; gap: var(--space-sm); }
 .stack-md { display: flex; flex-direction: column; gap: var(--space-md); }
 
+/* JS-generated element helpers */
+.loading-text { text-align: center; color: var(--color-gray); }
+.error-text { color: red; }
+.empty-state { padding: var(--space-xl); text-align: center; }
+.badge--inline { font-size: 0.65rem; padding: 1px 6px; }
+.badge--type-sm { font-size: 0.7rem; padding: 2px 6px; margin-right: 6px; }
+.thumb-img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md); }
+.poster-link { color: var(--color-primary); text-decoration: none; font-size: 0.75rem; }
+.sub-badge-static { position: static; }
+.search-bar--inline { max-width: 300px; margin: 0; }
+.btn--ml-auto { margin-left: auto; }
+.card--no-pad { padding: 0; }
+.formula-parent--sm { padding: 2px 6px; font-size: 0.75rem; }
+.formula-operator--sm { font-size: 0.875rem; }
+.whitespace-nowrap { white-space: nowrap; }
+.max-w-600 { max-width: 600px; }
+.max-w-400 { max-width: 400px; }
+.max-w-200 { max-width: 200px; }
+.text-danger-border { color: #dc3545; border: 1px solid #dc3545; background: transparent; }
+.font-xs-btn { font-size: 0.8rem; }
+
 /* Log box (admin bulk operations) */
 .log-box {
   max-height: 300px;

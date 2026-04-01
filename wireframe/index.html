@@ -622,7 +622,7 @@
       <!-- User Results (shown only when users match) -->
       <div id="search-user-results" class="d-none mb-xl">
         <h2 class="section-heading">ユーザー</h2>
-        <div id="search-user-list" class="card" style="padding:0"></div>
+        <div id="search-user-list" class="card card--no-pad"></div>
       </div>
 
       <!-- Cultivar Results -->
@@ -633,7 +633,7 @@
           <span class="chip active" data-genus="all" data-i18n="filter_all">すべて</span>
         </div>
 
-        <div id="search-cultivar-list" class="card" style="padding:0;"></div>
+        <div id="search-cultivar-list" class="card card--no-pad"></div>
       </div>
 
       <!-- Pagination -->
@@ -1858,7 +1858,7 @@
           // Species/Clones view
           if (g.has_seedlings) html += '<div data-genus-view="species-clones">';
           html += '<div class="sort-bar">';
-          html += '<div class="search-bar" style="max-width:300px;margin:0;">';
+          html += '<div class="search-bar search-bar--inline">';
           html += '<input type="text" class="search-bar__input" placeholder="属内を検索..." data-i18n-placeholder="genus_search">';
           html += '<button class="search-bar__btn">&#x1F50D;</button>';
           html += '</div>';
@@ -1873,10 +1873,10 @@
           html += '<span class="chip filter-chip" data-filter-type="hybrid" data-i18n="filter_hybrid">Hybrid</span>';
           html += '<span class="chip filter-chip" data-filter-type="clone" data-i18n="filter_clone">Clone</span>';
           html += '</div>';
-          html += '<a href="#" class="btn btn--primary btn--sm" data-nav="contribute" data-genus="' + g.name + '" data-i18n="add_cultivar" style="margin-left:auto;">+ 品種を追加</a>';
+          html += '<a href="#" class="btn btn--primary btn--sm" data-nav="contribute" data-genus="' + g.name + '" data-i18n="add_cultivar" class="btn--ml-auto">+ 品種を追加</a>';
           html += '</div>';
 
-          html += '<div class="card" style="padding:0;"></div>';
+          html += '<div class="card card--no-pad"></div>';
           html += '<div class="pagination"></div>';
 
           html += '<div class="ad-placeholder mt-lg">';
@@ -1890,13 +1890,13 @@
             // Seedlings view
             html += '<div data-genus-view="seedlings" style="display:none;">';
             html += '<div class="sort-bar">';
-            html += '<div class="search-bar" style="max-width:300px;margin:0;">';
+            html += '<div class="search-bar search-bar--inline">';
             html += '<input type="text" class="search-bar__input seedling-search" placeholder="実生を検索...">';
             html += '<button class="search-bar__btn">&#x1F50D;</button>';
             html += '</div>';
-            html += '<a href="#" class="btn btn--primary btn--sm" data-nav="contribute" data-genus="' + g.name + '" data-contribute-type="seedling" style="margin-left:auto;">+ 実生を追加</a>';
+            html += '<a href="#" class="btn btn--primary btn--sm" data-nav="contribute" data-genus="' + g.name + '" data-contribute-type="seedling" class="btn--ml-auto">+ 実生を追加</a>';
             html += '</div>';
-            html += '<div class="card seedling-list" style="padding:0;">';
+            html += '<div class="card seedling-list card--no-pad">';
             html += '<div class="text-center text-muted" style="padding:var(--space-xl);">まだ実生が登録されていません。</div>';
             html += '</div>';
             html += '<div class="pagination seedling-pagination"></div>';
@@ -2209,7 +2209,7 @@
           return;
         }
         if (loginMsg) loginMsg.style.display = 'none';
-        grid.innerHTML = '<p style="text-align:center;color:var(--color-gray);">読み込み中...</p>';
+        grid.innerHTML = '<p class="loading-text">読み込み中...</p>';
         var sb = window._supabaseClient;
         if (!sb) return;
         sb.from('cultivars').select('id, genus, cultivar_name, type, created_at')
@@ -2217,7 +2217,7 @@
           .order('created_at', { ascending: false })
           .then(function(res) {
             grid.innerHTML = '';
-            if (res.error) { grid.innerHTML = '<p style="color:red;">エラー: ' + res.error.message + '</p>'; return; }
+            if (res.error) { grid.innerHTML = '<p class="error-text">エラー: ' + res.error.message + '</p>'; return; }
             var rows = res.data || [];
             if (rows.length === 0) {
               if (emptyMsg) emptyMsg.style.display = '';
@@ -2231,10 +2231,10 @@
               var displayName = row.cultivar_name.replace(' [Seedling]', '');
               var date = row.created_at ? new Date(row.created_at).toLocaleDateString('ja-JP') : '';
               var typeBadge = row.type === 'species' ? 'species' : (row.type === 'seedling' ? 'seedling' : (row.type === 'clone' ? 'clone' : 'hybrid'));
-              card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-                '<div><span class="badge badge--' + typeBadge + '" style="font-size:0.7rem;padding:2px 6px;margin-right:6px;">' + (row.type || 'hybrid') + '</span>' +
+              card.innerHTML = '<div class="d-flex justify-between items-center">' +
+                '<div><span class="badge badge--' + typeBadge + ' badge--type-sm">' + (row.type || 'hybrid') + '</span>' +
                 '<strong>' + displayName + '</strong></div>' +
-                '<span style="font-size:0.75rem;color:var(--color-gray);">' + date + '</span></div>';
+                '<span class="text-xs text-muted">' + date + '</span></div>';
               card.addEventListener('click', function() {
                 window.navigateToCultivarById(row.id, row.genus, displayName.replace(row.genus + ' ', ''));
               });
@@ -2517,7 +2517,7 @@
         var thumbKey = isSeedling ? displayName : displayName;
         var thumbPath = _thumbMap[thumbKey];
         var thumbContent = thumbPath
-          ? '<img src="' + (window._SUPABASE_URL || '') + '/storage/v1/object/public/gallery-images/' + thumbPath + '" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-md);" alt="" loading="lazy">'
+          ? '<img src="' + (window._SUPABASE_URL || '') + '/storage/v1/object/public/gallery-images/' + thumbPath + '" class="thumb-img" alt="" loading="lazy">'
           : '<svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg>';
         h += '<div class="cultivar-row__thumb' + (locked ? ' seedling-thumb--locked' : '') + '">' + thumbContent + '</div>';
         h += '<div class="cultivar-row__info">';
@@ -2530,13 +2530,13 @@
         if (!isSeedling) h += '<div class="trust"><div class="trust__bar"><div class="trust__fill trust--low" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + (hasDesc ? trustPct + '%' : '-') + '</span></div>';
         h += '</div>';
         if (entry.formula && !locked) {
-          h += '<div class="text-sm text-muted mt-sm"><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + entry.formula.parentA + '</span><span class="formula-operator" style="font-size:0.875rem;">&times;</span><span class="formula-parent" style="padding:2px 6px;font-size:0.75rem;">' + entry.formula.parentB + '</span></div>';
+          h += '<div class="text-sm text-muted mt-sm"><span class="formula-parent formula-parent--sm">' + entry.formula.parentA + '</span><span class="formula-operator formula-operator--sm">&times;</span><span class="formula-parent formula-parent--sm">' + entry.formula.parentB + '</span></div>';
         }
         if (isSeedling && entry._creatorName && !locked) {
-          h += '<div class="text-xs text-muted" style="margin-top:2px;">作出者: ' + entry._creatorName + '</div>';
+          h += '<div class="text-xs text-muted mt-xs">作出者: ' + entry._creatorName + '</div>';
         }
         if (isSeedling && entry._userId && entry._posterName && !locked) {
-          h += '<div class="text-xs" style="margin-top:2px;"><a href="#/profile/' + entry._userId + '" class="poster-link" style="color:var(--color-primary);text-decoration:none;font-size:0.75rem;" onclick="event.stopPropagation();">&#x1F464; ' + entry._posterName + '</a></div>';
+          h += '<div class="text-xs mt-xs"><a href="#/profile/' + entry._userId + '" class="poster-link" onclick="event.stopPropagation();">&#x1F464; ' + entry._posterName + '</a></div>';
         }
         h += '</div></div>';
         return h;
@@ -2573,7 +2573,7 @@
         }).slice(0, 3);
 
         if (items.length === 0) {
-          grid.innerHTML = '<div class="text-center text-muted" style="grid-column:1/-1;padding:var(--space-xl);">まだ品種が登録されていません。</div>';
+          grid.innerHTML = '<div class="text-center text-muted grid-full empty-state">まだ品種が登録されていません。</div>';
           return;
         }
 
@@ -2591,7 +2591,7 @@
           html += '<svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
           html += '</div>';
           html += '<div class="font-bold">' + displayName + '</div>';
-          html += '<div class="text-sm text-muted">' + genus + ' <span class="badge ' + bi.cls + '" style="font-size:0.65rem;padding:1px 6px;">' + bi.txt + '</span></div>';
+          html += '<div class="text-sm text-muted">' + genus + ' <span class="badge ' + bi.cls + ' badge--inline">' + bi.txt + '</span></div>';
           if (hasOrigins) {
             html += '<div class="trust mt-sm"><div class="trust__bar"><div class="trust__fill ' + trustClass + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + trustPct + '%</span></div>';
           }
@@ -2759,7 +2759,7 @@
         var emptyMsg = document.getElementById('profile-posts-empty');
         if (!sb || !grid) return;
 
-        grid.innerHTML = '<p style="text-align:center;color:var(--color-gray);">読み込み中...</p>';
+        grid.innerHTML = '<p class="loading-text">読み込み中...</p>';
 
         var query = sb.from('cultivars')
           .select('id, genus, cultivar_name, type, created_at')
@@ -2774,7 +2774,7 @@
         query.then(function(res) {
           grid.innerHTML = '';
           if (res.error) {
-            grid.innerHTML = '<p style="color:red;">エラー: ' + res.error.message + '</p>';
+            grid.innerHTML = '<p class="error-text">エラー: ' + res.error.message + '</p>';
             return;
           }
           var rows = res.data || [];
@@ -2792,10 +2792,10 @@
             card.style.cssText = 'cursor:pointer;padding:var(--space-md);';
             var displayName = row.cultivar_name.replace(' [Seedling]', '');
             var date = row.created_at ? new Date(row.created_at).toLocaleDateString('ja-JP') : '';
-            card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-              '<div><span class="badge badge--seedling" style="font-size:0.7rem;padding:2px 6px;margin-right:6px;">seedling</span>' +
+            card.innerHTML = '<div class="d-flex justify-between items-center">' +
+              '<div><span class="badge badge--seedling badge--type-sm">seedling</span>' +
               '<strong>' + displayName + '</strong></div>' +
-              '<span style="font-size:0.75rem;color:var(--color-gray);">' + date + '</span></div>';
+              '<span class="text-xs text-muted">' + date + '</span></div>';
             card.addEventListener('click', function() {
               window.navigateToCultivarById(row.id, row.genus, displayName.replace(row.genus + ' ', ''));
             });
@@ -2885,7 +2885,7 @@
               if (isActive) {
                 var planLabel = sub.plan === 'granted' ? '無料付与' : (sub.plan === 'seedling_annual' ? '年額プラン' : '月額プラン');
                 var html = '<div style="display:flex;align-items:center;gap:var(--space-sm);">';
-                html += '<span class="profile-sub-badge profile-sub-badge--active" style="position:static;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Member</span>';
+                html += '<span class="profile-sub-badge profile-sub-badge--active sub-badge-static"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Member</span>';
                 html += '<span class="text-sm" style="font-weight:600;">' + planLabel + '</span>';
                 html += '</div>';
                 if (sub.current_period_end && sub.plan !== 'granted') {
@@ -2904,7 +2904,7 @@
               } else {
                 // Free user
                 var html = '<div style="display:flex;align-items:center;gap:var(--space-sm);">';
-                html += '<span class="profile-sub-badge profile-sub-badge--free" style="position:static;">Free</span>';
+                html += '<span class="profile-sub-badge profile-sub-badge--free sub-badge-static">Free</span>';
                 html += '<span class="text-sm text-muted">My Seedlings の詳細閲覧・投稿にはサブスクリプションが必要です</span>';
                 html += '</div>';
                 if (isOwnProfile) {
@@ -2923,7 +2923,7 @@
             if (subSection && subContent) {
               subSection.style.display = '';
               var html = '<div style="display:flex;align-items:center;gap:var(--space-sm);">';
-              html += '<span class="profile-sub-badge profile-sub-badge--free" style="position:static;">Free</span>';
+              html += '<span class="profile-sub-badge profile-sub-badge--free sub-badge-static">Free</span>';
               html += '<span class="text-sm text-muted">My Seedlings の詳細閲覧・投稿にはサブスクリプションが必要です</span>';
               html += '</div>';
               if (isOwnProfile) {
@@ -3306,7 +3306,7 @@
 
           html += '<div style="padding:var(--space-sm);">';
           html += '<div class="font-bold">' + displayName + '</div>';
-          html += '<div class="text-sm text-muted">' + genus + ' <span class="badge ' + bi.cls + '" style="font-size:0.65rem;padding:1px 6px;">' + bi.txt + '</span></div>';
+          html += '<div class="text-sm text-muted">' + genus + ' <span class="badge ' + bi.cls + ' badge--inline">' + bi.txt + '</span></div>';
           if (hasOrigins) {
             html += '<div class="trust mt-sm"><div class="trust__bar"><div class="trust__fill ' + trustClass + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + trustPct + '%</span></div>';
           }
@@ -3914,7 +3914,7 @@
       if (isSeedlingView) {
         container = scope.querySelector('.seedling-list');
       } else {
-        container = scope.querySelector('.card[style*="padding:0"]') || scope.querySelector('.card');
+        container = scope.querySelector('.card.card--no-pad') || scope.querySelector('.card');
       }
       if (container) {
         var start = (page - 1) * ITEMS_PER_PAGE;
@@ -3924,7 +3924,7 @@
           html += buildRowHtml(filtered[i].fullName, filtered[i].entry, filtered[i].meta);
         }
         if (filtered.length === 0) {
-          html = '<div style="padding:var(--space-xl);text-align:center;" class="text-muted">' + t('no_results') + '</div>';
+          html = '<div class="text-muted empty-state">' + t('no_results') + '</div>';
         }
         container.innerHTML = html;
 
@@ -4002,7 +4002,7 @@
       var cultivarList = document.getElementById('search-cultivar-list');
       if (cultivarList) {
         if (cultivarResults.length === 0) {
-          cultivarList.innerHTML = '<div style="padding:var(--space-xl);text-align:center;" class="text-muted">' + t('no_results') + '</div>';
+          cultivarList.innerHTML = '<div class="text-muted empty-state">' + t('no_results') + '</div>';
         } else {
           var html = '';
           cultivarResults.forEach(function(item) {
