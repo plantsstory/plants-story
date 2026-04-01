@@ -2559,13 +2559,55 @@
         });
       }
 
-      // Populate "Recently Added" on home page from cultivarData
+      // Fetch genus counts from server and update top page cards
+      function refreshGenusCountsFromServer() {
+        if (!supabase) return;
+        supabase.rpc('get_genus_counts').then(function(res) {
+          if (res.error || !res.data) return;
+          var counts = (typeof res.data === 'object' && !Array.isArray(res.data)) ? (res.data.counts || res.data) : {};
+          (window._generaData || []).forEach(function(gObj) {
+            var card = document.querySelector('.genus-card[data-genus="' + gObj.slug + '"]');
+            if (!card) return;
+            var countEl = card.querySelector('.genus-card__count');
+            if (!countEl) return;
+            // Match by genus name (capitalize first letter)
+            var genusName = gObj.slug.charAt(0).toUpperCase() + gObj.slug.slice(1);
+            var count = counts[genusName] || 0;
+            countEl.textContent = count + (currentLang === 'en' ? ' Cultivars' : ' 品種');
+          });
+        });
+      }
+
+      // Populate "Recently Added" on home page via RPC (server-side)
       function refreshRecentlyAdded() {
         var grid = document.getElementById('recently-added-grid');
         if (!grid) return;
+
+        // Try server-side RPC first
+        if (supabase) {
+          grid.innerHTML = '<div class="text-center text-muted grid-full">読み込み中...</div>';
+          supabase.rpc('get_recent_cultivars', { p_limit: 3 }).then(function(res) {
+            if (res.error || !res.data) {
+              refreshRecentlyAddedFromMemory(grid);
+              return;
+            }
+            var items = Array.isArray(res.data) ? res.data : (res.data.items || []);
+            if (items.length === 0) {
+              grid.innerHTML = '<div class="text-center text-muted grid-full empty-state">まだ品種が登録されていません。</div>';
+              return;
+            }
+            renderRecentCards(grid, items);
+          });
+        } else {
+          refreshRecentlyAddedFromMemory(grid);
+        }
+      }
+
+      // Fallback: render from in-memory cultivarData
+      function refreshRecentlyAddedFromMemory(grid) {
         var items = Object.keys(cultivarData).map(function(name) {
           var d = cultivarData[name];
-          return { name: name, created_at: d._created_at || '', type: d._type || '', origins: d.origins || [] };
+          return { cultivar_name: name, created_at: d._created_at || '', type: d._type || '', origins: d.origins || [] };
         }).filter(function(item) {
           return item.type !== 'seedling';
         }).sort(function(a, b) {
@@ -2576,17 +2618,24 @@
           grid.innerHTML = '<div class="text-center text-muted grid-full empty-state">まだ品種が登録されていません。</div>';
           return;
         }
+        renderRecentCards(grid, items);
+      }
 
+      // Shared renderer for recently added cards
+      function renderRecentCards(grid, items) {
         var html = '';
         items.forEach(function(item) {
-          var displayName = item.name.replace(' [Seedling]', '');
+          var name = item.cultivar_name;
+          var displayName = name.replace(' [Seedling]', '');
           var genus = displayName.split(' ')[0];
-          var hasOrigins = item.origins.length > 0 && item.origins[0].trust > 0;
-          var trustPct = hasOrigins ? item.origins.reduce(function(max, o) { return Math.max(max, o.trust || 0); }, 0) : 0;
+          var origins = item.origins || [];
+          var type = item.type || '';
+          var hasOrigins = origins.length > 0 && origins[0].trust > 0;
+          var trustPct = hasOrigins ? origins.reduce(function(max, o) { return Math.max(max, o.trust || 0); }, 0) : 0;
           var trustClass = getTrustClass(trustPct);
-          var bi = getBadgeInfo(item.type, item.name);
+          var bi = getBadgeInfo(type, name);
 
-          html += '<div class="card card--clickable" data-nav="cultivar" data-key="' + item.name.replace(/"/g, '&quot;') + '">';
+          html += '<div class="card card--clickable" data-nav="cultivar" data-key="' + name.replace(/"/g, '&quot;') + '">';
           html += '<div class="recent-card__img">';
           html += '<svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
           html += '</div>';
@@ -2655,13 +2704,15 @@
               var meta = { genus: genus, type: row.type || 'Hybrid', created_at: row.created_at || '', user_id: row.user_id || null, id: row.id };
               addCultivarRow(row.cultivar_name, entry, meta);
             });
+            // Mark full data as loaded
+            _dataFullyLoaded = true;
+            window._dataFullyLoaded = true;
             // Re-render all genus pages from data store
             (window._generaData || []).forEach(function(gObj) {
               var section = document.getElementById('genus-' + gObj.slug);
               if (section) paginateGenus(section, 1);
             });
             refreshGenusUI();
-            refreshRecentlyAdded();
             setTimeout(loadCultivarThumbnails, 100);
             // Sync localStorage: only remove entries that exist in DB with origins intact
             try {
@@ -2705,6 +2756,10 @@
       // Run after DOM is ready — load genera first, then cultivars
       function startApp() {
         window._generaLoaded = loadGenera().then(function() {
+          // Fast: fetch top page data from RPCs (genus counts + recent cultivars)
+          refreshRecentlyAdded();
+          refreshGenusCountsFromServer();
+          // Full data load (deferred, builds in-memory cache)
           restoreUserCultivars();
           setTimeout(pollPendingAIResearch, 2000);
         });
@@ -3875,9 +3930,128 @@
 
     // ---- Data-driven pagination: renders only current page from memory ----
     var ITEMS_PER_PAGE = 10;
+    var _dataFullyLoaded = false; // true after full Supabase fetch completes
+    window._dataFullyLoaded = false;
+
+    // Convert RPC row to _genusItems format
+    function rpcRowToItem(row) {
+      var origins = (row.origins || []).filter(function(o) { return !o || o._type !== 'formula'; });
+      var formula = null;
+      (row.origins || []).forEach(function(o) { if (o && o._type === 'formula') formula = o.formula; });
+      var entry = { origins: origins, formula: formula, _type: row.type, _created_at: row.created_at || '', _userId: row.user_id || null };
+      if (row.id) entry._id = row.id;
+      if (formula && formula.creatorName) entry._creatorName = formula.creatorName;
+      var meta = { genus: row.genus, type: row.type || 'Hybrid', created_at: row.created_at || '', user_id: row.user_id || null, id: row.id };
+      return { fullName: row.cultivar_name, entry: entry, meta: meta };
+    }
 
     function paginateGenus(genusEl, page) {
       page = page || 1;
+      var scope = getActiveView(genusEl);
+      var slug = genusEl.id.replace('genus-', '');
+      var allItems = _genusItems[slug] || [];
+
+      // If no data loaded yet for this genus, try server-side pagination
+      if (allItems.length === 0 && !_dataFullyLoaded && window._supabaseClient) {
+        paginateGenusFromServer(genusEl, page);
+        return;
+      }
+
+      // Use in-memory pagination (data is loaded)
+      paginateGenusFromMemory(genusEl, page);
+    }
+
+    // Server-side paginated fetch via RPC
+    function paginateGenusFromServer(genusEl, page) {
+      var scope = getActiveView(genusEl);
+      var slug = genusEl.id.replace('genus-', '');
+      var genusName = slug.charAt(0).toUpperCase() + slug.slice(1);
+
+      // Determine sort/filter/search from UI
+      var sortChips = scope.querySelectorAll('.chip:not(.filter-chip)');
+      var sortMode = 'name';
+      sortChips.forEach(function(c) {
+        if (c.classList.contains('active')) {
+          var txt = c.textContent.trim();
+          if (txt.indexOf('信頼') !== -1 || txt.indexOf('Trust') !== -1) sortMode = 'trust';
+          else if (txt.indexOf('新着') !== -1 || txt.indexOf('Newest') !== -1) sortMode = 'newest';
+        }
+      });
+
+      var isSeedlingView = scope.getAttribute('data-genus-view') === 'seedlings';
+      var activeFilterChip = scope.querySelector('.filter-chip.active');
+      var filterType = activeFilterChip ? activeFilterChip.getAttribute('data-filter-type') : 'all';
+      var typeFilter = isSeedlingView ? 'seedling' : filterType;
+
+      var searchInput = scope.querySelector('.search-bar__input');
+      var searchQuery = (searchInput ? searchInput.value.trim() : '') || null;
+
+      var offset = (page - 1) * ITEMS_PER_PAGE;
+
+      // Show loading state
+      var container;
+      if (isSeedlingView) {
+        container = scope.querySelector('.seedling-list');
+      } else {
+        container = scope.querySelector('.card.card--no-pad') || scope.querySelector('.card');
+      }
+      if (container) container.innerHTML = '<div class="text-muted empty-state">読み込み中...</div>';
+
+      window._supabaseClient.rpc('get_cultivars_paginated', {
+        p_genus: genusName,
+        p_type_filter: typeFilter,
+        p_sort: sortMode,
+        p_search: searchQuery,
+        p_limit: ITEMS_PER_PAGE,
+        p_offset: offset
+      }).then(function(res) {
+        if (res.error || !res.data || !res.data.success) {
+          if (container) container.innerHTML = '<div class="text-muted empty-state">' + t('no_results') + '</div>';
+          return;
+        }
+
+        var total = res.data.total || 0;
+        var items = (res.data.items || []).map(rpcRowToItem);
+        var totalPages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
+        if (page > totalPages) page = totalPages;
+
+        // Render rows
+        if (container) {
+          var html = '';
+          items.forEach(function(item) {
+            html += buildRowHtml(item.fullName, item.entry, item.meta);
+          });
+          if (items.length === 0) {
+            html = '<div class="text-muted empty-state">' + t('no_results') + '</div>';
+          }
+          container.innerHTML = html;
+
+          // Attach click handlers for locked seedlings
+          if (isSeedlingView) {
+            container.querySelectorAll('.cultivar-row--locked').forEach(function(row) {
+              row.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                showPaywallModal();
+              });
+            });
+          }
+        }
+
+        // Also populate cultivarData cache for detail page navigation
+        items.forEach(function(item) {
+          if (!cultivarData[item.fullName]) {
+            cultivarData[item.fullName] = item.entry;
+          }
+        });
+
+        // Render pagination UI
+        renderPaginationUI(scope, page, totalPages, total, searchQuery);
+      });
+    }
+
+    // In-memory pagination (original logic)
+    function paginateGenusFromMemory(genusEl, page) {
       var scope = getActiveView(genusEl);
       var slug = genusEl.id.replace('genus-', '');
       var allItems = _genusItems[slug] || [];
@@ -3940,7 +4114,16 @@
         }
       }
 
-      // Update pagination UI
+      // Render pagination UI
+      var isSeedling = scope.getAttribute('data-genus-view') === 'seedlings';
+      var totalCount = allItems.filter(function(it) { return isSeedling ? it.meta.type === 'seedling' : it.meta.type !== 'seedling'; }).length;
+      var searchInput = scope.querySelector('.search-bar__input');
+      var searchQuery = searchInput ? searchInput.value.trim() : '';
+      renderPaginationUI(scope, page, totalPages, totalCount, searchQuery || null);
+    }
+
+    // Shared pagination UI renderer
+    function renderPaginationUI(scope, page, totalPages, totalCount, searchQuery) {
       var pagDiv = scope.querySelector('.pagination');
       if (!pagDiv) return;
       pagDiv.innerHTML = '';
@@ -3968,11 +4151,9 @@
       // Update count text
       var countEl = scope.querySelector('.text-muted.mb-lg');
       if (countEl) {
-        var isSeedling = scope.getAttribute('data-genus-view') === 'seedlings';
-        var totalCount = allItems.filter(function(it) { return isSeedling ? it.meta.type === 'seedling' : it.meta.type !== 'seedling'; }).length;
-        var searchInput = scope.querySelector('.search-bar__input');
-        if (searchInput && searchInput.value.trim()) {
-          countEl.textContent = filtered.length + ' 件ヒット（全 ' + totalCount + ' 品種中）';
+        if (searchQuery) {
+          // For server-side, total IS the filtered count; for memory, it's the view total
+          countEl.textContent = totalCount + ' 品種が登録されています';
         } else {
           countEl.textContent = totalCount + ' 品種が登録されています';
         }
