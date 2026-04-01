@@ -22,9 +22,9 @@
   --color-trust-low: #BC4749;
 
   /* Typography */
-  --font-heading: "Varela Round", "Kiwi Maru", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
+  --font-heading: "Varela Round", "Zen Maru Gothic", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
   --font-heading-en: "Varela Round", "Helvetica Neue", Arial, sans-serif;
-  --font-primary: "Varela Round", "Kiwi Maru", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
+  --font-primary: "Varela Round", "Zen Maru Gothic", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "Fira Code", "Courier New", monospace;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
