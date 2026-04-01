@@ -2531,7 +2531,7 @@
         row.setAttribute('data-type', meta.type);
         if (meta.created_at) row.setAttribute('data-created', meta.created_at);
         var badgeClass = meta.type === 'species' ? 'badge--species' : (meta.type === 'hybrid' ? 'badge--hybrid' : (meta.type === 'seedling' ? 'badge--seedling' : 'badge--clone'));
-        var badgeText = meta.type === 'species' ? t('badge_species') : (meta.type === 'hybrid' ? 'Hybrid' : (meta.type === 'seedling' ? 'Seedling' : 'Clone'));
+        var badgeText = meta.type === 'species' ? getSpeciesBadgeText(fullName) : (meta.type === 'hybrid' ? 'Hybrid' : (meta.type === 'seedling' ? 'Seedling' : 'Clone'));
         var hasDesc = entry.origins.length > 0 && entry.origins[0].trust > 0;
         var originCount = hasDesc ? entry.origins.length : 0;
         var trustPct = hasDesc ? entry.origins[0].trust : 0;
@@ -2621,7 +2621,7 @@
           var trustPct = hasOrigins ? item.origins.reduce(function(max, o) { return Math.max(max, o.trust || 0); }, 0) : 0;
           var trustClass = trustPct >= 70 ? 'trust--high' : (trustPct >= 40 ? 'trust--mid' : 'trust--low');
           var badgeClass = item.type === 'species' ? 'badge--species' : (item.type === 'hybrid' ? 'badge--hybrid' : 'badge--clone');
-          var badgeText = item.type === 'species' ? t('badge_species') : (item.type === 'hybrid' ? 'Hybrid' : 'Clone');
+          var badgeText = item.type === 'species' ? getSpeciesBadgeText(item.name) : (item.type === 'hybrid' ? 'Hybrid' : 'Clone');
 
           html += '<div class="card card--clickable" data-nav="cultivar" data-key="' + item.name.replace(/"/g, '&quot;') + '">';
           html += '<div class="recent-card__img">';
@@ -3332,7 +3332,7 @@
           var genus = displayName.split(' ')[0];
           var type = cData._type || 'species';
           var badgeClass = type === 'species' ? 'badge--species' : (type === 'hybrid' ? 'badge--hybrid' : (type === 'clone' ? 'badge--clone' : 'badge--seedling'));
-          var badgeText = type === 'species' ? t('badge_species') : (type === 'hybrid' ? 'Hybrid' : (type === 'clone' ? 'Clone' : 'Seedling'));
+          var badgeText = type === 'species' ? getSpeciesBadgeText(name) : (type === 'hybrid' ? 'Hybrid' : (type === 'clone' ? 'Clone' : 'Seedling'));
           var hasOrigins = cData.origins && cData.origins.length > 0 && cData.origins[0].trust > 0;
           var trustPct = hasOrigins ? cData.origins.reduce(function(max, o) { return Math.max(max, o.trust || 0); }, 0) : 0;
           var trustClass = trustPct >= 70 ? 'trust--high' : (trustPct >= 40 ? 'trust--mid' : 'trust--low');
@@ -3708,7 +3708,7 @@
       // Get badge info from row, or fallback to cultivarData._type
       var badgeEl = rowEl ? rowEl.querySelector('.badge') : null;
       var badgeClass = 'badge--species';
-      var badgeText = '原種 / Original Species';
+      var badgeText = getSpeciesBadgeText(cultivarName);
       if (badgeEl) {
         if (badgeEl.classList.contains('badge--hybrid')) {
           badgeClass = 'badge--hybrid'; badgeText = 'Hybrid';
@@ -3729,6 +3729,7 @@
           if (_tempData._type === 'hybrid') { badgeClass = 'badge--hybrid'; badgeText = 'Hybrid'; }
           else if (_tempData._type === 'clone') { badgeClass = 'badge--clone'; badgeText = 'Clone'; }
           else if (_tempData._type === 'seedling') { badgeClass = 'badge--seedling'; badgeText = 'Seedling'; }
+          else { badgeText = getSpeciesBadgeText(cultivarName); }
         }
       }
 
@@ -4649,6 +4650,16 @@
     function t(key) {
       var entry = translations[key];
       return entry ? (entry[currentLang] || entry.jp) : key;
+    }
+
+    // Get species badge text based on cultivar name (aff., sp., cf., etc.)
+    function getSpeciesBadgeText(name) {
+      if (!name) return t('badge_species');
+      var lower = name.toLowerCase();
+      if (/\baff\b\.?/.test(lower)) return 'aff.';
+      if (/\bsp\b\.?/.test(lower)) return 'sp.';
+      if (/\bcf\b\.?/.test(lower)) return 'cf.';
+      return t('badge_species');
     }
 
     function applyLanguage(lang) {
@@ -6063,7 +6074,7 @@
                 row.setAttribute('data-nav', 'cultivar');
                 row.setAttribute('data-type', type);
                 var badgeClass = type === 'species' ? 'badge--species' : (type === 'hybrid' ? 'badge--hybrid' : (type === 'seedling' ? 'badge--seedling' : 'badge--clone'));
-                var badgeText = type === 'species' ? t('badge_species') : (type === 'hybrid' ? 'Hybrid' : (type === 'seedling' ? 'Seedling' : 'Clone'));
+                var badgeText = type === 'species' ? getSpeciesBadgeText(fullName) : (type === 'hybrid' ? 'Hybrid' : (type === 'seedling' ? 'Seedling' : 'Clone'));
                 var rowHtml = '<div class="cultivar-row__thumb"><svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg></div>';
                 rowHtml += '<div class="cultivar-row__info">';
                 var displayName = isSeedling ? fullName.replace(' [Seedling]', '') : fullName;
