@@ -47,7 +47,7 @@
   </header>
 
   <!-- Mobile Nav -->
-  <div class="mobile-nav" id="mobileNav">
+  <nav class="mobile-nav" id="mobileNav" aria-label="モバイルナビゲーション">
     <a href="#" data-nav="top" data-i18n="nav_home">&#x1F3E0; Home</a>
     <span id="mobile-nav-genera"></span>
     <a href="#" data-nav="favorites" data-i18n="nav_favorites">&#x2606; お気に入り</a>
@@ -56,8 +56,9 @@
     <div class="mt-sm" style="border-top:1px solid rgba(255,255,255,0.15);padding-top:var(--space-sm);">
       <a href="#" id="nav-auth" onclick="event.preventDefault();document.getElementById('header-auth-btn').click();document.getElementById('mobileNav').classList.remove('open');">&#x1F511; ログイン</a>
     </div>
-  </div>
+  </nav>
 
+  <main id="app-main">
   <!-- ========================================
        PAGE 1: TOP / LANDING
        ======================================== -->
@@ -79,7 +80,7 @@
         </p>
         <div class="search-bar mt-lg">
           <input type="text" class="search-bar__input" placeholder="品種名・ユーザー名を検索..." data-i18n-placeholder="search_placeholder">
-          <button class="search-bar__btn" data-nav="search">&#x1F50D;</button>
+          <button class="search-bar__btn" data-nav="search" aria-label="検索">&#x1F50D;</button>
         </div>
       </div>
 
@@ -185,7 +186,7 @@
         </div>
         <div class="flex gap-sm flex-align-center flex-wrap mt-sm">
           <button id="fav-btn" class="btn btn--sm btn--secondary cursor-pointer" style="font-size:0.8rem;white-space:nowrap;" title="お気に入り">&#x2606; お気に入り追加</button>
-          <button id="share-btn" class="btn btn--sm btn--secondary cursor-pointer" style="font-size:0.8rem;white-space:nowrap;" title="シェア">&#x1F517; シェア</button>
+          <button id="share-btn" class="btn btn--sm btn--secondary cursor-pointer" style="font-size:0.8rem;white-space:nowrap;" title="シェア" aria-label="この品種をシェア">&#x1F517; シェア</button>
           <div id="share-menu" class="hidden" style="position:absolute;z-index:50;background:var(--color-white);border:1px solid var(--color-light);border-radius:var(--radius-md);box-shadow:var(--shadow);padding:var(--space-sm);display:flex;gap:var(--space-sm);"></div>
           <div class="flex gap-sm flex-align-center" id="edit-key-section">
             <input type="password" id="detail-edit-key" class="form-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="編集キー" style="width:100px;padding:4px 8px;font-size:0.85rem;">
@@ -200,7 +201,7 @@
       <div class="mb-lg">
         <h2 class="section-title" data-i18n="images">画像</h2>
         <div class="gallery-carousel" id="gallery-carousel">
-          <button class="gallery-carousel__arrow gallery-carousel__arrow--left d-none" id="gallery-prev">&#x2039;</button>
+          <button class="gallery-carousel__arrow gallery-carousel__arrow--left d-none" id="gallery-prev" aria-label="前の画像">&#x2039;</button>
           <div class="gallery-carousel__viewport">
             <div class="gallery">
               <div class="gallery__empty">
@@ -220,7 +221,7 @@
               </div>
             </div>
           </div>
-          <button class="gallery-carousel__arrow gallery-carousel__arrow--right d-none" id="gallery-next">&#x203A;</button>
+          <button class="gallery-carousel__arrow gallery-carousel__arrow--right d-none" id="gallery-next" aria-label="次の画像">&#x203A;</button>
         </div>
         <div class="gallery-carousel__counter d-none" id="gallery-counter"></div>
         <p class="text-xs text-gray mt-sm" data-i18n="image_policy">
@@ -984,7 +985,7 @@
         <h2 class="section-title">My Seedlings</h2>
         <div class="search-bar mt-md mb-md" style="max-width:400px;">
           <input type="text" class="search-bar__input" id="profile-post-search" placeholder="品種名で検索...">
-          <button class="search-bar__btn">&#x1F50D;</button>
+          <button class="search-bar__btn" aria-label="検索">&#x1F50D;</button>
         </div>
         <div id="profile-posts-grid" class="card-grid"></div>
         <div id="profile-posts-empty" class="d-none text-center p-xl" style="color:var(--color-gray);">
@@ -1096,6 +1097,7 @@
       <p class="paywall-modal__note">決済はStripeにより安全に処理されます。解約後も投稿済みの実生は閲覧・削除が可能です。</p>
     </div>
   </div>
+  </main>
 
   <footer class="footer">
     <div class="container footer__inner">
@@ -1865,7 +1867,7 @@
           html += '<div class="sort-bar">';
           html += '<div class="search-bar search-bar--inline">';
           html += '<input type="text" class="search-bar__input" placeholder="属内を検索..." data-i18n-placeholder="genus_search">';
-          html += '<button class="search-bar__btn">&#x1F50D;</button>';
+          html += '<button class="search-bar__btn" aria-label="検索">&#x1F50D;</button>';
           html += '</div>';
           html += '<div class="chips">';
           html += '<span class="chip active" data-i18n="sort_name">名前順</span>';
@@ -1897,7 +1899,7 @@
             html += '<div class="sort-bar">';
             html += '<div class="search-bar search-bar--inline">';
             html += '<input type="text" class="search-bar__input seedling-search" placeholder="実生を検索...">';
-            html += '<button class="search-bar__btn">&#x1F50D;</button>';
+            html += '<button class="search-bar__btn" aria-label="検索">&#x1F50D;</button>';
             html += '</div>';
             html += '<a href="#" class="btn btn--primary btn--sm" data-nav="contribute" data-genus="' + g.name + '" data-contribute-type="seedling" class="btn--ml-auto">+ 実生を追加</a>';
             html += '</div>';
