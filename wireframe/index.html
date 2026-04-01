@@ -2114,6 +2114,7 @@
 
       // Show paywall modal
       window.showPaywallModal = showPaywallModal;
+      window.showPaywallModal = showPaywallModal;
       function showPaywallModal() {
         var modal = document.getElementById('paywall-modal');
         if (modal) modal.style.display = 'flex';
@@ -2125,6 +2126,7 @@
       }
 
       // Check seedling access for a given cultivar
+      window.canAccessSeedling = canAccessSeedling;
       window.canAccessSeedling = canAccessSeedling;
       function canAccessSeedling(entry) {
         if (window._isSubscribed) return 'full';
@@ -2499,6 +2501,7 @@
       }
 
       // Build HTML for a single cultivar row (pure function, no DOM mutation)
+      window.buildRowHtml = buildRowHtml;
       function buildRowHtml(fullName, entry, meta) {
         var isSeedling = meta.type === 'seedling';
         var seedlingAccess = isSeedling ? canAccessSeedling(entry) : 'full';
