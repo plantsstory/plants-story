@@ -2312,30 +2312,100 @@ function renderUsersPagination(total) {
   el.innerHTML = html;
 }
 
-function grantSubscription(userId) {
+async function grantSubscription(userId) {
   if (!confirm('このユーザーにサブスクリプションを無料付与しますか？')) return;
-  sb.rpc('admin_grant_subscription', { p_user_id: userId }).then(function(res) {
+  try {
+    showToast('処理中...');
+    var res = await sb.rpc('admin_grant_subscription', { p_user_id: userId });
     if (res.error) { showToast('エラー: ' + res.error.message); return; }
-    if (res.data && res.data.success) {
-      showToast('サブスクリプションを付与しました');
-      loadUsers();
-    } else {
-      showToast('エラー: ' + (res.data ? res.data.error : 'Unknown'));
-    }
-  });
+    showToast('サブスクリプションを付与しました');
+    await loadUsersAsync();
+  } catch (e) {
+    showToast('エラー: ' + e.message);
+  }
 }
 
-function revokeSubscription(userId) {
+async function revokeSubscription(userId) {
   if (!confirm('このユーザーの無料付与を取り消しますか？')) return;
-  sb.rpc('admin_revoke_subscription', { p_user_id: userId }).then(function(res) {
+  try {
+    showToast('処理中...');
+    var res = await sb.rpc('admin_revoke_subscription', { p_user_id: userId });
     if (res.error) { showToast('エラー: ' + res.error.message); return; }
-    if (res.data && res.data.success) {
-      showToast('付与を取り消しました');
-      loadUsers();
-    } else {
-      showToast('エラー: ' + (res.data ? res.data.error : 'Unknown'));
-    }
+    showToast('付与を取り消しました');
+    await loadUsersAsync();
+  } catch (e) {
+    showToast('エラー: ' + e.message);
+  }
+}
+
+// Async version of loadUsers for await usage
+async function loadUsersAsync() {
+  var search = document.getElementById('user-search').value.trim();
+  var filterStatus = document.getElementById('user-filter-status').value;
+  var tbody = document.getElementById('users-tbody');
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--color-gray);">読み込み中...</td></tr>';
+
+  var res = await sb.rpc('admin_list_users', {
+    p_search: search || null,
+    p_filter_status: filterStatus || null,
+    p_limit: usersPerPage,
+    p_offset: usersPage * usersPerPage
   });
+  if (res.error) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:red;">' + res.error.message + '</td></tr>';
+    return;
+  }
+  var data = res.data;
+  if (!data.success) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:red;">' + (data.error || 'Error') + '</td></tr>';
+    return;
+  }
+  var users = data.users || [];
+  var total = data.total || 0;
+
+  if (users.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--color-gray);">ユーザーが見つかりません</td></tr>';
+    renderUsersPagination(total);
+    return;
+  }
+
+  var html = '';
+  users.forEach(function(u) {
+    var planLabel = u.subscription_plan === 'granted' ? '<span style="color:#8b5cf6;font-weight:600;">無料付与</span>' :
+      u.subscription_plan === 'seedling_monthly' ? '月額' :
+      u.subscription_plan === 'seedling_annual' ? '年額' : 'Free';
+    var statusBadge = '';
+    if (u.subscription_status === 'active') statusBadge = '<span class="badge-sm badge-green">Active</span>';
+    else if (u.subscription_status === 'past_due') statusBadge = '<span class="badge-sm badge-yellow">Past Due</span>';
+    else if (u.subscription_status === 'canceled') statusBadge = '<span class="badge-sm badge-red">Canceled</span>';
+    else statusBadge = '<span class="badge-sm badge-gray">-</span>';
+
+    var endDate = u.current_period_end ? new Date(u.current_period_end).toLocaleDateString('ja-JP') : '-';
+    if (u.cancel_at_period_end) endDate += ' (解約予定)';
+
+    var actions = '';
+    if (u.subscription_plan === 'granted') {
+      actions = '<button class="btn btn-sm btn-danger" onclick="revokeSubscription(\'' + u.id + '\')">付与取消</button>';
+    } else if (u.subscription_status !== 'active') {
+      actions = '<button class="btn btn-sm btn-primary" onclick="grantSubscription(\'' + u.id + '\')">無料付与</button>';
+    } else {
+      actions = '<span class="text-sm text-muted">Stripe管理</span>';
+    }
+
+    html += '<tr>';
+    html += '<td>' +
+      '<div style="display:flex;align-items:center;gap:8px;">' +
+      (u.avatar_url ? '<img src="' + u.avatar_url + '" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">' : '<span style="width:28px;height:28px;border-radius:50%;background:var(--color-light);display:inline-block;"></span>') +
+      '<span>' + (u.display_name || '(未設定)') + '</span>' +
+      '</div></td>';
+    html += '<td>' + (u.username ? '@' + u.username : '<span class="text-muted">-</span>') + '</td>';
+    html += '<td>' + planLabel + ' ' + statusBadge + '</td>';
+    html += '<td style="font-size:var(--font-size-xs);">' + endDate + '</td>';
+    html += '<td>' + actions + '</td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+  renderUsersPagination(total);
 }
 
 // User search & filter
