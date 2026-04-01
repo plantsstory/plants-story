@@ -2282,7 +2282,7 @@ function loadUsers() {
       } else if (u.subscription_status !== 'active') {
         actions = '<button class="btn btn-sm btn-primary" data-action="grant" data-uid="' + u.id + '">無料付与</button>';
       } else {
-        actions = '<span class="text-sm text-muted">Stripe管理</span>';
+        actions = '<span class="text-sm text-muted">Stripe管理</span> <button class="btn btn-sm btn-outline" data-action="grant" data-uid="' + u.id + '">無期限付与</button>';
       }
 
       html += '<tr>';
