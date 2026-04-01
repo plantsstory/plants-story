@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/utilities.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -377,29 +378,29 @@
     <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);text-align:center;">管理画面へのアクセスにはアクセスコードが必要です</p>
     <div id="gate-error" class="login-error"></div>
     <input type="password" id="gate-code" placeholder="アクセスコード" autocomplete="off">
-    <button class="btn btn-primary" style="width:100%;justify-content:center;" id="btn-gate">認証</button>
+    <button class="btn btn-primary w-full justify-center" id="btn-gate">認証</button>
   </div>
 </div>
 
 <!-- ============ LOGIN SCREEN ============ -->
-<div id="login-screen" class="login-container" style="display:none;">
+<div id="login-screen" class="login-container d-none">
   <div class="login-box">
     <h1>ひなたぼっこぷらんつ Admin</h1>
     <div id="login-error" class="login-error"></div>
     <input type="email" id="login-email" placeholder="メールアドレス" autocomplete="email">
     <input type="password" id="login-password" placeholder="パスワード" autocomplete="current-password">
-    <button class="btn btn-primary" style="width:100%;justify-content:center;" id="btn-login">ログイン</button>
+    <button class="btn btn-primary w-full justify-center" id="btn-login">ログイン</button>
   </div>
 </div>
 
 <!-- ============ ADMIN APP ============ -->
 <div id="admin-app" class="hidden">
   <header class="admin-header">
-    <div style="display:flex;align-items:center;gap:var(--space-sm);">
+    <div class="flex-center-sm">
       <button class="hamburger-btn" id="hamburger-btn" aria-label="メニュー">☰</button>
       <h1>ひなたぼっこぷらんつ Admin</h1>
     </div>
-    <div style="display:flex;align-items:center;gap:var(--space-md);">
+    <div class="flex-center-md">
       <span class="user-info" id="admin-email"></span>
       <button id="btn-logout">ログアウト</button>
       <a href="index.html" style="color:#fff;font-size:var(--font-size-sm);text-decoration:none;opacity:0.7;">サイトへ</a>
@@ -442,10 +443,10 @@
             <div class="stat-label">AIリサーチ待ち</div>
           </div>
         </div>
-        <h3 style="margin-bottom:var(--space-md);font-size:var(--font-size-base);">Tier分布</h3>
-        <div id="tier-distribution" style="display:flex;gap:var(--space-sm);margin-bottom:var(--space-xl);flex-wrap:wrap;"></div>
-        <h3 style="margin-bottom:var(--space-md);font-size:var(--font-size-base);">属別品種数</h3>
-        <div id="genus-distribution" style="display:flex;gap:var(--space-sm);flex-wrap:wrap;"></div>
+        <h3 class="section-heading">Tier分布</h3>
+        <div id="tier-distribution" class="d-flex gap-sm mb-xl flex-wrap"></div>
+        <h3 class="section-heading">属別品種数</h3>
+        <div id="genus-distribution" class="d-flex gap-sm flex-wrap"></div>
       </section>
 
       <!-- ---- GENERA ---- -->
@@ -503,7 +504,7 @@
       <!-- ---- ORIGINS ---- -->
       <section id="sec-origins" class="hidden">
         <h2 class="section-title">由来管理</h2>
-        <div class="toolbar" style="flex-wrap:wrap;gap:8px;">
+        <div class="toolbar flex-wrap gap-xs">
           <select id="origin-cultivar-select" style="width:350px;">
             <option value="">すべての品種</option>
           </select>
@@ -522,45 +523,45 @@
       <!-- ---- IMAGES ---- -->
       <section id="sec-images" class="hidden">
         <h2 class="section-title">画像管理</h2>
-        <div style="display:flex;gap:0;margin-bottom:var(--space-md);border-bottom:2px solid var(--color-light);">
-          <button class="btn btn-sm image-tab active" data-image-tab="gallery" style="border-radius:var(--radius-md) var(--radius-md) 0 0;border-bottom:2px solid var(--color-primary);margin-bottom:-2px;font-weight:600;">ギャラリー画像</button>
-          <button class="btn btn-sm image-tab" data-image-tab="formula" style="border-radius:var(--radius-md) var(--radius-md) 0 0;margin-bottom:-2px;opacity:0.6;">交配式画像（母/父）</button>
+        <div class="tab-bar">
+          <button class="btn btn-sm image-tab tab-btn active" data-image-tab="gallery">ギャラリー画像</button>
+          <button class="btn btn-sm image-tab tab-btn" data-image-tab="formula">交配式画像（母/父）</button>
         </div>
         <div id="gallery-tab-content">
           <div class="toolbar">
             <input type="text" id="image-search" placeholder="品種名で検索...">
-            <label style="display:flex;align-items:center;gap:4px;font-size:var(--font-size-sm);cursor:pointer;">
+            <label class="d-flex items-center gap-xs text-sm cursor-pointer">
               <input type="checkbox" id="image-flag-filter"> Fake票が多い画像のみ
             </label>
             <button class="btn btn-primary btn-sm" id="btn-refresh-images">更新</button>
           </div>
-          <div id="image-stats" style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);"></div>
-          <div id="image-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--space-md);"></div>
+          <div id="image-stats" class="desc-text mb-md"></div>
+          <div id="image-grid" class="card-grid-sm"></div>
         </div>
-        <div id="formula-tab-content" style="display:none;">
+        <div id="formula-tab-content" class="d-none">
           <div class="toolbar">
             <input type="text" id="formula-image-search" placeholder="品種名で検索...">
             <button class="btn btn-primary btn-sm" id="btn-refresh-formula-images">更新</button>
           </div>
-          <div id="formula-image-stats" style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);"></div>
-          <div id="formula-image-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--space-md);"></div>
+          <div id="formula-image-stats" class="desc-text mb-md"></div>
+          <div id="formula-image-grid" class="card-grid-sm"></div>
         </div>
       </section>
 
       <!-- ---- DELETION REQUESTS ---- -->
       <section id="sec-delete-requests" class="hidden">
         <h2 class="section-title">削除依頼</h2>
-        <div style="display:flex;gap:0;margin-bottom:var(--space-md);border-bottom:2px solid var(--color-light);">
-          <button class="btn btn-sm dr-tab active" data-dr-tab="cultivar" style="border-radius:var(--radius-md) var(--radius-md) 0 0;border-bottom:2px solid var(--color-primary);margin-bottom:-2px;font-weight:600;">品種</button>
-          <button class="btn btn-sm dr-tab" data-dr-tab="image" style="border-radius:var(--radius-md) var(--radius-md) 0 0;margin-bottom:-2px;opacity:0.6;">画像</button>
+        <div class="tab-bar">
+          <button class="btn btn-sm dr-tab tab-btn active" data-dr-tab="cultivar">品種</button>
+          <button class="btn btn-sm dr-tab tab-btn" data-dr-tab="image">画像</button>
         </div>
         <div id="dr-cultivar-content">
-          <div id="dr-cultivar-list" style="display:grid;gap:var(--space-md);"></div>
-          <p id="dr-cultivar-empty" style="color:var(--color-gray);font-size:var(--font-size-sm);">品種の削除依頼はありません</p>
+          <div id="dr-cultivar-list" class="d-grid gap-md"></div>
+          <p id="dr-cultivar-empty" class="desc-text">品種の削除依頼はありません</p>
         </div>
-        <div id="dr-image-content" style="display:none;">
-          <div id="dr-image-list" style="display:grid;gap:var(--space-md);"></div>
-          <p id="dr-image-empty" style="color:var(--color-gray);font-size:var(--font-size-sm);">画像の削除依頼はありません</p>
+        <div id="dr-image-content" class="d-none">
+          <div id="dr-image-list" class="d-grid gap-md"></div>
+          <p id="dr-image-empty" class="desc-text">画像の削除依頼はありません</p>
         </div>
       </section>
 
@@ -571,7 +572,7 @@
           <button class="btn btn-primary" id="btn-add-affiliate">＋ 新規追加</button>
           <button class="btn btn-outline" id="btn-refresh-affiliates">更新</button>
         </div>
-        <div id="affiliate-list" style="display:grid;gap:var(--space-md);margin-top:var(--space-md);"></div>
+        <div id="affiliate-list" class="d-grid gap-md mt-md"></div>
       </section>
 
       <!-- ---- USER MANAGEMENT ---- -->
@@ -588,7 +589,7 @@
           </select>
           <button class="btn btn-outline btn-sm" id="btn-refresh-users">更新</button>
         </div>
-        <div id="users-table-wrap" style="margin-top:var(--space-md);">
+        <div id="users-table-wrap" class="mt-md">
           <table class="data-table">
             <thead>
               <tr>
@@ -602,22 +603,22 @@
             <tbody id="users-tbody"></tbody>
           </table>
         </div>
-        <div id="users-pagination" style="margin-top:var(--space-md);display:flex;gap:var(--space-sm);align-items:center;"></div>
+        <div id="users-pagination" class="mt-md d-flex gap-sm items-center"></div>
       </section>
 
       <!-- ---- BULK OPERATIONS ---- -->
       <section id="sec-bulk" class="hidden">
         <h2 class="section-title">一括操作</h2>
 
-        <div style="display:grid;gap:var(--space-lg);">
+        <div class="d-grid gap-lg">
           <!-- Bulk Image Compression -->
           <div class="stat-card">
-            <h3 style="margin-bottom:var(--space-md);">画像一括圧縮</h3>
-            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">
+            <h3 class="mb-md">画像一括圧縮</h3>
+            <p class="desc-text mb-md">
               既存画像をCanvas APIで再圧縮します。長辺2048px超はリサイズ、JPEG品質0.9で再エンコード。<br>
               <strong>スキップ条件:</strong> 長辺2048px以下 かつ 500KB未満の画像はスキップします。
             </p>
-            <div class="toolbar" style="margin-bottom:var(--space-md);">
+            <div class="toolbar mb-md">
               <select id="compress-target">
                 <option value="gallery">ギャラリー画像</option>
                 <option value="parent">親写真（母/父）</option>
@@ -627,31 +628,31 @@
             </div>
             <div id="compress-progress" class="hidden">
               <div class="progress-bar"><div class="progress-fill" id="compress-progress-fill" style="width:0%"></div></div>
-              <div id="compress-progress-text" style="font-size:var(--font-size-sm);color:var(--color-gray);"></div>
-              <div id="compress-log" style="max-height:300px;overflow-y:auto;font-size:var(--font-size-xs);font-family:var(--font-mono);margin-top:var(--space-sm);background:var(--color-bg);padding:var(--space-sm);border-radius:var(--radius-sm);"></div>
+              <div id="compress-progress-text" class="desc-text"></div>
+              <div id="compress-log" class="log-box"></div>
             </div>
           </div>
 
           <!-- Bulk Origin Migration -->
           <div class="stat-card">
-            <h3 style="margin-bottom:var(--space-md);">由来データ構造化移行</h3>
-            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">
+            <h3 class="mb-md">由来データ構造化移行</h3>
+            <p class="desc-text mb-md">
               既存の由来データ（bodyテキスト）を構造化フィールド（structured.notes）に移行します。<br>
               <strong>対象:</strong> structuredフィールドが未設定の由来のみ。既に構造化済みの由来はスキップします。<br>
               また、レガシーフィールド（discoverer_or_breeder, native_region, discovery_year）も対応するstructuredフィールドに移行します。
             </p>
             <button class="btn btn-warning" id="btn-bulk-migrate">移行実行</button>
-            <div id="migrate-progress" class="hidden" style="margin-top:var(--space-md);">
+            <div id="migrate-progress" class="hidden mt-md">
               <div class="progress-bar"><div class="progress-fill" id="migrate-progress-fill" style="width:0%"></div></div>
-              <div id="migrate-progress-text" style="font-size:var(--font-size-sm);color:var(--color-gray);"></div>
-              <div id="migrate-log" style="max-height:300px;overflow-y:auto;font-size:var(--font-size-xs);font-family:var(--font-mono);margin-top:var(--space-sm);background:var(--color-bg);padding:var(--space-sm);border-radius:var(--radius-sm);"></div>
+              <div id="migrate-progress-text" class="desc-text"></div>
+              <div id="migrate-log" class="log-box"></div>
             </div>
           </div>
 
           <!-- Data Export -->
           <div class="stat-card">
-            <h3 style="margin-bottom:var(--space-md);">データエクスポート</h3>
-            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">
+            <h3 class="mb-md">データエクスポート</h3>
+            <p class="desc-text mb-md">
               全品種データをJSON形式でダウンロードします。
             </p>
             <button class="btn btn-primary" id="btn-export">JSONエクスポート</button>
@@ -662,105 +663,105 @@
       <!-- ---- EXTERNAL SERVICES ---- -->
       <section id="sec-external" class="hidden">
         <h2 class="section-title">外部サービス管理</h2>
-        <p style="color:var(--color-gray);margin-bottom:var(--space-lg);">関連する外部サービスへのクイックリンク集です。</p>
+        <p class="text-muted mb-lg">関連する外部サービスへのクイックリンク集です。</p>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--space-lg);">
+        <div class="card-grid">
 
           <!-- Stripe -->
           <div class="stat-card">
-            <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
+            <div class="svc-card-header">
               <span style="font-size:1.5rem;">💳</span>
               <h3 style="margin:0;">Stripe</h3>
             </div>
-            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">決済・サブスクリプション管理</p>
-            <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
-              <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;text-decoration:none;">ダッシュボード</a>
-              <a href="https://dashboard.stripe.com/products" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">商品・価格</a>
-              <a href="https://dashboard.stripe.com/subscriptions" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">サブスクリプション一覧</a>
-              <a href="https://dashboard.stripe.com/customers" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">顧客一覧</a>
-              <a href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">Webhook設定</a>
-              <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">APIキー</a>
-              <a href="https://dashboard.stripe.com/settings/billing/portal" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">カスタマーポータル設定</a>
+            <p class="svc-card-desc">決済・サブスクリプション管理</p>
+            <div class="svc-card-links">
+              <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener" class="btn btn-primary btn-link">ダッシュボード</a>
+              <a href="https://dashboard.stripe.com/products" target="_blank" rel="noopener" class="btn btn-link">商品・価格</a>
+              <a href="https://dashboard.stripe.com/subscriptions" target="_blank" rel="noopener" class="btn btn-link">サブスクリプション一覧</a>
+              <a href="https://dashboard.stripe.com/customers" target="_blank" rel="noopener" class="btn btn-link">顧客一覧</a>
+              <a href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener" class="btn btn-link">Webhook設定</a>
+              <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener" class="btn btn-link">APIキー</a>
+              <a href="https://dashboard.stripe.com/settings/billing/portal" target="_blank" rel="noopener" class="btn btn-link">カスタマーポータル設定</a>
             </div>
           </div>
 
           <!-- Supabase -->
           <div class="stat-card">
-            <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
+            <div class="svc-card-header">
               <span style="font-size:1.5rem;">⚡</span>
               <h3 style="margin:0;">Supabase</h3>
             </div>
-            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">データベース・認証・Edge Functions</p>
-            <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
-              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;text-decoration:none;">プロジェクトホーム</a>
-              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/editor" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">テーブルエディタ</a>
-              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/auth/users" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">認証ユーザー</a>
-              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/functions" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">Edge Functions</a>
-              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/storage/buckets" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">Storage</a>
-              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/sql" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">SQLエディタ</a>
+            <p class="svc-card-desc">データベース・認証・Edge Functions</p>
+            <div class="svc-card-links">
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo" target="_blank" rel="noopener" class="btn btn-primary btn-link">プロジェクトホーム</a>
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/editor" target="_blank" rel="noopener" class="btn btn-link">テーブルエディタ</a>
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/auth/users" target="_blank" rel="noopener" class="btn btn-link">認証ユーザー</a>
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/functions" target="_blank" rel="noopener" class="btn btn-link">Edge Functions</a>
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/storage/buckets" target="_blank" rel="noopener" class="btn btn-link">Storage</a>
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/sql" target="_blank" rel="noopener" class="btn btn-link">SQLエディタ</a>
             </div>
           </div>
 
           <!-- GitHub -->
           <div class="stat-card">
-            <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
+            <div class="svc-card-header">
               <span style="font-size:1.5rem;">🐙</span>
               <h3 style="margin:0;">GitHub</h3>
             </div>
-            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">ソースコード・デプロイ</p>
-            <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
-              <a href="https://github.com/plantsstory/plants-story" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;text-decoration:none;">リポジトリ</a>
-              <a href="https://github.com/plantsstory/plants-story/actions" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">Actions（CI/CD）</a>
-              <a href="https://github.com/plantsstory/plants-story/settings/pages" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">GitHub Pages設定</a>
+            <p class="svc-card-desc">ソースコード・デプロイ</p>
+            <div class="svc-card-links">
+              <a href="https://github.com/plantsstory/plants-story" target="_blank" rel="noopener" class="btn btn-primary btn-link">リポジトリ</a>
+              <a href="https://github.com/plantsstory/plants-story/actions" target="_blank" rel="noopener" class="btn btn-link">Actions（CI/CD）</a>
+              <a href="https://github.com/plantsstory/plants-story/settings/pages" target="_blank" rel="noopener" class="btn btn-link">GitHub Pages設定</a>
             </div>
           </div>
 
           <!-- Google Cloud -->
           <div class="stat-card">
-            <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
+            <div class="svc-card-header">
               <span style="font-size:1.5rem;">☁️</span>
               <h3 style="margin:0;">Google Cloud</h3>
             </div>
-            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">OAuth認証・API設定</p>
-            <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
-              <a href="https://console.cloud.google.com/" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;text-decoration:none;">コンソール</a>
-              <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">OAuth認証情報</a>
+            <p class="svc-card-desc">OAuth認証・API設定</p>
+            <div class="svc-card-links">
+              <a href="https://console.cloud.google.com/" target="_blank" rel="noopener" class="btn btn-primary btn-link">コンソール</a>
+              <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener" class="btn btn-link">OAuth認証情報</a>
             </div>
           </div>
 
           <!-- Google Search Console -->
           <div class="stat-card">
-            <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
+            <div class="svc-card-header">
               <span style="font-size:1.5rem;">🔍</span>
               <h3 style="margin:0;">Google Search Console</h3>
             </div>
-            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">検索パフォーマンス・インデックス</p>
-            <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
-              <a href="https://search.google.com/search-console" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;text-decoration:none;">Search Console</a>
+            <p class="svc-card-desc">検索パフォーマンス・インデックス</p>
+            <div class="svc-card-links">
+              <a href="https://search.google.com/search-console" target="_blank" rel="noopener" class="btn btn-primary btn-link">Search Console</a>
             </div>
           </div>
 
           <!-- ChatGPT -->
           <div class="stat-card">
-            <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
+            <div class="svc-card-header">
               <span style="font-size:1.5rem;">🤖</span>
               <h3 style="margin:0;">ChatGPT</h3>
             </div>
-            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">AI アシスタント</p>
-            <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
-              <a href="https://chatgpt.com/" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;text-decoration:none;">ChatGPT</a>
+            <p class="svc-card-desc">AI アシスタント</p>
+            <div class="svc-card-links">
+              <a href="https://chatgpt.com/" target="_blank" rel="noopener" class="btn btn-primary btn-link">ChatGPT</a>
             </div>
           </div>
 
           <!-- サイトURL -->
           <div class="stat-card">
-            <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
+            <div class="svc-card-header">
               <span style="font-size:1.5rem;">🌐</span>
               <h3 style="margin:0;">サイト</h3>
             </div>
-            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">公開サイトへのリンク</p>
-            <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
-              <a href="https://plantsstory.github.io/plants-story/wireframe/" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;text-decoration:none;">本番サイト</a>
+            <p class="svc-card-desc">公開サイトへのリンク</p>
+            <div class="svc-card-links">
+              <a href="https://plantsstory.github.io/plants-story/wireframe/" target="_blank" rel="noopener" class="btn btn-primary btn-link">本番サイト</a>
             </div>
           </div>
 
@@ -1023,10 +1024,7 @@ function enterAdmin(user) {
   loadDashboard();
   loadAllCultivars();
   // Cleanup IPs older than 180 days on admin login
-  sb.rpc('cleanup_old_ips').then(function(res) {
-    if (res.error) console.warn('IP cleanup error:', res.error.message);
-    else console.log('IP cleanup completed');
-  });
+  sb.rpc('cleanup_old_ips');
 }
 
 // ========================================
@@ -2432,12 +2430,6 @@ function renderDeletionList(listId, emptyId, requests, type) {
     card.innerHTML = html;
     listEl.appendChild(card);
   });
-}
-
-function escapeHtml(str) {
-  var div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
 }
 
 // Handle approve/reject clicks
