@@ -4476,13 +4476,24 @@
       document.getElementById('mobileNav').classList.toggle('open');
     });
 
-    // ---- Genus search input listeners (event delegation for dynamic content) ----
+    // ---- Genus search input listeners (event delegation, debounced for server-side) ----
+    var _genusSearchTimer = null;
     document.addEventListener('input', function(e) {
       if (!e.target.matches('.genus-content .search-bar__input')) return;
       var genusEl = e.target.closest('.genus-content');
-      if (genusEl) {
+      if (!genusEl) return;
+      clearTimeout(_genusSearchTimer);
+      var slug = genusEl.id.replace('genus-', '');
+      var hasData = (_genusItems[slug] || []).length > 0;
+      if (hasData) {
+        // In-memory: filter instantly
         filterGenusRows(genusEl, e.target.value);
         paginateGenus(genusEl, 1);
+      } else {
+        // Server-side: debounce 300ms to avoid excessive RPC calls
+        _genusSearchTimer = setTimeout(function() {
+          paginateGenus(genusEl, 1);
+        }, 300);
       }
     });
 
