@@ -185,6 +185,8 @@
         </div>
         <div class="flex gap-sm flex-align-center flex-wrap mt-sm">
           <button id="fav-btn" class="btn btn--sm btn--secondary cursor-pointer" style="font-size:0.8rem;white-space:nowrap;" title="お気に入り">&#x2606; お気に入り追加</button>
+          <button id="share-btn" class="btn btn--sm btn--secondary cursor-pointer" style="font-size:0.8rem;white-space:nowrap;" title="シェア">&#x1F517; シェア</button>
+          <div id="share-menu" class="hidden" style="position:absolute;z-index:50;background:var(--color-white);border:1px solid var(--color-light);border-radius:var(--radius-md);box-shadow:var(--shadow);padding:var(--space-sm);display:flex;gap:var(--space-sm);"></div>
           <div class="flex gap-sm flex-align-center" id="edit-key-section">
             <input type="password" id="detail-edit-key" class="form-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="編集キー" style="width:100px;padding:4px 8px;font-size:0.85rem;">
             <button class="btn btn--secondary btn--sm" id="detail-edit-btn" style="font-size:0.8rem;">&#x270F; 編集</button>
@@ -3377,6 +3379,47 @@
       var name = h1.textContent;
       var added = toggleFavorite(name);
       showToast(t(added ? 'favorites_added' : 'favorites_removed'));
+    });
+
+    // ---- Share button ----
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('#share-btn');
+      if (!btn) {
+        // Close share menu if clicking elsewhere
+        var menu = document.getElementById('share-menu');
+        if (menu && !e.target.closest('#share-menu')) menu.classList.add('hidden');
+        return;
+      }
+      var h1 = document.querySelector('#page-cultivar h1');
+      if (!h1) return;
+      var name = h1.textContent;
+      var url = window.location.href;
+      var text = name + ' - Plants Story';
+
+      // Try native share API first (mobile)
+      if (navigator.share) {
+        navigator.share({ title: text, url: url }).catch(function() {});
+        return;
+      }
+
+      // Desktop: show share menu
+      var menu = document.getElementById('share-menu');
+      if (!menu) return;
+      var encodedUrl = encodeURIComponent(url);
+      var encodedText = encodeURIComponent(text);
+      menu.innerHTML =
+        '<a href="https://twitter.com/intent/tweet?text=' + encodedText + '&url=' + encodedUrl + '" target="_blank" rel="noopener" class="btn btn--sm btn--secondary" style="font-size:0.75rem;">X</a>' +
+        '<a href="https://line.me/R/msg/text/?' + encodedText + '%0A' + encodedUrl + '" target="_blank" rel="noopener" class="btn btn--sm btn--secondary" style="font-size:0.75rem;">LINE</a>' +
+        '<button class="btn btn--sm btn--secondary share-copy-btn" style="font-size:0.75rem;">URLコピー</button>';
+      menu.classList.toggle('hidden');
+
+      // Copy URL handler
+      menu.querySelector('.share-copy-btn').addEventListener('click', function() {
+        navigator.clipboard.writeText(url).then(function() {
+          showToast('URLをコピーしました');
+          menu.classList.add('hidden');
+        });
+      });
     });
 
     // Render favorites page
