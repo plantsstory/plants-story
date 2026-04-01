@@ -951,7 +951,10 @@
         <div class="profile-header">
           <div class="profile-avatar" id="profile-avatar"></div>
           <div class="profile-info">
-            <h1 class="profile-name" id="profile-display-name"></h1>
+            <div class="profile-name-row">
+              <h1 class="profile-name" id="profile-display-name"></h1>
+              <span class="profile-sub-badge" id="profile-sub-badge" style="display:none;"></span>
+            </div>
             <p class="text-muted text-sm" id="profile-username" style="margin-top:2px;"></p>
             <p class="text-muted text-sm" id="profile-bio" style="margin-top:var(--space-xs);white-space:pre-wrap;"></p>
             <div class="profile-sns" id="profile-sns-links"></div>
@@ -963,6 +966,11 @@
         <div id="profile-edit-link" style="display:none;margin-top:var(--space-md);">
           <a href="#/profile/edit" class="btn btn--secondary btn--sm">プロフィールを編集</a>
         </div>
+      </div>
+
+      <!-- Subscription Status -->
+      <div id="profile-subscription-section" class="card" style="padding:var(--space-md);margin-top:var(--space-md);display:none;">
+        <div id="profile-subscription-content"></div>
       </div>
 
       <!-- My Seedlings section -->
@@ -2886,6 +2894,85 @@
         if (editLink) {
           editLink.style.display = (window._currentUser && window._currentUser.id === userId) ? '' : 'none';
         }
+
+        // Fetch subscription status for the profile
+        var subBadge = document.getElementById('profile-sub-badge');
+        var subSection = document.getElementById('profile-subscription-section');
+        var subContent = document.getElementById('profile-subscription-content');
+        var isOwnProfile = window._currentUser && window._currentUser.id === userId;
+
+        // Fetch subscription status via public RPC
+        sb.rpc('get_subscription_status', { p_user_id: userId })
+          .then(function(subRes) {
+            var sub = subRes.data;
+            var isActive = sub && sub.active;
+
+            // Badge next to name
+            if (subBadge) {
+              if (isActive) {
+                subBadge.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Member';
+                subBadge.className = 'profile-sub-badge profile-sub-badge--active';
+                subBadge.style.display = '';
+              } else {
+                subBadge.className = 'profile-sub-badge profile-sub-badge--free';
+                subBadge.innerHTML = 'Free';
+                subBadge.style.display = '';
+              }
+            }
+
+            // Subscription section below profile card
+            if (subSection && subContent) {
+              subSection.style.display = '';
+              if (isActive) {
+                var planLabel = sub.plan === 'granted' ? '無料付与' : (sub.plan === 'seedling_annual' ? '年額プラン' : '月額プラン');
+                var html = '<div style="display:flex;align-items:center;gap:var(--space-sm);">';
+                html += '<span class="profile-sub-badge profile-sub-badge--active" style="position:static;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Member</span>';
+                html += '<span class="text-sm" style="font-weight:600;">' + planLabel + '</span>';
+                html += '</div>';
+                if (sub.current_period_end && sub.plan !== 'granted') {
+                  var endDate = new Date(sub.current_period_end);
+                  var endStr = endDate.getFullYear() + '/' + String(endDate.getMonth() + 1).padStart(2, '0') + '/' + String(endDate.getDate()).padStart(2, '0');
+                  if (sub.cancel_at_period_end) {
+                    html += '<div class="text-xs" style="margin-top:4px;color:var(--color-warning);">解約予定 (' + endStr + ' まで)</div>';
+                  } else {
+                    html += '<div class="text-xs text-muted" style="margin-top:4px;">次回更新: ' + endStr + '</div>';
+                  }
+                }
+                if (isOwnProfile) {
+                  html += '<div style="margin-top:var(--space-sm);"><button class="btn btn--secondary btn--sm" onclick="openCustomerPortal()">サブスクリプションを管理</button></div>';
+                }
+                subContent.innerHTML = html;
+              } else {
+                // Free user
+                var html = '<div style="display:flex;align-items:center;gap:var(--space-sm);">';
+                html += '<span class="profile-sub-badge profile-sub-badge--free" style="position:static;">Free</span>';
+                html += '<span class="text-sm text-muted">My Seedlings の詳細閲覧・投稿にはサブスクリプションが必要です</span>';
+                html += '</div>';
+                if (isOwnProfile) {
+                  html += '<div style="margin-top:var(--space-sm);"><button class="btn btn--primary btn--sm" onclick="showPaywallModal()">サブスクリプションを開始</button></div>';
+                }
+                subContent.innerHTML = html;
+              }
+            }
+          }).catch(function() {
+            // No subscription record - show as Free
+            if (subBadge) {
+              subBadge.className = 'profile-sub-badge profile-sub-badge--free';
+              subBadge.innerHTML = 'Free';
+              subBadge.style.display = '';
+            }
+            if (subSection && subContent) {
+              subSection.style.display = '';
+              var html = '<div style="display:flex;align-items:center;gap:var(--space-sm);">';
+              html += '<span class="profile-sub-badge profile-sub-badge--free" style="position:static;">Free</span>';
+              html += '<span class="text-sm text-muted">My Seedlings の詳細閲覧・投稿にはサブスクリプションが必要です</span>';
+              html += '</div>';
+              if (isOwnProfile) {
+                html += '<div style="margin-top:var(--space-sm);"><button class="btn btn--primary btn--sm" onclick="showPaywallModal()">サブスクリプションを開始</button></div>';
+              }
+              subContent.innerHTML = html;
+            }
+          });
 
         // Load seedling posts
         loadProfilePosts(userId, '');
