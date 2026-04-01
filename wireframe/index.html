@@ -17,6 +17,32 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1B4332">
   <link rel="apple-touch-icon" href="icons/icon-192.svg">
+  <link rel="canonical" id="canonical-link" href="https://plantsstory.github.io/plants-story/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "ひなたぼっこぷらんつ - Plants Story",
+    "alternateName": "Plants Story",
+    "url": "https://plantsstory.github.io/plants-story/",
+    "description": "アロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォーム",
+    "inLanguage": "ja",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://plantsstory.github.io/plants-story/#/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "ひなたぼっこぷらんつ",
+    "url": "https://plantsstory.github.io/plants-story/",
+    "logo": "https://plantsstory.github.io/plants-story/icons/icon-512.svg"
+  }
+  </script>
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/layout.css">
@@ -1129,6 +1155,49 @@
     }
 
     // Page navigation
+    var _siteBase = 'https://plantsstory.github.io/plants-story/';
+    var _defaultTitle = 'ひなたぼっこぷらんつ - Plants Story';
+    var _defaultDesc = 'アロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォーム';
+
+    function updateMeta(opts) {
+      opts = opts || {};
+      var title = opts.title || _defaultTitle;
+      var desc = opts.description || _defaultDesc;
+      var path = opts.path || '';
+      var url = _siteBase + (path ? '#/' + path : '');
+      document.title = title;
+      var metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.setAttribute('content', desc);
+      var ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle) ogTitle.setAttribute('content', title);
+      var ogDesc = document.querySelector('meta[property="og:description"]');
+      if (ogDesc) ogDesc.setAttribute('content', desc);
+      var twTitle = document.querySelector('meta[name="twitter:title"]');
+      if (twTitle) twTitle.setAttribute('content', title);
+      var twDesc = document.querySelector('meta[name="twitter:description"]');
+      if (twDesc) twDesc.setAttribute('content', desc);
+      var canonical = document.getElementById('canonical-link');
+      if (canonical) canonical.setAttribute('href', url);
+    }
+
+    function updateCultivarJsonLd(name, genus, type, description) {
+      var el = document.getElementById('cultivar-jsonld');
+      if (!el) {
+        el = document.createElement('script');
+        el.type = 'application/ld+json';
+        el.id = 'cultivar-jsonld';
+        document.head.appendChild(el);
+      }
+      var data = {
+        '@context': 'https://schema.org',
+        '@type': 'Thing',
+        'name': name,
+        'description': description || (name + ' - ' + genus + 'の品種情報'),
+        'url': _siteBase + '#/cultivar/' + encodeURIComponent(name)
+      };
+      el.textContent = JSON.stringify(data);
+    }
+
     function showPage(pageId) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       // profile-edit maps to page-profile-edit
@@ -1251,6 +1320,31 @@
       }
       if (page === 'profile-edit' && typeof window.loadProfileEditPage === 'function') {
         window.loadProfileEditPage();
+      }
+
+      // Update meta tags for non-cultivar pages (cultivar updates in updateCultivarDetail)
+      if (page !== 'cultivar') {
+        var pageTitles = {
+          top: _defaultTitle,
+          favorites: 'お気に入り - ' + _defaultTitle,
+          contribute: '品種を投稿 - ' + _defaultTitle,
+          about: 'About - ' + _defaultTitle,
+          terms: '利用規約 - ' + _defaultTitle,
+          privacy: 'プライバシー - ' + _defaultTitle,
+          contact: 'お問い合わせ - ' + _defaultTitle,
+          search: '検索結果 - ' + _defaultTitle,
+          mypost: '投稿履歴 - ' + _defaultTitle,
+          'profile-edit': 'プロフィール編集 - ' + _defaultTitle
+        };
+        if (page === 'genus' && options.genus) {
+          var gName = options.genus.charAt(0).toUpperCase() + options.genus.slice(1);
+          updateMeta({ title: gName + ' - ' + _defaultTitle, path: options.genus });
+        } else {
+          updateMeta({ title: pageTitles[page] || _defaultTitle, path: page === 'top' ? '' : page });
+        }
+        // Remove cultivar JSON-LD when leaving cultivar page
+        var cjld = document.getElementById('cultivar-jsonld');
+        if (cjld) cjld.remove();
       }
 
       if (pushHistory !== false) {
@@ -3842,11 +3936,22 @@
       var bi = getBadgeInfo(detectedType, cultivarName);
 
       // Update title
+      var displayName = cultivarName.replace(' [Seedling]', '');
       var h1 = detailPage.querySelector('h1');
-      if (h1) h1.textContent = cultivarName.replace(' [Seedling]', '');
+      if (h1) h1.textContent = displayName;
+
+      // Update SEO meta tags
+      var typeLabel = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: 'Seedling' }[detectedType] || '';
+      var metaDesc = displayName + ' (' + genusName + ' ' + typeLabel + ') の由来・歴史情報 - ひなたぼっこぷらんつ';
+      updateMeta({
+        title: displayName + ' - ' + genusName + ' | ' + _defaultTitle,
+        description: metaDesc,
+        path: 'cultivar/' + encodeURIComponent(displayName)
+      });
+      updateCultivarJsonLd(displayName, genusName, detectedType, metaDesc);
 
       // Update favorite button
-      updateFavBtn(cultivarName.replace(' [Seedling]', ''));
+      updateFavBtn(displayName);
 
       // Update badge
       var detailBadge = detailPage.querySelector('.badge');
