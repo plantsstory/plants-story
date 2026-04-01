@@ -405,6 +405,7 @@
       <a href="#" data-section="affiliates">アフィリエイト</a>
       <a href="#" data-section="users">ユーザー管理</a>
       <a href="#" data-section="bulk">一括操作</a>
+      <a href="#" data-section="external">外部サービス</a>
     </nav>
     <div class="nav-overlay" id="nav-overlay"></div>
     <main class="admin-content">
@@ -644,6 +645,102 @@
             </p>
             <button class="btn btn-primary" id="btn-export">JSONエクスポート</button>
           </div>
+        </div>
+      </section>
+
+      <!-- ---- EXTERNAL SERVICES ---- -->
+      <section id="sec-external" class="hidden">
+        <h2 class="section-title">外部サービス管理</h2>
+        <p style="color:var(--color-gray);margin-bottom:var(--space-lg);">関連する外部サービスへのクイックリンク集です。</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--space-lg);">
+
+          <!-- Stripe -->
+          <div class="stat-card">
+            <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
+              <span style="font-size:1.5rem;">💳</span>
+              <h3 style="margin:0;">Stripe</h3>
+            </div>
+            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">決済・サブスクリプション管理</p>
+            <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
+              <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;text-decoration:none;">ダッシュボード</a>
+              <a href="https://dashboard.stripe.com/products" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">商品・価格</a>
+              <a href="https://dashboard.stripe.com/subscriptions" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">サブスクリプション一覧</a>
+              <a href="https://dashboard.stripe.com/customers" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">顧客一覧</a>
+              <a href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">Webhook設定</a>
+              <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">APIキー</a>
+              <a href="https://dashboard.stripe.com/settings/billing/portal" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">カスタマーポータル設定</a>
+            </div>
+          </div>
+
+          <!-- Supabase -->
+          <div class="stat-card">
+            <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
+              <span style="font-size:1.5rem;">⚡</span>
+              <h3 style="margin:0;">Supabase</h3>
+            </div>
+            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">データベース・認証・Edge Functions</p>
+            <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;text-decoration:none;">プロジェクトホーム</a>
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/editor" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">テーブルエディタ</a>
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/auth/users" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">認証ユーザー</a>
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/functions" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">Edge Functions</a>
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/storage/buckets" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">Storage</a>
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/sql" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">SQLエディタ</a>
+            </div>
+          </div>
+
+          <!-- GitHub -->
+          <div class="stat-card">
+            <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
+              <span style="font-size:1.5rem;">🐙</span>
+              <h3 style="margin:0;">GitHub</h3>
+            </div>
+            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">ソースコード・デプロイ</p>
+            <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
+              <a href="https://github.com/plantsstory/plants-story" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;text-decoration:none;">リポジトリ</a>
+              <a href="https://github.com/plantsstory/plants-story/actions" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">Actions（CI/CD）</a>
+              <a href="https://github.com/plantsstory/plants-story/settings/pages" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">GitHub Pages設定</a>
+            </div>
+          </div>
+
+          <!-- Google Cloud -->
+          <div class="stat-card">
+            <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
+              <span style="font-size:1.5rem;">☁️</span>
+              <h3 style="margin:0;">Google Cloud</h3>
+            </div>
+            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">OAuth認証・API設定</p>
+            <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
+              <a href="https://console.cloud.google.com/" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;text-decoration:none;">コンソール</a>
+              <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener" class="btn" style="text-align:center;text-decoration:none;">OAuth認証情報</a>
+            </div>
+          </div>
+
+          <!-- Google Search Console -->
+          <div class="stat-card">
+            <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
+              <span style="font-size:1.5rem;">🔍</span>
+              <h3 style="margin:0;">Google Search Console</h3>
+            </div>
+            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">検索パフォーマンス・インデックス</p>
+            <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
+              <a href="https://search.google.com/search-console" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;text-decoration:none;">Search Console</a>
+            </div>
+          </div>
+
+          <!-- サイトURL -->
+          <div class="stat-card">
+            <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
+              <span style="font-size:1.5rem;">🌐</span>
+              <h3 style="margin:0;">サイト</h3>
+            </div>
+            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">公開サイトへのリンク</p>
+            <div style="display:flex;flex-direction:column;gap:var(--space-sm);">
+              <a href="https://plantsstory.github.io/plants-story/wireframe/" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;text-decoration:none;">本番サイト</a>
+            </div>
+          </div>
+
         </div>
       </section>
 
