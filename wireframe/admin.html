@@ -370,8 +370,19 @@
 </head>
 <body>
 
+<!-- ============ ACCESS GATE (Basic Auth equivalent) ============ -->
+<div id="access-gate" class="login-container">
+  <div class="login-box">
+    <h1>ひなたぼっこぷらんつ Admin</h1>
+    <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);text-align:center;">管理画面へのアクセスにはアクセスコードが必要です</p>
+    <div id="gate-error" class="login-error"></div>
+    <input type="password" id="gate-code" placeholder="アクセスコード" autocomplete="off">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" id="btn-gate">認証</button>
+  </div>
+</div>
+
 <!-- ============ LOGIN SCREEN ============ -->
-<div id="login-screen" class="login-container">
+<div id="login-screen" class="login-container" style="display:none;">
   <div class="login-box">
     <h1>ひなたぼっこぷらんつ Admin</h1>
     <div id="login-error" class="login-error"></div>
@@ -779,6 +790,54 @@ var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var allCultivars = [];
 var currentSession = null;
 
+// ========================================
+// Access Gate (Basic Auth equivalent)
+// ========================================
+// SHA-256 hash of access code — change this when you change the code
+// Current code hash is set via: crypto.subtle.digest('SHA-256', new TextEncoder().encode('YOUR_CODE'))
+var ACCESS_CODE_HASH = '90391c8a5b087faf65948a52e4fdaefe0764ae6c11ae696a27884d96d064e5f6';
+
+// On page load, check if gate was already passed in this session
+(function() {
+  if (sessionStorage.getItem('admin_gate_passed') === 'true') {
+    document.getElementById('access-gate').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+})();
+
+async function hashCode(code) {
+  var encoded = new TextEncoder().encode(code);
+  var buffer = await crypto.subtle.digest('SHA-256', encoded);
+  return Array.from(new Uint8Array(buffer)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+}
+
+document.getElementById('btn-gate').addEventListener('click', async function() {
+  var code = document.getElementById('gate-code').value;
+  var errEl = document.getElementById('gate-error');
+  errEl.style.display = 'none';
+
+  if (!code) {
+    errEl.textContent = 'アクセスコードを入力してください';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  var hash = await hashCode(code);
+  if (hash !== ACCESS_CODE_HASH) {
+    errEl.textContent = 'アクセスコードが正しくありません';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  sessionStorage.setItem('admin_gate_passed', 'true');
+  document.getElementById('access-gate').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+});
+
+document.getElementById('gate-code').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('btn-gate').click();
+});
+
 // Compress image using Canvas API (preserves aspect ratio)
 function compressImage(file, maxLongSide, quality) {
   maxLongSide = maxLongSide || 2048;
@@ -938,8 +997,10 @@ document.getElementById('login-password').addEventListener('keydown', function(e
 document.getElementById('btn-logout').addEventListener('click', async function() {
   await sb.auth.signOut();
   currentSession = null;
+  sessionStorage.removeItem('admin_gate_passed');
   document.getElementById('admin-app').classList.add('hidden');
-  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('access-gate').style.display = 'flex';
 });
 
 // Check existing session on load
