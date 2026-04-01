@@ -847,11 +847,56 @@ function trustColor(trust) {
 // ========================================
 // Auth
 // ========================================
+// ---- Account Lock (10 failures = 30 min lock) ----
+var MAX_LOGIN_ATTEMPTS = 10;
+var LOCK_DURATION_MS = 30 * 60 * 1000; // 30 minutes
+
+function getLoginAttempts() {
+  try {
+    var data = JSON.parse(localStorage.getItem('admin_login_attempts') || '{}');
+    // Reset if lock has expired
+    if (data.lockedUntil && Date.now() > data.lockedUntil) {
+      localStorage.removeItem('admin_login_attempts');
+      return { count: 0, lockedUntil: null };
+    }
+    return { count: data.count || 0, lockedUntil: data.lockedUntil || null };
+  } catch (e) {
+    return { count: 0, lockedUntil: null };
+  }
+}
+
+function recordFailedAttempt() {
+  var attempts = getLoginAttempts();
+  attempts.count += 1;
+  if (attempts.count >= MAX_LOGIN_ATTEMPTS) {
+    attempts.lockedUntil = Date.now() + LOCK_DURATION_MS;
+  }
+  localStorage.setItem('admin_login_attempts', JSON.stringify(attempts));
+  return attempts;
+}
+
+function resetLoginAttempts() {
+  localStorage.removeItem('admin_login_attempts');
+}
+
+function formatLockRemaining(lockedUntil) {
+  var remaining = Math.ceil((lockedUntil - Date.now()) / 60000);
+  return remaining + '分';
+}
+
 document.getElementById('btn-login').addEventListener('click', async function() {
   var email = document.getElementById('login-email').value.trim();
   var password = document.getElementById('login-password').value;
   var errEl = document.getElementById('login-error');
   errEl.style.display = 'none';
+
+  // Check if account is locked
+  var attempts = getLoginAttempts();
+  if (attempts.lockedUntil && Date.now() < attempts.lockedUntil) {
+    errEl.textContent = 'アカウントがロックされています。' + formatLockRemaining(attempts.lockedUntil) + '後に再試行してください。';
+    errEl.style.display = 'block';
+    return;
+  }
 
   if (!email || !password) {
     errEl.textContent = 'メールとパスワードを入力してください';
@@ -861,7 +906,13 @@ document.getElementById('btn-login').addEventListener('click', async function() 
 
   var result = await sb.auth.signInWithPassword({ email: email, password: password });
   if (result.error) {
-    errEl.textContent = 'ログインに失敗しました: ' + result.error.message;
+    var updated = recordFailedAttempt();
+    if (updated.lockedUntil) {
+      errEl.textContent = 'ログイン試行回数の上限に達しました。アカウントは' + formatLockRemaining(updated.lockedUntil) + 'ロックされます。';
+    } else {
+      var remaining = MAX_LOGIN_ATTEMPTS - updated.count;
+      errEl.textContent = 'ログインに失敗しました。残り' + remaining + '回でアカウントがロックされます。';
+    }
     errEl.style.display = 'block';
     return;
   }
@@ -874,6 +925,8 @@ document.getElementById('btn-login').addEventListener('click', async function() 
     return;
   }
 
+  // Login success — reset attempts
+  resetLoginAttempts();
   currentSession = result.data.session;
   enterAdmin(result.data.user);
 });
