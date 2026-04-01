@@ -2321,23 +2321,23 @@ document.getElementById('users-tbody').addEventListener('click', function(e) {
   if (!userId) return;
   btn.disabled = true;
   if (action === 'grant') {
-    showToast('付与処理中...');
+    toast('付与処理中...');
     sb.rpc('admin_grant_subscription', { p_user_id: userId }).then(function(res) {
-      if (res.error) { showToast('エラー: ' + res.error.message); btn.disabled = false; return; }
-      showToast('サブスクリプションを付与しました');
+      if (res.error) { toast('エラー: ' + res.error.message); btn.disabled = false; return; }
+      toast('サブスクリプションを付与しました');
       loadUsers();
     }).catch(function(e) {
-      showToast('エラー: ' + e.message);
+      toast('エラー: ' + e.message);
       btn.disabled = false;
     });
   } else if (action === 'revoke') {
-    showToast('取消処理中...');
+    toast('取消処理中...');
     sb.rpc('admin_revoke_subscription', { p_user_id: userId }).then(function(res) {
-      if (res.error) { showToast('エラー: ' + res.error.message); btn.disabled = false; return; }
-      showToast('付与を取り消しました');
+      if (res.error) { toast('エラー: ' + res.error.message); btn.disabled = false; return; }
+      toast('付与を取り消しました');
       loadUsers();
     }).catch(function(e) {
-      showToast('エラー: ' + e.message);
+      toast('エラー: ' + e.message);
       btn.disabled = false;
     });
   }
