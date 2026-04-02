@@ -356,6 +356,12 @@ var knownGenera = []; // Populated dynamically from genera table
 // Base path: '/' on custom domain, '/plants-story/' on GitHub Pages
 var _basePath = _isCustomDomain ? '/' : '/plants-story/';
 
+// Fix admin link href so it resolves correctly from any SPA route
+(function() {
+  var adminLink = document.getElementById('admin-footer-link');
+  if (adminLink) adminLink.href = _basePath + 'admin.html';
+})();
+
 function buildPath(page, options) {
   options = options || {};
   if (page === 'top') return _basePath;
