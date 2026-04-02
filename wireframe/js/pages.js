@@ -668,7 +668,7 @@ document.addEventListener('click', function(e) {
   var encodedText = encodeURIComponent(text);
   menu.innerHTML =
     '<a href="https://twitter.com/intent/tweet?text=' + encodedText + '&url=' + encodedUrl + '" target="_blank" rel="noopener" class="btn btn--sm btn--secondary text-xs">X</a>' +
-    '<a href="https://line.me/R/msg/text/?' + encodedText + '%0A' + encodedUrl + '" target="_blank" rel="noopener" class="btn btn--sm btn--secondary text-xs">LINE</a>' +
+    '<a href="https://line.me/R/msg/text/' + encodeURIComponent(text + '\n' + shareUrl) + '" target="_blank" rel="noopener" class="btn btn--sm btn--secondary text-xs">LINE</a>' +
     '<button class="btn btn--sm btn--secondary share-copy-btn text-xs">URLコピー</button>';
   menu.classList.toggle('hidden');
 

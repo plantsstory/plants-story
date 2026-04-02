@@ -263,13 +263,16 @@ function updateGenusJsonLd(genusName, cultivarNames) {
   ]);
 }
 
+var _isPopstate = false; // Flag for back/forward navigation
 function showPage(pageId) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   // profile-edit maps to page-profile-edit
   const target = document.getElementById('page-' + pageId);
   if (target) {
     target.classList.add('active');
-    window.scrollTo(0, 0);
+    if (!_isPopstate) {
+      window.scrollTo(0, 0);
+    }
   }
   if (pageId === 'mypost' && typeof window.loadMyPosts === 'function') {
     window.loadMyPosts();
@@ -450,6 +453,11 @@ function navigateTo(page, options, pushHistory) {
   }
 
   if (pushHistory !== false) {
+    // Save scroll position of current page before navigating away
+    var currentState = history.state || {};
+    currentState._scrollY = window.scrollY;
+    history.replaceState(currentState, '');
+
     var hash = buildHash(page, options);
     history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar, userId: options.userId, username: options.username }, '', hash);
     // Send GA4 page view for SPA navigation
@@ -467,7 +475,13 @@ if ('scrollRestoration' in history) {
 // Handle browser back/forward
 window.addEventListener('popstate', function(e) {
   var state = e.state || parseHash();
+  _isPopstate = true;
   navigateTo(state.page, state, false);
+  // Restore scroll position if saved
+  if (state._scrollY !== undefined) {
+    setTimeout(function() { window.scrollTo(0, state._scrollY); }, 50);
+  }
+  _isPopstate = false;
 });
 
 // Handle initial route on page load (deferred until genera are loaded)

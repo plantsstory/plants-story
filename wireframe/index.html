@@ -231,7 +231,7 @@
           <button id="share-btn" class="btn btn--sm btn--secondary cursor-pointer font-xs-btn whitespace-nowrap" title="シェア" aria-label="この品種をシェア">&#x1F517; シェア</button>
           <div id="share-menu" class="hidden share-menu-popup"></div>
           <div class="flex gap-sm flex-align-center" id="edit-key-section">
-            <input type="password" id="detail-edit-key" class="form-input edit-key-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="編集キー" aria-label="編集キー">
+            <input type="password" id="detail-edit-key" class="form-input edit-key-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="編集キー" aria-label="編集キー" autocomplete="one-time-code">
             <button class="btn btn--secondary btn--sm font-xs-btn" id="detail-edit-btn">&#x270F; 編集</button>
           </div>
           <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn" id="detail-add-photo-btn">&#x1F4F7; 画像追加</button>
@@ -642,7 +642,7 @@
         <h2 class="text-lg font-bold mb-md" data-i18n="edit_key_title">編集キー</h2>
         <div class="form-group">
           <label class="form-label" data-i18n="label_edit_key">4桁の編集キー</label>
-          <input type="password" id="edit-key-input" class="form-input max-w-200" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="4桁の数字">
+          <input type="password" id="edit-key-input" class="form-input max-w-200" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="4桁の数字" autocomplete="one-time-code">
           <p class="form-hint" id="edit-key-hint" data-i18n="edit_key_hint">編集する時に必要な4ケタのパスワードです。</p>
           <p class="form-hint d-none" id="edit-key-hint-edit" data-i18n="edit_key_hint_edit">正しいキーを入力すると品種名・タイプも変更できます。</p>
         </div>
