@@ -40,6 +40,14 @@
   text-decoration: none;
 }
 
+.header__logo:focus {
+  outline: none;
+}
+
+.header__logo {
+  -webkit-tap-highlight-color: transparent;
+}
+
 .header__nav {
   display: none;
   gap: var(--space-lg);
