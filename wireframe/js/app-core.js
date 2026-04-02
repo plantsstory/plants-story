@@ -1119,7 +1119,7 @@ var cultivarData = {
     if (!grid) return;
     var html = '';
     window._generaData.forEach(function(g) {
-      var imgSrc = g.card_image_path ? 'images/' + g.card_image_path : '';
+      var imgSrc = g.card_image_path ? _basePath + 'images/' + g.card_image_path : '';
       html += '<div class="card genus-card card--clickable" data-nav="genus" data-genus="' + g.slug + '">';
       html += '<div class="genus-card__img">';
       if (imgSrc) html += '<img src="' + imgSrc + '" alt="' + g.name + '" class="genus-card__photo">';
