@@ -115,7 +115,6 @@
   "shop_amazon": { "jp": "Amazonで探す", "en": "Shop on Amazon" },
   "shop_yahoo": { "jp": "Yahoo!で探す", "en": "Shop on Yahoo!" },
   "ad_label": { "jp": "広告", "en": "Advertisement" },
-  "donate_btn": { "jp": "☕ サイトを応援する", "en": "☕ Support This Site" },
   "upload_error_type": { "jp": "JPGまたはPNG画像のみアップロードできます", "en": "Only JPG or PNG images can be uploaded" },
   "upload_error_size": { "jp": "ファイルサイズは20MB以下にしてください", "en": "File size must be 20MB or less" },
   "upload_error_max": { "jp": "最大10枚までアップロードできます", "en": "Maximum 10 images can be uploaded" },

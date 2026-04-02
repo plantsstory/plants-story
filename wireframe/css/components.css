@@ -1593,31 +1593,6 @@
 }
 
 /* ========================================
-   DONATE BUTTON (Footer)
-   ======================================== */
-.footer__donate {
-  margin-top: var(--space-md);
-}
-
-.donate-btn {
-  display: inline-block;
-  padding: var(--space-sm) var(--space-lg);
-  background: var(--color-accent-warm);
-  color: var(--color-white);
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  transition: all var(--transition);
-  text-decoration: none;
-}
-
-.donate-btn:hover {
-  background: #c4944e;
-  text-decoration: none;
-  box-shadow: var(--shadow);
-}
-
-/* ========================================
    UPLOAD PREVIEW
    ======================================== */
 .upload-preview {
