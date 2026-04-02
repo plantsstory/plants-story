@@ -1127,11 +1127,13 @@ serve(async (req: Request) => {
       );
     }
 
-    // ── Rate limiting: 10 requests/hour/user ──
+    // ── Rate limiting ──
     const serviceClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+    const isAdmin = authUser.app_metadata?.role === "admin";
+    const rateLimit = isAdmin ? 200 : 10; // Admin: 200/hour, User: 10/hour
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const { count: recentCount } = await serviceClient
       .from("research_origin_requests")
@@ -1139,9 +1141,9 @@ serve(async (req: Request) => {
       .eq("user_id", authUser.id)
       .gte("requested_at", oneHourAgo);
 
-    if ((recentCount ?? 0) >= 10) {
+    if ((recentCount ?? 0) >= rateLimit) {
       return new Response(
-        JSON.stringify({ error: "Rate limit exceeded. Maximum 10 research requests per hour." }),
+        JSON.stringify({ error: `Rate limit exceeded. Maximum ${rateLimit} research requests per hour.` }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
