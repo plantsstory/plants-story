@@ -71,6 +71,10 @@
   window._flushErrorLogs = flushErrors;
 })();
 
+// Translation stub — overridden by the full i18n implementation in forms.js
+// Prevents ReferenceError when app-core.js renders DOM before forms.js loads
+function t(key) { return key; }
+
 // HTML escape helper to prevent XSS
 function escHtml(str) {
   if (!str && str !== 0) return '';
@@ -1235,30 +1239,31 @@ var cultivarData = {
       // Logged in: show profile in header, hide login button in header, show logout in menu
       var profileUrl = _basePath + 'profile/' + window._currentUser.id;
       if (headerProfileBtn) {
-        headerProfileBtn.style.display = '';
+        headerProfileBtn.classList.remove('d-none');
         headerProfileBtn.href = profileUrl;
+        headerProfileBtn.setAttribute('data-userid', window._currentUser.id);
       }
       if (headerAuthBtn) {
         headerAuthBtn.textContent = 'ログアウト';
         headerAuthBtn.title = window._currentUser.email || '';
-        headerAuthBtn.style.display = 'none';
+        headerAuthBtn.classList.add('d-none');
       }
-      if (navAuth) { navAuth.innerHTML = '&#x1F6AA; ログアウト'; navAuth.style.display = ''; }
-      if (navProfile) { navProfile.style.display = ''; navProfile.href = profileUrl; }
+      if (navAuth) { navAuth.innerHTML = '&#x1F6AA; ログアウト'; navAuth.classList.remove('d-none'); }
+      if (navProfile) { navProfile.classList.remove('d-none'); navProfile.href = profileUrl; navProfile.setAttribute('data-userid', window._currentUser.id); }
     } else {
       // Logged out: show login button in header, hide profile
-      if (headerProfileBtn) headerProfileBtn.style.display = 'none';
+      if (headerProfileBtn) headerProfileBtn.classList.add('d-none');
       if (headerAuthBtn) {
         headerAuthBtn.textContent = 'ログイン';
         headerAuthBtn.title = 'Googleでログイン';
-        headerAuthBtn.style.display = '';
+        headerAuthBtn.classList.remove('d-none');
       }
-      if (navAuth) { navAuth.innerHTML = '&#x1F511; ログイン'; navAuth.style.display = ''; }
-      if (navProfile) navProfile.style.display = 'none';
+      if (navAuth) { navAuth.innerHTML = '&#x1F511; ログイン'; navAuth.classList.remove('d-none'); }
+      if (navProfile) navProfile.classList.add('d-none');
     }
     // Show/hide 投稿履歴 menu item
     if (navMypost) {
-      navMypost.style.display = window._currentUser ? '' : 'none';
+      window._currentUser ? navMypost.classList.remove('d-none') : navMypost.classList.add('d-none');
     }
     // Update contribute page login card (may not exist on other pages)
     if (benefitsContent) {

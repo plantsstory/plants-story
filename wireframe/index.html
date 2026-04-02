@@ -81,7 +81,7 @@
       <a class="header__logo" data-nav="top">ひなたぼっこぷらんつ<br><span class="header__logo-sub">- Plants Story -</span></a>
       <div class="header__actions">
         <button class="header__lang" data-i18n="lang_toggle">EN / JP</button>
-        <a id="header-profile-btn" href="#" class="header__btn d-none">プロフィール</a>
+        <a id="header-profile-btn" href="#" class="header__btn d-none" data-nav="profile">プロフィール</a>
         <button class="header__auth-btn header__btn" id="header-auth-btn" type="button">ログイン</button>
         <button class="header__hamburger" id="hamburger" aria-label="Menu">
           <span></span><span></span><span></span>
@@ -96,7 +96,7 @@
     <span id="mobile-nav-genera"></span>
     <a href="#" data-nav="favorites" data-i18n="nav_favorites">&#x2606; お気に入り</a>
     <a href="#" data-nav="mypost" id="nav-mypost" class="d-none">&#x1F4DD; 投稿履歴</a>
-    <a href="#" id="nav-profile" class="d-none" onclick="document.getElementById('mobileNav').classList.remove('open');">&#x1F464; プロフィール</a>
+    <a href="#" id="nav-profile" class="d-none" data-nav="profile">&#x1F464; プロフィール</a>
     <div class="mt-sm mobile-nav__divider">
       <a href="#" id="nav-auth" onclick="event.preventDefault();document.getElementById('header-auth-btn').click();document.getElementById('mobileNav').classList.remove('open');">&#x1F511; ログイン</a>
     </div>

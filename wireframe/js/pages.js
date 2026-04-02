@@ -1705,6 +1705,11 @@ document.addEventListener('click', function(e) {
       navOptions.genus = genus.toLowerCase();
     }
 
+    if (page === 'profile') {
+      var userid = navEl.getAttribute('data-userid');
+      if (userid) navOptions.userId = userid;
+    }
+
     // If navigating to contribute in edit mode, set _editFlow to prevent exitEditMode
     var isEditNav = page === 'contribute' && navEl.getAttribute('data-edit') === 'true';
     if (isEditNav) navOptions._editFlow = true;
