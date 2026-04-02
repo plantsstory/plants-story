@@ -178,17 +178,19 @@ window.guardSubmit = guardSubmit;
     sessionStorage.removeItem('spa_redirect_path');
     history.replaceState(null, '', redirectPath);
   }
-  // Legacy hash URL migration: redirect #/path to /plants-story/path
+  // Legacy hash URL migration: redirect #/path to clean path
   if (location.hash && location.hash.indexOf('#/') === 0) {
     var hashRoute = location.hash.replace(/^#\/?/, '');
     if (hashRoute) {
-      history.replaceState(null, '', '/plants-story/' + hashRoute);
+      var legacyBase = location.hostname !== 'plantsstory.github.io' ? '/' : '/plants-story/';
+      history.replaceState(null, '', legacyBase + hashRoute);
     }
   }
 })();
 
-// Page navigation
-var _siteBase = 'https://plantsstory.github.io/plants-story/';
+// Page navigation — detect custom domain vs GitHub Pages
+var _isCustomDomain = location.hostname !== 'plantsstory.github.io';
+var _siteBase = _isCustomDomain ? 'https://plantsstory.com/' : 'https://plantsstory.github.io/plants-story/';
 var _defaultTitle = 'ひなたぼっこぷらんつ - Plants Story';
 var _defaultDesc = 'アロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォーム';
 
@@ -339,8 +341,8 @@ function showGenus(genusName) {
 var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'favorites', 'mypost', 'guide'];
 // Known genus names for URL mapping
 var knownGenera = []; // Populated dynamically from genera table
-// Base path for GitHub Pages deployment
-var _basePath = '/plants-story/';
+// Base path: '/' on custom domain, '/plants-story/' on GitHub Pages
+var _basePath = _isCustomDomain ? '/' : '/plants-story/';
 
 function buildPath(page, options) {
   options = options || {};

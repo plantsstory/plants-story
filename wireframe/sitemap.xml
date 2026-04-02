@@ -1,47 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://plantsstory.github.io/plants-story/</loc>
+    <loc>https://plantsstory.com/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://plantsstory.github.io/plants-story/anthurium</loc>
+    <loc>https://plantsstory.com/anthurium</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://plantsstory.github.io/plants-story/monstera</loc>
+    <loc>https://plantsstory.com/monstera</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://plantsstory.github.io/plants-story/philodendron</loc>
+    <loc>https://plantsstory.com/philodendron</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://plantsstory.github.io/plants-story/about</loc>
+    <loc>https://plantsstory.com/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://plantsstory.github.io/plants-story/guide</loc>
+    <loc>https://plantsstory.com/guide</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://plantsstory.github.io/plants-story/terms</loc>
+    <loc>https://plantsstory.com/terms</loc>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://plantsstory.github.io/plants-story/privacy</loc>
+    <loc>https://plantsstory.com/privacy</loc>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://plantsstory.github.io/plants-story/contact</loc>
+    <loc>https://plantsstory.com/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>

@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /admin
 
-Sitemap: https://plantsstory.github.io/plants-story/sitemap.xml
+Sitemap: https://plantsstory.com/sitemap.xml
