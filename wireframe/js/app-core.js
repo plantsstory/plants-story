@@ -1241,6 +1241,7 @@ var cultivarData = {
       if (headerProfileBtn) {
         headerProfileBtn.classList.remove('d-none');
         headerProfileBtn.href = profileUrl;
+        headerProfileBtn.setAttribute('data-nav', 'profile');
         headerProfileBtn.setAttribute('data-userid', window._currentUser.id);
       }
       if (headerAuthBtn) {
@@ -1249,7 +1250,7 @@ var cultivarData = {
         headerAuthBtn.classList.add('d-none');
       }
       if (navAuth) { navAuth.innerHTML = '&#x1F6AA; ログアウト'; navAuth.classList.remove('d-none'); }
-      if (navProfile) { navProfile.classList.remove('d-none'); navProfile.href = profileUrl; navProfile.setAttribute('data-userid', window._currentUser.id); }
+      if (navProfile) { navProfile.classList.remove('d-none'); navProfile.href = profileUrl; navProfile.setAttribute('data-nav', 'profile'); navProfile.setAttribute('data-userid', window._currentUser.id); }
     } else {
       // Logged out: show login button in header, hide profile
       if (headerProfileBtn) headerProfileBtn.classList.add('d-none');
