@@ -3483,6 +3483,16 @@
     });
 
     // ---- Share button ----
+    // Build OGP-friendly share URL via Edge Function (crawlers see proper meta tags)
+    function getShareUrl(cultivarName) {
+      var base = window._SUPABASE_URL;
+      if (base) {
+        return base + '/functions/v1/share?name=' + encodeURIComponent(cultivarName);
+      }
+      // Fallback: direct SPA URL
+      return _siteBase + '#/cultivar/' + encodeURIComponent(cultivarName);
+    }
+
     document.addEventListener('click', function(e) {
       var btn = e.target.closest('#share-btn');
       if (!btn) {
@@ -3494,19 +3504,19 @@
       var h1 = document.querySelector('#page-cultivar h1');
       if (!h1) return;
       var name = h1.textContent;
-      var url = window.location.href;
+      var shareUrl = getShareUrl(name);
       var text = name + ' - Plants Story';
 
       // Try native share API first (mobile)
       if (navigator.share) {
-        navigator.share({ title: text, url: url }).catch(function() {});
+        navigator.share({ title: text, url: shareUrl }).catch(function() {});
         return;
       }
 
       // Desktop: show share menu
       var menu = document.getElementById('share-menu');
       if (!menu) return;
-      var encodedUrl = encodeURIComponent(url);
+      var encodedUrl = encodeURIComponent(shareUrl);
       var encodedText = encodeURIComponent(text);
       menu.innerHTML =
         '<a href="https://twitter.com/intent/tweet?text=' + encodedText + '&url=' + encodedUrl + '" target="_blank" rel="noopener" class="btn btn--sm btn--secondary text-xs">X</a>' +
@@ -3516,7 +3526,7 @@
 
       // Copy URL handler
       menu.querySelector('.share-copy-btn').addEventListener('click', function() {
-        navigator.clipboard.writeText(url).then(function() {
+        navigator.clipboard.writeText(shareUrl).then(function() {
           showToast('URLをコピーしました');
           menu.classList.add('hidden');
         });
