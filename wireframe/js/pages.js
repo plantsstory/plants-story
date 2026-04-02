@@ -570,11 +570,21 @@ function syncFavoritesFromServer() {
     if (res.error || !res.data) return;
     // Server is source of truth — replace local with server data
     var serverFavs = {};
+    var staleNames = [];
     res.data.forEach(function(row) {
+      // If data is fully loaded, skip favorites for deleted cultivars
+      if (window._dataFullyLoaded && !cultivarData[row.cultivar_name] && !cultivarData[row.cultivar_name + ' [Seedling]']) {
+        staleNames.push(row.cultivar_name);
+        return;
+      }
       serverFavs[row.cultivar_name] = new Date(row.created_at).getTime();
     });
     localStorage.setItem(FAV_KEY, JSON.stringify(serverFavs));
     updateHeaderFavIcon();
+    // Delete stale favorites from server
+    if (staleNames.length > 0) {
+      sb.from('favorites').delete().eq('user_id', user.id).in('cultivar_name', staleNames).then(function() {});
+    }
   });
 }
 window.syncFavoritesFromServer = syncFavoritesFromServer;
@@ -754,19 +764,25 @@ function renderFavoritesPage() {
       html += '</div>';
     });
     grid.innerHTML = html || '<div class="text-center text-muted grid-full p-xl">' + t('favorites_empty') + '</div>';
-    // Clean up stale favorites not in cultivarData
-    if (rendered < names.length) {
+    // Clean up stale favorites not in cultivarData (only after full data load)
+    if (rendered < names.length && window._dataFullyLoaded) {
       var cleanFavs = getFavorites();
-      var stale = false;
+      var staleNames = [];
       names.forEach(function(name) {
         if (!cultivarData[name] && !cultivarData[name + ' [Seedling]']) {
           delete cleanFavs[name];
-          stale = true;
+          staleNames.push(name);
         }
       });
-      if (stale) {
+      if (staleNames.length > 0) {
         localStorage.setItem(FAV_KEY, JSON.stringify(cleanFavs));
         updateHeaderFavIcon();
+        // Also delete stale favorites from server to prevent them from coming back
+        var sb = window._supabaseClient;
+        var user = window._currentUser;
+        if (sb && user) {
+          sb.from('favorites').delete().eq('user_id', user.id).in('cultivar_name', staleNames).then(function() {});
+        }
       }
     }
     observeLazyImages(grid);
