@@ -2067,10 +2067,23 @@ updateCultivarDetail = function(cultivarName, rowEl) {
         canvas.height = h;
         var ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, w, h);
-        canvas.toBlob(function(blob) {
-          if (!blob) { reject(new Error('Compression failed')); return; }
-          resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
-        }, 'image/jpeg', quality);
+        // Prefer WebP for smaller file sizes, fallback to JPEG
+        var useWebP = typeof canvas.toBlob === 'function';
+        if (useWebP) {
+          canvas.toBlob(function(webpBlob) {
+            if (webpBlob && webpBlob.type === 'image/webp') {
+              resolve(new File([webpBlob], file.name.replace(/\.\w+$/, '.webp'), { type: 'image/webp' }));
+            } else {
+              // Browser doesn't support WebP encoding, fallback to JPEG
+              canvas.toBlob(function(jpgBlob) {
+                if (!jpgBlob) { reject(new Error('Compression failed')); return; }
+                resolve(new File([jpgBlob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
+              }, 'image/jpeg', quality);
+            }
+          }, 'image/webp', quality);
+        } else {
+          reject(new Error('Compression not supported'));
+        }
       };
       img.onerror = function() { reject(new Error('Failed to load image')); };
       img.src = URL.createObjectURL(file);
