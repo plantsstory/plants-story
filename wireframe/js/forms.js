@@ -2123,14 +2123,14 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     var store = getGalleryStore();
     if (!store[cultivarName]) store[cultivarName] = [];
     store[cultivarName].push(dataUrl);
-    localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(store));
+    safeLSSet(GALLERY_STORAGE_KEY, JSON.stringify(store));
   }
   function removeGalleryImageLocal(cultivarName, index) {
     var store = getGalleryStore();
     if (store[cultivarName]) {
       store[cultivarName].splice(index, 1);
       if (store[cultivarName].length === 0) delete store[cultivarName];
-      localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(store));
+      safeLSSet(GALLERY_STORAGE_KEY, JSON.stringify(store));
     }
   }
   function getGalleryImagesLocal(cultivarName) {

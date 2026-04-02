@@ -90,6 +90,28 @@ function rateLimit(action, cooldownMs) {
 }
 window.rateLimit = rateLimit;
 
+// Safe localStorage wrapper with quota handling
+function safeLSSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      // Clear gallery local data (largest items) and retry
+      try {
+        localStorage.removeItem('plants-story-gallery');
+        localStorage.setItem(key, value);
+        return true;
+      } catch (e2) {
+        console.warn('localStorage quota exceeded, could not save:', key);
+        return false;
+      }
+    }
+    return false;
+  }
+}
+window.safeLSSet = safeLSSet;
+
 // Toast notification helper (non-blocking replacement for alert)
 function showToast(msg, isError) {
   var container = document.getElementById('toast-container');
@@ -1435,7 +1457,7 @@ var cultivarData = {
       var existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
       Object.keys(existing).forEach(function(k) { saved[k] = existing[k]; });
     } catch(e) {}
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+    safeLSSet(STORAGE_KEY, JSON.stringify(saved));
   };
 
   // SHA256 hash helper (returns hex string)
@@ -1489,7 +1511,7 @@ var cultivarData = {
         var saved = {};
         try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
         saved[fullName] = { entry: entry, meta: meta };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+        safeLSSet(STORAGE_KEY, JSON.stringify(saved));
         // Trigger AI research for non-species types only
         // Species uses the AI auto-fill button before registration instead
         var isSpecies = meta.type === 'species';
@@ -1513,7 +1535,7 @@ var cultivarData = {
       var saved = {};
       try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
       saved[fullName] = { entry: entry, meta: meta };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+      safeLSSet(STORAGE_KEY, JSON.stringify(saved));
       return Promise.resolve();
     }
   };
@@ -1579,7 +1601,7 @@ var cultivarData = {
           var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
           if (saved[d.cultivar_name]) {
             saved[d.cultivar_name].entry.origins = d.origins;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+            safeLSSet(STORAGE_KEY, JSON.stringify(saved));
           }
         } catch(e) {}
       }
@@ -1927,7 +1949,7 @@ var cultivarData = {
             }
           });
           if (hasRemaining) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(remaining));
+            safeLSSet(STORAGE_KEY, JSON.stringify(remaining));
           } else {
             localStorage.removeItem(STORAGE_KEY);
           }
