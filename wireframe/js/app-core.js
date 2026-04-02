@@ -602,7 +602,12 @@ if (window._generaLoaded) {
 //   専門書籍: 75-88%  |  専門ナーセリー公式: 65-80%
 //   Instagram(作出者本人): 55-72%  |  コレクターブログ: 40-60%
 //   フォーラム議論: 30-50%  |  未検証SNS投稿: 15-35%
-var cultivarData = {
+// All cultivar data is loaded from Supabase DB — no hardcoded fallback
+var cultivarData = {};
+/* REMOVED: hardcoded cultivar data that was stale and diverged from DB.
+   All data is now fetched from Supabase via restoreUserCultivars(). */
+if (false) {
+  var _removedData = {
   'Anthurium crystallinum': {
     origins: [
       { trust: 93, trustClass: 'trust--high',
@@ -1037,7 +1042,8 @@ var cultivarData = {
       }
     ]
   }
-};
+  };
+} // end removed hardcoded data
 
 // ---- Supabase + localStorage persistence for user-added cultivars ----
 (function() {
