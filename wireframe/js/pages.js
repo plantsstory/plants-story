@@ -444,19 +444,38 @@
   }
 })();
 
-// ---- Lazy image loading with fade-in ----
-// Activate lazy images: swap data-src → src for native loading="lazy"
+// ---- Lazy image loading with Intersection Observer ----
+var _lazyObserver = null;
+if ('IntersectionObserver' in window) {
+  _lazyObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var img = entry.target;
+        img.addEventListener('load', function() { img.classList.add('lazy-loaded'); });
+        img.addEventListener('error', function() { img.style.display = 'none'; });
+        img.src = img.getAttribute('data-src');
+        img.removeAttribute('data-src');
+        _lazyObserver.unobserve(img);
+      }
+    });
+  }, { rootMargin: '200px' });
+}
+
 function observeLazyImages(container) {
   if (!container) return;
   var imgs = container.querySelectorAll('img[data-src]');
   for (var i = 0; i < imgs.length; i++) {
-    (function(img) {
-      img.addEventListener('load', function() { img.classList.add('lazy-loaded'); });
-      img.addEventListener('error', function() { img.style.display = 'none'; });
+    var img = imgs[i];
+    img.setAttribute('loading', 'lazy');
+    if (_lazyObserver) {
+      _lazyObserver.observe(img);
+    } else {
+      // Fallback: load immediately if IntersectionObserver not supported
+      img.addEventListener('load', function() { this.classList.add('lazy-loaded'); });
+      img.addEventListener('error', function() { this.style.display = 'none'; });
       img.src = img.getAttribute('data-src');
-      img.setAttribute('loading', 'lazy');
       img.removeAttribute('data-src');
-    })(imgs[i]);
+    }
   }
 }
 window.observeLazyImages = observeLazyImages;
