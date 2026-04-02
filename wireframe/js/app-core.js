@@ -1,3 +1,76 @@
+// --- Global Error Monitoring ---
+(function() {
+  var errorQueue = [];
+  var flushTimer = null;
+  var MAX_QUEUE = 10;
+  var FLUSH_INTERVAL = 5000;
+  var reportedErrors = {};
+
+  function fingerprint(msg, source, lineno) {
+    return (msg || '') + '|' + (source || '') + '|' + (lineno || 0);
+  }
+
+  function queueError(info) {
+    var fp = fingerprint(info.message, info.source, info.lineno);
+    if (reportedErrors[fp]) return;
+    reportedErrors[fp] = true;
+    errorQueue.push(info);
+    if (errorQueue.length >= MAX_QUEUE) {
+      flushErrors();
+    } else if (!flushTimer) {
+      flushTimer = setTimeout(flushErrors, FLUSH_INTERVAL);
+    }
+  }
+
+  function flushErrors() {
+    if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
+    if (!errorQueue.length) return;
+    var batch = errorQueue.splice(0, MAX_QUEUE);
+    var client = window._supabaseClient;
+    if (!client) return;
+    batch.forEach(function(err) {
+      client.rpc('log_client_error', {
+        p_message: (err.message || '').substring(0, 1000),
+        p_source: (err.source || '').substring(0, 500),
+        p_lineno: err.lineno || null,
+        p_colno: err.colno || null,
+        p_stack: (err.stack || '').substring(0, 2000),
+        p_url: (err.url || '').substring(0, 500),
+        p_user_agent: (err.userAgent || '').substring(0, 500)
+      }).then(function() {}).catch(function() {});
+    });
+  }
+
+  window.onerror = function(message, source, lineno, colno, error) {
+    queueError({
+      message: String(message),
+      source: source,
+      lineno: lineno,
+      colno: colno,
+      stack: error && error.stack ? error.stack : '',
+      url: location.href,
+      userAgent: navigator.userAgent
+    });
+  };
+
+  window.addEventListener('unhandledrejection', function(event) {
+    var reason = event.reason;
+    var message = reason instanceof Error ? reason.message : String(reason || 'Unhandled Promise rejection');
+    var stack = reason instanceof Error ? reason.stack || '' : '';
+    queueError({
+      message: message,
+      source: 'unhandledrejection',
+      lineno: 0,
+      colno: 0,
+      stack: stack,
+      url: location.href,
+      userAgent: navigator.userAgent
+    });
+  });
+
+  window._flushErrorLogs = flushErrors;
+})();
+
 // Toast notification helper (non-blocking replacement for alert)
 function showToast(msg, isError) {
   var toast = document.createElement('div');

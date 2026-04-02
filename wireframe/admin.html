@@ -59,6 +59,7 @@
       <a href="#" data-section="affiliates">アフィリエイト</a>
       <a href="#" data-section="users">ユーザー管理</a>
       <a href="#" data-section="bulk">一括操作</a>
+      <a href="#" data-section="error-logs">エラーログ</a>
       <a href="#" data-section="external">外部サービス</a>
     </nav>
     <div class="nav-overlay" id="nav-overlay"></div>
@@ -300,6 +301,30 @@
             <button class="btn btn-primary" id="btn-export">JSONエクスポート</button>
           </div>
         </div>
+      </section>
+
+      <!-- ---- ERROR LOGS ---- -->
+      <section id="sec-error-logs" class="hidden">
+        <h2 class="section-title">エラーログ</h2>
+        <p class="text-muted mb-lg">フロントエンドで発生したJavaScriptエラーの一覧です。</p>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="btn-load-errors">最新を読み込む</button>
+          <button class="btn" id="btn-clear-errors">30日以前を削除</button>
+          <span class="text-muted" id="error-count"></span>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:140px;">日時</th>
+              <th>メッセージ</th>
+              <th style="width:120px;">ソース</th>
+              <th style="width:60px;">行</th>
+            </tr>
+          </thead>
+          <tbody id="error-logs-body">
+            <tr><td colspan="4" class="text-muted">「最新を読み込む」をクリックしてください</td></tr>
+          </tbody>
+        </table>
       </section>
 
       <!-- ---- EXTERNAL SERVICES ---- -->
@@ -2633,6 +2658,65 @@ document.getElementById('btn-refresh-genera').addEventListener('click', function
     populateGenusFilter();
   }
 })();
+
+// ========================================
+// Error Logs
+// ========================================
+document.getElementById('btn-load-errors').addEventListener('click', loadErrorLogs);
+document.getElementById('btn-clear-errors').addEventListener('click', clearOldErrors);
+
+document.querySelectorAll('.admin-nav a').forEach(function(link) {
+  link.addEventListener('click', function() {
+    if (this.getAttribute('data-section') === 'error-logs') loadErrorLogs();
+  });
+});
+
+async function loadErrorLogs() {
+  var tbody = document.getElementById('error-logs-body');
+  tbody.innerHTML = '<tr><td colspan="4">読み込み中...</td></tr>';
+  try {
+    var res = await sb.from('error_logs').select('*').order('created_at', { ascending: false }).limit(100);
+    if (res.error) throw res.error;
+    var rows = res.data || [];
+    document.getElementById('error-count').textContent = rows.length + '件';
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="text-muted">エラーログはありません</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(function(r) {
+      var d = new Date(r.created_at);
+      var ts = d.toLocaleDateString('ja-JP') + ' ' + d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+      var src = (r.source || '').replace(/.*\//, '');
+      return '<tr>' +
+        '<td style="white-space:nowrap;font-size:var(--font-size-sm);">' + escHtml(ts) + '</td>' +
+        '<td title="' + escHtml(r.stack || '') + '" style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml((r.message || '').substring(0, 200)) + '</td>' +
+        '<td style="font-size:var(--font-size-sm);">' + escHtml(src) + '</td>' +
+        '<td>' + (r.lineno || '') + '</td>' +
+        '</tr>';
+    }).join('');
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="4" class="text-muted">読み込みエラー: ' + escHtml(e.message || String(e)) + '</td></tr>';
+  }
+}
+
+async function clearOldErrors() {
+  if (!confirm('30日以前のエラーログを削除しますか？')) return;
+  try {
+    var cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    var res = await sb.from('error_logs').delete().lt('created_at', cutoff);
+    if (res.error) throw res.error;
+    toast('古いエラーログを削除しました');
+    loadErrorLogs();
+  } catch (e) {
+    toast('削除エラー: ' + (e.message || String(e)));
+  }
+}
+
+function escHtml(s) {
+  var d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
 </script>
 </body>
 </html>
