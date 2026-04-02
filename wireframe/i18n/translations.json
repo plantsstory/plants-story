@@ -18,7 +18,7 @@
   "cultivar_count": { "jp": "- 品種", "en": "- Cultivars" },
   "monstera_count": { "jp": "- 品種", "en": "- Cultivars" },
   "philodendron_count": { "jp": "- 品種", "en": "- Cultivars" },
-  "recently_added": { "jp": "最近追加された品種", "en": "Recently Added Cultivars" },
+  "recently_updated": { "jp": "最近更新された品種", "en": "Recently Updated Cultivars" },
   "how_it_works": { "jp": "仕組み", "en": "How It Works" },
   "step1_title": { "jp": "学術DBから自動取得", "en": "Botanical Database Lookup" },
   "step1_desc": { "jp": "IPNI・POWO（キュー王立植物園）の学術データベースから由来情報を自動取得します", "en": "Origins are automatically retrieved from IPNI and POWO (Kew Gardens) botanical databases" },

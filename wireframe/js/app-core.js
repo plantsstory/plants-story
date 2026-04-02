@@ -1935,41 +1935,40 @@ if (false) {
     });
   }
 
-  // Populate "Recently Added" on home page via RPC (server-side)
-  function refreshRecentlyAdded() {
-    var grid = document.getElementById('recently-added-grid');
+  // Populate "Recently Updated" on home page
+  function refreshRecentlyUpdated() {
+    var grid = document.getElementById('recently-updated-grid');
     if (!grid) return;
 
-    // Try server-side RPC first
     if (supabase) {
-      grid.innerHTML = skeletonCards(3);
-      supabase.rpc('get_recent_cultivars', { p_limit: 3 }).then(function(res) {
-        if (res.error || !res.data) {
-          refreshRecentlyAddedFromMemory(grid);
-          return;
-        }
-        var items = Array.isArray(res.data) ? res.data : (res.data.items || []);
-        if (items.length === 0) {
-          grid.innerHTML = '<div class="text-center text-muted grid-full empty-state">まだ品種が登録されていません。</div>';
-          return;
-        }
-        renderRecentCards(grid, items);
-      });
+      grid.innerHTML = skeletonCards(5);
+      supabase.from('cultivars')
+        .select('id, cultivar_name, genus, type, origins, updated_at')
+        .neq('type', 'seedling')
+        .order('updated_at', { ascending: false, nullsFirst: false })
+        .limit(5)
+        .then(function(res) {
+          if (res.error || !res.data || res.data.length === 0) {
+            grid.innerHTML = '<div class="text-center text-muted grid-full empty-state">まだ品種が登録されていません。</div>';
+            return;
+          }
+          renderRecentCards(grid, res.data);
+        });
     } else {
-      refreshRecentlyAddedFromMemory(grid);
+      refreshRecentlyUpdatedFromMemory(grid);
     }
   }
 
   // Fallback: render from in-memory cultivarData
-  function refreshRecentlyAddedFromMemory(grid) {
+  function refreshRecentlyUpdatedFromMemory(grid) {
     var items = Object.keys(cultivarData).map(function(name) {
       var d = cultivarData[name];
-      return { cultivar_name: name, created_at: d._created_at || '', type: d._type || '', origins: d.origins || [] };
+      return { cultivar_name: name, updated_at: d._updated_at || d._created_at || '', type: d._type || '', origins: d.origins || [] };
     }).filter(function(item) {
       return item.type !== 'seedling';
     }).sort(function(a, b) {
-      return (b.created_at || '').localeCompare(a.created_at || '');
-    }).slice(0, 3);
+      return (b.updated_at || '').localeCompare(a.updated_at || '');
+    }).slice(0, 5);
 
     if (items.length === 0) {
       grid.innerHTML = '<div class="text-center text-muted grid-full empty-state">まだ品種が登録されていません。</div>';
@@ -1978,32 +1977,53 @@ if (false) {
     renderRecentCards(grid, items);
   }
 
-  // Shared renderer for recently added cards
+  // Shared renderer for recently updated cards (with thumbnails)
   function renderRecentCards(grid, items) {
-    var html = '';
-    items.forEach(function(item) {
-      var name = item.cultivar_name;
-      var displayName = name.replace(' [Seedling]', '');
-      var genus = displayName.split(' ')[0];
-      var origins = item.origins || [];
-      var type = item.type || '';
-      var hasOrigins = origins.length > 0 && origins[0].trust > 0;
-      var trustPct = hasOrigins ? origins.reduce(function(max, o) { return Math.max(max, o.trust || 0); }, 0) : 0;
-      var trustClass = getTrustClass(trustPct);
-      var bi = getBadgeInfo(type, name);
+    var baseUrl = window._SUPABASE_URL;
+    var names = items.map(function(item) { return item.cultivar_name.replace(' [Seedling]', ''); });
 
-      html += '<div class="card card--clickable" data-nav="cultivar" data-key="' + name.replace(/"/g, '&quot;') + '">';
-      html += '<div class="recent-card__img">';
-      html += '<svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
-      html += '</div>';
-      html += '<div class="font-bold">' + displayName + '</div>';
-      html += '<div class="text-sm text-muted">' + genus + ' <span class="badge ' + bi.cls + ' badge--inline">' + bi.txt + '</span></div>';
-      if (hasOrigins) {
-        html += '<div class="trust mt-sm"><div class="trust__bar"><div class="trust__fill ' + trustClass + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + trustPct + '%</span></div>';
-      }
-      html += '</div>';
+    // Fetch thumbnails
+    var thumbPromise;
+    if (supabase && baseUrl) {
+      thumbPromise = supabase.from('cultivar_images').select('cultivar_name, storage_path').in('cultivar_name', names).then(function(res) {
+        var map = {};
+        if (res.data) res.data.forEach(function(img) { if (!map[img.cultivar_name]) map[img.cultivar_name] = img.storage_path; });
+        return map;
+      });
+    } else {
+      thumbPromise = Promise.resolve({});
+    }
+
+    thumbPromise.then(function(thumbMap) {
+      var html = '';
+      items.forEach(function(item) {
+        var name = item.cultivar_name;
+        var displayName = name.replace(' [Seedling]', '');
+        var genus = displayName.split(' ')[0];
+        var type = item.type || '';
+        var bi = getBadgeInfo(type, name);
+
+        html += '<div class="card card--clickable" data-nav="cultivar" data-key="' + name.replace(/"/g, '&quot;') + '">';
+
+        // Thumbnail or fallback icon
+        if (thumbMap[displayName] && baseUrl) {
+          var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
+          html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt=""></div>';
+        } else {
+          html += '<div class="recent-card__img">';
+          html += '<svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
+          html += '</div>';
+        }
+
+        html += '<div class="p-sm">';
+        html += '<div class="font-bold text-sm">' + displayName + '</div>';
+        html += '<div class="text-xs text-muted">' + genus + ' <span class="badge ' + bi.cls + ' badge--inline">' + bi.txt + '</span></div>';
+        html += '</div>';
+        html += '</div>';
+      });
+      grid.innerHTML = html;
+      observeLazyImages(grid);
     });
-    grid.innerHTML = html;
   }
 
   // Restore cultivars from Supabase first, then localStorage as fallback
@@ -2020,7 +2040,7 @@ if (false) {
       if (section) paginateGenus(section, 1);
     });
     refreshGenusUI();
-    refreshRecentlyAdded();
+    refreshRecentlyUpdated();
 
     // Profile cache for poster names
     var _profileCache = {};
@@ -2115,7 +2135,7 @@ if (false) {
   function startApp() {
     window._generaLoaded = loadGenera().then(function() {
       // Fast: fetch top page data from RPCs (genus counts + recent cultivars)
-      refreshRecentlyAdded();
+      refreshRecentlyUpdated();
       refreshGenusCountsFromServer();
       // Full data load (deferred, builds in-memory cache)
       restoreUserCultivars();
