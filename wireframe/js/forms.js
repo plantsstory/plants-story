@@ -1,4 +1,24 @@
 
+// Contribute form: Quick/Detail mode toggle
+(function() {
+  var modeQuick = document.getElementById('mode-quick');
+  var modeDetail = document.getElementById('mode-detail');
+  if (!modeQuick || !modeDetail) return;
+
+  function setMode(isDetail) {
+    var sections = document.querySelectorAll('.contribute-detail-section');
+    sections.forEach(function(s) { s.style.display = isDetail ? '' : 'none'; });
+    modeQuick.classList.toggle('active', !isDetail);
+    modeDetail.classList.toggle('active', isDetail);
+  }
+
+  modeQuick.addEventListener('click', function() { setMode(false); });
+  modeDetail.addEventListener('click', function() { setMode(true); });
+
+  // Default to quick mode for new posts, detail mode for edits
+  if (!window._editingCultivar) setMode(false);
+})();
+
 // Tab switching for genus pages (Species/Clones vs My Seedlings)
 document.addEventListener('click', function(e) {
   var tab = e.target.closest('.genus-tab');
@@ -121,23 +141,22 @@ document.addEventListener('click', function(e) {
   }
 
   btn.disabled = true;
-  sb.from('cultivars').select('origins').eq('cultivar_name', cultivarName).single().then(function(res) {
-    if (res.error || !res.data || !res.data.origins) { btn.disabled = false; return; }
-    var origins = res.data.origins;
-    if (!origins[originIdx]) { btn.disabled = false; return; }
-    if (!origins[originIdx].votes) origins[originIdx].votes = { agree: 0, disagree: 0 };
-    origins[originIdx].votes[voteType] = (origins[originIdx].votes[voteType] || 0) + 1;
-    return sb.from('cultivars').update({ origins: origins }).eq('cultivar_name', cultivarName);
+  sb.rpc('cast_origin_vote', {
+    p_cultivar_name: cultivarName,
+    p_origin_idx: originIdx,
+    p_vote_type: voteType
   }).then(function(res) {
-    if (res && res.error) { btn.disabled = false; showToast(t('toast_vote_failed'), true); return; }
+    if (res.error) { btn.disabled = false; showToast(t('toast_vote_failed'), true); return; }
+    var result = res.data;
+    if (!result || !result.success) { btn.disabled = false; showToast(result && result.error ? result.error : t('toast_vote_failed'), true); return; }
     localStorage.setItem(voteKey, '1');
     btn.classList.add(voteType === 'agree' ? 'vote-btn--active' : 'vote-btn--active-down');
     var countEl = btn.querySelector('.vote-btn__badge');
-    if (countEl) countEl.textContent = parseInt(countEl.textContent, 10) + 1;
+    if (countEl) countEl.textContent = result.new_count;
     // Update in-memory data
     if (cultivarData[cultivarName] && cultivarData[cultivarName].origins && cultivarData[cultivarName].origins[originIdx]) {
       if (!cultivarData[cultivarName].origins[originIdx].votes) cultivarData[cultivarName].origins[originIdx].votes = { agree: 0, disagree: 0 };
-      cultivarData[cultivarName].origins[originIdx].votes[voteType]++;
+      cultivarData[cultivarName].origins[originIdx].votes[voteType] = result.new_count;
     }
     btn.disabled = false;
   }).catch(function() { btn.disabled = false; });
@@ -192,7 +211,7 @@ if (formulaUnknown && formulaInputs) {
 // i18n TRANSLATION SYSTEM
 // ========================================
 var translations = {};
-var currentLang = localStorage.getItem('plants-story-lang') || 'jp';
+var currentLang = localStorage.getItem('plants-story-lang') || (navigator.language && navigator.language.startsWith('ja') ? 'jp' : (navigator.language && navigator.language.startsWith('en') ? 'en' : 'jp'));
 
 // Load translations asynchronously (non-blocking)
 var _translationsReady = fetch('i18n/translations.json')

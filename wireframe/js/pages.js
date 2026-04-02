@@ -41,7 +41,7 @@
     var emptyMsg = document.getElementById('profile-posts-empty');
     if (!sb || !grid) return;
 
-    grid.innerHTML = '<p class="loading-text">' + t('loading') + '</p>';
+    grid.innerHTML = skeletonCards(3);
 
     var query = sb.from('cultivars')
       .select('id, genus, cultivar_name, type, created_at')
@@ -671,7 +671,8 @@ document.addEventListener('click', function(e) {
   var encodedUrl = encodeURIComponent(shareUrl);
   var encodedText = encodeURIComponent(text);
   menu.innerHTML =
-    '<a href="https://twitter.com/intent/tweet?text=' + encodedText + '&url=' + encodedUrl + '" target="_blank" rel="noopener" class="btn btn--sm btn--secondary text-xs">X</a>' +
+    '<a href="https://twitter.com/intent/tweet?text=' + encodedText + '&url=' + encodedUrl + '&hashtags=PlantsStory' + '" target="_blank" rel="noopener" class="btn btn--sm btn--secondary text-xs">X</a>' +
+    '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodedUrl + '" target="_blank" rel="noopener" class="btn btn--sm btn--secondary text-xs">Facebook</a>' +
     '<a href="https://line.me/R/msg/text/' + encodeURIComponent(text + '\n' + shareUrl) + '" target="_blank" rel="noopener" class="btn btn--sm btn--secondary text-xs">LINE</a>' +
     '<button class="btn btn--sm btn--secondary share-copy-btn text-xs">URLコピー</button>';
   menu.classList.toggle('hidden');
@@ -803,8 +804,10 @@ function renderTierBadge(tier, name, labelJp) {
 }
 
 function renderVoteButtons(i, votes) {
-  var h = '<button class="vote-btn" data-origin-idx="' + i + '" data-vote="agree"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88L14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88z"/></svg><span class="vote-btn__badge">' + (votes ? votes.agree : 0) + '</span></button>';
-  h += '<button class="vote-btn vote-btn--down" data-origin-idx="' + i + '" data-vote="disagree"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12L10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88z"/></svg><span class="vote-btn__badge">' + (votes ? votes.disagree : 0) + '</span></button>';
+  var agreeCount = votes ? votes.agree : 0;
+  var disagreeCount = votes ? votes.disagree : 0;
+  var h = '<button class="vote-btn" data-origin-idx="' + i + '" data-vote="agree" aria-label="' + t('vote_agree') + ' (' + agreeCount + ')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v12"/><path d="M15 5.88L14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88z"/></svg><span class="vote-btn__badge">' + agreeCount + '</span></button>';
+  h += '<button class="vote-btn vote-btn--down" data-origin-idx="' + i + '" data-vote="disagree" aria-label="' + t('vote_disagree') + ' (' + disagreeCount + ')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 14V2"/><path d="M9 18.12L10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88z"/></svg><span class="vote-btn__badge">' + disagreeCount + '</span></button>';
   return h;
 }
 
@@ -815,7 +818,7 @@ function renderOrigins(cultivarName) {
   var _sb = window._supabaseClient;
 
   // Show loading state
-  container.innerHTML = '<div class="text-center text-muted p-xl">' + t('loading') + '</div>';
+  container.innerHTML = '<div class="p-xl">' + skeletonLines(4) + '</div>';
 
   if (!_sb) {
     // No Supabase: use local data only
@@ -1390,7 +1393,7 @@ function paginateGenusFromServer(genusEl, page) {
   } else {
     container = scope.querySelector('.card.card--no-pad') || scope.querySelector('.card');
   }
-  if (container) container.innerHTML = '<div class="text-muted empty-state">' + t('loading') + '</div>';
+  if (container) container.innerHTML = '<div class="p-md">' + skeletonLines(6) + '</div>';
 
   window._supabaseClient.rpc('get_cultivars_paginated', {
     p_genus: genusName,

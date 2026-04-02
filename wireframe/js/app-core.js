@@ -78,6 +78,29 @@ function escHtml(str) {
 }
 window.escHtml = escHtml;
 
+// Skeleton loading UI helpers
+function skeletonCards(count) {
+  var h = '';
+  for (var i = 0; i < count; i++) {
+    h += '<div class="skeleton-card">' +
+      '<div class="skeleton skeleton-card__thumb"></div>' +
+      '<div class="skeleton skeleton-card__title"></div>' +
+      '<div class="skeleton skeleton-card__sub"></div>' +
+      '</div>';
+  }
+  return h;
+}
+function skeletonLines(count) {
+  var h = '';
+  var widths = ['skeleton-line--long', 'skeleton-line--medium', 'skeleton-line--short'];
+  for (var i = 0; i < count; i++) {
+    h += '<div class="skeleton skeleton-line ' + widths[i % 3] + '"></div>';
+  }
+  return h;
+}
+window.skeletonCards = skeletonCards;
+window.skeletonLines = skeletonLines;
+
 // Client-side rate limiter to prevent spam
 var _rateLimits = {};
 function rateLimit(action, cooldownMs) {
@@ -124,7 +147,7 @@ function showToast(msg, isError) {
   }
   var toast = document.createElement('div');
   toast.className = 'toast-notification' + (isError ? ' toast-error' : '');
-  toast.setAttribute('role', 'status');
+  toast.setAttribute('role', isError ? 'alert' : 'status');
   toast.textContent = msg;
   container.appendChild(toast);
   setTimeout(function() { toast.classList.add('show'); }, 10);
@@ -497,6 +520,18 @@ function navigateTo(page, options, pushHistory) {
       gtag('event', 'page_view', { page_location: location.href, page_title: document.title });
     }
   }
+
+  // Accessibility: focus the page heading after SPA navigation
+  setTimeout(function() {
+    var visiblePage = document.querySelector('[id^="page-"]:not([style*="display: none"]):not([style*="display:none"])');
+    if (visiblePage) {
+      var heading = visiblePage.querySelector('h1, h2');
+      if (heading) {
+        heading.setAttribute('tabindex', '-1');
+        heading.focus({ preventScroll: true });
+      }
+    }
+  }, 50);
 }
 
 // Disable browser's automatic scroll restoration for SPA navigation
@@ -1463,7 +1498,7 @@ var cultivarData = {
       return;
     }
     if (loginMsg) loginMsg.style.display = 'none';
-    grid.innerHTML = '<p class="loading-text">' + t('loading') + '</p>';
+    grid.innerHTML = skeletonCards(3);
     var sb = window._supabaseClient;
     if (!sb) return;
     sb.from('cultivars').select('id, genus, cultivar_name, type, created_at')
@@ -1683,6 +1718,10 @@ var cultivarData = {
   }
 
   // Poll for pending AI research on page load
+  // Uses a single consolidated timer to avoid memory leaks from multiple setIntervals
+  var _aiPollTimer = null;
+  var _aiPollIds = {}; // { cultivar_id: cultivar_name }
+
   function pollPendingAIResearch() {
     if (!supabase) return;
     supabase.from('cultivars').select('id, cultivar_name, ai_status')
@@ -1699,23 +1738,44 @@ var cultivarData = {
             break;
           }
         }
-        // Set up polling for this cultivar
-        if (!aiPollingTimers[c.id]) {
-          aiPollingTimers[c.id] = setInterval(function() {
-            refreshCultivarFromDB(c.id, c.cultivar_name);
-            // Check if completed and stop polling
-            supabase.from('cultivars').select('ai_status').eq('id', c.id).single()
-            .then(function(r) {
-              if (r.data && (r.data.ai_status === 'completed' || r.data.ai_status === 'failed')) {
-                clearInterval(aiPollingTimers[c.id]);
-                delete aiPollingTimers[c.id];
-              }
-            });
-          }, 5000); // Poll every 5 seconds
-        }
+        _aiPollIds[c.id] = c.cultivar_name;
       });
+      // Start single consolidated polling timer
+      if (Object.keys(_aiPollIds).length > 0 && !_aiPollTimer) {
+        _aiPollTimer = setInterval(_aiPollTick, 5000);
+      }
     });
   }
+
+  function _aiPollTick() {
+    var ids = Object.keys(_aiPollIds);
+    if (ids.length === 0) {
+      clearInterval(_aiPollTimer);
+      _aiPollTimer = null;
+      return;
+    }
+    supabase.from('cultivars').select('id, cultivar_name, ai_status')
+      .in('id', ids)
+    .then(function(res) {
+      if (res.error || !res.data) return;
+      res.data.forEach(function(row) {
+        if (row.ai_status === 'completed' || row.ai_status === 'failed') {
+          delete _aiPollIds[row.id];
+          refreshCultivarFromDB(row.id, row.cultivar_name);
+        }
+      });
+      // Stop timer if no more pending
+      if (Object.keys(_aiPollIds).length === 0) {
+        clearInterval(_aiPollTimer);
+        _aiPollTimer = null;
+      }
+    });
+  }
+
+  // Cleanup on page unload
+  window.addEventListener('beforeunload', function() {
+    if (_aiPollTimer) { clearInterval(_aiPollTimer); _aiPollTimer = null; }
+  });
 
   // Which genera have seedling tabs (exposed globally for contribute form)
   var SEEDLING_GENERA = []; // Populated dynamically from genera table
@@ -1838,7 +1898,7 @@ var cultivarData = {
 
     // Try server-side RPC first
     if (supabase) {
-      grid.innerHTML = '<div class="text-center text-muted grid-full">' + t('loading') + '</div>';
+      grid.innerHTML = skeletonCards(3);
       supabase.rpc('get_recent_cultivars', { p_limit: 3 }).then(function(res) {
         if (res.error || !res.data) {
           refreshRecentlyAddedFromMemory(grid);

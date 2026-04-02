@@ -53,6 +53,12 @@ serve(async (req: Request) => {
 
         if (!userId) {
           console.error("No supabase_user_id in checkout session metadata");
+          await supabase.from("stripe_webhook_errors").insert({
+            event_id: event.id,
+            event_type: event.type,
+            error_message: "No supabase_user_id in checkout session metadata",
+            error_details: { session_id: session.id },
+          });
           break;
         }
 
@@ -92,6 +98,12 @@ serve(async (req: Request) => {
 
         if (!profile) {
           console.error("No profile found for customer:", customerId);
+          await supabase.from("stripe_webhook_errors").insert({
+            event_id: event.id,
+            event_type: event.type,
+            error_message: "No profile found for customer",
+            error_details: { customer_id: customerId },
+          });
           break;
         }
 
@@ -127,20 +139,27 @@ serve(async (req: Request) => {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
 
-        const { data: profile } = await supabase
+        const { data: profile3 } = await supabase
           .from("profiles")
           .select("id")
           .eq("stripe_customer_id", customerId)
           .single();
 
-        if (profile) {
+        if (profile3) {
           await supabase.from("subscriptions").update({
             status: "canceled",
             cancel_at_period_end: false,
             updated_at: new Date().toISOString(),
-          }).eq("user_id", profile.id);
+          }).eq("user_id", profile3.id);
 
-          console.log(`Subscription canceled for user ${profile.id}`);
+          console.log(`Subscription canceled for user ${profile3.id}`);
+        } else {
+          await supabase.from("stripe_webhook_errors").insert({
+            event_id: event.id,
+            event_type: event.type,
+            error_message: "No profile found for customer on subscription.deleted",
+            error_details: { customer_id: customerId },
+          });
         }
         break;
       }
@@ -149,19 +168,26 @@ serve(async (req: Request) => {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = invoice.customer as string;
 
-        const { data: profile } = await supabase
+        const { data: profile4 } = await supabase
           .from("profiles")
           .select("id")
           .eq("stripe_customer_id", customerId)
           .single();
 
-        if (profile) {
+        if (profile4) {
           await supabase.from("subscriptions").update({
             status: "past_due",
             updated_at: new Date().toISOString(),
-          }).eq("user_id", profile.id);
+          }).eq("user_id", profile4.id);
 
-          console.log(`Payment failed for user ${profile.id}`);
+          console.log(`Payment failed for user ${profile4.id}`);
+        } else {
+          await supabase.from("stripe_webhook_errors").insert({
+            event_id: event.id,
+            event_type: event.type,
+            error_message: "No profile found for customer on payment_failed",
+            error_details: { customer_id: customerId },
+          });
         }
         break;
       }
@@ -176,6 +202,19 @@ serve(async (req: Request) => {
     });
   } catch (err) {
     console.error("Webhook error:", err);
+    // Best-effort error logging (supabase may not be initialized if error was early)
+    try {
+      const supabaseForLog = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+      await supabaseForLog.from("stripe_webhook_errors").insert({
+        event_id: "unknown",
+        event_type: "unknown",
+        error_message: err.message || String(err),
+        error_details: { stack: err.stack },
+      });
+    } catch { /* ignore logging failure */ }
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

@@ -71,6 +71,8 @@
 </head>
 <body>
 
+  <a href="#app-main" class="skip-to-content">コンテンツへスキップ</a>
+
   <!-- ========================================
        HEADER
        ======================================== -->
@@ -407,7 +409,13 @@
     <div class="container container--narrow">
 
       <h1 class="section-title" id="contribute-page-title" data-i18n="contribute_title">新しい品種を登録</h1>
-      <p class="text-muted mb-lg" id="contribute-page-desc" data-i18n="contribute_desc">既存品種に由来を追加する場合は、その品種のページから追加できます。</p>
+      <p class="text-muted mb-md" id="contribute-page-desc" data-i18n="contribute_desc">既存品種に由来を追加する場合は、その品種のページから追加できます。</p>
+
+      <!-- Quick/Detail mode toggle -->
+      <div class="d-flex gap-sm mb-lg" id="contribute-mode-toggle">
+        <button class="chip active" id="mode-quick" type="button" data-i18n="mode_quick">かんたん投稿</button>
+        <button class="chip" id="mode-detail" type="button" data-i18n="mode_detail">詳細投稿</button>
+      </div>
 
       <!-- Login benefits card -->
       <div id="login-benefits-card" class="card mb-lg login-benefits-bg">
@@ -494,7 +502,7 @@
       </div>
 
       <!-- Image upload -->
-      <div class="card mb-lg">
+      <div class="card mb-lg contribute-detail-section">
         <h2 class="text-lg font-bold mb-md" data-i18n="image_upload">画像アップロード</h2>
         <div class="upload-area" id="contribute-upload-area">
           <input type="file" id="contribute-file-input" accept="image/jpeg,image/png" multiple class="d-none" aria-label="品種画像をアップロード">
@@ -507,7 +515,7 @@
       </div>
 
       <!-- Origin story — structured fields per type -->
-      <div class="card mb-lg" id="origin-card">
+      <div class="card mb-lg contribute-detail-section" id="origin-card">
         <h2 class="text-lg font-bold mb-md" data-i18n="origin_story">由来</h2>
         <p class="form-hint d-none" id="origin-ai-hint"></p>
 

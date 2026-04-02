@@ -1126,6 +1126,31 @@ serve(async (req: Request) => {
       );
     }
 
+    // ── Rate limiting: 10 requests/hour/user ──
+    const serviceClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentCount } = await serviceClient
+      .from("research_origin_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", authUser.id)
+      .gte("requested_at", oneHourAgo);
+
+    if ((recentCount ?? 0) >= 10) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Maximum 10 research requests per hour." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Log this request for rate limiting
+    await serviceClient.from("research_origin_requests").insert({
+      user_id: authUser.id,
+      cultivar_name: cultivar_name,
+    });
+
     // Skip AI research for seedlings
     if (type === "seedling") {
       return new Response(

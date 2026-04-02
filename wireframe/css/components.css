@@ -2447,3 +2447,60 @@ dialog.parent-photo-dialog .dialog-label {
   border: 1px solid var(--color-light);
 }
 
+/* ---- Skeleton loading UI ---- */
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--color-lighter) 25%, #e8e8e8 50%, var(--color-lighter) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+.skeleton-card {
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  border: 1px solid var(--color-light);
+}
+.skeleton-card__thumb {
+  width: 100%;
+  aspect-ratio: 4/3;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-sm);
+}
+.skeleton-card__title {
+  height: 1em;
+  width: 70%;
+  margin-bottom: var(--space-xs);
+}
+.skeleton-card__sub {
+  height: 0.8em;
+  width: 40%;
+}
+.skeleton-line {
+  height: 1em;
+  margin-bottom: var(--space-xs);
+}
+.skeleton-line--short { width: 40%; }
+.skeleton-line--medium { width: 65%; }
+.skeleton-line--long { width: 90%; }
+
+/* ---- Accessibility ---- */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 10000;
+  background: var(--color-primary);
+  color: #fff;
+  padding: var(--space-sm) var(--space-md);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 var(--radius-sm) 0;
+}
+.skip-to-content:focus {
+  left: 0;
+}
+
