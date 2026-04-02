@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const ALLOWED_ORIGINS = [
+  "https://plantsstory.com",
   "https://plantsstory.github.io",
   "http://localhost:3000",
   "http://127.0.0.1:3000",

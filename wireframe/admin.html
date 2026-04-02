@@ -1102,9 +1102,11 @@ async function reresearchCultivar(id) {
     }
   }
   try {
+    var session = (await sb.auth.getSession()).data.session;
+    var token = session ? session.access_token : SUPABASE_ANON_KEY;
     var res = await fetch(SUPABASE_URL + '/functions/v1/research-origin', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify(payload)
     });
     var data = await res.json();

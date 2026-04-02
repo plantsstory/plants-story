@@ -1036,11 +1036,21 @@ document.addEventListener('click', function(e) {
       if (aiAutofillStatus) aiAutofillStatus.textContent = 'IPNI/POWOデータベースを検索中...';
 
       var edgeFnUrl = 'https://jpgbehsrglsiwijglhjo.supabase.co/functions/v1/research-origin';
-      var anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
-      fetch(edgeFnUrl, {
+      // Get auth token (user JWT if logged in, fallback to anon key)
+      var tokenPromise;
+      try {
+        tokenPromise = window._supabaseClient.auth.getSession().then(function(r) {
+          return (r.data.session && r.data.session.access_token) ? r.data.session.access_token : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
+        });
+      } catch(e) {
+        tokenPromise = Promise.resolve('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA');
+      }
+      tokenPromise.then(function(authToken) {
+      return fetch(edgeFnUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + anonKey },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
         body: JSON.stringify({ cultivar_name: fullName, genus: genus, type: 'species', preview: true })
+      });
       })
       .then(function(res) { return res.json(); })
       .then(function(data) {

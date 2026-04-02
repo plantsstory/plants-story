@@ -1642,8 +1642,17 @@ var cultivarData = {
   var EDGE_FUNCTION_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co/functions/v1/research-origin';
   var aiPollingTimers = {};
 
+  // Get auth token for Edge Function calls (user JWT if available, fallback to anon key)
+  async function getEdgeFnToken() {
+    try {
+      var sess = (await supabase.auth.getSession()).data.session;
+      if (sess && sess.access_token) return sess.access_token;
+    } catch(e) {}
+    return SUPABASE_ANON_KEY;
+  }
+
   // Trigger AI research for a cultivar
-  function triggerAIResearch(cultivarId, genus, cultivarName, type, manualOrigins, userText, userSources) {
+  async function triggerAIResearch(cultivarId, genus, cultivarName, type, manualOrigins, userText, userSources) {
     var payload = {
       cultivar_id: cultivarId,
       genus: genus,
@@ -1661,11 +1670,12 @@ var cultivarData = {
     if (userSources && userSources.length > 0) {
       payload.user_sources = userSources;
     }
+    var token = await getEdgeFnToken();
     fetch(EDGE_FUNCTION_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        'Authorization': 'Bearer ' + token
       },
       body: JSON.stringify(payload)
     }).then(function(res) { return res.json(); })
