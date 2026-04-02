@@ -2921,32 +2921,59 @@ document.getElementById('kr-cultivar-select').addEventListener('change', functio
   var c = allCultivars.find(function(x) { return x.id === cultivarId; });
   if (!c) { existingDiv.classList.add('hidden'); return; }
 
-  var origins = (c.origins || []).filter(function(o) { return !o._type; }); // exclude formula-only entries
+  var origins = c.origins || [];
   if (origins.length === 0) {
     contentDiv.innerHTML = '<span style="color:#999;">由来データなし</span>';
     existingDiv.classList.remove('hidden');
     return;
   }
 
+  var cType = c.type || 'species';
   var html = '';
   origins.forEach(function(o, idx) {
+    var s = o.structured || {};
+    var oType = s.origin_type || cType;
     html += '<div style="background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:var(--space-sm);margin-bottom:var(--space-sm);">';
-    html += '<div style="display:flex;align-items:center;gap:var(--space-xs);margin-bottom:var(--space-xs);">';
+    html += '<div style="display:flex;align-items:center;gap:var(--space-xs);margin-bottom:var(--space-xs);flex-wrap:wrap;">';
     html += '<span style="font-weight:700;">由来 #' + (idx + 1) + '</span>';
-    if (o.source_tier) html += ' ' + tierBadge(o.source_tier);
-    if (o.trust != null) html += ' <span style="color:' + trustColor(o.trust) + ';font-weight:700;">' + o.trust + '%</span>';
-    if (o.author) {
-      var authorLabel = o.author.isAI ? 'AI' : 'User';
-      if (o.source_type === 'ipni_powo') authorLabel = 'IPNI/Kew';
-      html += ' <span style="font-size:0.75rem;background:#eee;padding:1px 6px;border-radius:3px;">' + authorLabel + '</span>';
+    if (o._type === 'formula') {
+      html += ' <span style="font-size:0.75rem;background:#e8f5e9;color:#2e7d32;padding:1px 6px;border-radius:3px;">交配式</span>';
+    } else {
+      if (o.source_tier) html += ' ' + tierBadge(o.source_tier);
+      if (o.trust != null) html += ' <span style="color:' + trustColor(o.trust) + ';font-weight:700;">' + o.trust + '%</span>';
     }
+    // Author badge (same logic as loadOrigins)
+    if (o.source_type === 'ipni_powo') {
+      html += ' <span style="font-size:0.75rem;background:#e3f2fd;padding:1px 6px;border-radius:3px;">IPNI/Kew</span>';
+    } else if (o.source_type === 'user_verified' || o.source_type === 'ai_verified') {
+      html += ' <span style="font-size:0.75rem;background:#e8f5e9;padding:1px 6px;border-radius:3px;">AI検証済</span>';
+    } else if (o.author && o.author.isAI) {
+      html += ' <span style="font-size:0.75rem;background:#fff3e0;padding:1px 6px;border-radius:3px;">AI</span>';
+    } else if (o.author) {
+      html += ' <span style="font-size:0.75rem;background:#eee;padding:1px 6px;border-radius:3px;">User</span>';
+    }
+    if (o.source_name) html += ' <span style="color:#666;font-size:0.8rem;">(' + escapeHtml(o.source_name) + ')</span>';
     html += '</div>';
 
-    var structHtml = structuredSummaryHtml(o.structured, c.type, o);
+    var structHtml = structuredSummaryHtml(s, oType, o);
     if (structHtml) html += '<div style="font-size:0.85rem;margin-bottom:var(--space-xs);">' + structHtml + '</div>';
 
     if (o.body) html += '<div style="font-size:0.85rem;color:#333;margin-bottom:var(--space-xs);"><strong>JP:</strong> ' + escapeHtml(o.body) + '</div>';
     if (o.body_en) html += '<div style="font-size:0.85rem;color:#555;"><strong>EN:</strong> ' + escapeHtml(o.body_en) + '</div>';
+
+    // Sources
+    if (o.sources && o.sources.length) {
+      html += '<div style="font-size:0.8rem;color:#888;">ソース: ';
+      o.sources.forEach(function(src, si) {
+        if (si > 0) html += ', ';
+        if (src.url) {
+          html += '<a href="' + escapeHtml(src.url) + '" target="_blank" rel="noopener">' + escapeHtml(src.label || src.name || src.url) + '</a>';
+        } else {
+          html += escapeHtml(src.label || src.name || '');
+        }
+      });
+      html += '</div>';
+    }
     html += '</div>';
   });
   contentDiv.innerHTML = html;
