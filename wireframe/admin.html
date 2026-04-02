@@ -1151,40 +1151,46 @@ function originTypeBadge(t, structured) {
   return '<span class="badge ' + cls + ' badge--type-sm">' + label + '</span>';
 }
 
-function structuredSummaryHtml(s, cType) {
-  if (!s) return '<span style="color:#999;">構造化データなし</span>';
+function structuredSummaryHtml(s, cType, body) {
   var parts = [];
-  if (cType === 'species') {
-    if (s.species_subcategory && s.species_subcategory !== 'species') {
-      var subLabels = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
-      parts.push('<b>分類:</b> ' + (subLabels[s.species_subcategory] || s.species_subcategory));
+  if (s) {
+    if (cType === 'species') {
+      if (s.species_subcategory && s.species_subcategory !== 'species') {
+        var subLabels = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
+        parts.push('<b>分類:</b> ' + (subLabels[s.species_subcategory] || s.species_subcategory));
+      }
+      if (s.author_name) parts.push('<b>発表者:</b> ' + escapeHtml(s.author_name));
+      if (s.publication_year) parts.push('<b>発表年:</b> ' + s.publication_year);
+      if (s.collector) parts.push('<b>発見者:</b> ' + escapeHtml(s.collector));
+      if (s.collection_year) parts.push('<b>採取年:</b> ' + s.collection_year);
+      if (s.type_locality) parts.push('<b>採取地:</b> ' + escapeHtml(s.type_locality));
+      if (s.known_habitats) parts.push('<b>生息地:</b> ' + escapeHtml((s.known_habitats || '').substring(0, 40)));
+    } else if (cType === 'clone') {
+      if (s.namer) parts.push('<b>命名者:</b> ' + escapeHtml(s.namer));
+      if (s.naming_year) parts.push('<b>命名年:</b> ' + s.naming_year);
+      if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
+    } else if (cType === 'hybrid') {
+      if (s.breeder) parts.push('<b>作出者:</b> ' + escapeHtml(s.breeder));
+      if (s.naming_year) parts.push('<b>命名年:</b> ' + s.naming_year);
+      if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
+    } else if (cType === 'seedling') {
+      if (s.breeder) parts.push('<b>作出者:</b> ' + escapeHtml(s.breeder));
+      if (s.sowing_date) parts.push('<b>播種日:</b> ' + escapeHtml(s.sowing_date));
+      if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
     }
-    if (s.author_name) parts.push('<b>発表者:</b> ' + escapeHtml(s.author_name));
-    if (s.publication_year) parts.push('<b>発表年:</b> ' + s.publication_year);
-    if (s.collector) parts.push('<b>発見者:</b> ' + escapeHtml(s.collector));
-    if (s.collection_year) parts.push('<b>採取年:</b> ' + s.collection_year);
-    if (s.type_locality) parts.push('<b>採取地:</b> ' + escapeHtml(s.type_locality));
-    if (s.known_habitats) parts.push('<b>生息地:</b> ' + escapeHtml((s.known_habitats || '').substring(0, 40)));
-  } else if (cType === 'clone') {
-    if (s.namer) parts.push('<b>命名者:</b> ' + escapeHtml(s.namer));
-    if (s.naming_year) parts.push('<b>命名年:</b> ' + s.naming_year);
-    if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
-  } else if (cType === 'hybrid') {
-    if (s.breeder) parts.push('<b>作出者:</b> ' + escapeHtml(s.breeder));
-    if (s.naming_year) parts.push('<b>命名年:</b> ' + s.naming_year);
-    if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
-  } else if (cType === 'seedling') {
-    if (s.breeder) parts.push('<b>作出者:</b> ' + escapeHtml(s.breeder));
-    if (s.sowing_date) parts.push('<b>播種日:</b> ' + escapeHtml(s.sowing_date));
-    if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
+    if (s.notes) {
+      var notesShort = s.notes.substring(0, 30);
+      if (s.notes.length > 30) notesShort += '...';
+      parts.push('<b>補足:</b> ' + escapeHtml(notesShort));
+    }
+    if (s.citation_links && s.citation_links.length) {
+      parts.push('<b>引用:</b> ' + s.citation_links.length + '件');
+    }
   }
-  if (s.notes) {
-    var notesShort = s.notes.substring(0, 30);
-    if (s.notes.length > 30) notesShort += '...';
-    parts.push('<b>補足:</b> ' + escapeHtml(notesShort));
-  }
-  if (s.citation_links && s.citation_links.length) {
-    parts.push('<b>引用:</b> ' + s.citation_links.length + '件');
+  if (!parts.length && body) {
+    var bodyShort = body.substring(0, 60);
+    if (body.length > 60) bodyShort += '...';
+    return '<span style="color:#666;">' + escapeHtml(bodyShort) + '</span>';
   }
   if (!parts.length) return '<span style="color:#999;">データ未入力</span>';
   return parts.join('<br>');
@@ -1276,7 +1282,7 @@ function loadOrigins() {
       html += '<div class="trust-bar"><div class="trust-fill" style="width:' + trustPct + '%;background:' + tColor + ';"></div></div> ';
       html += trustPct + '%';
       html += '</td>';
-      html += '<td style="font-size:var(--font-size-xs);line-height:1.5;">' + structuredSummaryHtml(s, oType) + '</td>';
+      html += '<td style="font-size:var(--font-size-xs);line-height:1.5;">' + structuredSummaryHtml(s, oType, o.body) + '</td>';
       html += '<td>' + authorLabel + '</td>';
       var votes = o.votes || { agree: 0, disagree: 0 };
       html += '<td><div class="vote-group">';
