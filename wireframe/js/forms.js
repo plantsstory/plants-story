@@ -103,7 +103,7 @@ document.addEventListener('click', function(e) {
 document.addEventListener('click', function(e) {
   var btn = e.target.closest('.vote-btn');
   if (!btn) return;
-  if (!rateLimit('vote', 3000)) { showToast('しばらくお待ちください', true); return; }
+  if (!rateLimit('vote', 3000)) { showToast(t('rate_limit_wait'), true); return; }
   var sb = window._supabaseClient;
   if (!sb) return;
   var originIdx = parseInt(btn.getAttribute('data-origin-idx'), 10);
@@ -129,7 +129,7 @@ document.addEventListener('click', function(e) {
     origins[originIdx].votes[voteType] = (origins[originIdx].votes[voteType] || 0) + 1;
     return sb.from('cultivars').update({ origins: origins }).eq('cultivar_name', cultivarName);
   }).then(function(res) {
-    if (res && res.error) { btn.disabled = false; showToast('投票に失敗しました', true); return; }
+    if (res && res.error) { btn.disabled = false; showToast(t('toast_vote_failed'), true); return; }
     localStorage.setItem(voteKey, '1');
     btn.classList.add(voteType === 'agree' ? 'vote-btn--active' : 'vote-btn--active-down');
     var countEl = btn.querySelector('.vote-btn__badge');
@@ -685,7 +685,7 @@ document.addEventListener('click', function(e) {
                 }).then(function() {
                   editImages.splice(idx, 1);
                   renderEditImagePreviews();
-                  showToast('画像を削除しました');
+                  showToast(t('toast_image_deleted'));
                 }).catch(function(err) {
                   showToast('画像削除エラー: ' + (err.message || err), true);
                 });
@@ -856,7 +856,7 @@ document.addEventListener('click', function(e) {
       });
       window.exitEditMode();
       navigateTo('top');
-      showToast('品種を削除しました');
+      showToast(t('toast_cultivar_deleted'));
     }).catch(function(err) {
       btn.disabled = false;
       btn.textContent = '\uD83D\uDDD1 この品種を削除';
@@ -885,7 +885,7 @@ document.addEventListener('click', function(e) {
       if (!contributeSourceInput) return;
       var url = contributeSourceInput.value.trim();
       if (!url) return;
-      if (!/^https?:\/\/.+/i.test(url)) { showToast('URLはhttp://またはhttps://で始めてください', true); return; }
+      if (!/^https?:\/\/.+/i.test(url)) { showToast(t('toast_url_invalid'), true); return; }
       contributeSources.push(url);
       contributeSourceInput.value = '';
       renderContributeSources();
@@ -1369,7 +1369,7 @@ document.addEventListener('click', function(e) {
             if (paths[1]) updatedFormula.fatherPhoto = paths[1];
           }).catch(function(err) {
             console.warn('Parent photo upload failed:', err);
-            showToast('親株写真のアップロードに失敗しました', true);
+            showToast(t('toast_parent_photo_failed'), true);
           });
         } else {
           editParentPhotoPromise = Promise.resolve();
@@ -1485,7 +1485,7 @@ document.addEventListener('click', function(e) {
           submitBtn.disabled = false;
           submitBtn.style.opacity = '';
           motherPhotoFile = null; fatherPhotoFile = null;
-          showToast('更新しました');
+          showToast(t('toast_updated'));
         }).catch(function(err) {
           submitBtn.disabled = false;
           submitBtn.style.opacity = '';
@@ -1560,7 +1560,7 @@ document.addEventListener('click', function(e) {
       if (origin) newEntry.origins.push(origin);
 
       // Disable submit button to prevent double-click
-      if (!rateLimit('contribute', 30000)) { showToast('連続投稿はしばらくお待ちください', true); return; }
+      if (!rateLimit('contribute', 30000)) { showToast(t('rate_limit_submit'), true); return; }
       submitBtn.disabled = true;
       submitBtn.style.opacity = '0.5';
 
@@ -1671,7 +1671,7 @@ document.addEventListener('click', function(e) {
           }
         }).catch(function(err) {
           console.warn('Parent photo upload failed:', err);
-          showToast('親株写真のアップロードに失敗しました', true);
+          showToast(t('toast_parent_photo_failed'), true);
         });
       } else {
         photoUploadPromise = Promise.resolve();
@@ -1706,7 +1706,7 @@ document.addEventListener('click', function(e) {
           finishSubmit();
         } catch (finishErr) {
           console.error('finishSubmit error:', finishErr);
-          showToast('登録処理でエラーが発生しました', true);
+          showToast(t('toast_submit_error'), true);
         }
         if (typeof window.loadCultivarThumbnails === 'function') {
           setTimeout(window.loadCultivarThumbnails, 500);
@@ -1737,7 +1737,7 @@ document.addEventListener('click', function(e) {
       e.preventDefault();
       var url = sourceInput.value.trim();
       if (!url) return;
-      if (!/^https?:\/\/.+/i.test(url)) { showToast('URLはhttp://またはhttps://で始めてください', true); return; }
+      if (!/^https?:\/\/.+/i.test(url)) { showToast(t('toast_url_invalid'), true); return; }
       originSources.push(url);
       sourceInput.value = '';
       // Visual feedback - show added sources
@@ -1775,7 +1775,7 @@ document.addEventListener('click', function(e) {
   if (submitOriginBtn) {
     submitOriginBtn.addEventListener('click', function(e) {
       e.preventDefault();
-      if (!rateLimit('add_origin', 15000)) { showToast('しばらくお待ちください', true); return; }
+      if (!rateLimit('add_origin', 15000)) { showToast(t('rate_limit_wait'), true); return; }
       var desc = originForm.querySelector('.form-textarea');
       var descText = desc ? desc.value.trim() : '';
 
@@ -1880,7 +1880,7 @@ document.addEventListener('click', function(e) {
           var failed = results.filter(function(r) { return r.error; });
           if (failed.length > 0) {
             console.error('Failed to save origin to DB:', failed[0].error);
-            showToast('DB保存に失敗しました', true);
+            showToast(t('toast_db_save_failed'), true);
           } else {
             // Trigger AI verification for CLONE/hybrid after origin is saved
             var cData = cultivarData[cultivarName];
@@ -2456,7 +2456,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       // --- Vote handling ---
       var voteBtn = e.target.closest('.vote-btn[data-vote]');
       if (voteBtn) {
-        if (!rateLimit('image_vote', 3000)) { showToast('しばらくお待ちください', true); return; }
+        if (!rateLimit('image_vote', 3000)) { showToast(t('rate_limit_wait'), true); return; }
         var item = voteBtn.closest('.gallery__item[data-user-upload]');
         if (!item) return;
         var imageId = item.getAttribute('data-image-id');
@@ -2468,7 +2468,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
           if (h1) renderGalleryForCultivar(h1.textContent);
         }).catch(function(err) {
           console.warn('Vote failed:', err);
-          showToast('投票に失敗しました', true);
+          showToast(t('toast_vote_failed'), true);
         });
         return;
       }

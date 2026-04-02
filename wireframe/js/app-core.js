@@ -114,7 +114,7 @@ function guardSubmit(btn, asyncFn) {
   if (btn.disabled) return;
   btn.disabled = true;
   var origText = btn.textContent;
-  btn.textContent = '処理中...';
+  btn.textContent = t('processing');
   Promise.resolve(asyncFn()).then(function() {
     btn.disabled = false;
     btn.textContent = origText;
@@ -1030,7 +1030,7 @@ var cultivarData = {
       var display = idx === 0 ? '' : ' style="display:none;"';
       html += '<div class="genus-content" id="genus-' + g.slug + '"' + display + '>';
       html += '<h1 class="section-title">' + g.name + '</h1>';
-      html += '<p class="text-muted mb-lg">読み込み中...</p>';
+      html += '<p class="text-muted mb-lg">' + t('loading') + '</p>';
 
       if (g.has_seedlings) {
         // Pattern 1: with seedlings tab
@@ -1394,7 +1394,7 @@ var cultivarData = {
       return;
     }
     if (loginMsg) loginMsg.style.display = 'none';
-    grid.innerHTML = '<p class="loading-text">読み込み中...</p>';
+    grid.innerHTML = '<p class="loading-text">' + t('loading') + '</p>';
     var sb = window._supabaseClient;
     if (!sb) return;
     sb.from('cultivars').select('id, genus, cultivar_name, type, created_at')
@@ -1556,7 +1556,7 @@ var cultivarData = {
       }
     }).catch(function(err) {
       console.error('AI research trigger error:', err);
-      showToast('AI検証の開始に失敗しました', true);
+      showToast(t('toast_ai_research_failed'), true);
     });
   }
 
@@ -1717,7 +1717,7 @@ var cultivarData = {
       h += '<div class="text-sm text-muted mt-sm"><span class="formula-parent formula-parent--sm">' + escHtml(entry.formula.parentA) + '</span><span class="formula-operator formula-operator--sm">&times;</span><span class="formula-parent formula-parent--sm">' + escHtml(entry.formula.parentB) + '</span></div>';
     }
     if (isSeedling && entry._creatorName && !locked) {
-      h += '<div class="text-xs text-muted mt-xs">作出者: ' + escHtml(entry._creatorName) + '</div>';
+      h += '<div class="text-xs text-muted mt-xs">' + t('creator_label') + escHtml(entry._creatorName) + '</div>';
     }
     if (isSeedling && entry._userId && entry._posterName && !locked) {
       h += '<div class="text-xs mt-xs"><a href="#/profile/' + escHtml(entry._userId) + '" class="poster-link" onclick="event.stopPropagation();">&#x1F464; ' + escHtml(entry._posterName) + '</a></div>';
@@ -1769,7 +1769,7 @@ var cultivarData = {
 
     // Try server-side RPC first
     if (supabase) {
-      grid.innerHTML = '<div class="text-center text-muted grid-full">読み込み中...</div>';
+      grid.innerHTML = '<div class="text-center text-muted grid-full">' + t('loading') + '</div>';
       supabase.rpc('get_recent_cultivars', { p_limit: 3 }).then(function(res) {
         if (res.error || !res.data) {
           refreshRecentlyAddedFromMemory(grid);

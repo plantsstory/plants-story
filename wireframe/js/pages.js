@@ -41,7 +41,7 @@
     var emptyMsg = document.getElementById('profile-posts-empty');
     if (!sb || !grid) return;
 
-    grid.innerHTML = '<p class="loading-text">読み込み中...</p>';
+    grid.innerHTML = '<p class="loading-text">' + t('loading') + '</p>';
 
     var query = sb.from('cultivars')
       .select('id, genus, cultivar_name, type, created_at')
@@ -356,7 +356,7 @@
       var sb = window._supabaseClient;
       if (!sb || !window._currentUser) return;
 
-      avatarBtn.textContent = 'アップロード中...';
+      avatarBtn.textContent = t('avatar_uploading');
       avatarBtn.disabled = true;
 
       window.compressImage(file).then(function(compressed) {
@@ -369,12 +369,12 @@
           var publicUrl = sb.storage.from('gallery-images').getPublicUrl(path).data.publicUrl;
           window._editAvatarUrl = publicUrl;
           renderAvatar(document.getElementById('edit-avatar-preview'), publicUrl);
-          showToast('アバターをアップロードしました');
+          showToast(t('toast_avatar_uploaded'));
         });
       }).catch(function(err) {
         showToast('アップロードに失敗しました: ' + (err.message || err), true);
       }).finally(function() {
-        avatarBtn.textContent = 'アバターを変更';
+        avatarBtn.textContent = t('avatar_upload_btn');
         avatarBtn.disabled = false;
       });
     });
@@ -404,7 +404,7 @@
         } else if (res.data && res.data.success === false) {
           showToast(res.data.error || '保存に失敗しました', true);
         } else {
-          showToast('プロフィールを保存しました');
+          showToast(t('toast_profile_saved'));
           // Use @username URL if available
           if (usernameVal) {
             location.hash = '#/profile/@' + usernameVal;
@@ -800,7 +800,7 @@ function renderOrigins(cultivarName) {
   var _sb = window._supabaseClient;
 
   // Show loading state
-  container.innerHTML = '<div class="text-center text-muted p-xl">読み込み中...</div>';
+  container.innerHTML = '<div class="text-center text-muted p-xl">' + t('loading') + '</div>';
 
   if (!_sb) {
     // No Supabase: use local data only
@@ -1375,7 +1375,7 @@ function paginateGenusFromServer(genusEl, page) {
   } else {
     container = scope.querySelector('.card.card--no-pad') || scope.querySelector('.card');
   }
-  if (container) container.innerHTML = '<div class="text-muted empty-state">読み込み中...</div>';
+  if (container) container.innerHTML = '<div class="text-muted empty-state">' + t('loading') + '</div>';
 
   window._supabaseClient.rpc('get_cultivars_paginated', {
     p_genus: genusName,
@@ -1622,7 +1622,7 @@ function globalSearch(query) {
         html += '<a href="' + profileUrl + '" class="user-list-item">';
         html += avatarHtml;
         html += '<div class="flex-1 min-w-0">';
-        html += '<div class="font-semibold">' + escHtml(u.display_name || '名前未設定') + '</div>';
+        html += '<div class="font-semibold">' + escHtml(u.display_name || t('name_not_set')) + '</div>';
         if (u.username) {
           html += '<div class="text-sm text-muted">@' + escHtml(u.username) + '</div>';
         }
@@ -1639,7 +1639,7 @@ function globalSearch(query) {
     }).catch(function(err) {
       console.error('search_profiles exception:', err);
       if (userSection) userSection.style.display = 'none';
-      showToast('ユーザー検索に失敗しました', true);
+      showToast(t('toast_user_search_failed'), true);
     });
   }
 
