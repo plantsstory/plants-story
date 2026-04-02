@@ -2958,9 +2958,6 @@ document.getElementById('kr-cultivar-select').addEventListener('change', functio
     var structHtml = structuredSummaryHtml(s, oType, o);
     if (structHtml) html += '<div style="font-size:0.85rem;margin-bottom:var(--space-xs);">' + structHtml + '</div>';
 
-    if (o.body) html += '<div style="font-size:0.85rem;color:#333;margin-bottom:var(--space-xs);"><strong>JP:</strong> ' + escapeHtml(o.body) + '</div>';
-    if (o.body_en) html += '<div style="font-size:0.85rem;color:#555;"><strong>EN:</strong> ' + escapeHtml(o.body_en) + '</div>';
-
     // Sources
     if (o.sources && o.sources.length) {
       html += '<div style="font-size:0.8rem;color:#888;">ソース: ';
@@ -3043,14 +3040,6 @@ function renderKRResults(origins, cultivar) {
     // Structured data summary
     var structHtml = structuredSummaryHtml(o.structured, cultivar.type, o);
     if (structHtml) html += '<div style="font-size:0.85rem;margin-bottom:var(--space-xs);">' + structHtml + '</div>';
-
-    // Body text
-    if (o.body) {
-      html += '<div style="font-size:0.85rem;color:#333;margin-bottom:var(--space-xs);"><strong>JP:</strong> ' + escapeHtml(o.body) + '</div>';
-    }
-    if (o.body_en) {
-      html += '<div style="font-size:0.85rem;color:#555;margin-bottom:var(--space-xs);"><strong>EN:</strong> ' + escapeHtml(o.body_en) + '</div>';
-    }
 
     // Sources
     if (o.sources && o.sources.length) {
