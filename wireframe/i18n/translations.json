@@ -75,6 +75,8 @@
   "search_results": { "jp": "検索結果", "en": "Search Results" },
   "filter_all": { "jp": "すべて", "en": "All" },
   "footer_about": { "jp": "About", "en": "About" },
+  "footer_guide": { "jp": "使い方", "en": "Guide" },
+  "guide_title": { "jp": "使い方ガイド", "en": "User Guide" },
   "footer_terms": { "jp": "利用規約", "en": "Terms" },
   "footer_privacy": { "jp": "プライバシー", "en": "Privacy" },
   "footer_contact": { "jp": "お問い合わせ", "en": "Contact" },

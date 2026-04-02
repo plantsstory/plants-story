@@ -901,6 +901,132 @@
   </section>
 
   <!-- ========================================
+       PAGE: GUIDE (使い方)
+       ======================================== -->
+  <section id="page-guide" class="page">
+    <div class="container container--narrow legal-page">
+      <h1 data-i18n="guide_title">使い方ガイド</h1>
+
+      <div class="about-mission">
+        <p>ひなたぼっこぷらんつは、アロイド植物の品種の由来・歴史情報をコミュニティで収集・共有するプラットフォームです。このページでは、品種情報の閲覧・投稿・編集方法を解説します。</p>
+      </div>
+
+      <!-- 閲覧方法 -->
+      <h2>&#x1F50D; 品種情報の閲覧</h2>
+      <ol class="terms-list">
+        <li><strong>トップページ</strong>で属（Genus）を選択します。Anthurium、Monstera、Philodendronなどから選べます。</li>
+        <li>品種一覧から気になる品種をタップすると、<strong>詳細ページ</strong>が開きます。</li>
+        <li>詳細ページでは、由来情報（交配式・発見者・作出者など）、画像ギャラリー、信頼度スコアが確認できます。</li>
+        <li>上部の<strong>検索バー</strong>で品種名やユーザー名を直接検索することもできます。</li>
+      </ol>
+
+      <!-- 投稿方法 -->
+      <h2>&#x1F4DD; 品種情報の投稿</h2>
+      <ol class="terms-list">
+        <li>ナビゲーションの「<strong>投稿</strong>」をタップして投稿ページを開きます。</li>
+        <li><strong>属</strong>を選択し、<strong>品種名</strong>を入力します。</li>
+        <li><strong>タイプ</strong>（原種/ハイブリッド/クローン/実生）を選択します（詳細は下記）。</li>
+        <li>画像があればアップロードします（最大3枚、JPG/PNG、各20MB以下で自動圧縮されます）。</li>
+        <li>由来情報を入力します。タイプによって入力フィールドが異なります。</li>
+        <li>引用リンク（参考URL）があれば追加します。</li>
+        <li><strong>編集キー</strong>（4桁の数字）を設定すると、ログインしていなくても後から編集できます。</li>
+        <li>「投稿する」ボタンで送信します。</li>
+      </ol>
+      <p class="text-sm text-muted">※ Googleアカウントでログインすると、編集キーなしで自分の投稿を編集できます。</p>
+
+      <!-- タイプ別説明 -->
+      <h2>&#x1F331; 品種タイプの違い</h2>
+
+      <div class="card mb-md">
+        <h3>&#x1F33F; 原種（Species）</h3>
+        <p>学術的に記載された種のほか、未記載種（sp.）、亜種（ssp.）、近縁種（cf.）、類似種（aff.）も含みます。</p>
+        <p class="text-sm font-bold mt-sm">入力項目:</p>
+        <ul class="terms-list">
+          <li><strong>発表者（Author）</strong> — 学名を発表した人物（例: Engl.）</li>
+          <li><strong>発表年（Year）</strong> — 記載論文の発表年</li>
+          <li><strong>発見者（Collector）</strong> — 最初に採取した人物</li>
+          <li><strong>採取年</strong> — 採取された年</li>
+          <li><strong>採取地（Type locality）</strong> — 最初に採取された場所</li>
+          <li><strong>生息地</strong> — 現在わかっている自生地</li>
+        </ul>
+        <p class="text-sm text-muted mt-sm">※ 原種を選択すると、分類詳細チップ（原種/sp./ssp./cf./aff.）が表示されます。</p>
+        <p class="text-sm text-muted">※ 「AI自動記入」ボタンで、品種名から自動的に情報を取得できます。</p>
+      </div>
+
+      <div class="card mb-md">
+        <h3>&#x1F33A; ハイブリッド（Hybrid）</h3>
+        <p>交配式につく品種名です。特定の親の組み合わせで作られたF1世代の、不特定多数の選抜個体につけられる名前を指します。</p>
+        <p class="text-sm font-bold mt-sm">入力項目:</p>
+        <ul class="terms-list">
+          <li><strong>作出者/ナーセリー</strong> — 交配を行った人物や園芸場（例: Ecuagenera）</li>
+          <li><strong>名付けた年</strong> — ハイブリッド名がつけられた年</li>
+          <li><strong>交配式（必須）</strong> — Parent A（母）× Parent B（父）</li>
+        </ul>
+        <p class="text-sm text-muted mt-sm">※ ハイブリッドでは交配式の入力が<strong>必須</strong>です。</p>
+      </div>
+
+      <div class="card mb-md">
+        <h3>&#x1F3F7; クローン（Clone）</h3>
+        <p>特定の個体につけられた品種名です。self交配やF2以降の個体の画像も掲載可能です。</p>
+        <p class="text-sm font-bold mt-sm">入力項目:</p>
+        <ul class="terms-list">
+          <li><strong>名付けた人物</strong> — クローン名をつけた人物</li>
+          <li><strong>名付けた年</strong></li>
+          <li><strong>交配式</strong> — 親が分かっていれば入力（不明の場合はチェックボックスで「交配式が不明」を選択）</li>
+        </ul>
+        <p class="text-sm text-muted mt-sm">※ 画像はSNSリンクと合わせて投稿すると、どの個体の写真か判別しやすくなります。</p>
+      </div>
+
+      <div class="card mb-md">
+        <h3>&#x1F331; 実生（Seedling）</h3>
+        <p>趣味家の播種記録を公開するためのタイプです。自分で交配・播種した実生の記録を共有できます。</p>
+        <p class="text-sm font-bold mt-sm">入力項目:</p>
+        <ul class="terms-list">
+          <li><strong>作出者（Creator/Breeder）</strong> — 播種した人物</li>
+          <li><strong>播種日</strong> — 種をまいた日付</li>
+          <li><strong>交配式</strong> — 親が分かっていれば入力（不明の場合はチェックボックスで選択）</li>
+        </ul>
+      </div>
+
+      <!-- 編集方法 -->
+      <h2>&#x270F; 品種情報の編集</h2>
+      <ol class="terms-list">
+        <li>品種の<strong>詳細ページ</strong>を開きます。</li>
+        <li>投稿時に設定した<strong>編集キー（4桁）</strong>を入力し、「編集」ボタンをタップします。</li>
+        <li>投稿フォームが編集モードで開くので、情報を修正して再送信します。</li>
+      </ol>
+      <p class="text-sm text-muted">※ Googleアカウントでログイン済みの場合、自分の投稿は編集キーなしで編集できます。</p>
+
+      <!-- 由来の追加 -->
+      <h2>&#x1F4DA; 由来情報の追加</h2>
+      <p>既存の品種に新しい由来情報を追加できます:</p>
+      <ol class="terms-list">
+        <li>品種の詳細ページで「<strong>+ 由来を追加</strong>」ボタンをタップします。</li>
+        <li>補足情報・引用リンクを入力して送信します。</li>
+        <li>追加された由来は、既存の由来と並んで表示されます。</li>
+        <li>各由来には信頼度を示す投票（Agree/Disagree）機能があります。</li>
+      </ol>
+
+      <!-- 画像追加 -->
+      <h2>&#x1F4F7; 画像の追加</h2>
+      <ol class="terms-list">
+        <li>品種詳細ページの「<strong>画像追加</strong>」ボタンをタップします。</li>
+        <li>画像をアップロードし、キャプション（説明）やSNSリンクを入力します。</li>
+        <li>画像にはReal/Fake投票機能があり、コミュニティで品質管理を行います。</li>
+      </ol>
+
+      <!-- その他の機能 -->
+      <h2>&#x2B50; その他の機能</h2>
+      <ul class="terms-list">
+        <li><strong>お気に入り</strong> — 気になる品種をお気に入りに追加して、後からすぐにアクセスできます。</li>
+        <li><strong>シェア</strong> — 品種ページをSNSで共有できます（X、LINE、コピー）。</li>
+        <li><strong>プロフィール</strong> — Googleログイン後、ユーザー名やアバターを設定できます。</li>
+        <li><strong>投稿履歴</strong> — 自分が投稿した品種を一覧で確認できます。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ========================================
        PAGE: CONTACT
        ======================================== -->
   <section id="page-contact" class="page">
@@ -1140,6 +1266,7 @@
       </div>
       <div class="footer__links">
         <a href="#" data-nav="about" data-i18n="footer_about">About</a>
+        <a href="#" data-nav="guide" data-i18n="footer_guide">使い方</a>
         <a href="#" data-nav="terms" data-i18n="footer_terms">利用規約</a>
         <a href="#" data-nav="privacy" data-i18n="footer_privacy">プライバシー</a>
         <a href="#" data-nav="contact" data-i18n="footer_contact">お問い合わせ</a>
