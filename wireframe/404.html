@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ひなたぼっこぷらんつ - Plants Story</title>
+  <script>
+    // GitHub Pages SPA redirect: preserve the path for client-side routing
+    // This 404 page redirects all unknown paths to index.html while preserving the route
+    var path = window.location.pathname;
+    var search = window.location.search;
+    // Redirect to index.html with the original path stored in sessionStorage
+    sessionStorage.setItem('spa_redirect_path', path + search);
+    window.location.replace('/plants-story/' + search);
+  </script>
+</head>
+<body>
+</body>
+</html>

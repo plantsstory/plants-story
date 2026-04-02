@@ -223,7 +223,7 @@
   window.loadProfileEditPage = function() {
     if (!window._currentUser) {
       showToast('ログインが必要です', true);
-      location.hash = '#/';
+      navigateTo('top');
       return;
     }
     var sb = window._supabaseClient;
@@ -407,9 +407,9 @@
           showToast(t('toast_profile_saved'));
           // Use @username URL if available
           if (usernameVal) {
-            location.hash = '#/profile/@' + usernameVal;
+            navigateTo('profile', { username: usernameVal });
           } else {
-            location.hash = '#/profile/' + window._currentUser.id;
+            navigateTo('profile', { userId: window._currentUser.id });
           }
         }
       }).finally(function() {
@@ -428,7 +428,7 @@
         sb.auth.signOut().then(function() {
           window._currentUser = null;
           if (typeof updateLoginUI === 'function') updateLoginUI();
-          location.hash = '#/';
+          navigateTo('top');
           showToast('ログアウトしました');
         });
       }
@@ -436,7 +436,7 @@
   }
 
   // Handle initial route if page loaded on a profile URL
-  var initState = parseHash();
+  var initState = parseRoute();
   if (initState.page === 'profile' && initState.userId) {
     window.loadProfilePage(initState.userId);
   } else if (initState.page === 'profile-edit') {
@@ -638,7 +638,11 @@ function getShareUrl(cultivarName) {
     return base + '/functions/v1/share?name=' + encodeURIComponent(cultivarName);
   }
   // Fallback: direct SPA URL
-  return _siteBase + '#/cultivar/' + encodeURIComponent(cultivarName);
+  // Build path-based URL for sharing
+  var parts = cultivarName.split(' ');
+  var genus = parts[0].toLowerCase();
+  var rest = parts.slice(1).join(' ');
+  return _siteBase + genus + '/' + encodeURIComponent(rest);
 }
 
 document.addEventListener('click', function(e) {
@@ -1213,7 +1217,7 @@ function updateCultivarDetail(cultivarName, rowEl) {
   var posterNameEl = document.getElementById('detail-poster-name');
   if (posterNameEl) {
     if (isSeedlingDetail && cData && cData._userId && cData._posterName) {
-      posterNameEl.innerHTML = '投稿者: <a href="#/profile/' + escHtml(cData._userId) + '" class="text-primary no-decoration">' + escHtml(cData._posterName) + '</a>';
+      posterNameEl.innerHTML = '投稿者: <a href="' + _basePath + 'profile/' + escHtml(cData._userId) + '" class="text-primary no-decoration">' + escHtml(cData._posterName) + '</a>';
     } else {
       posterNameEl.innerHTML = '';
     }
@@ -1623,7 +1627,7 @@ function globalSearch(query) {
       // Render user results
       var html = '';
       users.forEach(function(u) {
-        var profileUrl = u.username ? '#/profile/@' + escHtml(u.username) : '#/profile/' + escHtml(u.id);
+        var profileUrl = u.username ? _basePath + 'profile/@' + escHtml(u.username) : _basePath + 'profile/' + escHtml(u.id);
         var avatarHtml = '';
         if (u.avatar_url) {
           avatarHtml = '<img src="' + escHtml(u.avatar_url) + '" class="avatar-sm" alt="">';

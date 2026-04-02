@@ -148,6 +148,22 @@ function guardSubmit(btn, asyncFn) {
 }
 window.guardSubmit = guardSubmit;
 
+// SPA redirect restoration (GitHub Pages 404.html redirects here)
+(function() {
+  var redirectPath = sessionStorage.getItem('spa_redirect_path');
+  if (redirectPath) {
+    sessionStorage.removeItem('spa_redirect_path');
+    history.replaceState(null, '', redirectPath);
+  }
+  // Legacy hash URL migration: redirect #/path to /plants-story/path
+  if (location.hash && location.hash.indexOf('#/') === 0) {
+    var hashRoute = location.hash.replace(/^#\/?/, '');
+    if (hashRoute) {
+      history.replaceState(null, '', '/plants-story/' + hashRoute);
+    }
+  }
+})();
+
 // Page navigation
 var _siteBase = 'https://plantsstory.github.io/plants-story/';
 var _defaultTitle = 'ひなたぼっこぷらんつ - Plants Story';
@@ -158,7 +174,7 @@ function updateMeta(opts) {
   var title = opts.title || _defaultTitle;
   var desc = opts.description || _defaultDesc;
   var path = opts.path || '';
-  var url = _siteBase + (path ? '#/' + path : '');
+  var url = _siteBase + (path ? path : '');
   var image = opts.image || '';
   document.title = title;
   var metaDesc = document.querySelector('meta[name="description"]');
@@ -197,14 +213,14 @@ function updateCultivarJsonLd(name, genus, type, description) {
     '@type': 'Thing',
     'name': name,
     'description': description || (name + ' - ' + genus + 'の品種情報'),
-    'url': _siteBase + '#/cultivar/' + encodeURIComponent(name)
+    'url': _siteBase + genus.toLowerCase() + '/' + encodeURIComponent(name.replace(genus + ' ', ''))
   };
   el.textContent = JSON.stringify(data);
   // Breadcrumb: Home > Genus > Cultivar
   updateBreadcrumbJsonLd([
     { name: 'Home', url: _siteBase },
-    { name: genus, url: _siteBase + '#/' + genus.toLowerCase() },
-    { name: name, url: _siteBase + '#/cultivar/' + encodeURIComponent(name) }
+    { name: genus, url: _siteBase + genus.toLowerCase() },
+    { name: name, url: _siteBase + genus.toLowerCase() + '/' + encodeURIComponent(name.replace(genus + ' ', '')) }
   ]);
 }
 
@@ -251,7 +267,7 @@ function updateGenusJsonLd(genusName, cultivarNames) {
         '@type': 'ListItem',
         'position': i + 1,
         'name': name,
-        'url': _siteBase + '#/cultivar/' + encodeURIComponent(name)
+        'url': _siteBase + genusName.toLowerCase() + '/' + encodeURIComponent(name.replace(genusName + ' ', ''))
       };
     })
   };
@@ -259,7 +275,7 @@ function updateGenusJsonLd(genusName, cultivarNames) {
   // Breadcrumb: Home > Genus
   updateBreadcrumbJsonLd([
     { name: 'Home', url: _siteBase },
-    { name: genusName, url: _siteBase + '#/' + genusName.toLowerCase() }
+    { name: genusName, url: _siteBase + genusName.toLowerCase() }
   ]);
 }
 
@@ -295,33 +311,48 @@ function showGenus(genusName) {
   }
 }
 
-// ---- Hash-based routing (History API) ----
+// ---- Path-based routing (History API) ----
 // Known simple pages (no sub-parameters)
-var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'favorites', 'mypost'];
+var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'favorites', 'mypost', 'guide'];
 // Known genus names for URL mapping
 var knownGenera = []; // Populated dynamically from genera table
+// Base path for GitHub Pages deployment
+var _basePath = '/plants-story/';
 
-function buildHash(page, options) {
+function buildPath(page, options) {
   options = options || {};
-  if (page === 'top') return '#/';
-  if (page === 'profile' && options.username) return '#/profile/@' + options.username;
-  if (page === 'profile' && options.userId) return '#/profile/' + options.userId;
-  if (page === 'profile-edit') return '#/profile/edit';
-  if (page === 'genus' && options.genus) return '#/' + options.genus.toLowerCase();
+  if (page === 'top') return _basePath;
+  if (page === 'profile' && options.username) return _basePath + 'profile/@' + options.username;
+  if (page === 'profile' && options.userId) return _basePath + 'profile/' + options.userId;
+  if (page === 'profile-edit') return _basePath + 'profile/edit';
+  if (page === 'genus' && options.genus) return _basePath + options.genus.toLowerCase();
   if (page === 'cultivar' && options.cultivar) {
-    // e.g. "Anthurium crystallinum" -> #/anthurium/crystallinum
     var parts = options.cultivar.split(' ');
     var g = parts[0].toLowerCase();
     var rest = parts.slice(1).join(' ');
-    return '#/' + g + '/' + encodeURIComponent(rest);
+    return _basePath + g + '/' + encodeURIComponent(rest);
   }
-  if (simplePages.indexOf(page) !== -1) return '#/' + page;
-  return '#/';
+  if (simplePages.indexOf(page) !== -1) return _basePath + page;
+  return _basePath;
 }
+// Keep buildHash as alias for backward compatibility in case any external code references it
+var buildHash = buildPath;
 
-function parseHash() {
-  var hash = location.hash || '#/';
-  var path = hash.replace(/^#\/?/, '');  // remove leading #/
+function parseRoute() {
+  // First check for legacy hash URLs and redirect
+  if (location.hash && location.hash.indexOf('#/') === 0) {
+    var hashPath = location.hash.replace(/^#\/?/, '');
+    if (hashPath) {
+      var newUrl = _basePath + hashPath;
+      history.replaceState(null, '', newUrl);
+    }
+  }
+
+  var pathname = location.pathname;
+  // Remove base path prefix
+  var path = pathname.replace(new RegExp('^' + _basePath.replace(/\//g, '\\/')), '');
+  // Remove trailing slash and index.html
+  path = path.replace(/\/$/, '').replace(/^index\.html$/, '');
   if (!path) return { page: 'top' };
 
   var segments = path.split('/').map(function(s) { return decodeURIComponent(s); });
@@ -340,7 +371,6 @@ function parseHash() {
   // Check if it's a genus
   if (knownGenera.indexOf(first) !== -1) {
     if (segments.length > 1 && segments[1]) {
-      // Cultivar detail: #/anthurium/crystallinum
       var genusProper = first.charAt(0).toUpperCase() + first.slice(1);
       return { page: 'cultivar', genus: first, cultivar: genusProper + ' ' + segments[1] };
     }
@@ -352,6 +382,8 @@ function parseHash() {
 
   return { page: 'top' };
 }
+// Keep parseHash as alias
+var parseHash = parseRoute;
 
 function navigateTo(page, options, pushHistory) {
   options = options || {};
@@ -379,7 +411,7 @@ function navigateTo(page, options, pushHistory) {
           window.loadProfilePage(res.data);
         } else {
           showToast('ユーザーが見つかりませんでした', true);
-          location.hash = '#/';
+          navigateTo('top');
         }
       });
     }
@@ -443,7 +475,7 @@ function navigateTo(page, options, pushHistory) {
       } else {
         updateBreadcrumbJsonLd([
           { name: 'Home', url: _siteBase },
-          { name: pageTitles[page] ? pageTitles[page].split(' - ')[0] : page, url: _siteBase + '#/' + page }
+          { name: pageTitles[page] ? pageTitles[page].split(' - ')[0] : page, url: _siteBase + page }
         ]);
       }
     }
@@ -458,8 +490,8 @@ function navigateTo(page, options, pushHistory) {
     currentState._scrollY = window.scrollY;
     history.replaceState(currentState, '');
 
-    var hash = buildHash(page, options);
-    history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar, userId: options.userId, username: options.username }, '', hash);
+    var routePath = buildPath(page, options);
+    history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar, userId: options.userId, username: options.username }, '', routePath);
     // Send GA4 page view for SPA navigation
     if (typeof gtag === 'function') {
       gtag('event', 'page_view', { page_location: location.href, page_title: document.title });
@@ -474,7 +506,7 @@ if ('scrollRestoration' in history) {
 
 // Handle browser back/forward
 window.addEventListener('popstate', function(e) {
-  var state = e.state || parseHash();
+  var state = e.state || parseRoute();
   _isPopstate = true;
   navigateTo(state.page, state, false);
   // Restore scroll position if saved
@@ -486,12 +518,12 @@ window.addEventListener('popstate', function(e) {
 
 // Handle initial route on page load (deferred until genera are loaded)
 function handleInitialRoute() {
-  var state = parseHash();
+  var state = parseRoute();
   if (state.page !== 'top') {
     navigateTo(state.page, state, false);
   }
   // Record initial state so back button works from first navigation
-  history.replaceState({ page: state.page, genus: state.genus, cultivar: state.cultivar, userId: state.userId }, '', buildHash(state.page, state));
+  history.replaceState({ page: state.page, genus: state.genus, cultivar: state.cultivar, userId: state.userId }, '', buildPath(state.page, state));
 }
 // Wait for genera to load before routing (genera create the DOM targets)
 if (window._generaLoaded) {
@@ -1160,7 +1192,7 @@ var cultivarData = {
     var headerProfileBtn = document.getElementById('header-profile-btn');
     if (window._currentUser) {
       // Logged in: show profile in header, hide login button in header, show logout in menu
-      var profileUrl = '#/profile/' + window._currentUser.id;
+      var profileUrl = _basePath + 'profile/' + window._currentUser.id;
       if (headerProfileBtn) {
         headerProfileBtn.style.display = '';
         headerProfileBtn.href = profileUrl;
@@ -1212,15 +1244,15 @@ var cultivarData = {
       checkSubscription();
       if (session && typeof syncFavoritesFromServer === 'function') syncFavoritesFromServer();
       if (event === 'SIGNED_IN' && window.location.search.indexOf('code=') !== -1) {
-        var returnHash = localStorage.getItem('login_return_hash');
-        localStorage.removeItem('login_return_hash');
-        if (returnHash) {
-          window.history.replaceState({}, '', window.location.pathname + returnHash);
-          var route = returnHash.replace('#/', '').replace('#', '');
-          if (route && typeof navigateTo === 'function') navigateTo(route);
+        var returnPath = localStorage.getItem('login_return_path');
+        localStorage.removeItem('login_return_path');
+        if (returnPath) {
+          window.history.replaceState({}, '', returnPath);
+          var state = parseRoute();
+          if (state.page !== 'top' && typeof navigateTo === 'function') navigateTo(state.page, state, false);
         } else {
-          window.history.replaceState({}, '', window.location.pathname + '#/');
-          if (typeof navigateTo === 'function') navigateTo('');
+          window.history.replaceState({}, '', _basePath);
+          if (typeof navigateTo === 'function') navigateTo('top');
         }
       }
     });
@@ -1238,11 +1270,11 @@ var cultivarData = {
   var googleLoginBtn = document.getElementById('google-login-btn');
   if (googleLoginBtn && supabase) {
     googleLoginBtn.addEventListener('click', function() {
-      localStorage.setItem('login_return_hash', window.location.hash || '');
+      localStorage.setItem('login_return_path', window.location.pathname || _basePath);
       supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + window.location.pathname,
+          redirectTo: window.location.origin + _basePath,
           queryParams: { prompt: 'select_account' }
         }
       });
@@ -1379,11 +1411,11 @@ var cultivarData = {
           showToast('ログアウトしました');
         });
       } else {
-        localStorage.setItem('login_return_hash', window.location.hash || '');
+        localStorage.setItem('login_return_path', window.location.pathname || _basePath);
         supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: window.location.origin + window.location.pathname,
+            redirectTo: window.location.origin + _basePath,
             queryParams: { prompt: 'select_account' }
           }
         });
@@ -1413,7 +1445,8 @@ var cultivarData = {
         var dispKey = key.replace(' [Seedling]', '');
         if (dispKey !== key) cultivarData[dispKey] = entry;
       }
-      location.hash = '#/' + genus.toLowerCase() + '/' + encodeURIComponent(displayName);
+      history.pushState({ page: 'cultivar', genus: genus.toLowerCase(), cultivar: genus + ' ' + displayName }, '', _basePath + genus.toLowerCase() + '/' + encodeURIComponent(displayName));
+      navigateTo('cultivar', { genus: genus.toLowerCase(), cultivar: genus + ' ' + displayName }, false);
     });
   };
 
@@ -1756,7 +1789,7 @@ var cultivarData = {
       h += '<div class="text-xs text-muted mt-xs">' + t('creator_label') + escHtml(entry._creatorName) + '</div>';
     }
     if (isSeedling && entry._userId && entry._posterName && !locked) {
-      h += '<div class="text-xs mt-xs"><a href="#/profile/' + escHtml(entry._userId) + '" class="poster-link" onclick="event.stopPropagation();">&#x1F464; ' + escHtml(entry._posterName) + '</a></div>';
+      h += '<div class="text-xs mt-xs"><a href="' + _basePath + 'profile/' + escHtml(entry._userId) + '" class="poster-link" onclick="event.stopPropagation();">&#x1F464; ' + escHtml(entry._posterName) + '</a></div>';
     }
     h += '</div></div>';
     return h;

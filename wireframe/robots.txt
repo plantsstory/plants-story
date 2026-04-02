@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 
-Sitemap: https://jpgbehsrglsiwijglhjo.supabase.co/functions/v1/sitemap
+Sitemap: https://plantsstory.github.io/plants-story/sitemap.xml
