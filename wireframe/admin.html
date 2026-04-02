@@ -514,6 +514,11 @@
           <button class="btn btn-primary" id="btn-kr-search">リサーチ開始</button>
         </div>
 
+        <div id="kr-existing" class="hidden" style="margin-top:var(--space-lg);">
+          <h3 style="margin-bottom:var(--space-sm);">現在の由来</h3>
+          <div id="kr-existing-content" style="background:#f0f7f4;border:1px solid #c8e6c9;border-radius:8px;padding:var(--space-md);"></div>
+        </div>
+
         <div id="kr-loading" class="hidden" style="margin-top:var(--space-lg);text-align:center;">
           <p style="color:var(--color-primary);font-weight:700;">🔍 リサーチ中... (30秒〜1分)</p>
         </div>
@@ -2898,6 +2903,55 @@ function populateKRSelect() {
   });
   sel.innerHTML = html;
 }
+
+// Show existing origins when a cultivar is selected
+document.getElementById('kr-cultivar-select').addEventListener('change', function() {
+  var cultivarId = parseInt(this.value);
+  var existingDiv = document.getElementById('kr-existing');
+  var contentDiv = document.getElementById('kr-existing-content');
+  document.getElementById('kr-results').classList.add('hidden');
+  krPendingOrigins = null;
+  krSelectedCultivar = null;
+
+  if (!cultivarId) {
+    existingDiv.classList.add('hidden');
+    return;
+  }
+
+  var c = allCultivars.find(function(x) { return x.id === cultivarId; });
+  if (!c) { existingDiv.classList.add('hidden'); return; }
+
+  var origins = (c.origins || []).filter(function(o) { return !o._type; }); // exclude formula-only entries
+  if (origins.length === 0) {
+    contentDiv.innerHTML = '<span style="color:#999;">由来データなし</span>';
+    existingDiv.classList.remove('hidden');
+    return;
+  }
+
+  var html = '';
+  origins.forEach(function(o, idx) {
+    html += '<div style="background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:var(--space-sm);margin-bottom:var(--space-sm);">';
+    html += '<div style="display:flex;align-items:center;gap:var(--space-xs);margin-bottom:var(--space-xs);">';
+    html += '<span style="font-weight:700;">由来 #' + (idx + 1) + '</span>';
+    if (o.source_tier) html += ' ' + tierBadge(o.source_tier);
+    if (o.trust != null) html += ' <span style="color:' + trustColor(o.trust) + ';font-weight:700;">' + o.trust + '%</span>';
+    if (o.author) {
+      var authorLabel = o.author.isAI ? 'AI' : 'User';
+      if (o.source_type === 'ipni_powo') authorLabel = 'IPNI/Kew';
+      html += ' <span style="font-size:0.75rem;background:#eee;padding:1px 6px;border-radius:3px;">' + authorLabel + '</span>';
+    }
+    html += '</div>';
+
+    var structHtml = structuredSummaryHtml(o.structured, c.type, o);
+    if (structHtml) html += '<div style="font-size:0.85rem;margin-bottom:var(--space-xs);">' + structHtml + '</div>';
+
+    if (o.body) html += '<div style="font-size:0.85rem;color:#333;margin-bottom:var(--space-xs);"><strong>JP:</strong> ' + escapeHtml(o.body) + '</div>';
+    if (o.body_en) html += '<div style="font-size:0.85rem;color:#555;"><strong>EN:</strong> ' + escapeHtml(o.body_en) + '</div>';
+    html += '</div>';
+  });
+  contentDiv.innerHTML = html;
+  existingDiv.classList.remove('hidden');
+});
 
 document.getElementById('btn-kr-search').addEventListener('click', async function() {
   var cultivarId = parseInt(document.getElementById('kr-cultivar-select').value);
