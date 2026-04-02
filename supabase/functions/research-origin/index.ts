@@ -1177,24 +1177,25 @@ serve(async (req: Request) => {
     const groqApiKey = Deno.env.get("GROQ_API_KEY") || "";
     const openaiApiKey = Deno.env.get("OPENAI_API_KEY") || "";
 
-    // Preserve manual (user-written) origins
+    // Preserve non-AI origins (user-written, user-verified, manual)
     // Priority: use manual_origins passed directly from frontend (avoids race condition)
     // Fallback: fetch from DB for re-research scenarios (admin "AI再調査" button)
-    let manualOrigins: any[] = [];
+    let preservedOrigins: any[] = [];
     if (manual_origins && Array.isArray(manual_origins) && manual_origins.length > 0) {
-      manualOrigins = manual_origins;
-      console.log(`[Manual] Using ${manualOrigins.length} manual origins passed from frontend`);
+      preservedOrigins = manual_origins;
+      console.log(`[Preserved] Using ${preservedOrigins.length} origins passed from frontend`);
     } else if (!preview) {
       const { data: existingRow } = await supabase
         .from("cultivars")
         .select("origins")
         .eq("id", cultivar_id)
         .single();
-      manualOrigins = (existingRow?.origins || []).filter(
-        (o: any) => o.source_type === "manual" || (o.author && o.author.isAI === false && o.source_type !== "user_verified")
+      // Keep all non-AI origins: manual, user_verified, and any user-written origins
+      preservedOrigins = (existingRow?.origins || []).filter(
+        (o: any) => o.source_type === "manual" || o.source_type === "user_verified" || (o.author && o.author.isAI === false)
       );
-      if (manualOrigins.length > 0) {
-        console.log(`[Manual] Preserved ${manualOrigins.length} manual origins from DB`);
+      if (preservedOrigins.length > 0) {
+        console.log(`[Preserved] Kept ${preservedOrigins.length} user origins from DB`);
       }
     }
 
@@ -1364,7 +1365,7 @@ serve(async (req: Request) => {
 
         if (!effectiveUserText) {
           // Try to find user text from manual_origins or DB
-          const userOrigin = manualOrigins.find(
+          const userOrigin = preservedOrigins.find(
             (o: any) => o.source_type === "user_verified" || o.source_type === "manual" || (o.author && o.author.isAI === false)
           );
           if (userOrigin) {
@@ -1548,7 +1549,7 @@ serve(async (req: Request) => {
               body_en: cs.notes_en || "",
               trust,
               trustClass,
-              source_type: "user_verified",
+              source_type: "ai_verified",
               source_tier: vTier,
               source_tier_label_en: tierInfo.label_en,
               source_tier_label_jp: tierInfo.label_jp,
@@ -1606,7 +1607,7 @@ serve(async (req: Request) => {
               body_en: "",
               trust: 20,
               trustClass: "trust--low",
-              source_type: "manual",
+              source_type: "ai_fallback",
               source_tier: "D",
               source_tier_label_en: tierInfo.label_en,
               source_tier_label_jp: tierInfo.label_jp,
@@ -1631,11 +1632,15 @@ serve(async (req: Request) => {
           }
         }
 
-        // Clear manualOrigins to prevent duplication — the verified/fallback entry
-        // already contains the user text, so merging manualOrigins would duplicate it.
+        // Remove preserved origins that have the same source_type as new AI entries
+        // to avoid exact duplicates, but keep user-originated origins (user_verified, manual)
         if (originEntries.length > 0) {
-          console.log(`[Verify] Clearing ${manualOrigins.length} manual origins to prevent duplication`);
-          manualOrigins = [];
+          const aiSourceTypes = new Set(originEntries.map((o: any) => o.source_type));
+          const before = preservedOrigins.length;
+          preservedOrigins = preservedOrigins.filter((o: any) => !aiSourceTypes.has(o.source_type));
+          if (before !== preservedOrigins.length) {
+            console.log(`[Verify] Removed ${before - preservedOrigins.length} duplicate origins, kept ${preservedOrigins.length}`);
+          }
         }
 
       // ---- Species fallback: AI generation (unchanged) ----
@@ -1831,7 +1836,7 @@ serve(async (req: Request) => {
     }
 
     // Merge: AI origins + preserved manual origins
-    originEntries = [...originEntries, ...manualOrigins];
+    originEntries = [...originEntries, ...preservedOrigins];
 
     // Sort by trust descending
     originEntries.sort((a, b) => b.trust - a.trust);
