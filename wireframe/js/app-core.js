@@ -415,6 +415,10 @@ function navigateTo(page, options, pushHistory) {
   if (page === 'contribute' && !options._editFlow && typeof window.exitEditMode === 'function') {
     window.exitEditMode();
   }
+  // Default to quick mode for new posts, detail mode for edits
+  if (page === 'contribute' && typeof window.setContributeMode === 'function') {
+    window.setContributeMode(!!options._editFlow);
+  }
   if (page === 'favorites') renderFavoritesPage();
   if (page === 'genus' && options.genus) showGenus(options.genus);
   if (page === 'cultivar' && options.cultivar && !options._skipUpdate) {

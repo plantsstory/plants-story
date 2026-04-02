@@ -1,23 +1,19 @@
 
 // Contribute form: Quick/Detail mode toggle
-(function() {
+function setContributeMode(isDetail) {
+  var sections = document.querySelectorAll('.contribute-detail-section');
+  sections.forEach(function(s) { s.style.display = isDetail ? '' : 'none'; });
   var modeQuick = document.getElementById('mode-quick');
   var modeDetail = document.getElementById('mode-detail');
-  if (!modeQuick || !modeDetail) return;
+  if (modeQuick) modeQuick.classList.toggle('active', !isDetail);
+  if (modeDetail) modeDetail.classList.toggle('active', isDetail);
+}
+window.setContributeMode = setContributeMode;
 
-  function setMode(isDetail) {
-    var sections = document.querySelectorAll('.contribute-detail-section');
-    sections.forEach(function(s) { s.style.display = isDetail ? '' : 'none'; });
-    modeQuick.classList.toggle('active', !isDetail);
-    modeDetail.classList.toggle('active', isDetail);
-  }
-
-  modeQuick.addEventListener('click', function() { setMode(false); });
-  modeDetail.addEventListener('click', function() { setMode(true); });
-
-  // Default to quick mode for new posts, detail mode for edits
-  if (!window._editingCultivar) setMode(false);
-})();
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'mode-quick') { setContributeMode(false); }
+  else if (e.target.id === 'mode-detail') { setContributeMode(true); }
+});
 
 // Tab switching for genus pages (Species/Clones vs My Seedlings)
 document.addEventListener('click', function(e) {
