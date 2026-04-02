@@ -1151,8 +1151,17 @@ function originTypeBadge(t, structured) {
   return '<span class="badge ' + cls + ' badge--type-sm">' + label + '</span>';
 }
 
-function structuredSummaryHtml(s, cType, body) {
+function structuredSummaryHtml(s, cType, origin) {
+  var body = origin ? origin.body : '';
   var parts = [];
+  // Show formula from _type=formula origins
+  if (origin && origin._type === 'formula' && origin.formula) {
+    var f = origin.formula;
+    parts.push('<b>交配式:</b> ' + escapeHtml((f.parentA || '?') + ' × ' + (f.parentB || '?')));
+    if (f.motherPhoto) parts.push('<b>母株画像:</b> あり');
+    if (f.fatherPhoto) parts.push('<b>父株画像:</b> あり');
+    return parts.join('<br>');
+  }
   if (s) {
     if (cType === 'species') {
       if (s.species_subcategory && s.species_subcategory !== 'species') {
@@ -1282,7 +1291,7 @@ function loadOrigins() {
       html += '<div class="trust-bar"><div class="trust-fill" style="width:' + trustPct + '%;background:' + tColor + ';"></div></div> ';
       html += trustPct + '%';
       html += '</td>';
-      html += '<td style="font-size:var(--font-size-xs);line-height:1.5;">' + structuredSummaryHtml(s, oType, o.body) + '</td>';
+      html += '<td style="font-size:var(--font-size-xs);line-height:1.5;">' + structuredSummaryHtml(s, oType, o) + '</td>';
       html += '<td>' + authorLabel + '</td>';
       var votes = o.votes || { agree: 0, disagree: 0 };
       html += '<td><div class="vote-group">';
