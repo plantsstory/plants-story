@@ -1980,10 +1980,15 @@ var affiliateProducts = [];
     var result = await sbAff.from('affiliates').select('*').eq('is_published', true).order('sort_order');
     if (result.data && result.data.length > 0) {
       affiliateProducts = result.data.map(function(a) {
+        // Extract direct image URL from rakuten tracking URL (hbb.afl.rakuten.co.jp)
+        var imgUrl = a.image || '';
+        if (imgUrl.indexOf('hbb.afl.rakuten.co.jp') > -1) {
+          try { var pc = new URL(imgUrl).searchParams.get('pc'); if (pc) imgUrl = pc; } catch(e) {}
+        }
         return {
           name: a.name, nameEn: a.name_en || a.name,
           productName: a.product_name, productNameEn: a.product_name_en || a.product_name,
-          image: a.image || '', icon: a.icon || '🛒',
+          image: imgUrl, icon: a.icon || '🛒',
           badge: a.badge || '', badgeEn: a.badge_en || '',
           rakuten: a.rakuten || '', amazon: a.amazon || '', yahoo: a.yahoo || ''
         };
