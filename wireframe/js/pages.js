@@ -56,7 +56,7 @@
     query.then(function(res) {
       grid.innerHTML = '';
       if (res.error) {
-        grid.innerHTML = '<p class="error-text">エラー: ' + res.error.message + '</p>';
+        grid.innerHTML = '<p class="error-text">エラー: ' + escHtml(res.error.message) + '</p>';
         return;
       }
       var rows = res.data || [];
@@ -485,14 +485,24 @@ window.observeLazyImages = observeLazyImages;
 var _thumbMap = {};
 window._thumbMap = _thumbMap;
 
+var _thumbMapLoaded = false;
 function loadCultivarThumbnails() {
   var sb = window._supabaseClient;
   var baseUrl = window._SUPABASE_URL;
   if (!sb || !baseUrl) return;
+  // Skip if already loaded (prevent redundant full-table fetches)
+  if (_thumbMapLoaded && Object.keys(_thumbMap).length > 0) {
+    (window._generaData || []).forEach(function(gObj) {
+      var section = document.getElementById('genus-' + gObj.slug);
+      if (section) paginateGenus(section);
+    });
+    return;
+  }
   sb.from('cultivar_images')
     .select('cultivar_name, storage_path')
     .order('created_at', { ascending: true })
     .then(function(res) {
+      _thumbMapLoaded = true;
       if (res.error || !res.data) return;
       res.data.forEach(function(img) {
         if (!_thumbMap[img.cultivar_name]) {
@@ -686,10 +696,11 @@ function renderFavoritesPage() {
   var sb = window._supabaseClient;
   var baseUrl = window._SUPABASE_URL;
 
-  // Get thumbnails for favorites
+  // Get thumbnails only for favorited cultivar names (not full table)
   var thumbPromise;
   if (sb) {
-    thumbPromise = sb.from('cultivar_images').select('cultivar_name, storage_path').then(function(res) {
+    var displayNames = names.map(function(n) { return n.replace(' [Seedling]', ''); });
+    thumbPromise = sb.from('cultivar_images').select('cultivar_name, storage_path').in('cultivar_name', displayNames).then(function(res) {
       var map = {};
       if (res.data) res.data.forEach(function(img) { if (!map[img.cultivar_name]) map[img.cultivar_name] = img.storage_path; });
       return map;
@@ -1202,7 +1213,7 @@ function updateCultivarDetail(cultivarName, rowEl) {
   var posterNameEl = document.getElementById('detail-poster-name');
   if (posterNameEl) {
     if (isSeedlingDetail && cData && cData._userId && cData._posterName) {
-      posterNameEl.innerHTML = '投稿者: <a href="#/profile/' + cData._userId + '" class="text-primary no-decoration">' + cData._posterName + '</a>';
+      posterNameEl.innerHTML = '投稿者: <a href="#/profile/' + escHtml(cData._userId) + '" class="text-primary no-decoration">' + escHtml(cData._posterName) + '</a>';
     } else {
       posterNameEl.innerHTML = '';
     }

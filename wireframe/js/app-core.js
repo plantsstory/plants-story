@@ -1439,9 +1439,9 @@ var cultivarData = {
           var date = row.created_at ? new Date(row.created_at).toLocaleDateString('ja-JP') : '';
           var typeBadge = row.type === 'species' ? 'species' : (row.type === 'seedling' ? 'seedling' : (row.type === 'clone' ? 'clone' : 'hybrid'));
           card.innerHTML = '<div class="d-flex justify-between items-center">' +
-            '<div><span class="badge badge--' + typeBadge + ' badge--type-sm">' + (row.type || 'hybrid') + '</span>' +
-            '<strong>' + displayName + '</strong></div>' +
-            '<span class="text-xs text-muted">' + date + '</span></div>';
+            '<div><span class="badge badge--' + typeBadge + ' badge--type-sm">' + escHtml(row.type || 'hybrid') + '</span>' +
+            '<strong>' + escHtml(displayName) + '</strong></div>' +
+            '<span class="text-xs text-muted">' + escHtml(date) + '</span></div>';
           card.addEventListener('click', function() {
             window.navigateToCultivarById(row.id, row.genus, displayName.replace(row.genus + ' ', ''));
           });
@@ -1876,8 +1876,9 @@ var cultivarData = {
     window._profileCache = _profileCache;
 
     // Then load from Supabase (async, authoritative source)
+    // Fetch only needed columns to reduce payload size
     if (supabase) {
-      supabase.from('cultivars').select('*').then(function(res) {
+      supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id').then(function(res) {
         if (res.error || !res.data) return;
 
         // Collect unique user_ids to fetch profiles

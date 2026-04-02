@@ -31,6 +31,7 @@ interface BotanicalResult {
   referenceCollation: string;
   // Type data from IPNI HTML scraping
   collectorTeam: string;
+  collectionDate: string;
   typeLocality: string;
   typeRemarks: string;
   typeDistribution: string;
@@ -145,6 +146,7 @@ async function searchIPNI(genus: string, species: string): Promise<{ year: strin
 // Step 4: Scrape IPNI HTML for type specimen data (Collector, Locality, Type Remarks)
 interface IpniTypeData {
   collectorTeam: string;
+  collectionDate: string;
   locality: string;
   typeRemarks: string;
   typeDistribution: string;
@@ -178,6 +180,7 @@ async function scrapeIpniTypeData(ipniId: string): Promise<IpniTypeData | null> 
 
     const result: IpniTypeData = {
       collectorTeam: extractField("Collector Team"),
+      collectionDate: extractField("Collection Date"),
       locality: extractField("Locality"),
       typeRemarks: extractField("Type Remarks"),
       typeDistribution: extractField("Distribution Of Types"),
@@ -186,7 +189,7 @@ async function scrapeIpniTypeData(ipniId: string): Promise<IpniTypeData | null> 
     const hasData = result.collectorTeam || result.locality || result.typeRemarks;
     if (!hasData) return null;
 
-    console.log(`[IPNI HTML] Type data scraped: collector="${result.collectorTeam}", locality="${result.locality}", remarks="${result.typeRemarks.substring(0, 80)}..."`);
+    console.log(`[IPNI HTML] Type data scraped: collector="${result.collectorTeam}", date="${result.collectionDate}", locality="${result.locality}", remarks="${result.typeRemarks.substring(0, 80)}..."`);
     return result;
   } catch (e) {
     console.log(`[IPNI HTML] Scrape failed:`, String(e));
@@ -232,6 +235,7 @@ async function queryBotanicalDBs(genus: string, species: string): Promise<Botani
     publication: ipni?.publication || "",
     referenceCollation: ipni?.collation || "",
     collectorTeam: typeData?.collectorTeam || "",
+    collectionDate: typeData?.collectionDate || "",
     typeLocality: typeData?.locality || "",
     typeRemarks: typeData?.typeRemarks || "",
     typeDistribution: typeData?.typeDistribution || "",
@@ -250,8 +254,17 @@ interface WikidataResult {
   wikidataUrl: string;
 }
 
+function sanitizeSparql(input: string): string {
+  // Remove characters that could break out of SPARQL string literals
+  return input.replace(/[\\"'\n\r\t{}()]/g, "").trim();
+}
+
 async function queryWikidata(genus: string, epithet: string): Promise<WikidataResult | null> {
   try {
+    const safeEpithet = sanitizeSparql(epithet.toLowerCase());
+    const safeGenus = sanitizeSparql(genus.toLowerCase());
+    if (!safeEpithet || !safeGenus) return null;
+
     // Search by label containing the cultivar epithet within the genus
     const sparql = `
 SELECT ?item ?itemLabel ?itemDescription ?parentTaxon ?parentTaxonLabel
@@ -259,8 +272,8 @@ SELECT ?item ?itemLabel ?itemDescription ?parentTaxon ?parentTaxonLabel
   {
     ?item rdfs:label ?label .
     FILTER(LANG(?label) = "en")
-    FILTER(CONTAINS(LCASE(?label), "${epithet.toLowerCase()}"))
-    FILTER(CONTAINS(LCASE(?label), "${genus.toLowerCase()}"))
+    FILTER(CONTAINS(LCASE(?label), "${safeEpithet}"))
+    FILTER(CONTAINS(LCASE(?label), "${safeGenus}"))
   }
   OPTIONAL { ?item wdt:P171 ?parentTaxon }
   OPTIONAL { ?item wdt:P61 ?creator }
@@ -585,6 +598,7 @@ function buildSpeciesStructuredPrompt(bot: BotanicalResult): string {
   if (bot.collectorTeam || bot.typeLocality || bot.typeRemarks) {
     typeDataSection = `\n=== TYPE SPECIMEN DATA (from IPNI — use this as PRIMARY source) ===`;
     if (bot.collectorTeam) typeDataSection += `\nCollector Team: ${bot.collectorTeam}`;
+    if (bot.collectionDate) typeDataSection += `\nCollection Date: ${bot.collectionDate}`;
     if (bot.typeLocality) typeDataSection += `\nLocality: ${bot.typeLocality}`;
     if (bot.typeRemarks) typeDataSection += `\nType Remarks: ${bot.typeRemarks}`;
     if (bot.typeDistribution) typeDataSection += `\nDistribution Of Types: ${bot.typeDistribution}`;
@@ -1072,6 +1086,27 @@ serve(async (req: Request) => {
   }
 
   try {
+    // ── Authentication: require a valid JWT ──
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user: authUser }, error: authError } = await authClient.auth.getUser();
+    if (authError || !authUser) {
+      return new Response(
+        JSON.stringify({ error: "Invalid or expired token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { cultivar_id, genus, cultivar_name, type, manual_origins, user_text, user_sources, preview } = await req.json();
 
     if ((!cultivar_id && !preview) || !cultivar_name) {
@@ -1097,7 +1132,6 @@ serve(async (req: Request) => {
       );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const geminiApiKey = Deno.env.get("GEMINI_API_KEY") || "";
@@ -1244,7 +1278,10 @@ serve(async (req: Request) => {
               author_name: botResult.authors || "不明",
               publication_year: botResult.publicationYear ? parseInt(botResult.publicationYear) : null,
               collector: known(aiStructured?.collector) || ipniCollector || "不明",
-              collection_year: aiStructured?.collection_year || null,
+              collection_year: aiStructured?.collection_year || (() => {
+                const m = botResult.collectionDate.match(/\b(\d{4})\b/);
+                return m ? parseInt(m[1]) : null;
+              })(),
               type_locality: known(aiStructured?.type_locality) || ipniLocality || botResult.nativeDistribution[0] || "不明",
               known_habitats: botResult.typeDistribution || dist || "不明",
               notes: "",

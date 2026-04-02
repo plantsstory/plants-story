@@ -833,14 +833,12 @@ document.addEventListener('click', function(e) {
         var inputHash = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
         return sbClient.rpc('delete_with_edit_key_hash', {
           p_cultivar_id: editCultivarId,
-          p_edit_key_hash: inputHash,
-          p_user_id: window._currentUser ? window._currentUser.id : null
+          p_edit_key_hash: inputHash
         });
       });
     } else {
       deletePromise = sbClient.rpc('delete_with_edit_key_hash', {
-        p_cultivar_id: editCultivarId,
-        p_user_id: window._currentUser ? window._currentUser.id : null
+        p_cultivar_id: editCultivarId
       });
     }
     deletePromise.then(function(res) {
