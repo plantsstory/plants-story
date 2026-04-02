@@ -518,10 +518,11 @@ function loadCultivarThumbnails() {
 }
 window.loadCultivarThumbnails = loadCultivarThumbnails;
 
-// ---- Favorites (localStorage + Supabase sync for logged-in users) ----
+// ---- Favorites (Supabase for logged-in users only) ----
 var FAV_KEY = 'plants-story-favorites';
 
 function getFavorites() {
+  if (!window._currentUser) return {};
   try { return JSON.parse(localStorage.getItem(FAV_KEY) || '{}'); } catch(e) { return {}; }
 }
 
@@ -530,6 +531,7 @@ function isFavorite(name) {
 }
 
 function toggleFavorite(name) {
+  if (!window._currentUser) return false;
   var favs = getFavorites();
   var added;
   if (favs[name]) {
@@ -543,7 +545,7 @@ function toggleFavorite(name) {
   updateFavBtn(name);
   updateHeaderFavIcon();
 
-  // Sync to Supabase if logged in
+  // Sync to Supabase
   var sb = window._supabaseClient;
   var user = window._currentUser;
   if (sb && user) {
@@ -556,41 +558,20 @@ function toggleFavorite(name) {
   return added;
 }
 
-// Sync favorites from Supabase on login (merge with localStorage)
+// Sync favorites from Supabase on login (server is source of truth)
 function syncFavoritesFromServer() {
   var sb = window._supabaseClient;
   var user = window._currentUser;
   if (!sb || !user) return;
   sb.from('favorites').select('cultivar_name, created_at').eq('user_id', user.id).then(function(res) {
     if (res.error || !res.data) return;
-    var localFavs = getFavorites();
-    var changed = false;
-
-    // Merge server favorites into local
+    // Server is source of truth — replace local with server data
+    var merged = {};
     res.data.forEach(function(row) {
-      if (!localFavs[row.cultivar_name]) {
-        localFavs[row.cultivar_name] = new Date(row.created_at).getTime();
-        changed = true;
-      }
+      merged[row.cultivar_name] = new Date(row.created_at).getTime();
     });
-
-    // Upload local-only favorites to server
-    var serverNames = {};
-    res.data.forEach(function(row) { serverNames[row.cultivar_name] = true; });
-    var toUpload = [];
-    Object.keys(localFavs).forEach(function(name) {
-      if (!serverNames[name]) {
-        toUpload.push({ user_id: user.id, cultivar_name: name });
-      }
-    });
-    if (toUpload.length > 0) {
-      sb.from('favorites').upsert(toUpload, { onConflict: 'user_id,cultivar_name' }).then(function() {});
-    }
-
-    if (changed) {
-      localStorage.setItem(FAV_KEY, JSON.stringify(localFavs));
-      updateHeaderFavIcon();
-    }
+    localStorage.setItem(FAV_KEY, JSON.stringify(merged));
+    updateHeaderFavIcon();
   });
 }
 window.syncFavoritesFromServer = syncFavoritesFromServer;
@@ -598,6 +579,13 @@ window.syncFavoritesFromServer = syncFavoritesFromServer;
 function updateFavBtn(name) {
   var btn = document.getElementById('fav-btn');
   if (!btn) return;
+  if (!window._currentUser) {
+    btn.innerHTML = '&#x2606; お気に入り追加';
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+    return;
+  }
   var fav = isFavorite(name);
   btn.innerHTML = fav ? '&#x2605; お気に入り済み' : '&#x2606; お気に入り追加';
   if (fav) {
@@ -623,6 +611,10 @@ function updateHeaderFavIcon() {
 document.addEventListener('click', function(e) {
   var btn = e.target.closest('#fav-btn');
   if (!btn) return;
+  if (!window._currentUser) {
+    showToast('お気に入り機能を使うにはログインしてください');
+    return;
+  }
   var h1 = document.querySelector('#page-cultivar h1');
   if (!h1) return;
   var name = h1.textContent;
@@ -690,6 +682,16 @@ document.addEventListener('click', function(e) {
 function renderFavoritesPage() {
   var grid = document.getElementById('favorites-grid');
   if (!grid) return;
+
+  // Require login
+  if (!window._currentUser) {
+    grid.innerHTML = '<div class="text-center grid-full p-xl">' +
+      '<p class="text-muted mb-md">お気に入り機能を使うにはログインしてください</p>' +
+      '<button class="btn btn--primary" onclick="document.getElementById(\'btn-login\').click()">Googleでログイン</button>' +
+      '</div>';
+    return;
+  }
+
   var favs = getFavorites();
   var names = Object.keys(favs).sort(function(a, b) { return favs[b] - favs[a]; });
 
@@ -716,9 +718,11 @@ function renderFavoritesPage() {
 
   thumbPromise.then(function(thumbMap) {
     var html = '';
+    var rendered = 0;
     names.forEach(function(name) {
       var cData = cultivarData[name] || cultivarData[name + ' [Seedling]'];
       if (!cData) return;
+      rendered++;
       var displayName = name.replace(' [Seedling]', '');
       var genus = displayName.split(' ')[0];
       var type = cData._type || 'species';
@@ -753,6 +757,21 @@ function renderFavoritesPage() {
       html += '</div>';
     });
     grid.innerHTML = html || '<div class="text-center text-muted grid-full p-xl">' + t('favorites_empty') + '</div>';
+    // Clean up stale favorites not in cultivarData
+    if (rendered < names.length) {
+      var cleanFavs = getFavorites();
+      var stale = false;
+      names.forEach(function(name) {
+        if (!cultivarData[name] && !cultivarData[name + ' [Seedling]']) {
+          delete cleanFavs[name];
+          stale = true;
+        }
+      });
+      if (stale) {
+        localStorage.setItem(FAV_KEY, JSON.stringify(cleanFavs));
+        updateHeaderFavIcon();
+      }
+    }
     observeLazyImages(grid);
   });
 }

@@ -1460,6 +1460,8 @@ if (false) {
         window._currentUser = null;
         window._isSubscribed = false;
         window._subscriptionPlan = 'free';
+        localStorage.removeItem('plants-story-favorites');
+        if (typeof updateHeaderFavIcon === 'function') updateHeaderFavIcon();
         updateLoginUI();
       });
     });
@@ -1472,6 +1474,8 @@ if (false) {
       if (window._currentUser) {
         supabase.auth.signOut().then(function() {
           window._currentUser = null;
+          localStorage.removeItem('plants-story-favorites');
+          if (typeof updateHeaderFavIcon === 'function') updateHeaderFavIcon();
           updateLoginUI();
           showToast('ログアウトしました');
         });
