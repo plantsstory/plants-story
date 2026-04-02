@@ -1651,7 +1651,7 @@ document.addEventListener('click', function(e) {
   var pageLink = e.target.closest('.page-link');
   if (pageLink && !pageLink.classList.contains('disabled')) {
     e.preventDefault();
-    var pageNum = parseInt(pageLink.getAttribute('data-page'));
+    var pageNum = parseInt(pageLink.getAttribute('data-page'), 10);
     if (!isNaN(pageNum)) {
       var genusEl = pageLink.closest('.genus-content');
       if (genusEl) {

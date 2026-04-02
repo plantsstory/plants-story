@@ -105,7 +105,7 @@ document.addEventListener('click', function(e) {
   if (!btn) return;
   var sb = window._supabaseClient;
   if (!sb) return;
-  var originIdx = parseInt(btn.getAttribute('data-origin-idx'));
+  var originIdx = parseInt(btn.getAttribute('data-origin-idx'), 10);
   if (isNaN(originIdx)) return;
   var h1 = document.querySelector('#page-cultivar h1');
   if (!h1) return;
@@ -132,7 +132,7 @@ document.addEventListener('click', function(e) {
     localStorage.setItem(voteKey, '1');
     btn.classList.add(voteType === 'agree' ? 'vote-btn--active' : 'vote-btn--active-down');
     var countEl = btn.querySelector('.vote-btn__badge');
-    if (countEl) countEl.textContent = parseInt(countEl.textContent) + 1;
+    if (countEl) countEl.textContent = parseInt(countEl.textContent, 10) + 1;
     // Update in-memory data
     if (cultivarData[cultivarName] && cultivarData[cultivarName].origins && cultivarData[cultivarName].origins[originIdx]) {
       if (!cultivarData[cultivarName].origins[originIdx].votes) cultivarData[cultivarName].origins[originIdx].votes = { agree: 0, disagree: 0 };
@@ -677,7 +677,7 @@ document.addEventListener('click', function(e) {
                 e.stopPropagation();
                 var imageId = this.getAttribute('data-image-id');
                 var storagePath = this.getAttribute('data-storage-path');
-                var idx = parseInt(this.getAttribute('data-idx'));
+                var idx = parseInt(this.getAttribute('data-idx'), 10);
                 if (!confirm('この画像を削除しますか？')) return;
                 _sbForGallery.storage.from('gallery-images').remove([storagePath]).then(function() {
                   return _sbForGallery.from('cultivar_images').delete().eq('id', imageId);
@@ -884,6 +884,7 @@ document.addEventListener('click', function(e) {
       if (!contributeSourceInput) return;
       var url = contributeSourceInput.value.trim();
       if (!url) return;
+      if (!/^https?:\/\/.+/i.test(url)) { showToast('URLはhttp://またはhttps://で始めてください', true); return; }
       contributeSources.push(url);
       contributeSourceInput.value = '';
       renderContributeSources();
@@ -895,7 +896,7 @@ document.addEventListener('click', function(e) {
     contributeSourceList.addEventListener('click', function(e) {
       var removeBtn = e.target.closest('.source-list__remove');
       if (removeBtn) {
-        var idx = parseInt(removeBtn.getAttribute('data-source-idx'));
+        var idx = parseInt(removeBtn.getAttribute('data-source-idx'), 10);
         if (!isNaN(idx)) {
           contributeSources.splice(idx, 1);
           renderContributeSources();
@@ -1209,15 +1210,15 @@ document.addEventListener('click', function(e) {
           var v;
           s.species_subcategory = getSelectedSubcategory();
           v = document.getElementById('sf-author-name'); if (v) s.author_name = v.value.trim();
-          v = document.getElementById('sf-publication-year'); if (v && v.value) s.publication_year = parseInt(v.value) || null;
+          v = document.getElementById('sf-publication-year'); if (v && v.value) s.publication_year = parseInt(v.value, 10) || null;
           v = document.getElementById('sf-collector'); if (v) s.collector = v.value.trim();
-          v = document.getElementById('sf-collection-year'); if (v && v.value) s.collection_year = parseInt(v.value) || null;
+          v = document.getElementById('sf-collection-year'); if (v && v.value) s.collection_year = parseInt(v.value, 10) || null;
           v = document.getElementById('sf-type-locality'); if (v) s.type_locality = v.value.trim();
           v = document.getElementById('sf-known-habitats'); if (v) s.known_habitats = v.value.trim();
         } else if (type === 'clone') {
           var v;
           v = document.getElementById('sf-clone-namer'); if (v) s.namer = v.value.trim();
-          v = document.getElementById('sf-clone-naming-year'); if (v && v.value) s.naming_year = parseInt(v.value) || null;
+          v = document.getElementById('sf-clone-naming-year'); if (v && v.value) s.naming_year = parseInt(v.value, 10) || null;
           if (f.a && f.b) {
             var pA = f.a.value.trim(), pB = f.b.value.trim();
             if (pA && pB) s.formula = { parentA: pA, parentB: pB };
@@ -1225,7 +1226,7 @@ document.addEventListener('click', function(e) {
         } else if (type === 'hybrid') {
           var v;
           v = document.getElementById('sf-hybrid-breeder'); if (v) s.breeder = v.value.trim();
-          v = document.getElementById('sf-hybrid-naming-year'); if (v && v.value) s.naming_year = parseInt(v.value) || null;
+          v = document.getElementById('sf-hybrid-naming-year'); if (v && v.value) s.naming_year = parseInt(v.value, 10) || null;
           if (f.a && f.b) {
             var pA = f.a.value.trim(), pB = f.b.value.trim();
             if (pA && pB) s.formula = { parentA: pA, parentB: pB };
@@ -1731,6 +1732,7 @@ document.addEventListener('click', function(e) {
       e.preventDefault();
       var url = sourceInput.value.trim();
       if (!url) return;
+      if (!/^https?:\/\/.+/i.test(url)) { showToast('URLはhttp://またはhttps://で始めてください', true); return; }
       originSources.push(url);
       sourceInput.value = '';
       // Visual feedback - show added sources
@@ -1752,7 +1754,7 @@ document.addEventListener('click', function(e) {
     originForm.addEventListener('click', function(e) {
       var rm = e.target.getAttribute('data-remove-origin-src');
       if (rm !== null) {
-        originSources.splice(parseInt(rm), 1);
+        originSources.splice(parseInt(rm, 10), 1);
         var list = originForm.querySelector('.origin-source-list');
         if (list) {
           list.innerHTML = '';
@@ -1784,21 +1786,21 @@ document.addEventListener('click', function(e) {
       if (cType === 'species') {
         var v;
         v = document.getElementById('ao-author-name'); if (v && v.value.trim()) aoStructured.author_name = v.value.trim();
-        v = document.getElementById('ao-publication-year'); if (v && v.value) aoStructured.publication_year = parseInt(v.value) || null;
+        v = document.getElementById('ao-publication-year'); if (v && v.value) aoStructured.publication_year = parseInt(v.value, 10) || null;
         v = document.getElementById('ao-collector'); if (v && v.value.trim()) aoStructured.collector = v.value.trim();
-        v = document.getElementById('ao-collection-year'); if (v && v.value) aoStructured.collection_year = parseInt(v.value) || null;
+        v = document.getElementById('ao-collection-year'); if (v && v.value) aoStructured.collection_year = parseInt(v.value, 10) || null;
         v = document.getElementById('ao-type-locality'); if (v && v.value.trim()) aoStructured.type_locality = v.value.trim();
         v = document.getElementById('ao-known-habitats'); if (v && v.value.trim()) aoStructured.known_habitats = v.value.trim();
       } else if (cType === 'clone') {
         var v;
         v = document.getElementById('ao-clone-namer'); if (v && v.value.trim()) aoStructured.namer = v.value.trim();
-        v = document.getElementById('ao-clone-naming-year'); if (v && v.value) aoStructured.naming_year = parseInt(v.value) || null;
+        v = document.getElementById('ao-clone-naming-year'); if (v && v.value) aoStructured.naming_year = parseInt(v.value, 10) || null;
         var pA = document.getElementById('ao-clone-parentA'), pB = document.getElementById('ao-clone-parentB');
         if (pA && pB && pA.value.trim() && pB.value.trim()) aoStructured.formula = { parentA: pA.value.trim(), parentB: pB.value.trim() };
       } else if (cType === 'hybrid') {
         var v;
         v = document.getElementById('ao-hybrid-breeder'); if (v && v.value.trim()) aoStructured.breeder = v.value.trim();
-        v = document.getElementById('ao-hybrid-naming-year'); if (v && v.value) aoStructured.naming_year = parseInt(v.value) || null;
+        v = document.getElementById('ao-hybrid-naming-year'); if (v && v.value) aoStructured.naming_year = parseInt(v.value, 10) || null;
         var pA = document.getElementById('ao-hybrid-parentA'), pB = document.getElementById('ao-hybrid-parentB');
         if (pA && pB && pA.value.trim() && pB.value.trim()) aoStructured.formula = { parentA: pA.value.trim(), parentB: pB.value.trim() };
       } else if (cType === 'seedling') {
@@ -1845,6 +1847,9 @@ document.addEventListener('click', function(e) {
 
       renderOrigins(cultivarName);
 
+      // Disable submit to prevent double submission
+      if (submitOriginBtn) { submitOriginBtn.disabled = true; submitOriginBtn.style.opacity = '0.5'; }
+
       // Persist to Supabase via RPC (bypasses RLS UPDATE restriction)
       var _sb = window._supabaseClient;
       if (_sb) {
@@ -1865,6 +1870,7 @@ document.addEventListener('click', function(e) {
           }));
         });
         savePromises.then(function(results) {
+          if (submitOriginBtn) { submitOriginBtn.disabled = false; submitOriginBtn.style.opacity = ''; }
           var failed = results.filter(function(r) { return r.error; });
           if (failed.length > 0) {
             console.error('Failed to save origin to DB:', failed[0].error);
@@ -2579,7 +2585,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       container.querySelectorAll('.upload-preview__move-btn').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
           e.stopPropagation();
-          var pos = parseInt(this.getAttribute('data-pos'));
+          var pos = parseInt(this.getAttribute('data-pos'), 10);
           var dir = this.getAttribute('data-dir');
           var targetPos = dir === 'left' ? pos - 1 : pos + 1;
           var items = Array.from(container.querySelectorAll('.upload-preview__item'));
@@ -2679,7 +2685,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       contributePreview.querySelectorAll('.upload-preview__remove').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
           e.stopPropagation();
-          var idx = parseInt(this.getAttribute('data-idx'));
+          var idx = parseInt(this.getAttribute('data-idx'), 10);
           contributeImages.splice(idx, 1);
           contributeFiles.splice(idx, 1);
           contributeCaptions.splice(idx, 1);
@@ -2691,14 +2697,14 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       contributePreview.querySelectorAll('.upload-preview__img').forEach(function(img) {
         img.addEventListener('click', function(e) {
           e.stopPropagation();
-          contributeReplaceIdx = parseInt(this.getAttribute('data-idx'));
+          contributeReplaceIdx = parseInt(this.getAttribute('data-idx'), 10);
           contributeInput.click();
         });
       });
       // Attach caption/link input handlers
       contributePreview.querySelectorAll('.upload-preview__meta input').forEach(function(inp) {
         inp.addEventListener('input', function() {
-          var idx = parseInt(this.getAttribute('data-idx'));
+          var idx = parseInt(this.getAttribute('data-idx'), 10);
           var field = this.getAttribute('data-field');
           if (field === 'caption') contributeCaptions[idx] = this.value;
           else if (field === 'caption-other') contributeCaptions[idx] = this.value;
@@ -2708,7 +2714,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       // Attach clone caption select handlers
       contributePreview.querySelectorAll('.clone-caption-select').forEach(function(sel) {
         sel.addEventListener('change', function() {
-          var idx = parseInt(this.getAttribute('data-idx'));
+          var idx = parseInt(this.getAttribute('data-idx'), 10);
           var otherInput = this.parentNode.querySelector('.clone-caption-other');
           if (this.value === 'other') {
             otherInput.style.display = '';
