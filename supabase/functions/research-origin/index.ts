@@ -975,6 +975,109 @@ CRITICAL: In ALL Japanese text fields, the following MUST be written in Latin/En
 }
 
 // ============================================================
+// Build keyword research prompt for CLONE/Hybrid (allows community sources)
+// ============================================================
+function buildKeywordResearchPrompt(
+  cultivarName: string,
+  genus: string,
+  plantType: string,
+  keywords: string,
+  ext: ExternalData
+): string {
+  const externalContext = buildExternalDataContext(ext);
+  const typeLabel = plantType === "hybrid" ? "HYBRID" : "CLONE";
+  const typeGuide = plantType === "hybrid"
+    ? `- Focus on PARENTAGE (Parent A × Parent B) — most important for hybrids.
+- Identify the BREEDER/CREATOR who made this cross.
+- Note when the cross was first made, registered, or named.
+- Describe distinctive features compared to parents.`
+    : `- Focus on ORIGIN STORY: How was this clone discovered or selected?
+- Was it a natural mutation (sport), tissue culture mutation, or deliberate selection?
+- If it has a plant patent (USPP), cite the patent number and inventor.
+- Who discovered or first propagated this clone?
+- What makes this clone DISTINCT from the typical species form?`;
+
+  return `You are an expert plant researcher investigating the origin of the ${typeLabel} cultivar "${cultivarName}" (genus: ${genus}).
+
+=== ADMIN-PROVIDED KEYWORDS ===
+${keywords}
+
+Use these keywords as primary research hints. They may contain breeder names, years, parentage, geographic origin, or other clues.
+${externalContext}
+=== IMPORTANT CONTEXT ===
+Clone and Hybrid cultivars are RARELY registered in academic databases (IPNI, POWO).
+Their origin information is primarily found in:
+- Breeder's own posts on Instagram, Facebook, X (Twitter), YouTube
+- Hobbyist forums and collector communities (Aroid Society, plant collector groups)
+- Nursery websites and blogs BY THE ORIGINAL BREEDER (not resellers)
+- Plant patent records (USPTO USPP) for patented cultivars
+- Aroid-related publications (Aroideana, IAS newsletters)
+- Collector/breeder interviews and articles
+
+=== SOURCE RELIABILITY FOR CULTIVARS ===
+Tier A (75-90%): Plant patents, academic papers, breeder's official records
+Tier B (55-75%): Breeder's own social media posts, IAS publications, verified collector info
+Tier C (35-55%): Community consensus from multiple independent sources, forums
+Tier D (20-35%): Single unverified source, hearsay, or no corroboration
+
+=== SEARCH STRATEGY ===
+When researching, mentally search with combinations like:
+- "${cultivarName}" + origin, history, bred by, created by, cross, parentage, roots
+- "${cultivarName}" + breeder, hybridizer, discoverer, selected by
+- "${cultivarName}" + patent, USPP, registration
+- The cultivar epithet alone + ${genus} + origin
+- Breeder name (from keywords) + their other cultivars for cross-reference
+
+=== ${typeLabel}-SPECIFIC GUIDELINES ===
+${typeGuide}
+
+=== CRITICAL RULES ===
+1. Use ALL available knowledge from your training data — including social media posts, forum discussions, breeder announcements, and community knowledge.
+2. NEVER attribute creation to plant SELLERS or RESELLERS unless they are the VERIFIED original breeder. These are SELLERS, not creators: NSE Tropicals, Ecuagenera, LCA Plants, Aroid Greenhouses, Gabriella Plants, Peace Love Happiness Club, Steve's Leaves, Logee's, etc.
+3. NEVER write "believed to be", "thought to be", "possibly", "likely" — state facts or write "由来は不明".
+4. Do NOT include specific size measurements. Sizes vary greatly between individuals.
+5. If you cannot find reliable info, return confidence: 0.2 with tier "D" — do NOT fabricate.
+
+=== OUTPUT FORMAT ===
+Return ONLY valid JSON (no markdown):
+{
+  "origins": [
+    {
+      "source_tier": "B|C|D — assign based on source quality",
+      "source_name": "Name of the most reliable source found",
+      "source_url": "URL if available, or empty string",
+      "description_en": "Factual English description (100-250 words). Focus on origin story, parentage, breeder, and distinctive features.",
+      "description_jp": "日本語の由来説明文（150-300文字）。自然で読みやすい日本語の文章で書くこと。品種名・学名・人名・地名は英語（Latin alphabet）のまま表記。交配親・作出者・特徴を中心に記述。",
+      "parentage": "Parent A × Parent B (or null if unknown)",
+      "discovery_year": null,
+      "discoverer_or_breeder": "Name or null",
+      "native_region": null,
+      "first_description": "Patent, publication, or first public announcement reference (or null)",
+      "confidence": 0.0
+    }
+  ],
+  "cultivar_summary_en": "One-sentence factual summary",
+  "cultivar_summary_jp": "事実に基づく一文要約（日本語）"
+}
+
+=== RULES ===
+- Return 1 origin only. Quality over quantity.
+- confidence: YOUR confidence this info is accurate (0.0-1.0). Be honest.
+- description_jp MUST be a complete, natural Japanese paragraph — not a word-for-word translation of English.
+  Write as if explaining to a Japanese plant enthusiast. Use proper Japanese grammar and sentence structure.
+  Only species/cultivar names, person names, and place names should remain in English.
+- If truly no info found: set confidence 0.2, tier "D", and write "由来は不明。" followed by a brief physical description.
+
+=== MANDATORY WRITING RULES FOR JAPANESE TEXT ===
+CRITICAL: In ALL Japanese text fields:
+- Species/cultivar names: Latin scientific names ONLY. Write "Anthurium crystallinum", NEVER katakana.
+- Person names: English alphabet ONLY. Write "John Banta", NEVER katakana.
+- Place/region names: English alphabet ONLY. Write "Florida", NEVER katakana.
+- Everything else (connecting words, descriptions, explanations): Write in natural Japanese.
+  例: "John Bantaによって Florida で作出された交配種で、Anthurium crystallinum × Anthurium magnificum の交配により誕生した。"`;
+}
+
+// ============================================================
 // Build verification prompt for user-written CLONE/Hybrid origins
 // ============================================================
 function buildVerificationPrompt(
@@ -1370,12 +1473,8 @@ serve(async (req: Request) => {
           const paperCount = externalData.papers.length;
           console.log(`[KeywordResearch] External data: wikidata=${hasWd}, papers=${paperCount}`);
 
-          // Use the type-specific research prompt with keywords injected
-          const basePrompt = plantType === "hybrid"
-            ? buildHybridResearchPrompt(cultivar_name, effectiveGenus, externalData)
-            : buildCloneResearchPrompt(cultivar_name, effectiveGenus, externalData);
-
-          const researchPrompt = basePrompt + `\n\n=== ADMIN-PROVIDED KEYWORDS (use as research hints) ===\n${keywordsText}\nUse these keywords to guide your research. They may contain breeder names, years, parentage info, or other relevant details. Verify them against reliable sources before including in your response.`;
+          // Build keyword research prompt — allows community/SNS sources for clone/hybrid
+          const researchPrompt = buildKeywordResearchPrompt(cultivar_name, effectiveGenus, plantType, keywordsText, externalData);
 
           let researchResult: any = null;
 
