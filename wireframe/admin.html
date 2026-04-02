@@ -1140,15 +1140,15 @@ document.getElementById('origin-type-filter').addEventListener('change', loadOri
 document.getElementById('origin-search').addEventListener('input', loadOrigins);
 
 function originTypeBadge(t, structured) {
-  var map = { species: ['原種', '#1B4332'], clone: ['CLONE', '#4A235A'], hybrid: ['交配種', '#7B2D26'], seedling: ['実生', '#1A5276'] };
-  var m = map[t] || [t || '?', '#666'];
-  var label = m[0];
-  // Show species subcategory if available
+  var clsMap = { species: 'badge--species', clone: 'badge--clone', hybrid: 'badge--hybrid', seedling: 'badge--seedling' };
+  var txtMap = { species: '原種', clone: 'Clone', hybrid: 'Hybrid', seedling: 'Seedling' };
+  var cls = clsMap[t] || '';
+  var label = txtMap[t] || t || '?';
   if (t === 'species' && structured && structured.species_subcategory && structured.species_subcategory !== 'species') {
     var subMap = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
     label += ' (' + (subMap[structured.species_subcategory] || structured.species_subcategory) + ')';
   }
-  return '<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:0.65rem;font-weight:600;color:#fff;background:' + m[1] + ';">' + label + '</span>';
+  return '<span class="badge ' + cls + ' badge--type-sm">' + label + '</span>';
 }
 
 function structuredSummaryHtml(s, cType) {
@@ -1243,13 +1243,13 @@ function loadOrigins() {
     origins.forEach(function(o, i) {
       var authorLabel;
       if (o.source_type === 'ipni_powo') {
-        authorLabel = '<span class="badge badge-s" style="font-size:0.65rem;">IPNI/Kew</span>';
+        authorLabel = '<span class="badge badge--species badge--type-sm">&#x1F4DA; IPNI/Kew</span>';
       } else if (o.source_type === 'user_verified') {
-        authorLabel = '<span class="badge" style="background:#2D6A4F;color:#fff;font-size:0.65rem;">AI検証済</span>';
+        authorLabel = '<span class="badge badge--clone badge--type-sm">&#x2705; AI検証済</span>';
       } else if (o.author && o.author.isAI) {
-        authorLabel = '<span class="badge badge-ai">AI</span>';
+        authorLabel = '<span class="badge badge--hybrid badge--type-sm">&#x1F916; AI</span>';
       } else {
-        authorLabel = '<span class="badge badge-user">User</span>';
+        authorLabel = '<span class="badge badge--seedling badge--type-sm">&#x1F464; User</span>';
       }
       var trustPct = o.trust || 0;
       var tColor = trustColor(trustPct);
@@ -1279,7 +1279,10 @@ function loadOrigins() {
       html += '<td style="font-size:var(--font-size-xs);line-height:1.5;">' + structuredSummaryHtml(s, oType) + '</td>';
       html += '<td>' + authorLabel + '</td>';
       var votes = o.votes || { agree: 0, disagree: 0 };
-      html += '<td style="white-space:nowrap;font-size:var(--font-size-xs);">&#x1F44D; ' + (votes.agree || 0) + ' / &#x1F44E; ' + (votes.disagree || 0) + '</td>';
+      html += '<td><div class="vote-group">';
+      html += '<span class="vote-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88L14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88z"/></svg><span class="vote-btn__badge">' + (votes.agree || 0) + '</span></span>';
+      html += '<span class="vote-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12L10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88z"/></svg><span class="vote-btn__badge">' + (votes.disagree || 0) + '</span></span>';
+      html += '</div></td>';
       html += '</tr>';
     });
   });

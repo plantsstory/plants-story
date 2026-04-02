@@ -282,6 +282,64 @@ body {
 .badge-completed { background: var(--color-primary-light); color: #fff; }
 .badge-pending { background: var(--color-accent-warm); color: #fff; }
 .badge-failed { background: var(--color-danger); color: #fff; }
+/* Cultivar type badges (matching components.css) */
+.badge--species {
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(27, 67, 50, 0.05);
+}
+.badge--hybrid {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: 1px solid var(--color-primary);
+}
+.badge--clone {
+  background: rgba(212, 163, 115, 0.12);
+  border: 1px solid var(--color-accent-warm);
+  color: #8B6B3D;
+}
+.badge--seedling {
+  background: rgba(76, 175, 80, 0.12);
+  border: 1px solid #4CAF50;
+  color: #2E7D32;
+}
+.badge--type-sm {
+  font-size: 0.65rem;
+  padding: 1px 6px;
+}
+/* Vote buttons (matching components.css) */
+.vote-group { display: flex; gap: 4px; }
+.vote-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-light);
+  background: var(--color-white);
+  cursor: default;
+  color: var(--color-gray);
+}
+.vote-btn svg { width: 14px; height: 14px; }
+.vote-btn__badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--color-gray);
+  color: var(--color-white);
+  font-size: 0.55rem;
+  font-weight: 700;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  line-height: 1;
+}
 .trust-bar {
   display: inline-block;
   width: 60px;
