@@ -451,6 +451,55 @@ async function gatherExternalData(genus: string, epithet: string): Promise<Exter
 }
 
 // ============================================================
+// YouTube Data API v3: Search for videos and retrieve snippets
+// ============================================================
+interface YouTubeSnippet {
+  title: string;
+  description: string;
+  channelTitle: string;
+  videoUrl: string;
+}
+
+async function searchYouTube(
+  apiKey: string,
+  cultivarName: string,
+  keywords: string,
+  maxResults = 5
+): Promise<YouTubeSnippet[]> {
+  if (!apiKey) return [];
+  try {
+    // Build search query: cultivar name + keywords + origin-related terms
+    const query = `${cultivarName} ${keywords} origin`.substring(0, 128);
+    const params = new URLSearchParams({
+      part: "snippet",
+      q: query,
+      type: "video",
+      maxResults: String(maxResults),
+      relevanceLanguage: "en",
+      key: apiKey,
+    });
+    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`, {
+      headers: { "Accept": "application/json" },
+    });
+    if (!res.ok) {
+      console.log(`[YouTube] API error: ${res.status} ${res.statusText}`);
+      return [];
+    }
+    const data = await res.json();
+    const items = data.items || [];
+    return items.map((item: any) => ({
+      title: item.snippet?.title || "",
+      description: item.snippet?.description || "",
+      channelTitle: item.snippet?.channelTitle || "",
+      videoUrl: `https://www.youtube.com/watch?v=${item.id?.videoId || ""}`,
+    }));
+  } catch (e) {
+    console.log(`[YouTube] Search failed: ${String(e)}`);
+    return [];
+  }
+}
+
+// ============================================================
 // Build external data context block for LLM prompts
 // ============================================================
 function buildExternalDataContext(ext: ExternalData): string {
@@ -1279,6 +1328,7 @@ serve(async (req: Request) => {
     const geminiApiKey = Deno.env.get("GEMINI_API_KEY") || "";
     const groqApiKey = Deno.env.get("GROQ_API_KEY") || "";
     const openaiApiKey = Deno.env.get("OPENAI_API_KEY") || "";
+    const youtubeApiKey = Deno.env.get("YOUTUBE_API_KEY") || "";
 
     // Preserve non-AI origins (user-written, user-verified, manual)
     // Priority: use manual_origins passed directly from frontend (avoids race condition)
@@ -1467,14 +1517,28 @@ serve(async (req: Request) => {
         if (keywordsText) {
           console.log(`[KeywordResearch] Researching ${plantType}: ${cultivar_name} with keywords: ${keywordsText}`);
 
+          // Gather external data + YouTube in parallel
           let externalData: ExternalData = { wikidata: null, papers: [] };
-          externalData = await gatherExternalData(effectiveGenus, cultivarEpithet);
+          const [extResult, ytResults] = await Promise.all([
+            gatherExternalData(effectiveGenus, cultivarEpithet),
+            searchYouTube(youtubeApiKey, cultivar_name, keywordsText, 5),
+          ]);
+          externalData = extResult;
           const hasWd = externalData.wikidata ? "yes" : "no";
           const paperCount = externalData.papers.length;
-          console.log(`[KeywordResearch] External data: wikidata=${hasWd}, papers=${paperCount}`);
+          console.log(`[KeywordResearch] External data: wikidata=${hasWd}, papers=${paperCount}, youtube=${ytResults.length}`);
+
+          // Build YouTube context for prompt
+          let youtubeContext = "";
+          if (ytResults.length > 0) {
+            const ytLines = ytResults.map((yt, i) =>
+              `  ${i + 1}. "${yt.title}" by ${yt.channelTitle}\n     ${yt.description.substring(0, 300)}${yt.description.length > 300 ? "..." : ""}\n     URL: ${yt.videoUrl}`
+            );
+            youtubeContext = `\n=== YOUTUBE VIDEO DATA ===\nThe following YouTube videos were found. Extract any origin/parentage/breeder information:\n${ytLines.join("\n")}\n`;
+          }
 
           // Build keyword research prompt — allows community/SNS sources for clone/hybrid
-          const researchPrompt = buildKeywordResearchPrompt(cultivar_name, effectiveGenus, plantType, keywordsText, externalData);
+          const researchPrompt = buildKeywordResearchPrompt(cultivar_name, effectiveGenus, plantType, keywordsText, externalData) + youtubeContext;
 
           let researchResult: any = null;
 
@@ -1540,6 +1604,12 @@ serve(async (req: Request) => {
               }
               for (const paper of externalData.papers) {
                 sourcesArr.push({ url: `https://doi.org/${paper.doi}`, label: `${paper.journal} (${paper.year})` });
+              }
+              // Add YouTube sources if available
+              for (const yt of ytResults) {
+                if (yt.videoUrl) {
+                  sourcesArr.push({ url: yt.videoUrl, label: `YouTube: ${yt.channelTitle}` });
+                }
               }
 
               const citLinks = sourcesArr.filter((s: any) => s.url).map((s: any) => ({ url: s.url, label: s.label || s.url }));
