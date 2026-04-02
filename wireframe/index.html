@@ -57,12 +57,12 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20260402b">
-  <link rel="stylesheet" href="css/reset.css?v=20260402b">
-  <link rel="stylesheet" href="css/layout.css?v=20260402b">
-  <link rel="stylesheet" href="css/components.css?v=20260402b">
-  <link rel="stylesheet" href="css/pages.css?v=20260402b">
-  <link rel="stylesheet" href="css/utilities.css?v=20260402b">
+  <link rel="stylesheet" href="css/variables.css?v=20260402c">
+  <link rel="stylesheet" href="css/reset.css?v=20260402c">
+  <link rel="stylesheet" href="css/layout.css?v=20260402c">
+  <link rel="stylesheet" href="css/components.css?v=20260402c">
+  <link rel="stylesheet" href="css/pages.css?v=20260402c">
+  <link rel="stylesheet" href="css/utilities.css?v=20260402c">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Varela+Round&family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
@@ -411,12 +411,6 @@
       <h1 class="section-title" id="contribute-page-title" data-i18n="contribute_title">新しい品種を登録</h1>
       <p class="text-muted mb-md" id="contribute-page-desc" data-i18n="contribute_desc">既存品種に由来を追加する場合は、その品種のページから追加できます。</p>
 
-      <!-- Quick/Detail mode toggle -->
-      <div class="d-flex gap-sm mb-lg" id="contribute-mode-toggle">
-        <button class="chip active" id="mode-quick" type="button" data-i18n="mode_quick">かんたん投稿</button>
-        <button class="chip" id="mode-detail" type="button" data-i18n="mode_detail">詳細投稿</button>
-      </div>
-
       <!-- Login benefits card -->
       <div id="login-benefits-card" class="card mb-lg login-benefits-bg">
         <div id="login-benefits-content" class="flex-center-md flex-wrap">
@@ -502,7 +496,7 @@
       </div>
 
       <!-- Image upload -->
-      <div class="card mb-lg contribute-detail-section">
+      <div class="card mb-lg">
         <h2 class="text-lg font-bold mb-md" data-i18n="image_upload">画像アップロード</h2>
         <div class="upload-area" id="contribute-upload-area">
           <input type="file" id="contribute-file-input" accept="image/jpeg,image/png" multiple class="d-none" aria-label="品種画像をアップロード">
@@ -515,7 +509,7 @@
       </div>
 
       <!-- Origin story — structured fields per type -->
-      <div class="card mb-lg contribute-detail-section" id="origin-card">
+      <div class="card mb-lg" id="origin-card">
         <h2 class="text-lg font-bold mb-md" data-i18n="origin_story">由来</h2>
         <p class="form-hint d-none" id="origin-ai-hint"></p>
 
@@ -1294,9 +1288,9 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/app-core.js?v=20260402b"></script>
-  <script src="js/pages.js?v=20260402b"></script>
-  <script src="js/forms.js?v=20260402b"></script>
+  <script src="js/app-core.js?v=20260402c"></script>
+  <script src="js/pages.js?v=20260402c"></script>
+  <script src="js/forms.js?v=20260402c"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1306,7 +1300,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20260402b"></script>
+  <script src="js/dialogs.js?v=20260402c"></script>
 
   <!-- Deletion Request Dialog -->
   <dialog id="delete-request-dialog" class="dialog-clean" aria-labelledby="delete-dialog-title">

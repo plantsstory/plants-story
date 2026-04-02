@@ -1,20 +1,4 @@
 
-// Contribute form: Quick/Detail mode toggle
-function setContributeMode(isDetail) {
-  var sections = document.querySelectorAll('.contribute-detail-section');
-  sections.forEach(function(s) { s.style.display = isDetail ? '' : 'none'; });
-  var modeQuick = document.getElementById('mode-quick');
-  var modeDetail = document.getElementById('mode-detail');
-  if (modeQuick) modeQuick.classList.toggle('active', !isDetail);
-  if (modeDetail) modeDetail.classList.toggle('active', isDetail);
-}
-window.setContributeMode = setContributeMode;
-
-document.addEventListener('click', function(e) {
-  if (e.target.id === 'mode-quick') { setContributeMode(false); }
-  else if (e.target.id === 'mode-detail') { setContributeMode(true); }
-});
-
 // Tab switching for genus pages (Species/Clones vs My Seedlings)
 document.addEventListener('click', function(e) {
   var tab = e.target.closest('.genus-tab');

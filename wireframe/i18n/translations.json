@@ -47,8 +47,6 @@
   "btn_submit_origin": { "jp": "投稿する", "en": "Submit" },
   "btn_cancel": { "jp": "キャンセル", "en": "Cancel" },
   "contribute_title": { "jp": "新しい品種を登録", "en": "Register New Cultivar" },
-  "mode_quick": { "jp": "かんたん投稿", "en": "Quick Post" },
-  "mode_detail": { "jp": "詳細投稿", "en": "Detailed Post" },
   "contribute_desc": { "jp": "既存品種に由来を追加する場合は、その品種のページから追加できます。", "en": "To add origins to an existing cultivar, go to that cultivar's page." },
   "edit_title": { "jp": "品種を編集", "en": "Edit Cultivar" },
   "edit_desc": { "jp": "品種の情報を編集できます。", "en": "Edit cultivar information." },
