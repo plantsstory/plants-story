@@ -71,9 +71,17 @@
   window._flushErrorLogs = flushErrors;
 })();
 
-// Translation stub — overridden by the full i18n implementation in forms.js
-// Prevents ReferenceError when app-core.js renders DOM before forms.js loads
+// Stubs — overridden by the full implementations in forms.js / pages.js
+// Prevents ReferenceError when app-core.js runs before those files load
 function t(key) { return key; }
+var currentLang = 'jp';
+function getTrustClass(pct) { return pct >= 70 ? 'trust--high' : pct >= 40 ? 'trust--mid' : 'trust--low'; }
+function getBadgeInfo(type, name) { return { cls: 'badge--' + (type || 'species'), txt: type || 'species' }; }
+function paginateGenus(genusEl, page) {}
+function filterGenusRows(container, query) {}
+function renderFavoritesPage() {}
+function updateCultivarDetail(key, row) {}
+function loadCultivarThumbnails() {}
 
 // HTML escape helper to prevent XSS
 function escHtml(str) {
