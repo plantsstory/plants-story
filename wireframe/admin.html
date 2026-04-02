@@ -1206,7 +1206,7 @@ function structuredSummaryHtml(s, cType, origin) {
       if (s.collector) parts.push('<b>発見者:</b> ' + escapeHtml(s.collector));
       if (s.collection_year) parts.push('<b>採取年:</b> ' + s.collection_year);
       if (s.type_locality) parts.push('<b>採取地:</b> ' + escapeHtml(s.type_locality));
-      if (s.known_habitats) parts.push('<b>生息地:</b> ' + escapeHtml((s.known_habitats || '').substring(0, 40)));
+      if (s.known_habitats) parts.push('<b>生息地:</b> ' + escapeHtml(s.known_habitats));
     } else if (cType === 'clone') {
       if (s.namer) parts.push('<b>命名者:</b> ' + escapeHtml(s.namer));
       if (s.naming_year) parts.push('<b>命名年:</b> ' + s.naming_year);
@@ -1228,9 +1228,7 @@ function structuredSummaryHtml(s, cType, origin) {
     }
   }
   if (!parts.length && body) {
-    var bodyShort = body.substring(0, 60);
-    if (body.length > 60) bodyShort += '...';
-    return '<span style="color:#666;">' + escapeHtml(bodyShort) + '</span>';
+    return '<span style="color:#666;">' + escapeHtml(body) + '</span>';
   }
   if (!parts.length) return '<span style="color:#999;">データ未入力</span>';
   return parts.join('<br>');
