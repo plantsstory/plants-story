@@ -185,7 +185,9 @@ window.guardSubmit = guardSubmit;
 
 // SPA redirect restoration (GitHub Pages 404.html redirects here)
 (function() {
-  var redirectPath = sessionStorage.getItem('spa_redirect_path');
+  // Check URL parameter first (more reliable on hard refresh), then sessionStorage
+  var params = new URLSearchParams(location.search);
+  var redirectPath = params.get('spa_path') || sessionStorage.getItem('spa_redirect_path');
   if (redirectPath) {
     sessionStorage.removeItem('spa_redirect_path');
     history.replaceState(null, '', redirectPath);

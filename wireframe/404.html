@@ -7,10 +7,12 @@
     // GitHub Pages SPA redirect: preserve the path for client-side routing
     var path = window.location.pathname;
     var search = window.location.search;
+    // Store in both sessionStorage and URL parameter for reliability
     sessionStorage.setItem('spa_redirect_path', path + search);
     // Custom domain serves from '/', GitHub Pages from '/plants-story/'
     var root = window.location.hostname !== 'plantsstory.github.io' ? '/' : '/plants-story/';
-    window.location.replace(root + search);
+    var separator = root.indexOf('?') !== -1 ? '&' : '?';
+    window.location.replace(root + separator + 'spa_path=' + encodeURIComponent(path + search));
   </script>
 </head>
 <body>
