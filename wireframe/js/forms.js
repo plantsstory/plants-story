@@ -955,6 +955,9 @@ document.addEventListener('click', function(e) {
       else if (type === 'seedling') { originAiHint.classList.add('d-none'); }
       else { originAiHint.textContent = '由来を記入するとAIが内容を検証し、信頼度スコアを算出します'; originAiHint.classList.remove('d-none'); }
     }
+    // Show/hide parent photos section for seedlings
+    var parentPhotosSection = document.getElementById('parent-photos-section');
+    if (parentPhotosSection) parentPhotosSection.style.display = type === 'seedling' ? '' : 'none';
     updateAiAutofillVisibility();
   }
   document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(radio) {
