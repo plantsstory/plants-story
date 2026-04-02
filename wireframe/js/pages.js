@@ -563,14 +563,17 @@ function syncFavoritesFromServer() {
   var sb = window._supabaseClient;
   var user = window._currentUser;
   if (!sb || !user) return;
+  // Clear stale local data immediately so count shows 0 until sync completes
+  localStorage.removeItem(FAV_KEY);
+  updateHeaderFavIcon();
   sb.from('favorites').select('cultivar_name, created_at').eq('user_id', user.id).then(function(res) {
     if (res.error || !res.data) return;
     // Server is source of truth — replace local with server data
-    var merged = {};
+    var serverFavs = {};
     res.data.forEach(function(row) {
-      merged[row.cultivar_name] = new Date(row.created_at).getTime();
+      serverFavs[row.cultivar_name] = new Date(row.created_at).getTime();
     });
-    localStorage.setItem(FAV_KEY, JSON.stringify(merged));
+    localStorage.setItem(FAV_KEY, JSON.stringify(serverFavs));
     updateHeaderFavIcon();
   });
 }
