@@ -103,6 +103,7 @@ document.addEventListener('click', function(e) {
 document.addEventListener('click', function(e) {
   var btn = e.target.closest('.vote-btn');
   if (!btn) return;
+  if (!rateLimit('vote', 3000)) { showToast('しばらくお待ちください', true); return; }
   var sb = window._supabaseClient;
   if (!sb) return;
   var originIdx = parseInt(btn.getAttribute('data-origin-idx'), 10);
@@ -1559,6 +1560,7 @@ document.addEventListener('click', function(e) {
       if (origin) newEntry.origins.push(origin);
 
       // Disable submit button to prevent double-click
+      if (!rateLimit('contribute', 30000)) { showToast('連続投稿はしばらくお待ちください', true); return; }
       submitBtn.disabled = true;
       submitBtn.style.opacity = '0.5';
 
@@ -1773,6 +1775,7 @@ document.addEventListener('click', function(e) {
   if (submitOriginBtn) {
     submitOriginBtn.addEventListener('click', function(e) {
       e.preventDefault();
+      if (!rateLimit('add_origin', 15000)) { showToast('しばらくお待ちください', true); return; }
       var desc = originForm.querySelector('.form-textarea');
       var descText = desc ? desc.value.trim() : '';
 
@@ -2453,6 +2456,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       // --- Vote handling ---
       var voteBtn = e.target.closest('.vote-btn[data-vote]');
       if (voteBtn) {
+        if (!rateLimit('image_vote', 3000)) { showToast('しばらくお待ちください', true); return; }
         var item = voteBtn.closest('.gallery__item[data-user-upload]');
         if (!item) return;
         var imageId = item.getAttribute('data-image-id');

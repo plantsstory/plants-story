@@ -78,6 +78,18 @@ function escHtml(str) {
 }
 window.escHtml = escHtml;
 
+// Client-side rate limiter to prevent spam
+var _rateLimits = {};
+function rateLimit(action, cooldownMs) {
+  var now = Date.now();
+  if (_rateLimits[action] && now - _rateLimits[action] < cooldownMs) {
+    return false;
+  }
+  _rateLimits[action] = now;
+  return true;
+}
+window.rateLimit = rateLimit;
+
 // Toast notification helper (non-blocking replacement for alert)
 function showToast(msg, isError) {
   var container = document.getElementById('toast-container');
