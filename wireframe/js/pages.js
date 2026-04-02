@@ -876,6 +876,11 @@ function renderOrigins(cultivarName) {
 // Render structured origin fields as HTML
 function renderStructuredOrigin(s) {
   var h = '';
+  // Show origin type badge matching cultivar list style
+  if (s.origin_type) {
+    var bi = getBadgeInfo(s.origin_type, '');
+    h += '<div class="mb-sm"><span class="badge ' + bi.cls + ' badge--type-sm">' + bi.txt + '</span></div>';
+  }
   if (s.origin_type === 'species') {
     // 分類詳細（サブカテゴリ）
     if (s.species_subcategory && s.species_subcategory !== 'species') {
@@ -1052,11 +1057,11 @@ function renderOriginsInner(cultivarName, container) {
     // Footer
     html += '<div class="origin-card__footer"><div class="origin-card__author">';
     if (origin.source_type === 'ipni_powo') {
-      html += '<span class="badge badge--research">&#x1F4DA; IPNI/Kew</span>';
+      html += '<span class="badge badge--species badge--type-sm">&#x1F4DA; IPNI/Kew</span>';
     } else if (origin.source_type === 'user_verified') {
-      html += '<span class="badge badge--verified">&#x2705; AI検証済</span>';
+      html += '<span class="badge badge--clone badge--type-sm">&#x2705; AI検証済</span>';
     } else if (origin.author && origin.author.isAI) {
-      html += '<span class="badge badge--ai">&#x1F916; AI</span>';
+      html += '<span class="badge badge--hybrid badge--type-sm">&#x1F916; AI</span>';
     } else {
       html += '<span>&#x1F464;</span><span>' + (origin.author ? origin.author.name : 'User') + '</span>';
     }

@@ -1883,8 +1883,10 @@ document.querySelectorAll('.image-tab').forEach(function(tab) {
     this.style.opacity = '1';
     this.style.fontWeight = '600';
     var which = this.getAttribute('data-image-tab');
-    document.getElementById('gallery-tab-content').style.display = which === 'gallery' ? '' : 'none';
-    document.getElementById('formula-tab-content').style.display = which === 'formula' ? '' : 'none';
+    var galleryTab = document.getElementById('gallery-tab-content');
+    var formulaTab = document.getElementById('formula-tab-content');
+    galleryTab.classList.toggle('d-none', which !== 'gallery');
+    formulaTab.classList.toggle('d-none', which !== 'formula');
     if (which === 'formula' && allFormulaImages.length === 0) loadFormulaImages();
   });
 });
