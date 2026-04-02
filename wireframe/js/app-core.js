@@ -73,10 +73,19 @@
 
 // Toast notification helper (non-blocking replacement for alert)
 function showToast(msg, isError) {
+  var container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.setAttribute('aria-live', 'polite');
+    container.setAttribute('aria-atomic', 'true');
+    document.body.appendChild(container);
+  }
   var toast = document.createElement('div');
   toast.className = 'toast-notification' + (isError ? ' toast-error' : '');
+  toast.setAttribute('role', 'status');
   toast.textContent = msg;
-  document.body.appendChild(toast);
+  container.appendChild(toast);
   setTimeout(function() { toast.classList.add('show'); }, 10);
   setTimeout(function() { toast.classList.remove('show'); setTimeout(function() { toast.remove(); }, 300); }, 3000);
 }

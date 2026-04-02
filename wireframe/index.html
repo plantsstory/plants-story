@@ -113,7 +113,7 @@
           Discover the origins of your favorite plants
         </p>
         <div class="search-bar mt-lg">
-          <input type="text" class="search-bar__input" placeholder="品種名・ユーザー名を検索..." data-i18n-placeholder="search_placeholder">
+          <input type="text" class="search-bar__input" placeholder="品種名・ユーザー名を検索..." data-i18n-placeholder="search_placeholder" aria-label="品種名・ユーザー名を検索">
           <button class="search-bar__btn" data-nav="search" aria-label="検索">&#x1F50D;</button>
         </div>
       </div>
@@ -198,7 +198,7 @@
     <div class="container">
 
       <!-- Breadcrumb -->
-      <nav class="breadcrumb">
+      <nav class="breadcrumb" aria-label="パンくずリスト">
         <a href="#" data-nav="top">Home</a>
         <span class="breadcrumb__sep">/</span>
         <a href="#" data-nav="genus" data-genus="anthurium">Anthurium</a>
@@ -223,7 +223,7 @@
           <button id="share-btn" class="btn btn--sm btn--secondary cursor-pointer font-xs-btn whitespace-nowrap" title="シェア" aria-label="この品種をシェア">&#x1F517; シェア</button>
           <div id="share-menu" class="hidden share-menu-popup"></div>
           <div class="flex gap-sm flex-align-center" id="edit-key-section">
-            <input type="password" id="detail-edit-key" class="form-input edit-key-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="編集キー">
+            <input type="password" id="detail-edit-key" class="form-input edit-key-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="編集キー" aria-label="編集キー">
             <button class="btn btn--secondary btn--sm font-xs-btn" id="detail-edit-btn">&#x270F; 編集</button>
           </div>
           <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn" id="detail-add-photo-btn">&#x1F4F7; 画像追加</button>
@@ -248,7 +248,7 @@
                 </div>
               </div>
               <div class="gallery__upload" id="gallery-upload">
-                <input type="file" id="gallery-file-input" accept="image/jpeg,image/png" class="d-none">
+                <input type="file" id="gallery-file-input" accept="image/jpeg,image/png" class="d-none" aria-label="ギャラリー画像をアップロード">
                 <div class="upload-area__icon">&#x2B06;</div>
                 <div class="upload-area__text" data-i18n="upload_image">画像をアップロード</div>
                 <div class="upload-area__hint">JPG/PNG, 20MB以下（自動圧縮）</div>
@@ -489,7 +489,7 @@
       <div class="card mb-lg">
         <h2 class="text-lg font-bold mb-md" data-i18n="image_upload">画像アップロード</h2>
         <div class="upload-area" id="contribute-upload-area">
-          <input type="file" id="contribute-file-input" accept="image/jpeg,image/png" multiple class="d-none">
+          <input type="file" id="contribute-file-input" accept="image/jpeg,image/png" multiple class="d-none" aria-label="品種画像をアップロード">
           <div class="upload-area__icon">&#x1F4F7;</div>
           <div class="upload-area__text" data-i18n="drag_drop">ドラッグ&ドロップ または クリック</div>
           <div class="upload-area__hint">最大3枚, JPG/PNG, 各20MB以下（自動圧縮）</div>
@@ -590,7 +590,7 @@
               <div class="flex-1 text-center">
                 <div class="text-sm font-bold mb-sm">Mother (母)</div>
                 <div class="upload-area upload-area--small" id="mother-upload">
-                  <input type="file" id="mother-photo-input" accept="image/jpeg,image/png,image/webp" class="d-none">
+                  <input type="file" id="mother-photo-input" accept="image/jpeg,image/png,image/webp" class="d-none" aria-label="母株の写真をアップロード">
                   <div class="upload-area__icon">&#x1F4F7;</div>
                   <div class="upload-area__text text-xs">写真をアップロード</div>
                 </div>
@@ -602,7 +602,7 @@
               <div class="flex-1 text-center">
                 <div class="text-sm font-bold mb-sm">Father (父)</div>
                 <div class="upload-area upload-area--small" id="father-upload">
-                  <input type="file" id="father-photo-input" accept="image/jpeg,image/png,image/webp" class="d-none">
+                  <input type="file" id="father-photo-input" accept="image/jpeg,image/png,image/webp" class="d-none" aria-label="父株の写真をアップロード">
                   <div class="upload-area__icon">&#x1F4F7;</div>
                   <div class="upload-area__text text-xs">写真をアップロード</div>
                 </div>
@@ -1103,10 +1103,10 @@
   <!-- ========================================
        PAYWALL MODAL
        ======================================== -->
-  <div id="paywall-modal" class="paywall-modal d-none">
+  <div id="paywall-modal" class="paywall-modal d-none" role="dialog" aria-modal="true" aria-label="サブスクリプション">
     <div class="paywall-modal__backdrop" onclick="hidePaywallModal()"></div>
     <div class="paywall-modal__content">
-      <button class="paywall-modal__close" onclick="hidePaywallModal()">&times;</button>
+      <button class="paywall-modal__close" onclick="hidePaywallModal()" aria-label="閉じる">&times;</button>
       <div class="paywall-modal__icon">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="1.5">
           <path d="M12 2C8 1 4 4 3 10C2 16 8 22 12 26C16 22 22 16 21 10C20 4 16 1 12 2Z"/>
@@ -1156,7 +1156,7 @@
   <script src="js/forms.js"></script>
 
   <!-- Parent photo dialog lightbox -->
-  <dialog class="parent-photo-dialog" id="parentPhotoDialog">
+  <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
     <div class="dialog-inner">
       <button class="dialog-close" aria-label="Close">&times;</button>
       <img src="" alt="">
@@ -1166,8 +1166,8 @@
   <script src="js/dialogs.js"></script>
 
   <!-- Deletion Request Dialog -->
-  <dialog id="delete-request-dialog" class="dialog-clean">
-    <h3 class="dialog-title">削除依頼</h3>
+  <dialog id="delete-request-dialog" class="dialog-clean" aria-labelledby="delete-dialog-title">
+    <h3 class="dialog-title" id="delete-dialog-title">削除依頼</h3>
     <p id="delete-request-target" class="dialog-subtitle"></p>
     <div class="dialog-options" id="delete-reason-options"></div>
     <textarea id="delete-reason-detail" placeholder="詳細を入力..." rows="3" class="dialog-textarea d-none"></textarea>
