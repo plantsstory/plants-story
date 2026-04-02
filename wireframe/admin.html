@@ -337,8 +337,8 @@
           <!-- Stripe -->
           <div class="stat-card">
             <div class="svc-card-header">
-              <span style="font-size:1.5rem;">💳</span>
-              <h3 style="margin:0;">Stripe</h3>
+              <span class="adm-icon">💳</span>
+              <h3 class="adm-m-0">Stripe</h3>
             </div>
             <p class="svc-card-desc">決済・サブスクリプション管理</p>
             <div class="svc-card-links">
@@ -355,8 +355,8 @@
           <!-- Supabase -->
           <div class="stat-card">
             <div class="svc-card-header">
-              <span style="font-size:1.5rem;">⚡</span>
-              <h3 style="margin:0;">Supabase</h3>
+              <span class="adm-icon">⚡</span>
+              <h3 class="adm-m-0">Supabase</h3>
             </div>
             <p class="svc-card-desc">データベース・認証・Edge Functions</p>
             <div class="svc-card-links">
@@ -372,8 +372,8 @@
           <!-- GitHub -->
           <div class="stat-card">
             <div class="svc-card-header">
-              <span style="font-size:1.5rem;">🐙</span>
-              <h3 style="margin:0;">GitHub</h3>
+              <span class="adm-icon">🐙</span>
+              <h3 class="adm-m-0">GitHub</h3>
             </div>
             <p class="svc-card-desc">ソースコード・デプロイ</p>
             <div class="svc-card-links">
@@ -386,8 +386,8 @@
           <!-- Google Cloud -->
           <div class="stat-card">
             <div class="svc-card-header">
-              <span style="font-size:1.5rem;">☁️</span>
-              <h3 style="margin:0;">Google Cloud</h3>
+              <span class="adm-icon">☁️</span>
+              <h3 class="adm-m-0">Google Cloud</h3>
             </div>
             <p class="svc-card-desc">OAuth認証・API設定</p>
             <div class="svc-card-links">
@@ -399,8 +399,8 @@
           <!-- Google Search Console -->
           <div class="stat-card">
             <div class="svc-card-header">
-              <span style="font-size:1.5rem;">🔍</span>
-              <h3 style="margin:0;">Google Search Console</h3>
+              <span class="adm-icon">🔍</span>
+              <h3 class="adm-m-0">Google Search Console</h3>
             </div>
             <p class="svc-card-desc">検索パフォーマンス・インデックス</p>
             <div class="svc-card-links">
@@ -411,8 +411,8 @@
           <!-- ChatGPT -->
           <div class="stat-card">
             <div class="svc-card-header">
-              <span style="font-size:1.5rem;">🤖</span>
-              <h3 style="margin:0;">ChatGPT</h3>
+              <span class="adm-icon">🤖</span>
+              <h3 class="adm-m-0">ChatGPT</h3>
             </div>
             <p class="svc-card-desc">AI アシスタント</p>
             <div class="svc-card-links">
@@ -423,8 +423,8 @@
           <!-- サイトURL -->
           <div class="stat-card">
             <div class="svc-card-header">
-              <span style="font-size:1.5rem;">🌐</span>
-              <h3 style="margin:0;">サイト</h3>
+              <span class="adm-icon">🌐</span>
+              <h3 class="adm-m-0">サイト</h3>
             </div>
             <p class="svc-card-desc">公開サイトへのリンク</p>
             <div class="svc-card-links">
@@ -773,7 +773,7 @@ async function loadDashboard() {
   ['S', 'A', 'B', 'C', 'D'].forEach(function(t) {
     tierHtml += '<div class="stat-card" style="padding:var(--space-md);text-align:center;min-width:80px;">';
     tierHtml += tierBadge(t) + '<br>';
-    tierHtml += '<span style="font-size:var(--font-size-lg);font-weight:700;">' + tierCounts[t] + '</span>';
+    tierHtml += '<span class="adm-stat-value">' + tierCounts[t] + '</span>';
     tierHtml += '</div>';
   });
   document.getElementById('tier-distribution').innerHTML = tierHtml;
@@ -782,7 +782,7 @@ async function loadDashboard() {
   var genusHtml = '';
   Object.keys(genusCounts).sort().forEach(function(g) {
     genusHtml += '<div class="stat-card" style="padding:var(--space-md);text-align:center;min-width:120px;">';
-    genusHtml += '<span style="font-size:var(--font-size-lg);font-weight:700;">' + genusCounts[g] + '</span><br>';
+    genusHtml += '<span class="adm-stat-value">' + genusCounts[g] + '</span><br>';
     genusHtml += '<span style="font-size:var(--font-size-sm);color:var(--color-gray);">' + escapeHtml(g) + '</span>';
     genusHtml += '</div>';
   });
@@ -820,7 +820,7 @@ function renderCultivarTable() {
     html += '</td>';
     html += '</tr>';
   });
-  document.getElementById('cultivar-tbody').innerHTML = html || '<tr><td colspan="9" style="text-align:center;color:var(--color-gray);">データなし</td></tr>';
+  document.getElementById('cultivar-tbody').innerHTML = html || '<tr><td colspan="9" class="adm-text-center-gray">データなし</td></tr>';
 }
 
 document.getElementById('cultivar-search').addEventListener('input', renderCultivarTable);
@@ -862,14 +862,14 @@ function editCultivar(id) {
     html += '<h3 style="font-size:1rem;margin-bottom:var(--space-sm);">親株画像</h3>';
     html += '<label>母株 (Mother) 画像</label>';
     if (formula && formula.motherPhoto) {
-      html += '<div id="edit-mother-preview" style="margin-bottom:var(--space-sm);"><img src="' + SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + formula.motherPhoto + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #ddd;"></div>';
+      html += '<div id="edit-mother-preview" style="margin-bottom:var(--space-sm);"><img src="' + SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + formula.motherPhoto + '" class="adm-img-thumb"></div>';
     } else {
       html += '<div id="edit-mother-preview" style="margin-bottom:var(--space-sm);color:var(--color-gray);font-size:0.85rem;">未設定</div>';
     }
     html += '<input type="file" id="edit-mother-photo" accept="image/jpeg,image/png" style="margin-bottom:var(--space-md);">';
     html += '<label>父株 (Father) 画像</label>';
     if (formula && formula.fatherPhoto) {
-      html += '<div id="edit-father-preview" style="margin-bottom:var(--space-sm);"><img src="' + SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + formula.fatherPhoto + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #ddd;"></div>';
+      html += '<div id="edit-father-preview" style="margin-bottom:var(--space-sm);"><img src="' + SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + formula.fatherPhoto + '" class="adm-img-thumb"></div>';
     } else {
       html += '<div id="edit-father-preview" style="margin-bottom:var(--space-sm);color:var(--color-gray);font-size:0.85rem;">未設定</div>';
     }
@@ -1191,12 +1191,12 @@ function editOrigin(cultivarId, originIndex) {
 
   if (cType === 'species') {
     html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#1B4332;">記載情報</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div class="adm-grid-2col">';
     html += '<div><label>発表者 (Author)</label><input type="text" id="edit-s-author-name" value="' + escapeHtml(s.author_name || '') + '" placeholder="例: Engl."></div>';
     html += '<div><label>発表年</label><input type="number" id="edit-s-publication-year" value="' + (s.publication_year || '') + '" placeholder="例: 1898"></div>';
     html += '</div>';
     html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#1B4332;">採取情報</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div class="adm-grid-2col">';
     html += '<div><label>発見者 (Collector)</label><input type="text" id="edit-s-collector" value="' + escapeHtml(s.collector || '') + '"></div>';
     html += '<div><label>採取年</label><input type="number" id="edit-s-collection-year" value="' + (s.collection_year || '') + '"></div>';
     html += '</div>';
@@ -1204,41 +1204,41 @@ function editOrigin(cultivarId, originIndex) {
     html += '<label>生息地</label><textarea id="edit-s-known-habitats" rows="2">' + escapeHtml(s.known_habitats || '') + '</textarea>';
   } else if (cType === 'clone') {
     html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#4A235A;">命名情報</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div class="adm-grid-2col">';
     html += '<div><label>命名者</label><input type="text" id="edit-s-namer" value="' + escapeHtml(s.namer || '') + '"></div>';
     html += '<div><label>命名年</label><input type="number" id="edit-s-naming-year" value="' + (s.naming_year || '') + '"></div>';
     html += '</div>';
     var sf = s.formula || {};
     html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#4A235A;">交配式</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;">';
+    html += '<div class="adm-grid-3col">';
     html += '<div><label>Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '"></div>';
-    html += '<span style="padding-bottom:8px;font-weight:bold;font-size:1.1rem;">×</span>';
+    html += '<span class="adm-section-title">×</span>';
     html += '<div><label>Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '"></div>';
     html += '</div>';
   } else if (cType === 'hybrid') {
     html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#7B2D26;">作出情報</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div class="adm-grid-2col">';
     html += '<div><label>作出者 / ナーセリー</label><input type="text" id="edit-s-breeder" value="' + escapeHtml(s.breeder || '') + '"></div>';
     html += '<div><label>命名年</label><input type="number" id="edit-s-naming-year" value="' + (s.naming_year || '') + '"></div>';
     html += '</div>';
     var sf = s.formula || {};
     html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#7B2D26;">交配式</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;">';
+    html += '<div class="adm-grid-3col">';
     html += '<div><label>Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '"></div>';
-    html += '<span style="padding-bottom:8px;font-weight:bold;font-size:1.1rem;">×</span>';
+    html += '<span class="adm-section-title">×</span>';
     html += '<div><label>Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '"></div>';
     html += '</div>';
   } else if (cType === 'seedling') {
     html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#1A5276;">作出情報</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div class="adm-grid-2col">';
     html += '<div><label>作出者</label><input type="text" id="edit-s-breeder" value="' + escapeHtml(s.breeder || '') + '"></div>';
     html += '<div><label>播種日</label><input type="date" id="edit-s-sowing-date" value="' + escapeHtml(s.sowing_date || '') + '"></div>';
     html += '</div>';
     var sf = s.formula || {};
     html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#1A5276;">交配式</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;">';
+    html += '<div class="adm-grid-3col">';
     html += '<div><label>Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '"></div>';
-    html += '<span style="padding-bottom:8px;font-weight:bold;font-size:1.1rem;">×</span>';
+    html += '<span class="adm-section-title">×</span>';
     html += '<div><label>Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '"></div>';
     html += '</div>';
   }
@@ -1655,24 +1655,24 @@ function renderImageGrid() {
     var fakeHigh = (img.fake_votes || 0) > (img.real_votes || 0);
     card.innerHTML =
       '<div style="position:relative;">' +
-        '<img src="' + getImageUrl(img.storage_path) + '" style="width:100%;height:160px;object-fit:cover;display:block;" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22160%22><rect fill=%22%23eee%22 width=%22200%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23999%22>Error</text></svg>\'">' +
+        '<img src="' + getImageUrl(img.storage_path) + '" class="adm-img-cover" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22160%22><rect fill=%22%23eee%22 width=%22200%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23999%22>Error</text></svg>\'">' +
         (fakeHigh ? '<span style="position:absolute;top:4px;right:4px;background:#c62828;color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;">Fake多</span>' : '') +
       '</div>' +
       '<div style="padding:8px;font-size:var(--font-size-sm);">' +
-        '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(img.cultivar_name || '') + '">' + escapeHtml(img.cultivar_name || '不明') + '</div>' +
+        '<div class="adm-text-truncate" title="' + escapeHtml(img.cultivar_name || '') + '">' + escapeHtml(img.cultivar_name || '不明') + '</div>' +
         '<div style="display:flex;gap:8px;margin:4px 0;color:var(--color-gray);">' +
           '<span>Real: ' + (img.real_votes || 0) + '</span>' +
           '<span>Fake: ' + (img.fake_votes || 0) + '</span>' +
         '</div>' +
         '<div style="margin:4px 0;">' +
-          '<input type="text" placeholder="補足（日付等）" value="' + escapeHtml(img.caption || '') + '" data-img-field="caption" data-img-id="' + img.id + '" style="width:100%;font-size:0.75rem;padding:3px 6px;border:1px solid var(--color-light);border-radius:4px;box-sizing:border-box;">' +
+          '<input type="text" placeholder="補足（日付等）" value="' + escapeHtml(img.caption || '') + '" data-img-field="caption" data-img-id="' + img.id + '" class="adm-input-sm">' +
         '</div>' +
         '<div style="margin:4px 0;">' +
-          '<input type="url" placeholder="リンクURL" value="' + escapeHtml(img.link_url || '') + '" data-img-field="link_url" data-img-id="' + img.id + '" style="width:100%;font-size:0.75rem;padding:3px 6px;border:1px solid var(--color-light);border-radius:4px;box-sizing:border-box;">' +
+          '<input type="url" placeholder="リンクURL" value="' + escapeHtml(img.link_url || '') + '" data-img-field="link_url" data-img-id="' + img.id + '" class="adm-input-sm">' +
         '</div>' +
         '<div style="color:var(--color-gray);font-size:0.75rem;">' + (img.created_at ? new Date(img.created_at).toLocaleDateString('ja') : '') + '</div>' +
         '<div style="color:var(--color-gray);font-size:0.7rem;font-family:monospace;">IP: ' + escapeHtml(img.created_ip || '-') + '</div>' +
-        '<button class="btn btn-sm" style="margin-top:6px;color:#c62828;border-color:#c62828;width:100%;" data-delete-image="' + img.id + '" data-storage-path="' + escapeHtml(img.storage_path) + '">削除</button>' +
+        '<button class="btn btn-sm" class="adm-btn-delete" data-delete-image="' + img.id + '" data-storage-path="' + escapeHtml(img.storage_path) + '">削除</button>' +
       '</div>';
     grid.appendChild(card);
   });
@@ -1825,13 +1825,13 @@ function renderFormulaImageGrid() {
     var roleColor = img.role === 'mother' ? '#e91e63' : '#1976d2';
     card.innerHTML =
       '<div style="position:relative;">' +
-        '<img src="' + getImageUrl(img.storagePath) + '" style="width:100%;height:160px;object-fit:cover;display:block;" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22160%22><rect fill=%22%23eee%22 width=%22200%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23999%22>Error</text></svg>\'">' +
+        '<img src="' + getImageUrl(img.storagePath) + '" class="adm-img-cover" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22160%22><rect fill=%22%23eee%22 width=%22200%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23999%22>Error</text></svg>\'">' +
         '<span style="position:absolute;top:4px;right:4px;background:' + roleColor + ';color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;">' + roleLabel + '</span>' +
       '</div>' +
       '<div style="padding:8px;font-size:var(--font-size-sm);">' +
-        '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(img.cultivarName || '') + '">' + escapeHtml(img.cultivarName || '不明') + '</div>' +
+        '<div class="adm-text-truncate" title="' + escapeHtml(img.cultivarName || '') + '">' + escapeHtml(img.cultivarName || '不明') + '</div>' +
         '<div style="color:var(--color-gray);font-size:0.75rem;margin:4px 0;">Storage: ' + escapeHtml(img.storagePath.split('/').pop()) + '</div>' +
-        '<button class="btn btn-sm" style="margin-top:6px;color:#c62828;border-color:#c62828;width:100%;" data-delete-formula-image data-cultivar-id="' + img.cultivarId + '" data-role="' + img.role + '" data-storage-path="' + escapeHtml(img.storagePath) + '">削除</button>' +
+        '<button class="btn btn-sm" class="adm-btn-delete" data-delete-formula-image data-cultivar-id="' + img.cultivarId + '" data-role="' + img.role + '" data-storage-path="' + escapeHtml(img.storagePath) + '">削除</button>' +
       '</div>';
     grid.appendChild(card);
   });
@@ -1901,7 +1901,7 @@ function loadUsers() {
   var search = document.getElementById('user-search').value.trim();
   var filterStatus = document.getElementById('user-filter-status').value;
   var tbody = document.getElementById('users-tbody');
-  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--color-gray);">読み込み中...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="5" class="adm-text-center-gray">読み込み中...</td></tr>';
 
   sb.rpc('admin_list_users', {
     p_search: search || null,
@@ -1922,7 +1922,7 @@ function loadUsers() {
     var total = data.total || 0;
 
     if (users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--color-gray);">ユーザーが見つかりません</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" class="adm-text-center-gray">ユーザーが見つかりません</td></tr>';
       renderUsersPagination(total);
       return;
     }
@@ -2234,22 +2234,22 @@ function showAffiliateForm(data) {
   var title = isEdit ? 'アフィリエイト編集' : 'アフィリエイト新規追加';
   var html = '<h3 style="margin-bottom:var(--space-md);">' + title + '</h3>';
   html += '<form id="affiliate-form" style="display:grid;gap:var(--space-sm);">';
-  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-sm);">';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">カテゴリ名（日本語）*</label><input class="form-input" name="name" value="' + escapeHtml(data.name || '') + '" required></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">カテゴリ名（英語）</label><input class="form-input" name="name_en" value="' + escapeHtml(data.name_en || '') + '"></div>';
+  html += '<div class="adm-grid-2col-var">';
+  html += '<div><label class="adm-label">カテゴリ名（日本語）*</label><input class="form-input" name="name" value="' + escapeHtml(data.name || '') + '" required></div>';
+  html += '<div><label class="adm-label">カテゴリ名（英語）</label><input class="form-input" name="name_en" value="' + escapeHtml(data.name_en || '') + '"></div>';
   html += '</div>';
-  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-sm);">';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">商品名（日本語）*</label><input class="form-input" name="product_name" value="' + escapeHtml(data.product_name || '') + '" required></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">商品名（英語）</label><input class="form-input" name="product_name_en" value="' + escapeHtml(data.product_name_en || '') + '"></div>';
+  html += '<div class="adm-grid-2col-var">';
+  html += '<div><label class="adm-label">商品名（日本語）*</label><input class="form-input" name="product_name" value="' + escapeHtml(data.product_name || '') + '" required></div>';
+  html += '<div><label class="adm-label">商品名（英語）</label><input class="form-input" name="product_name_en" value="' + escapeHtml(data.product_name_en || '') + '"></div>';
   html += '</div>';
-  html += '<div style="display:grid;grid-template-columns:3fr 1fr 1fr;gap:var(--space-sm);">';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">アイコン（絵文字）</label><input class="form-input" name="icon" value="' + escapeHtml(data.icon || '🛒') + '"></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">バッジ（日）</label><input class="form-input" name="badge" value="' + escapeHtml(data.badge || '') + '"></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">バッジ（英）</label><input class="form-input" name="badge_en" value="' + escapeHtml(data.badge_en || '') + '"></div>';
+  html += '<div class="adm-grid-formula">';
+  html += '<div><label class="adm-label">アイコン（絵文字）</label><input class="form-input" name="icon" value="' + escapeHtml(data.icon || '🛒') + '"></div>';
+  html += '<div><label class="adm-label">バッジ（日）</label><input class="form-input" name="badge" value="' + escapeHtml(data.badge || '') + '"></div>';
+  html += '<div><label class="adm-label">バッジ（英）</label><input class="form-input" name="badge_en" value="' + escapeHtml(data.badge_en || '') + '"></div>';
   html += '</div>';
-  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-sm);">';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">表示順</label><input class="form-input" name="sort_order" type="number" value="' + (data.sort_order || 0) + '"></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">公開状態</label><select class="form-input" name="is_published"><option value="true"' + (data.is_published !== false ? ' selected' : '') + '>公開</option><option value="false"' + (data.is_published === false ? ' selected' : '') + '>非公開</option></select></div>';
+  html += '<div class="adm-grid-2col-var">';
+  html += '<div><label class="adm-label">表示順</label><input class="form-input" name="sort_order" type="number" value="' + (data.sort_order || 0) + '"></div>';
+  html += '<div><label class="adm-label">公開状態</label><select class="form-input" name="is_published"><option value="true"' + (data.is_published !== false ? ' selected' : '') + '>公開</option><option value="false"' + (data.is_published === false ? ' selected' : '') + '>非公開</option></select></div>';
   html += '</div>';
 
   html += '<hr style="border:none;border-top:1px solid var(--color-light);margin:var(--space-sm) 0;">';
@@ -2263,10 +2263,10 @@ function showAffiliateForm(data) {
   html += '<span id="rakuten-parse-result" style="font-size:var(--font-size-xs);margin-left:var(--space-sm);color:var(--color-gray);"></span>';
   html += '</div>';
 
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">Amazon URL</label><input class="form-input" name="amazon" value="' + escapeHtml(data.amazon || '') + '" placeholder="https://amzn.to/..."></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">楽天 URL</label><textarea class="form-input" name="rakuten" rows="2" placeholder="https://hb.afl.rakuten.co.jp/...">' + escapeHtml(data.rakuten || '') + '</textarea></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">Yahoo URL</label><input class="form-input" name="yahoo" value="' + escapeHtml(data.yahoo || '') + '" placeholder="https://yahoo.jp/..."></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">商品画像URL（楽天画像など）</label><textarea class="form-input" name="image" rows="2" placeholder="https://hbb.afl.rakuten.co.jp/...">' + escapeHtml(data.image || '') + '</textarea></div>';
+  html += '<div><label class="adm-label">Amazon URL</label><input class="form-input" name="amazon" value="' + escapeHtml(data.amazon || '') + '" placeholder="https://amzn.to/..."></div>';
+  html += '<div><label class="adm-label">楽天 URL</label><textarea class="form-input" name="rakuten" rows="2" placeholder="https://hb.afl.rakuten.co.jp/...">' + escapeHtml(data.rakuten || '') + '</textarea></div>';
+  html += '<div><label class="adm-label">Yahoo URL</label><input class="form-input" name="yahoo" value="' + escapeHtml(data.yahoo || '') + '" placeholder="https://yahoo.jp/..."></div>';
+  html += '<div><label class="adm-label">商品画像URL（楽天画像など）</label><textarea class="form-input" name="image" rows="2" placeholder="https://hbb.afl.rakuten.co.jp/...">' + escapeHtml(data.image || '') + '</textarea></div>';
 
   html += '<div style="display:flex;gap:var(--space-sm);justify-content:flex-end;margin-top:var(--space-md);">';
   html += '<button type="button" class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
@@ -2570,7 +2570,7 @@ function openEditGenusModal(id) {
   html += '</label>';
   html += '<label style="margin-top:var(--space-md);">カード画像</label>';
   if (g.card_image_path) {
-    html += '<div style="margin-bottom:var(--space-sm);"><img src="images/' + g.card_image_path + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #ddd;"></div>';
+    html += '<div style="margin-bottom:var(--space-sm);"><img src="images/' + g.card_image_path + '" class="adm-img-thumb"></div>';
   }
   html += '<input type="file" id="genus-image" accept="image/jpeg,image/png">';
   html += '<small style="color:var(--color-gray);">新しい画像を選択すると差し替えられます</small>';
