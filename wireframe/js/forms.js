@@ -2014,7 +2014,7 @@ function renderAffiliateBanner(containerOrId, options) {
     }
     if (product.image) {
       html += '<a href="' + product.rakuten + '" target="_blank" rel="nofollow sponsored noopener">';
-      html += '<img class="affiliate-card__image" src="' + product.image + '" alt="' + prodName + '" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.insertAdjacentHTML(\'afterend\',\'<span class=affiliate-card__icon>' + (product.icon || '🛒') + '</span>\')">';
+      html += '<img class="affiliate-card__image" src="' + product.image + '" alt="' + prodName + '" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display=\'none\';this.parentElement.insertAdjacentHTML(\'afterend\',\'<span class=affiliate-card__icon>' + (product.icon || '🛒') + '</span>\')">';
       html += '</a>';
     } else {
       html += '<span class="affiliate-card__icon">' + product.icon + '</span>';
