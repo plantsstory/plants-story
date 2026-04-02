@@ -2014,7 +2014,7 @@ function renderAffiliateBanner(containerOrId, options) {
     }
     if (product.image) {
       html += '<a href="' + product.rakuten + '" target="_blank" rel="nofollow sponsored noopener">';
-      html += '<img class="affiliate-card__image" src="' + product.image + '" alt="' + prodName + '" loading="lazy">';
+      html += '<img class="affiliate-card__image" src="' + product.image + '" alt="' + prodName + '" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.insertAdjacentHTML(\'afterend\',\'<span class=affiliate-card__icon>' + (product.icon || '🛒') + '</span>\')">';
       html += '</a>';
     } else {
       html += '<span class="affiliate-card__icon">' + product.icon + '</span>';
@@ -2030,6 +2030,17 @@ function renderAffiliateBanner(containerOrId, options) {
     html += '</div>';
   });
   container.innerHTML = html;
+  // Fallback: if images don't load within 5s, show icon instead
+  setTimeout(function() {
+    container.querySelectorAll('.affiliate-card__image').forEach(function(img) {
+      if (!img.naturalWidth) {
+        img.style.display = 'none';
+        if (!img.parentElement.querySelector('.affiliate-card__icon')) {
+          img.parentElement.insertAdjacentHTML('afterend', '<span class="affiliate-card__icon">\uD83D\uDED2</span>');
+        }
+      }
+    });
+  }, 5000);
 }
 
 // Add affiliate banner containers to all genus pages (data filled by async loader above)
