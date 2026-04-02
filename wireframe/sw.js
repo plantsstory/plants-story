@@ -1,5 +1,5 @@
 // Service Worker for Plants Story PWA
-var CACHE_VERSION = 'plants-story-v14';
+var CACHE_VERSION = 'plants-story-v15';
 var STATIC_ASSETS = [
   './',
   './index.html',
@@ -60,6 +60,9 @@ self.addEventListener('fetch', function(event) {
   // Skip external resources (Supabase API, CDNs, etc.) — always network
   if (url.hostname !== self.location.hostname) return;
 
+  // Skip admin.html — always fetch from network, never SPA fallback
+  if (url.pathname.indexOf('admin') !== -1) return;
+
   // Network-first: try network, fall back to cache for offline support
   event.respondWith(
     fetch(event.request).then(function(response) {
@@ -73,7 +76,7 @@ self.addEventListener('fetch', function(event) {
       // Offline: serve from cache
       return caches.match(event.request).then(function(cached) {
         if (cached) return cached;
-        // For navigation requests, fall back to cached index.html (SPA)
+        // For SPA navigation requests, fall back to cached index.html
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
