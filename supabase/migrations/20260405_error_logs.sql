@@ -26,24 +26,12 @@ CREATE POLICY "Anyone can insert error logs"
 -- Only admins can read error logs
 CREATE POLICY "Admins can read error logs"
   ON error_logs FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role = 'admin'
-    )
-  );
+  USING (public.is_admin());
 
 -- Only admins can delete error logs
 CREATE POLICY "Admins can delete error logs"
   ON error_logs FOR DELETE
-  USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role = 'admin'
-    )
-  );
+  USING (public.is_admin());
 
 -- Auto-cleanup: delete logs older than 30 days (run via pg_cron or manual)
 -- SELECT cron.schedule('cleanup-error-logs', '0 3 * * *', $$DELETE FROM error_logs WHERE created_at < now() - interval '30 days'$$);
