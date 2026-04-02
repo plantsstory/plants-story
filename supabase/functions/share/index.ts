@@ -88,7 +88,9 @@ serve(async (req: Request) => {
 
   const title = displayName + " - " + genus + " | ひなたぼっこぷらんつ - Plants Story";
   const desc = description || displayName + " (" + genus + " " + typeLabel + ") の由来・歴史情報";
-  const spaUrl = SITE_URL + "#/cultivar/" + encodeURIComponent(displayName);
+  const genusSlug = (genus || displayName.split(" ")[0]).toLowerCase();
+  const rest = displayName.replace(/^\S+\s*/, "");
+  const spaUrl = SITE_URL + genusSlug + "/" + encodeURIComponent(rest);
 
   // Fallback OG image: use og-image Edge Function
   const ogImage = imageUrl || (supabaseUrl + "/functions/v1/og-image?name=" + encodeURIComponent(displayName) + "&genus=" + encodeURIComponent(genus) + "&type=" + encodeURIComponent(type));

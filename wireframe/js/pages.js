@@ -626,14 +626,8 @@ document.addEventListener('click', function(e) {
 });
 
 // ---- Share button ----
-// Build OGP-friendly share URL via Edge Function (crawlers see proper meta tags)
+// Build clean site URL for sharing
 function getShareUrl(cultivarName) {
-  var base = window._SUPABASE_URL;
-  if (base) {
-    return base + '/functions/v1/share?name=' + encodeURIComponent(cultivarName);
-  }
-  // Fallback: direct SPA URL
-  // Build path-based URL for sharing
   var parts = cultivarName.split(' ');
   var genus = parts[0].toLowerCase();
   var rest = parts.slice(1).join(' ');
