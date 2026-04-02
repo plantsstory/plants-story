@@ -63,6 +63,7 @@
       <a href="#" data-section="bulk">一括操作</a>
       <a href="#" data-section="error-logs">エラーログ</a>
       <a href="#" data-section="external">外部サービス</a>
+      <a href="#" data-section="keyword-research">キーワードリサーチ</a>
     </nav>
     <div class="nav-overlay" id="nav-overlay"></div>
     <main class="admin-content">
@@ -501,6 +502,32 @@
         </div>
       </section>
 
+      <!-- ---- KEYWORD RESEARCH ---- -->
+      <section id="sec-keyword-research" class="hidden">
+        <h2 class="section-title">キーワードリサーチ</h2>
+        <p class="text-muted" style="margin-bottom:var(--space-md);">Clone・Hybridの由来をキーワードで調査します。英語圏の学術ソースを優先して検索します。</p>
+        <div class="toolbar flex-wrap gap-xs">
+          <select id="kr-cultivar-select" style="width:350px;">
+            <option value="">品種を選択...</option>
+          </select>
+          <input type="text" id="kr-keywords" placeholder="キーワード（例: breeder name, year, origin story）" style="width:400px;">
+          <button class="btn btn-primary" id="btn-kr-search">リサーチ開始</button>
+        </div>
+
+        <div id="kr-loading" class="hidden" style="margin-top:var(--space-lg);text-align:center;">
+          <p style="color:var(--color-primary);font-weight:700;">🔍 リサーチ中... (30秒〜1分)</p>
+        </div>
+
+        <div id="kr-results" class="hidden" style="margin-top:var(--space-lg);">
+          <h3 style="margin-bottom:var(--space-sm);">リサーチ結果</h3>
+          <div id="kr-result-content" style="background:#f9f9f9;border:1px solid #ddd;border-radius:8px;padding:var(--space-md);"></div>
+          <div style="margin-top:var(--space-md);display:flex;gap:var(--space-sm);">
+            <button class="btn btn-primary" id="btn-kr-accept">採用する</button>
+            <button class="btn btn-outline" id="btn-kr-reject" style="color:#c0392b;border-color:#c0392b;">破棄する</button>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 </div>
@@ -783,6 +810,7 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
     if (section === 'genera') loadAdminGenera();
     if (section === 'origins') loadOrigins();
     if (section === 'affiliates') loadAffiliates();
+    if (section === 'keyword-research') populateKRSelect();
     closeNav();
   });
 });
@@ -2850,6 +2878,161 @@ function escHtml(s) {
   d.textContent = s || '';
   return d.innerHTML;
 }
+
+// ========================================
+// KEYWORD RESEARCH
+// ========================================
+var krPendingOrigins = null;
+var krSelectedCultivar = null;
+
+function populateKRSelect() {
+  var sel = document.getElementById('kr-cultivar-select');
+  var html = '<option value="">品種を選択...</option>';
+  allCultivars.filter(function(c) {
+    return c.type === 'clone' || c.type === 'hybrid';
+  }).sort(function(a, b) {
+    return a.cultivar_name.localeCompare(b.cultivar_name);
+  }).forEach(function(c) {
+    var typeLbl = c.type === 'clone' ? 'Clone' : 'Hybrid';
+    html += '<option value="' + c.id + '">' + escapeHtml(c.cultivar_name) + ' [' + typeLbl + '] (' + (c.genus || '') + ')</option>';
+  });
+  sel.innerHTML = html;
+}
+
+document.getElementById('btn-kr-search').addEventListener('click', async function() {
+  var cultivarId = parseInt(document.getElementById('kr-cultivar-select').value);
+  var keywords = document.getElementById('kr-keywords').value.trim();
+  if (!cultivarId) { toast('品種を選択してください'); return; }
+  if (!keywords) { toast('キーワードを入力してください'); return; }
+
+  var c = allCultivars.find(function(x) { return x.id === cultivarId; });
+  if (!c) return;
+
+  // Format keywords as research context for the LLM
+  var userText = 'Research keywords: ' + keywords + '. Please investigate the origin of this cultivar using these keywords as search hints. Prioritize English-language academic and horticultural sources.';
+
+  document.getElementById('kr-loading').classList.remove('hidden');
+  document.getElementById('kr-results').classList.add('hidden');
+  krPendingOrigins = null;
+  krSelectedCultivar = null;
+
+  try {
+    var session = (await sb.auth.getSession()).data.session;
+    var token = session ? session.access_token : SUPABASE_ANON_KEY;
+    var res = await fetch(SUPABASE_URL + '/functions/v1/research-origin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({
+        cultivar_id: c.id,
+        cultivar_name: c.cultivar_name,
+        genus: c.genus,
+        type: c.type,
+        user_text: userText,
+        preview: true
+      })
+    });
+    var data = await res.json();
+    document.getElementById('kr-loading').classList.add('hidden');
+
+    if (!data.success || !data.origins || data.origins.length === 0) {
+      toast('由来情報が見つかりませんでした');
+      return;
+    }
+
+    krPendingOrigins = data.origins;
+    krSelectedCultivar = c;
+    renderKRResults(data.origins, c);
+    document.getElementById('kr-results').classList.remove('hidden');
+  } catch (e) {
+    document.getElementById('kr-loading').classList.add('hidden');
+    toast('エラー: ' + e.message);
+  }
+});
+
+function renderKRResults(origins, cultivar) {
+  var html = '<div style="margin-bottom:var(--space-sm);"><strong>' + escapeHtml(cultivar.cultivar_name) + '</strong> (' + cultivar.type + ' / ' + (cultivar.genus || '') + ')</div>';
+  origins.forEach(function(o, idx) {
+    html += '<div style="background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:var(--space-sm);margin-bottom:var(--space-sm);">';
+    html += '<div style="display:flex;align-items:center;gap:var(--space-xs);margin-bottom:var(--space-xs);">';
+    html += '<span style="font-weight:700;">由来 #' + (idx + 1) + '</span>';
+    if (o.source_tier) html += ' ' + tierBadge(o.source_tier);
+    if (o.trust != null) {
+      html += ' <span style="color:' + trustColor(o.trust) + ';font-weight:700;">' + o.trust + '%</span>';
+    }
+    if (o.source_name) html += ' <span style="color:#666;font-size:0.8rem;">(' + escapeHtml(o.source_name) + ')</span>';
+    html += '</div>';
+
+    // Structured data summary
+    var structHtml = structuredSummaryHtml(o.structured, cultivar.type, o);
+    if (structHtml) html += '<div style="font-size:0.85rem;margin-bottom:var(--space-xs);">' + structHtml + '</div>';
+
+    // Body text
+    if (o.body) {
+      html += '<div style="font-size:0.85rem;color:#333;margin-bottom:var(--space-xs);"><strong>JP:</strong> ' + escapeHtml(o.body) + '</div>';
+    }
+    if (o.body_en) {
+      html += '<div style="font-size:0.85rem;color:#555;margin-bottom:var(--space-xs);"><strong>EN:</strong> ' + escapeHtml(o.body_en) + '</div>';
+    }
+
+    // Sources
+    if (o.sources && o.sources.length) {
+      html += '<div style="font-size:0.8rem;color:#888;">ソース: ';
+      o.sources.forEach(function(s, si) {
+        if (si > 0) html += ', ';
+        if (s.url) {
+          html += '<a href="' + escapeHtml(s.url) + '" target="_blank" rel="noopener">' + escapeHtml(s.label || s.name || s.url) + '</a>';
+        } else {
+          html += escapeHtml(s.label || s.name || '');
+        }
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+  document.getElementById('kr-result-content').innerHTML = html;
+}
+
+document.getElementById('btn-kr-accept').addEventListener('click', async function() {
+  if (!krPendingOrigins || !krSelectedCultivar) return;
+  if (!confirm('このリサーチ結果を「' + krSelectedCultivar.cultivar_name + '」の由来として採用しますか？')) return;
+
+  try {
+    // Get current origins and merge (keep existing manual/user origins, replace AI ones)
+    var existing = (krSelectedCultivar.origins || []).filter(function(o) {
+      return o.source_type === 'manual' || (o.author && o.author.isAI === false);
+    });
+    var merged = existing.concat(krPendingOrigins);
+    merged.sort(function(a, b) { return (b.trust || 0) - (a.trust || 0); });
+
+    var result = await sb.from('cultivars').update({
+      origins: merged,
+      ai_status: 'completed',
+      ai_research_data: {
+        research_source: 'keyword-research',
+        origins_count: merged.length,
+        best_trust: merged[0] ? merged[0].trust : 0,
+        researched_at: new Date().toISOString()
+      },
+      updated_at: new Date().toISOString()
+    }).eq('id', krSelectedCultivar.id);
+
+    if (result.error) throw result.error;
+    toast('由来を採用しました');
+    document.getElementById('kr-results').classList.add('hidden');
+    krPendingOrigins = null;
+    krSelectedCultivar = null;
+    loadAllCultivars();
+  } catch (e) {
+    toast('保存エラー: ' + e.message);
+  }
+});
+
+document.getElementById('btn-kr-reject').addEventListener('click', function() {
+  krPendingOrigins = null;
+  krSelectedCultivar = null;
+  document.getElementById('kr-results').classList.add('hidden');
+  toast('リサーチ結果を破棄しました');
+});
 </script>
 </body>
 </html>

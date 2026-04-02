@@ -1852,6 +1852,7 @@ serve(async (req: Request) => {
       return new Response(
         JSON.stringify({
           success: originEntries.length > 0,
+          origins: originEntries,
           structured: originEntries[0]?.structured || null,
           body: originEntries[0]?.body || null,
           sources: originEntries[0]?.sources || [],
