@@ -1129,9 +1129,8 @@ function populateOriginSelect() {
   var sel = document.getElementById('origin-cultivar-select');
   var html = '<option value="">すべての品種</option>';
   allCultivars.forEach(function(c) {
-    if ((c.origins || []).length) {
-      html += '<option value="' + c.id + '">' + escapeHtml(c.cultivar_name) + ' (' + (c.origins || []).length + '件)</option>';
-    }
+    var cnt = (c.origins || []).length;
+    html += '<option value="' + c.id + '">' + escapeHtml(c.cultivar_name) + ' (' + cnt + '件)</option>';
   });
   sel.innerHTML = html;
 }
@@ -1199,7 +1198,6 @@ function loadOrigins() {
   var targets = allCultivars.filter(function(c) {
     if (filterId && c.id !== filterId) return false;
     if (filterType && (c.type || 'species') !== filterType) return false;
-    if (!c.origins || !c.origins.length) return false;
     if (search) {
       var match = (c.cultivar_name || '').toLowerCase().indexOf(search) >= 0
         || (c.genus || '').toLowerCase().indexOf(search) >= 0
@@ -1231,6 +1229,17 @@ function loadOrigins() {
   targets.forEach(function(c) {
     var cType = c.type || 'species';
     var origins = c.origins || [];
+    if (origins.length === 0) {
+      html += '<tr>';
+      html += '<td style="max-width:150px;font-size:var(--font-size-sm);vertical-align:top;border-right:2px solid var(--color-lighter);word-break:break-word;">';
+      html += '<span style="font-weight:600;">' + escapeHtml(c.cultivar_name) + '</span>';
+      html += '<div style="display:flex;gap:3px;margin-top:4px;flex-wrap:wrap;">';
+      html += '<button class="btn btn-outline btn-sm" style="font-size:0.65rem;" onclick="reresearchCultivar(' + c.id + ')" id="rr-btn-' + c.id + '">AI再調査</button>';
+      html += '</div>';
+      html += '</td>';
+      html += '<td colspan="7" style="color:var(--color-gray);font-size:var(--font-size-sm);">由来データなし</td>';
+      html += '</tr>';
+    }
     origins.forEach(function(o, i) {
       var authorLabel;
       if (o.source_type === 'ipni_powo') {
