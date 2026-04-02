@@ -110,6 +110,11 @@ function updateMeta(opts) {
   if (twImage) twImage.setAttribute('content', image);
   var canonical = document.getElementById('canonical-link');
   if (canonical) canonical.setAttribute('href', url);
+  // Update hreflang tags
+  ['ja', 'en', 'default'].forEach(function(lang) {
+    var el = document.getElementById('hreflang-' + lang);
+    if (el) el.setAttribute('href', url);
+  });
 }
 
 function updateCultivarJsonLd(name, genus, type, description) {
@@ -128,6 +133,67 @@ function updateCultivarJsonLd(name, genus, type, description) {
     'url': _siteBase + '#/cultivar/' + encodeURIComponent(name)
   };
   el.textContent = JSON.stringify(data);
+  // Breadcrumb: Home > Genus > Cultivar
+  updateBreadcrumbJsonLd([
+    { name: 'Home', url: _siteBase },
+    { name: genus, url: _siteBase + '#/' + genus.toLowerCase() },
+    { name: name, url: _siteBase + '#/cultivar/' + encodeURIComponent(name) }
+  ]);
+}
+
+// Breadcrumb structured data (Google rich result)
+function updateBreadcrumbJsonLd(items) {
+  var el = document.getElementById('breadcrumb-jsonld');
+  if (!el) {
+    el = document.createElement('script');
+    el.type = 'application/ld+json';
+    el.id = 'breadcrumb-jsonld';
+    document.head.appendChild(el);
+  }
+  var data = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': items.map(function(item, i) {
+      return {
+        '@type': 'ListItem',
+        'position': i + 1,
+        'name': item.name,
+        'item': item.url
+      };
+    })
+  };
+  el.textContent = JSON.stringify(data);
+}
+
+// Genus page structured data (ItemList of cultivars)
+function updateGenusJsonLd(genusName, cultivarNames) {
+  var el = document.getElementById('genus-jsonld');
+  if (!el) {
+    el = document.createElement('script');
+    el.type = 'application/ld+json';
+    el.id = 'genus-jsonld';
+    document.head.appendChild(el);
+  }
+  var data = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    'name': genusName + ' - 品種一覧',
+    'numberOfItems': cultivarNames.length,
+    'itemListElement': cultivarNames.slice(0, 100).map(function(name, i) {
+      return {
+        '@type': 'ListItem',
+        'position': i + 1,
+        'name': name,
+        'url': _siteBase + '#/cultivar/' + encodeURIComponent(name)
+      };
+    })
+  };
+  el.textContent = JSON.stringify(data);
+  // Breadcrumb: Home > Genus
+  updateBreadcrumbJsonLd([
+    { name: 'Home', url: _siteBase },
+    { name: genusName, url: _siteBase + '#/' + genusName.toLowerCase() }
+  ]);
 }
 
 function showPage(pageId) {
@@ -268,11 +334,46 @@ function navigateTo(page, options, pushHistory) {
       mypost: '投稿履歴 - ' + _defaultTitle,
       'profile-edit': 'プロフィール編集 - ' + _defaultTitle
     };
+    var pageDescriptions = {
+      top: _defaultDesc,
+      favorites: 'お気に入りに追加した品種の一覧です',
+      contribute: 'アロイド植物の品種情報を投稿して、コミュニティに貢献しましょう',
+      about: 'ひなたぼっこぷらんつ（Plants Story）について - アロイド植物の由来・歴史を共有するプラットフォーム',
+      terms: 'ひなたぼっこぷらんつ（Plants Story）の利用規約',
+      privacy: 'ひなたぼっこぷらんつ（Plants Story）のプライバシーポリシー',
+      contact: 'ひなたぼっこぷらんつ（Plants Story）へのお問い合わせ',
+      search: 'アロイド植物の品種名で検索 - Anthurium, Monstera, Philodendronなど',
+      mypost: 'あなたが投稿した品種の履歴'
+    };
     if (page === 'genus' && options.genus) {
       var gName = options.genus.charAt(0).toUpperCase() + options.genus.slice(1);
-      updateMeta({ title: gName + ' - ' + _defaultTitle, path: options.genus });
+      updateMeta({
+        title: gName + ' - ' + _defaultTitle,
+        description: gName + 'の品種一覧 - 由来・歴史情報をコミュニティで共有',
+        path: options.genus
+      });
+      // Build genus ItemList JSON-LD
+      var genusSection = document.getElementById('genus-' + options.genus);
+      if (genusSection) {
+        var rows = genusSection.querySelectorAll('.cultivar-row');
+        var names = [];
+        rows.forEach(function(r) { var n = r.getAttribute('data-name'); if (n) names.push(n); });
+        updateGenusJsonLd(gName, names);
+      }
     } else {
-      updateMeta({ title: pageTitles[page] || _defaultTitle, path: page === 'top' ? '' : page });
+      updateMeta({ title: pageTitles[page] || _defaultTitle, description: pageDescriptions[page] || _defaultDesc, path: page === 'top' ? '' : page });
+      // Remove genus JSON-LD on non-genus pages
+      var gjld = document.getElementById('genus-jsonld');
+      if (gjld) gjld.remove();
+      // Top page breadcrumb
+      if (page === 'top') {
+        updateBreadcrumbJsonLd([{ name: 'Home', url: _siteBase }]);
+      } else {
+        updateBreadcrumbJsonLd([
+          { name: 'Home', url: _siteBase },
+          { name: pageTitles[page] ? pageTitles[page].split(' - ')[0] : page, url: _siteBase + '#/' + page }
+        ]);
+      }
     }
     // Remove cultivar JSON-LD when leaving cultivar page
     var cjld = document.getElementById('cultivar-jsonld');
