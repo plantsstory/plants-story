@@ -359,10 +359,9 @@
 
 /* Recently added card images */
 .recent-card__img {
-  height: 100px;
+  height: 160px;
   background: linear-gradient(135deg, var(--color-lighter), #D4E7D9);
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--space-sm);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
   display: flex;
   align-items: center;
   justify-content: center;
