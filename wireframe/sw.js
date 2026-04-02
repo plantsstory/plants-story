@@ -1,8 +1,12 @@
 // Service Worker for Plants Story PWA
-var CACHE_VERSION = 'plants-story-v1';
+var CACHE_VERSION = 'plants-story-v2';
 var STATIC_ASSETS = [
   './',
   './index.html',
+  './js/app-core.js',
+  './js/pages.js',
+  './js/forms.js',
+  './js/dialogs.js',
   './css/variables.css',
   './css/reset.css',
   './css/layout.css',
