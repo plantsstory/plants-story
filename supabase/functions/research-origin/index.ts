@@ -464,39 +464,79 @@ async function searchYouTube(
   apiKey: string,
   cultivarName: string,
   keywords: string,
-  maxResults = 5
+  maxResults = 5,
+  channels?: { id: string; name: string }[]
 ): Promise<YouTubeSnippet[]> {
   if (!apiKey) return [];
-  try {
-    // Build search query: cultivar name + keywords + origin-related terms
-    const query = `${cultivarName} ${keywords} origin`.substring(0, 128);
-    const params = new URLSearchParams({
-      part: "snippet",
-      q: query,
-      type: "video",
-      maxResults: String(maxResults),
-      relevanceLanguage: "en",
-      key: apiKey,
-    });
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`, {
-      headers: { "Accept": "application/json" },
-    });
-    if (!res.ok) {
-      console.log(`[YouTube] API error: ${res.status} ${res.statusText}`);
+
+  const allResults: YouTubeSnippet[] = [];
+
+  async function doSearch(query: string, channelId?: string, perPage = 5): Promise<YouTubeSnippet[]> {
+    try {
+      const params = new URLSearchParams({
+        part: "snippet",
+        q: query.substring(0, 128),
+        type: "video",
+        maxResults: String(perPage),
+        relevanceLanguage: "en",
+        key: apiKey,
+      });
+      if (channelId && channelId.startsWith("UC")) {
+        params.set("channelId", channelId);
+      }
+      const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`, {
+        headers: { "Accept": "application/json" },
+      });
+      if (!res.ok) {
+        console.log(`[YouTube] API error: ${res.status} ${res.statusText}`);
+        return [];
+      }
+      const data = await res.json();
+      return (data.items || []).map((item: any) => ({
+        title: item.snippet?.title || "",
+        description: item.snippet?.description || "",
+        channelTitle: item.snippet?.channelTitle || "",
+        videoUrl: `https://www.youtube.com/watch?v=${item.id?.videoId || ""}`,
+      }));
+    } catch (e) {
+      console.log(`[YouTube] Search failed: ${String(e)}`);
       return [];
     }
-    const data = await res.json();
-    const items = data.items || [];
-    return items.map((item: any) => ({
-      title: item.snippet?.title || "",
-      description: item.snippet?.description || "",
-      channelTitle: item.snippet?.channelTitle || "",
-      videoUrl: `https://www.youtube.com/watch?v=${item.id?.videoId || ""}`,
-    }));
-  } catch (e) {
-    console.log(`[YouTube] Search failed: ${String(e)}`);
-    return [];
   }
+
+  const query = `${cultivarName} ${keywords}`;
+  const searches: Promise<YouTubeSnippet[]>[] = [];
+
+  if (channels && channels.length > 0) {
+    // Search each specified channel (3 results each)
+    for (const ch of channels) {
+      if (ch.id.startsWith("search:")) {
+        // Channel name search: include channel name in query
+        searches.push(doSearch(`${query} ${ch.id.replace("search:", "")}`, undefined, 3));
+      } else {
+        searches.push(doSearch(query, ch.id, 3));
+      }
+    }
+    // Also do a general search (2 results) for broader coverage
+    searches.push(doSearch(`${query} origin`, undefined, 2));
+  } else {
+    // No channels specified: general search
+    searches.push(doSearch(`${query} origin`, undefined, maxResults));
+  }
+
+  const results = await Promise.all(searches);
+  const seenUrls = new Set<string>();
+  for (const batch of results) {
+    for (const item of batch) {
+      if (!seenUrls.has(item.videoUrl)) {
+        seenUrls.add(item.videoUrl);
+        allResults.push(item);
+      }
+    }
+  }
+
+  console.log(`[YouTube] Total unique results: ${allResults.length}`);
+  return allResults;
 }
 
 // ============================================================
@@ -1270,7 +1310,7 @@ serve(async (req: Request) => {
       );
     }
 
-    const { cultivar_id, genus, cultivar_name, type, manual_origins, user_text, user_sources, preview, keywords } = await req.json();
+    const { cultivar_id, genus, cultivar_name, type, manual_origins, user_text, user_sources, preview, keywords, youtube_channels } = await req.json();
 
     if ((!cultivar_id && !preview) || !cultivar_name) {
       return new Response(
@@ -1521,7 +1561,7 @@ serve(async (req: Request) => {
           let externalData: ExternalData = { wikidata: null, papers: [] };
           const [extResult, ytResults] = await Promise.all([
             gatherExternalData(effectiveGenus, cultivarEpithet),
-            searchYouTube(youtubeApiKey, cultivar_name, keywordsText, 5),
+            searchYouTube(youtubeApiKey, cultivar_name, keywordsText, 5, youtube_channels || undefined),
           ]);
           externalData = extResult;
           const hasWd = externalData.wikidata ? "yes" : "no";

@@ -513,6 +513,14 @@
           <input type="text" id="kr-keywords" placeholder="キーワード（例: breeder name, year, origin story）" style="width:400px;">
           <button class="btn btn-primary" id="btn-kr-search">リサーチ開始</button>
         </div>
+        <div style="margin-top:var(--space-sm);">
+          <label style="font-size:0.85rem;font-weight:600;margin-bottom:4px;display:block;">YouTube優先チャンネル（任意・複数選択可）</label>
+          <div id="kr-yt-channels" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;"></div>
+          <div style="display:flex;gap:var(--space-xs);align-items:center;">
+            <input type="text" id="kr-yt-custom" placeholder="チャンネル名またはチャンネルID" style="width:280px;font-size:0.85rem;">
+            <button class="btn" id="btn-kr-yt-add" style="font-size:0.8rem;padding:4px 10px;">追加</button>
+          </div>
+        </div>
 
         <div id="kr-existing" class="hidden" style="margin-top:var(--space-lg);">
           <h3 style="margin-bottom:var(--space-sm);">現在の由来</h3>
@@ -2886,6 +2894,71 @@ function escHtml(s) {
 var krPendingOrigins = null;
 var krSelectedCultivar = null;
 
+// YouTube channel presets + custom channels
+var KR_YT_PRESETS = [
+  { name: 'Kaylee Ellen', id: 'UCmPPqTOqKRnMEFGOq3OHirA' },
+  { name: 'Harli G', id: 'UCmSv8gPtGFPlhBTantRGN-Q' },
+  { name: 'Exotic Rainforest', id: 'UC1pEuxZa6TaFYqIzrfPli9Q' },
+  { name: 'Sydney Plant Guy', id: 'UCxGGf_HRQDY0CfBRac2j6JA' },
+  { name: 'Plant Arena', id: 'UCQBG5bN4JI0tx2x0e4WYYQ' },
+  { name: 'Legends of Monstera', id: 'UCU4k0fGXAJbgqr8KlYD7JCw' },
+];
+var krYtSelected = {}; // { channelId: name }
+var KR_YT_STORAGE_KEY = 'kr_yt_custom_channels';
+
+function loadCustomYtChannels() {
+  try { return JSON.parse(localStorage.getItem(KR_YT_STORAGE_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+function saveCustomYtChannels(list) {
+  localStorage.setItem(KR_YT_STORAGE_KEY, JSON.stringify(list));
+}
+
+function renderYtChannelButtons() {
+  var container = document.getElementById('kr-yt-channels');
+  var all = KR_YT_PRESETS.concat(loadCustomYtChannels());
+  var html = '';
+  all.forEach(function(ch) {
+    var selected = !!krYtSelected[ch.id];
+    var bg = selected ? '#2e7d32' : '#e0e0e0';
+    var color = selected ? '#fff' : '#333';
+    html += '<button type="button" class="kr-yt-btn" data-chid="' + escapeHtml(ch.id) + '" data-chname="' + escapeHtml(ch.name) + '" style="font-size:0.8rem;padding:3px 10px;border-radius:14px;border:none;cursor:pointer;background:' + bg + ';color:' + color + ';">' + escapeHtml(ch.name) + '</button>';
+  });
+  container.innerHTML = html;
+}
+
+document.getElementById('kr-yt-channels').addEventListener('click', function(e) {
+  var btn = e.target.closest('.kr-yt-btn');
+  if (!btn) return;
+  var chid = btn.getAttribute('data-chid');
+  var chname = btn.getAttribute('data-chname');
+  if (krYtSelected[chid]) {
+    delete krYtSelected[chid];
+  } else {
+    krYtSelected[chid] = chname;
+  }
+  renderYtChannelButtons();
+});
+
+document.getElementById('btn-kr-yt-add').addEventListener('click', function() {
+  var input = document.getElementById('kr-yt-custom');
+  var val = (input.value || '').trim();
+  if (!val) return;
+  // If it looks like a channel ID (starts with UC), use as-is; otherwise use as name/search
+  var chId = val.startsWith('UC') && val.length > 20 ? val : 'search:' + val;
+  var chName = val.startsWith('UC') && val.length > 20 ? val.substring(0, 16) + '...' : val;
+  var customs = loadCustomYtChannels();
+  if (!customs.find(function(c) { return c.id === chId; })) {
+    customs.push({ name: chName, id: chId });
+    saveCustomYtChannels(customs);
+  }
+  krYtSelected[chId] = chName;
+  input.value = '';
+  renderYtChannelButtons();
+});
+
+renderYtChannelButtons();
+
 function populateKRSelect() {
   var sel = document.getElementById('kr-cultivar-select');
   var html = '<option value="">品種を選択...</option>';
@@ -2999,7 +3072,8 @@ document.getElementById('btn-kr-search').addEventListener('click', async functio
         genus: c.genus,
         type: c.type,
         keywords: keywords,
-        preview: true
+        preview: true,
+        youtube_channels: Object.keys(krYtSelected).length > 0 ? Object.keys(krYtSelected).map(function(id) { return { id: id, name: krYtSelected[id] }; }) : null
       })
     });
     var data = await res.json();
