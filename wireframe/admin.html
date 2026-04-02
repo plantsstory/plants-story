@@ -2908,9 +2908,6 @@ document.getElementById('btn-kr-search').addEventListener('click', async functio
   var c = allCultivars.find(function(x) { return x.id === cultivarId; });
   if (!c) return;
 
-  // Format keywords as research context for the LLM
-  var userText = 'Research keywords: ' + keywords + '. Please investigate the origin of this cultivar using these keywords as search hints. Prioritize English-language academic and horticultural sources.';
-
   document.getElementById('kr-loading').classList.remove('hidden');
   document.getElementById('kr-results').classList.add('hidden');
   krPendingOrigins = null;
@@ -2927,7 +2924,7 @@ document.getElementById('btn-kr-search').addEventListener('click', async functio
         cultivar_name: c.cultivar_name,
         genus: c.genus,
         type: c.type,
-        user_text: userText,
+        keywords: keywords,
         preview: true
       })
     });

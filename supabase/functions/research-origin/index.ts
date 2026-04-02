@@ -1118,7 +1118,7 @@ serve(async (req: Request) => {
       );
     }
 
-    const { cultivar_id, genus, cultivar_name, type, manual_origins, user_text, user_sources, preview } = await req.json();
+    const { cultivar_id, genus, cultivar_name, type, manual_origins, user_text, user_sources, preview, keywords } = await req.json();
 
     if ((!cultivar_id && !preview) || !cultivar_name) {
       return new Response(
@@ -1357,8 +1357,141 @@ serve(async (req: Request) => {
       const cultivarEpithet = epithetMatch ? epithetMatch[1] : cultivar_name.split(/\s+/).slice(1).join(" ");
       const effectiveGenus = genus || parsed.genus;
 
-      // ---- CLONE/Hybrid: Verify user text (no AI generation) ----
+      // ---- CLONE/Hybrid: Keyword research or verify user text ----
       if (plantType === "hybrid" || plantType === "clone") {
+        // Keyword research mode: use research prompts with keywords as hints
+        const keywordsText = (keywords || "").trim();
+        if (keywordsText) {
+          console.log(`[KeywordResearch] Researching ${plantType}: ${cultivar_name} with keywords: ${keywordsText}`);
+
+          let externalData: ExternalData = { wikidata: null, papers: [] };
+          externalData = await gatherExternalData(effectiveGenus, cultivarEpithet);
+          const hasWd = externalData.wikidata ? "yes" : "no";
+          const paperCount = externalData.papers.length;
+          console.log(`[KeywordResearch] External data: wikidata=${hasWd}, papers=${paperCount}`);
+
+          // Use the type-specific research prompt with keywords injected
+          const basePrompt = plantType === "hybrid"
+            ? buildHybridResearchPrompt(cultivar_name, effectiveGenus, externalData)
+            : buildCloneResearchPrompt(cultivar_name, effectiveGenus, externalData);
+
+          const researchPrompt = basePrompt + `\n\n=== ADMIN-PROVIDED KEYWORDS (use as research hints) ===\n${keywordsText}\nUse these keywords to guide your research. They may contain breeder names, years, parentage info, or other relevant details. Verify them against reliable sources before including in your response.`;
+
+          let researchResult: any = null;
+
+          if (geminiApiKey) {
+            try {
+              console.log("[KeywordResearch] Trying Gemini...");
+              const text = await callGemini(geminiApiKey, researchPrompt, 3000);
+              researchResult = extractJson(text);
+              if (researchResult?.origins?.length) {
+                researchSource = "gemini";
+                console.log(`[KeywordResearch] Gemini OK: ${researchResult.origins.length} origins`);
+              } else { researchResult = null; }
+            } catch (e) { console.log("[KeywordResearch] Gemini failed:", String(e)); }
+          }
+
+          if (!researchResult && groqApiKey) {
+            try {
+              console.log("[KeywordResearch] Trying Groq...");
+              const text = await callGroq(groqApiKey, "llama-3.3-70b-versatile",
+                "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
+                researchPrompt, 3000);
+              researchResult = extractJson(text);
+              if (researchResult?.origins?.length) {
+                researchSource = "groq-llama3.3-70b";
+                console.log(`[KeywordResearch] Groq OK`);
+              }
+            } catch (e) { console.log("[KeywordResearch] Groq failed:", String(e)); }
+          }
+
+          if (!researchResult && openaiApiKey) {
+            try {
+              console.log("[KeywordResearch] Trying GPT-4o mini...");
+              const text = await callOpenAI(openaiApiKey,
+                "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
+                researchPrompt, 3000);
+              researchResult = extractJson(text);
+              if (researchResult?.origins?.length) {
+                researchSource = "gpt-4o-mini";
+                console.log(`[KeywordResearch] GPT-4o mini OK`);
+              }
+            } catch (e) { console.log("[KeywordResearch] GPT-4o mini failed:", String(e)); }
+          }
+
+          if (researchResult?.origins?.length) {
+            for (const origin of researchResult.origins) {
+              const tier = origin.source_tier || "D";
+              const aiConf = Math.max(0, Math.min(1, origin.confidence || 0));
+              const tierInfo = TIER_CONFIG[tier] || TIER_CONFIG.D;
+              let trust = Math.round(tierInfo.base_min + (tierInfo.base_max - tierInfo.base_min) * aiConf);
+              trust = Math.max(tierInfo.base_min, Math.min(tierInfo.base_max, trust));
+
+              let bodyJp = origin.description_jp || "";
+              const bodyEn = origin.description_en || "";
+              if (!bodyJp || bodyJp.length < 15) bodyJp = bodyEn;
+
+              let trustClass = "trust--low";
+              if (trust >= 70) trustClass = "trust--high";
+              else if (trust >= 40) trustClass = "trust--mid";
+
+              const sourcesArr: any[] = origin.source_url ? [{ url: origin.source_url, label: origin.source_name }] : [];
+              if (externalData.wikidata) {
+                sourcesArr.push({ url: externalData.wikidata.wikidataUrl, label: "Wikidata" });
+              }
+              for (const paper of externalData.papers) {
+                sourcesArr.push({ url: `https://doi.org/${paper.doi}`, label: `${paper.journal} (${paper.year})` });
+              }
+
+              const citLinks = sourcesArr.filter((s: any) => s.url).map((s: any) => ({ url: s.url, label: s.label || s.url }));
+              const structuredEntry: any = { origin_type: plantType, notes: bodyJp, citation_links: citLinks };
+
+              if (plantType === "clone") {
+                structuredEntry.namer = origin.discoverer_or_breeder || "不明";
+                structuredEntry.naming_year = origin.discovery_year || null;
+                if (origin.parentage) {
+                  const parts = (origin.parentage || "").split(/\s*[×x]\s*/i);
+                  structuredEntry.formula = { parentA: parts[0] || "", parentB: parts[1] || "" };
+                }
+              } else if (plantType === "hybrid") {
+                structuredEntry.breeder = origin.discoverer_or_breeder || "不明";
+                structuredEntry.naming_year = origin.discovery_year || null;
+                if (origin.parentage) {
+                  const parts = (origin.parentage || "").split(/\s*[×x]\s*/i);
+                  structuredEntry.formula = { parentA: parts[0] || "", parentB: parts[1] || "" };
+                }
+              }
+
+              originEntries.push({
+                body: bodyJp,
+                body_en: bodyEn,
+                trust,
+                trustClass,
+                source_type: "ai_research",
+                source_tier: tier,
+                source_tier_label_en: tierInfo.label_en,
+                source_tier_label_jp: tierInfo.label_jp,
+                source_name: origin.source_name || "",
+                source_url: origin.source_url || "",
+                source_language: "en",
+                parentage: origin.parentage || null,
+                discovery_year: origin.discovery_year || null,
+                discoverer_or_breeder: origin.discoverer_or_breeder || null,
+                native_region: origin.native_region || null,
+                first_description: origin.first_description || null,
+                structured: structuredEntry,
+                author: {
+                  name: researchSource === "gemini" ? "AI (Gemini 2.0 Flash)" : researchSource === "gpt-4o-mini" ? "AI (GPT-4o mini)" : "AI (Llama 3.3 70B)",
+                  isAI: true,
+                  date: new Date().toISOString().split("T")[0],
+                },
+                sources: sourcesArr,
+                votes: { agree: 0, disagree: 0 },
+                verified: false,
+              });
+            }
+          }
+        } else {
         // Resolve user text: prefer passed user_text, fallback to DB manual origins
         let effectiveUserText = (user_text || "").trim();
         let effectiveUserSources: string[] = Array.isArray(user_sources) ? user_sources.filter(Boolean) : [];
@@ -1642,6 +1775,7 @@ serve(async (req: Request) => {
             console.log(`[Verify] Removed ${before - preservedOrigins.length} duplicate origins, kept ${preservedOrigins.length}`);
           }
         }
+        } // end of keyword-research else (verification path)
 
       // ---- Species fallback: AI generation (unchanged) ----
       } else {
