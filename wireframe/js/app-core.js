@@ -411,6 +411,10 @@ function navigateTo(page, options, pushHistory) {
   if (pushHistory !== false) {
     var hash = buildHash(page, options);
     history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar, userId: options.userId, username: options.username }, '', hash);
+    // Send GA4 page view for SPA navigation
+    if (typeof gtag === 'function') {
+      gtag('event', 'page_view', { page_location: location.href, page_title: document.title });
+    }
   }
 }
 
