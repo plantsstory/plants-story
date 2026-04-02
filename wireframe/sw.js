@@ -1,5 +1,5 @@
 // Service Worker for Plants Story PWA
-var CACHE_VERSION = 'plants-story-v8';
+var CACHE_VERSION = 'plants-story-v9';
 var STATIC_ASSETS = [
   './',
   './index.html',
@@ -29,7 +29,7 @@ self.addEventListener('install', function(event) {
   );
 });
 
-// Activate: clean old caches
+// Activate: clean old caches and notify clients to reload
 self.addEventListener('activate', function(event) {
   event.waitUntil(
     caches.keys().then(function(keys) {
@@ -39,52 +39,45 @@ self.addEventListener('activate', function(event) {
       );
     }).then(function() {
       return self.clients.claim();
+    }).then(function() {
+      // Notify all clients that a new version is active
+      return self.clients.matchAll().then(function(clients) {
+        clients.forEach(function(client) {
+          client.postMessage({ type: 'SW_UPDATED' });
+        });
+      });
     })
   );
 });
 
-// Fetch strategy
+// Fetch strategy: network-first for everything (cache only as offline fallback)
 self.addEventListener('fetch', function(event) {
   var url = new URL(event.request.url);
 
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
 
-  // Skip Supabase API calls and external resources (always network)
+  // Skip external resources (Supabase API, CDNs, etc.) — always network
   if (url.hostname !== self.location.hostname) return;
 
-  // For navigation requests (HTML): network-first with cache fallback
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).then(function(response) {
-        var clone = response.clone();
-        caches.open(CACHE_VERSION).then(function(cache) {
-          cache.put(event.request, clone);
-        });
-        return response;
-      }).catch(function() {
-        return caches.match(event.request).then(function(cached) {
-          return cached || caches.match('./index.html');
-        });
-      })
-    );
-    return;
-  }
-
-  // For static assets: stale-while-revalidate
-  // Return cached version immediately, then update cache in background
+  // Network-first: try network, fall back to cache for offline support
   event.respondWith(
-    caches.open(CACHE_VERSION).then(function(cache) {
-      return cache.match(event.request).then(function(cached) {
-        var fetchPromise = fetch(event.request).then(function(response) {
-          if (response.ok) {
-            cache.put(event.request, response.clone());
-          }
-          return response;
-        }).catch(function() {
-          return cached;
-        });
-        return cached || fetchPromise;
+    fetch(event.request).then(function(response) {
+      // Cache the fresh response for offline use
+      var clone = response.clone();
+      caches.open(CACHE_VERSION).then(function(cache) {
+        cache.put(event.request, clone);
+      });
+      return response;
+    }).catch(function() {
+      // Offline: serve from cache
+      return caches.match(event.request).then(function(cached) {
+        if (cached) return cached;
+        // For navigation requests, fall back to cached index.html (SPA)
+        if (event.request.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
+        return cached;
       });
     })
   );
