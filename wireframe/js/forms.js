@@ -929,17 +929,17 @@ document.addEventListener('click', function(e) {
     if (!aiContainer) return;
     var checkedRadio = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
     var currentType = checkedRadio ? checkedRadio.value : 'species';
-    aiContainer.style.display = (currentType === 'species') ? '' : 'none';
+    aiContainer.classList.toggle('d-none', currentType !== 'species');
   }
 
   function showTypeFields(type) {
-    if (speciesFields) speciesFields.style.display = type === 'species' ? '' : 'none';
-    if (cloneFields) cloneFields.style.display = type === 'clone' ? '' : 'none';
-    if (hybridFields) hybridFields.style.display = type === 'hybrid' ? '' : 'none';
-    if (seedlingFields) seedlingFields.style.display = type === 'seedling' ? '' : 'none';
+    if (speciesFields) speciesFields.classList.toggle('d-none', type !== 'species');
+    if (cloneFields) cloneFields.classList.toggle('d-none', type !== 'clone');
+    if (hybridFields) hybridFields.classList.toggle('d-none', type !== 'hybrid');
+    if (seedlingFields) seedlingFields.classList.toggle('d-none', type !== 'seedling');
     // Show/hide clone image hint
     var cloneImageHint = document.getElementById('clone-image-hint');
-    if (cloneImageHint) cloneImageHint.style.display = type === 'clone' ? '' : 'none';
+    if (cloneImageHint) cloneImageHint.classList.toggle('d-none', type !== 'clone');
     // Re-render image preview to switch between clone select UI and normal text input
     if (typeof renderContributePreview === 'function' && document.getElementById('contribute-preview') && document.getElementById('contribute-preview').children.length > 0) {
       renderContributePreview();
@@ -947,13 +947,13 @@ document.addEventListener('click', function(e) {
     // Show/hide species subcategory chips and reset to default when switching back
     var subcatContainer = document.getElementById('species-subcategory');
     if (subcatContainer) {
-      subcatContainer.style.display = type === 'species' ? '' : 'none';
+      subcatContainer.classList.toggle('d-none', type !== 'species');
       if (type === 'species') setSubcategory('species');
     }
     if (originAiHint) {
-      if (type === 'species') { originAiHint.textContent = 'AIが自動で由来を調査します'; originAiHint.style.display = ''; }
-      else if (type === 'seedling') { originAiHint.style.display = 'none'; }
-      else { originAiHint.textContent = '由来を記入するとAIが内容を検証し、信頼度スコアを算出します'; originAiHint.style.display = ''; }
+      if (type === 'species') { originAiHint.textContent = 'AIが自動で由来を調査します'; originAiHint.classList.remove('d-none'); }
+      else if (type === 'seedling') { originAiHint.classList.add('d-none'); }
+      else { originAiHint.textContent = '由来を記入するとAIが内容を検証し、信頼度スコアを算出します'; originAiHint.classList.remove('d-none'); }
     }
     updateAiAutofillVisibility();
   }
