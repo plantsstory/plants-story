@@ -1160,10 +1160,11 @@ serve(async (req: Request) => {
       );
     }
 
-    // Skip post-registration AI research for species (only allow preview mode for auto-fill button)
-    if (type === "species" && !preview) {
+    // For species: allow both preview mode (auto-fill button) and re-research (admin with cultivar_id)
+    // Only block if neither preview nor cultivar_id is provided
+    if (type === "species" && !preview && !cultivar_id) {
       return new Response(
-        JSON.stringify({ success: false, reason: "Species uses pre-registration auto-fill only" }),
+        JSON.stringify({ success: false, reason: "Species requires preview mode or cultivar_id for research" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
