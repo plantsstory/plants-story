@@ -191,17 +191,17 @@ if (formulaUnknown && formulaInputs) {
 // i18n TRANSLATION SYSTEM
 // ========================================
 var translations = {};
-// Load translations from external JSON (sync to ensure t() works immediately)
-(function() {
-  try {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'i18n/translations.json', false);
-    xhr.send();
-    if (xhr.status === 200) translations = JSON.parse(xhr.responseText);
-  } catch(e) {}
-})();
-
 var currentLang = localStorage.getItem('plants-story-lang') || 'jp';
+
+// Load translations asynchronously (non-blocking)
+var _translationsReady = fetch('i18n/translations.json')
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    translations = data;
+    // Apply language once translations are loaded
+    applyLanguage(currentLang);
+  })
+  .catch(function() {});
 
 function t(key) {
   var entry = translations[key];
@@ -314,10 +314,7 @@ document.querySelector('.header__lang').addEventListener('click', function() {
   applyLanguage(currentLang === 'jp' ? 'en' : 'jp');
 });
 
-// Apply saved language on load
-if (currentLang !== 'jp') {
-  applyLanguage(currentLang);
-}
+// Language is applied after translations load (see _translationsReady above)
 
 // ========================================
 // SORT FUNCTIONALITY (event delegation for dynamic content)
