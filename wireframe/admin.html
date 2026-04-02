@@ -1221,9 +1221,7 @@ function structuredSummaryHtml(s, cType, origin) {
       if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
     }
     if (s.notes) {
-      var notesShort = s.notes.substring(0, 30);
-      if (s.notes.length > 30) notesShort += '...';
-      parts.push('<b>補足:</b> ' + escapeHtml(notesShort));
+      parts.push('<b>補足:</b> ' + escapeHtml(s.notes));
     }
     if (s.citation_links && s.citation_links.length) {
       parts.push('<b>引用:</b> ' + s.citation_links.length + '件');
