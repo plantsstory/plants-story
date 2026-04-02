@@ -81,6 +81,23 @@ function showToast(msg, isError) {
   setTimeout(function() { toast.classList.remove('show'); setTimeout(function() { toast.remove(); }, 300); }, 3000);
 }
 
+// Submit guard: prevents double submission on buttons
+function guardSubmit(btn, asyncFn) {
+  if (btn.disabled) return;
+  btn.disabled = true;
+  var origText = btn.textContent;
+  btn.textContent = '処理中...';
+  Promise.resolve(asyncFn()).then(function() {
+    btn.disabled = false;
+    btn.textContent = origText;
+  }).catch(function(e) {
+    btn.disabled = false;
+    btn.textContent = origText;
+    showToast(e.message || 'エラーが発生しました', true);
+  });
+}
+window.guardSubmit = guardSubmit;
+
 // Page navigation
 var _siteBase = 'https://plantsstory.github.io/plants-story/';
 var _defaultTitle = 'ひなたぼっこぷらんつ - Plants Story';
@@ -1507,6 +1524,7 @@ var cultivarData = {
       }
     }).catch(function(err) {
       console.error('AI research trigger error:', err);
+      showToast('AI検証の開始に失敗しました', true);
     });
   }
 

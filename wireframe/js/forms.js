@@ -1368,6 +1368,7 @@ document.addEventListener('click', function(e) {
             if (paths[1]) updatedFormula.fatherPhoto = paths[1];
           }).catch(function(err) {
             console.warn('Parent photo upload failed:', err);
+            showToast('親株写真のアップロードに失敗しました', true);
           });
         } else {
           editParentPhotoPromise = Promise.resolve();
@@ -1668,6 +1669,7 @@ document.addEventListener('click', function(e) {
           }
         }).catch(function(err) {
           console.warn('Parent photo upload failed:', err);
+          showToast('親株写真のアップロードに失敗しました', true);
         });
       } else {
         photoUploadPromise = Promise.resolve();
@@ -1702,6 +1704,7 @@ document.addEventListener('click', function(e) {
           finishSubmit();
         } catch (finishErr) {
           console.error('finishSubmit error:', finishErr);
+          showToast('登録処理でエラーが発生しました', true);
         }
         if (typeof window.loadCultivarThumbnails === 'function') {
           setTimeout(window.loadCultivarThumbnails, 500);
@@ -2461,6 +2464,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
           if (h1) renderGalleryForCultivar(h1.textContent);
         }).catch(function(err) {
           console.warn('Vote failed:', err);
+          showToast('投票に失敗しました', true);
         });
         return;
       }

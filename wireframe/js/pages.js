@@ -1639,6 +1639,7 @@ function globalSearch(query) {
     }).catch(function(err) {
       console.error('search_profiles exception:', err);
       if (userSection) userSection.style.display = 'none';
+      showToast('ユーザー検索に失敗しました', true);
     });
   }
 
