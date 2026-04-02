@@ -88,6 +88,34 @@
             <div class="stat-label">AIリサーチ待ち</div>
           </div>
         </div>
+        <!-- サイト状況 -->
+        <h3 class="section-heading">サイト状況</h3>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-users">-</div>
+            <div class="stat-label">登録ユーザー数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-images">-</div>
+            <div class="stat-label">画像数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-storage">-</div>
+            <div class="stat-label">Storage使用量</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-subscribers">-</div>
+            <div class="stat-label">有料サブスク</div>
+          </div>
+        </div>
+        <div class="stat-grid" style="margin-top:var(--space-md);">
+          <div class="stat-card" style="grid-column:1/-1;">
+            <div class="stat-label" style="margin-bottom:var(--space-sm);">📊 Google Analytics（PV・ユーザー数）</div>
+            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin:0;">GA4ダッシュボードで確認してください。リアルタイム・PV・ユーザー数・流入元が確認できます。</p>
+            <a href="https://analytics.google.com/" target="_blank" rel="noopener" class="btn btn-primary btn-sm" style="margin-top:var(--space-sm);">GA4を開く →</a>
+          </div>
+        </div>
+
         <h3 class="section-heading">Tier分布</h3>
         <div id="tier-distribution" class="d-flex gap-sm mb-xl flex-wrap"></div>
         <h3 class="section-heading">属別品種数</h3>
@@ -825,6 +853,42 @@ async function loadDashboard() {
     genusHtml += '</div>';
   });
   document.getElementById('genus-distribution').innerHTML = genusHtml;
+
+  // Load site stats (users, images, storage, subscribers)
+  loadSiteStats();
+}
+
+async function loadSiteStats() {
+  // User count
+  try {
+    var userRes = await sb.rpc('get_user_count');
+    if (!userRes.error && userRes.data !== null) {
+      document.getElementById('stat-users').textContent = userRes.data;
+    } else {
+      // Fallback: count profiles
+      var profileRes = await sb.from('profiles').select('id', { count: 'exact', head: true });
+      document.getElementById('stat-users').textContent = profileRes.count || '-';
+    }
+  } catch(e) { document.getElementById('stat-users').textContent = '-'; }
+
+  // Image count
+  try {
+    var imgRes = await sb.from('cultivar_images').select('id', { count: 'exact', head: true });
+    document.getElementById('stat-images').textContent = imgRes.count !== null ? imgRes.count : '-';
+  } catch(e) { document.getElementById('stat-images').textContent = '-'; }
+
+  // Storage usage estimate (count images * avg size)
+  try {
+    var imgCount = parseInt(document.getElementById('stat-images').textContent, 10) || 0;
+    var estMB = Math.round(imgCount * 0.25); // ~250KB avg per image
+    document.getElementById('stat-storage').textContent = estMB < 1000 ? '~' + estMB + 'MB' : '~' + (estMB / 1000).toFixed(1) + 'GB';
+  } catch(e) { document.getElementById('stat-storage').textContent = '-'; }
+
+  // Active subscribers
+  try {
+    var subRes = await sb.from('subscriptions').select('id', { count: 'exact', head: true }).in('status', ['active', 'trialing']);
+    document.getElementById('stat-subscribers').textContent = subRes.count !== null ? subRes.count : '0';
+  } catch(e) { document.getElementById('stat-subscribers').textContent = '-'; }
 }
 
 // ========================================
