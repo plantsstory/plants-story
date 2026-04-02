@@ -200,7 +200,7 @@ function updateMeta(opts) {
   var desc = opts.description || _defaultDesc;
   var path = opts.path || '';
   var url = _siteBase + (path ? path : '');
-  var image = opts.image || '';
+  var image = opts.image || (_siteBase + 'images/og-default.png');
   document.title = title;
   var metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc) metaDesc.setAttribute('content', desc);
