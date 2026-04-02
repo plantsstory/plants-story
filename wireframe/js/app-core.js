@@ -1289,7 +1289,6 @@ var cultivarData = {
 
   // Show paywall modal
   window.showPaywallModal = showPaywallModal;
-  window.showPaywallModal = showPaywallModal;
   function showPaywallModal() {
     var modal = document.getElementById('paywall-modal');
     if (modal) modal.style.display = 'flex';
@@ -1301,7 +1300,6 @@ var cultivarData = {
   }
 
   // Check seedling access for a given cultivar
-  window.canAccessSeedling = canAccessSeedling;
   window.canAccessSeedling = canAccessSeedling;
   function canAccessSeedling(entry) {
     if (window._isSubscribed) return 'full';
