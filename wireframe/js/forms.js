@@ -872,7 +872,7 @@ document.addEventListener('click', function(e) {
     contributeSources.forEach(function(url, i) {
       var div = document.createElement('div');
       div.className = 'source-list__item';
-      div.innerHTML = '<a href="#">' + url + '</a><span class="source-list__remove" data-source-idx="' + i + '">&times;</span>';
+      div.innerHTML = '<a href="#">' + escHtml(url) + '</a><span class="source-list__remove" data-source-idx="' + i + '">&times;</span>';
       contributeSourceList.appendChild(div);
     });
   }
@@ -1747,7 +1747,7 @@ document.addEventListener('click', function(e) {
       }
       hint.innerHTML = '';
       originSources.forEach(function(u, i) {
-        hint.innerHTML += '<div class="text-sm mt-xs">' + u + ' <span class="cursor-pointer text-dark" data-remove-origin-src="' + i + '">&times;</span></div>';
+        hint.innerHTML += '<div class="text-sm mt-xs">' + escHtml(u) + ' <span class="cursor-pointer text-dark" data-remove-origin-src="' + i + '">&times;</span></div>';
       });
     });
   }
@@ -1762,7 +1762,7 @@ document.addEventListener('click', function(e) {
         if (list) {
           list.innerHTML = '';
           originSources.forEach(function(u, i) {
-            list.innerHTML += '<div class="text-sm mt-xs">' + u + ' <span class="cursor-pointer text-dark" data-remove-origin-src="' + i + '">&times;</span></div>';
+            list.innerHTML += '<div class="text-sm mt-xs">' + escHtml(u) + ' <span class="cursor-pointer text-dark" data-remove-origin-src="' + i + '">&times;</span></div>';
           });
         }
       }

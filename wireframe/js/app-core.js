@@ -71,6 +71,13 @@
   window._flushErrorLogs = flushErrors;
 })();
 
+// HTML escape helper to prevent XSS
+function escHtml(str) {
+  if (!str && str !== 0) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+window.escHtml = escHtml;
+
 // Toast notification helper (non-blocking replacement for alert)
 function showToast(msg, isError) {
   var container = document.getElementById('toast-container');
@@ -1688,7 +1695,7 @@ var cultivarData = {
       : '<svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg>';
     h += '<div class="cultivar-row__thumb' + (locked ? ' seedling-thumb--locked' : '') + '">' + thumbContent + '</div>';
     h += '<div class="cultivar-row__info">';
-    h += '<div class="cultivar-row__name" data-key="' + fullName.replace(/"/g, '&quot;') + '">' + displayName + '</div>';
+    h += '<div class="cultivar-row__name" data-key="' + escHtml(fullName) + '">' + escHtml(displayName) + '</div>';
     h += '<div class="cultivar-row__meta">';
     if (!isSeedling) h += '<span>' + t('origin_prefix') + originCount + t('origin_count_suffix') + '</span>';
     h += '<span class="badge ' + bi.cls + '">' + bi.txt + '</span>';
@@ -1697,13 +1704,13 @@ var cultivarData = {
     if (!isSeedling) h += '<div class="trust"><div class="trust__bar"><div class="trust__fill trust--low" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + (hasDesc ? trustPct + '%' : '-') + '</span></div>';
     h += '</div>';
     if (entry.formula && !locked) {
-      h += '<div class="text-sm text-muted mt-sm"><span class="formula-parent formula-parent--sm">' + entry.formula.parentA + '</span><span class="formula-operator formula-operator--sm">&times;</span><span class="formula-parent formula-parent--sm">' + entry.formula.parentB + '</span></div>';
+      h += '<div class="text-sm text-muted mt-sm"><span class="formula-parent formula-parent--sm">' + escHtml(entry.formula.parentA) + '</span><span class="formula-operator formula-operator--sm">&times;</span><span class="formula-parent formula-parent--sm">' + escHtml(entry.formula.parentB) + '</span></div>';
     }
     if (isSeedling && entry._creatorName && !locked) {
-      h += '<div class="text-xs text-muted mt-xs">作出者: ' + entry._creatorName + '</div>';
+      h += '<div class="text-xs text-muted mt-xs">作出者: ' + escHtml(entry._creatorName) + '</div>';
     }
     if (isSeedling && entry._userId && entry._posterName && !locked) {
-      h += '<div class="text-xs mt-xs"><a href="#/profile/' + entry._userId + '" class="poster-link" onclick="event.stopPropagation();">&#x1F464; ' + entry._posterName + '</a></div>';
+      h += '<div class="text-xs mt-xs"><a href="#/profile/' + escHtml(entry._userId) + '" class="poster-link" onclick="event.stopPropagation();">&#x1F464; ' + escHtml(entry._posterName) + '</a></div>';
     }
     h += '</div></div>';
     return h;

@@ -10,7 +10,7 @@
   function renderAvatar(el, url) {
     if (!el) return;
     if (url) {
-      el.innerHTML = '<img src="' + url + '" alt="avatar">';
+      el.innerHTML = '<img src="' + escHtml(url) + '" alt="avatar">';
     } else {
       el.innerHTML = defaultAvatarSvg;
     }
@@ -22,12 +22,12 @@
     if (profile.sns_instagram) {
       var igUrl = profile.sns_instagram.indexOf('http') === 0 ? profile.sns_instagram :
         'https://www.instagram.com/' + profile.sns_instagram.replace(/^@/, '');
-      html += '<a href="' + igUrl + '" target="_blank" rel="noopener" class="profile-sns__ig" title="Instagram"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg></a>';
+      html += '<a href="' + escHtml(igUrl) + '" target="_blank" rel="noopener" class="profile-sns__ig" title="Instagram"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg></a>';
     }
     if (profile.sns_twitter) {
       var twUrl = profile.sns_twitter.indexOf('http') === 0 ? profile.sns_twitter :
         'https://x.com/' + profile.sns_twitter.replace(/^@/, '');
-      html += '<a href="' + twUrl + '" target="_blank" rel="noopener" class="profile-sns__x" title="X"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>';
+      html += '<a href="' + escHtml(twUrl) + '" target="_blank" rel="noopener" class="profile-sns__x" title="X"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>';
     }
     el.innerHTML = html;
   }
@@ -76,8 +76,8 @@
         var date = row.created_at ? new Date(row.created_at).toLocaleDateString('ja-JP') : '';
         card.innerHTML = '<div class="d-flex justify-between items-center">' +
           '<div><span class="badge badge--seedling badge--type-sm">seedling</span>' +
-          '<strong>' + displayName + '</strong></div>' +
-          '<span class="text-xs text-muted">' + date + '</span></div>';
+          '<strong>' + escHtml(displayName) + '</strong></div>' +
+          '<span class="text-xs text-muted">' + escHtml(date) + '</span></div>';
         card.addEventListener('click', function() {
           window.navigateToCultivarById(row.id, row.genus, displayName.replace(row.genus + ' ', ''));
         });
@@ -1612,26 +1612,26 @@ function globalSearch(query) {
       // Render user results
       var html = '';
       users.forEach(function(u) {
-        var profileUrl = u.username ? '#/profile/@' + u.username : '#/profile/' + u.id;
+        var profileUrl = u.username ? '#/profile/@' + escHtml(u.username) : '#/profile/' + escHtml(u.id);
         var avatarHtml = '';
         if (u.avatar_url) {
-          avatarHtml = '<img src="' + u.avatar_url + '" class="avatar-sm" alt="">';
+          avatarHtml = '<img src="' + escHtml(u.avatar_url) + '" class="avatar-sm" alt="">';
         } else {
-          avatarHtml = '<div class="avatar-placeholder-sm">' + (u.display_name ? u.display_name.charAt(0).toUpperCase() : '?') + '</div>';
+          avatarHtml = '<div class="avatar-placeholder-sm">' + (u.display_name ? escHtml(u.display_name.charAt(0).toUpperCase()) : '?') + '</div>';
         }
         html += '<a href="' + profileUrl + '" class="user-list-item">';
         html += avatarHtml;
         html += '<div class="flex-1 min-w-0">';
-        html += '<div class="font-semibold">' + (u.display_name || '名前未設定') + '</div>';
+        html += '<div class="font-semibold">' + escHtml(u.display_name || '名前未設定') + '</div>';
         if (u.username) {
-          html += '<div class="text-sm text-muted">@' + u.username + '</div>';
+          html += '<div class="text-sm text-muted">@' + escHtml(u.username) + '</div>';
         }
         if (u.bio) {
           var bioShort = u.bio.length > 60 ? u.bio.substring(0, 60) + '...' : u.bio;
-          html += '<div class="font-xs-btn text-muted" style="margin-top:2px">' + bioShort + '</div>';
+          html += '<div class="font-xs-btn text-muted" style="margin-top:2px">' + escHtml(bioShort) + '</div>';
         }
         html += '</div>';
-        html += '<div class="font-xs-btn text-muted whitespace-nowrap">' + u.post_count + ' 投稿</div>';
+        html += '<div class="font-xs-btn text-muted whitespace-nowrap">' + escHtml(u.post_count) + ' 投稿</div>';
         html += '</a>';
       });
       if (userList) userList.innerHTML = html;
