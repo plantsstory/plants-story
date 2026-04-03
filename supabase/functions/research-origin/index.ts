@@ -1089,9 +1089,9 @@ function buildKeywordResearchPrompt(
   return `You are an expert plant researcher investigating the origin of the ${typeLabel} cultivar "${cultivarName}" (genus: ${genus}).
 
 === ADMIN-PROVIDED KEYWORDS ===
-${keywords}
+${keywords || '(none provided — research using the cultivar name and genus only)'}
 
-Use these keywords as primary research hints. They may contain breeder names, years, parentage, geographic origin, or other clues.
+${keywords ? 'Use these keywords as primary research hints. They may contain breeder names, years, parentage, geographic origin, or other clues.' : 'No keywords provided. Research using the full cultivar name "' + cultivarName + '" and genus "' + genus + '" as your primary search terms.'}
 ${externalContext}
 === IMPORTANT CONTEXT ===
 Clone and Hybrid cultivars are RARELY registered in academic databases (IPNI, POWO).
@@ -1552,10 +1552,13 @@ serve(async (req: Request) => {
 
       // ---- CLONE/Hybrid: Keyword research or verify user text ----
       if (plantType === "hybrid" || plantType === "clone") {
-        // Keyword research mode: use research prompts with keywords as hints
+        // Keyword research mode: use research prompts with optional keywords as hints
+        // Also triggers when no user_text and no keywords (pure name-based research)
         const keywordsText = (keywords || "").trim();
-        if (keywordsText) {
-          console.log(`[KeywordResearch] Researching ${plantType}: ${cultivar_name} with keywords: ${keywordsText}`);
+        const hasYtChannels = Array.isArray(youtube_channels) && youtube_channels.length > 0;
+        const useKeywordResearch = keywordsText || hasYtChannels || (!user_text && !preservedOrigins.some((o: any) => o.source_type === "manual" || (o.author && o.author.isAI === false)));
+        if (useKeywordResearch) {
+          console.log(`[KeywordResearch] Researching ${plantType}: ${cultivar_name} with keywords: ${keywordsText || '(none, name-based)'}`);
 
           // Gather external data + YouTube in parallel
           let externalData: ExternalData = { wikidata: null, papers: [] };

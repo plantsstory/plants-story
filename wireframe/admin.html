@@ -3050,7 +3050,6 @@ document.getElementById('btn-kr-search').addEventListener('click', async functio
   var cultivarId = parseInt(document.getElementById('kr-cultivar-select').value);
   var keywords = document.getElementById('kr-keywords').value.trim();
   if (!cultivarId) { toast('品種を選択してください'); return; }
-  if (!keywords) { toast('キーワードを入力してください'); return; }
 
   var c = allCultivars.find(function(x) { return x.id === cultivarId; });
   if (!c) return;
