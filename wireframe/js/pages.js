@@ -1306,13 +1306,14 @@ function updateCultivarDetail(cultivarName, rowEl) {
     }
   }
 
-  // If logged-in user owns this cultivar, hide edit key input
+  // Show edit button only for logged-in owner
   var editKeySection = document.getElementById('edit-key-section');
-  var detailEditKeyInput = document.getElementById('detail-edit-key');
-  if (editKeySection && window._currentUser && cData && cData._userId === window._currentUser.id) {
-    if (detailEditKeyInput) detailEditKeyInput.style.display = 'none';
-  } else {
-    if (detailEditKeyInput) detailEditKeyInput.style.display = '';
+  if (editKeySection) {
+    if (window._currentUser && cData && cData._userId === window._currentUser.id) {
+      editKeySection.style.display = '';
+    } else {
+      editKeySection.style.display = 'none';
+    }
   }
 
   // Render origins dynamically
@@ -1790,14 +1791,12 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// Edit button on cultivar detail page - verify edit key before entering edit mode
+// Edit button on cultivar detail page - require login
 (function() {
   document.addEventListener('click', function(e) {
     var editBtn = e.target.closest('#detail-edit-btn');
     if (!editBtn) return;
     e.preventDefault();
-    var editKeyInput = document.getElementById('detail-edit-key');
-    var editKey = editKeyInput ? editKeyInput.value.trim() : '';
     var detailH1 = document.querySelector('#page-cultivar h1');
     var cultivarName = detailH1 ? detailH1.textContent : '';
     if (!cultivarName) { showToast('品種が見つかりません', true); return; }
@@ -1807,7 +1806,11 @@ document.addEventListener('click', function(e) {
       cultivarName = cultivarName + ' [Seedling]';
     }
 
-    // Verify edit key via Supabase RPC
+    if (!window._currentUser) {
+      showToast('編集するにはログインが必要です', true);
+      return;
+    }
+
     var sbClient = window._supabaseClient;
     if (!sbClient) {
       showToast('データベース接続エラー', true);
@@ -1817,46 +1820,29 @@ document.addEventListener('click', function(e) {
     editBtn.disabled = true;
     editBtn.style.opacity = '0.5';
 
-    // Use stored cultivar ID if available, otherwise search by name
     var storedId = document.getElementById('page-cultivar').getAttribute('data-cultivar-id');
     var query;
     if (storedId) {
-      query = sbClient.from('cultivars').select('id, edit_key_hash, user_id').eq('id', storedId).limit(1);
+      query = sbClient.from('cultivars').select('id, user_id').eq('id', storedId).limit(1);
     } else {
-      query = sbClient.from('cultivars').select('id, edit_key_hash, user_id').eq('cultivar_name', cultivarName).limit(1);
+      query = sbClient.from('cultivars').select('id, user_id').eq('cultivar_name', cultivarName).limit(1);
     }
     query.then(function(res) {
       if (res.error) throw new Error(res.error.message);
       if (!res.data || res.data.length === 0) throw new Error('品種が見つかりません');
       var row = res.data[0];
 
-      // If logged-in user owns this cultivar, skip edit key
-      if (window._currentUser && row.user_id && window._currentUser.id === row.user_id) {
+      // Allow if owner (admin check is done server-side in RPC)
+      if (row.user_id && window._currentUser.id === row.user_id) {
         return row.id;
       }
-
-      // Otherwise require edit key
-      if (!editKey || editKey.length !== 4) {
-        throw new Error('4桁の編集キーを入力してください');
-      }
-      var storedHash = row.edit_key_hash;
-      if (!storedHash) throw new Error('この品種には編集キーが設定されていません');
-
-      var encoder = new TextEncoder();
-      var keyData = encoder.encode(editKey);
-      return crypto.subtle.digest('SHA-256', keyData).then(function(buffer) {
-        var hashArray = Array.from(new Uint8Array(buffer));
-        var inputHash = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-        if (inputHash !== storedHash) throw new Error('編集キーが正しくありません');
-        return row.id;
-      });
+      throw new Error('この品種の編集権限がありません');
     }).then(function(cultivarId) {
       editBtn.disabled = false;
       editBtn.style.opacity = '';
-      // Key verified - navigate to edit page
       navigateTo('contribute', { _editFlow: true });
       if (typeof window.enterEditMode === 'function') {
-        window.enterEditMode(cultivarName, editKey, cultivarId);
+        window.enterEditMode(cultivarName, null, cultivarId);
       }
     }).catch(function(err) {
       editBtn.disabled = false;

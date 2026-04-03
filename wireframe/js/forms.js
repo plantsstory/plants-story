@@ -452,12 +452,11 @@ document.addEventListener('click', function(e) {
   var editMode = false;
   var editCultivarKey = null; // original full name (key in cultivarData)
   var editCultivarId = null;  // DB id for delete
-  var verifiedEditKey = null; // edit key verified on detail page
   var contributePageTitle = document.getElementById('contribute-page-title');
   var contributePageDesc = document.getElementById('contribute-page-desc');
   var contributeSubmitBtn = document.getElementById('contribute-submit-btn');
 
-  window.enterEditMode = function(cultivarName, editKeyFromDetail, cultivarIdFromDetail) {
+  window.enterEditMode = function(cultivarName, _unused, cultivarIdFromDetail) {
     // Find the cultivar in data - try exact match first, then with [Seedling] suffix
     var data = cultivarData[cultivarName] || cultivarData[cultivarName + ' [Seedling]'];
     var key = cultivarData[cultivarName] ? cultivarName : (cultivarData[cultivarName + ' [Seedling]'] ? cultivarName + ' [Seedling]' : null);
@@ -486,7 +485,6 @@ document.addEventListener('click', function(e) {
     editMode = true;
     editCultivarKey = key;
     editCultivarId = cultivarIdFromDetail || null;
-    verifiedEditKey = editKeyFromDetail || null;
 
     // Update page title and button
     if (contributePageTitle) contributePageTitle.textContent = t('edit_title');
@@ -722,11 +720,7 @@ document.addEventListener('click', function(e) {
     // Disable type radios
     document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(r) { r.disabled = true; });
 
-    // Hide edit key card in edit mode (already verified on detail page)
-    var editKeyCard = document.getElementById('edit-key-card');
-    if (editKeyCard) editKeyCard.style.display = 'none';
-
-    // Unlock genus, name, type fields (key was already verified)
+    // Unlock genus, name, type fields
     if (contributeGenus) contributeGenus.disabled = false;
     if (contributeName) contributeName.disabled = false;
     document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(r) { r.disabled = false; });
@@ -750,17 +744,6 @@ document.addEventListener('click', function(e) {
     if (contributeGenus) contributeGenus.disabled = false;
     if (contributeName) contributeName.disabled = false;
     document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(r) { r.disabled = false; });
-
-    // Clear edit key and restore card/hints
-    verifiedEditKey = null;
-    var editKeyCard = document.getElementById('edit-key-card');
-    if (editKeyCard) editKeyCard.style.display = window._currentUser ? 'none' : '';
-    var editKeyInput = document.getElementById('edit-key-input');
-    if (editKeyInput) editKeyInput.value = '';
-    var editKeyHint = document.getElementById('edit-key-hint');
-    var editKeyHintEdit = document.getElementById('edit-key-hint-edit');
-    if (editKeyHint) editKeyHint.style.display = '';
-    if (editKeyHintEdit) editKeyHintEdit.style.display = 'none';
 
     // Reset form
     if (contributeName) contributeName.value = '';
@@ -818,28 +801,15 @@ document.addEventListener('click', function(e) {
 
     var sbClient = window._supabaseClient;
     if (!sbClient) { showToast('データベース接続エラー', true); return; }
-    if (!verifiedEditKey && !window._currentUser) { showToast('編集キーが未検証です', true); return; }
+    if (!window._currentUser) { showToast('削除するにはログインが必要です', true); return; }
     if (!editCultivarId) { showToast('品種IDが不明です', true); return; }
 
     btn.disabled = true;
     btn.textContent = '削除中...';
 
-    var deletePromise;
-    if (verifiedEditKey) {
-      var keyData = new TextEncoder().encode(verifiedEditKey);
-      deletePromise = crypto.subtle.digest('SHA-256', keyData).then(function(buffer) {
-        var hashArray = Array.from(new Uint8Array(buffer));
-        var inputHash = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-        return sbClient.rpc('delete_with_edit_key_hash', {
-          p_cultivar_id: editCultivarId,
-          p_edit_key_hash: inputHash
-        });
-      });
-    } else {
-      deletePromise = sbClient.rpc('delete_with_edit_key_hash', {
-        p_cultivar_id: editCultivarId
-      });
-    }
+    var deletePromise = sbClient.rpc('delete_with_edit_key_hash', {
+      p_cultivar_id: editCultivarId
+    });
     deletePromise.then(function(res) {
       if (res.error) throw new Error(res.error.message);
       var result = res.data;
@@ -1179,18 +1149,10 @@ document.addEventListener('click', function(e) {
       if (!genus) { showToast(t('error_genus_required'), true); return; }
       if (!name) { showToast(t('error_name_required'), true); return; }
 
-      // Edit key validation (required for new registration, skip in edit mode or when logged in)
-      if (!editMode && !window._currentUser) {
-        var editKeyInput = document.getElementById('edit-key-input');
-        var editKeyVal = editKeyInput ? editKeyInput.value.trim() : '';
-        if (!editKeyVal) {
-          showToast('編集キーを記入してください', true);
-          return;
-        }
-        if (!/^[0-9]{4}$/.test(editKeyVal)) {
-          showToast('編集キーは4桁の数字で入力してください', true);
-          return;
-        }
+      // Login required
+      if (!window._currentUser) {
+        showToast('投稿するにはログインが必要です', true);
+        return;
       }
 
       // Build full name — strip existing quotes to avoid double-quoting
@@ -1353,7 +1315,6 @@ document.addEventListener('click', function(e) {
         submitBtn.style.opacity = '0.5';
 
         var sbClient = window._supabaseClient;
-        var editKeyValue = verifiedEditKey || '';
         var nameChanged = fullName !== editCultivarKey;
         var isSeedlingEdit = type === 'seedling';
 
@@ -1401,46 +1362,24 @@ document.addEventListener('click', function(e) {
           // Update in Supabase
           var updatePromise;
 
-          if (sbClient && (editKeyValue || window._currentUser)) {
-            // Edit key or logged-in user: use RPC for full update
+          if (sbClient && window._currentUser) {
             var rpcParams = {
               p_cultivar_name: editCultivarKey,
               p_new_cultivar_name: nameChanged ? fullName : null,
               p_new_genus: nameChanged ? genus : null,
               p_new_type: type,
-              p_origins: dbOrigins,
-              p_user_id: window._currentUser ? window._currentUser.id : null
+              p_origins: dbOrigins
             };
-            if (editKeyValue) {
-              var encoder = new TextEncoder();
-              var keyData = encoder.encode(editKeyValue);
-              updatePromise = crypto.subtle.digest('SHA-256', keyData).then(function(buffer) {
-                var hashArray = Array.from(new Uint8Array(buffer));
-                rpcParams.p_edit_key_hash = hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-                return sbClient.rpc('update_with_edit_key_hash', rpcParams);
-              });
-            } else {
-              updatePromise = sbClient.rpc('update_with_edit_key_hash', rpcParams);
-            }
-            updatePromise = updatePromise.then(function(res) {
+            updatePromise = sbClient.rpc('update_with_edit_key_hash', rpcParams).then(function(res) {
               if (res.error) throw new Error(res.error.message);
               var result = res.data;
               if (result && !result.success) throw new Error(result.error || 'Update failed');
             });
           } else if (sbClient) {
-            // No edit key: update only origins (current behavior)
-            if (nameChanged) {
-              submitBtn.disabled = false;
-              submitBtn.style.opacity = '';
-              showToast('品種名を変更するには編集キーが必要です', true);
-              return;
-            }
-            updatePromise = sbClient.from('cultivars')
-              .update({ origins: dbOrigins })
-              .eq('cultivar_name', editCultivarKey)
-              .then(function(res) {
-                if (res.error) throw new Error(res.error.message);
-              });
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '';
+            showToast('編集するにはログインが必要です', true);
+            return;
           } else {
             updatePromise = Promise.resolve();
           }
@@ -1694,13 +1633,9 @@ document.addEventListener('click', function(e) {
       // Gallery uses display name (without [Seedling]) to match h1 and detail page
       var galleryName = fullName.replace(' [Seedling]', '');
 
-      // Get edit key value for new registration
-      var editKeyInput = document.getElementById('edit-key-input');
-      var editKeyValue = editKeyInput ? editKeyInput.value.trim() : '';
-
       // After parent photos are ready, save to DB, upload gallery images, then update UI
       photoUploadPromise.then(function() {
-        return addUserCultivar(fullName, newEntry, { genus: genus, type: type }, editKeyValue || null);
+        return addUserCultivar(fullName, newEntry, { genus: genus, type: type });
       }).then(function() {
         // Upload gallery images after DB record exists
         if (galleryFiles.length > 0 && typeof window.uploadGalleryImage === 'function') {

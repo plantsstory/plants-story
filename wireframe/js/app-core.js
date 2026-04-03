@@ -1246,7 +1246,6 @@ if (false) {
   function updateLoginUI() {
     var benefitsContent = document.getElementById('login-benefits-content');
     var loggedInInfo = document.getElementById('logged-in-info');
-    var editKeyCard = document.getElementById('edit-key-card');
     var headerAuthBtn = document.getElementById('header-auth-btn');
     var navMypost = document.getElementById('nav-mypost');
     // Update header auth button and nav auth link
@@ -1293,11 +1292,9 @@ if (false) {
         loggedInInfo.style.gap = 'var(--space-md)';
         loggedInInfo.style.flexWrap = 'wrap';
         document.getElementById('logged-in-email').textContent = window._currentUser.email || '';
-        if (editKeyCard) editKeyCard.style.display = 'none';
       } else {
         benefitsContent.style.display = 'flex';
         loggedInInfo.style.display = 'none';
-        if (editKeyCard) editKeyCard.style.display = '';
       }
     }
   }
@@ -1576,20 +1573,9 @@ if (false) {
     safeLSSet(STORAGE_KEY, JSON.stringify(saved));
   };
 
-  // SHA256 hash helper (returns hex string)
-  function sha256(text) {
-    var encoder = new TextEncoder();
-    var data = encoder.encode(text);
-    return crypto.subtle.digest('SHA-256', data).then(function(buffer) {
-      var hashArray = Array.from(new Uint8Array(buffer));
-      return hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-    });
-  }
-
   // Add cultivar to both Supabase and localStorage
   // Returns a Promise that resolves on success, rejects on DB error
-  // editKey: optional 4-digit edit key string
-  window.addUserCultivar = function(fullName, entry, meta, editKey) {
+  window.addUserCultivar = function(fullName, entry, meta) {
     if (supabase) {
       var isSeedling = meta.type === 'seedling';
       var originsData = JSON.parse(JSON.stringify(entry.origins || []));
@@ -1597,20 +1583,14 @@ if (false) {
         originsData.push({ _type: 'formula', formula: entry.formula });
       }
 
-      // Hash edit key client-side, then insert via RPC (SECURITY DEFINER)
-      var hashPromise = editKey ? sha256(editKey) : Promise.resolve(null);
-      var insertPromise = Promise.all([hashPromise, getUserIp()]).then(function(results) {
-        var editKeyHash = results[0];
-        var userIp = results[1];
+      var insertPromise = getUserIp().then(function(userIp) {
         return supabase.rpc('insert_with_edit_key_hash', {
           p_genus: meta.genus,
           p_cultivar_name: fullName,
           p_type: meta.type || 'Hybrid',
           p_origins: originsData,
-          p_edit_key_hash: editKeyHash,
           p_ai_status: meta.type === 'species' ? 'completed' : null,
-          p_created_ip: userIp,
-          p_user_id: window._currentUser ? window._currentUser.id : null
+          p_created_ip: userIp
         });
       });
 
