@@ -1,5 +1,5 @@
 // Service Worker for Plants Story PWA
-var CACHE_VERSION = 'plants-story-v19';
+var CACHE_VERSION = 'plants-story-v20';
 var STATIC_ASSETS = [
   './',
   './index.html',
@@ -50,7 +50,7 @@ self.addEventListener('activate', function(event) {
   );
 });
 
-// Fetch strategy: network-first for everything (cache only as offline fallback)
+// Fetch strategy: network-first with SPA navigation support
 self.addEventListener('fetch', function(event) {
   var url = new URL(event.request.url);
 
@@ -63,25 +63,44 @@ self.addEventListener('fetch', function(event) {
   // Skip admin.html — always fetch from network, never SPA fallback
   if (url.pathname.indexOf('admin') !== -1) return;
 
-  // Network-first: try network, fall back to cache for offline support
+  // SPA navigation requests: serve index.html for client-side routing
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).then(function(response) {
+        // If the server returns an HTML page (200 or 404 with SPA fallback),
+        // cache the root index.html and return it
+        if (response.ok) {
+          var clone = response.clone();
+          caches.open(CACHE_VERSION).then(function(cache) {
+            cache.put(new Request('./index.html'), clone);
+          });
+          return response;
+        }
+        // For 404s on navigation, serve cached index.html (SPA routing)
+        return caches.match('./index.html').then(function(cached) {
+          return cached || response;
+        });
+      }).catch(function() {
+        return caches.match('./index.html');
+      })
+    );
+    return;
+  }
+
+  // Static assets: network-first, only cache successful responses
   event.respondWith(
     fetch(event.request).then(function(response) {
-      // Cache the fresh response for offline use
-      var clone = response.clone();
-      caches.open(CACHE_VERSION).then(function(cache) {
-        cache.put(event.request, clone);
-      });
+      // Only cache successful responses (not 404s)
+      if (response.ok) {
+        var clone = response.clone();
+        caches.open(CACHE_VERSION).then(function(cache) {
+          cache.put(event.request, clone);
+        });
+      }
       return response;
     }).catch(function() {
       // Offline: serve from cache
-      return caches.match(event.request).then(function(cached) {
-        if (cached) return cached;
-        // For SPA navigation requests, fall back to cached index.html
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
-        return cached;
-      });
+      return caches.match(event.request);
     })
   );
 });
