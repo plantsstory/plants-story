@@ -99,26 +99,26 @@ document.addEventListener('click', function(e) {
   chip.classList.add('active');
 });
 
-// Vote button handler (persists to Supabase)
+// Vote button handler (persists to Supabase with server-side duplicate prevention)
 document.addEventListener('click', function(e) {
   var btn = e.target.closest('.vote-btn');
   if (!btn) return;
   if (!rateLimit('vote', 3000)) { showToast(t('rate_limit_wait'), true); return; }
   var sb = window._supabaseClient;
   if (!sb) return;
+
+  // Require login to vote
+  if (!window._currentUser) {
+    showToast(t('login_required_vote') || '投票にはログインが必要です', true);
+    return;
+  }
+
   var originIdx = parseInt(btn.getAttribute('data-origin-idx'), 10);
   if (isNaN(originIdx)) return;
   var h1 = document.querySelector('#page-cultivar h1');
   if (!h1) return;
   var cultivarName = h1.textContent;
   var voteType = btn.getAttribute('data-vote') === 'agree' ? 'agree' : 'disagree';
-
-  // Check localStorage to prevent double voting
-  var voteKey = 'vote_' + cultivarName + '_' + originIdx + '_' + voteType;
-  if (localStorage.getItem(voteKey)) {
-    showToast('既に投票済みです', true);
-    return;
-  }
 
   btn.disabled = true;
   sb.rpc('cast_origin_vote', {
@@ -129,15 +129,26 @@ document.addEventListener('click', function(e) {
     if (res.error) { btn.disabled = false; showToast(t('toast_vote_failed'), true); return; }
     var result = res.data;
     if (!result || !result.success) { btn.disabled = false; showToast(result && result.error ? result.error : t('toast_vote_failed'), true); return; }
-    localStorage.setItem(voteKey, '1');
-    btn.classList.add(voteType === 'agree' ? 'vote-btn--active' : 'vote-btn--active-down');
-    var countEl = btn.querySelector('.vote-btn__badge');
-    if (countEl) countEl.textContent = result.new_count;
+
+    // Update vote button states based on server response
+    var voteGroup = btn.closest('.vote-group');
+    if (voteGroup) {
+      var agreeBtn = voteGroup.querySelector('[data-vote="agree"]');
+      var disagreeBtn = voteGroup.querySelector('[data-vote="disagree"]');
+      // Clear all active states
+      if (agreeBtn) { agreeBtn.classList.remove('vote-btn--active'); agreeBtn.setAttribute('aria-pressed', 'false'); }
+      if (disagreeBtn) { disagreeBtn.classList.remove('vote-btn--active-down'); disagreeBtn.setAttribute('aria-pressed', 'false'); }
+      // Set active state based on server's user_vote
+      if (result.user_vote === 'agree' && agreeBtn) { agreeBtn.classList.add('vote-btn--active'); agreeBtn.setAttribute('aria-pressed', 'true'); }
+      if (result.user_vote === 'disagree' && disagreeBtn) { disagreeBtn.classList.add('vote-btn--active-down'); disagreeBtn.setAttribute('aria-pressed', 'true'); }
+      // Update counts from authoritative server values
+      if (agreeBtn) { var ac = agreeBtn.querySelector('.vote-btn__badge'); if (ac) ac.textContent = result.new_agree; }
+      if (disagreeBtn) { var dc = disagreeBtn.querySelector('.vote-btn__badge'); if (dc) dc.textContent = result.new_disagree; }
+    }
+
     // Update in-memory data
     if (cultivarData[cultivarName] && cultivarData[cultivarName].origins && cultivarData[cultivarName].origins[originIdx]) {
-      if (!cultivarData[cultivarName].origins[originIdx].votes) cultivarData[cultivarName].origins[originIdx].votes = { agree: 0, disagree: 0 };
-      cultivarData[cultivarName].origins[originIdx].votes[voteType] = result.new_count;
-      // Update trust in memory if server returned new_trust
+      cultivarData[cultivarName].origins[originIdx].votes = { agree: result.new_agree, disagree: result.new_disagree };
       if (typeof result.new_trust === 'number') {
         cultivarData[cultivarName].origins[originIdx].trust = result.new_trust;
         if (typeof result.base_trust === 'number') {
@@ -145,7 +156,7 @@ document.addEventListener('click', function(e) {
         }
       }
     }
-    // Animate trust bar update if server returned new_trust
+    // Animate trust bar update
     if (typeof result.new_trust === 'number') {
       var trustEl = document.querySelector('[data-trust-idx="' + originIdx + '"]');
       if (trustEl) {
@@ -2159,6 +2170,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
         if (caption) row.caption = caption;
         if (linkUrl) row.link_url = linkUrl;
         if (userIp) row.created_ip = userIp;
+        if (window._currentUser) row.user_id = window._currentUser.id;
         if (typeof displayOrder === 'number') row.display_order = displayOrder;
         return sb.from('cultivar_images').insert(row).select().then(function(dbRes) {
           if (dbRes.error) throw dbRes.error;

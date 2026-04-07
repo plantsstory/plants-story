@@ -1429,17 +1429,66 @@ if (false) {
     });
   }
 
-  // Show paywall modal
+  // Show paywall modal with focus trap and keyboard support
+  var _paywallPreviousFocus = null;
   window.showPaywallModal = showPaywallModal;
   function showPaywallModal() {
     var modal = document.getElementById('paywall-modal');
-    if (modal) modal.style.display = 'flex';
+    if (!modal) return;
+    _paywallPreviousFocus = document.activeElement;
+    modal.style.display = 'flex';
+    // Focus the close button for keyboard users
+    var closeBtn = document.getElementById('paywall-close-btn');
+    if (closeBtn) setTimeout(function() { closeBtn.focus(); }, 50);
   }
   window.hidePaywallModal = hidePaywallModal;
   function hidePaywallModal() {
     var modal = document.getElementById('paywall-modal');
-    if (modal) modal.style.display = 'none';
+    if (!modal) return;
+    modal.style.display = 'none';
+    // Restore focus to the element that opened the modal
+    if (_paywallPreviousFocus && _paywallPreviousFocus.focus) {
+      _paywallPreviousFocus.focus();
+      _paywallPreviousFocus = null;
+    }
   }
+
+  // Paywall modal: backdrop click, close button, plan buttons (replacing inline onclick)
+  (function() {
+    var backdrop = document.getElementById('paywall-backdrop');
+    var closeBtn = document.getElementById('paywall-close-btn');
+    var planMonthly = document.getElementById('plan-monthly');
+    var planAnnual = document.getElementById('plan-annual');
+    if (backdrop) backdrop.addEventListener('click', hidePaywallModal);
+    if (closeBtn) closeBtn.addEventListener('click', hidePaywallModal);
+    if (planMonthly) planMonthly.addEventListener('click', function() { startCheckout('monthly'); });
+    if (planAnnual) planAnnual.addEventListener('click', function() { startCheckout('annual'); });
+  })();
+
+  // Escape key closes paywall modal; focus trap keeps Tab inside
+  document.addEventListener('keydown', function(e) {
+    var modal = document.getElementById('paywall-modal');
+    if (!modal || modal.style.display !== 'flex') return;
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      hidePaywallModal();
+      return;
+    }
+    // Focus trap: Tab/Shift+Tab stays within modal content
+    if (e.key === 'Tab') {
+      var content = modal.querySelector('.paywall-modal__content');
+      if (!content) return;
+      var focusable = content.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (focusable.length === 0) return;
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+  });
 
   // Check seedling access for a given cultivar
   window.canAccessSeedling = canAccessSeedling;

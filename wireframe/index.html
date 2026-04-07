@@ -1290,30 +1290,30 @@
   <!-- ========================================
        PAYWALL MODAL
        ======================================== -->
-  <div id="paywall-modal" class="paywall-modal d-none" role="dialog" aria-modal="true" aria-label="サブスクリプション">
-    <div class="paywall-modal__backdrop" onclick="hidePaywallModal()"></div>
+  <div id="paywall-modal" class="paywall-modal d-none" role="dialog" aria-modal="true" aria-labelledby="paywall-modal-title">
+    <div class="paywall-modal__backdrop" id="paywall-backdrop"></div>
     <div class="paywall-modal__content">
-      <button class="paywall-modal__close" onclick="hidePaywallModal()" aria-label="閉じる">&times;</button>
+      <button class="paywall-modal__close" id="paywall-close-btn" aria-label="閉じる">&times;</button>
       <div class="paywall-modal__icon">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="1.5">
           <path d="M12 2C8 1 4 4 3 10C2 16 8 22 12 26C16 22 22 16 21 10C20 4 16 1 12 2Z"/>
           <path d="M12 8v4M12 14h0"/>
         </svg>
       </div>
-      <h3 class="paywall-modal__title">My Seedlings サブスクリプション</h3>
+      <h3 class="paywall-modal__title" id="paywall-modal-title">My Seedlings サブスクリプション</h3>
       <p class="paywall-modal__desc">実生の詳細情報（交配式・画像・作出者情報）の閲覧と投稿にはサブスクリプションが必要です。<strong>初回は30日間無料でお試しいただけます。</strong></p>
       <div class="paywall-modal__plans">
-        <div class="pricing-card" onclick="startCheckout('monthly')">
+        <button class="pricing-card" id="plan-monthly" type="button">
           <div class="pricing-card__name">月額プラン</div>
           <div class="pricing-card__price"><span class="pricing-card__amount">240</span><span class="pricing-card__unit">円/月</span></div>
           <div class="pricing-card__desc">30日間無料、その後 240円/月</div>
-        </div>
-        <div class="pricing-card pricing-card--recommended" onclick="startCheckout('annual')">
+        </button>
+        <button class="pricing-card pricing-card--recommended" id="plan-annual" type="button">
           <div class="pricing-card__badge">おすすめ</div>
           <div class="pricing-card__name">年額プラン</div>
           <div class="pricing-card__price"><span class="pricing-card__amount">2,500</span><span class="pricing-card__unit">円/年</span></div>
           <div class="pricing-card__desc">30日間無料、その後 2,500円/年</div>
-        </div>
+        </button>
       </div>
       <p class="paywall-modal__note">決済はStripeにより安全に処理されます。解約後も投稿済みの実生は閲覧・削除が可能です。</p>
     </div>

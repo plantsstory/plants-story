@@ -32,7 +32,7 @@ serve(async (req: Request) => {
       );
     } catch (err) {
       console.error("Webhook signature verification failed:", err.message);
-      return new Response("Invalid signature: " + err.message, { status: 400 });
+      return new Response("Webhook signature verification failed", { status: 400 });
     }
 
     // 2. Initialize Supabase with service_role (bypasses RLS)
@@ -215,7 +215,7 @@ serve(async (req: Request) => {
         error_details: { stack: err.stack },
       });
     } catch { /* ignore logging failure */ }
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

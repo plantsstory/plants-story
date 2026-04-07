@@ -2335,6 +2335,14 @@ dialog.parent-photo-dialog .dialog-label {
   cursor: pointer;
   transition: var(--transition);
   text-align: center;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+.pricing-card:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 .pricing-card:hover {
   border-color: var(--color-primary-light);
