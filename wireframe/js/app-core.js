@@ -2072,6 +2072,73 @@ if (false) {
     });
   }
 
+  // Seedling feed preview on homepage (blurred cards for non-subscribers)
+  function refreshSeedlingPreview() {
+    var section = document.getElementById('seedling-preview-section');
+    var grid = document.getElementById('seedling-preview-grid');
+    if (!section || !grid || !supabase) return;
+
+    supabase.from('cultivars')
+      .select('id, cultivar_name, genus, type, created_at, user_id')
+      .eq('type', 'seedling')
+      .order('created_at', { ascending: false })
+      .limit(6)
+      .then(function(res) {
+        if (res.error || !res.data || res.data.length === 0) return;
+
+        section.style.display = '';
+        var items = res.data;
+        var names = items.map(function(item) { return item.cultivar_name.replace(' [Seedling]', ''); });
+        var baseUrl = window._SUPABASE_URL;
+
+        // Fetch thumbnails
+        var thumbPromise = supabase.from('cultivar_images')
+          .select('cultivar_name, storage_path')
+          .in('cultivar_name', names)
+          .then(function(imgRes) {
+            var map = {};
+            if (imgRes.data) imgRes.data.forEach(function(img) { if (!map[img.cultivar_name]) map[img.cultivar_name] = img.storage_path; });
+            return map;
+          });
+
+        // Check if user is subscribed
+        var isSubscribed = window._currentUser && window._subscriptionStatus &&
+          (window._subscriptionStatus === 'active' || window._subscriptionStatus === 'trialing');
+
+        thumbPromise.then(function(thumbMap) {
+          var html = '';
+          items.forEach(function(item, idx) {
+            var name = item.cultivar_name;
+            var displayName = name.replace(' [Seedling]', '');
+            var genus = displayName.split(' ')[0];
+            var shouldBlur = !isSubscribed && idx >= 2; // Show first 2 clearly, blur the rest
+
+            html += '<div class="card' + (shouldBlur ? '' : ' card--clickable') + '"';
+            if (!shouldBlur) html += ' data-nav="cultivar" data-key="' + name.replace(/"/g, '&quot;') + '"';
+            html += ' style="' + (shouldBlur ? 'filter:blur(4px);pointer-events:none;user-select:none;' : '') + '">';
+
+            // Thumbnail
+            if (thumbMap[displayName] && baseUrl) {
+              var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
+              html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt=""></div>';
+            } else {
+              html += '<div class="recent-card__img">';
+              html += '<svg viewBox="0 0 80 60" width="80" height="60"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
+              html += '</div>';
+            }
+
+            html += '<div class="p-sm">';
+            html += '<div class="font-bold text-sm">' + (shouldBlur ? '●●●●●●' : escHtml(displayName)) + '</div>';
+            html += '<div class="text-xs text-muted">' + escHtml(genus) + ' <span class="badge badge--seedling badge--inline">seedling</span></div>';
+            html += '</div>';
+            html += '</div>';
+          });
+          grid.innerHTML = html;
+          observeLazyImages(grid);
+        });
+      });
+  }
+
   // Restore cultivars from Supabase first, then localStorage as fallback
   function restoreUserCultivars() {
     // Always load localStorage first (instant)
@@ -2087,6 +2154,7 @@ if (false) {
     });
     refreshGenusUI();
     refreshRecentlyUpdated();
+    refreshSeedlingPreview();
 
     // Profile cache for poster names
     var _profileCache = {};

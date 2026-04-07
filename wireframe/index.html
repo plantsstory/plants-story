@@ -58,12 +58,12 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20260408b">
-  <link rel="stylesheet" href="css/reset.css?v=20260408b">
-  <link rel="stylesheet" href="css/layout.css?v=20260408b">
-  <link rel="stylesheet" href="css/components.css?v=20260408b">
-  <link rel="stylesheet" href="css/pages.css?v=20260408b">
-  <link rel="stylesheet" href="css/utilities.css?v=20260408b">
+  <link rel="stylesheet" href="css/variables.css?v=20260408c">
+  <link rel="stylesheet" href="css/reset.css?v=20260408c">
+  <link rel="stylesheet" href="css/layout.css?v=20260408c">
+  <link rel="stylesheet" href="css/components.css?v=20260408c">
+  <link rel="stylesheet" href="css/pages.css?v=20260408c">
+  <link rel="stylesheet" href="css/utilities.css?v=20260408c">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Varela+Round&family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
@@ -145,6 +145,16 @@
         <h2 class="section-title" data-i18n="recently_updated">最近更新された品種</h2>
         <div class="grid grid--5" id="recently-updated-grid">
           <div class="text-center text-muted grid-full p-xl">読み込み中...</div>
+        </div>
+      </div>
+
+      <!-- Seedling Feed Preview -->
+      <div class="mt-2xl" id="seedling-preview-section" style="display:none;">
+        <h2 class="section-title" data-i18n="seedling_preview_title">新着シードリング</h2>
+        <p class="text-muted text-sm mb-md" data-i18n="seedling_preview_desc">コレクターが登録した交配個体の最新投稿</p>
+        <div class="grid grid--3" id="seedling-preview-grid"></div>
+        <div class="text-center mt-md">
+          <button class="btn btn--outline" data-action="show-paywall" data-i18n="seedling_preview_cta">🔒 すべてのシードリングを見る</button>
         </div>
       </div>
 
@@ -1337,9 +1347,9 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/app-core.js?v=20260408b"></script>
-  <script src="js/pages.js?v=20260408b"></script>
-  <script src="js/forms.js?v=20260408b"></script>
+  <script src="js/app-core.js?v=20260408c"></script>
+  <script src="js/pages.js?v=20260408c"></script>
+  <script src="js/forms.js?v=20260408c"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1349,7 +1359,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20260408b"></script>
+  <script src="js/dialogs.js?v=20260408c"></script>
 
   <!-- Deletion Request Dialog -->
   <dialog id="delete-request-dialog" class="dialog-clean" aria-labelledby="delete-dialog-title">
