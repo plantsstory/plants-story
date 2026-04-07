@@ -1721,7 +1721,7 @@ document.addEventListener('click', function(e) {
     submitOriginBtn.addEventListener('click', function(e) {
       e.preventDefault();
       if (!rateLimit('add_origin', 15000)) { showToast(t('rate_limit_wait'), true); return; }
-      var desc = originForm.querySelector('.form-textarea');
+      var desc = document.getElementById('ao-description');
       var descText = desc ? desc.value.trim() : '';
 
       // Get current cultivar
@@ -1845,7 +1845,7 @@ document.addEventListener('click', function(e) {
       var list = originForm.querySelector('.origin-source-list');
       if (list) list.innerHTML = '';
       // Clear all inline structured fields
-      ['ao-author-name','ao-publication-year','ao-collector','ao-collection-year','ao-type-locality','ao-known-habitats',
+      ['ao-description','ao-author-name','ao-publication-year','ao-collector','ao-collection-year','ao-type-locality','ao-known-habitats',
        'ao-clone-namer','ao-clone-naming-year','ao-clone-parentA','ao-clone-parentB',
        'ao-hybrid-breeder','ao-hybrid-naming-year','ao-hybrid-parentA','ao-hybrid-parentB',
        'ao-seedling-breeder','ao-sowing-date','ao-seedling-parentA','ao-seedling-parentB'].forEach(function(id) {
