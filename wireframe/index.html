@@ -211,15 +211,15 @@
       <nav class="breadcrumb" aria-label="パンくずリスト">
         <a href="#" data-nav="top">Home</a>
         <span class="breadcrumb__sep">/</span>
-        <a href="#" data-nav="genus" data-genus="anthurium">Anthurium</a>
+        <a href="#" data-nav="genus" data-genus="">...</a>
         <span class="breadcrumb__sep">/</span>
-        <span>Crystallinum</span>
+        <span>...</span>
       </nav>
 
       <!-- Cultivar Header -->
       <div class="mb-lg">
         <div>
-          <h1 class="detail-title">Anthurium crystallinum</h1>
+          <h1 class="detail-title"></h1>
           <div class="flex gap-sm mt-sm flex-align-center flex-wrap">
             <span class="badge badge--species">原種 / Original Species</span>
             <span class="text-sm text-muted">Anthurium</span>
@@ -451,7 +451,7 @@
           <!-- Duplicate name alert (hidden by default, shown via JS) -->
           <div class="duplicate-alert d-none mt-sm p-md" id="duplicate-alert">
             <p class="text-sm font-bold mb-sm" data-i18n="duplicate_found">この品種は既に登録されています</p>
-            <p class="text-sm text-muted mb-sm">「Anthurium crystallinum」は既に登録済みです。由来を追加する場合は品種ページから行えます。</p>
+            <p class="text-sm text-muted mb-sm" id="duplicate-cultivar-msg"></p>
             <a href="#" class="btn btn--primary btn--sm" data-nav="cultivar" data-i18n="go_to_page">品種ページへ移動</a>
           </div>
         </div>
