@@ -41,6 +41,11 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://plantsstory.com/tokushoho</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
     <loc>https://plantsstory.com/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
