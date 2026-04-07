@@ -1161,6 +1161,9 @@ if (false) {
       var display = idx === 0 ? '' : ' style="display:none;"';
       html += '<div class="genus-content" id="genus-' + g.slug + '"' + display + '>';
       html += '<h1 class="section-title">' + g.name + '</h1>';
+      html += '<div class="genus-stats" id="genus-stats-' + g.slug + '" style="display:none;">';
+      html += '<div class="genus-stats__chips"></div>';
+      html += '</div>';
       html += '<p class="text-muted mb-lg">' + t('loading') + '</p>';
 
       if (g.has_seedlings) {
@@ -1959,7 +1962,40 @@ if (false) {
           countEl.textContent = total + (currentLang === 'en' ? ' Cultivars' : ' 品種');
         }
       }
+      // Populate genus stats summary
+      refreshGenusStats(g);
     });
+  }
+
+  function refreshGenusStats(slug) {
+    var statsEl = document.getElementById('genus-stats-' + slug);
+    if (!statsEl) return;
+    var items = (_genusItems[slug] || []).filter(function(it) { return it.meta.type !== 'seedling'; });
+    if (items.length === 0) { statsEl.style.display = 'none'; return; }
+
+    var speciesCount = 0, hybridCount = 0, cloneCount = 0;
+    var avgTrust = 0, trustSum = 0;
+    items.forEach(function(it) {
+      var t = it.meta.type || '';
+      if (t === 'species') speciesCount++;
+      else if (t === 'hybrid') hybridCount++;
+      else if (t === 'clone') cloneCount++;
+      // Calculate avg trust from first origin
+      var origins = it.entry.origins || [];
+      if (origins.length > 0 && origins[0].trust != null) trustSum += origins[0].trust;
+    });
+    avgTrust = items.length > 0 ? Math.round(trustSum / items.length) : 0;
+
+    var chipsEl = statsEl.querySelector('.genus-stats__chips');
+    if (chipsEl) {
+      var html = '<span class="genus-stat-chip">' + items.length + (currentLang === 'en' ? ' cultivars' : ' 品種') + '</span>';
+      if (speciesCount > 0) html += '<span class="genus-stat-chip genus-stat-chip--species">' + speciesCount + ' species</span>';
+      if (hybridCount > 0) html += '<span class="genus-stat-chip genus-stat-chip--hybrid">' + hybridCount + ' hybrid</span>';
+      if (cloneCount > 0) html += '<span class="genus-stat-chip genus-stat-chip--clone">' + cloneCount + ' clone</span>';
+      html += '<span class="genus-stat-chip genus-stat-chip--trust">avg trust ' + avgTrust + '%</span>';
+      chipsEl.innerHTML = html;
+    }
+    statsEl.style.display = '';
   }
 
   // Fetch genus counts from server and update top page cards

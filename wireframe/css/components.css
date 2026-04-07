@@ -365,6 +365,33 @@
   color: var(--color-gray);
 }
 
+/* Genus stats summary */
+.genus-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+.genus-stats__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+.genus-stat-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--color-lighter);
+  color: var(--color-gray-dark);
+}
+.genus-stat-chip--species { background: #e8f5e9; color: #2e7d32; }
+.genus-stat-chip--hybrid { background: #fce4ec; color: #c62828; }
+.genus-stat-chip--clone { background: #e3f2fd; color: #1565c0; }
+.genus-stat-chip--trust { background: #fff3e0; color: #e65100; }
+
 /* Recently added card images */
 .recent-card__img {
   height: 160px;
