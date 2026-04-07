@@ -1032,7 +1032,7 @@ function renderOriginsInner(cultivarName, container) {
     if (!isSeedling) {
       html += '<div class="origin-card__header">';
       html += '<span class="origin-card__rank">#' + (i + 1) + '</span>';
-      html += '<div class="trust trust--lg" style="flex:1;margin-left:var(--space-md);">';
+      html += '<div class="trust trust--lg" style="flex:1;margin-left:var(--space-md);" data-trust-idx="' + i + '">';
       html += '<div class="trust__bar"><div class="trust__fill ' + trustLevel + '" style="width:' + origin.trust + '%"></div></div>';
       html += '<span class="trust__label">' + origin.trust + '%</span>';
       html += '</div></div>';

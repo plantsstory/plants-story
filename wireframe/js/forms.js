@@ -137,6 +137,27 @@ document.addEventListener('click', function(e) {
     if (cultivarData[cultivarName] && cultivarData[cultivarName].origins && cultivarData[cultivarName].origins[originIdx]) {
       if (!cultivarData[cultivarName].origins[originIdx].votes) cultivarData[cultivarName].origins[originIdx].votes = { agree: 0, disagree: 0 };
       cultivarData[cultivarName].origins[originIdx].votes[voteType] = result.new_count;
+      // Update trust in memory if server returned new_trust
+      if (typeof result.new_trust === 'number') {
+        cultivarData[cultivarName].origins[originIdx].trust = result.new_trust;
+        if (typeof result.base_trust === 'number') {
+          cultivarData[cultivarName].origins[originIdx].base_trust = result.base_trust;
+        }
+      }
+    }
+    // Animate trust bar update if server returned new_trust
+    if (typeof result.new_trust === 'number') {
+      var trustEl = document.querySelector('[data-trust-idx="' + originIdx + '"]');
+      if (trustEl) {
+        var fill = trustEl.querySelector('.trust__fill');
+        var label = trustEl.querySelector('.trust__label');
+        if (fill) {
+          fill.style.transition = 'width 0.5s ease, background-color 0.5s ease';
+          fill.style.width = result.new_trust + '%';
+          fill.className = 'trust__fill ' + getTrustClass(result.new_trust);
+        }
+        if (label) label.textContent = result.new_trust + '%';
+      }
     }
     btn.disabled = false;
   }).catch(function() { btn.disabled = false; });
