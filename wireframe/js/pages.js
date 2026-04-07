@@ -958,10 +958,10 @@ function renderStructuredOrigin(s) {
     if (s.namer) h += '<div class="structured-field"><span class="structured-field__label">名付けた人物</span><span class="structured-field__value">' + s.namer + '</span></div>';
     if (s.naming_year) h += '<div class="structured-field"><span class="structured-field__label">名付けた年</span><span class="structured-field__value">' + s.naming_year + '</span></div>';
   } else if (s.origin_type === 'hybrid') {
-    if (s.breeder) h += '<div class="structured-field"><span class="structured-field__label">作出者</span><span class="structured-field__value">' + s.breeder + '</span></div>';
+    if (s.breeder) h += '<div class="structured-field"><span class="structured-field__label">作出者</span><span class="structured-field__value"><a href="#" class="text-primary no-decoration breeder-link" data-breeder="' + escHtml(s.breeder) + '">' + escHtml(s.breeder) + '</a></span></div>';
     if (s.naming_year) h += '<div class="structured-field"><span class="structured-field__label">名付けた年</span><span class="structured-field__value">' + s.naming_year + '</span></div>';
   } else if (s.origin_type === 'seedling') {
-    if (s.breeder) h += '<div class="structured-field"><span class="structured-field__label">作出者</span><span class="structured-field__value">' + s.breeder + '</span></div>';
+    if (s.breeder) h += '<div class="structured-field"><span class="structured-field__label">作出者</span><span class="structured-field__value"><a href="#" class="text-primary no-decoration breeder-link" data-breeder="' + escHtml(s.breeder) + '">' + escHtml(s.breeder) + '</a></span></div>';
     if (s.sowing_date) h += '<div class="structured-field"><span class="structured-field__label">播種日</span><span class="structured-field__value">' + s.sowing_date + '</span></div>';
   }
   // 補足欄 (all types)
@@ -1713,6 +1713,19 @@ function globalSearch(query) {
 
   navigateTo('search', {});
 }
+
+// Breeder link click handler — search by breeder name
+document.addEventListener('click', function(e) {
+  var breederLink = e.target.closest('.breeder-link');
+  if (!breederLink) return;
+  e.preventDefault();
+  var breederName = breederLink.getAttribute('data-breeder');
+  if (!breederName) return;
+  // Set search input and trigger global search
+  var searchInput = document.querySelector('#page-top .search-bar__input');
+  if (searchInput) searchInput.value = breederName;
+  globalSearch(breederName);
+});
 
 // Navigation click handler
 document.addEventListener('click', function(e) {
