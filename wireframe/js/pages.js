@@ -147,11 +147,13 @@
       .then(function(subRes) {
         var sub = subRes.data;
         var isActive = sub && sub.active;
+        var isTrial = sub && sub.status === 'trialing';
 
         // Badge next to name
         if (subBadge) {
           if (isActive) {
-            subBadge.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Member';
+            var badgeLabel = isTrial ? 'Trial' : 'Member';
+            subBadge.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> ' + badgeLabel;
             subBadge.className = 'profile-sub-badge profile-sub-badge--active';
             subBadge.style.display = '';
           } else {
@@ -166,11 +168,16 @@
           subSection.style.display = '';
           if (isActive) {
             var planLabel = sub.plan === 'granted' ? '無料付与' : (sub.plan === 'seedling_annual' ? '年額プラン' : '月額プラン');
+            var badgeLabel2 = isTrial ? 'Trial' : 'Member';
             var html = '<div class="flex-center-sm">';
-            html += '<span class="profile-sub-badge profile-sub-badge--active sub-badge-static"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Member</span>';
+            html += '<span class="profile-sub-badge profile-sub-badge--active sub-badge-static"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> ' + badgeLabel2 + '</span>';
             html += '<span class="text-sm font-semibold">' + planLabel + '</span>';
             html += '</div>';
-            if (sub.current_period_end && sub.plan !== 'granted') {
+            if (isTrial && sub.current_period_end) {
+              var trialEnd = new Date(sub.current_period_end);
+              var trialEndStr = trialEnd.getFullYear() + '/' + String(trialEnd.getMonth() + 1).padStart(2, '0') + '/' + String(trialEnd.getDate()).padStart(2, '0');
+              html += '<div class="text-xs mt-xs text-warning">無料お試し期間: ' + trialEndStr + ' まで</div>';
+            } else if (sub.current_period_end && sub.plan !== 'granted') {
               var endDate = new Date(sub.current_period_end);
               var endStr = endDate.getFullYear() + '/' + String(endDate.getMonth() + 1).padStart(2, '0') + '/' + String(endDate.getDate()).padStart(2, '0');
               if (sub.cancel_at_period_end) {
@@ -309,12 +316,17 @@
         var endDate = window._subscriptionEnd ? new Date(window._subscriptionEnd) : null;
 
         if (window._isSubscribed) {
+          var isTrial = status === 'trialing';
           var planLabel = plan === 'granted' ? '無料付与' : (plan === 'seedling_annual' ? '年額プラン' : '月額プラン');
+          var badgeText = isTrial ? 'Trial' : 'Active';
           var statusHtml = '<div class="flex-center-sm mb-sm">';
-          statusHtml += '<span class="badge badge--seedling font-xs-btn">Active</span>';
+          statusHtml += '<span class="badge badge--seedling font-xs-btn">' + badgeText + '</span>';
           statusHtml += '<span class="font-semibold">' + planLabel + '</span>';
           statusHtml += '</div>';
-          if (endDate && plan !== 'granted') {
+          if (isTrial && endDate) {
+            var trialEndStr = endDate.getFullYear() + '/' + String(endDate.getMonth() + 1).padStart(2, '0') + '/' + String(endDate.getDate()).padStart(2, '0');
+            statusHtml += '<div class="text-sm text-warning">無料お試し期間: ' + trialEndStr + ' まで</div>';
+          } else if (endDate && plan !== 'granted') {
             var endStr = endDate.getFullYear() + '/' + String(endDate.getMonth() + 1).padStart(2, '0') + '/' + String(endDate.getDate()).padStart(2, '0');
             if (cancelAtEnd) {
               statusHtml += '<div class="text-sm text-warning">解約予定: ' + endStr + ' まで利用可能</div>';

@@ -745,7 +745,8 @@
       <ul class="terms-list" data-i18n-list="terms_9a_list">
         <li>料金: 月額240円（税込）または年額2,500円（税込）</li>
         <li>決済はStripe, Inc.の決済基盤を利用します</li>
-        <li>申込時点で利用を開始し、以後契約期間の終了時に自動更新されます</li>
+        <li>初回申込時は30日間の無料お試し期間が提供されます。お試し期間終了後、自動的に有料プランへ移行し課金が開始されます</li>
+        <li>無料お試し期間は1ユーザーにつき1回限りです</li>
         <li>原種・ハイブリッド・クローンの閲覧・投稿は無料で利用できます</li>
         <li>運営チームの判断により、特定のユーザーに無料でサブスクリプションを付与する場合があります。付与・取消は運営チームの裁量によります</li>
       </ul>
@@ -754,8 +755,8 @@
       <p data-i18n="terms_9b_body">サブスクリプションの自動更新と解約について、以下の通り定めます：</p>
       <ul class="terms-list" data-i18n-list="terms_9b_list">
         <li>サブスクリプションは契約期間の終了時に同一プランで自動更新されます</li>
-        <li>解約はStripe Customer Portalを通じて随時行うことができます</li>
-        <li>解約した場合、現在の契約期間の終了日まではサービスを利用できます</li>
+        <li>解約はStripe Customer Portalを通じて随時行うことができます（無料お試し期間中も解約可能です）</li>
+        <li>解約した場合、現在の契約期間（または無料お試し期間）の終了日まではサービスを利用できます</li>
         <li>解約後も、ご自身が投稿した実生の閲覧および削除は引き続き可能です。ただし、編集および新規投稿にはサブスクリプションの再契約が必要です</li>
       </ul>
 
@@ -905,7 +906,7 @@
         </tr>
         <tr>
           <th data-i18n="tokushoho_price_label">販売価格</th>
-          <td data-i18n="tokushoho_price_value">月額プラン: 240円（税込）／ 年額プラン: 2,500円（税込）</td>
+          <td data-i18n="tokushoho_price_value">月額プラン: 240円（税込）／ 年額プラン: 2,500円（税込）　※初回30日間無料</td>
         </tr>
         <tr>
           <th data-i18n="tokushoho_payment_label">支払方法</th>
@@ -913,7 +914,7 @@
         </tr>
         <tr>
           <th data-i18n="tokushoho_timing_label">支払時期</th>
-          <td data-i18n="tokushoho_timing_value">申込時に即時決済。以後、契約期間終了時に自動更新されます</td>
+          <td data-i18n="tokushoho_timing_value">初回は30日間の無料お試し期間後に初回決済。以後、契約期間終了時に自動更新されます</td>
         </tr>
         <tr>
           <th data-i18n="tokushoho_delivery_label">商品引渡時期</th>
@@ -1299,18 +1300,18 @@
         </svg>
       </div>
       <h3 class="paywall-modal__title">My Seedlings サブスクリプション</h3>
-      <p class="paywall-modal__desc">実生の詳細情報（交配式・画像・作出者情報）の閲覧と投稿にはサブスクリプションが必要です。</p>
+      <p class="paywall-modal__desc">実生の詳細情報（交配式・画像・作出者情報）の閲覧と投稿にはサブスクリプションが必要です。<strong>初回は30日間無料でお試しいただけます。</strong></p>
       <div class="paywall-modal__plans">
         <div class="pricing-card" onclick="startCheckout('monthly')">
           <div class="pricing-card__name">月額プラン</div>
           <div class="pricing-card__price"><span class="pricing-card__amount">240</span><span class="pricing-card__unit">円/月</span></div>
-          <div class="pricing-card__desc">いつでも解約可能</div>
+          <div class="pricing-card__desc">30日間無料、その後 240円/月</div>
         </div>
         <div class="pricing-card pricing-card--recommended" onclick="startCheckout('annual')">
           <div class="pricing-card__badge">おすすめ</div>
           <div class="pricing-card__name">年額プラン</div>
           <div class="pricing-card__price"><span class="pricing-card__amount">2,500</span><span class="pricing-card__unit">円/年</span></div>
-          <div class="pricing-card__desc">月あたり約208円（13%お得）</div>
+          <div class="pricing-card__desc">30日間無料、その後 2,500円/年</div>
         </div>
       </div>
       <p class="paywall-modal__note">決済はStripeにより安全に処理されます。解約後も投稿済みの実生は閲覧・削除が可能です。</p>

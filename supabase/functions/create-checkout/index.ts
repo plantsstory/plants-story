@@ -80,14 +80,28 @@ serve(async (req: Request) => {
     const cancelUrl = baseUrl + "?subscription=canceled#/profile-edit";
 
     // 5. Create Checkout Session
-    const session = await stripe.checkout.sessions.create({
+    // Check if the user already had a subscription (prevent repeat trials)
+    const { data: existingSub } = await supabase
+      .from("subscriptions")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+
+    const sessionParams: any = {
       customer: customerId,
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: { supabase_user_id: user.id },
-    });
+    };
+
+    // Only offer trial to first-time subscribers
+    if (!existingSub) {
+      sessionParams.subscription_data = { trial_period_days: 30 };
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
