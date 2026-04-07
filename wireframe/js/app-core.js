@@ -1382,14 +1382,37 @@ if (false) {
 
   // Start Stripe checkout
   window.startCheckout = startCheckout;
+  var _checkoutInProgress = false;
   function startCheckout(plan) {
+    if (_checkoutInProgress) return;
     var sb = window._supabaseClient;
     if (!sb || !window._currentUser) {
       showToast('ログインが必要です', true);
       return;
     }
+
+    // Show loading state on plan buttons
+    _checkoutInProgress = true;
+    var planBtns = document.querySelectorAll('#plan-monthly, #plan-annual');
+    planBtns.forEach(function(btn) { btn.disabled = true; btn.classList.add('is-loading'); });
+    var clickedBtn = document.getElementById(plan === 'annual' ? 'plan-annual' : 'plan-monthly');
+    var originalText = '';
+    if (clickedBtn) {
+      var priceEl = clickedBtn.querySelector('.pricing-card__price');
+      if (priceEl) { originalText = priceEl.textContent; priceEl.textContent = '処理中...'; }
+    }
+
+    function resetLoading() {
+      _checkoutInProgress = false;
+      planBtns.forEach(function(btn) { btn.disabled = false; btn.classList.remove('is-loading'); });
+      if (clickedBtn && originalText) {
+        var priceEl = clickedBtn.querySelector('.pricing-card__price');
+        if (priceEl) priceEl.textContent = originalText;
+      }
+    }
+
     sb.auth.getSession().then(function(res) {
-      if (!res.data || !res.data.session) { showToast('セッションエラー', true); return; }
+      if (!res.data || !res.data.session) { showToast('セッションエラー', true); resetLoading(); return; }
       var token = res.data.session.access_token;
       fetch(window._SUPABASE_URL + '/functions/v1/create-checkout', {
         method: 'POST',
@@ -1401,10 +1424,15 @@ if (false) {
       })
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        if (data.url) window.location.href = data.url;
-        else showToast('チェックアウトエラー: ' + (data.error || 'Unknown'), true);
+        if (data.url) {
+          window.location.href = data.url;
+          // Don't reset — page is navigating away
+        } else {
+          showToast('チェックアウトエラー: ' + (data.error || 'Unknown'), true);
+          resetLoading();
+        }
       })
-      .catch(function(err) { showToast('エラー: ' + err.message, true); });
+      .catch(function(err) { showToast('エラー: ' + err.message, true); resetLoading(); });
     });
   }
 
