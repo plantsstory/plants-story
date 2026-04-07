@@ -197,7 +197,7 @@
             html += '<span class="text-sm text-muted">My Seedlings の詳細閲覧・投稿にはサブスクリプションが必要です</span>';
             html += '</div>';
             if (isOwnProfile) {
-              html += '<div class="mt-sm"><button class="btn btn--primary btn--sm" onclick="showPaywallModal()">サブスクリプションを開始</button></div>';
+              html += '<div class="mt-sm"><button class="btn btn--primary btn--sm" data-action="show-paywall">サブスクリプションを開始</button></div>';
             }
             subContent.innerHTML = html;
           }
@@ -216,7 +216,7 @@
           html += '<span class="text-sm text-muted">My Seedlings の詳細閲覧・投稿にはサブスクリプションが必要です</span>';
           html += '</div>';
           if (isOwnProfile) {
-            html += '<div class="mt-sm"><button class="btn btn--primary btn--sm" onclick="showPaywallModal()">サブスクリプションを開始</button></div>';
+            html += '<div class="mt-sm"><button class="btn btn--primary btn--sm" data-action="show-paywall">サブスクリプションを開始</button></div>';
           }
           subContent.innerHTML = html;
         }
@@ -1236,7 +1236,7 @@ function updateCultivarDetail(cultivarName, rowEl) {
       '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>' +
       '<h3>My Seedlings</h3>' +
       '<p>実生の詳細情報（交配式・画像・作出者情報）の閲覧にはサブスクリプションが必要です。</p>' +
-      '<button class="btn btn--primary" onclick="showPaywallModal()">サブスクリプションを見る</button>' +
+      '<button class="btn btn--primary" data-action="show-paywall">サブスクリプションを見る</button>' +
       '</div>';
     var originsContainer = document.getElementById('origins-container');
     if (originsContainer) originsContainer.parentNode.insertBefore(overlay, originsContainer);

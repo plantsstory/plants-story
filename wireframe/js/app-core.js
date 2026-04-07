@@ -1465,6 +1465,12 @@ if (false) {
     if (planAnnual) planAnnual.addEventListener('click', function() { startCheckout('annual'); });
   })();
 
+  // Delegated click handler for dynamically rendered paywall CTA buttons
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-action="show-paywall"]');
+    if (btn) showPaywallModal();
+  });
+
   // Escape key closes paywall modal; focus trap keeps Tab inside
   document.addEventListener('keydown', function(e) {
     var modal = document.getElementById('paywall-modal');
@@ -1535,6 +1541,17 @@ if (false) {
           }
         });
       }
+    });
+  }
+
+  // Mobile nav auth link: delegate to header auth button
+  var navAuth = document.getElementById('nav-auth');
+  if (navAuth && headerAuthBtn) {
+    navAuth.addEventListener('click', function(e) {
+      e.preventDefault();
+      headerAuthBtn.click();
+      var mobileNav = document.getElementById('mobileNav');
+      if (mobileNav) mobileNav.classList.remove('open');
     });
   }
 

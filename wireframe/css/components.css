@@ -2299,9 +2299,20 @@ dialog.parent-photo-dialog .dialog-label {
   color: var(--color-mid);
   cursor: pointer;
   line-height: 1;
-  padding: 4px 8px;
+  padding: 8px 12px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
 }
 .paywall-modal__close:hover {
+  color: var(--color-black);
+}
+.paywall-modal__close:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
   color: var(--color-black);
 }
 .paywall-modal__icon {
