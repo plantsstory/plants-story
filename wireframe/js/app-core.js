@@ -2002,17 +2002,12 @@ if (false) {
     if (items.length === 0) { statsEl.style.display = 'none'; return; }
 
     var speciesCount = 0, hybridCount = 0, cloneCount = 0;
-    var avgTrust = 0, trustSum = 0;
     items.forEach(function(it) {
       var t = it.meta.type || '';
       if (t === 'species') speciesCount++;
       else if (t === 'hybrid') hybridCount++;
       else if (t === 'clone') cloneCount++;
-      // Calculate avg trust from first origin
-      var origins = it.entry.origins || [];
-      if (origins.length > 0 && origins[0].trust != null) trustSum += origins[0].trust;
     });
-    avgTrust = items.length > 0 ? Math.round(trustSum / items.length) : 0;
 
     var chipsEl = statsEl.querySelector('.genus-stats__chips');
     if (chipsEl) {
@@ -2020,7 +2015,6 @@ if (false) {
       if (speciesCount > 0) html += '<span class="genus-stat-chip genus-stat-chip--species">' + speciesCount + ' species</span>';
       if (hybridCount > 0) html += '<span class="genus-stat-chip genus-stat-chip--hybrid">' + hybridCount + ' hybrid</span>';
       if (cloneCount > 0) html += '<span class="genus-stat-chip genus-stat-chip--clone">' + cloneCount + ' clone</span>';
-      html += '<span class="genus-stat-chip genus-stat-chip--trust">avg trust ' + avgTrust + '%</span>';
       chipsEl.innerHTML = html;
     }
     statsEl.style.display = '';
