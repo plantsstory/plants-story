@@ -4,6 +4,24 @@ import Stripe from "https://esm.sh/stripe@14?target=deno";
 
 // No CORS needed for webhooks (Stripe server-to-server)
 
+async function sendErrorAlert(subject: string, details: string) {
+  const resendKey = Deno.env.get("RESEND_API_KEY");
+  const alertEmail = Deno.env.get("ALERT_EMAIL") || "admin@plantsstory.com";
+  if (!resendKey) return;
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "Plants Story <noreply@plantsstory.com>",
+        to: [alertEmail],
+        subject: `[Stripe Webhook Alert] ${subject}`,
+        text: `Stripe webhook error detected:\n\n${details}\n\nTimestamp: ${new Date().toISOString()}`,
+      }),
+    });
+  } catch { /* best-effort alert */ }
+}
+
 serve(async (req: Request) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
@@ -52,13 +70,15 @@ serve(async (req: Request) => {
         const customerId = session.customer as string;
 
         if (!userId) {
-          console.error("No supabase_user_id in checkout session metadata");
+          const msg = "No supabase_user_id in checkout session metadata";
+          console.error(msg);
           await supabase.from("stripe_webhook_errors").insert({
             event_id: event.id,
             event_type: event.type,
-            error_message: "No supabase_user_id in checkout session metadata",
+            error_message: msg,
             error_details: { session_id: session.id },
           });
+          await sendErrorAlert(msg, `Event: ${event.type}\nSession: ${session.id}`);
           break;
         }
 
@@ -97,13 +117,15 @@ serve(async (req: Request) => {
           .single();
 
         if (!profile) {
-          console.error("No profile found for customer:", customerId);
+          const msg = "No profile found for customer";
+          console.error(msg, customerId);
           await supabase.from("stripe_webhook_errors").insert({
             event_id: event.id,
             event_type: event.type,
-            error_message: "No profile found for customer",
+            error_message: msg,
             error_details: { customer_id: customerId },
           });
+          await sendErrorAlert(msg, `Event: ${event.type}\nCustomer: ${customerId}`);
           break;
         }
 
@@ -154,12 +176,14 @@ serve(async (req: Request) => {
 
           console.log(`Subscription canceled for user ${profile3.id}`);
         } else {
+          const msg = "No profile found for customer on subscription.deleted";
           await supabase.from("stripe_webhook_errors").insert({
             event_id: event.id,
             event_type: event.type,
-            error_message: "No profile found for customer on subscription.deleted",
+            error_message: msg,
             error_details: { customer_id: customerId },
           });
+          await sendErrorAlert(msg, `Event: ${event.type}\nCustomer: ${customerId}`);
         }
         break;
       }
@@ -182,12 +206,14 @@ serve(async (req: Request) => {
 
           console.log(`Payment failed for user ${profile4.id}`);
         } else {
+          const msg = "No profile found for customer on payment_failed";
           await supabase.from("stripe_webhook_errors").insert({
             event_id: event.id,
             event_type: event.type,
-            error_message: "No profile found for customer on payment_failed",
+            error_message: msg,
             error_details: { customer_id: customerId },
           });
+          await sendErrorAlert(msg, `Event: ${event.type}\nCustomer: ${customerId}`);
         }
         break;
       }
@@ -215,6 +241,7 @@ serve(async (req: Request) => {
         error_details: { stack: err.stack },
       });
     } catch { /* ignore logging failure */ }
+    await sendErrorAlert("Unhandled webhook error", err.message || String(err));
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

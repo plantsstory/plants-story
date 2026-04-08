@@ -1951,7 +1951,7 @@ if (false) {
     var thumbKey = isSeedling ? displayName : displayName;
     var thumbPath = _thumbMap[thumbKey];
     var thumbContent = thumbPath
-      ? '<img data-src="' + (window._SUPABASE_URL || '') + '/storage/v1/object/public/gallery-images/' + thumbPath + '" class="thumb-img" alt="">'
+      ? '<img data-src="' + (window._SUPABASE_URL || '') + '/storage/v1/object/public/gallery-images/' + thumbPath + '" class="thumb-img" alt="' + escHtml(displayName) + '">'
       : '<svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg>';
     h += '<div class="cultivar-row__thumb' + (locked ? ' seedling-thumb--locked' : '') + '">' + thumbContent + '</div>';
     h += '<div class="cultivar-row__info">';
@@ -2112,7 +2112,7 @@ if (false) {
         // Thumbnail or fallback icon
         if (thumbMap[displayName] && baseUrl) {
           var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
-          html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt=""></div>';
+          html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '"></div>';
         } else {
           html += '<div class="recent-card__img">';
           html += '<svg viewBox="0 0 80 60" width="80" height="60"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
@@ -2178,7 +2178,7 @@ if (false) {
             // Thumbnail
             if (thumbMap[displayName] && baseUrl) {
               var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
-              html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt=""></div>';
+              html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '"></div>';
             } else {
               html += '<div class="recent-card__img">';
               html += '<svg viewBox="0 0 80 60" width="80" height="60"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';

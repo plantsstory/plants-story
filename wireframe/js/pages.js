@@ -755,7 +755,7 @@ function renderFavoritesPage() {
       // Thumbnail or plant icon
       if (thumbMap[displayName] && baseUrl) {
         var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
-        html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt=""></div>';
+        html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '"></div>';
       } else {
         html += '<div class="recent-card__img">';
         html += '<svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
@@ -1683,7 +1683,7 @@ function globalSearch(query) {
         var profileUrl = u.username ? _basePath + 'profile/@' + escHtml(u.username) : _basePath + 'profile/' + escHtml(u.id);
         var avatarHtml = '';
         if (u.avatar_url) {
-          avatarHtml = '<img src="' + escHtml(u.avatar_url) + '" class="avatar-sm" alt="">';
+          avatarHtml = '<img src="' + escHtml(u.avatar_url) + '" class="avatar-sm" alt="' + escHtml(u.display_name || 'User') + '">';
         } else {
           avatarHtml = '<div class="avatar-placeholder-sm">' + (u.display_name ? escHtml(u.display_name.charAt(0).toUpperCase()) : '?') + '</div>';
         }

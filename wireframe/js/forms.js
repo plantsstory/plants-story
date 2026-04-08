@@ -434,6 +434,9 @@ document.addEventListener('click', function(e) {
 (function() {
   var contributeGenus = document.querySelector('#page-contribute .form-select');
   var contributeName = document.getElementById('cultivar-name-input');
+  // Set aria-required on required fields
+  if (contributeGenus) contributeGenus.setAttribute('aria-required', 'true');
+  if (contributeName) contributeName.setAttribute('aria-required', 'true');
   var duplicateAlert = document.getElementById('duplicate-alert');
   var contributeDesc = document.getElementById('sf-notes'); // 補足欄
   var contributeSourceInput = document.querySelector('#page-contribute input[type="url"]');
@@ -1177,9 +1180,21 @@ document.addEventListener('click', function(e) {
       type = type ? type.value : 'species';
       var desc = contributeDesc ? contributeDesc.value.trim() : '';
 
+      // Clear previous validation states
+      [contributeGenus, contributeName].forEach(function(el) {
+        if (el) { el.setAttribute('aria-invalid', 'false'); el.style.borderColor = ''; }
+      });
       // Validation
-      if (!genus) { showToast(t('error_genus_required'), true); return; }
-      if (!name) { showToast(t('error_name_required'), true); return; }
+      if (!genus) {
+        showToast(t('error_genus_required'), true);
+        if (contributeGenus) { contributeGenus.setAttribute('aria-invalid', 'true'); contributeGenus.style.borderColor = 'var(--color-danger)'; contributeGenus.focus(); }
+        return;
+      }
+      if (!name) {
+        showToast(t('error_name_required'), true);
+        if (contributeName) { contributeName.setAttribute('aria-invalid', 'true'); contributeName.style.borderColor = 'var(--color-danger)'; contributeName.focus(); }
+        return;
+      }
 
       // Login required
       if (!window._currentUser) {
@@ -2759,16 +2774,25 @@ updateCultivarDetail = function(cultivarName, rowEl) {
   if (!submitBtn) return;
   submitBtn.addEventListener('click', function(e) {
     e.preventDefault();
-    var name = document.getElementById('contact-name').value.trim();
-    var email = document.getElementById('contact-email').value.trim();
-    var message = document.getElementById('contact-message').value.trim();
+    var nameEl = document.getElementById('contact-name');
+    var emailEl = document.getElementById('contact-email');
+    var messageEl = document.getElementById('contact-message');
+    var name = nameEl.value.trim();
+    var email = emailEl.value.trim();
+    var message = messageEl.value.trim();
+    // Clear previous validation
+    [nameEl, emailEl, messageEl].forEach(function(el) { el.setAttribute('aria-invalid', 'false'); el.style.borderColor = ''; });
     if (!name || !email || !message) {
       showToast(t('contact_error_required'), true);
+      var first = !name ? nameEl : !email ? emailEl : messageEl;
+      first.setAttribute('aria-invalid', 'true');
+      first.style.borderColor = 'var(--color-danger)';
+      first.focus();
       return;
     }
     showToast(t('contact_success'));
-    document.getElementById('contact-name').value = '';
-    document.getElementById('contact-email').value = '';
-    document.getElementById('contact-message').value = '';
+    nameEl.value = '';
+    emailEl.value = '';
+    messageEl.value = '';
   });
 })();

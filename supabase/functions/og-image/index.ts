@@ -1,11 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import init, { svg2png } from "https://deno.land/x/resvg_wasm@0.0.2/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+let wasmInitialized = false;
 
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -67,10 +69,19 @@ serve(async (req: Request) => {
   <text x="80" y="560" font-family="sans-serif" font-size="20" fill="#C8D0C0" opacity="0.6">品種の由来や歴史をコミュニティで収集・共有</text>
 </svg>`;
 
-    return new Response(svg, {
+    // Initialize WASM once
+    if (!wasmInitialized) {
+      await init();
+      wasmInitialized = true;
+    }
+
+    // Convert SVG to PNG
+    const png = svg2png(svg, { width: 1200 });
+
+    return new Response(png, {
       headers: {
         ...corsHeaders,
-        "Content-Type": "image/svg+xml",
+        "Content-Type": "image/png",
         "Cache-Control": "public, max-age=86400, s-maxage=86400",
       },
     });
