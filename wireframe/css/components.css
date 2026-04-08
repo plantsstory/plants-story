@@ -374,16 +374,18 @@
 }
 .genus-stats__chips {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--space-xs);
+  overflow-x: auto;
 }
 .genus-stat-chip {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
+  white-space: nowrap;
   background: var(--color-lighter);
   color: var(--color-gray-dark);
 }
