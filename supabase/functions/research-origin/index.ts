@@ -1,11 +1,21 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+const ALLOWED_ORIGINS = [
+  "https://plantsstory.com",
+  "https://plantsstory.github.io",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+];
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") || "";
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  };
+}
 
 // ============================================================
 // Source Trust Tier Definitions (revised)
@@ -31,6 +41,7 @@ interface BotanicalResult {
   referenceCollation: string;
   // Type data from IPNI HTML scraping
   collectorTeam: string;
+  collectionDate: string;
   typeLocality: string;
   typeRemarks: string;
   typeDistribution: string;
@@ -145,6 +156,7 @@ async function searchIPNI(genus: string, species: string): Promise<{ year: strin
 // Step 4: Scrape IPNI HTML for type specimen data (Collector, Locality, Type Remarks)
 interface IpniTypeData {
   collectorTeam: string;
+  collectionDate: string;
   locality: string;
   typeRemarks: string;
   typeDistribution: string;
@@ -178,6 +190,7 @@ async function scrapeIpniTypeData(ipniId: string): Promise<IpniTypeData | null> 
 
     const result: IpniTypeData = {
       collectorTeam: extractField("Collector Team"),
+      collectionDate: extractField("Collection Date"),
       locality: extractField("Locality"),
       typeRemarks: extractField("Type Remarks"),
       typeDistribution: extractField("Distribution Of Types"),
@@ -186,7 +199,7 @@ async function scrapeIpniTypeData(ipniId: string): Promise<IpniTypeData | null> 
     const hasData = result.collectorTeam || result.locality || result.typeRemarks;
     if (!hasData) return null;
 
-    console.log(`[IPNI HTML] Type data scraped: collector="${result.collectorTeam}", locality="${result.locality}", remarks="${result.typeRemarks.substring(0, 80)}..."`);
+    console.log(`[IPNI HTML] Type data scraped: collector="${result.collectorTeam}", date="${result.collectionDate}", locality="${result.locality}", remarks="${result.typeRemarks.substring(0, 80)}..."`);
     return result;
   } catch (e) {
     console.log(`[IPNI HTML] Scrape failed:`, String(e));
@@ -232,6 +245,7 @@ async function queryBotanicalDBs(genus: string, species: string): Promise<Botani
     publication: ipni?.publication || "",
     referenceCollation: ipni?.collation || "",
     collectorTeam: typeData?.collectorTeam || "",
+    collectionDate: typeData?.collectionDate || "",
     typeLocality: typeData?.locality || "",
     typeRemarks: typeData?.typeRemarks || "",
     typeDistribution: typeData?.typeDistribution || "",
@@ -250,8 +264,17 @@ interface WikidataResult {
   wikidataUrl: string;
 }
 
+function sanitizeSparql(input: string): string {
+  // Remove characters that could break out of SPARQL string literals
+  return input.replace(/[\\"'\n\r\t{}()]/g, "").trim();
+}
+
 async function queryWikidata(genus: string, epithet: string): Promise<WikidataResult | null> {
   try {
+    const safeEpithet = sanitizeSparql(epithet.toLowerCase());
+    const safeGenus = sanitizeSparql(genus.toLowerCase());
+    if (!safeEpithet || !safeGenus) return null;
+
     // Search by label containing the cultivar epithet within the genus
     const sparql = `
 SELECT ?item ?itemLabel ?itemDescription ?parentTaxon ?parentTaxonLabel
@@ -259,8 +282,8 @@ SELECT ?item ?itemLabel ?itemDescription ?parentTaxon ?parentTaxonLabel
   {
     ?item rdfs:label ?label .
     FILTER(LANG(?label) = "en")
-    FILTER(CONTAINS(LCASE(?label), "${epithet.toLowerCase()}"))
-    FILTER(CONTAINS(LCASE(?label), "${genus.toLowerCase()}"))
+    FILTER(CONTAINS(LCASE(?label), "${safeEpithet}"))
+    FILTER(CONTAINS(LCASE(?label), "${safeGenus}"))
   }
   OPTIONAL { ?item wdt:P171 ?parentTaxon }
   OPTIONAL { ?item wdt:P61 ?creator }
@@ -428,6 +451,95 @@ async function gatherExternalData(genus: string, epithet: string): Promise<Exter
 }
 
 // ============================================================
+// YouTube Data API v3: Search for videos and retrieve snippets
+// ============================================================
+interface YouTubeSnippet {
+  title: string;
+  description: string;
+  channelTitle: string;
+  videoUrl: string;
+}
+
+async function searchYouTube(
+  apiKey: string,
+  cultivarName: string,
+  keywords: string,
+  maxResults = 5,
+  channels?: { id: string; name: string }[]
+): Promise<YouTubeSnippet[]> {
+  if (!apiKey) return [];
+
+  const allResults: YouTubeSnippet[] = [];
+
+  async function doSearch(query: string, channelId?: string, perPage = 5): Promise<YouTubeSnippet[]> {
+    try {
+      const params = new URLSearchParams({
+        part: "snippet",
+        q: query.substring(0, 128),
+        type: "video",
+        maxResults: String(perPage),
+        relevanceLanguage: "en",
+        key: apiKey,
+      });
+      if (channelId && channelId.startsWith("UC")) {
+        params.set("channelId", channelId);
+      }
+      const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`, {
+        headers: { "Accept": "application/json" },
+      });
+      if (!res.ok) {
+        console.log(`[YouTube] API error: ${res.status} ${res.statusText}`);
+        return [];
+      }
+      const data = await res.json();
+      return (data.items || []).map((item: any) => ({
+        title: item.snippet?.title || "",
+        description: item.snippet?.description || "",
+        channelTitle: item.snippet?.channelTitle || "",
+        videoUrl: `https://www.youtube.com/watch?v=${item.id?.videoId || ""}`,
+      }));
+    } catch (e) {
+      console.log(`[YouTube] Search failed: ${String(e)}`);
+      return [];
+    }
+  }
+
+  const query = `${cultivarName} ${keywords}`;
+  const searches: Promise<YouTubeSnippet[]>[] = [];
+
+  if (channels && channels.length > 0) {
+    // Search each specified channel (3 results each)
+    for (const ch of channels) {
+      if (ch.id.startsWith("search:")) {
+        // Channel name search: include channel name in query
+        searches.push(doSearch(`${query} ${ch.id.replace("search:", "")}`, undefined, 3));
+      } else {
+        searches.push(doSearch(query, ch.id, 3));
+      }
+    }
+    // Also do a general search (2 results) for broader coverage
+    searches.push(doSearch(`${query} origin`, undefined, 2));
+  } else {
+    // No channels specified: general search
+    searches.push(doSearch(`${query} origin`, undefined, maxResults));
+  }
+
+  const results = await Promise.all(searches);
+  const seenUrls = new Set<string>();
+  for (const batch of results) {
+    for (const item of batch) {
+      if (!seenUrls.has(item.videoUrl)) {
+        seenUrls.add(item.videoUrl);
+        allResults.push(item);
+      }
+    }
+  }
+
+  console.log(`[YouTube] Total unique results: ${allResults.length}`);
+  return allResults;
+}
+
+// ============================================================
 // Build external data context block for LLM prompts
 // ============================================================
 function buildExternalDataContext(ext: ExternalData): string {
@@ -585,6 +697,7 @@ function buildSpeciesStructuredPrompt(bot: BotanicalResult): string {
   if (bot.collectorTeam || bot.typeLocality || bot.typeRemarks) {
     typeDataSection = `\n=== TYPE SPECIMEN DATA (from IPNI — use this as PRIMARY source) ===`;
     if (bot.collectorTeam) typeDataSection += `\nCollector Team: ${bot.collectorTeam}`;
+    if (bot.collectionDate) typeDataSection += `\nCollection Date: ${bot.collectionDate}`;
     if (bot.typeLocality) typeDataSection += `\nLocality: ${bot.typeLocality}`;
     if (bot.typeRemarks) typeDataSection += `\nType Remarks: ${bot.typeRemarks}`;
     if (bot.typeDistribution) typeDataSection += `\nDistribution Of Types: ${bot.typeDistribution}`;
@@ -951,6 +1064,109 @@ CRITICAL: In ALL Japanese text fields, the following MUST be written in Latin/En
 }
 
 // ============================================================
+// Build keyword research prompt for CLONE/Hybrid (allows community sources)
+// ============================================================
+function buildKeywordResearchPrompt(
+  cultivarName: string,
+  genus: string,
+  plantType: string,
+  keywords: string,
+  ext: ExternalData
+): string {
+  const externalContext = buildExternalDataContext(ext);
+  const typeLabel = plantType === "hybrid" ? "HYBRID" : "CLONE";
+  const typeGuide = plantType === "hybrid"
+    ? `- Focus on PARENTAGE (Parent A × Parent B) — most important for hybrids.
+- Identify the BREEDER/CREATOR who made this cross.
+- Note when the cross was first made, registered, or named.
+- Describe distinctive features compared to parents.`
+    : `- Focus on ORIGIN STORY: How was this clone discovered or selected?
+- Was it a natural mutation (sport), tissue culture mutation, or deliberate selection?
+- If it has a plant patent (USPP), cite the patent number and inventor.
+- Who discovered or first propagated this clone?
+- What makes this clone DISTINCT from the typical species form?`;
+
+  return `You are an expert plant researcher investigating the origin of the ${typeLabel} cultivar "${cultivarName}" (genus: ${genus}).
+
+=== ADMIN-PROVIDED KEYWORDS ===
+${keywords || '(none provided — research using the cultivar name and genus only)'}
+
+${keywords ? 'Use these keywords as primary research hints. They may contain breeder names, years, parentage, geographic origin, or other clues.' : 'No keywords provided. Research using the full cultivar name "' + cultivarName + '" and genus "' + genus + '" as your primary search terms.'}
+${externalContext}
+=== IMPORTANT CONTEXT ===
+Clone and Hybrid cultivars are RARELY registered in academic databases (IPNI, POWO).
+Their origin information is primarily found in:
+- Breeder's own posts on Instagram, Facebook, X (Twitter), YouTube
+- Hobbyist forums and collector communities (Aroid Society, plant collector groups)
+- Nursery websites and blogs BY THE ORIGINAL BREEDER (not resellers)
+- Plant patent records (USPTO USPP) for patented cultivars
+- Aroid-related publications (Aroideana, IAS newsletters)
+- Collector/breeder interviews and articles
+
+=== SOURCE RELIABILITY FOR CULTIVARS ===
+Tier A (75-90%): Plant patents, academic papers, breeder's official records
+Tier B (55-75%): Breeder's own social media posts, IAS publications, verified collector info
+Tier C (35-55%): Community consensus from multiple independent sources, forums
+Tier D (20-35%): Single unverified source, hearsay, or no corroboration
+
+=== SEARCH STRATEGY ===
+When researching, mentally search with combinations like:
+- "${cultivarName}" + origin, history, bred by, created by, cross, parentage, roots
+- "${cultivarName}" + breeder, hybridizer, discoverer, selected by
+- "${cultivarName}" + patent, USPP, registration
+- The cultivar epithet alone + ${genus} + origin
+- Breeder name (from keywords) + their other cultivars for cross-reference
+
+=== ${typeLabel}-SPECIFIC GUIDELINES ===
+${typeGuide}
+
+=== CRITICAL RULES ===
+1. Use ALL available knowledge from your training data — including social media posts, forum discussions, breeder announcements, and community knowledge.
+2. NEVER attribute creation to plant SELLERS or RESELLERS unless they are the VERIFIED original breeder. These are SELLERS, not creators: NSE Tropicals, Ecuagenera, LCA Plants, Aroid Greenhouses, Gabriella Plants, Peace Love Happiness Club, Steve's Leaves, Logee's, etc.
+3. NEVER write "believed to be", "thought to be", "possibly", "likely" — state facts or write "由来は不明".
+4. Do NOT include specific size measurements. Sizes vary greatly between individuals.
+5. If you cannot find reliable info, return confidence: 0.2 with tier "D" — do NOT fabricate.
+
+=== OUTPUT FORMAT ===
+Return ONLY valid JSON (no markdown):
+{
+  "origins": [
+    {
+      "source_tier": "B|C|D — assign based on source quality",
+      "source_name": "Name of the most reliable source found",
+      "source_url": "URL if available, or empty string",
+      "description_en": "Factual English description (100-250 words). Focus on origin story, parentage, breeder, and distinctive features.",
+      "description_jp": "日本語の由来説明文（150-300文字）。自然で読みやすい日本語の文章で書くこと。品種名・学名・人名・地名は英語（Latin alphabet）のまま表記。交配親・作出者・特徴を中心に記述。",
+      "parentage": "Parent A × Parent B (or null if unknown)",
+      "discovery_year": null,
+      "discoverer_or_breeder": "Name or null",
+      "native_region": null,
+      "first_description": "Patent, publication, or first public announcement reference (or null)",
+      "confidence": 0.0
+    }
+  ],
+  "cultivar_summary_en": "One-sentence factual summary",
+  "cultivar_summary_jp": "事実に基づく一文要約（日本語）"
+}
+
+=== RULES ===
+- Return 1 origin only. Quality over quantity.
+- confidence: YOUR confidence this info is accurate (0.0-1.0). Be honest.
+- description_jp MUST be a complete, natural Japanese paragraph — not a word-for-word translation of English.
+  Write as if explaining to a Japanese plant enthusiast. Use proper Japanese grammar and sentence structure.
+  Only species/cultivar names, person names, and place names should remain in English.
+- If truly no info found: set confidence 0.2, tier "D", and write "由来は不明。" followed by a brief physical description.
+
+=== MANDATORY WRITING RULES FOR JAPANESE TEXT ===
+CRITICAL: In ALL Japanese text fields:
+- Species/cultivar names: Latin scientific names ONLY. Write "Anthurium crystallinum", NEVER katakana.
+- Person names: English alphabet ONLY. Write "John Banta", NEVER katakana.
+- Place/region names: English alphabet ONLY. Write "Florida", NEVER katakana.
+- Everything else (connecting words, descriptions, explanations): Write in natural Japanese.
+  例: "John Bantaによって Florida で作出された交配種で、Anthurium crystallinum × Anthurium magnificum の交配により誕生した。"`;
+}
+
+// ============================================================
 // Build verification prompt for user-written CLONE/Hybrid origins
 // ============================================================
 function buildVerificationPrompt(
@@ -1067,12 +1283,34 @@ function calculateEnhancedTrust(
 // Main Handler
 // ============================================================
 serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    const { cultivar_id, genus, cultivar_name, type, manual_origins, user_text, user_sources, preview } = await req.json();
+    // ── Authentication: require a valid JWT ──
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user: authUser }, error: authError } = await authClient.auth.getUser();
+    if (authError || !authUser) {
+      return new Response(
+        JSON.stringify({ error: "Invalid or expired token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { cultivar_id, genus, cultivar_name, type, manual_origins, user_text, user_sources, preview, keywords, youtube_channels } = await req.json();
 
     if ((!cultivar_id && !preview) || !cultivar_name) {
       return new Response(
@@ -1080,6 +1318,33 @@ serve(async (req: Request) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // ── Rate limiting ──
+    const serviceClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const isAdmin = authUser.app_metadata?.role === "admin";
+    const rateLimit = isAdmin ? 200 : 10; // Admin: 200/hour, User: 10/hour
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentCount } = await serviceClient
+      .from("research_origin_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", authUser.id)
+      .gte("requested_at", oneHourAgo);
+
+    if ((recentCount ?? 0) >= rateLimit) {
+      return new Response(
+        JSON.stringify({ error: `Rate limit exceeded. Maximum ${rateLimit} research requests per hour.` }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Log this request for rate limiting
+    await serviceClient.from("research_origin_requests").insert({
+      user_id: authUser.id,
+      cultivar_name: cultivar_name,
+    });
 
     // Skip AI research for seedlings
     if (type === "seedling") {
@@ -1089,39 +1354,41 @@ serve(async (req: Request) => {
       );
     }
 
-    // Skip post-registration AI research for species (only allow preview mode for auto-fill button)
-    if (type === "species" && !preview) {
+    // For species: allow both preview mode (auto-fill button) and re-research (admin with cultivar_id)
+    // Only block if neither preview nor cultivar_id is provided
+    if (type === "species" && !preview && !cultivar_id) {
       return new Response(
-        JSON.stringify({ success: false, reason: "Species uses pre-registration auto-fill only" }),
+        JSON.stringify({ success: false, reason: "Species requires preview mode or cultivar_id for research" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const geminiApiKey = Deno.env.get("GEMINI_API_KEY") || "";
     const groqApiKey = Deno.env.get("GROQ_API_KEY") || "";
     const openaiApiKey = Deno.env.get("OPENAI_API_KEY") || "";
+    const youtubeApiKey = Deno.env.get("YOUTUBE_API_KEY") || "";
 
-    // Preserve manual (user-written) origins
+    // Preserve non-AI origins (user-written, user-verified, manual)
     // Priority: use manual_origins passed directly from frontend (avoids race condition)
     // Fallback: fetch from DB for re-research scenarios (admin "AI再調査" button)
-    let manualOrigins: any[] = [];
+    let preservedOrigins: any[] = [];
     if (manual_origins && Array.isArray(manual_origins) && manual_origins.length > 0) {
-      manualOrigins = manual_origins;
-      console.log(`[Manual] Using ${manualOrigins.length} manual origins passed from frontend`);
+      preservedOrigins = manual_origins;
+      console.log(`[Preserved] Using ${preservedOrigins.length} origins passed from frontend`);
     } else if (!preview) {
       const { data: existingRow } = await supabase
         .from("cultivars")
         .select("origins")
         .eq("id", cultivar_id)
         .single();
-      manualOrigins = (existingRow?.origins || []).filter(
-        (o: any) => o.source_type === "manual" || (o.author && o.author.isAI === false && o.source_type !== "user_verified")
+      // Keep all non-AI origins: manual, user_verified, and any user-written origins
+      preservedOrigins = (existingRow?.origins || []).filter(
+        (o: any) => o.source_type === "manual" || o.source_type === "user_verified" || (o.author && o.author.isAI === false)
       );
-      if (manualOrigins.length > 0) {
-        console.log(`[Manual] Preserved ${manualOrigins.length} manual origins from DB`);
+      if (preservedOrigins.length > 0) {
+        console.log(`[Preserved] Kept ${preservedOrigins.length} user origins from DB`);
       }
     }
 
@@ -1244,7 +1511,10 @@ serve(async (req: Request) => {
               author_name: botResult.authors || "不明",
               publication_year: botResult.publicationYear ? parseInt(botResult.publicationYear) : null,
               collector: known(aiStructured?.collector) || ipniCollector || "不明",
-              collection_year: aiStructured?.collection_year || null,
+              collection_year: aiStructured?.collection_year || (() => {
+                const m = botResult.collectionDate.match(/\b(\d{4})\b/);
+                return m ? parseInt(m[1]) : null;
+              })(),
               type_locality: known(aiStructured?.type_locality) || ipniLocality || botResult.nativeDistribution[0] || "不明",
               known_habitats: botResult.typeDistribution || dist || "不明",
               notes: "",
@@ -1280,15 +1550,167 @@ serve(async (req: Request) => {
       const cultivarEpithet = epithetMatch ? epithetMatch[1] : cultivar_name.split(/\s+/).slice(1).join(" ");
       const effectiveGenus = genus || parsed.genus;
 
-      // ---- CLONE/Hybrid: Verify user text (no AI generation) ----
+      // ---- CLONE/Hybrid: Keyword research or verify user text ----
       if (plantType === "hybrid" || plantType === "clone") {
+        // Keyword research mode: use research prompts with optional keywords as hints
+        // Also triggers when no user_text and no keywords (pure name-based research)
+        const keywordsText = (keywords || "").trim();
+        const hasYtChannels = Array.isArray(youtube_channels) && youtube_channels.length > 0;
+        const useKeywordResearch = keywordsText || hasYtChannels || (!user_text && !preservedOrigins.some((o: any) => o.source_type === "manual" || (o.author && o.author.isAI === false)));
+        if (useKeywordResearch) {
+          console.log(`[KeywordResearch] Researching ${plantType}: ${cultivar_name} with keywords: ${keywordsText || '(none, name-based)'}`);
+
+          // Gather external data + YouTube in parallel
+          let externalData: ExternalData = { wikidata: null, papers: [] };
+          const [extResult, ytResults] = await Promise.all([
+            gatherExternalData(effectiveGenus, cultivarEpithet),
+            searchYouTube(youtubeApiKey, cultivar_name, keywordsText, 5, youtube_channels || undefined),
+          ]);
+          externalData = extResult;
+          const hasWd = externalData.wikidata ? "yes" : "no";
+          const paperCount = externalData.papers.length;
+          console.log(`[KeywordResearch] External data: wikidata=${hasWd}, papers=${paperCount}, youtube=${ytResults.length}`);
+
+          // Build YouTube context for prompt
+          let youtubeContext = "";
+          if (ytResults.length > 0) {
+            const ytLines = ytResults.map((yt, i) =>
+              `  ${i + 1}. "${yt.title}" by ${yt.channelTitle}\n     ${yt.description.substring(0, 300)}${yt.description.length > 300 ? "..." : ""}\n     URL: ${yt.videoUrl}`
+            );
+            youtubeContext = `\n=== YOUTUBE VIDEO DATA ===\nThe following YouTube videos were found. Extract any origin/parentage/breeder information:\n${ytLines.join("\n")}\n`;
+          }
+
+          // Build keyword research prompt — allows community/SNS sources for clone/hybrid
+          const researchPrompt = buildKeywordResearchPrompt(cultivar_name, effectiveGenus, plantType, keywordsText, externalData) + youtubeContext;
+
+          let researchResult: any = null;
+
+          if (geminiApiKey) {
+            try {
+              console.log("[KeywordResearch] Trying Gemini...");
+              const text = await callGemini(geminiApiKey, researchPrompt, 3000);
+              researchResult = extractJson(text);
+              if (researchResult?.origins?.length) {
+                researchSource = "gemini";
+                console.log(`[KeywordResearch] Gemini OK: ${researchResult.origins.length} origins`);
+              } else { researchResult = null; }
+            } catch (e) { console.log("[KeywordResearch] Gemini failed:", String(e)); }
+          }
+
+          if (!researchResult && groqApiKey) {
+            try {
+              console.log("[KeywordResearch] Trying Groq...");
+              const text = await callGroq(groqApiKey, "llama-3.3-70b-versatile",
+                "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
+                researchPrompt, 3000);
+              researchResult = extractJson(text);
+              if (researchResult?.origins?.length) {
+                researchSource = "groq-llama3.3-70b";
+                console.log(`[KeywordResearch] Groq OK`);
+              }
+            } catch (e) { console.log("[KeywordResearch] Groq failed:", String(e)); }
+          }
+
+          if (!researchResult && openaiApiKey) {
+            try {
+              console.log("[KeywordResearch] Trying GPT-4o mini...");
+              const text = await callOpenAI(openaiApiKey,
+                "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
+                researchPrompt, 3000);
+              researchResult = extractJson(text);
+              if (researchResult?.origins?.length) {
+                researchSource = "gpt-4o-mini";
+                console.log(`[KeywordResearch] GPT-4o mini OK`);
+              }
+            } catch (e) { console.log("[KeywordResearch] GPT-4o mini failed:", String(e)); }
+          }
+
+          if (researchResult?.origins?.length) {
+            for (const origin of researchResult.origins) {
+              const tier = origin.source_tier || "D";
+              const aiConf = Math.max(0, Math.min(1, origin.confidence || 0));
+              const tierInfo = TIER_CONFIG[tier] || TIER_CONFIG.D;
+              let trust = Math.round(tierInfo.base_min + (tierInfo.base_max - tierInfo.base_min) * aiConf);
+              trust = Math.max(tierInfo.base_min, Math.min(tierInfo.base_max, trust));
+
+              let bodyJp = origin.description_jp || "";
+              const bodyEn = origin.description_en || "";
+              if (!bodyJp || bodyJp.length < 15) bodyJp = bodyEn;
+
+              let trustClass = "trust--low";
+              if (trust >= 70) trustClass = "trust--high";
+              else if (trust >= 40) trustClass = "trust--mid";
+
+              const sourcesArr: any[] = origin.source_url ? [{ url: origin.source_url, label: origin.source_name }] : [];
+              if (externalData.wikidata) {
+                sourcesArr.push({ url: externalData.wikidata.wikidataUrl, label: "Wikidata" });
+              }
+              for (const paper of externalData.papers) {
+                sourcesArr.push({ url: `https://doi.org/${paper.doi}`, label: `${paper.journal} (${paper.year})` });
+              }
+              // Add YouTube sources if available
+              for (const yt of ytResults) {
+                if (yt.videoUrl) {
+                  sourcesArr.push({ url: yt.videoUrl, label: `YouTube: ${yt.channelTitle}` });
+                }
+              }
+
+              const citLinks = sourcesArr.filter((s: any) => s.url).map((s: any) => ({ url: s.url, label: s.label || s.url }));
+              const structuredEntry: any = { origin_type: plantType, notes: bodyJp, citation_links: citLinks };
+
+              if (plantType === "clone") {
+                structuredEntry.namer = origin.discoverer_or_breeder || "不明";
+                structuredEntry.naming_year = origin.discovery_year || null;
+                if (origin.parentage) {
+                  const parts = (origin.parentage || "").split(/\s*[×x]\s*/i);
+                  structuredEntry.formula = { parentA: parts[0] || "", parentB: parts[1] || "" };
+                }
+              } else if (plantType === "hybrid") {
+                structuredEntry.breeder = origin.discoverer_or_breeder || "不明";
+                structuredEntry.naming_year = origin.discovery_year || null;
+                if (origin.parentage) {
+                  const parts = (origin.parentage || "").split(/\s*[×x]\s*/i);
+                  structuredEntry.formula = { parentA: parts[0] || "", parentB: parts[1] || "" };
+                }
+              }
+
+              originEntries.push({
+                body: bodyJp,
+                body_en: bodyEn,
+                trust,
+                trustClass,
+                source_type: "ai_research",
+                source_tier: tier,
+                source_tier_label_en: tierInfo.label_en,
+                source_tier_label_jp: tierInfo.label_jp,
+                source_name: origin.source_name || "",
+                source_url: origin.source_url || "",
+                source_language: "en",
+                parentage: origin.parentage || null,
+                discovery_year: origin.discovery_year || null,
+                discoverer_or_breeder: origin.discoverer_or_breeder || null,
+                native_region: origin.native_region || null,
+                first_description: origin.first_description || null,
+                structured: structuredEntry,
+                author: {
+                  name: researchSource === "gemini" ? "AI (Gemini 2.0 Flash)" : researchSource === "gpt-4o-mini" ? "AI (GPT-4o mini)" : "AI (Llama 3.3 70B)",
+                  isAI: true,
+                  date: new Date().toISOString().split("T")[0],
+                },
+                sources: sourcesArr,
+                votes: { agree: 0, disagree: 0 },
+                verified: false,
+              });
+            }
+          }
+        } else {
         // Resolve user text: prefer passed user_text, fallback to DB manual origins
         let effectiveUserText = (user_text || "").trim();
         let effectiveUserSources: string[] = Array.isArray(user_sources) ? user_sources.filter(Boolean) : [];
 
         if (!effectiveUserText) {
           // Try to find user text from manual_origins or DB
-          const userOrigin = manualOrigins.find(
+          const userOrigin = preservedOrigins.find(
             (o: any) => o.source_type === "user_verified" || o.source_type === "manual" || (o.author && o.author.isAI === false)
           );
           if (userOrigin) {
@@ -1472,7 +1894,7 @@ serve(async (req: Request) => {
               body_en: cs.notes_en || "",
               trust,
               trustClass,
-              source_type: "user_verified",
+              source_type: "ai_verified",
               source_tier: vTier,
               source_tier_label_en: tierInfo.label_en,
               source_tier_label_jp: tierInfo.label_jp,
@@ -1530,7 +1952,7 @@ serve(async (req: Request) => {
               body_en: "",
               trust: 20,
               trustClass: "trust--low",
-              source_type: "manual",
+              source_type: "ai_fallback",
               source_tier: "D",
               source_tier_label_en: tierInfo.label_en,
               source_tier_label_jp: tierInfo.label_jp,
@@ -1555,12 +1977,17 @@ serve(async (req: Request) => {
           }
         }
 
-        // Clear manualOrigins to prevent duplication — the verified/fallback entry
-        // already contains the user text, so merging manualOrigins would duplicate it.
+        // Remove preserved origins that have the same source_type as new AI entries
+        // to avoid exact duplicates, but keep user-originated origins (user_verified, manual)
         if (originEntries.length > 0) {
-          console.log(`[Verify] Clearing ${manualOrigins.length} manual origins to prevent duplication`);
-          manualOrigins = [];
+          const aiSourceTypes = new Set(originEntries.map((o: any) => o.source_type));
+          const before = preservedOrigins.length;
+          preservedOrigins = preservedOrigins.filter((o: any) => !aiSourceTypes.has(o.source_type));
+          if (before !== preservedOrigins.length) {
+            console.log(`[Verify] Removed ${before - preservedOrigins.length} duplicate origins, kept ${preservedOrigins.length}`);
+          }
         }
+        } // end of keyword-research else (verification path)
 
       // ---- Species fallback: AI generation (unchanged) ----
       } else {
@@ -1755,7 +2182,7 @@ serve(async (req: Request) => {
     }
 
     // Merge: AI origins + preserved manual origins
-    originEntries = [...originEntries, ...manualOrigins];
+    originEntries = [...originEntries, ...preservedOrigins];
 
     // Sort by trust descending
     originEntries.sort((a, b) => b.trust - a.trust);
@@ -1771,6 +2198,7 @@ serve(async (req: Request) => {
       return new Response(
         JSON.stringify({
           success: originEntries.length > 0,
+          origins: originEntries,
           structured: originEntries[0]?.structured || null,
           body: originEntries[0]?.body || null,
           sources: originEntries[0]?.sources || [],

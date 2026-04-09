@@ -3,378 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Plants Story - Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <title>ひなたぼっこぷらんつ - Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/utilities.css">
+  <link rel="stylesheet" href="css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-primary);
-      background: var(--color-bg);
-      color: var(--color-black);
-      min-height: 100vh;
-    }
-
-    /* ---- Layout ---- */
-    .admin-header {
-      background: var(--color-primary-dark);
-      color: #fff;
-      padding: var(--space-md) var(--space-xl);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .admin-header h1 { font-family: var(--font-heading); font-size: var(--font-size-lg); }
-    .admin-header .user-info { font-size: var(--font-size-sm); opacity: 0.8; }
-    .admin-header button {
-      background: rgba(255,255,255,0.15);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.3);
-      padding: 6px 16px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-size: var(--font-size-sm);
-    }
-    .admin-header button:hover { background: rgba(255,255,255,0.25); }
-
-    .admin-body { display: flex; min-height: calc(100vh - 56px); }
-
-    .admin-nav {
-      width: 220px;
-      background: var(--color-white);
-      border-right: 1px solid var(--color-light);
-      padding: var(--space-md) 0;
-      flex-shrink: 0;
-    }
-    .admin-nav a {
-      display: block;
-      padding: var(--space-sm) var(--space-lg);
-      color: var(--color-mid);
-      text-decoration: none;
-      font-size: var(--font-size-sm);
-      border-left: 3px solid transparent;
-      transition: var(--transition);
-    }
-    .admin-nav a:hover { background: var(--color-lighter); color: var(--color-primary); }
-    .admin-nav a.active {
-      color: var(--color-primary);
-      border-left-color: var(--color-primary);
-      background: var(--color-lighter);
-      font-weight: 700;
-    }
-
-    .admin-content {
-      flex: 1;
-      padding: var(--space-xl);
-      max-width: 1200px;
-      overflow-x: auto;
-    }
-
-    /* ---- Login ---- */
-    .login-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: var(--color-bg);
-    }
-    .login-box {
-      background: var(--color-white);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
-      padding: var(--space-2xl);
-      width: 100%;
-      max-width: 400px;
-    }
-    .login-box h1 {
-      font-family: var(--font-heading);
-      color: var(--color-primary);
-      margin-bottom: var(--space-lg);
-      text-align: center;
-    }
-    .login-box input {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid var(--color-light);
-      border-radius: var(--radius-sm);
-      font-size: var(--font-size-base);
-      margin-bottom: var(--space-md);
-    }
-    .login-box input:focus { outline: none; border-color: var(--color-primary); }
-    .login-error {
-      color: var(--color-danger);
-      font-size: var(--font-size-sm);
-      margin-bottom: var(--space-md);
-      display: none;
-    }
-
-    /* ---- Buttons ---- */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: var(--font-size-sm);
-      cursor: pointer;
-      transition: var(--transition);
-      font-family: var(--font-primary);
-    }
-    .btn-primary { background: var(--color-primary); color: #fff; }
-    .btn-primary:hover { background: var(--color-primary-dark); }
-    .btn-danger { background: var(--color-danger); color: #fff; }
-    .btn-danger:hover { opacity: 0.85; }
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--color-light);
-      color: var(--color-mid);
-    }
-    .btn-outline:hover { border-color: var(--color-primary); color: var(--color-primary); }
-    .btn-sm { padding: 4px 10px; font-size: var(--font-size-xs); }
-    .btn-warning { background: var(--color-accent-warm); color: #fff; }
-
-    /* ---- Cards ---- */
-    .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: var(--space-md);
-      margin-bottom: var(--space-xl);
-    }
-    .stat-card {
-      background: var(--color-white);
-      border-radius: var(--radius-md);
-      padding: var(--space-lg);
-      box-shadow: var(--shadow-sm);
-    }
-    .stat-card .stat-value {
-      font-size: var(--font-size-2xl);
-      font-weight: 700;
-      color: var(--color-primary);
-    }
-    .stat-card .stat-label {
-      font-size: var(--font-size-sm);
-      color: var(--color-gray);
-      margin-top: var(--space-xs);
-    }
-
-    /* ---- Table ---- */
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--color-white);
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-    }
-    .data-table th, .data-table td {
-      padding: 10px 14px;
-      text-align: left;
-      font-size: var(--font-size-sm);
-      border-bottom: 1px solid var(--color-lighter);
-    }
-    .data-table th {
-      background: var(--color-primary-dark);
-      color: #fff;
-      font-weight: 500;
-      font-size: var(--font-size-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .data-table tr:hover td { background: var(--color-bg); }
-    .data-table .actions { white-space: nowrap; }
-
-    /* ---- Modal ---- */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 200;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal {
-      background: var(--color-white);
-      border-radius: var(--radius-lg);
-      padding: var(--space-xl);
-      width: 90%;
-      max-width: 600px;
-      max-height: 80vh;
-      overflow-y: auto;
-      box-shadow: var(--shadow-lg);
-    }
-    .modal h2 { font-family: var(--font-heading); margin-bottom: var(--space-lg); }
-    .modal label {
-      display: block;
-      font-size: var(--font-size-sm);
-      font-weight: 500;
-      margin-bottom: var(--space-xs);
-      color: var(--color-mid);
-    }
-    .modal input, .modal textarea, .modal select {
-      width: 100%;
-      padding: 8px 12px;
-      border: 1px solid var(--color-light);
-      border-radius: var(--radius-sm);
-      font-size: var(--font-size-sm);
-      margin-bottom: var(--space-md);
-      font-family: var(--font-primary);
-    }
-    .modal textarea { min-height: 80px; resize: vertical; }
-    .modal-actions { display: flex; gap: var(--space-sm); justify-content: flex-end; margin-top: var(--space-md); }
-
-    /* ---- Misc ---- */
-    .section-title {
-      font-family: var(--font-heading);
-      font-size: var(--font-size-xl);
-      color: var(--color-primary);
-      margin-bottom: var(--space-lg);
-    }
-    .toolbar {
-      display: flex;
-      gap: var(--space-sm);
-      margin-bottom: var(--space-md);
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .toolbar input[type="text"] {
-      padding: 8px 12px;
-      border: 1px solid var(--color-light);
-      border-radius: var(--radius-sm);
-      font-size: var(--font-size-sm);
-      width: 250px;
-    }
-    .toolbar select {
-      padding: 8px 12px;
-      border: 1px solid var(--color-light);
-      border-radius: var(--radius-sm);
-      font-size: var(--font-size-sm);
-    }
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: var(--radius-full);
-      font-size: var(--font-size-xs);
-      font-weight: 600;
-    }
-    .badge-s { background: #8b5cf6; color: #fff; }
-    .badge-a { background: #3b82f6; color: #fff; }
-    .badge-b { background: #10b981; color: #fff; }
-    .badge-c { background: #f59e0b; color: #fff; }
-    .badge-d { background: #ef4444; color: #fff; }
-    .badge-ai { background: #f59e0b; color: #fff; }
-    .badge-user { background: var(--color-primary-light); color: #fff; }
-    .badge-completed { background: var(--color-primary-light); color: #fff; }
-    .badge-pending { background: var(--color-accent-warm); color: #fff; }
-    .badge-failed { background: var(--color-danger); color: #fff; }
-    .trust-bar {
-      display: inline-block;
-      width: 60px;
-      height: 8px;
-      background: var(--color-lighter);
-      border-radius: 4px;
-      overflow: hidden;
-      vertical-align: middle;
-    }
-    .trust-fill { height: 100%; border-radius: 4px; }
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--color-primary);
-      color: #fff;
-      padding: 12px 24px;
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-lg);
-      z-index: 300;
-      display: none;
-      font-size: var(--font-size-sm);
-    }
-    .toast.show { display: block; }
-    .progress-bar {
-      width: 100%;
-      height: 6px;
-      background: var(--color-lighter);
-      border-radius: 3px;
-      overflow: hidden;
-      margin: var(--space-sm) 0;
-    }
-    .progress-fill {
-      height: 100%;
-      background: var(--color-primary-light);
-      border-radius: 3px;
-      transition: width 0.3s;
-    }
-    .hidden { display: none !important; }
-
-    /* ---- Hamburger button (mobile only) ---- */
-    .hamburger-btn {
-      display: none;
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 4px 8px;
-      line-height: 1;
-    }
-    .nav-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      z-index: 199;
-    }
-    .nav-overlay.show { display: block; }
-
-    @media (max-width: 768px) {
-      .hamburger-btn { display: block; }
-      .admin-nav {
-        position: fixed;
-        top: 0;
-        left: -260px;
-        width: 250px;
-        height: 100vh;
-        z-index: 200;
-        transition: left 0.25s ease;
-        box-shadow: 2px 0 8px rgba(0,0,0,0.15);
-        padding-top: var(--space-xl);
-      }
-      .admin-nav.open { left: 0; }
-      .admin-content { padding: var(--space-md); }
-      .admin-content table { font-size: var(--font-size-sm); }
-      .stat-grid { grid-template-columns: 1fr 1fr; }
-    }
-  </style>
 </head>
 <body>
 
-<!-- ============ LOGIN SCREEN ============ -->
-<div id="login-screen" class="login-container">
+<!-- ============ ACCESS GATE (Basic Auth equivalent) ============ -->
+<div id="access-gate" class="login-container">
   <div class="login-box">
-    <h1>Plants Story Admin</h1>
+    <h1>ひなたぼっこぷらんつ Admin</h1>
+    <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);text-align:center;">管理画面へのアクセスにはアクセスコードが必要です</p>
+    <div id="gate-error" class="login-error"></div>
+    <input type="password" id="gate-code" placeholder="アクセスコード" autocomplete="off">
+    <button class="btn btn-primary w-full justify-center" id="btn-gate">認証</button>
+  </div>
+</div>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="login-screen" class="login-container d-none">
+  <div class="login-box">
+    <h1>ひなたぼっこぷらんつ Admin</h1>
     <div id="login-error" class="login-error"></div>
     <input type="email" id="login-email" placeholder="メールアドレス" autocomplete="email">
     <input type="password" id="login-password" placeholder="パスワード" autocomplete="current-password">
-    <button class="btn btn-primary" style="width:100%;justify-content:center;" id="btn-login">ログイン</button>
+    <button class="btn btn-primary w-full justify-center" id="btn-login">ログイン</button>
   </div>
 </div>
 
 <!-- ============ ADMIN APP ============ -->
 <div id="admin-app" class="hidden">
   <header class="admin-header">
-    <div style="display:flex;align-items:center;gap:var(--space-sm);">
+    <div class="flex-center-sm">
       <button class="hamburger-btn" id="hamburger-btn" aria-label="メニュー">☰</button>
-      <h1>Plants Story Admin</h1>
+      <h1>ひなたぼっこぷらんつ Admin</h1>
     </div>
-    <div style="display:flex;align-items:center;gap:var(--space-md);">
+    <div class="flex-center-md">
       <span class="user-info" id="admin-email"></span>
       <button id="btn-logout">ログアウト</button>
       <a href="index.html" style="color:#fff;font-size:var(--font-size-sm);text-decoration:none;opacity:0.7;">サイトへ</a>
@@ -389,7 +59,11 @@
       <a href="#" data-section="images">画像管理</a>
       <a href="#" data-section="delete-requests">削除依頼</a>
       <a href="#" data-section="affiliates">アフィリエイト</a>
+      <a href="#" data-section="users">ユーザー管理</a>
       <a href="#" data-section="bulk">一括操作</a>
+      <a href="#" data-section="error-logs">エラーログ</a>
+      <a href="#" data-section="external">外部サービス</a>
+      <a href="#" data-section="keyword-research">キーワードリサーチ</a>
     </nav>
     <div class="nav-overlay" id="nav-overlay"></div>
     <main class="admin-content">
@@ -415,10 +89,38 @@
             <div class="stat-label">AIリサーチ待ち</div>
           </div>
         </div>
-        <h3 style="margin-bottom:var(--space-md);font-size:var(--font-size-base);">Tier分布</h3>
-        <div id="tier-distribution" style="display:flex;gap:var(--space-sm);margin-bottom:var(--space-xl);flex-wrap:wrap;"></div>
-        <h3 style="margin-bottom:var(--space-md);font-size:var(--font-size-base);">属別品種数</h3>
-        <div id="genus-distribution" style="display:flex;gap:var(--space-sm);flex-wrap:wrap;"></div>
+        <!-- サイト状況 -->
+        <h3 class="section-heading">サイト状況</h3>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-users">-</div>
+            <div class="stat-label">登録ユーザー数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-images">-</div>
+            <div class="stat-label">画像数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-storage">-</div>
+            <div class="stat-label">Storage使用量</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-subscribers">-</div>
+            <div class="stat-label">有料サブスク</div>
+          </div>
+        </div>
+        <div class="stat-grid" style="margin-top:var(--space-md);">
+          <div class="stat-card" style="grid-column:1/-1;">
+            <div class="stat-label" style="margin-bottom:var(--space-sm);">📊 Google Analytics（PV・ユーザー数）</div>
+            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin:0;">GA4ダッシュボードで確認してください。リアルタイム・PV・ユーザー数・流入元が確認できます。</p>
+            <a href="https://analytics.google.com/" target="_blank" rel="noopener" class="btn btn-primary btn-sm" style="margin-top:var(--space-sm);">GA4を開く →</a>
+          </div>
+        </div>
+
+        <h3 class="section-heading">Tier分布</h3>
+        <div id="tier-distribution" class="d-flex gap-sm mb-xl flex-wrap"></div>
+        <h3 class="section-heading">属別品種数</h3>
+        <div id="genus-distribution" class="d-flex gap-sm flex-wrap"></div>
       </section>
 
       <!-- ---- GENERA ---- -->
@@ -476,7 +178,7 @@
       <!-- ---- ORIGINS ---- -->
       <section id="sec-origins" class="hidden">
         <h2 class="section-title">由来管理</h2>
-        <div class="toolbar" style="flex-wrap:wrap;gap:8px;">
+        <div class="toolbar flex-wrap gap-xs">
           <select id="origin-cultivar-select" style="width:350px;">
             <option value="">すべての品種</option>
           </select>
@@ -495,45 +197,45 @@
       <!-- ---- IMAGES ---- -->
       <section id="sec-images" class="hidden">
         <h2 class="section-title">画像管理</h2>
-        <div style="display:flex;gap:0;margin-bottom:var(--space-md);border-bottom:2px solid var(--color-light);">
-          <button class="btn btn-sm image-tab active" data-image-tab="gallery" style="border-radius:var(--radius-md) var(--radius-md) 0 0;border-bottom:2px solid var(--color-primary);margin-bottom:-2px;font-weight:600;">ギャラリー画像</button>
-          <button class="btn btn-sm image-tab" data-image-tab="formula" style="border-radius:var(--radius-md) var(--radius-md) 0 0;margin-bottom:-2px;opacity:0.6;">交配式画像（母/父）</button>
+        <div class="tab-bar">
+          <button class="btn btn-sm image-tab tab-btn active" data-image-tab="gallery">ギャラリー画像</button>
+          <button class="btn btn-sm image-tab tab-btn" data-image-tab="formula">交配式画像（母/父）</button>
         </div>
         <div id="gallery-tab-content">
           <div class="toolbar">
             <input type="text" id="image-search" placeholder="品種名で検索...">
-            <label style="display:flex;align-items:center;gap:4px;font-size:var(--font-size-sm);cursor:pointer;">
+            <label class="d-flex items-center gap-xs text-sm cursor-pointer">
               <input type="checkbox" id="image-flag-filter"> Fake票が多い画像のみ
             </label>
             <button class="btn btn-primary btn-sm" id="btn-refresh-images">更新</button>
           </div>
-          <div id="image-stats" style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);"></div>
-          <div id="image-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--space-md);"></div>
+          <div id="image-stats" class="desc-text mb-md"></div>
+          <div id="image-grid" class="card-grid-sm"></div>
         </div>
-        <div id="formula-tab-content" style="display:none;">
+        <div id="formula-tab-content" class="d-none">
           <div class="toolbar">
             <input type="text" id="formula-image-search" placeholder="品種名で検索...">
             <button class="btn btn-primary btn-sm" id="btn-refresh-formula-images">更新</button>
           </div>
-          <div id="formula-image-stats" style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);"></div>
-          <div id="formula-image-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--space-md);"></div>
+          <div id="formula-image-stats" class="desc-text mb-md"></div>
+          <div id="formula-image-grid" class="card-grid-sm"></div>
         </div>
       </section>
 
       <!-- ---- DELETION REQUESTS ---- -->
       <section id="sec-delete-requests" class="hidden">
         <h2 class="section-title">削除依頼</h2>
-        <div style="display:flex;gap:0;margin-bottom:var(--space-md);border-bottom:2px solid var(--color-light);">
-          <button class="btn btn-sm dr-tab active" data-dr-tab="cultivar" style="border-radius:var(--radius-md) var(--radius-md) 0 0;border-bottom:2px solid var(--color-primary);margin-bottom:-2px;font-weight:600;">品種</button>
-          <button class="btn btn-sm dr-tab" data-dr-tab="image" style="border-radius:var(--radius-md) var(--radius-md) 0 0;margin-bottom:-2px;opacity:0.6;">画像</button>
+        <div class="tab-bar">
+          <button class="btn btn-sm dr-tab tab-btn active" data-dr-tab="cultivar">品種</button>
+          <button class="btn btn-sm dr-tab tab-btn" data-dr-tab="image">画像</button>
         </div>
         <div id="dr-cultivar-content">
-          <div id="dr-cultivar-list" style="display:grid;gap:var(--space-md);"></div>
-          <p id="dr-cultivar-empty" style="color:var(--color-gray);font-size:var(--font-size-sm);">品種の削除依頼はありません</p>
+          <div id="dr-cultivar-list" class="d-grid gap-md"></div>
+          <p id="dr-cultivar-empty" class="desc-text">品種の削除依頼はありません</p>
         </div>
-        <div id="dr-image-content" style="display:none;">
-          <div id="dr-image-list" style="display:grid;gap:var(--space-md);"></div>
-          <p id="dr-image-empty" style="color:var(--color-gray);font-size:var(--font-size-sm);">画像の削除依頼はありません</p>
+        <div id="dr-image-content" class="d-none">
+          <div id="dr-image-list" class="d-grid gap-md"></div>
+          <p id="dr-image-empty" class="desc-text">画像の削除依頼はありません</p>
         </div>
       </section>
 
@@ -544,22 +246,53 @@
           <button class="btn btn-primary" id="btn-add-affiliate">＋ 新規追加</button>
           <button class="btn btn-outline" id="btn-refresh-affiliates">更新</button>
         </div>
-        <div id="affiliate-list" style="display:grid;gap:var(--space-md);margin-top:var(--space-md);"></div>
+        <div id="affiliate-list" class="d-grid gap-md mt-md"></div>
+      </section>
+
+      <!-- ---- USER MANAGEMENT ---- -->
+      <section id="sec-users" class="hidden">
+        <h2 class="section-title">ユーザー管理</h2>
+        <div class="toolbar">
+          <input type="text" class="form-input" id="user-search" placeholder="ユーザー名・表示名で検索..." style="flex:1;max-width:300px;">
+          <select class="form-select" id="user-filter-status" style="width:auto;">
+            <option value="">全てのステータス</option>
+            <option value="active">Active</option>
+            <option value="granted">無料付与</option>
+            <option value="canceled">解約済み</option>
+            <option value="none">未登録</option>
+          </select>
+          <button class="btn btn-outline btn-sm" id="btn-refresh-users">更新</button>
+        </div>
+        <div id="users-table-wrap" class="mt-md">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ユーザー</th>
+                <th>ユーザー名</th>
+                <th>サブスク</th>
+                <th>期限</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+        <div id="users-pagination" class="mt-md d-flex gap-sm items-center"></div>
       </section>
 
       <!-- ---- BULK OPERATIONS ---- -->
       <section id="sec-bulk" class="hidden">
         <h2 class="section-title">一括操作</h2>
 
-        <div style="display:grid;gap:var(--space-lg);">
+        <div class="d-grid gap-lg">
           <!-- Bulk Image Compression -->
           <div class="stat-card">
-            <h3 style="margin-bottom:var(--space-md);">画像一括圧縮</h3>
-            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">
+            <h3 class="mb-md">画像一括圧縮</h3>
+            <p class="desc-text mb-md">
               既存画像をCanvas APIで再圧縮します。長辺2048px超はリサイズ、JPEG品質0.9で再エンコード。<br>
               <strong>スキップ条件:</strong> 長辺2048px以下 かつ 500KB未満の画像はスキップします。
             </p>
-            <div class="toolbar" style="margin-bottom:var(--space-md);">
+            <div class="toolbar mb-md">
               <select id="compress-target">
                 <option value="gallery">ギャラリー画像</option>
                 <option value="parent">親写真（母/父）</option>
@@ -569,34 +302,287 @@
             </div>
             <div id="compress-progress" class="hidden">
               <div class="progress-bar"><div class="progress-fill" id="compress-progress-fill" style="width:0%"></div></div>
-              <div id="compress-progress-text" style="font-size:var(--font-size-sm);color:var(--color-gray);"></div>
-              <div id="compress-log" style="max-height:300px;overflow-y:auto;font-size:var(--font-size-xs);font-family:var(--font-mono);margin-top:var(--space-sm);background:var(--color-bg);padding:var(--space-sm);border-radius:var(--radius-sm);"></div>
+              <div id="compress-progress-text" class="desc-text"></div>
+              <div id="compress-log" class="log-box"></div>
             </div>
           </div>
 
           <!-- Bulk Origin Migration -->
           <div class="stat-card">
-            <h3 style="margin-bottom:var(--space-md);">由来データ構造化移行</h3>
-            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">
+            <h3 class="mb-md">由来データ構造化移行</h3>
+            <p class="desc-text mb-md">
               既存の由来データ（bodyテキスト）を構造化フィールド（structured.notes）に移行します。<br>
               <strong>対象:</strong> structuredフィールドが未設定の由来のみ。既に構造化済みの由来はスキップします。<br>
               また、レガシーフィールド（discoverer_or_breeder, native_region, discovery_year）も対応するstructuredフィールドに移行します。
             </p>
             <button class="btn btn-warning" id="btn-bulk-migrate">移行実行</button>
-            <div id="migrate-progress" class="hidden" style="margin-top:var(--space-md);">
+            <div id="migrate-progress" class="hidden mt-md">
               <div class="progress-bar"><div class="progress-fill" id="migrate-progress-fill" style="width:0%"></div></div>
-              <div id="migrate-progress-text" style="font-size:var(--font-size-sm);color:var(--color-gray);"></div>
-              <div id="migrate-log" style="max-height:300px;overflow-y:auto;font-size:var(--font-size-xs);font-family:var(--font-mono);margin-top:var(--space-sm);background:var(--color-bg);padding:var(--space-sm);border-radius:var(--radius-sm);"></div>
+              <div id="migrate-progress-text" class="desc-text"></div>
+              <div id="migrate-log" class="log-box"></div>
             </div>
           </div>
 
           <!-- Data Export -->
           <div class="stat-card">
-            <h3 style="margin-bottom:var(--space-md);">データエクスポート</h3>
-            <p style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:var(--space-md);">
+            <h3 class="mb-md">データエクスポート</h3>
+            <p class="desc-text mb-md">
               全品種データをJSON形式でダウンロードします。
             </p>
             <button class="btn btn-primary" id="btn-export">JSONエクスポート</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---- ERROR LOGS ---- -->
+      <section id="sec-error-logs" class="hidden">
+        <h2 class="section-title">エラーログ</h2>
+        <p class="text-muted mb-lg">フロントエンドで発生したJavaScriptエラーの一覧です。</p>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="btn-load-errors">最新を読み込む</button>
+          <button class="btn" id="btn-clear-errors">30日以前を削除</button>
+          <span class="text-muted" id="error-count"></span>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:140px;">日時</th>
+              <th>メッセージ</th>
+              <th style="width:120px;">ソース</th>
+              <th style="width:60px;">行</th>
+            </tr>
+          </thead>
+          <tbody id="error-logs-body">
+            <tr><td colspan="4" class="text-muted">「最新を読み込む」をクリックしてください</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ---- EXTERNAL SERVICES ---- -->
+      <section id="sec-external" class="hidden">
+        <h2 class="section-title">外部サービス管理</h2>
+        <p class="text-muted mb-lg">関連する外部サービスへのクイックリンク集です。</p>
+
+        <div class="card-grid">
+
+          <!-- Stripe -->
+          <div class="stat-card">
+            <div class="svc-card-header">
+              <span class="adm-icon">💳</span>
+              <h3 class="adm-m-0">Stripe</h3>
+            </div>
+            <p class="svc-card-desc">決済・サブスクリプション管理</p>
+            <div class="svc-card-links">
+              <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener" class="btn btn-primary btn-link">ダッシュボード</a>
+              <a href="https://dashboard.stripe.com/products" target="_blank" rel="noopener" class="btn btn-link">商品・価格</a>
+              <a href="https://dashboard.stripe.com/subscriptions" target="_blank" rel="noopener" class="btn btn-link">サブスクリプション一覧</a>
+              <a href="https://dashboard.stripe.com/customers" target="_blank" rel="noopener" class="btn btn-link">顧客一覧</a>
+              <a href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener" class="btn btn-link">Webhook設定</a>
+              <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener" class="btn btn-link">APIキー</a>
+              <a href="https://dashboard.stripe.com/settings/billing/portal" target="_blank" rel="noopener" class="btn btn-link">カスタマーポータル設定</a>
+            </div>
+          </div>
+
+          <!-- Supabase -->
+          <div class="stat-card">
+            <div class="svc-card-header">
+              <span class="adm-icon">⚡</span>
+              <h3 class="adm-m-0">Supabase</h3>
+            </div>
+            <p class="svc-card-desc">データベース・認証・Edge Functions</p>
+            <div class="svc-card-links">
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo" target="_blank" rel="noopener" class="btn btn-primary btn-link">プロジェクトホーム</a>
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/editor" target="_blank" rel="noopener" class="btn btn-link">テーブルエディタ</a>
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/auth/users" target="_blank" rel="noopener" class="btn btn-link">認証ユーザー</a>
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/functions" target="_blank" rel="noopener" class="btn btn-link">Edge Functions</a>
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/storage/buckets" target="_blank" rel="noopener" class="btn btn-link">Storage</a>
+              <a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo/sql" target="_blank" rel="noopener" class="btn btn-link">SQLエディタ</a>
+            </div>
+          </div>
+
+          <!-- GitHub -->
+          <div class="stat-card">
+            <div class="svc-card-header">
+              <span class="adm-icon">🐙</span>
+              <h3 class="adm-m-0">GitHub</h3>
+            </div>
+            <p class="svc-card-desc">ソースコード・デプロイ</p>
+            <div class="svc-card-links">
+              <a href="https://github.com/plantsstory/plants-story" target="_blank" rel="noopener" class="btn btn-primary btn-link">リポジトリ</a>
+              <a href="https://github.com/plantsstory/plants-story/actions" target="_blank" rel="noopener" class="btn btn-link">Actions（CI/CD）</a>
+              <a href="https://github.com/plantsstory/plants-story/settings/pages" target="_blank" rel="noopener" class="btn btn-link">GitHub Pages設定</a>
+            </div>
+          </div>
+
+          <!-- Google Cloud -->
+          <div class="stat-card">
+            <div class="svc-card-header">
+              <span class="adm-icon">☁️</span>
+              <h3 class="adm-m-0">Google Cloud</h3>
+            </div>
+            <p class="svc-card-desc">OAuth認証・API設定</p>
+            <div class="svc-card-links">
+              <a href="https://console.cloud.google.com/" target="_blank" rel="noopener" class="btn btn-primary btn-link">コンソール</a>
+              <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener" class="btn btn-link">OAuth認証情報</a>
+            </div>
+          </div>
+
+          <!-- Google Search Console -->
+          <div class="stat-card">
+            <div class="svc-card-header">
+              <span class="adm-icon">🔍</span>
+              <h3 class="adm-m-0">Google Search Console</h3>
+            </div>
+            <p class="svc-card-desc">検索パフォーマンス・インデックス</p>
+            <div class="svc-card-links">
+              <a href="https://search.google.com/search-console" target="_blank" rel="noopener" class="btn btn-primary btn-link">Search Console</a>
+            </div>
+          </div>
+
+          <!-- Google Analytics -->
+          <div class="stat-card">
+            <div class="svc-card-header">
+              <span class="adm-icon">📊</span>
+              <h3 class="adm-m-0">Google Analytics</h3>
+            </div>
+            <p class="svc-card-desc">アクセス解析（GA4: G-KJK72JH471）</p>
+            <div class="svc-card-links">
+              <a href="https://analytics.google.com/" target="_blank" rel="noopener" class="btn btn-primary btn-link">Analytics</a>
+            </div>
+          </div>
+
+          <!-- Google AI Studio -->
+          <div class="stat-card">
+            <div class="svc-card-header">
+              <span class="adm-icon">✨</span>
+              <h3 class="adm-m-0">Google AI Studio</h3>
+            </div>
+            <p class="svc-card-desc">Gemini APIキー管理</p>
+            <div class="svc-card-links">
+              <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" class="btn btn-primary btn-link">APIキー管理</a>
+            </div>
+          </div>
+
+          <!-- Groq -->
+          <div class="stat-card">
+            <div class="svc-card-header">
+              <span class="adm-icon">⚡</span>
+              <h3 class="adm-m-0">Groq</h3>
+            </div>
+            <p class="svc-card-desc">LLM API（フォールバック用）</p>
+            <div class="svc-card-links">
+              <a href="https://console.groq.com/keys" target="_blank" rel="noopener" class="btn btn-primary btn-link">APIキー管理</a>
+            </div>
+          </div>
+
+          <!-- ChatGPT -->
+          <div class="stat-card">
+            <div class="svc-card-header">
+              <span class="adm-icon">🤖</span>
+              <h3 class="adm-m-0">ChatGPT</h3>
+            </div>
+            <p class="svc-card-desc">AI アシスタント</p>
+            <div class="svc-card-links">
+              <a href="https://chatgpt.com/" target="_blank" rel="noopener" class="btn btn-primary btn-link">ChatGPT</a>
+            </div>
+          </div>
+
+          <!-- Resend -->
+          <div class="stat-card">
+            <div class="svc-card-header">
+              <span class="adm-icon">📧</span>
+              <h3 class="adm-m-0">Resend</h3>
+            </div>
+            <p class="svc-card-desc">トランザクションメール送信</p>
+            <div class="svc-card-links">
+              <a href="https://resend.com/overview" target="_blank" rel="noopener" class="btn btn-primary btn-link">ダッシュボード</a>
+              <a href="https://resend.com/domains" target="_blank" rel="noopener" class="btn btn-link">ドメイン設定</a>
+              <a href="https://resend.com/api-keys" target="_blank" rel="noopener" class="btn btn-link">APIキー</a>
+              <a href="https://resend.com/emails" target="_blank" rel="noopener" class="btn btn-link">送信ログ</a>
+            </div>
+          </div>
+
+          <!-- Cloudflare -->
+          <div class="stat-card">
+            <div class="svc-card-header">
+              <span class="adm-icon">🛡️</span>
+              <h3 class="adm-m-0">Cloudflare</h3>
+            </div>
+            <p class="svc-card-desc">DNS・CDN・セキュリティ</p>
+            <div class="svc-card-links">
+              <a href="https://dash.cloudflare.com/f9b9935722e242f65c12bd29503c8b84/plantsstory.com" target="_blank" rel="noopener" class="btn btn-primary btn-link">ダッシュボード</a>
+              <a href="https://dash.cloudflare.com/f9b9935722e242f65c12bd29503c8b84/plantsstory.com/dns/records" target="_blank" rel="noopener" class="btn btn-link">DNSレコード</a>
+              <a href="https://dash.cloudflare.com/f9b9935722e242f65c12bd29503c8b84/plantsstory.com/ssl-tls" target="_blank" rel="noopener" class="btn btn-link">SSL/TLS</a>
+            </div>
+          </div>
+
+          <!-- サイトURL -->
+          <div class="stat-card">
+            <div class="svc-card-header">
+              <span class="adm-icon">🌐</span>
+              <h3 class="adm-m-0">サイト</h3>
+            </div>
+            <p class="svc-card-desc">公開サイトへのリンク</p>
+            <div class="svc-card-links">
+              <a href="https://plantsstory.com/" target="_blank" rel="noopener" class="btn btn-primary btn-link">本番サイト</a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ログイン情報メモ -->
+        <h3 class="section-title mt-lg" style="margin-top:var(--space-2xl);">ログイン情報メモ</h3>
+        <p class="text-muted mb-lg">各サービスへのクイックアクセス一覧です。</p>
+        <table class="adm-table" style="max-width:700px;">
+          <thead><tr><th>サービス</th><th>URL</th></tr></thead>
+          <tbody>
+            <tr><td>Stripe</td><td><a href="https://dashboard.stripe.com/" target="_blank" rel="noopener">dashboard.stripe.com</a></td></tr>
+            <tr><td>Supabase</td><td><a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo" target="_blank" rel="noopener">supabase.com/dashboard</a></td></tr>
+            <tr><td>GitHub</td><td><a href="https://github.com/plantsstory/plants-story" target="_blank" rel="noopener">github.com/plantsstory</a></td></tr>
+            <tr><td>Google Cloud</td><td><a href="https://console.cloud.google.com/" target="_blank" rel="noopener">console.cloud.google.com</a></td></tr>
+            <tr><td>Google Analytics</td><td><a href="https://analytics.google.com/" target="_blank" rel="noopener">analytics.google.com</a></td></tr>
+            <tr><td>Search Console</td><td><a href="https://search.google.com/search-console" target="_blank" rel="noopener">search.google.com/search-console</a></td></tr>
+            <tr><td>Resend</td><td><a href="https://resend.com/overview" target="_blank" rel="noopener">resend.com</a></td></tr>
+            <tr><td>Cloudflare</td><td><a href="https://dash.cloudflare.com/f9b9935722e242f65c12bd29503c8b84/plantsstory.com" target="_blank" rel="noopener">dash.cloudflare.com</a></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ---- KEYWORD RESEARCH ---- -->
+      <section id="sec-keyword-research" class="hidden">
+        <h2 class="section-title">キーワードリサーチ</h2>
+        <p class="text-muted" style="margin-bottom:var(--space-md);">Clone・Hybridの由来をキーワードで調査します。英語圏の学術ソースを優先して検索します。</p>
+        <div class="toolbar flex-wrap gap-xs">
+          <select id="kr-cultivar-select" style="width:350px;">
+            <option value="">品種を選択...</option>
+          </select>
+          <input type="text" id="kr-keywords" placeholder="キーワード（例: breeder name, year, origin story）" style="width:400px;">
+          <button class="btn btn-primary" id="btn-kr-search">リサーチ開始</button>
+        </div>
+        <div style="margin-top:var(--space-sm);">
+          <label style="font-size:0.85rem;font-weight:600;margin-bottom:4px;display:block;">YouTube優先チャンネル（任意・複数選択可）</label>
+          <div id="kr-yt-channels" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;"></div>
+          <div style="display:flex;gap:var(--space-xs);align-items:center;">
+            <input type="text" id="kr-yt-custom" placeholder="チャンネル名またはチャンネルID" style="width:280px;font-size:0.85rem;">
+            <button class="btn" id="btn-kr-yt-add" style="font-size:0.8rem;padding:4px 10px;">追加</button>
+          </div>
+        </div>
+
+        <div id="kr-existing" class="hidden" style="margin-top:var(--space-lg);">
+          <h3 style="margin-bottom:var(--space-sm);">現在の由来</h3>
+          <div id="kr-existing-content" style="background:#f0f7f4;border:1px solid #c8e6c9;border-radius:8px;padding:var(--space-md);"></div>
+        </div>
+
+        <div id="kr-loading" class="hidden" style="margin-top:var(--space-lg);text-align:center;">
+          <p style="color:var(--color-primary);font-weight:700;">🔍 リサーチ中... (30秒〜1分)</p>
+        </div>
+
+        <div id="kr-results" class="hidden" style="margin-top:var(--space-lg);">
+          <h3 style="margin-bottom:var(--space-sm);">リサーチ結果</h3>
+          <div id="kr-result-content" style="background:#f9f9f9;border:1px solid #ddd;border-radius:8px;padding:var(--space-md);"></div>
+          <div style="margin-top:var(--space-md);display:flex;gap:var(--space-sm);">
+            <button class="btn btn-primary" id="btn-kr-accept">採用する</button>
+            <button class="btn btn-outline" id="btn-kr-reject" style="color:#c0392b;border-color:#c0392b;">破棄する</button>
           </div>
         </div>
       </section>
@@ -623,6 +609,54 @@ var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 var allCultivars = [];
 var currentSession = null;
+
+// ========================================
+// Access Gate (Basic Auth equivalent)
+// ========================================
+// SHA-256 hash of access code — change this when you change the code
+// Current code hash is set via: crypto.subtle.digest('SHA-256', new TextEncoder().encode('YOUR_CODE'))
+var ACCESS_CODE_HASH = '90391c8a5b087faf65948a52e4fdaefe0764ae6c11ae696a27884d96d064e5f6';
+
+// On page load, check if gate was already passed in this session
+(function() {
+  if (sessionStorage.getItem('admin_gate_passed') === 'true') {
+    document.getElementById('access-gate').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+})();
+
+async function hashCode(code) {
+  var encoded = new TextEncoder().encode(code);
+  var buffer = await crypto.subtle.digest('SHA-256', encoded);
+  return Array.from(new Uint8Array(buffer)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+}
+
+document.getElementById('btn-gate').addEventListener('click', async function() {
+  var code = document.getElementById('gate-code').value;
+  var errEl = document.getElementById('gate-error');
+  errEl.style.display = 'none';
+
+  if (!code) {
+    errEl.textContent = 'アクセスコードを入力してください';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  var hash = await hashCode(code);
+  if (hash !== ACCESS_CODE_HASH) {
+    errEl.textContent = 'アクセスコードが正しくありません';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  sessionStorage.setItem('admin_gate_passed', 'true');
+  document.getElementById('access-gate').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+});
+
+document.getElementById('gate-code').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('btn-gate').click();
+});
 
 // Compress image using Canvas API (preserves aspect ratio)
 function compressImage(file, maxLongSide, quality) {
@@ -692,11 +726,56 @@ function trustColor(trust) {
 // ========================================
 // Auth
 // ========================================
+// ---- Account Lock (10 failures = 30 min lock) ----
+var MAX_LOGIN_ATTEMPTS = 10;
+var LOCK_DURATION_MS = 30 * 60 * 1000; // 30 minutes
+
+function getLoginAttempts() {
+  try {
+    var data = JSON.parse(localStorage.getItem('admin_login_attempts') || '{}');
+    // Reset if lock has expired
+    if (data.lockedUntil && Date.now() > data.lockedUntil) {
+      localStorage.removeItem('admin_login_attempts');
+      return { count: 0, lockedUntil: null };
+    }
+    return { count: data.count || 0, lockedUntil: data.lockedUntil || null };
+  } catch (e) {
+    return { count: 0, lockedUntil: null };
+  }
+}
+
+function recordFailedAttempt() {
+  var attempts = getLoginAttempts();
+  attempts.count += 1;
+  if (attempts.count >= MAX_LOGIN_ATTEMPTS) {
+    attempts.lockedUntil = Date.now() + LOCK_DURATION_MS;
+  }
+  localStorage.setItem('admin_login_attempts', JSON.stringify(attempts));
+  return attempts;
+}
+
+function resetLoginAttempts() {
+  localStorage.removeItem('admin_login_attempts');
+}
+
+function formatLockRemaining(lockedUntil) {
+  var remaining = Math.ceil((lockedUntil - Date.now()) / 60000);
+  return remaining + '分';
+}
+
 document.getElementById('btn-login').addEventListener('click', async function() {
   var email = document.getElementById('login-email').value.trim();
   var password = document.getElementById('login-password').value;
   var errEl = document.getElementById('login-error');
   errEl.style.display = 'none';
+
+  // Check if account is locked
+  var attempts = getLoginAttempts();
+  if (attempts.lockedUntil && Date.now() < attempts.lockedUntil) {
+    errEl.textContent = 'アカウントがロックされています。' + formatLockRemaining(attempts.lockedUntil) + '後に再試行してください。';
+    errEl.style.display = 'block';
+    return;
+  }
 
   if (!email || !password) {
     errEl.textContent = 'メールとパスワードを入力してください';
@@ -706,7 +785,13 @@ document.getElementById('btn-login').addEventListener('click', async function() 
 
   var result = await sb.auth.signInWithPassword({ email: email, password: password });
   if (result.error) {
-    errEl.textContent = 'ログインに失敗しました: ' + result.error.message;
+    var updated = recordFailedAttempt();
+    if (updated.lockedUntil) {
+      errEl.textContent = 'ログイン試行回数の上限に達しました。アカウントは' + formatLockRemaining(updated.lockedUntil) + 'ロックされます。';
+    } else {
+      var remaining = MAX_LOGIN_ATTEMPTS - updated.count;
+      errEl.textContent = 'ログインに失敗しました。残り' + remaining + '回でアカウントがロックされます。';
+    }
     errEl.style.display = 'block';
     return;
   }
@@ -719,6 +804,8 @@ document.getElementById('btn-login').addEventListener('click', async function() 
     return;
   }
 
+  // Login success — reset attempts
+  resetLoginAttempts();
   currentSession = result.data.session;
   enterAdmin(result.data.user);
 });
@@ -730,8 +817,10 @@ document.getElementById('login-password').addEventListener('keydown', function(e
 document.getElementById('btn-logout').addEventListener('click', async function() {
   await sb.auth.signOut();
   currentSession = null;
+  sessionStorage.removeItem('admin_gate_passed');
   document.getElementById('admin-app').classList.add('hidden');
-  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('access-gate').style.display = 'flex';
 });
 
 // Check existing session on load
@@ -754,10 +843,7 @@ function enterAdmin(user) {
   loadDashboard();
   loadAllCultivars();
   // Cleanup IPs older than 180 days on admin login
-  sb.rpc('cleanup_old_ips').then(function(res) {
-    if (res.error) console.warn('IP cleanup error:', res.error.message);
-    else console.log('IP cleanup completed');
-  });
+  sb.rpc('cleanup_old_ips');
 }
 
 // ========================================
@@ -783,6 +869,7 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
     if (section === 'genera') loadAdminGenera();
     if (section === 'origins') loadOrigins();
     if (section === 'affiliates') loadAffiliates();
+    if (section === 'keyword-research') populateKRSelect();
     closeNav();
   });
 });
@@ -839,7 +926,7 @@ async function loadDashboard() {
   ['S', 'A', 'B', 'C', 'D'].forEach(function(t) {
     tierHtml += '<div class="stat-card" style="padding:var(--space-md);text-align:center;min-width:80px;">';
     tierHtml += tierBadge(t) + '<br>';
-    tierHtml += '<span style="font-size:var(--font-size-lg);font-weight:700;">' + tierCounts[t] + '</span>';
+    tierHtml += '<span class="adm-stat-value">' + tierCounts[t] + '</span>';
     tierHtml += '</div>';
   });
   document.getElementById('tier-distribution').innerHTML = tierHtml;
@@ -848,11 +935,47 @@ async function loadDashboard() {
   var genusHtml = '';
   Object.keys(genusCounts).sort().forEach(function(g) {
     genusHtml += '<div class="stat-card" style="padding:var(--space-md);text-align:center;min-width:120px;">';
-    genusHtml += '<span style="font-size:var(--font-size-lg);font-weight:700;">' + genusCounts[g] + '</span><br>';
+    genusHtml += '<span class="adm-stat-value">' + genusCounts[g] + '</span><br>';
     genusHtml += '<span style="font-size:var(--font-size-sm);color:var(--color-gray);">' + escapeHtml(g) + '</span>';
     genusHtml += '</div>';
   });
   document.getElementById('genus-distribution').innerHTML = genusHtml;
+
+  // Load site stats (users, images, storage, subscribers)
+  loadSiteStats();
+}
+
+async function loadSiteStats() {
+  // User count
+  try {
+    var userRes = await sb.rpc('get_user_count');
+    if (!userRes.error && userRes.data !== null) {
+      document.getElementById('stat-users').textContent = userRes.data;
+    } else {
+      // Fallback: count profiles
+      var profileRes = await sb.from('profiles').select('id', { count: 'exact', head: true });
+      document.getElementById('stat-users').textContent = profileRes.count || '-';
+    }
+  } catch(e) { document.getElementById('stat-users').textContent = '-'; }
+
+  // Image count
+  try {
+    var imgRes = await sb.from('cultivar_images').select('id', { count: 'exact', head: true });
+    document.getElementById('stat-images').textContent = imgRes.count !== null ? imgRes.count : '-';
+  } catch(e) { document.getElementById('stat-images').textContent = '-'; }
+
+  // Storage usage estimate (count images * avg size)
+  try {
+    var imgCount = parseInt(document.getElementById('stat-images').textContent, 10) || 0;
+    var estMB = Math.round(imgCount * 0.25); // ~250KB avg per image
+    document.getElementById('stat-storage').textContent = estMB < 1000 ? '~' + estMB + 'MB' : '~' + (estMB / 1000).toFixed(1) + 'GB';
+  } catch(e) { document.getElementById('stat-storage').textContent = '-'; }
+
+  // Active subscribers
+  try {
+    var subRes = await sb.from('subscriptions').select('id', { count: 'exact', head: true }).in('status', ['active', 'trialing']);
+    document.getElementById('stat-subscribers').textContent = subRes.count !== null ? subRes.count : '0';
+  } catch(e) { document.getElementById('stat-subscribers').textContent = '-'; }
 }
 
 // ========================================
@@ -886,7 +1009,7 @@ function renderCultivarTable() {
     html += '</td>';
     html += '</tr>';
   });
-  document.getElementById('cultivar-tbody').innerHTML = html || '<tr><td colspan="9" style="text-align:center;color:var(--color-gray);">データなし</td></tr>';
+  document.getElementById('cultivar-tbody').innerHTML = html || '<tr><td colspan="9" class="adm-text-center-gray">データなし</td></tr>';
 }
 
 document.getElementById('cultivar-search').addEventListener('input', renderCultivarTable);
@@ -928,14 +1051,14 @@ function editCultivar(id) {
     html += '<h3 style="font-size:1rem;margin-bottom:var(--space-sm);">親株画像</h3>';
     html += '<label>母株 (Mother) 画像</label>';
     if (formula && formula.motherPhoto) {
-      html += '<div id="edit-mother-preview" style="margin-bottom:var(--space-sm);"><img src="' + SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + formula.motherPhoto + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #ddd;"></div>';
+      html += '<div id="edit-mother-preview" style="margin-bottom:var(--space-sm);"><img src="' + SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + formula.motherPhoto + '" class="adm-img-thumb"></div>';
     } else {
       html += '<div id="edit-mother-preview" style="margin-bottom:var(--space-sm);color:var(--color-gray);font-size:0.85rem;">未設定</div>';
     }
     html += '<input type="file" id="edit-mother-photo" accept="image/jpeg,image/png" style="margin-bottom:var(--space-md);">';
     html += '<label>父株 (Father) 画像</label>';
     if (formula && formula.fatherPhoto) {
-      html += '<div id="edit-father-preview" style="margin-bottom:var(--space-sm);"><img src="' + SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + formula.fatherPhoto + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #ddd;"></div>';
+      html += '<div id="edit-father-preview" style="margin-bottom:var(--space-sm);"><img src="' + SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + formula.fatherPhoto + '" class="adm-img-thumb"></div>';
     } else {
       html += '<div id="edit-father-preview" style="margin-bottom:var(--space-sm);color:var(--color-gray);font-size:0.85rem;">未設定</div>';
     }
@@ -1066,9 +1189,11 @@ async function reresearchCultivar(id) {
     }
   }
   try {
+    var session = (await sb.auth.getSession()).data.session;
+    var token = session ? session.access_token : SUPABASE_ANON_KEY;
     var res = await fetch(SUPABASE_URL + '/functions/v1/research-origin', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify(payload)
     });
     var data = await res.json();
@@ -1091,9 +1216,8 @@ function populateOriginSelect() {
   var sel = document.getElementById('origin-cultivar-select');
   var html = '<option value="">すべての品種</option>';
   allCultivars.forEach(function(c) {
-    if ((c.origins || []).length) {
-      html += '<option value="' + c.id + '">' + escapeHtml(c.cultivar_name) + ' (' + (c.origins || []).length + '件)</option>';
-    }
+    var cnt = (c.origins || []).length;
+    html += '<option value="' + c.id + '">' + escapeHtml(c.cultivar_name) + ' (' + cnt + '件)</option>';
   });
   sel.innerHTML = html;
 }
@@ -1103,51 +1227,62 @@ document.getElementById('origin-type-filter').addEventListener('change', loadOri
 document.getElementById('origin-search').addEventListener('input', loadOrigins);
 
 function originTypeBadge(t, structured) {
-  var map = { species: ['原種', '#1B4332'], clone: ['CLONE', '#4A235A'], hybrid: ['交配種', '#7B2D26'], seedling: ['実生', '#1A5276'] };
-  var m = map[t] || [t || '?', '#666'];
-  var label = m[0];
-  // Show species subcategory if available
+  var clsMap = { species: 'badge--species', clone: 'badge--clone', hybrid: 'badge--hybrid', seedling: 'badge--seedling' };
+  var txtMap = { species: '原種', clone: 'Clone', hybrid: 'Hybrid', seedling: 'Seedling' };
+  var cls = clsMap[t] || '';
+  var label = txtMap[t] || t || '?';
   if (t === 'species' && structured && structured.species_subcategory && structured.species_subcategory !== 'species') {
     var subMap = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
     label += ' (' + (subMap[structured.species_subcategory] || structured.species_subcategory) + ')';
   }
-  return '<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:0.65rem;font-weight:600;color:#fff;background:' + m[1] + ';">' + label + '</span>';
+  return '<span class="badge ' + cls + ' badge--type-sm">' + label + '</span>';
 }
 
-function structuredSummaryHtml(s, cType) {
-  if (!s) return '<span style="color:#999;">構造化データなし</span>';
+function structuredSummaryHtml(s, cType, origin) {
+  var body = origin ? origin.body : '';
   var parts = [];
-  if (cType === 'species') {
-    if (s.species_subcategory && s.species_subcategory !== 'species') {
-      var subLabels = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
-      parts.push('<b>分類:</b> ' + (subLabels[s.species_subcategory] || s.species_subcategory));
+  // Show formula from _type=formula origins
+  if (origin && origin._type === 'formula' && origin.formula) {
+    var f = origin.formula;
+    parts.push('<b>交配式:</b> ' + escapeHtml((f.parentA || '?') + ' × ' + (f.parentB || '?')));
+    if (f.motherPhoto) parts.push('<b>母株画像:</b> あり');
+    if (f.fatherPhoto) parts.push('<b>父株画像:</b> あり');
+    return parts.join('<br>');
+  }
+  if (s) {
+    if (cType === 'species') {
+      if (s.species_subcategory && s.species_subcategory !== 'species') {
+        var subLabels = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
+        parts.push('<b>分類:</b> ' + (subLabels[s.species_subcategory] || s.species_subcategory));
+      }
+      if (s.author_name) parts.push('<b>発表者:</b> ' + escapeHtml(s.author_name));
+      if (s.publication_year) parts.push('<b>発表年:</b> ' + s.publication_year);
+      if (s.collector) parts.push('<b>発見者:</b> ' + escapeHtml(s.collector));
+      if (s.collection_year) parts.push('<b>採取年:</b> ' + s.collection_year);
+      if (s.type_locality) parts.push('<b>採取地:</b> ' + escapeHtml(s.type_locality));
+      if (s.known_habitats) parts.push('<b>生息地:</b> ' + escapeHtml(s.known_habitats));
+    } else if (cType === 'clone') {
+      if (s.namer) parts.push('<b>命名者:</b> ' + escapeHtml(s.namer));
+      if (s.naming_year) parts.push('<b>命名年:</b> ' + s.naming_year);
+      if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
+    } else if (cType === 'hybrid') {
+      if (s.breeder) parts.push('<b>作出者:</b> ' + escapeHtml(s.breeder));
+      if (s.naming_year) parts.push('<b>命名年:</b> ' + s.naming_year);
+      if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
+    } else if (cType === 'seedling') {
+      if (s.breeder) parts.push('<b>作出者:</b> ' + escapeHtml(s.breeder));
+      if (s.sowing_date) parts.push('<b>播種日:</b> ' + escapeHtml(s.sowing_date));
+      if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
     }
-    if (s.author_name) parts.push('<b>発表者:</b> ' + escapeHtml(s.author_name));
-    if (s.publication_year) parts.push('<b>発表年:</b> ' + s.publication_year);
-    if (s.collector) parts.push('<b>発見者:</b> ' + escapeHtml(s.collector));
-    if (s.collection_year) parts.push('<b>採取年:</b> ' + s.collection_year);
-    if (s.type_locality) parts.push('<b>採取地:</b> ' + escapeHtml(s.type_locality));
-    if (s.known_habitats) parts.push('<b>生息地:</b> ' + escapeHtml((s.known_habitats || '').substring(0, 40)));
-  } else if (cType === 'clone') {
-    if (s.namer) parts.push('<b>命名者:</b> ' + escapeHtml(s.namer));
-    if (s.naming_year) parts.push('<b>命名年:</b> ' + s.naming_year);
-    if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
-  } else if (cType === 'hybrid') {
-    if (s.breeder) parts.push('<b>作出者:</b> ' + escapeHtml(s.breeder));
-    if (s.naming_year) parts.push('<b>命名年:</b> ' + s.naming_year);
-    if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
-  } else if (cType === 'seedling') {
-    if (s.breeder) parts.push('<b>作出者:</b> ' + escapeHtml(s.breeder));
-    if (s.sowing_date) parts.push('<b>播種日:</b> ' + escapeHtml(s.sowing_date));
-    if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
+    if (s.notes) {
+      parts.push('<b>補足:</b> ' + escapeHtml(s.notes));
+    }
+    if (s.citation_links && s.citation_links.length) {
+      parts.push('<b>引用:</b> ' + s.citation_links.length + '件');
+    }
   }
-  if (s.notes) {
-    var notesShort = s.notes.substring(0, 30);
-    if (s.notes.length > 30) notesShort += '...';
-    parts.push('<b>補足:</b> ' + escapeHtml(notesShort));
-  }
-  if (s.citation_links && s.citation_links.length) {
-    parts.push('<b>引用:</b> ' + s.citation_links.length + '件');
+  if (!parts.length && body) {
+    return '<span style="color:#666;">' + escapeHtml(body) + '</span>';
   }
   if (!parts.length) return '<span style="color:#999;">データ未入力</span>';
   return parts.join('<br>');
@@ -1161,7 +1296,6 @@ function loadOrigins() {
   var targets = allCultivars.filter(function(c) {
     if (filterId && c.id !== filterId) return false;
     if (filterType && (c.type || 'species') !== filterType) return false;
-    if (!c.origins || !c.origins.length) return false;
     if (search) {
       var match = (c.cultivar_name || '').toLowerCase().indexOf(search) >= 0
         || (c.genus || '').toLowerCase().indexOf(search) >= 0
@@ -1193,16 +1327,27 @@ function loadOrigins() {
   targets.forEach(function(c) {
     var cType = c.type || 'species';
     var origins = c.origins || [];
+    if (origins.length === 0) {
+      html += '<tr>';
+      html += '<td style="max-width:150px;font-size:var(--font-size-sm);vertical-align:top;border-right:2px solid var(--color-lighter);word-break:break-word;">';
+      html += '<span style="font-weight:600;">' + escapeHtml(c.cultivar_name) + '</span>';
+      html += '<div style="display:flex;gap:3px;margin-top:4px;flex-wrap:wrap;">';
+      html += '<button class="btn btn-outline btn-sm" style="font-size:0.65rem;" onclick="reresearchCultivar(' + c.id + ')" id="rr-btn-' + c.id + '">AI再調査</button>';
+      html += '</div>';
+      html += '</td>';
+      html += '<td colspan="7" style="color:var(--color-gray);font-size:var(--font-size-sm);">由来データなし</td>';
+      html += '</tr>';
+    }
     origins.forEach(function(o, i) {
       var authorLabel;
       if (o.source_type === 'ipni_powo') {
-        authorLabel = '<span class="badge badge-s" style="font-size:0.65rem;">IPNI/Kew</span>';
+        authorLabel = '<span class="badge badge--species badge--type-sm">&#x1F4DA; IPNI/Kew</span>';
       } else if (o.source_type === 'user_verified') {
-        authorLabel = '<span class="badge" style="background:#2D6A4F;color:#fff;font-size:0.65rem;">AI検証済</span>';
+        authorLabel = '<span class="badge badge--clone badge--type-sm">&#x2705; AI検証済</span>';
       } else if (o.author && o.author.isAI) {
-        authorLabel = '<span class="badge badge-ai">AI</span>';
+        authorLabel = '<span class="badge badge--hybrid badge--type-sm">&#x1F916; AI</span>';
       } else {
-        authorLabel = '<span class="badge badge-user">User</span>';
+        authorLabel = '<span class="badge badge--seedling badge--type-sm">&#x1F464; User</span>';
       }
       var trustPct = o.trust || 0;
       var tColor = trustColor(trustPct);
@@ -1229,10 +1374,13 @@ function loadOrigins() {
       html += '<div class="trust-bar"><div class="trust-fill" style="width:' + trustPct + '%;background:' + tColor + ';"></div></div> ';
       html += trustPct + '%';
       html += '</td>';
-      html += '<td style="font-size:var(--font-size-xs);line-height:1.5;">' + structuredSummaryHtml(s, oType) + '</td>';
+      html += '<td style="font-size:var(--font-size-xs);line-height:1.5;">' + structuredSummaryHtml(s, oType, o) + '</td>';
       html += '<td>' + authorLabel + '</td>';
       var votes = o.votes || { agree: 0, disagree: 0 };
-      html += '<td style="white-space:nowrap;font-size:var(--font-size-xs);">&#x1F44D; ' + (votes.agree || 0) + ' / &#x1F44E; ' + (votes.disagree || 0) + '</td>';
+      html += '<td><div class="vote-group">';
+      html += '<span class="vote-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88L14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88z"/></svg><span class="vote-btn__badge">' + (votes.agree || 0) + '</span></span>';
+      html += '<span class="vote-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12L10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88z"/></svg><span class="vote-btn__badge">' + (votes.disagree || 0) + '</span></span>';
+      html += '</div></td>';
       html += '</tr>';
     });
   });
@@ -1257,12 +1405,12 @@ function editOrigin(cultivarId, originIndex) {
 
   if (cType === 'species') {
     html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#1B4332;">記載情報</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div class="adm-grid-2col">';
     html += '<div><label>発表者 (Author)</label><input type="text" id="edit-s-author-name" value="' + escapeHtml(s.author_name || '') + '" placeholder="例: Engl."></div>';
     html += '<div><label>発表年</label><input type="number" id="edit-s-publication-year" value="' + (s.publication_year || '') + '" placeholder="例: 1898"></div>';
     html += '</div>';
     html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#1B4332;">採取情報</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div class="adm-grid-2col">';
     html += '<div><label>発見者 (Collector)</label><input type="text" id="edit-s-collector" value="' + escapeHtml(s.collector || '') + '"></div>';
     html += '<div><label>採取年</label><input type="number" id="edit-s-collection-year" value="' + (s.collection_year || '') + '"></div>';
     html += '</div>';
@@ -1270,41 +1418,41 @@ function editOrigin(cultivarId, originIndex) {
     html += '<label>生息地</label><textarea id="edit-s-known-habitats" rows="2">' + escapeHtml(s.known_habitats || '') + '</textarea>';
   } else if (cType === 'clone') {
     html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#4A235A;">命名情報</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div class="adm-grid-2col">';
     html += '<div><label>命名者</label><input type="text" id="edit-s-namer" value="' + escapeHtml(s.namer || '') + '"></div>';
     html += '<div><label>命名年</label><input type="number" id="edit-s-naming-year" value="' + (s.naming_year || '') + '"></div>';
     html += '</div>';
     var sf = s.formula || {};
     html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#4A235A;">交配式</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;">';
+    html += '<div class="adm-grid-3col">';
     html += '<div><label>Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '"></div>';
-    html += '<span style="padding-bottom:8px;font-weight:bold;font-size:1.1rem;">×</span>';
+    html += '<span class="adm-section-title">×</span>';
     html += '<div><label>Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '"></div>';
     html += '</div>';
   } else if (cType === 'hybrid') {
     html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#7B2D26;">作出情報</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div class="adm-grid-2col">';
     html += '<div><label>作出者 / ナーセリー</label><input type="text" id="edit-s-breeder" value="' + escapeHtml(s.breeder || '') + '"></div>';
     html += '<div><label>命名年</label><input type="number" id="edit-s-naming-year" value="' + (s.naming_year || '') + '"></div>';
     html += '</div>';
     var sf = s.formula || {};
     html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#7B2D26;">交配式</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;">';
+    html += '<div class="adm-grid-3col">';
     html += '<div><label>Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '"></div>';
-    html += '<span style="padding-bottom:8px;font-weight:bold;font-size:1.1rem;">×</span>';
+    html += '<span class="adm-section-title">×</span>';
     html += '<div><label>Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '"></div>';
     html += '</div>';
   } else if (cType === 'seedling') {
     html += '<h3 style="font-size:0.85rem;margin-bottom:8px;color:#1A5276;">作出情報</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    html += '<div class="adm-grid-2col">';
     html += '<div><label>作出者</label><input type="text" id="edit-s-breeder" value="' + escapeHtml(s.breeder || '') + '"></div>';
     html += '<div><label>播種日</label><input type="date" id="edit-s-sowing-date" value="' + escapeHtml(s.sowing_date || '') + '"></div>';
     html += '</div>';
     var sf = s.formula || {};
     html += '<h3 style="font-size:0.85rem;margin:12px 0 8px;color:#1A5276;">交配式</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;">';
+    html += '<div class="adm-grid-3col">';
     html += '<div><label>Parent A</label><input type="text" id="edit-s-parentA" value="' + escapeHtml(sf.parentA || '') + '"></div>';
-    html += '<span style="padding-bottom:8px;font-weight:bold;font-size:1.1rem;">×</span>';
+    html += '<span class="adm-section-title">×</span>';
     html += '<div><label>Parent B</label><input type="text" id="edit-s-parentB" value="' + escapeHtml(sf.parentB || '') + '"></div>';
     html += '</div>';
   }
@@ -1721,18 +1869,24 @@ function renderImageGrid() {
     var fakeHigh = (img.fake_votes || 0) > (img.real_votes || 0);
     card.innerHTML =
       '<div style="position:relative;">' +
-        '<img src="' + getImageUrl(img.storage_path) + '" style="width:100%;height:160px;object-fit:cover;display:block;" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22160%22><rect fill=%22%23eee%22 width=%22200%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23999%22>Error</text></svg>\'">' +
+        '<img src="' + getImageUrl(img.storage_path) + '" class="adm-img-cover" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22160%22><rect fill=%22%23eee%22 width=%22200%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23999%22>Error</text></svg>\'">' +
         (fakeHigh ? '<span style="position:absolute;top:4px;right:4px;background:#c62828;color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;">Fake多</span>' : '') +
       '</div>' +
       '<div style="padding:8px;font-size:var(--font-size-sm);">' +
-        '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(img.cultivar_name || '') + '">' + escapeHtml(img.cultivar_name || '不明') + '</div>' +
+        '<div class="adm-text-truncate" title="' + escapeHtml(img.cultivar_name || '') + '">' + escapeHtml(img.cultivar_name || '不明') + '</div>' +
         '<div style="display:flex;gap:8px;margin:4px 0;color:var(--color-gray);">' +
           '<span>Real: ' + (img.real_votes || 0) + '</span>' +
           '<span>Fake: ' + (img.fake_votes || 0) + '</span>' +
         '</div>' +
+        '<div style="margin:4px 0;">' +
+          '<input type="text" placeholder="補足（日付等）" value="' + escapeHtml(img.caption || '') + '" data-img-field="caption" data-img-id="' + img.id + '" class="adm-input-sm">' +
+        '</div>' +
+        '<div style="margin:4px 0;">' +
+          '<input type="url" placeholder="リンクURL" value="' + escapeHtml(img.link_url || '') + '" data-img-field="link_url" data-img-id="' + img.id + '" class="adm-input-sm">' +
+        '</div>' +
         '<div style="color:var(--color-gray);font-size:0.75rem;">' + (img.created_at ? new Date(img.created_at).toLocaleDateString('ja') : '') + '</div>' +
         '<div style="color:var(--color-gray);font-size:0.7rem;font-family:monospace;">IP: ' + escapeHtml(img.created_ip || '-') + '</div>' +
-        '<button class="btn btn-sm" style="margin-top:6px;color:#c62828;border-color:#c62828;width:100%;" data-delete-image="' + img.id + '" data-storage-path="' + escapeHtml(img.storage_path) + '">削除</button>' +
+        '<button class="btn btn-sm" class="adm-btn-delete" data-delete-image="' + img.id + '" data-storage-path="' + escapeHtml(img.storage_path) + '">削除</button>' +
       '</div>';
     grid.appendChild(card);
   });
@@ -1791,6 +1945,29 @@ document.getElementById('image-grid').addEventListener('click', async function(e
   }
 });
 
+// Save caption/link_url on blur
+document.getElementById('image-grid').addEventListener('focusout', async function(e) {
+  var inp = e.target.closest('[data-img-field]');
+  if (!inp) return;
+  var field = inp.getAttribute('data-img-field');
+  var imageId = inp.getAttribute('data-img-id');
+  var val = inp.value.trim() || null;
+  // Update local data
+  var imgObj = allImages.find(function(i) { return String(i.id) === String(imageId); });
+  if (imgObj && imgObj[field] === val) return; // no change
+  if (imgObj) imgObj[field] = val;
+  var updates = {};
+  updates[field] = val;
+  var res = await sb.from('cultivar_images').update(updates).eq('id', imageId);
+  if (res.error) {
+    toast(field + ' 保存エラー: ' + res.error.message);
+    inp.style.borderColor = '#c62828';
+  } else {
+    inp.style.borderColor = '#4caf50';
+    setTimeout(function() { inp.style.borderColor = ''; }, 1500);
+  }
+});
+
 // ========================================
 // IMAGE TAB SWITCHING
 // ========================================
@@ -1807,8 +1984,10 @@ document.querySelectorAll('.image-tab').forEach(function(tab) {
     this.style.opacity = '1';
     this.style.fontWeight = '600';
     var which = this.getAttribute('data-image-tab');
-    document.getElementById('gallery-tab-content').style.display = which === 'gallery' ? '' : 'none';
-    document.getElementById('formula-tab-content').style.display = which === 'formula' ? '' : 'none';
+    var galleryTab = document.getElementById('gallery-tab-content');
+    var formulaTab = document.getElementById('formula-tab-content');
+    galleryTab.classList.toggle('d-none', which !== 'gallery');
+    formulaTab.classList.toggle('d-none', which !== 'formula');
     if (which === 'formula' && allFormulaImages.length === 0) loadFormulaImages();
   });
 });
@@ -1862,13 +2041,13 @@ function renderFormulaImageGrid() {
     var roleColor = img.role === 'mother' ? '#e91e63' : '#1976d2';
     card.innerHTML =
       '<div style="position:relative;">' +
-        '<img src="' + getImageUrl(img.storagePath) + '" style="width:100%;height:160px;object-fit:cover;display:block;" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22160%22><rect fill=%22%23eee%22 width=%22200%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23999%22>Error</text></svg>\'">' +
+        '<img src="' + getImageUrl(img.storagePath) + '" class="adm-img-cover" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22160%22><rect fill=%22%23eee%22 width=%22200%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23999%22>Error</text></svg>\'">' +
         '<span style="position:absolute;top:4px;right:4px;background:' + roleColor + ';color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;">' + roleLabel + '</span>' +
       '</div>' +
       '<div style="padding:8px;font-size:var(--font-size-sm);">' +
-        '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(img.cultivarName || '') + '">' + escapeHtml(img.cultivarName || '不明') + '</div>' +
+        '<div class="adm-text-truncate" title="' + escapeHtml(img.cultivarName || '') + '">' + escapeHtml(img.cultivarName || '不明') + '</div>' +
         '<div style="color:var(--color-gray);font-size:0.75rem;margin:4px 0;">Storage: ' + escapeHtml(img.storagePath.split('/').pop()) + '</div>' +
-        '<button class="btn btn-sm" style="margin-top:6px;color:#c62828;border-color:#c62828;width:100%;" data-delete-formula-image data-cultivar-id="' + img.cultivarId + '" data-role="' + img.role + '" data-storage-path="' + escapeHtml(img.storagePath) + '">削除</button>' +
+        '<button class="btn btn-sm" class="adm-btn-delete" data-delete-formula-image data-cultivar-id="' + img.cultivarId + '" data-role="' + img.role + '" data-storage-path="' + escapeHtml(img.storagePath) + '">削除</button>' +
       '</div>';
     grid.appendChild(card);
   });
@@ -1919,12 +2098,145 @@ document.getElementById('formula-image-grid').addEventListener('click', async fu
   }
 });
 
-// Load images when section is shown
+// Load images/users when section is shown
 document.querySelectorAll('.admin-nav a').forEach(function(link) {
   link.addEventListener('click', function() {
     if (this.getAttribute('data-section') === 'images') loadImages();
     if (this.getAttribute('data-section') === 'delete-requests') loadDeletionRequests();
+    if (this.getAttribute('data-section') === 'users') loadUsers();
   });
+});
+
+// ========================================
+// User Management
+// ========================================
+var usersPage = 0;
+var usersPerPage = 20;
+
+function loadUsers() {
+  var search = document.getElementById('user-search').value.trim();
+  var filterStatus = document.getElementById('user-filter-status').value;
+  var tbody = document.getElementById('users-tbody');
+  tbody.innerHTML = '<tr><td colspan="5" class="adm-text-center-gray">読み込み中...</td></tr>';
+
+  sb.rpc('admin_list_users', {
+    p_search: search || null,
+    p_filter_status: filterStatus || null,
+    p_limit: usersPerPage,
+    p_offset: usersPage * usersPerPage
+  }).then(function(res) {
+    if (res.error) {
+      tbody.innerHTML = '<tr><td colspan="5" style="color:red;">' + res.error.message + '</td></tr>';
+      return;
+    }
+    var data = res.data;
+    if (!data.success) {
+      tbody.innerHTML = '<tr><td colspan="5" style="color:red;">' + (data.error || 'Error') + '</td></tr>';
+      return;
+    }
+    var users = data.users || [];
+    var total = data.total || 0;
+
+    if (users.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="adm-text-center-gray">ユーザーが見つかりません</td></tr>';
+      renderUsersPagination(total);
+      return;
+    }
+
+    var html = '';
+    users.forEach(function(u) {
+      var planLabel = u.subscription_plan === 'granted' ? '<span style="color:#8b5cf6;font-weight:600;">無料付与</span>' :
+        u.subscription_plan === 'seedling_monthly' ? '月額' :
+        u.subscription_plan === 'seedling_annual' ? '年額' : 'Free';
+      var statusBadge = '';
+      if (u.subscription_status === 'active') statusBadge = '<span class="badge-sm badge-green">Active</span>';
+      else if (u.subscription_status === 'past_due') statusBadge = '<span class="badge-sm badge-yellow">Past Due</span>';
+      else if (u.subscription_status === 'canceled') statusBadge = '<span class="badge-sm badge-red">Canceled</span>';
+      else statusBadge = '<span class="badge-sm badge-gray">-</span>';
+
+      var endDate = u.current_period_end ? new Date(u.current_period_end).toLocaleDateString('ja-JP') : '-';
+      if (u.cancel_at_period_end) endDate += ' (解約予定)';
+
+      var actions = '';
+      if (u.subscription_plan === 'granted') {
+        actions = '<button class="btn btn-sm btn-danger" data-action="revoke" data-uid="' + u.id + '">付与取消</button>';
+      } else if (u.subscription_status !== 'active') {
+        actions = '<button class="btn btn-sm btn-primary" data-action="grant" data-uid="' + u.id + '">無料付与</button>';
+      } else {
+        actions = '<span class="text-sm text-muted">Stripe管理</span> <button class="btn btn-sm btn-outline" data-action="grant" data-uid="' + u.id + '">無期限付与</button>';
+      }
+
+      html += '<tr>';
+      html += '<td>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+        (u.avatar_url ? '<img src="' + u.avatar_url + '" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">' : '<span style="width:28px;height:28px;border-radius:50%;background:var(--color-light);display:inline-block;"></span>') +
+        '<span>' + (u.display_name || '(未設定)') + '</span>' +
+        '</div></td>';
+      html += '<td>' + (u.username ? '@' + u.username : '<span class="text-muted">-</span>') + '</td>';
+      html += '<td>' + planLabel + ' ' + statusBadge + '</td>';
+      html += '<td style="font-size:var(--font-size-xs);">' + endDate + '</td>';
+      html += '<td>' + actions + '</td>';
+      html += '</tr>';
+    });
+    tbody.innerHTML = html;
+    renderUsersPagination(total);
+  });
+}
+
+function renderUsersPagination(total) {
+  var el = document.getElementById('users-pagination');
+  var totalPages = Math.ceil(total / usersPerPage);
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
+  var html = '<span class="text-sm text-muted">' + total + '件中 ' + (usersPage * usersPerPage + 1) + '-' + Math.min((usersPage + 1) * usersPerPage, total) + '</span>';
+  if (usersPage > 0) html += '<button class="btn btn-sm btn-outline" onclick="usersPage--;loadUsers();">&lt; 前</button>';
+  if (usersPage < totalPages - 1) html += '<button class="btn btn-sm btn-outline" onclick="usersPage++;loadUsers();">次 &gt;</button>';
+  el.innerHTML = html;
+}
+
+// Event delegation for grant/revoke buttons
+document.getElementById('users-tbody').addEventListener('click', function(e) {
+  var btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  var action = btn.getAttribute('data-action');
+  var userId = btn.getAttribute('data-uid');
+  if (!userId) return;
+  btn.disabled = true;
+  if (action === 'grant') {
+    toast('付与処理中...');
+    sb.rpc('admin_grant_subscription', { p_user_id: userId }).then(function(res) {
+      if (res.error) { toast('エラー: ' + res.error.message); btn.disabled = false; return; }
+      toast('サブスクリプションを付与しました');
+      loadUsers();
+    }).catch(function(e) {
+      toast('エラー: ' + e.message);
+      btn.disabled = false;
+    });
+  } else if (action === 'revoke') {
+    toast('取消処理中...');
+    sb.rpc('admin_revoke_subscription', { p_user_id: userId }).then(function(res) {
+      if (res.error) { toast('エラー: ' + res.error.message); btn.disabled = false; return; }
+      toast('付与を取り消しました');
+      loadUsers();
+    }).catch(function(e) {
+      toast('エラー: ' + e.message);
+      btn.disabled = false;
+    });
+  }
+});
+
+// User search & filter
+document.getElementById('user-search').addEventListener('input', function() {
+  usersPage = 0;
+  clearTimeout(this._timer);
+  this._timer = setTimeout(loadUsers, 300);
+});
+document.getElementById('user-filter-status').addEventListener('change', function() {
+  usersPage = 0;
+  loadUsers();
+});
+document.getElementById('btn-refresh-users').addEventListener('click', function() {
+  usersPage = 0;
+  loadUsers();
 });
 
 // ========================================
@@ -2001,12 +2313,6 @@ function renderDeletionList(listId, emptyId, requests, type) {
     card.innerHTML = html;
     listEl.appendChild(card);
   });
-}
-
-function escapeHtml(str) {
-  var div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
 }
 
 // Handle approve/reject clicks
@@ -2144,22 +2450,22 @@ function showAffiliateForm(data) {
   var title = isEdit ? 'アフィリエイト編集' : 'アフィリエイト新規追加';
   var html = '<h3 style="margin-bottom:var(--space-md);">' + title + '</h3>';
   html += '<form id="affiliate-form" style="display:grid;gap:var(--space-sm);">';
-  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-sm);">';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">カテゴリ名（日本語）*</label><input class="form-input" name="name" value="' + escapeHtml(data.name || '') + '" required></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">カテゴリ名（英語）</label><input class="form-input" name="name_en" value="' + escapeHtml(data.name_en || '') + '"></div>';
+  html += '<div class="adm-grid-2col-var">';
+  html += '<div><label class="adm-label">カテゴリ名（日本語）*</label><input class="form-input" name="name" value="' + escapeHtml(data.name || '') + '" required></div>';
+  html += '<div><label class="adm-label">カテゴリ名（英語）</label><input class="form-input" name="name_en" value="' + escapeHtml(data.name_en || '') + '"></div>';
   html += '</div>';
-  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-sm);">';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">商品名（日本語）*</label><input class="form-input" name="product_name" value="' + escapeHtml(data.product_name || '') + '" required></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">商品名（英語）</label><input class="form-input" name="product_name_en" value="' + escapeHtml(data.product_name_en || '') + '"></div>';
+  html += '<div class="adm-grid-2col-var">';
+  html += '<div><label class="adm-label">商品名（日本語）*</label><input class="form-input" name="product_name" value="' + escapeHtml(data.product_name || '') + '" required></div>';
+  html += '<div><label class="adm-label">商品名（英語）</label><input class="form-input" name="product_name_en" value="' + escapeHtml(data.product_name_en || '') + '"></div>';
   html += '</div>';
-  html += '<div style="display:grid;grid-template-columns:3fr 1fr 1fr;gap:var(--space-sm);">';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">アイコン（絵文字）</label><input class="form-input" name="icon" value="' + escapeHtml(data.icon || '🛒') + '"></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">バッジ（日）</label><input class="form-input" name="badge" value="' + escapeHtml(data.badge || '') + '"></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">バッジ（英）</label><input class="form-input" name="badge_en" value="' + escapeHtml(data.badge_en || '') + '"></div>';
+  html += '<div class="adm-grid-formula">';
+  html += '<div><label class="adm-label">アイコン（絵文字）</label><input class="form-input" name="icon" value="' + escapeHtml(data.icon || '🛒') + '"></div>';
+  html += '<div><label class="adm-label">バッジ（日）</label><input class="form-input" name="badge" value="' + escapeHtml(data.badge || '') + '"></div>';
+  html += '<div><label class="adm-label">バッジ（英）</label><input class="form-input" name="badge_en" value="' + escapeHtml(data.badge_en || '') + '"></div>';
   html += '</div>';
-  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-sm);">';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">表示順</label><input class="form-input" name="sort_order" type="number" value="' + (data.sort_order || 0) + '"></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">公開状態</label><select class="form-input" name="is_published"><option value="true"' + (data.is_published !== false ? ' selected' : '') + '>公開</option><option value="false"' + (data.is_published === false ? ' selected' : '') + '>非公開</option></select></div>';
+  html += '<div class="adm-grid-2col-var">';
+  html += '<div><label class="adm-label">表示順</label><input class="form-input" name="sort_order" type="number" value="' + (data.sort_order || 0) + '"></div>';
+  html += '<div><label class="adm-label">公開状態</label><select class="form-input" name="is_published"><option value="true"' + (data.is_published !== false ? ' selected' : '') + '>公開</option><option value="false"' + (data.is_published === false ? ' selected' : '') + '>非公開</option></select></div>';
   html += '</div>';
 
   html += '<hr style="border:none;border-top:1px solid var(--color-light);margin:var(--space-sm) 0;">';
@@ -2173,10 +2479,10 @@ function showAffiliateForm(data) {
   html += '<span id="rakuten-parse-result" style="font-size:var(--font-size-xs);margin-left:var(--space-sm);color:var(--color-gray);"></span>';
   html += '</div>';
 
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">Amazon URL</label><input class="form-input" name="amazon" value="' + escapeHtml(data.amazon || '') + '" placeholder="https://amzn.to/..."></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">楽天 URL</label><textarea class="form-input" name="rakuten" rows="2" placeholder="https://hb.afl.rakuten.co.jp/...">' + escapeHtml(data.rakuten || '') + '</textarea></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">Yahoo URL</label><input class="form-input" name="yahoo" value="' + escapeHtml(data.yahoo || '') + '" placeholder="https://yahoo.jp/..."></div>';
-  html += '<div><label style="font-size:var(--font-size-sm);font-weight:600;">商品画像URL（楽天画像など）</label><textarea class="form-input" name="image" rows="2" placeholder="https://hbb.afl.rakuten.co.jp/...">' + escapeHtml(data.image || '') + '</textarea></div>';
+  html += '<div><label class="adm-label">Amazon URL</label><input class="form-input" name="amazon" value="' + escapeHtml(data.amazon || '') + '" placeholder="https://amzn.to/..."></div>';
+  html += '<div><label class="adm-label">楽天 URL</label><textarea class="form-input" name="rakuten" rows="2" placeholder="https://hb.afl.rakuten.co.jp/...">' + escapeHtml(data.rakuten || '') + '</textarea></div>';
+  html += '<div><label class="adm-label">Yahoo URL</label><input class="form-input" name="yahoo" value="' + escapeHtml(data.yahoo || '') + '" placeholder="https://yahoo.jp/..."></div>';
+  html += '<div><label class="adm-label">商品画像URL（楽天画像など）</label><textarea class="form-input" name="image" rows="2" placeholder="https://hbb.afl.rakuten.co.jp/...">' + escapeHtml(data.image || '') + '</textarea></div>';
 
   html += '<div style="display:flex;gap:var(--space-sm);justify-content:flex-end;margin-top:var(--space-md);">';
   html += '<button type="button" class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
@@ -2480,7 +2786,7 @@ function openEditGenusModal(id) {
   html += '</label>';
   html += '<label style="margin-top:var(--space-md);">カード画像</label>';
   if (g.card_image_path) {
-    html += '<div style="margin-bottom:var(--space-sm);"><img src="images/' + g.card_image_path + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #ddd;"></div>';
+    html += '<div style="margin-bottom:var(--space-sm);"><img src="images/' + g.card_image_path + '" class="adm-img-thumb"></div>';
   }
   html += '<input type="file" id="genus-image" accept="image/jpeg,image/png">';
   html += '<small style="color:var(--color-gray);">新しい画像を選択すると差し替えられます</small>';
@@ -2568,6 +2874,347 @@ document.getElementById('btn-refresh-genera').addEventListener('click', function
     populateGenusFilter();
   }
 })();
+
+// ========================================
+// Error Logs
+// ========================================
+document.getElementById('btn-load-errors').addEventListener('click', loadErrorLogs);
+document.getElementById('btn-clear-errors').addEventListener('click', clearOldErrors);
+
+document.querySelectorAll('.admin-nav a').forEach(function(link) {
+  link.addEventListener('click', function() {
+    if (this.getAttribute('data-section') === 'error-logs') loadErrorLogs();
+  });
+});
+
+async function loadErrorLogs() {
+  var tbody = document.getElementById('error-logs-body');
+  tbody.innerHTML = '<tr><td colspan="4">読み込み中...</td></tr>';
+  try {
+    var res = await sb.from('error_logs').select('*').order('created_at', { ascending: false }).limit(100);
+    if (res.error) throw res.error;
+    var rows = res.data || [];
+    document.getElementById('error-count').textContent = rows.length + '件';
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="text-muted">エラーログはありません</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(function(r) {
+      var d = new Date(r.created_at);
+      var ts = d.toLocaleDateString('ja-JP') + ' ' + d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+      var src = (r.source || '').replace(/.*\//, '');
+      return '<tr>' +
+        '<td style="white-space:nowrap;font-size:var(--font-size-sm);">' + escHtml(ts) + '</td>' +
+        '<td title="' + escHtml(r.stack || '') + '" style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml((r.message || '').substring(0, 200)) + '</td>' +
+        '<td style="font-size:var(--font-size-sm);">' + escHtml(src) + '</td>' +
+        '<td>' + (r.lineno || '') + '</td>' +
+        '</tr>';
+    }).join('');
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="4" class="text-muted">読み込みエラー: ' + escHtml(e.message || String(e)) + '</td></tr>';
+  }
+}
+
+async function clearOldErrors() {
+  if (!confirm('30日以前のエラーログを削除しますか？')) return;
+  try {
+    var cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    var res = await sb.from('error_logs').delete().lt('created_at', cutoff);
+    if (res.error) throw res.error;
+    toast('古いエラーログを削除しました');
+    loadErrorLogs();
+  } catch (e) {
+    toast('削除エラー: ' + (e.message || String(e)));
+  }
+}
+
+function escHtml(s) {
+  var d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+// ========================================
+// KEYWORD RESEARCH
+// ========================================
+var krPendingOrigins = null;
+var krSelectedCultivar = null;
+
+// YouTube channel presets + custom channels
+var KR_YT_PRESETS = [
+  { name: 'Kaylee Ellen', id: 'UCmPPqTOqKRnMEFGOq3OHirA' },
+  { name: 'Harli G', id: 'UCmSv8gPtGFPlhBTantRGN-Q' },
+  { name: 'Exotic Rainforest', id: 'UC1pEuxZa6TaFYqIzrfPli9Q' },
+  { name: 'Sydney Plant Guy', id: 'UCxGGf_HRQDY0CfBRac2j6JA' },
+  { name: 'Plant Arena', id: 'UCQBG5bN4JI0tx2x0e4WYYQ' },
+  { name: 'Legends of Monstera', id: 'UCU4k0fGXAJbgqr8KlYD7JCw' },
+];
+var krYtSelected = {}; // { channelId: name }
+var KR_YT_STORAGE_KEY = 'kr_yt_custom_channels';
+
+function loadCustomYtChannels() {
+  try { return JSON.parse(localStorage.getItem(KR_YT_STORAGE_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+function saveCustomYtChannels(list) {
+  localStorage.setItem(KR_YT_STORAGE_KEY, JSON.stringify(list));
+}
+
+function renderYtChannelButtons() {
+  var container = document.getElementById('kr-yt-channels');
+  var all = KR_YT_PRESETS.concat(loadCustomYtChannels());
+  var html = '';
+  all.forEach(function(ch) {
+    var selected = !!krYtSelected[ch.id];
+    var bg = selected ? '#2e7d32' : '#e0e0e0';
+    var color = selected ? '#fff' : '#333';
+    html += '<button type="button" class="kr-yt-btn" data-chid="' + escapeHtml(ch.id) + '" data-chname="' + escapeHtml(ch.name) + '" style="font-size:0.8rem;padding:3px 10px;border-radius:14px;border:none;cursor:pointer;background:' + bg + ';color:' + color + ';">' + escapeHtml(ch.name) + '</button>';
+  });
+  container.innerHTML = html;
+}
+
+document.getElementById('kr-yt-channels').addEventListener('click', function(e) {
+  var btn = e.target.closest('.kr-yt-btn');
+  if (!btn) return;
+  var chid = btn.getAttribute('data-chid');
+  var chname = btn.getAttribute('data-chname');
+  if (krYtSelected[chid]) {
+    delete krYtSelected[chid];
+  } else {
+    krYtSelected[chid] = chname;
+  }
+  renderYtChannelButtons();
+});
+
+document.getElementById('btn-kr-yt-add').addEventListener('click', function() {
+  var input = document.getElementById('kr-yt-custom');
+  var val = (input.value || '').trim();
+  if (!val) return;
+  // If it looks like a channel ID (starts with UC), use as-is; otherwise use as name/search
+  var chId = val.startsWith('UC') && val.length > 20 ? val : 'search:' + val;
+  var chName = val.startsWith('UC') && val.length > 20 ? val.substring(0, 16) + '...' : val;
+  var customs = loadCustomYtChannels();
+  if (!customs.find(function(c) { return c.id === chId; })) {
+    customs.push({ name: chName, id: chId });
+    saveCustomYtChannels(customs);
+  }
+  krYtSelected[chId] = chName;
+  input.value = '';
+  renderYtChannelButtons();
+});
+
+renderYtChannelButtons();
+
+function populateKRSelect() {
+  var sel = document.getElementById('kr-cultivar-select');
+  var html = '<option value="">品種を選択...</option>';
+  allCultivars.filter(function(c) {
+    return c.type === 'clone' || c.type === 'hybrid';
+  }).sort(function(a, b) {
+    return a.cultivar_name.localeCompare(b.cultivar_name);
+  }).forEach(function(c) {
+    var typeLbl = c.type === 'clone' ? 'Clone' : 'Hybrid';
+    html += '<option value="' + c.id + '">' + escapeHtml(c.cultivar_name) + ' [' + typeLbl + '] (' + (c.genus || '') + ')</option>';
+  });
+  sel.innerHTML = html;
+}
+
+// Show existing origins when a cultivar is selected
+document.getElementById('kr-cultivar-select').addEventListener('change', function() {
+  var cultivarId = parseInt(this.value);
+  var existingDiv = document.getElementById('kr-existing');
+  var contentDiv = document.getElementById('kr-existing-content');
+  document.getElementById('kr-results').classList.add('hidden');
+  krPendingOrigins = null;
+  krSelectedCultivar = null;
+
+  if (!cultivarId) {
+    existingDiv.classList.add('hidden');
+    return;
+  }
+
+  var c = allCultivars.find(function(x) { return x.id === cultivarId; });
+  if (!c) { existingDiv.classList.add('hidden'); return; }
+
+  var origins = c.origins || [];
+  if (origins.length === 0) {
+    contentDiv.innerHTML = '<span style="color:#999;">由来データなし</span>';
+    existingDiv.classList.remove('hidden');
+    return;
+  }
+
+  var cType = c.type || 'species';
+  var html = '';
+  origins.forEach(function(o, idx) {
+    var s = o.structured || {};
+    var oType = s.origin_type || cType;
+    html += '<div style="background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:var(--space-sm);margin-bottom:var(--space-sm);">';
+    html += '<div style="display:flex;align-items:center;gap:var(--space-xs);margin-bottom:var(--space-xs);flex-wrap:wrap;">';
+    html += '<span style="font-weight:700;">由来 #' + (idx + 1) + '</span>';
+    if (o._type === 'formula') {
+      html += ' <span style="font-size:0.75rem;background:#e8f5e9;color:#2e7d32;padding:1px 6px;border-radius:3px;">交配式</span>';
+    } else {
+      if (o.source_tier) html += ' ' + tierBadge(o.source_tier);
+      if (o.trust != null) html += ' <span style="color:' + trustColor(o.trust) + ';font-weight:700;">' + o.trust + '%</span>';
+    }
+    // Author badge (same logic as loadOrigins)
+    if (o.source_type === 'ipni_powo') {
+      html += ' <span style="font-size:0.75rem;background:#e3f2fd;padding:1px 6px;border-radius:3px;">IPNI/Kew</span>';
+    } else if (o.source_type === 'user_verified' || o.source_type === 'ai_verified') {
+      html += ' <span style="font-size:0.75rem;background:#e8f5e9;padding:1px 6px;border-radius:3px;">AI検証済</span>';
+    } else if (o.author && o.author.isAI) {
+      html += ' <span style="font-size:0.75rem;background:#fff3e0;padding:1px 6px;border-radius:3px;">AI</span>';
+    } else if (o.author) {
+      html += ' <span style="font-size:0.75rem;background:#eee;padding:1px 6px;border-radius:3px;">User</span>';
+    }
+    if (o.source_name) html += ' <span style="color:#666;font-size:0.8rem;">(' + escapeHtml(o.source_name) + ')</span>';
+    html += '</div>';
+
+    var structHtml = structuredSummaryHtml(s, oType, o);
+    if (structHtml) html += '<div style="font-size:0.85rem;margin-bottom:var(--space-xs);">' + structHtml + '</div>';
+
+    // Sources
+    if (o.sources && o.sources.length) {
+      html += '<div style="font-size:0.8rem;color:#888;">ソース: ';
+      o.sources.forEach(function(src, si) {
+        if (si > 0) html += ', ';
+        if (src.url) {
+          html += '<a href="' + escapeHtml(src.url) + '" target="_blank" rel="noopener">' + escapeHtml(src.label || src.name || src.url) + '</a>';
+        } else {
+          html += escapeHtml(src.label || src.name || '');
+        }
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+  contentDiv.innerHTML = html;
+  existingDiv.classList.remove('hidden');
+});
+
+document.getElementById('btn-kr-search').addEventListener('click', async function() {
+  var cultivarId = parseInt(document.getElementById('kr-cultivar-select').value);
+  var keywords = document.getElementById('kr-keywords').value.trim();
+  if (!cultivarId) { toast('品種を選択してください'); return; }
+
+  var c = allCultivars.find(function(x) { return x.id === cultivarId; });
+  if (!c) return;
+
+  document.getElementById('kr-loading').classList.remove('hidden');
+  document.getElementById('kr-results').classList.add('hidden');
+  krPendingOrigins = null;
+  krSelectedCultivar = null;
+
+  try {
+    var session = (await sb.auth.getSession()).data.session;
+    var token = session ? session.access_token : SUPABASE_ANON_KEY;
+    var res = await fetch(SUPABASE_URL + '/functions/v1/research-origin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({
+        cultivar_id: c.id,
+        cultivar_name: c.cultivar_name,
+        genus: c.genus,
+        type: c.type,
+        keywords: keywords,
+        preview: true,
+        youtube_channels: Object.keys(krYtSelected).length > 0 ? Object.keys(krYtSelected).map(function(id) { return { id: id, name: krYtSelected[id] }; }) : null
+      })
+    });
+    var data = await res.json();
+    document.getElementById('kr-loading').classList.add('hidden');
+
+    if (!data.success || !data.origins || data.origins.length === 0) {
+      toast('由来情報が見つかりませんでした');
+      return;
+    }
+
+    krPendingOrigins = data.origins;
+    krSelectedCultivar = c;
+    renderKRResults(data.origins, c);
+    document.getElementById('kr-results').classList.remove('hidden');
+  } catch (e) {
+    document.getElementById('kr-loading').classList.add('hidden');
+    toast('エラー: ' + e.message);
+  }
+});
+
+function renderKRResults(origins, cultivar) {
+  var html = '<div style="margin-bottom:var(--space-sm);"><strong>' + escapeHtml(cultivar.cultivar_name) + '</strong> (' + cultivar.type + ' / ' + (cultivar.genus || '') + ')</div>';
+  origins.forEach(function(o, idx) {
+    html += '<div style="background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:var(--space-sm);margin-bottom:var(--space-sm);">';
+    html += '<div style="display:flex;align-items:center;gap:var(--space-xs);margin-bottom:var(--space-xs);">';
+    html += '<span style="font-weight:700;">由来 #' + (idx + 1) + '</span>';
+    if (o.source_tier) html += ' ' + tierBadge(o.source_tier);
+    if (o.trust != null) {
+      html += ' <span style="color:' + trustColor(o.trust) + ';font-weight:700;">' + o.trust + '%</span>';
+    }
+    if (o.source_name) html += ' <span style="color:#666;font-size:0.8rem;">(' + escapeHtml(o.source_name) + ')</span>';
+    html += '</div>';
+
+    // Structured data summary
+    var structHtml = structuredSummaryHtml(o.structured, cultivar.type, o);
+    if (structHtml) html += '<div style="font-size:0.85rem;margin-bottom:var(--space-xs);">' + structHtml + '</div>';
+
+    // Sources
+    if (o.sources && o.sources.length) {
+      html += '<div style="font-size:0.8rem;color:#888;">ソース: ';
+      o.sources.forEach(function(s, si) {
+        if (si > 0) html += ', ';
+        if (s.url) {
+          html += '<a href="' + escapeHtml(s.url) + '" target="_blank" rel="noopener">' + escapeHtml(s.label || s.name || s.url) + '</a>';
+        } else {
+          html += escapeHtml(s.label || s.name || '');
+        }
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+  document.getElementById('kr-result-content').innerHTML = html;
+}
+
+document.getElementById('btn-kr-accept').addEventListener('click', async function() {
+  if (!krPendingOrigins || !krSelectedCultivar) return;
+  if (!confirm('このリサーチ結果を「' + krSelectedCultivar.cultivar_name + '」の由来として採用しますか？')) return;
+
+  try {
+    // Get current origins and merge (keep existing manual/user origins, replace AI ones)
+    var existing = (krSelectedCultivar.origins || []).filter(function(o) {
+      return o.source_type === 'manual' || (o.author && o.author.isAI === false);
+    });
+    var merged = existing.concat(krPendingOrigins);
+    merged.sort(function(a, b) { return (b.trust || 0) - (a.trust || 0); });
+
+    var result = await sb.from('cultivars').update({
+      origins: merged,
+      ai_status: 'completed',
+      ai_research_data: {
+        research_source: 'keyword-research',
+        origins_count: merged.length,
+        best_trust: merged[0] ? merged[0].trust : 0,
+        researched_at: new Date().toISOString()
+      },
+      updated_at: new Date().toISOString()
+    }).eq('id', krSelectedCultivar.id);
+
+    if (result.error) throw result.error;
+    toast('由来を採用しました');
+    document.getElementById('kr-results').classList.add('hidden');
+    krPendingOrigins = null;
+    krSelectedCultivar = null;
+    loadAllCultivars();
+  } catch (e) {
+    toast('保存エラー: ' + e.message);
+  }
+});
+
+document.getElementById('btn-kr-reject').addEventListener('click', function() {
+  krPendingOrigins = null;
+  krSelectedCultivar = null;
+  document.getElementById('kr-results').classList.add('hidden');
+  toast('リサーチ結果を破棄しました');
+});
 </script>
 </body>
 </html>
