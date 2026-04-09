@@ -1,5 +1,5 @@
 // Service Worker for Plants Story PWA
-var CACHE_VERSION = 'plants-story-v26';
+var CACHE_VERSION = 'plants-story-v27';
 var OFFLINE_PAGE = './offline.html';
 var STATIC_ASSETS = [
   './',
@@ -93,20 +93,19 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // Static assets: network-first, only cache successful responses
+  // Static assets: stale-while-revalidate (instant from cache, update in background)
   event.respondWith(
-    fetch(event.request).then(function(response) {
-      // Only cache successful responses (not 404s)
-      if (response.ok) {
-        var clone = response.clone();
-        caches.open(CACHE_VERSION).then(function(cache) {
-          cache.put(event.request, clone);
-        });
-      }
-      return response;
-    }).catch(function() {
-      // Offline: serve from cache
-      return caches.match(event.request);
+    caches.match(event.request).then(function(cached) {
+      var fetchPromise = fetch(event.request).then(function(response) {
+        if (response.ok) {
+          var clone = response.clone();
+          caches.open(CACHE_VERSION).then(function(cache) {
+            cache.put(event.request, clone);
+          });
+        }
+        return response;
+      });
+      return cached || fetchPromise;
     })
   );
 });
