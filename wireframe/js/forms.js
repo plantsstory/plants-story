@@ -2352,9 +2352,9 @@ updateCultivarDetail = function(cultivarName, rowEl) {
 
     if (total <= 1) {
       // Hide arrows and counter for 0-1 images
-      if (prevBtn) prevBtn.style.display = 'none';
-      if (nextBtn) nextBtn.style.display = 'none';
-      if (counter) counter.style.display = 'none';
+      if (prevBtn) prevBtn.classList.add('d-none');
+      if (nextBtn) nextBtn.classList.add('d-none');
+      if (counter) counter.classList.add('d-none');
       // Show the single image or placeholder
       items.forEach(function(item) { item.style.display = ''; });
       gallery.querySelectorAll('.gallery__empty').forEach(function(el) {
@@ -2377,9 +2377,9 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     });
 
     // Show arrows and counter
-    if (prevBtn) prevBtn.style.display = '';
-    if (nextBtn) nextBtn.style.display = '';
-    if (counter) { counter.style.display = ''; counter.textContent = (galleryCarouselIdx + 1) + ' / ' + total; }
+    if (prevBtn) prevBtn.classList.remove('d-none');
+    if (nextBtn) nextBtn.classList.remove('d-none');
+    if (counter) { counter.classList.remove('d-none'); counter.textContent = (galleryCarouselIdx + 1) + ' / ' + total; }
   }
 
   document.getElementById('gallery-prev').addEventListener('click', function() {
