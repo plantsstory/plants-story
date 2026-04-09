@@ -1,17 +1,28 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import init, { svg2png } from "https://deno.land/x/resvg_wasm@0.0.2/mod.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+const ALLOWED_ORIGINS = [
+  "https://plantsstory.com",
+  "https://www.plantsstory.com",
+  "http://localhost:3000",
+];
+
+function getCorsOrigin(req: Request): string {
+  const origin = req.headers.get("origin") || "";
+  return ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+}
+
+const corsHeaders = (req: Request) => ({
+  "Access-Control-Allow-Origin": getCorsOrigin(req),
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
-};
+});
 
 let wasmInitialized = false;
 
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: corsHeaders(req) });
   }
 
   try {
@@ -80,7 +91,7 @@ serve(async (req: Request) => {
 
     return new Response(png, {
       headers: {
-        ...corsHeaders,
+        ...corsHeaders(req),
         "Content-Type": "image/png",
         "Cache-Control": "public, max-age=86400, s-maxage=86400",
       },
@@ -88,7 +99,7 @@ serve(async (req: Request) => {
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders(req), "Content-Type": "application/json" },
     });
   }
 });

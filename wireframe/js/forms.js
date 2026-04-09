@@ -1,4 +1,29 @@
 
+// Inline field error helpers
+function showFieldError(input, message) {
+  if (!input) return;
+  input.classList.add('form-input--invalid');
+  var err = input.parentNode.querySelector('.field-error');
+  if (!err) {
+    err = document.createElement('div');
+    err.className = 'field-error';
+    input.parentNode.appendChild(err);
+  }
+  err.textContent = message;
+  err.classList.add('visible');
+}
+function clearFieldError(input) {
+  if (!input) return;
+  input.classList.remove('form-input--invalid');
+  var err = input.parentNode.querySelector('.field-error');
+  if (err) err.classList.remove('visible');
+}
+function clearAllFieldErrors(container) {
+  if (!container) return;
+  container.querySelectorAll('.form-input--invalid').forEach(function(el) { el.classList.remove('form-input--invalid'); });
+  container.querySelectorAll('.field-error.visible').forEach(function(el) { el.classList.remove('visible'); });
+}
+
 // Tab switching for genus pages (Species/Clones vs My Seedlings)
 document.addEventListener('click', function(e) {
   var tab = e.target.closest('.genus-tab');
@@ -130,6 +155,7 @@ document.addEventListener('click', function(e) {
     var result = res.data;
     if (!result || !result.success) { btn.disabled = false; showToast(result && result.error ? result.error : t('toast_vote_failed'), true); return; }
 
+    trackEvent('origin_vote', { cultivar_name: cultivarName, vote_type: voteType });
     // Update vote button states based on server response
     var voteGroup = btn.closest('.vote-group');
     if (voteGroup) {
@@ -699,8 +725,8 @@ document.addEventListener('click', function(e) {
                   '<button class="upload-preview__remove" data-image-id="' + img.id + '" data-storage-path="' + img.storage_path + '" data-idx="' + idx + '">&times;</button>' +
                 '</div>' +
                 '<div class="upload-preview__meta">' +
-                  '<input type="text" placeholder="補足（日付等）" data-image-id="' + img.id + '" data-field="caption" value="' + (img.caption || '').replace(/"/g, '&quot;') + '">' +
-                  '<input type="url" placeholder="リンクURL" data-image-id="' + img.id + '" data-field="link_url" value="' + (img.link_url || '').replace(/"/g, '&quot;') + '">' +
+                  '<input type="text" placeholder="補足（日付等）" data-image-id="' + img.id + '" data-field="caption" value="' + escHtml(img.caption || '') + '">' +
+                  '<input type="url" placeholder="リンクURL" data-image-id="' + img.id + '" data-field="link_url" value="' + escHtml(img.link_url || '') + '">' +
                 '</div>';
               previewEl.appendChild(item);
             });
@@ -1111,6 +1137,7 @@ document.addEventListener('click', function(e) {
     fileInput.addEventListener('change', function() {
       var file = this.files[0];
       if (!file) return;
+      if (!file.type || !file.type.startsWith('image/')) { showToast('画像ファイルのみアップロードできます', true); this.value = ''; return; }
       if (file.size > 20 * 1024 * 1024) { showToast('ファイルサイズは20MB以下にしてください', true); this.value = ''; return; }
       if (parent === 'mother') motherPhotoFile = file; else fatherPhotoFile = file;
       var reader = new FileReader();
@@ -1181,20 +1208,18 @@ document.addEventListener('click', function(e) {
       var desc = contributeDesc ? contributeDesc.value.trim() : '';
 
       // Clear previous validation states
-      [contributeGenus, contributeName].forEach(function(el) {
-        if (el) { el.setAttribute('aria-invalid', 'false'); el.style.borderColor = ''; }
-      });
+      clearAllFieldErrors(document.getElementById('page-contribute'));
       // Validation
+      var hasError = false;
       if (!genus) {
-        showToast(t('error_genus_required'), true);
-        if (contributeGenus) { contributeGenus.setAttribute('aria-invalid', 'true'); contributeGenus.style.borderColor = 'var(--color-danger)'; contributeGenus.focus(); }
-        return;
+        showFieldError(contributeGenus, t('error_genus_required'));
+        if (!hasError && contributeGenus) { contributeGenus.focus(); hasError = true; }
       }
       if (!name) {
-        showToast(t('error_name_required'), true);
-        if (contributeName) { contributeName.setAttribute('aria-invalid', 'true'); contributeName.style.borderColor = 'var(--color-danger)'; contributeName.focus(); }
-        return;
+        showFieldError(contributeName, t('error_name_required'));
+        if (!hasError && contributeName) { contributeName.focus(); hasError = true; }
       }
+      if (hasError) return;
 
       // Login required
       if (!window._currentUser) {
@@ -1634,6 +1659,7 @@ document.addEventListener('click', function(e) {
         submitBtn.disabled = false;
         submitBtn.style.opacity = '';
         showToast(t('submit_success'));
+        trackEvent('contribute_cultivar', { cultivar_name: fullName, type: type });
       }
 
       function handleSubmitError(msg) {
@@ -2222,17 +2248,23 @@ updateCultivarDetail = function(cultivarName, rowEl) {
   function voteImage(imageId, voteType) {
     var sb = getSupabase();
     if (!sb) return Promise.reject('No Supabase');
-    var prev = getVote(imageId);
-    if (prev === voteType) return Promise.resolve(); // already voted same
-    // Single atomic RPC call (replaces previous N+1 SELECT + UPDATE pattern)
+    // Server handles toggle (same vote = remove), auth check, and rate limit
     return sb.rpc('vote_on_image', {
       p_image_id: imageId,
       p_vote_type: voteType,
-      p_prev_vote: prev || null
+      p_prev_vote: getVote(imageId) || null
     }).then(function(res) {
       if (res.error) throw res.error;
       if (res.data && !res.data.ok) throw new Error(res.data.error);
-      markVoted(imageId, voteType);
+      // user_vote is null if toggled off, otherwise the vote type
+      if (res.data.user_vote) {
+        markVoted(imageId, res.data.user_vote);
+      } else {
+        // Vote was toggled off — remove from local tracking
+        var voted = getVotedImages();
+        delete voted[imageId];
+        localStorage.setItem(VOTE_STORAGE_KEY, JSON.stringify(voted));
+      }
     });
   }
 
@@ -2256,15 +2288,15 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     var overlayHtml = '';
     if (hasOverlay) {
       overlayHtml = '<div class="gallery__overlay">';
-      if (caption) overlayHtml += '<div class="gallery__overlay-caption">' + caption.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+      if (caption) overlayHtml += '<div class="gallery__overlay-caption">' + escHtml(caption) + '</div>';
       if (linkUrl) {
         var displayLink = linkUrl.replace(/^https?:\/\//, '').substring(0, 40);
-        overlayHtml += '<div class="gallery__overlay-link"><a href="' + linkUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener">🔗 ' + displayLink.replace(/</g, '&lt;') + '</a></div>';
+        overlayHtml += '<div class="gallery__overlay-link"><a href="' + escHtml(linkUrl) + '" target="_blank" rel="noopener">🔗 ' + escHtml(displayLink) + '</a></div>';
       }
       overlayHtml += '</div>';
     }
     item.innerHTML =
-      '<div class="gallery__img"><img src="' + src + '" class="gallery__img-full" loading="lazy">' + overlayHtml + '</div>' +
+      '<div class="gallery__img"><img src="' + src + '" class="gallery__img-full" loading="lazy" decoding="async" sizes="(max-width: 768px) 100vw, 600px">' + overlayHtml + '</div>' +
       '<div class="gallery__actions">' +
         '<div class="vote-group">' +
           '<button class="vote-btn' + realActive + '" data-vote="real"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88L14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88z"/></svg><span class="vote-btn__badge">' + realVotes + '</span></button>' +
@@ -2471,6 +2503,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       if (sb) {
         uploadToSupabase(file, cultivarName, caption.trim(), linkUrl.trim()).then(function() {
           renderGalleryForCultivar(cultivarName);
+          trackEvent('gallery_upload', { cultivar_name: cultivarName });
           if (typeof loadCultivarThumbnails === 'function') loadCultivarThumbnails();
         }).catch(function(err) {
           console.warn('Supabase upload failed, saving locally:', err);
@@ -2798,6 +2831,18 @@ updateCultivarDetail = function(cultivarName, rowEl) {
   }
 })();
 
+// Register cultivar page cleanup: remove gallery items to free memory on navigation
+if (window._pageCleanups) {
+  window._pageCleanups['cultivar'] = function() {
+    var gallery = document.querySelector('#gallery-carousel .gallery');
+    if (gallery) {
+      gallery.querySelectorAll('.gallery__item[data-user-upload]').forEach(function(el) { el.remove(); });
+    }
+    var originsContainer = document.getElementById('origins-container');
+    if (originsContainer) originsContainer.innerHTML = '';
+  };
+}
+
 // ========================================
 // CONTACT FORM - Demo handler
 // ========================================
@@ -2813,15 +2858,12 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     var email = emailEl.value.trim();
     var message = messageEl.value.trim();
     // Clear previous validation
-    [nameEl, emailEl, messageEl].forEach(function(el) { el.setAttribute('aria-invalid', 'false'); el.style.borderColor = ''; });
-    if (!name || !email || !message) {
-      showToast(t('contact_error_required'), true);
-      var first = !name ? nameEl : !email ? emailEl : messageEl;
-      first.setAttribute('aria-invalid', 'true');
-      first.style.borderColor = 'var(--color-danger)';
-      first.focus();
-      return;
-    }
+    clearAllFieldErrors(document.querySelector('.contact-form') || submitBtn.parentNode);
+    var hasErr = false;
+    if (!name) { showFieldError(nameEl, 'お名前を入力してください'); if (!hasErr) { nameEl.focus(); hasErr = true; } }
+    if (!email) { showFieldError(emailEl, 'メールアドレスを入力してください'); if (!hasErr) { emailEl.focus(); hasErr = true; } }
+    if (!message) { showFieldError(messageEl, 'メッセージを入力してください'); if (!hasErr) { messageEl.focus(); hasErr = true; } }
+    if (hasErr) return;
     showToast(t('contact_success'));
     nameEl.value = '';
     emailEl.value = '';

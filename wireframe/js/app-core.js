@@ -110,8 +110,21 @@ function skeletonLines(count) {
   }
   return h;
 }
+function skeletonRows(count) {
+  var h = '';
+  for (var i = 0; i < count; i++) {
+    h += '<div class="skeleton-row">' +
+      '<div class="skeleton skeleton-row__thumb"></div>' +
+      '<div class="skeleton-row__body">' +
+      '<div class="skeleton skeleton-row__title"></div>' +
+      '<div class="skeleton skeleton-row__meta"></div>' +
+      '</div></div>';
+  }
+  return h;
+}
 window.skeletonCards = skeletonCards;
 window.skeletonLines = skeletonLines;
+window.skeletonRows = skeletonRows;
 
 // Client-side rate limiter to prevent spam
 var _rateLimits = {};
@@ -146,6 +159,34 @@ function safeLSSet(key, value) {
   }
 }
 window.safeLSSet = safeLSSet;
+
+// GA4 custom event helper
+function trackEvent(eventName, params) {
+  if (typeof gtag === 'function') {
+    gtag('event', eventName, params || {});
+  }
+}
+window.trackEvent = trackEvent;
+
+// localStorage version management — clears stale cache on version bump
+(function() {
+  var LS_VERSION_KEY = 'plants-story-ls-version';
+  var LS_VERSION = '2026040901'; // Bump this on deploy to invalidate cached data
+  var CACHE_KEYS = [
+    'plants-story-user-cultivars',
+    'plants-story-gallery-images',
+    'plants-story-image-votes'
+  ];
+  // Keys that should NOT be cleared (user preferences, auth state)
+  // 'plants-story-lang', 'plants-story-favorites', 'login_return_path'
+  try {
+    var stored = localStorage.getItem(LS_VERSION_KEY);
+    if (stored !== LS_VERSION) {
+      CACHE_KEYS.forEach(function(k) { localStorage.removeItem(k); });
+      localStorage.setItem(LS_VERSION_KEY, LS_VERSION);
+    }
+  } catch(e) { /* ignore */ }
+})();
 
 // Toast notification helper (non-blocking replacement for alert)
 function showToast(msg, isError) {
@@ -237,6 +278,14 @@ function updateMeta(opts) {
     var el = document.getElementById('hreflang-' + lang);
     if (el) el.setAttribute('href', url);
   });
+  // noindex for low-value pages (search, profile, mypost, seedlings)
+  var robots = document.querySelector('meta[name="robots"]');
+  if (!robots) {
+    robots = document.createElement('meta');
+    robots.setAttribute('name', 'robots');
+    document.head.appendChild(robots);
+  }
+  robots.setAttribute('content', opts.noindex ? 'noindex, follow' : 'index, follow');
 }
 
 function updateCultivarJsonLd(name, genus, type, description) {
@@ -319,7 +368,29 @@ function updateGenusJsonLd(genusName, cultivarNames) {
 }
 
 var _isPopstate = false; // Flag for back/forward navigation
+
+// Page cleanup registry — functions run when leaving a page
+var _pageCleanups = {};
+window._pageCleanups = _pageCleanups;
+// Current AbortController for in-flight page requests
+window._pageAbort = null;
+function getPageAbort() {
+  if (window._pageAbort) window._pageAbort.abort();
+  window._pageAbort = new AbortController();
+  return window._pageAbort.signal;
+}
+window.getPageAbort = getPageAbort;
+
+var _currentPageId = null;
 function showPage(pageId) {
+  // Run cleanup for the page we're leaving
+  if (_currentPageId && _pageCleanups[_currentPageId]) {
+    try { _pageCleanups[_currentPageId](); } catch(e) { /* ignore */ }
+  }
+  // Abort any in-flight page requests
+  if (window._pageAbort) { window._pageAbort.abort(); window._pageAbort = null; }
+  _currentPageId = pageId;
+
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   // profile-edit maps to page-profile-edit
   const target = document.getElementById('page-' + pageId);
@@ -496,10 +567,14 @@ function navigateTo(page, options, pushHistory) {
     };
     if (page === 'genus' && options.genus) {
       var gName = options.genus.charAt(0).toUpperCase() + options.genus.slice(1);
+      var genusOgImage = window._SUPABASE_URL
+        ? window._SUPABASE_URL + '/functions/v1/og-image?name=' + encodeURIComponent(gName) + '&genus=' + encodeURIComponent(gName) + '&type=species'
+        : '';
       updateMeta({
         title: gName + ' - ' + _defaultTitle,
         description: gName + 'の品種一覧 - 由来・歴史情報をコミュニティで共有',
-        path: options.genus
+        path: options.genus,
+        image: genusOgImage
       });
       // Build genus ItemList JSON-LD
       var genusSection = document.getElementById('genus-' + options.genus);
@@ -510,7 +585,8 @@ function navigateTo(page, options, pushHistory) {
         updateGenusJsonLd(gName, names);
       }
     } else {
-      updateMeta({ title: pageTitles[page] || _defaultTitle, description: pageDescriptions[page] || _defaultDesc, path: page === 'top' ? '' : page });
+      var noindexPages = { search: true, mypost: true, favorites: true, profile: true, 'profile-edit': true };
+      updateMeta({ title: pageTitles[page] || _defaultTitle, description: pageDescriptions[page] || _defaultDesc, path: page === 'top' ? '' : page, noindex: !!noindexPages[page] });
       // Remove genus JSON-LD on non-genus pages
       var gjld = document.getElementById('genus-jsonld');
       if (gjld) gjld.remove();
@@ -1634,7 +1710,7 @@ if (false) {
       .order('created_at', { ascending: false })
       .then(function(res) {
         grid.innerHTML = '';
-        if (res.error) { grid.innerHTML = '<p class="error-text">エラー: ' + res.error.message + '</p>'; return; }
+        if (res.error) { grid.innerHTML = '<p class="error-text">エラー: ' + escHtml(res.error.message) + '</p>'; return; }
         var rows = res.data || [];
         if (rows.length === 0) {
           if (emptyMsg) emptyMsg.style.display = '';
@@ -1951,7 +2027,7 @@ if (false) {
     var thumbKey = isSeedling ? displayName : displayName;
     var thumbPath = _thumbMap[thumbKey];
     var thumbContent = thumbPath
-      ? '<img data-src="' + (window._SUPABASE_URL || '') + '/storage/v1/object/public/gallery-images/' + thumbPath + '" class="thumb-img" alt="' + escHtml(displayName) + '">'
+      ? '<img data-src="' + (window._SUPABASE_URL || '') + '/storage/v1/object/public/gallery-images/' + thumbPath + '" class="thumb-img" alt="' + escHtml(displayName) + '" width="60" height="60" decoding="async">'
       : '<svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg>';
     h += '<div class="cultivar-row__thumb' + (locked ? ' seedling-thumb--locked' : '') + '">' + thumbContent + '</div>';
     h += '<div class="cultivar-row__info">';
@@ -2112,7 +2188,7 @@ if (false) {
         // Thumbnail or fallback icon
         if (thumbMap[displayName] && baseUrl) {
           var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
-          html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '"></div>';
+          html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '" width="260" height="160" decoding="async"></div>';
         } else {
           html += '<div class="recent-card__img">';
           html += '<svg viewBox="0 0 80 60" width="80" height="60"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
@@ -2178,7 +2254,7 @@ if (false) {
             // Thumbnail
             if (thumbMap[displayName] && baseUrl) {
               var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
-              html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '"></div>';
+              html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '" width="260" height="160" decoding="async"></div>';
             } else {
               html += '<div class="recent-card__img">';
               html += '<svg viewBox="0 0 80 60" width="80" height="60"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';

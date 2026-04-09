@@ -556,6 +556,7 @@ function toggleFavorite(name) {
   localStorage.setItem(FAV_KEY, JSON.stringify(favs));
   updateFavBtn(name);
   updateHeaderFavIcon();
+  trackEvent(added ? 'add_favorite' : 'remove_favorite', { cultivar_name: name });
 
   // Sync to Supabase
   var sb = window._supabaseClient;
@@ -755,7 +756,7 @@ function renderFavoritesPage() {
       // Thumbnail or plant icon
       if (thumbMap[displayName] && baseUrl) {
         var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
-        html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '"></div>';
+        html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '" width="260" height="160" decoding="async"></div>';
       } else {
         html += '<div class="recent-card__img">';
         html += '<svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
@@ -988,7 +989,7 @@ function buildFormulaHtml(data, isSeedling, _sb) {
     if (isSeedling) {
       if (photoPath && _sb) {
         var url = _sb.storage.from('gallery-images').getPublicUrl(photoPath).data.publicUrl;
-        h += '<div class="parent-photo-display flex-shrink-0"><img class="has-photo parent-photo" src="' + url + '" alt="' + label + '"></div>';
+        h += '<div class="parent-photo-display flex-shrink-0"><img class="has-photo parent-photo" src="' + url + '" alt="' + label + '" width="60" height="60" decoding="async" loading="lazy"></div>';
       } else {
         h += '<div class="parent-photo-display flex-shrink-0">' + noPhoto + '</div>';
       }
@@ -1171,10 +1172,12 @@ function updateCultivarDetail(cultivarName, rowEl) {
   updateMeta({
     title: displayName + ' - ' + genusName + ' | ' + _defaultTitle,
     description: metaDesc,
-    path: 'cultivar/' + encodeURIComponent(displayName),
-    image: ogImageUrl
+    path: genusKey + '/' + encodeURIComponent(displayName.replace(genusName + ' ', '')),
+    image: ogImageUrl,
+    noindex: detectedType === 'seedling'
   });
   updateCultivarJsonLd(displayName, genusName, detectedType, metaDesc);
+  trackEvent('view_cultivar', { cultivar_name: displayName, genus: genusName, type: detectedType });
 
   // Update favorite button
   updateFavBtn(displayName);
@@ -1380,6 +1383,7 @@ function filterGenusRows(genusEl, query) {
 var ITEMS_PER_PAGE = 10;
 var _dataFullyLoaded = false; // true after full Supabase fetch completes
 window._dataFullyLoaded = false;
+var _paginationCursors = {}; // genus-slug -> { page -> lastCultivarName }
 
 // Convert RPC row to _genusItems format
 function rpcRowToItem(row) {
@@ -1436,6 +1440,11 @@ function paginateGenusFromServer(genusEl, page) {
 
   var offset = (page - 1) * ITEMS_PER_PAGE;
 
+  // Cursor-based: use cursor from previous page when sorting by name
+  var cursorKey = slug + '_' + typeFilter + '_' + (searchQuery || '');
+  var cursors = _paginationCursors[cursorKey] || {};
+  var cursor = (sortMode === 'name' && page > 1 && cursors[page - 1]) ? cursors[page - 1] : null;
+
   // Show loading state
   var container;
   if (isSeedlingView) {
@@ -1443,7 +1452,7 @@ function paginateGenusFromServer(genusEl, page) {
   } else {
     container = scope.querySelector('.card.card--no-pad') || scope.querySelector('.card');
   }
-  if (container) container.innerHTML = '<div class="p-md">' + skeletonLines(6) + '</div>';
+  if (container) container.innerHTML = '<div class="p-md">' + skeletonRows(6) + '</div>';
 
   window._supabaseClient.rpc('get_cultivars_paginated', {
     p_genus: genusName,
@@ -1451,7 +1460,8 @@ function paginateGenusFromServer(genusEl, page) {
     p_sort: sortMode,
     p_search: searchQuery,
     p_limit: ITEMS_PER_PAGE,
-    p_offset: offset
+    p_offset: cursor ? 0 : offset,
+    p_cursor: cursor
   }).then(function(res) {
     if (res.error || !res.data || !res.data.success) {
       if (container) container.innerHTML = '<div class="text-muted empty-state">' + t('no_results') + '</div>';
@@ -1462,6 +1472,12 @@ function paginateGenusFromServer(genusEl, page) {
     var items = (res.data.items || []).map(rpcRowToItem);
     var totalPages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
     if (page > totalPages) page = totalPages;
+
+    // Store cursor for next-page keyset navigation
+    if (items.length > 0 && sortMode === 'name') {
+      if (!_paginationCursors[cursorKey]) _paginationCursors[cursorKey] = {};
+      _paginationCursors[cursorKey][page] = items[items.length - 1].fullName;
+    }
 
     // Render rows
     if (container) {
@@ -1614,6 +1630,7 @@ function renderPaginationUI(scope, page, totalPages, totalCount, searchQuery) {
 function globalSearch(query) {
   var q = query.toLowerCase().trim();
   if (!q) return;
+  trackEvent('search', { search_term: q });
 
   // -- Cultivar search (data-driven from _genusItems) --
   var cultivarResults = [];

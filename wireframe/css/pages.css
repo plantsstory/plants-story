@@ -271,6 +271,7 @@
 .contact-form .form-textarea:focus {
   outline: none;
   border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(27, 67, 50, 0.08);
 }
 
 .contact-form .form-textarea {
