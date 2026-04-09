@@ -465,12 +465,15 @@ if ('IntersectionObserver' in window) {
         var img = entry.target;
         img.addEventListener('load', function() { img.classList.add('lazy-loaded'); });
         img.addEventListener('error', function() { img.style.display = 'none'; });
+        // Use srcset if available, otherwise fallback to data-src
+        var srcset = img.getAttribute('data-srcset');
+        if (srcset) { img.srcset = srcset; img.removeAttribute('data-srcset'); }
         img.src = img.getAttribute('data-src');
         img.removeAttribute('data-src');
         _lazyObserver.unobserve(img);
       }
     });
-  }, { rootMargin: '200px' });
+  }, { rootMargin: '400px 0px', threshold: 0 });
 }
 
 function observeLazyImages(container) {

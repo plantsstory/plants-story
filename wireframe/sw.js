@@ -1,8 +1,10 @@
 // Service Worker for Plants Story PWA
-var CACHE_VERSION = 'plants-story-v23';
+var CACHE_VERSION = 'plants-story-v24';
+var OFFLINE_PAGE = './offline.html';
 var STATIC_ASSETS = [
   './',
   './index.html',
+  OFFLINE_PAGE,
   './js/app-core.js',
   './js/pages.js',
   './js/forms.js',
@@ -83,7 +85,9 @@ self.addEventListener('fetch', function(event) {
           return cached || response;
         });
       }).catch(function() {
-        return caches.match('./index.html');
+        return caches.match('./index.html').then(function(cached) {
+          return cached || caches.match(OFFLINE_PAGE);
+        });
       })
     );
     return;

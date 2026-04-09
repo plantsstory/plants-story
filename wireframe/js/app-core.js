@@ -41,6 +41,17 @@
     });
   }
 
+  // Throttled user-facing error notification
+  var _lastUserErrorToast = 0;
+  function notifyUser() {
+    var now = Date.now();
+    if (now - _lastUserErrorToast < 10000) return; // max once per 10s
+    _lastUserErrorToast = now;
+    if (typeof showToast === 'function') {
+      showToast('エラーが発生しました。ページを再読み込みしてください。', true);
+    }
+  }
+
   window.onerror = function(message, source, lineno, colno, error) {
     queueError({
       message: String(message),
@@ -51,10 +62,13 @@
       url: location.href,
       userAgent: navigator.userAgent
     });
+    notifyUser();
   };
 
   window.addEventListener('unhandledrejection', function(event) {
     var reason = event.reason;
+    // Ignore AbortError (from page navigation cleanup)
+    if (reason && reason.name === 'AbortError') return;
     var message = reason instanceof Error ? reason.message : String(reason || 'Unhandled Promise rejection');
     var stack = reason instanceof Error ? reason.stack || '' : '';
     queueError({
@@ -66,6 +80,7 @@
       url: location.href,
       userAgent: navigator.userAgent
     });
+    notifyUser();
   });
 
   window._flushErrorLogs = flushErrors;
