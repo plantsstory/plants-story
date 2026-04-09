@@ -1,3 +1,7 @@
+// --- PlantStory Namespace ---
+window.PlantStory = window.PlantStory || {};
+function psExport(name, val) { window.PlantStory[name] = val; window[name] = val; }
+
 // --- Global Error Monitoring ---
 (function() {
   var errorQueue = [];
@@ -83,7 +87,7 @@
     notifyUser();
   });
 
-  window._flushErrorLogs = flushErrors;
+  psExport('_flushErrorLogs', flushErrors);
 })();
 
 // Stubs — overridden by the full implementations in forms.js / pages.js
@@ -103,7 +107,7 @@ function escHtml(str) {
   if (!str && str !== 0) return '';
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
-window.escHtml = escHtml;
+psExport('escHtml', escHtml);
 
 // Safe DOM query by data-key attribute (avoids CSS selector injection)
 function findByDataKey(selector, key) {
@@ -113,7 +117,7 @@ function findByDataKey(selector, key) {
   }
   return null;
 }
-window.findByDataKey = findByDataKey;
+psExport('findByDataKey', findByDataKey);
 
 // Validate redirect path (prevents open redirect)
 function isValidInternalPath(path) {
@@ -154,9 +158,9 @@ function skeletonRows(count) {
   }
   return h;
 }
-window.skeletonCards = skeletonCards;
-window.skeletonLines = skeletonLines;
-window.skeletonRows = skeletonRows;
+psExport('skeletonCards', skeletonCards);
+psExport('skeletonLines', skeletonLines);
+psExport('skeletonRows', skeletonRows);
 
 // Client-side rate limiter to prevent spam
 var _rateLimits = {};
@@ -168,7 +172,7 @@ function rateLimit(action, cooldownMs) {
   _rateLimits[action] = now;
   return true;
 }
-window.rateLimit = rateLimit;
+psExport('rateLimit', rateLimit);
 
 // Safe localStorage wrapper with quota handling
 function safeLSSet(key, value) {
@@ -190,7 +194,7 @@ function safeLSSet(key, value) {
     return false;
   }
 }
-window.safeLSSet = safeLSSet;
+psExport('safeLSSet', safeLSSet);
 
 // GA4 custom event helper
 function trackEvent(eventName, params) {
@@ -198,7 +202,7 @@ function trackEvent(eventName, params) {
     gtag('event', eventName, params || {});
   }
 }
-window.trackEvent = trackEvent;
+psExport('trackEvent', trackEvent);
 
 // localStorage version management — clears stale cache on version bump
 (function() {
@@ -254,7 +258,7 @@ function guardSubmit(btn, asyncFn) {
     showToast(e.message || 'エラーが発生しました', true);
   });
 }
-window.guardSubmit = guardSubmit;
+psExport('guardSubmit', guardSubmit);
 
 // SPA redirect restoration (GitHub Pages 404.html redirects here)
 (function() {
@@ -434,7 +438,7 @@ var _isPopstate = false; // Flag for back/forward navigation
 
 // Page cleanup registry — functions run when leaving a page
 var _pageCleanups = {};
-window._pageCleanups = _pageCleanups;
+psExport('_pageCleanups', _pageCleanups);
 
 // Managed event listener registry — automatically removed on page navigation
 var _managedListeners = [];
@@ -449,7 +453,7 @@ function cleanupManagedListeners() {
   });
   _managedListeners = [];
 }
-window.addManagedListener = addManagedListener;
+psExport('addManagedListener', addManagedListener);
 
 // Current AbortController for in-flight page requests
 window._pageAbort = null;
@@ -458,7 +462,7 @@ function getPageAbort() {
   window._pageAbort = new AbortController();
   return window._pageAbort.signal;
 }
-window.getPageAbort = getPageAbort;
+psExport('getPageAbort', getPageAbort);
 
 var _currentPageId = null;
 function showPage(pageId) {
@@ -1516,7 +1520,7 @@ if (false) {
   window._isSubscribed = false;
   window._subscriptionPlan = 'free'; // 'free', 'seedling_monthly', 'seedling_annual', 'granted'
 
-  window.checkSubscription = checkSubscription;
+  psExport('checkSubscription', checkSubscription);
   function checkSubscription() {
     if (!window._currentUser || !supabase) {
       window._isSubscribed = false;
@@ -1545,7 +1549,7 @@ if (false) {
   }
 
   // Start Stripe checkout
-  window.startCheckout = startCheckout;
+  psExport('startCheckout', startCheckout);
   var _checkoutInProgress = false;
   function startCheckout(plan) {
     if (_checkoutInProgress) return;
@@ -1601,7 +1605,7 @@ if (false) {
   }
 
   // Open Stripe Customer Portal
-  window.openCustomerPortal = openCustomerPortal;
+  psExport('openCustomerPortal', openCustomerPortal);
   function openCustomerPortal() {
     var sb = window._supabaseClient;
     if (!sb || !window._currentUser) return;
@@ -1626,7 +1630,7 @@ if (false) {
 
   // Show paywall modal with focus trap and keyboard support
   var _paywallPreviousFocus = null;
-  window.showPaywallModal = showPaywallModal;
+  psExport('showPaywallModal', showPaywallModal);
   function showPaywallModal() {
     var modal = document.getElementById('paywall-modal');
     if (!modal) return;
@@ -1636,7 +1640,7 @@ if (false) {
     var closeBtn = document.getElementById('paywall-close-btn');
     if (closeBtn) setTimeout(function() { closeBtn.focus(); }, 50);
   }
-  window.hidePaywallModal = hidePaywallModal;
+  psExport('hidePaywallModal', hidePaywallModal);
   function hidePaywallModal() {
     var modal = document.getElementById('paywall-modal');
     if (!modal) return;
@@ -1692,7 +1696,7 @@ if (false) {
   });
 
   // Check seedling access for a given cultivar
-  window.canAccessSeedling = canAccessSeedling;
+  psExport('canAccessSeedling', canAccessSeedling);
   function canAccessSeedling(entry) {
     if (window._isSubscribed) return 'full';
     if (window._currentUser && entry && entry._userId === window._currentUser.id) return 'owner';
@@ -2072,11 +2076,11 @@ if (false) {
 
   // Which genera have seedling tabs (exposed globally for contribute form)
   var SEEDLING_GENERA = []; // Populated dynamically from genera table
-  window.SEEDLING_GENERA = SEEDLING_GENERA;
+  psExport('SEEDLING_GENERA', SEEDLING_GENERA);
 
   // Per-genus data store: { genusSlug: [{ fullName, entry, meta }, ...] }
   var _genusItems = {};
-  window._genusItems = _genusItems;
+  psExport('_genusItems', _genusItems);
 
   // Store cultivar data without creating DOM elements
   function addCultivarRow(fullName, entry, meta) {
@@ -2107,7 +2111,7 @@ if (false) {
   }
 
   // Build HTML for a single cultivar row (pure function, no DOM mutation)
-  window.buildRowHtml = buildRowHtml;
+  psExport('buildRowHtml', buildRowHtml);
   function buildRowHtml(fullName, entry, meta) {
     var isSeedling = meta.type === 'seedling';
     var seedlingAccess = isSeedling ? canAccessSeedling(entry) : 'full';

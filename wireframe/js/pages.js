@@ -493,12 +493,12 @@ function observeLazyImages(container) {
     }
   }
 }
-window.observeLazyImages = observeLazyImages;
+psExport('observeLazyImages', observeLazyImages);
 
 // ---- Load cultivar thumbnails from gallery images ----
 // Cached thumbnail map: cultivar_name -> storage_path (used by buildRowHtml)
 var _thumbMap = {};
-window._thumbMap = _thumbMap;
+psExport('_thumbMap', _thumbMap);
 
 var _thumbMapLoaded = false;
 function loadCultivarThumbnails() {
@@ -531,7 +531,7 @@ function loadCultivarThumbnails() {
       });
     });
 }
-window.loadCultivarThumbnails = loadCultivarThumbnails;
+psExport('loadCultivarThumbnails', loadCultivarThumbnails);
 
 // ---- Favorites (Supabase for logged-in users only) ----
 var FAV_KEY = 'plants-story-favorites';
@@ -603,7 +603,7 @@ function syncFavoritesFromServer() {
     }
   });
 }
-window.syncFavoritesFromServer = syncFavoritesFromServer;
+psExport('syncFavoritesFromServer', syncFavoritesFromServer);
 
 function updateFavBtn(name) {
   var btn = document.getElementById('fav-btn');
@@ -834,7 +834,7 @@ function getBadgeInfo(type, name) {
   var txt = type === 'species' ? getSpeciesBadgeText(name) : (type === 'hybrid' ? 'Hybrid' : (type === 'seedling' ? 'Seedling' : 'Clone'));
   return { cls: cls, txt: txt };
 }
-window.getBadgeInfo = getBadgeInfo;
+psExport('getBadgeInfo', getBadgeInfo);
 
 function getTrustClass(pct) {
   return pct >= 70 ? 'trust--high' : (pct >= 40 ? 'trust--mid' : 'trust--low');
@@ -1392,7 +1392,7 @@ function filterGenusRows(genusEl, query) {
 // ---- Data-driven pagination: renders only current page from memory ----
 var ITEMS_PER_PAGE = 10;
 var _dataFullyLoaded = false; // true after full Supabase fetch completes
-window._dataFullyLoaded = false;
+psExport('_dataFullyLoaded', false);
 var _paginationCursors = {}; // genus-slug -> { page -> lastCultivarName }
 
 // Convert RPC row to _genusItems format

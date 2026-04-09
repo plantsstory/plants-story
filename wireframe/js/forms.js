@@ -2135,7 +2135,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       img.src = URL.createObjectURL(file);
     });
   }
-  window.compressImage = compressImage; // Expose for parent photo uploads
+  psExport('compressImage', compressImage); // Expose for parent photo uploads
 
   function validateFile(file) {
     if (ALLOWED_TYPES.indexOf(file.type) === -1) {
@@ -2221,7 +2221,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     });
   }
 
-  window.uploadGalleryImage = uploadToSupabase;
+  psExport('uploadGalleryImage', uploadToSupabase);
 
   function fetchImagesFromSupabase(cultivarName) {
     var sb = getSupabase();
