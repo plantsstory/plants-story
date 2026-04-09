@@ -317,3 +317,32 @@ button:focus-visible,
   justify-content: center;
   background: var(--color-lighter);
 }
+
+/* PWA install banner */
+.pwa-install-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-white);
+  border-top: 1px solid var(--color-light);
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+.pwa-install-banner--visible { transform: translateY(0); }
+.pwa-install-banner__text { flex: 1; font-size: var(--font-size-sm); }
+.pwa-install-banner__close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--color-gray);
+  padding: 0 4px;
+  line-height: 1;
+}
