@@ -2224,16 +2224,14 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     if (!sb) return Promise.reject('No Supabase');
     var prev = getVote(imageId);
     if (prev === voteType) return Promise.resolve(); // already voted same
-    // Build update: increment new vote, decrement old if switching
-    return sb.from('cultivar_images').select('real_votes, fake_votes').eq('id', imageId).single().then(function(res) {
+    // Single atomic RPC call (replaces previous N+1 SELECT + UPDATE pattern)
+    return sb.rpc('vote_on_image', {
+      p_image_id: imageId,
+      p_vote_type: voteType,
+      p_prev_vote: prev || null
+    }).then(function(res) {
       if (res.error) throw res.error;
-      var updates = {};
-      if (voteType === 'real') updates.real_votes = (res.data.real_votes || 0) + 1;
-      if (voteType === 'fake') updates.fake_votes = (res.data.fake_votes || 0) + 1;
-      if (prev === 'real') updates.real_votes = Math.max(0, (res.data.real_votes || 0) - 1);
-      if (prev === 'fake') updates.fake_votes = Math.max(0, (res.data.fake_votes || 0) - 1);
-      return sb.from('cultivar_images').update(updates).eq('id', imageId);
-    }).then(function() {
+      if (res.data && !res.data.ok) throw new Error(res.data.error);
       markVoted(imageId, voteType);
     });
   }
@@ -2391,6 +2389,40 @@ updateCultivarDetail = function(cultivarName, rowEl) {
   document.getElementById('gallery-next').addEventListener('click', function() {
     galleryCarouselIdx++;
     updateGalleryCarousel();
+  });
+
+  // Touch swipe support for gallery carousel
+  (function() {
+    var viewport = document.querySelector('#gallery-carousel .gallery-carousel__viewport');
+    if (!viewport) return;
+    var startX = 0, startY = 0, tracking = false;
+    viewport.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 1) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        tracking = true;
+      }
+    }, { passive: true });
+    viewport.addEventListener('touchend', function(e) {
+      if (!tracking) return;
+      tracking = false;
+      var endX = e.changedTouches[0].clientX;
+      var endY = e.changedTouches[0].clientY;
+      var dx = endX - startX;
+      var dy = endY - startY;
+      // Only trigger if horizontal swipe > 50px and more horizontal than vertical
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+        if (dx < 0) { galleryCarouselIdx++; } // swipe left = next
+        else { galleryCarouselIdx--; } // swipe right = prev
+        updateGalleryCarousel();
+      }
+    }, { passive: true });
+  })();
+
+  // Keyboard navigation for gallery carousel
+  document.getElementById('gallery-carousel').addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft') { galleryCarouselIdx--; updateGalleryCarousel(); e.preventDefault(); }
+    if (e.key === 'ArrowRight') { galleryCarouselIdx++; updateGalleryCarousel(); e.preventDefault(); }
   });
 
   // --- Gallery Upload (cultivar detail page) ---
