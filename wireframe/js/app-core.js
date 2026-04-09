@@ -1476,6 +1476,16 @@ if (false) {
       updateLoginUI();
       checkSubscription();
       if (session && typeof syncFavoritesFromServer === 'function') syncFavoritesFromServer();
+      // Update profile logout button visibility if profile page is showing
+      var profilePage = document.getElementById('page-profile');
+      if (profilePage && profilePage.style.display !== 'none') {
+        var profileUid = profilePage.getAttribute('data-profile-uid');
+        var isOwn = window._currentUser && profileUid === window._currentUser.id;
+        var profLogoutBtn = document.getElementById('profile-logout-btn');
+        if (profLogoutBtn) profLogoutBtn.style.display = isOwn ? '' : 'none';
+        var editLink = document.getElementById('profile-edit-link');
+        if (editLink) editLink.style.display = isOwn ? '' : 'none';
+      }
       if (event === 'SIGNED_IN' && window.location.search.indexOf('code=') !== -1) {
         var returnPath = localStorage.getItem('login_return_path');
         localStorage.removeItem('login_return_path');

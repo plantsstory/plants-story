@@ -432,6 +432,12 @@
   color: var(--color-dark);
 }
 
+.profile-logout-btn {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+}
+
 @media (max-width: 480px) {
   .profile-header {
     flex-direction: column;

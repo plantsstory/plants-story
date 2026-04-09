@@ -130,10 +130,19 @@
         }
       });
 
-    // Show edit link only for own profile
+    // Store profile userId on the page element for auth state change detection
+    var profilePageEl = document.getElementById('page-profile');
+    if (profilePageEl) profilePageEl.setAttribute('data-profile-uid', userId);
+
+    // Show edit link and logout button only for own profile
+    var isOwn = window._currentUser && window._currentUser.id === userId;
     var editLink = document.getElementById('profile-edit-link');
     if (editLink) {
-      editLink.style.display = (window._currentUser && window._currentUser.id === userId) ? '' : 'none';
+      editLink.style.display = isOwn ? '' : 'none';
+    }
+    var logoutBtn = document.getElementById('profile-logout-btn');
+    if (logoutBtn) {
+      logoutBtn.style.display = isOwn ? '' : 'none';
     }
 
     // Fetch subscription status for the profile
@@ -428,6 +437,22 @@
         saveBtn.textContent = '保存';
         saveBtn.disabled = false;
       });
+    });
+  }
+
+  // Logout button on profile view page
+  var profileLogoutBtn = document.getElementById('profile-logout-btn');
+  if (profileLogoutBtn) {
+    profileLogoutBtn.addEventListener('click', function() {
+      var sb = window._supabaseClient;
+      if (sb) {
+        sb.auth.signOut().then(function() {
+          window._currentUser = null;
+          if (typeof updateLoginUI === 'function') updateLoginUI();
+          navigateTo('top');
+          showToast('ログアウトしました');
+        });
+      }
     });
   }
 
