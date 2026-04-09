@@ -316,5 +316,4 @@ button:focus-visible,
   align-items: center;
   justify-content: center;
   background: var(--color-lighter);
-  aspect-ratio: 260 / 160;
 }

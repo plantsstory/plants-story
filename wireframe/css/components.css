@@ -2526,7 +2526,7 @@ dialog.parent-photo-dialog .dialog-label {
 }
 .skeleton-card__thumb {
   width: 100%;
-  aspect-ratio: 4/3;
+  height: 160px;
   border-radius: var(--radius-sm);
   margin-bottom: var(--space-sm);
 }
