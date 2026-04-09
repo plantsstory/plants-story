@@ -754,7 +754,7 @@ function renderFavoritesPage() {
       var trustPct = hasOrigins ? cData.origins.reduce(function(max, o) { return Math.max(max, o.trust || 0); }, 0) : 0;
       var trustClass = getTrustClass(trustPct);
 
-      html += '<div class="card card--clickable" data-nav="cultivar" data-key="' + name.replace(/"/g, '&quot;') + '" style="position:relative">';
+      html += '<div class="card card--clickable" data-nav="cultivar" data-key="' + escHtml(name) + '" style="position:relative">';
 
       // Thumbnail or plant icon
       if (thumbMap[displayName] && baseUrl) {
@@ -767,15 +767,15 @@ function renderFavoritesPage() {
       }
 
       html += '<div class="p-sm">';
-      html += '<div class="font-bold">' + displayName + '</div>';
-      html += '<div class="text-sm text-muted">' + genus + ' <span class="badge ' + bi.cls + ' badge--inline">' + bi.txt + '</span></div>';
+      html += '<div class="font-bold">' + escHtml(displayName) + '</div>';
+      html += '<div class="text-sm text-muted">' + escHtml(genus) + ' <span class="badge ' + bi.cls + ' badge--inline">' + bi.txt + '</span></div>';
       if (hasOrigins) {
         html += '<div class="trust mt-sm"><div class="trust__bar"><div class="trust__fill ' + trustClass + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + trustPct + '%</span></div>';
       }
       html += '</div>';
 
       // Remove button
-      html += '<button class="fav-remove-btn" data-fav-remove="' + name.replace(/"/g, '&quot;') + '">&#x2605;</button>';
+      html += '<button class="fav-remove-btn" data-fav-remove="' + escHtml(name) + '">&#x2605;</button>';
 
       html += '</div>';
     });
@@ -1179,7 +1179,14 @@ function updateCultivarDetail(cultivarName, rowEl) {
     image: ogImageUrl,
     noindex: detectedType === 'seedling'
   });
-  updateCultivarJsonLd(displayName, genusName, detectedType, metaDesc);
+  // Pass extra structured data for rich JSON-LD
+  var jsonLdExtra = { image: ogImageUrl };
+  if (cData && cData.origins && cData.origins.length > 0) {
+    var maxTrust = cData.origins.reduce(function(m, o) { return Math.max(m, o.trust || 0); }, 0);
+    jsonLdExtra.trustPct = maxTrust;
+    jsonLdExtra.voteCount = cData.origins.length;
+  }
+  updateCultivarJsonLd(displayName, genusName, detectedType, metaDesc, jsonLdExtra);
   trackEvent('view_cultivar', { cultivar_name: displayName, genus: genusName, type: detectedType });
 
   // Update favorite button

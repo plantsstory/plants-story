@@ -124,6 +124,7 @@
   "upload_error_max": { "jp": "最大10枚までアップロードできます", "en": "Maximum 10 images can be uploaded" },
   "ai_pending_origin": { "jp": "AIによる由来情報の生成待ちです", "en": "Awaiting AI-generated origin information" },
   "ai_pending_badge": { "jp": "AI生成待ち", "en": "AI Pending" },
+  "subscribe_to_view": { "jp": "有料プランで閲覧", "en": "Subscribe to view" },
   "terms_title": { "jp": "利用規約", "en": "Terms of Service" },
   "terms_updated": { "jp": "最終更新日: 2026年3月13日", "en": "Last Updated: March 13, 2026" },
   "terms_1_title": { "jp": "第1条 適用範囲", "en": "Article 1: Scope" },

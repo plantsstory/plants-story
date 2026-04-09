@@ -105,6 +105,23 @@ function escHtml(str) {
 }
 window.escHtml = escHtml;
 
+// Safe DOM query by data-key attribute (avoids CSS selector injection)
+function findByDataKey(selector, key) {
+  var els = document.querySelectorAll(selector);
+  for (var i = 0; i < els.length; i++) {
+    if (els[i].getAttribute('data-key') === key) return els[i];
+  }
+  return null;
+}
+window.findByDataKey = findByDataKey;
+
+// Validate redirect path (prevents open redirect)
+function isValidInternalPath(path) {
+  if (!path) return false;
+  // Must start with / and not contain protocol or double slashes
+  return /^\/[\w\-./%;@~+,]*$/.test(path) && path.indexOf('//') === -1;
+}
+
 // Skeleton loading UI helpers
 function skeletonCards(count) {
   var h = '';
@@ -186,7 +203,7 @@ window.trackEvent = trackEvent;
 // localStorage version management — clears stale cache on version bump
 (function() {
   var LS_VERSION_KEY = 'plants-story-ls-version';
-  var LS_VERSION = '2026040901'; // Bump this on deploy to invalidate cached data
+  var LS_VERSION = '2026041001'; // Bump this on deploy to invalidate cached data
   var CACHE_KEYS = [
     'plants-story-user-cultivars',
     'plants-story-gallery-images',
@@ -244,14 +261,16 @@ window.guardSubmit = guardSubmit;
   // Check URL parameter first (more reliable on hard refresh), then sessionStorage
   var params = new URLSearchParams(location.search);
   var redirectPath = params.get('spa_path') || sessionStorage.getItem('spa_redirect_path');
-  if (redirectPath) {
+  if (redirectPath && isValidInternalPath(redirectPath)) {
     sessionStorage.removeItem('spa_redirect_path');
     history.replaceState(null, '', redirectPath);
+  } else {
+    sessionStorage.removeItem('spa_redirect_path');
   }
   // Legacy hash URL migration: redirect #/path to clean path
   if (location.hash && location.hash.indexOf('#/') === 0) {
     var hashRoute = location.hash.replace(/^#\/?/, '');
-    if (hashRoute) {
+    if (hashRoute && /^[\w\-./%;@~+,]*$/.test(hashRoute) && hashRoute.indexOf('//') === -1) {
       var legacyBase = location.hostname !== 'plantsstory.github.io' ? '/' : '/plants-story/';
       history.replaceState(null, '', legacyBase + hashRoute);
     }
@@ -303,7 +322,7 @@ function updateMeta(opts) {
   robots.setAttribute('content', opts.noindex ? 'noindex, follow' : 'index, follow');
 }
 
-function updateCultivarJsonLd(name, genus, type, description) {
+function updateCultivarJsonLd(name, genus, type, description, extraData) {
   var el = document.getElementById('cultivar-jsonld');
   if (!el) {
     el = document.createElement('script');
@@ -311,13 +330,42 @@ function updateCultivarJsonLd(name, genus, type, description) {
     el.id = 'cultivar-jsonld';
     document.head.appendChild(el);
   }
+  extraData = extraData || {};
+  var cultivarUrl = _siteBase + genus.toLowerCase() + '/' + encodeURIComponent(name.replace(genus + ' ', ''));
   var data = {
     '@context': 'https://schema.org',
     '@type': 'Thing',
     'name': name,
     'description': description || (name + ' - ' + genus + 'の品種情報'),
-    'url': _siteBase + genus.toLowerCase() + '/' + encodeURIComponent(name.replace(genus + ' ', ''))
+    'url': cultivarUrl,
+    'additionalType': 'https://en.wikipedia.org/wiki/Cultivar',
+    'isPartOf': {
+      '@type': 'CollectionPage',
+      'name': genus + ' - 品種一覧',
+      'url': _siteBase + genus.toLowerCase()
+    }
   };
+  // Add image if available
+  if (extraData.image) {
+    data['image'] = extraData.image;
+  }
+  // Add aggregate rating from trust score
+  if (extraData.trustPct && extraData.voteCount) {
+    data['aggregateRating'] = {
+      '@type': 'AggregateRating',
+      'ratingValue': extraData.trustPct,
+      'bestRating': 100,
+      'worstRating': 0,
+      'ratingCount': extraData.voteCount
+    };
+  }
+  // Add classification info
+  if (type) {
+    data['additionalProperty'] = [
+      { '@type': 'PropertyValue', 'name': 'genus', 'value': genus },
+      { '@type': 'PropertyValue', 'name': 'cultivarType', 'value': type }
+    ];
+  }
   el.textContent = JSON.stringify(data);
   // Breadcrumb: Home > Genus > Cultivar
   updateBreadcrumbJsonLd([
@@ -387,6 +435,22 @@ var _isPopstate = false; // Flag for back/forward navigation
 // Page cleanup registry — functions run when leaving a page
 var _pageCleanups = {};
 window._pageCleanups = _pageCleanups;
+
+// Managed event listener registry — automatically removed on page navigation
+var _managedListeners = [];
+function addManagedListener(el, event, handler, options) {
+  if (!el) return;
+  el.addEventListener(event, handler, options);
+  _managedListeners.push({ el: el, event: event, handler: handler, options: options });
+}
+function cleanupManagedListeners() {
+  _managedListeners.forEach(function(l) {
+    try { l.el.removeEventListener(l.event, l.handler, l.options); } catch(e) {}
+  });
+  _managedListeners = [];
+}
+window.addManagedListener = addManagedListener;
+
 // Current AbortController for in-flight page requests
 window._pageAbort = null;
 function getPageAbort() {
@@ -402,6 +466,8 @@ function showPage(pageId) {
   if (_currentPageId && _pageCleanups[_currentPageId]) {
     try { _pageCleanups[_currentPageId](); } catch(e) { /* ignore */ }
   }
+  // Remove managed event listeners from previous page
+  cleanupManagedListeners();
   // Abort any in-flight page requests
   if (window._pageAbort) { window._pageAbort.abort(); window._pageAbort = null; }
   _currentPageId = pageId;
@@ -528,7 +594,7 @@ function navigateTo(page, options, pushHistory) {
   if (page === 'cultivar' && options.cultivar && !options._skipUpdate) {
     // Find the cultivar row to pass badge info (used by popstate)
     var cultivarKey = options.cultivar;
-    var rowEl = document.querySelector('.cultivar-row__name[data-key="' + cultivarKey.replace(/"/g, '\\"') + '"]');
+    var rowEl = findByDataKey('.cultivar-row__name', cultivarKey);
     var parentRow = rowEl ? rowEl.closest('[data-nav]') : null;
     updateCultivarDetail(cultivarKey, parentRow);
   }
@@ -657,6 +723,10 @@ window.addEventListener('popstate', function(e) {
   var state = e.state || parseRoute();
   _isPopstate = true;
   navigateTo(state.page, state, false);
+  // Track page view on popstate (back/forward navigation)
+  if (typeof gtag === 'function') {
+    gtag('event', 'page_view', { page_location: location.href, page_title: document.title });
+  }
   // Restore scroll position if saved
   if (state._scrollY !== undefined) {
     setTimeout(function() { window.scrollTo(0, state._scrollY); }, 50);
@@ -677,13 +747,15 @@ function handleInitialRoute() {
 if (window._generaLoaded) {
   window._generaLoaded.then(handleInitialRoute);
 } else {
-  // Fallback: genera may not be loaded yet, defer
+  // Fallback: genera may not be loaded yet, defer with increasing interval + timeout
   var _checkGenera = setInterval(function() {
     if (window._generaLoaded) {
       clearInterval(_checkGenera);
       window._generaLoaded.then(handleInitialRoute);
     }
-  }, 50);
+  }, 100);
+  // Safety timeout: stop polling after 10 seconds
+  setTimeout(function() { clearInterval(_checkGenera); }, 10000);
 }
 
 // ---- Cultivar origin data ----
@@ -1251,6 +1323,7 @@ if (false) {
     window._generaData.forEach(function(g, idx) {
       var display = idx === 0 ? '' : ' style="display:none;"';
       html += '<div class="genus-content" id="genus-' + g.slug + '"' + display + '>';
+      html += '<nav class="breadcrumb mb-sm" aria-label="パンくずリスト"><a href="' + _basePath + '" data-nav="top">Home</a><span class="breadcrumb__sep">/</span><span>' + escHtml(g.name) + '</span></nav>';
       html += '<h1 class="section-title">' + g.name + '</h1>';
       html += '<div class="genus-stats" id="genus-stats-' + g.slug + '" style="display:none;">';
       html += '<div class="genus-stats__chips"></div>';
@@ -1988,6 +2061,14 @@ if (false) {
   window.addEventListener('beforeunload', function() {
     if (_aiPollTimer) { clearInterval(_aiPollTimer); _aiPollTimer = null; }
   });
+  // Pause AI polling when tab is hidden, resume when visible
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      if (_aiPollTimer) { clearInterval(_aiPollTimer); _aiPollTimer = null; }
+    } else if (Object.keys(_aiPollIds).length > 0 && !_aiPollTimer) {
+      _aiPollTimer = setInterval(_aiPollTick, 5000);
+    }
+  });
 
   // Which genera have seedling tabs (exposed globally for contribute form)
   var SEEDLING_GENERA = []; // Populated dynamically from genera table
@@ -2198,21 +2279,21 @@ if (false) {
         var type = item.type || '';
         var bi = getBadgeInfo(type, name);
 
-        html += '<div class="card card--clickable" data-nav="cultivar" data-key="' + name.replace(/"/g, '&quot;') + '">';
+        html += '<div class="card card--clickable" data-nav="cultivar" data-key="' + escHtml(name) + '">';
 
         // Thumbnail or fallback icon
         if (thumbMap[displayName] && baseUrl) {
           var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
           html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '" width="260" height="160" decoding="async"></div>';
         } else {
-          html += '<div class="recent-card__img">';
+          html += '<div class="card-img-container recent-card__placeholder">';
           html += '<svg viewBox="0 0 80 60" width="80" height="60"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
           html += '</div>';
         }
 
         html += '<div class="p-sm">';
-        html += '<div class="font-bold text-sm">' + displayName + '</div>';
-        html += '<div class="text-xs text-muted">' + genus + ' <span class="badge ' + bi.cls + ' badge--inline">' + bi.txt + '</span></div>';
+        html += '<div class="font-bold text-sm">' + escHtml(displayName) + '</div>';
+        html += '<div class="text-xs text-muted">' + escHtml(genus) + ' <span class="badge ' + bi.cls + ' badge--inline">' + bi.txt + '</span></div>';
         html += '</div>';
         html += '</div>';
       });
@@ -2260,20 +2341,23 @@ if (false) {
             var name = item.cultivar_name;
             var displayName = name.replace(' [Seedling]', '');
             var genus = displayName.split(' ')[0];
-            var shouldBlur = !isSubscribed && idx >= 2; // Show first 2 clearly, blur the rest
+            var shouldBlur = !isSubscribed; // Non-subscribers see all seedlings blurred
 
-            html += '<div class="card' + (shouldBlur ? '' : ' card--clickable') + '"';
-            if (!shouldBlur) html += ' data-nav="cultivar" data-key="' + name.replace(/"/g, '&quot;') + '"';
-            html += ' style="' + (shouldBlur ? 'filter:blur(4px);pointer-events:none;user-select:none;' : '') + '">';
+            html += '<div class="card' + (shouldBlur ? ' card--seedling-locked' : ' card--clickable') + '"';
+            if (!shouldBlur) html += ' data-nav="cultivar" data-key="' + escHtml(name) + '"';
+            html += '>';
 
-            // Thumbnail
+            // Thumbnail (same card-img-container as recently updated for size consistency)
             if (thumbMap[displayName] && baseUrl) {
               var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
-              html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '" width="260" height="160" decoding="async"></div>';
+              html += '<div class="card-img-container' + (shouldBlur ? ' seedling-mosaic' : '') + '"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '" width="260" height="160" decoding="async"></div>';
             } else {
-              html += '<div class="recent-card__img">';
+              html += '<div class="card-img-container recent-card__placeholder' + (shouldBlur ? ' seedling-mosaic' : '') + '">';
               html += '<svg viewBox="0 0 80 60" width="80" height="60"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
               html += '</div>';
+            }
+            if (shouldBlur) {
+              html += '<div class="seedling-lock-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><span>' + t('subscribe_to_view') + '</span></div>';
             }
 
             html += '<div class="p-sm">';

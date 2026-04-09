@@ -16,8 +16,11 @@
   letter-spacing: 0.04em;
   color: var(--color-white);
   line-height: 1.3;
-  outline: none;
   -webkit-tap-highlight-color: transparent;
+}
+.hero__title:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .hero__title-sub {
@@ -269,7 +272,8 @@
 
 .contact-form .form-input:focus,
 .contact-form .form-textarea:focus {
-  outline: none;
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
   border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(27, 67, 50, 0.08);
 }

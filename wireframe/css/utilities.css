@@ -272,3 +272,49 @@ button:focus-visible,
   border-color: var(--color-danger) !important;
   box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.15);
 }
+
+/* ========================================
+   SEEDLING MOSAIC / LOCK OVERLAY
+   ======================================== */
+.seedling-mosaic {
+  filter: blur(10px) saturate(0.5);
+  -webkit-filter: blur(10px) saturate(0.5);
+  pointer-events: none;
+  user-select: none;
+}
+.card--seedling-locked {
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+.seedling-lock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(27, 67, 50, 0.35);
+  color: #fff;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  z-index: 2;
+  backdrop-filter: blur(2px);
+}
+.seedling-lock-overlay svg {
+  opacity: 0.9;
+}
+
+/* Card placeholder (no-image) same height as card-img-container */
+.recent-card__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-lighter);
+  aspect-ratio: 260 / 160;
+}

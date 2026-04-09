@@ -1477,7 +1477,7 @@ document.addEventListener('click', function(e) {
             delete cultivarData[editCultivarKey];
             existingData._type = type;
             // Update the cultivar row in the genus list
-            var oldRow = document.querySelector('.cultivar-row__name[data-key="' + editCultivarKey.replace(/"/g, '\\"') + '"]');
+            var oldRow = findByDataKey('.cultivar-row__name', editCultivarKey);
             if (oldRow) {
               oldRow.setAttribute('data-key', fullName);
               var displayName = fullName.replace(' [Seedling]', '');
