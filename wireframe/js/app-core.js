@@ -508,7 +508,7 @@ function showGenus(genusName) {
 
 // ---- Path-based routing (History API) ----
 // Known simple pages (no sub-parameters)
-var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'favorites', 'mypost', 'guide'];
+var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'favorites', 'mypost', 'guide'];
 // Known genus names for URL mapping
 var knownGenera = []; // Populated dynamically from genera table
 // Base path: '/' on custom domain, '/plants-story/' on GitHub Pages
@@ -643,6 +643,7 @@ function navigateTo(page, options, pushHistory) {
       terms: '利用規約 - ' + _defaultTitle,
       privacy: 'プライバシー - ' + _defaultTitle,
       guide: '使い方ガイド - ' + _defaultTitle,
+      tokushoho: '特定商取引法に基づく表記 - ' + _defaultTitle,
       contact: 'お問い合わせ - ' + _defaultTitle,
       search: '検索結果 - ' + _defaultTitle,
       mypost: '投稿履歴 - ' + _defaultTitle,
@@ -656,6 +657,7 @@ function navigateTo(page, options, pushHistory) {
       terms: 'ひなたぼっこぷらんつ（Plants Story）の利用規約',
       privacy: 'ひなたぼっこぷらんつ（Plants Story）のプライバシーポリシー',
       guide: '品種情報の閲覧・投稿・編集方法と、原種/ハイブリッド/クローン/実生の違いを解説',
+      tokushoho: 'ひなたぼっこぷらんつ（Plants Story）の特定商取引法に基づく表記',
       contact: 'ひなたぼっこぷらんつ（Plants Story）へのお問い合わせ',
       search: 'アロイド植物の品種名で検索 - Anthurium, Monstera, Philodendronなど',
       mypost: 'あなたが投稿した品種の履歴'
