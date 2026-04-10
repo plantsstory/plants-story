@@ -72,7 +72,7 @@
 /* Section titles with heading font */
 .section-title {
   font-family: var(--font-heading);
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 
 @media (min-width: 768px) {
@@ -136,7 +136,7 @@
 
 .legal-page h1 {
   font-family: var(--font-heading);
-  color: var(--color-primary);
+  color: var(--color-dark);
   margin-bottom: var(--space-sm);
 }
 
@@ -151,7 +151,7 @@
   font-weight: 700;
   margin-top: var(--space-xl);
   margin-bottom: var(--space-sm);
-  color: var(--color-primary);
+  color: var(--color-dark);
   border-left: 3px solid var(--color-accent);
   padding-left: var(--space-sm);
 }
@@ -205,7 +205,7 @@
 .tokushoho-table th {
   white-space: nowrap;
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--color-dark);
   width: 130px;
   font-size: var(--font-size-sm);
 }
@@ -322,7 +322,7 @@
 
 .contact-link__icon--email {
   background: rgba(27, 67, 50, 0.08);
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 
 .contact-link__icon--instagram {
@@ -395,7 +395,7 @@
 .profile-name {
   font-family: var(--font-heading);
   font-size: var(--font-size-xl);
-  color: var(--color-primary);
+  color: var(--color-dark);
   margin: 0;
 }
 

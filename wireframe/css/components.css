@@ -267,7 +267,7 @@
 
 .btn--secondary {
   background: var(--color-white);
-  color: var(--color-primary);
+  color: var(--color-dark);
   border-color: var(--color-light);
 }
 
@@ -360,7 +360,7 @@
   font-family: var(--font-heading);
   font-size: 1.2rem;
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--color-dark);
   margin-bottom: var(--space-xs);
 }
 
@@ -497,7 +497,7 @@
 .trust__label {
   font-size: var(--font-size-sm);
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--color-dark);
   min-width: 36px;
 }
 
@@ -528,7 +528,7 @@
 
 .badge--species {
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-dark);
   background: rgba(27, 67, 50, 0.05);
 }
 
@@ -631,7 +631,7 @@
 }
 .genus-tab:hover {
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 .genus-tab.active {
   color: var(--color-white);
@@ -735,7 +735,7 @@
 .vote-btn:hover {
   border-color: var(--color-primary);
   background: var(--color-lighter);
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 
 .vote-btn--down:hover {
@@ -747,7 +747,7 @@
 .vote-btn--active {
   background: #e8f5e9;
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 
 .vote-btn--active-down {
@@ -813,7 +813,7 @@
   text-decoration: underline;
   cursor: pointer;
   font-weight: 600;
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 
 .formula-parent:hover {
@@ -823,7 +823,7 @@
 .formula-operator {
   font-size: var(--font-size-xl);
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 
 /* ========================================
@@ -848,7 +848,7 @@
   font-family: var(--font-heading);
   font-size: var(--font-size-lg);
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 
 .origin-card__body {
@@ -876,7 +876,7 @@
 }
 
 .origin-card__source-item a:hover {
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 
 .origin-card__footer {
@@ -988,14 +988,14 @@
 }
 
 .gallery__empty-icon {
-  color: var(--color-accent);
+  color: var(--color-dark);
   margin-bottom: 6px;
 }
 
 .gallery__empty-text {
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 
 .gallery__empty-accent {
@@ -1221,11 +1221,11 @@
 }
 
 .tab:hover {
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 
 .tab.active {
-  color: var(--color-primary);
+  color: var(--color-dark);
   border-bottom-color: var(--color-primary);
 }
 
@@ -1322,7 +1322,7 @@
 }
 
 .breadcrumb a:hover {
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 
 .breadcrumb__sep {
@@ -1354,7 +1354,7 @@
 
 .page-link:hover {
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-dark);
   text-decoration: none;
 }
 
@@ -1391,7 +1391,7 @@
 
 .chip:hover {
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 
 .chip.active {
@@ -1430,7 +1430,7 @@
 .type-hint:hover,
 .type-hint.active {
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 .type-hint__popup {
   position: absolute;
@@ -1756,7 +1756,7 @@
 .step__content h3 {
   font-size: var(--font-size-base);
   margin-bottom: var(--space-xs);
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 
 .step__content p {
@@ -1827,7 +1827,7 @@
 
 .upload-area:hover {
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-dark);
 }
 
 .upload-area__icon {
@@ -2079,7 +2079,7 @@
   top: 4px;
   right: 8px;
   font-size: 0.7rem;
-  color: var(--color-primary);
+  color: var(--color-dark);
   animation: ai-dots 1.5s steps(3, end) infinite;
   background: rgba(255,255,255,0.9);
   padding: 2px 8px;
@@ -2212,7 +2212,7 @@ dialog.parent-photo-dialog .dialog-label {
 }
 .structured-citation a {
   font-size: 0.85rem;
-  color: var(--color-primary);
+  color: var(--color-dark);
   word-break: break-all;
 }
 
