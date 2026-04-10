@@ -2,7 +2,7 @@
    PAGE: TOP / LANDING
    ======================================== */
 .hero {
-  background: linear-gradient(135deg, #071A12 0%, #0B2B1E 60%, #143325 100%);
+  background: linear-gradient(135deg, #111111 0%, #1A1A1A 60%, #222222 100%);
   padding: var(--space-3xl) 0 var(--space-2xl);
   position: relative;
   overflow: hidden;
@@ -274,7 +274,7 @@
   outline: 2px solid var(--color-accent);
   outline-offset: -2px;
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(27, 67, 50, 0.08);
+  box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.1);
 }
 
 .contact-form .form-textarea {
@@ -320,7 +320,7 @@
 }
 
 .contact-link__icon--email {
-  background: rgba(27, 67, 50, 0.08);
+  background: rgba(82, 183, 136, 0.1);
   color: var(--color-dark);
 }
 

@@ -9,11 +9,11 @@
   --color-black: #f0f0f0;
   --color-dark: #E8ECE3;
   --color-mid: #B0BAA8;
-  --color-gray: #A8B8A0;
-  --color-light: #2E3830;
-  --color-lighter: #1E2922;
-  --color-bg: #141E18;
-  --color-white: #1A2620;
+  --color-gray: #999999;
+  --color-light: #505050;
+  --color-lighter: #303030;
+  --color-bg: #1A1A1A;
+  --color-white: #383838;
 
   /* Semantic Colors */
   --color-danger: #F47174;

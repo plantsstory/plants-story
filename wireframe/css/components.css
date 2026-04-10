@@ -2591,7 +2591,7 @@ dialog.parent-photo-dialog .dialog-label {
    DARK THEME OVERRIDES (Forest Night default)
    ======================================== */
 /* Header mobile menu */
-.mobile-nav { background: #0B2B1E; }
+.mobile-nav { background: #222222; }
 
 /* Cards */
 .card { border-color: var(--color-light); }
@@ -2662,22 +2662,22 @@ dialog.parent-photo-dialog .dialog-label {
 }
 
 /* Toast */
-.toast { background: #1E2922; color: var(--color-dark); border: 1px solid var(--color-light); }
+.toast { background: #2A2A2A; color: var(--color-dark); border: 1px solid var(--color-light); }
 .toast--error { background: #2A1518; border-color: #5A2328; }
 
 /* Pagination */
 .page-link { color: var(--color-gray); }
-.page-link.active { background: var(--color-accent); color: #0B2B1E; }
+.page-link.active { background: var(--color-accent); color: #1A1A1A; }
 
 /* Scrollbar (webkit) */
 ::-webkit-scrollbar { background: var(--color-bg); }
 ::-webkit-scrollbar-thumb { background: var(--color-light); border-radius: 4px; }
 
 /* About mission card */
-.about-mission { background: linear-gradient(135deg, #071A12, #0B2B1E); }
+.about-mission { background: linear-gradient(135deg, #1A1A1A, #2A2A2A); }
 
 /* Login benefits card */
-.login-benefits-bg { background: linear-gradient(135deg, #1A2E22, #1E3628); border-color: var(--color-light); }
+.login-benefits-bg { background: linear-gradient(135deg, #2A2A2A, #333333); border-color: var(--color-light); }
 
 /* Paywall overlay */
 .paywall-overlay { background: rgba(10, 20, 14, 0.95); }
