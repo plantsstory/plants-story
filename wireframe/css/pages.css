@@ -236,7 +236,7 @@
 /* About page mission card */
 .about-mission {
   background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
-  color: var(--color-white);
+  color: #fff;
   border-radius: var(--radius-lg);
   padding: var(--space-xl) var(--space-lg);
   margin-bottom: var(--space-xl);

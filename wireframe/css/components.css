@@ -19,7 +19,7 @@
   font-family: var(--font-heading);
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--color-white);
+  color: var(--color-dark);
   letter-spacing: 0.02em;
   cursor: pointer;
   display: flex;
@@ -63,7 +63,7 @@
 
 .header__nav a:hover,
 .header__nav a.active {
-  color: var(--color-white);
+  color: #fff;
   text-decoration: none;
 }
 
@@ -108,7 +108,7 @@
 
 .header__lang:hover {
   border-color: rgba(255, 255, 255, 0.6);
-  color: var(--color-white);
+  color: #fff;
 }
 
 .header__user-icon {
@@ -116,7 +116,7 @@
   height: 32px;
   border-radius: var(--radius-full);
   background: var(--color-primary-light);
-  color: var(--color-white);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -226,7 +226,7 @@
 }
 
 .footer__links a:hover {
-  color: var(--color-white);
+  color: #fff;
   text-decoration: none;
 }
 
@@ -254,7 +254,7 @@
 
 .btn--primary {
   background: var(--color-primary);
-  color: var(--color-white);
+  color: #fff;
   border-color: var(--color-primary);
 }
 
@@ -534,7 +534,7 @@
 
 .badge--hybrid {
   background: var(--color-primary);
-  color: var(--color-white);
+  color: #fff;
   border-color: var(--color-primary);
 }
 
@@ -634,7 +634,7 @@
   color: var(--color-dark);
 }
 .genus-tab.active {
-  color: var(--color-white);
+  color: #fff;
   background: var(--color-primary);
   border-color: var(--color-primary);
 }
@@ -649,7 +649,7 @@
 .genus-tab[data-tab="seedlings"].active {
   background: #2E7D32;
   border-color: #2E7D32;
-  color: var(--color-white);
+  color: #fff;
 }
 
 /* Parent photo display */
@@ -770,7 +770,7 @@
   top: -6px;
   right: -6px;
   background: var(--color-gray);
-  color: var(--color-white);
+  color: #fff;
   font-size: 0.6rem;
   font-weight: 700;
   min-width: 16px;
@@ -1190,7 +1190,7 @@
 .search-bar__btn {
   padding: var(--space-sm) var(--space-md);
   background: var(--color-primary);
-  color: var(--color-white);
+  color: #fff;
   border: none;
   cursor: pointer;
   font-size: var(--font-size-base);
@@ -1360,7 +1360,7 @@
 
 .page-link.active {
   background: var(--color-primary);
-  color: var(--color-white);
+  color: #fff;
   border-color: var(--color-primary);
 }
 
@@ -1396,7 +1396,7 @@
 
 .chip.active {
   background: var(--color-primary);
-  color: var(--color-white);
+  color: #fff;
   border-color: var(--color-primary);
 }
 
@@ -1557,7 +1557,7 @@
 
 .affiliate-card__badge {
   background: var(--color-accent-warm);
-  color: var(--color-white);
+  color: #fff;
   font-size: 0.65rem;
   font-weight: 700;
   padding: 2px 8px;
@@ -1674,7 +1674,7 @@
   top: 4px;
   right: 4px;
   background: rgba(0, 0, 0, 0.6);
-  color: var(--color-white);
+  color: #fff;
   border: none;
   border-radius: var(--radius-full);
   width: 22px;
@@ -1703,7 +1703,7 @@
 
 .upload-preview__move-btn {
   background: rgba(0, 0, 0, 0.55);
-  color: var(--color-white);
+  color: #fff;
   border: none;
   border-radius: var(--radius-full);
   width: 24px;
@@ -1745,7 +1745,7 @@
   height: 40px;
   border-radius: var(--radius-full);
   background: var(--color-primary);
-  color: var(--color-white);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
