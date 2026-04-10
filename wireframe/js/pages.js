@@ -1307,7 +1307,7 @@ function updateCultivarDetail(cultivarName, rowEl) {
   var posterNameEl = document.getElementById('detail-poster-name');
   if (posterNameEl) {
     if (isSeedlingDetail && cData && cData._userId && cData._posterName) {
-      posterNameEl.innerHTML = '投稿者: <a href="' + _basePath + 'profile/' + escHtml(cData._userId) + '" class="text-primary no-decoration">' + escHtml(cData._posterName) + '</a>';
+      posterNameEl.innerHTML = '投稿者: <a href="' + _basePath + 'profile/' + escHtml(cData._userId) + '" class="text-primary no-decoration" data-nav="profile" data-userid="' + escHtml(cData._userId) + '">' + escHtml(cData._posterName) + '</a>';
     } else {
       posterNameEl.innerHTML = '';
     }
