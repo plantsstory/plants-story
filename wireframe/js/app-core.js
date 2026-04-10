@@ -533,6 +533,7 @@ function buildPath(page, options) {
     var rest = parts.slice(1).join(' ');
     return _basePath + g + '/' + encodeURIComponent(rest);
   }
+  if (page === 'search' && options.q) return _basePath + 'search?q=' + encodeURIComponent(options.q);
   if (simplePages.indexOf(page) !== -1) return _basePath + page;
   return _basePath;
 }
@@ -579,6 +580,11 @@ function parseRoute() {
   }
 
   // Check simple pages
+  if (first === 'search') {
+    var searchParams = new URLSearchParams(location.search);
+    var sq = searchParams.get('q');
+    return { page: 'search', q: sq || '', _fromRoute: true };
+  }
   if (simplePages.indexOf(first) !== -1) return { page: first };
 
   return { page: 'top' };
@@ -621,6 +627,10 @@ function navigateTo(page, options, pushHistory) {
   }
   if (page === 'profile-edit' && typeof window.loadProfileEditPage === 'function') {
     window.loadProfileEditPage();
+  }
+  if (page === 'search' && options.q && options._fromRoute && typeof globalSearch === 'function') {
+    globalSearch(options.q);
+    return; // globalSearch calls navigateTo internally
   }
 
   // Update meta tags for non-cultivar pages (cultivar updates in updateCultivarDetail)
@@ -697,7 +707,7 @@ function navigateTo(page, options, pushHistory) {
     history.replaceState(currentState, '');
 
     var routePath = buildPath(page, options);
-    history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar, userId: options.userId, username: options.username }, '', routePath);
+    history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar, userId: options.userId, username: options.username, q: options.q }, '', routePath);
     // Send GA4 page view for SPA navigation
     if (typeof gtag === 'function') {
       gtag('event', 'page_view', { page_location: location.href, page_title: document.title });
@@ -725,6 +735,7 @@ if ('scrollRestoration' in history) {
 // Handle browser back/forward
 window.addEventListener('popstate', function(e) {
   var state = e.state || parseRoute();
+  if (state.page === 'search' && state.q) state._fromRoute = true;
   _isPopstate = true;
   navigateTo(state.page, state, false);
   // Track page view on popstate (back/forward navigation)
@@ -745,7 +756,7 @@ function handleInitialRoute() {
     navigateTo(state.page, state, false);
   }
   // Record initial state so back button works from first navigation
-  history.replaceState({ page: state.page, genus: state.genus, cultivar: state.cultivar, userId: state.userId }, '', buildPath(state.page, state));
+  history.replaceState({ page: state.page, genus: state.genus, cultivar: state.cultivar, userId: state.userId, q: state.q }, '', buildPath(state.page, state));
 }
 // Wait for genera to load before routing (genera create the DOM targets)
 if (window._generaLoaded) {
