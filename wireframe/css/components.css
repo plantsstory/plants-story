@@ -2,7 +2,7 @@
    HEADER / NAVIGATION
    ======================================== */
 .header {
-  background: #EFF3F2;
+  background: linear-gradient(135deg, #2E7A68 0%, #3D8A78 100%);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -19,7 +19,7 @@
   font-family: var(--font-heading);
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--color-dark);
+  color: #fff;
   letter-spacing: 0.02em;
   cursor: pointer;
   display: flex;
@@ -34,6 +34,7 @@
   letter-spacing: 0.08em;
   opacity: 0.85;
   text-align: center;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .header__logo:hover {
@@ -57,13 +58,13 @@
 
 .header__nav a {
   font-size: var(--font-size-sm);
-  color: var(--color-mid);
+  color: rgba(255, 255, 255, 0.7);
   transition: color var(--transition);
 }
 
 .header__nav a:hover,
 .header__nav a.active {
-  color: var(--color-dark);
+  color: #fff;
   text-decoration: none;
 }
 
@@ -77,10 +78,10 @@
 .header__btn {
   font-size: var(--font-size-xs);
   padding: var(--space-xs) var(--space-sm);
-  border: 1px solid var(--color-dark);
+  border: 1px solid #fff;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--color-dark);
+  color: #fff;
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
@@ -98,17 +99,17 @@
 .header__lang {
   font-size: var(--font-size-xs);
   padding: var(--space-xs) var(--space-sm);
-  border: 1px solid var(--color-light);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--color-mid);
+  color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
   transition: all var(--transition);
 }
 
 .header__lang:hover {
-  border-color: var(--color-mid);
-  color: var(--color-dark);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: #fff;
 }
 
 .header__user-icon {
@@ -136,7 +137,7 @@
   display: block;
   width: 20px;
   height: 2px;
-  background: var(--color-dark);
+  background: #fff;
 }
 
 /* Mobile nav overlay */
