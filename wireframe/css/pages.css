@@ -2,7 +2,7 @@
    PAGE: TOP / LANDING
    ======================================== */
 .hero {
-  background: linear-gradient(135deg, #111111 0%, #1A1A1A 60%, #222222 100%);
+  background: linear-gradient(135deg, #2E7A68 0%, #3D8A78 50%, #6AB0A0 100%);
   padding: var(--space-3xl) 0 var(--space-2xl);
   position: relative;
   overflow: hidden;
@@ -449,10 +449,10 @@
 }
 
 /* ========================================
-   DARK THEME PAGE OVERRIDES (Forest Night default)
+   TROPICAL SHADE THEME PAGE OVERRIDES
    ======================================== */
 .hero .search-bar {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .legal-page h2 {
@@ -472,7 +472,7 @@
   border-color: var(--color-accent);
 }
 .contact-link__icon--email {
-  background: rgba(82, 183, 136, 0.15);
+  background: rgba(61, 138, 120, 0.1);
 }
 
 .profile-avatar {

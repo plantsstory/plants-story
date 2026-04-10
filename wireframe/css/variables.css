@@ -1,26 +1,26 @@
 :root {
-  /* Forest Night — Dark Theme */
-  --color-primary: #52B788;
-  --color-primary-dark: #222222;
-  --color-primary-light: #74C69D;
-  --color-accent: #74C69D;
-  --color-accent-warm: #D4A373;
+  /* Tropical Shade — Light Theme */
+  --color-primary: #3D8A78;
+  --color-primary-dark: #2E7A68;
+  --color-primary-light: #6AB0A0;
+  --color-accent: #3D8A78;
+  --color-accent-warm: #C49B5C;
 
-  --color-black: #f0f0f0;
-  --color-dark: #E8ECE3;
-  --color-mid: #B0BAA8;
-  --color-gray: #999999;
-  --color-light: #505050;
-  --color-lighter: #303030;
-  --color-bg: #1A1A1A;
-  --color-white: #383838;
+  --color-black: #283532;
+  --color-dark: #283532;
+  --color-mid: #5E736D;
+  --color-gray: #8A9E98;
+  --color-light: #D2DBD7;
+  --color-lighter: #E8EDEB;
+  --color-bg: #F2F5F4;
+  --color-white: #FFFFFF;
 
   /* Semantic Colors */
-  --color-danger: #F47174;
-  --color-warning: #F0A050;
-  --color-trust-high: #52B788;
-  --color-trust-mid: #D4A373;
-  --color-trust-low: #E06365;
+  --color-danger: #D94045;
+  --color-warning: #D4870A;
+  --color-trust-high: #3D8A78;
+  --color-trust-mid: #C49B5C;
+  --color-trust-low: #D94045;
 
   /* Typography */
   --font-heading: "Varela Round", "BIZ UDPGothic", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
@@ -51,9 +51,9 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
 
   /* Transitions */
   --transition: 0.2s ease;
