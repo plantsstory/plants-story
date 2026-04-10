@@ -1,26 +1,26 @@
 :root {
-  /* Deep Jungle Palette */
-  --color-primary: #1B4332;
+  /* Forest Night — Dark Theme */
+  --color-primary: #52B788;
   --color-primary-dark: #0B2B1E;
-  --color-primary-light: #52B788;
-  --color-accent: #52B788;
+  --color-primary-light: #74C69D;
+  --color-accent: #74C69D;
   --color-accent-warm: #D4A373;
 
-  --color-black: #1a1a1a;
-  --color-dark: #1B4332;
-  --color-mid: #4A5546;
-  --color-gray: #7A8B6F;
-  --color-light: #C8D0C0;
-  --color-lighter: #E8ECE3;
-  --color-bg: #F5F7F2;
-  --color-white: #ffffff;
+  --color-black: #f0f0f0;
+  --color-dark: #E8ECE3;
+  --color-mid: #B0BAA8;
+  --color-gray: #A8B8A0;
+  --color-light: #2E3830;
+  --color-lighter: #1E2922;
+  --color-bg: #141E18;
+  --color-white: #1A2620;
 
   /* Semantic Colors */
-  --color-danger: #C1121F;
-  --color-warning: #e67e22;
-  --color-trust-high: #1B4332;
+  --color-danger: #F47174;
+  --color-warning: #F0A050;
+  --color-trust-high: #52B788;
   --color-trust-mid: #D4A373;
-  --color-trust-low: #BC4749;
+  --color-trust-low: #E06365;
 
   /* Typography */
   --font-heading: "Varela Round", "BIZ UDPGothic", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
@@ -51,41 +51,10 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(27, 67, 50, 0.06);
-  --shadow: 0 2px 8px rgba(27, 67, 50, 0.1);
-  --shadow-lg: 0 8px 24px rgba(27, 67, 50, 0.15);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
 
   /* Transitions */
   --transition: 0.2s ease;
-}
-
-/* ========================================
-   DARK MODE
-   ======================================== */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-primary: #52B788;
-    --color-primary-dark: #0B2B1E;
-    --color-primary-light: #74C69D;
-    --color-accent: #74C69D;
-
-    --color-black: #f0f0f0;
-    --color-dark: #E8ECE3;
-    --color-mid: #B0BAA8;
-    --color-gray: #A8B8A0;
-    --color-light: #2E3830;
-    --color-lighter: #1E2922;
-    --color-bg: #141E18;
-    --color-white: #1A2620;
-
-    --color-danger: #F47174;
-    --color-warning: #F0A050;
-    --color-trust-high: #52B788;
-    --color-trust-mid: #D4A373;
-    --color-trust-low: #E06365;
-
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
-  }
 }

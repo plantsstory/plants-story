@@ -450,34 +450,32 @@
 }
 
 /* ========================================
-   DARK MODE PAGE OVERRIDES
+   DARK THEME PAGE OVERRIDES (Forest Night default)
    ======================================== */
-@media (prefers-color-scheme: dark) {
-  .hero .search-bar {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  }
+.hero .search-bar {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
 
-  .legal-page h2 {
-    border-left-color: var(--color-accent);
-  }
+.legal-page h2 {
+  border-left-color: var(--color-accent);
+}
 
-  .tokushoho-table th,
-  .tokushoho-table td {
-    border-bottom-color: var(--color-light);
-  }
+.tokushoho-table th,
+.tokushoho-table td {
+  border-bottom-color: var(--color-light);
+}
 
-  .contact-link {
-    background: var(--color-white);
-    border-color: var(--color-light);
-  }
-  .contact-link:hover {
-    border-color: var(--color-accent);
-  }
-  .contact-link__icon--email {
-    background: rgba(82, 183, 136, 0.15);
-  }
+.contact-link {
+  background: var(--color-white);
+  border-color: var(--color-light);
+}
+.contact-link:hover {
+  border-color: var(--color-accent);
+}
+.contact-link__icon--email {
+  background: rgba(82, 183, 136, 0.15);
+}
 
-  .profile-avatar {
-    background: var(--color-lighter);
-  }
+.profile-avatar {
+  background: var(--color-lighter);
 }

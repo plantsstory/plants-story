@@ -2588,104 +2588,102 @@ dialog.parent-photo-dialog .dialog-label {
 }
 
 /* ========================================
-   DARK MODE OVERRIDES
+   DARK THEME OVERRIDES (Forest Night default)
    ======================================== */
-@media (prefers-color-scheme: dark) {
-  /* Header mobile menu */
-  .mobile-nav { background: #0B2B1E; }
+/* Header mobile menu */
+.mobile-nav { background: #0B2B1E; }
 
-  /* Cards */
-  .card { border-color: var(--color-light); }
+/* Cards */
+.card { border-color: var(--color-light); }
 
-  /* Hero gradient — keep dark on dark */
-  .hero {
-    background: linear-gradient(135deg, #071A12 0%, #0B2B1E 60%, #143325 100%);
-  }
-
-  /* Badge colors (dark-friendly) */
-  .badge--species { background: rgba(82, 183, 136, 0.15); color: #74C69D; }
-  .badge--hybrid { background: rgba(212, 163, 115, 0.15); color: #D4A373; }
-  .badge--clone { background: rgba(100, 181, 246, 0.15); color: #64B5F6; }
-  .badge--seedling { background: rgba(255, 183, 77, 0.15); color: #FFB74D; }
-  .badge--ai { background: rgba(139, 92, 246, 0.15); color: #A78BFA; }
-  .badge--locked { background: rgba(255, 255, 255, 0.1); color: var(--color-gray); }
-
-  /* Genus stat chips */
-  .genus-stat-chip--species { background: rgba(82, 183, 136, 0.15); color: #74C69D; }
-  .genus-stat-chip--hybrid { background: rgba(212, 163, 115, 0.15); color: #D4A373; }
-  .genus-stat-chip--clone { background: rgba(100, 181, 246, 0.15); color: #64B5F6; }
-
-  /* Trust bar background */
-  .trust__bar { background: var(--color-light); }
-
-  /* Origin card */
-  .origin-card { border-color: var(--color-light); }
-  .origin-card__header { border-bottom-color: var(--color-light); }
-
-  /* Vote buttons */
-  .vote-btn { background: var(--color-lighter); border-color: var(--color-light); color: var(--color-gray); }
-  .vote-btn--active { background: rgba(82, 183, 136, 0.2); border-color: #52B788; color: #52B788; }
-  .vote-btn--active-down { background: rgba(224, 99, 101, 0.2); border-color: #E06365; color: #E06365; }
-
-  /* Cultivar row hover */
-  .cultivar-row:hover { background: rgba(82, 183, 136, 0.05); }
-
-  /* Search bar */
-  .search-bar { background: var(--color-white); border-color: var(--color-light); }
-  .search-bar__input { color: var(--color-dark); }
-
-  /* Dialog */
-  .dialog-clean { background: var(--color-bg); color: var(--color-dark); }
-
-  /* Form inputs */
-  .form-input, .form-select, .form-textarea,
-  .contact-form .form-input,
-  .contact-form .form-textarea {
-    background: var(--color-lighter);
-    color: var(--color-dark);
-    border-color: var(--color-light);
-  }
-  .form-input::placeholder,
-  .form-textarea::placeholder,
-  .search-bar__input::placeholder {
-    color: var(--color-gray);
-    opacity: 1;
-  }
-  .form-input:focus,
-  .form-select:focus,
-  .form-textarea:focus {
-    box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.2);
-  }
-  .form-select option {
-    background: var(--color-lighter);
-    color: var(--color-dark);
-  }
-
-  /* Skeleton shimmer */
-  .skeleton {
-    background: linear-gradient(90deg, var(--color-lighter) 25%, var(--color-light) 50%, var(--color-lighter) 75%);
-    background-size: 200% 100%;
-  }
-
-  /* Toast */
-  .toast { background: #1E2922; color: var(--color-dark); border: 1px solid var(--color-light); }
-  .toast--error { background: #2A1518; border-color: #5A2328; }
-
-  /* Pagination */
-  .page-link { color: var(--color-gray); }
-  .page-link.active { background: var(--color-accent); color: #0B2B1E; }
-
-  /* Scrollbar (webkit) */
-  ::-webkit-scrollbar { background: var(--color-bg); }
-  ::-webkit-scrollbar-thumb { background: var(--color-light); border-radius: 4px; }
-
-  /* About mission card — keep dark look */
-  .about-mission { background: linear-gradient(135deg, #071A12, #0B2B1E); }
-
-  /* Login benefits card */
-  .login-benefits-bg { background: linear-gradient(135deg, #1A2E22, #1E3628); border-color: var(--color-light); }
-
-  /* Paywall overlay */
-  .paywall-overlay { background: rgba(10, 20, 14, 0.95); }
+/* Hero gradient */
+.hero {
+  background: linear-gradient(135deg, #071A12 0%, #0B2B1E 60%, #143325 100%);
 }
+
+/* Badge colors */
+.badge--species { background: rgba(82, 183, 136, 0.15); color: #74C69D; }
+.badge--hybrid { background: rgba(212, 163, 115, 0.15); color: #D4A373; }
+.badge--clone { background: rgba(100, 181, 246, 0.15); color: #64B5F6; }
+.badge--seedling { background: rgba(255, 183, 77, 0.15); color: #FFB74D; }
+.badge--ai { background: rgba(139, 92, 246, 0.15); color: #A78BFA; }
+.badge--locked { background: rgba(255, 255, 255, 0.1); color: var(--color-gray); }
+
+/* Genus stat chips */
+.genus-stat-chip--species { background: rgba(82, 183, 136, 0.15); color: #74C69D; }
+.genus-stat-chip--hybrid { background: rgba(212, 163, 115, 0.15); color: #D4A373; }
+.genus-stat-chip--clone { background: rgba(100, 181, 246, 0.15); color: #64B5F6; }
+
+/* Trust bar background */
+.trust__bar { background: var(--color-light); }
+
+/* Origin card */
+.origin-card { border-color: var(--color-light); }
+.origin-card__header { border-bottom-color: var(--color-light); }
+
+/* Vote buttons */
+.vote-btn { background: var(--color-lighter); border-color: var(--color-light); color: var(--color-gray); }
+.vote-btn--active { background: rgba(82, 183, 136, 0.2); border-color: #52B788; color: #52B788; }
+.vote-btn--active-down { background: rgba(224, 99, 101, 0.2); border-color: #E06365; color: #E06365; }
+
+/* Cultivar row hover */
+.cultivar-row:hover { background: rgba(82, 183, 136, 0.05); }
+
+/* Search bar */
+.search-bar { background: var(--color-white); border-color: var(--color-light); }
+.search-bar__input { color: var(--color-dark); }
+
+/* Dialog */
+.dialog-clean { background: var(--color-bg); color: var(--color-dark); }
+
+/* Form inputs */
+.form-input, .form-select, .form-textarea,
+.contact-form .form-input,
+.contact-form .form-textarea {
+  background: var(--color-lighter);
+  color: var(--color-dark);
+  border-color: var(--color-light);
+}
+.form-input::placeholder,
+.form-textarea::placeholder,
+.search-bar__input::placeholder {
+  color: var(--color-gray);
+  opacity: 1;
+}
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.2);
+}
+.form-select option {
+  background: var(--color-lighter);
+  color: var(--color-dark);
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  background: linear-gradient(90deg, var(--color-lighter) 25%, var(--color-light) 50%, var(--color-lighter) 75%);
+  background-size: 200% 100%;
+}
+
+/* Toast */
+.toast { background: #1E2922; color: var(--color-dark); border: 1px solid var(--color-light); }
+.toast--error { background: #2A1518; border-color: #5A2328; }
+
+/* Pagination */
+.page-link { color: var(--color-gray); }
+.page-link.active { background: var(--color-accent); color: #0B2B1E; }
+
+/* Scrollbar (webkit) */
+::-webkit-scrollbar { background: var(--color-bg); }
+::-webkit-scrollbar-thumb { background: var(--color-light); border-radius: 4px; }
+
+/* About mission card */
+.about-mission { background: linear-gradient(135deg, #071A12, #0B2B1E); }
+
+/* Login benefits card */
+.login-benefits-bg { background: linear-gradient(135deg, #1A2E22, #1E3628); border-color: var(--color-light); }
+
+/* Paywall overlay */
+.paywall-overlay { background: rgba(10, 20, 14, 0.95); }
 
