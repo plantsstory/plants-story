@@ -2169,7 +2169,7 @@ if (false) {
       h += '<div class="text-xs text-muted mt-xs">' + t('creator_label') + escHtml(entry._creatorName) + '</div>';
     }
     if (isSeedling && entry._userId && entry._posterName && !locked) {
-      h += '<div class="text-xs mt-xs"><a href="' + _basePath + 'profile/' + escHtml(entry._userId) + '" class="poster-link" onclick="event.stopPropagation();">&#x1F464; ' + escHtml(entry._posterName) + '</a></div>';
+      h += '<div class="text-xs mt-xs"><a href="' + _basePath + 'profile/' + escHtml(entry._userId) + '" class="poster-link" data-nav="profile" data-userid="' + escHtml(entry._userId) + '" onclick="event.stopPropagation();">&#x1F464; ' + escHtml(entry._posterName) + '</a></div>';
     }
     h += '</div></div>';
     return h;
