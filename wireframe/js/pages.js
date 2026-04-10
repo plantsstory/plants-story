@@ -1763,7 +1763,7 @@ function globalSearch(query) {
     });
   }
 
-  navigateTo('search', {});
+  navigateTo('search', { q: query });
 }
 
 // Breeder link click handler — search by breeder name

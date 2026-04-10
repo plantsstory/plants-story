@@ -1,5 +1,5 @@
 // Service Worker for Plants Story PWA
-var CACHE_VERSION = 'plants-story-v29';
+var CACHE_VERSION = 'plants-story-v30';
 var OFFLINE_PAGE = './offline.html';
 var STATIC_ASSETS = [
   './',
