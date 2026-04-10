@@ -2,7 +2,7 @@
    HEADER / NAVIGATION
    ======================================== */
 .header {
-  background: linear-gradient(135deg, #2E7A68 0%, #3D8A78 100%);
+  background: linear-gradient(135deg, #1A5548 0%, #25685A 100%);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -2675,7 +2675,7 @@ dialog.parent-photo-dialog .dialog-label {
 ::-webkit-scrollbar-thumb { background: var(--color-light); border-radius: 4px; }
 
 /* About mission card */
-.about-mission { background: linear-gradient(135deg, #2E7A68, #3D8A78); }
+.about-mission { background: linear-gradient(135deg, #1A5548, #25685A); }
 
 /* Login benefits card */
 .login-benefits-bg { background: linear-gradient(135deg, #e8f5e9, #f1f8e9); border-color: #c8e6c9; }

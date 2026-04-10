@@ -2,7 +2,7 @@
    PAGE: TOP / LANDING
    ======================================== */
 .hero {
-  background: linear-gradient(135deg, #2E7A68 0%, #3D8A78 50%, #6AB0A0 100%);
+  background: linear-gradient(135deg, #1A5548 0%, #25685A 50%, #558A7A 100%);
   padding: var(--space-3xl) 0 var(--space-2xl);
   position: relative;
   overflow: hidden;
@@ -234,7 +234,7 @@
 
 /* About page mission card */
 .about-mission {
-  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+  background: linear-gradient(135deg, #1A5548, #25685A);
   color: #fff;
   border-radius: var(--radius-lg);
   padding: var(--space-xl) var(--space-lg);
