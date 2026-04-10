@@ -36,6 +36,11 @@ a:hover {
   text-decoration: underline;
 }
 
+/* Programmatic focus on headings (tabindex="-1") should not show outline */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
 ul, ol {
   list-style: none;
 }
