@@ -2,7 +2,7 @@
    HEADER / NAVIGATION
    ======================================== */
 .header {
-  background: var(--color-primary-dark);
+  background: #222222;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -147,7 +147,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(180deg, var(--color-primary-dark) 0%, #1a3a2a 100%);
+  background: linear-gradient(180deg, var(--color-primary-dark) 0%, #2A2A2A 100%);
   z-index: 99;
   padding: var(--space-lg) var(--space-xl);
   overflow-y: auto;
@@ -201,7 +201,7 @@
    FOOTER
    ======================================== */
 .footer {
-  background: var(--color-primary-dark);
+  background: #222222;
   padding: var(--space-xl) 0;
   margin-top: var(--space-3xl);
 }
