@@ -1755,7 +1755,7 @@ function globalSearch(query) {
         html += '</a>';
       });
       if (userList) userList.innerHTML = html;
-      if (userSection) userSection.style.display = '';
+      if (userSection) { userSection.classList.remove('d-none'); userSection.style.display = ''; }
     }).catch(function(err) {
       console.error('search_profiles exception:', err);
       if (userSection) userSection.style.display = 'none';
