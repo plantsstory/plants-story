@@ -2596,11 +2596,6 @@ dialog.parent-photo-dialog .dialog-label {
 /* Cards */
 .card { border-color: var(--color-light); }
 
-/* Hero gradient */
-.hero {
-  background: linear-gradient(135deg, #071A12 0%, #0B2B1E 60%, #143325 100%);
-}
-
 /* Badge colors */
 .badge--species { background: rgba(82, 183, 136, 0.15); color: #74C69D; }
 .badge--hybrid { background: rgba(212, 163, 115, 0.15); color: #D4A373; }
