@@ -1,5 +1,5 @@
 // Service Worker for Plants Story PWA
-var CACHE_VERSION = 'plants-story-v45';
+var CACHE_VERSION = 'plants-story-v46';
 var OFFLINE_PAGE = './offline.html';
 var STATIC_ASSETS = [
   './',
@@ -64,8 +64,9 @@ self.addEventListener('fetch', function(event) {
   // Skip external resources (Supabase API, CDNs, etc.) — always network
   if (url.hostname !== self.location.hostname) return;
 
-  // Skip admin.html — always fetch from network, never SPA fallback
+  // Skip admin.html and static legal pages — always fetch from network, never SPA fallback
   if (url.pathname.indexOf('admin') !== -1) return;
+  if (url.pathname.indexOf('/tokushoho') !== -1) return;
 
   // SPA navigation requests: serve index.html for client-side routing
   if (event.request.mode === 'navigate') {
