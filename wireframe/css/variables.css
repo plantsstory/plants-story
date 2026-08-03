@@ -1,31 +1,31 @@
 :root {
-  /* Dark Botanical — Warm Premium Theme */
-  --color-primary: #F0EDE8;
-  --color-primary-dark: #D8D4CE;
-  --color-primary-light: rgba(240,237,232,0.5);
-  --color-accent: #F0EDE8;
+  /* Tropical Shade — Light Theme */
+  --color-primary: #3D8A78;
+  --color-primary-dark: #1A5548;
+  --color-primary-light: #6AB0A0;
+  --color-accent: #3D8A78;
   --color-accent-warm: #C49B5C;
 
-  --color-black: #E8E5E0;
-  --color-dark: #CCC8C2;
-  --color-mid: rgba(240,237,232,0.6);
-  --color-gray: rgba(240,237,232,0.4);
-  --color-light: rgba(240,237,232,0.12);
-  --color-lighter: rgba(240,237,232,0.06);
-  --color-bg: #131311;
-  --color-white: #1C1B19;
+  --color-black: #283532;
+  --color-dark: #283532;
+  --color-mid: #5E736D;
+  --color-gray: #8A9E98;
+  --color-light: #D2DBD7;
+  --color-lighter: #E8EDEB;
+  --color-bg: #F2F5F4;
+  --color-white: #FFFFFF;
 
   /* Semantic Colors */
-  --color-danger: #E05555;
-  --color-warning: #D4A030;
-  --color-trust-high: #6BBF80;
-  --color-trust-mid: #D4A030;
-  --color-trust-low: #E05555;
+  --color-danger: #D94045;
+  --color-warning: #D4870A;
+  --color-trust-high: #3D8A78;
+  --color-trust-mid: #C49B5C;
+  --color-trust-low: #D94045;
 
   /* Typography */
-  --font-heading: "Helvetica Neue", Arial, "Noto Sans JP", sans-serif;
-  --font-heading-en: "Helvetica Neue", Arial, sans-serif;
-  --font-primary: "Helvetica Neue", Arial, "Noto Sans JP", sans-serif;
+  --font-heading: "Varela Round", "BIZ UDPGothic", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
+  --font-heading-en: "Varela Round", "Helvetica Neue", Arial, sans-serif;
+  --font-primary: "Varela Round", "BIZ UDPGothic", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "Fira Code", "Courier New", monospace;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
@@ -51,9 +51,9 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
 
   /* Transitions */
   --transition: 0.2s ease;

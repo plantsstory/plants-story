@@ -2,7 +2,7 @@
    PAGE: TOP / LANDING
    ======================================== */
 .hero {
-  background: #131311;
+  background: linear-gradient(135deg, #1A5548 0%, #25685A 50%, #558A7A 100%);
   padding: var(--space-3xl) 0 var(--space-2xl);
   position: relative;
   overflow: hidden;
@@ -13,11 +13,9 @@
 .hero__title {
   font-family: var(--font-heading);
   font-size: 2rem;
-  font-weight: 300;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.04em;
   color: #fff;
   line-height: 1.3;
-  text-transform: uppercase;
   -webkit-tap-highlight-color: transparent;
 }
 .hero__title:focus {
@@ -27,53 +25,58 @@
 .hero__title-sub {
   font-family: var(--font-heading-en);
   font-size: 1.2rem;
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: 0.08em;
-  opacity: 0.4;
+  opacity: 0.85;
 }
 
 .hero__subtitle {
   font-size: var(--font-size-lg);
-  color: rgba(240, 237, 232, 0.55);
-  margin-top: var(--space-md);
-  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: var(--space-sm);
 }
 
 .hero__subtitle-en {
-  color: rgba(240, 237, 232, 0.35);
-  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .hero .search-bar {
   position: relative;
-  border-color: rgba(240,237,232,0.1);
-  box-shadow: none;
-  background: rgba(240,237,232,0.04);
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .hero .search-bar:focus-within {
-  border-color: rgba(240,237,232,0.18);
-  box-shadow: none;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
 }
 
-/* Hero SVG leaf decorations — hidden in monochrome */
+/* Hero SVG leaf decorations */
 .hero__leaf {
-  display: none;
+  position: absolute;
+  z-index: -1;
+  opacity: 0.07;
+  pointer-events: none;
 }
 
-/* Section titles */
+.hero__leaf--left {
+  left: -60px;
+  bottom: -40px;
+}
+
+.hero__leaf--right {
+  right: -40px;
+  top: -20px;
+}
+
+/* Section titles with heading font */
 .section-title {
   font-family: var(--font-heading);
   color: var(--color-dark);
-  font-weight: 300;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-size: 0.85rem;
 }
 
 @media (min-width: 768px) {
   .hero__title {
-    font-size: 2.8rem;
+    font-size: 2.5rem;
   }
   .hero__title-sub {
     font-size: 1.5rem;
@@ -97,7 +100,7 @@
    PAGE: CULTIVAR DETAIL
    ======================================== */
 #page-cultivar .origin-card:first-of-type {
-  border-left: 4px solid rgba(240,237,232,0.25);
+  border-left: 4px solid var(--color-accent);
 }
 
 #page-cultivar h1 {
@@ -144,11 +147,11 @@
 
 .legal-page h2 {
   font-size: var(--font-size-lg);
-  font-weight: 500;
+  font-weight: 700;
   margin-top: var(--space-xl);
   margin-bottom: var(--space-sm);
   color: var(--color-dark);
-  border-left: 3px solid rgba(240,237,232,0.18);
+  border-left: 3px solid var(--color-accent);
   padding-left: var(--space-sm);
 }
 
@@ -171,8 +174,7 @@
 }
 
 .legal-page .legal-operator {
-  background: rgba(240,237,232,0.04);
-  border: 1px solid rgba(240,237,232,0.08);
+  background: var(--color-lighter);
   border-radius: var(--radius-md);
   padding: var(--space-md) var(--space-lg);
   margin-top: var(--space-lg);
@@ -192,7 +194,7 @@
 .tokushoho-table th,
 .tokushoho-table td {
   padding: var(--space-sm) var(--space-md);
-  border-bottom: 1px solid rgba(240,237,232,0.08);
+  border-bottom: 1px solid var(--color-lighter);
   line-height: 1.7;
   color: var(--color-mid);
   text-align: left;
@@ -201,7 +203,7 @@
 
 .tokushoho-table th {
   white-space: nowrap;
-  font-weight: 500;
+  font-weight: 700;
   color: var(--color-dark);
   width: 130px;
   font-size: var(--font-size-sm);
@@ -223,7 +225,7 @@
     padding-bottom: 0;
   }
   .tokushoho-table tr {
-    border-bottom: 1px solid rgba(240,237,232,0.08);
+    border-bottom: 1px solid var(--color-lighter);
     padding-bottom: var(--space-sm);
     display: block;
     margin-bottom: var(--space-sm);
@@ -232,16 +234,15 @@
 
 /* About page mission card */
 .about-mission {
-  background: #1C1B19;
-  border: 1px solid rgba(240,237,232,0.08);
-  color: #E8E5E0;
+  background: linear-gradient(135deg, #1A5548, #25685A);
+  color: #fff;
   border-radius: var(--radius-lg);
   padding: var(--space-xl) var(--space-lg);
   margin-bottom: var(--space-xl);
 }
 
 .about-mission p {
-  color: rgba(240, 237, 232, 0.7);
+  color: rgba(255, 255, 255, 0.9);
   line-height: 1.8;
 }
 
@@ -253,7 +254,7 @@
 .contact-form .form-label {
   display: block;
   margin-bottom: var(--space-xs);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-dark);
 }
 
@@ -261,21 +262,19 @@
 .contact-form .form-textarea {
   width: 100%;
   padding: var(--space-sm) var(--space-md);
-  border: 1px solid rgba(240,237,232,0.1);
+  border: 1px solid var(--color-light);
   border-radius: var(--radius-md);
   font-family: var(--font-primary);
   font-size: var(--font-size-base);
   transition: border-color var(--transition);
-  background: rgba(240,237,232,0.06);
-  color: #E8E5E0;
 }
 
 .contact-form .form-input:focus,
 .contact-form .form-textarea:focus {
-  outline: 2px solid rgba(240,237,232,0.25);
+  outline: 2px solid var(--color-accent);
   outline-offset: -2px;
-  border-color: rgba(240,237,232,0.25);
-  box-shadow: 0 0 0 3px rgba(240,237,232,0.07);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.1);
 }
 
 .contact-form .form-textarea {
@@ -298,7 +297,7 @@
   min-width: 240px;
   padding: var(--space-lg);
   background: var(--color-white);
-  border: 1px solid rgba(240,237,232,0.08);
+  border: 1px solid var(--color-lighter);
   border-radius: var(--radius-lg);
   text-decoration: none;
   color: inherit;
@@ -306,7 +305,7 @@
 }
 
 .contact-link:hover {
-  border-color: rgba(240,237,232,0.18);
+  border-color: var(--color-accent);
   box-shadow: var(--shadow);
 }
 
@@ -321,7 +320,7 @@
 }
 
 .contact-link__icon--email {
-  background: rgba(240,237,232,0.08);
+  background: rgba(82, 183, 136, 0.1);
   color: var(--color-dark);
 }
 
@@ -338,7 +337,7 @@
 }
 
 .contact-link__label {
-  font-weight: 500;
+  font-weight: 600;
   font-size: var(--font-size-base);
   color: var(--color-dark);
 }
@@ -373,7 +372,7 @@
   width: 80px;
   height: 80px;
   border-radius: var(--radius-full);
-  background: rgba(240,237,232,0.08);
+  background: var(--color-lighter);
   flex-shrink: 0;
   overflow: hidden;
   display: flex;
@@ -429,7 +428,7 @@
 }
 
 .profile-sns__x:hover {
-  color: #fff;
+  color: var(--color-dark);
 }
 
 .profile-logout-btn {
@@ -447,4 +446,35 @@
   .profile-sns {
     justify-content: center;
   }
+}
+
+/* ========================================
+   TROPICAL SHADE THEME PAGE OVERRIDES
+   ======================================== */
+.hero .search-bar {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.legal-page h2 {
+  border-left-color: var(--color-accent);
+}
+
+.tokushoho-table th,
+.tokushoho-table td {
+  border-bottom-color: var(--color-light);
+}
+
+.contact-link {
+  background: var(--color-white);
+  border-color: var(--color-light);
+}
+.contact-link:hover {
+  border-color: var(--color-accent);
+}
+.contact-link__icon--email {
+  background: rgba(61, 138, 120, 0.1);
+}
+
+.profile-avatar {
+  background: var(--color-lighter);
 }

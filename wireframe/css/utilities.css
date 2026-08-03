@@ -123,7 +123,7 @@ button:focus-visible,
 .section-separator { padding-top: var(--space-lg); border-top: 1px solid var(--color-light); }
 
 /* Login benefits card */
-.login-benefits-bg { background: rgba(240,237,232,0.06); border: 1px solid rgba(240,237,232,0.12); }
+.login-benefits-bg { background: linear-gradient(135deg, #e8f5e9, #f1f8e9); border: 1px solid #c8e6c9; }
 
 /* Cultivar detail title */
 .detail-title { font-size: var(--font-size-2xl); margin-bottom: var(--space-xs); }
@@ -138,16 +138,16 @@ button:focus-visible,
 .admin-link { opacity: 0.3; font-size: 0.7rem; text-decoration: none; color: inherit; margin-left: 8px; }
 
 /* Delete request dialog */
-.dialog-clean { border: none; border-radius: 12px; padding: 24px; max-width: 400px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,0.5); background: #1C1B19; color: #E8E5E0; }
+.dialog-clean { border: none; border-radius: 12px; padding: 24px; max-width: 400px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
 .dialog-title { margin: 0 0 8px 0; font-size: 1.1rem; }
-.dialog-subtitle { margin: 0 0 16px 0; font-size: 0.9rem; color: rgba(240,237,232,0.65); }
+.dialog-subtitle { margin: 0 0 16px 0; font-size: 0.9rem; color: #666; }
 .dialog-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-.dialog-textarea { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid rgba(240,237,232,0.14); border-radius: 6px; font-size: 0.9rem; margin-bottom: 16px; resize: vertical; background: rgba(240,237,232,0.06); color: #E8E5E0; }
+.dialog-textarea { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; margin-bottom: 16px; resize: vertical; }
 .dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .btn--danger { background: #dc3545; color: #fff; border: none; }
 
 /* Favorite remove button (star overlay) */
-.fav-remove-btn { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 1.1rem; color: #f5c518; cursor: pointer; line-height: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.fav-remove-btn { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 1.1rem; color: #f5c518; cursor: pointer; line-height: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
 
 /* Photo preview (contribution form) */
 .photo-preview { position: relative; display: inline-block; }
@@ -299,7 +299,7 @@ button:focus-visible,
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: rgba(19, 19, 17, 0.75);
+  background: rgba(242, 245, 244, 0.7);
   color: var(--color-dark);
   font-size: var(--font-size-xs);
   font-weight: 600;
