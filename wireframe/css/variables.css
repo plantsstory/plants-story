@@ -1,19 +1,19 @@
 :root {
-  /* Monochrome Museum — Dark Theme */
-  --color-primary: #FFFFFF;
-  --color-primary-dark: #E0E0E0;
-  --color-primary-light: rgba(255,255,255,0.5);
-  --color-accent: #FFFFFF;
+  /* Dark Botanical — Warm Premium Theme */
+  --color-primary: #F0EDE8;
+  --color-primary-dark: #D8D4CE;
+  --color-primary-light: rgba(240,237,232,0.5);
+  --color-accent: #F0EDE8;
   --color-accent-warm: #C49B5C;
 
-  --color-black: #E8E8E8;
-  --color-dark: #D8D8D8;
-  --color-mid: rgba(255,255,255,0.5);
-  --color-gray: rgba(255,255,255,0.3);
-  --color-light: rgba(255,255,255,0.1);
-  --color-lighter: rgba(255,255,255,0.05);
-  --color-bg: #111111;
-  --color-white: #1A1A1A;
+  --color-black: #E8E5E0;
+  --color-dark: #CCC8C2;
+  --color-mid: rgba(240,237,232,0.6);
+  --color-gray: rgba(240,237,232,0.4);
+  --color-light: rgba(240,237,232,0.12);
+  --color-lighter: rgba(240,237,232,0.06);
+  --color-bg: #131311;
+  --color-white: #1C1B19;
 
   /* Semantic Colors */
   --color-danger: #E05555;
