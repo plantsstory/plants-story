@@ -1,11 +1,11 @@
 {
-  "name": "ひなたぼっこぷらんつ - Plants Story",
-  "short_name": "Plants Story",
+  "name": "Aroid Origins",
+  "short_name": "Aroid Origins",
   "description": "アロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォーム",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#F5F7F2",
-  "theme_color": "#1B4332",
+  "background_color": "#111111",
+  "theme_color": "#111111",
   "lang": "ja",
   "icons": [
     {

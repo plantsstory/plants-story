@@ -14,7 +14,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
  *   Header: Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>
  */
 
-const FROM_EMAIL = "Plants Story <noreply@plantsstory.com>";
+const FROM_EMAIL = "Aroid Origins <noreply@plantsstory.com>";
 const SITE_URL = "https://plantsstory.com";
 
 serve(async (req: Request) => {
@@ -109,7 +109,7 @@ serve(async (req: Request) => {
         body: JSON.stringify({
           from: FROM_EMAIL,
           to: [email],
-          subject: `【Plants Story】無料トライアルが${formattedDate}に終了します`,
+          subject: `【Aroid Origins】無料トライアルが${formattedDate}に終了します`,
           html: buildReminderHtml(displayName, formattedDate),
         }),
       });
@@ -146,7 +146,7 @@ function buildReminderHtml(name: string, endDate: string): string {
 <body style="margin:0;padding:0;background:#f7f7f7;font-family:'Helvetica Neue',Arial,sans-serif;">
   <div style="max-width:560px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
     <div style="background:linear-gradient(135deg,#2d6a4f,#40916c);padding:32px 24px;text-align:center;">
-      <h1 style="color:#fff;margin:0;font-size:22px;">🌿 Plants Story</h1>
+      <h1 style="color:#fff;margin:0;font-size:22px;">🌿 Aroid Origins</h1>
     </div>
     <div style="padding:32px 24px;">
       <p style="font-size:16px;color:#333;margin:0 0 16px;">${name} さん、こんにちは。</p>
@@ -163,12 +163,12 @@ function buildReminderHtml(name: string, endDate: string): string {
       </p>
       <div style="text-align:center;margin:24px 0;">
         <a href="${SITE_URL}" style="display:inline-block;background:#40916c;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:bold;">
-          Plants Story を開く
+          Aroid Origins を開く
         </a>
       </div>
       <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
       <p style="font-size:12px;color:#999;line-height:1.6;margin:0;">
-        このメールは Plants Story の無料トライアルをご利用中のお客様にお送りしています。<br>
+        このメールは Aroid Origins の無料トライアルをご利用中のお客様にお送りしています。<br>
         ご不明な点がございましたら <a href="mailto:plantsstory2026@gmail.com" style="color:#40916c;">plantsstory2026@gmail.com</a> までお問い合わせください。
       </p>
     </div>

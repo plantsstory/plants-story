@@ -697,7 +697,7 @@ document.addEventListener('click', function(e) {
   if (!h1) return;
   var name = h1.textContent;
   var shareUrl = getShareUrl(name);
-  var text = name + ' - Plants Story';
+  var text = name + ' - Aroid Origins';
 
   // Try native share API first (mobile)
   if (navigator.share) {
@@ -1193,7 +1193,7 @@ function updateCultivarDetail(cultivarName, rowEl) {
 
   // Update SEO meta tags
   var typeLabel = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: 'Seedling' }[detectedType] || '';
-  var metaDesc = displayName + ' (' + genusName + ' ' + typeLabel + ') の由来・歴史情報 - ひなたぼっこぷらんつ';
+  var metaDesc = displayName + ' (' + genusName + ' ' + typeLabel + ') の由来・歴史情報 - Aroid Origins';
   var ogImageUrl = window._SUPABASE_URL
     ? window._SUPABASE_URL + '/functions/v1/og-image?name=' + encodeURIComponent(displayName) + '&genus=' + encodeURIComponent(genusName) + '&type=' + encodeURIComponent(detectedType)
     : '';

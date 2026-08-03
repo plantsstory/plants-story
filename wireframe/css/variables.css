@@ -1,31 +1,31 @@
 :root {
-  /* Tropical Shade — Light Theme */
-  --color-primary: #3D8A78;
-  --color-primary-dark: #1A5548;
-  --color-primary-light: #6AB0A0;
-  --color-accent: #3D8A78;
+  /* Monochrome Museum — Dark Theme */
+  --color-primary: #FFFFFF;
+  --color-primary-dark: #E0E0E0;
+  --color-primary-light: rgba(255,255,255,0.5);
+  --color-accent: #FFFFFF;
   --color-accent-warm: #C49B5C;
 
-  --color-black: #283532;
-  --color-dark: #283532;
-  --color-mid: #5E736D;
-  --color-gray: #8A9E98;
-  --color-light: #D2DBD7;
-  --color-lighter: #E8EDEB;
-  --color-bg: #F2F5F4;
-  --color-white: #FFFFFF;
+  --color-black: #E8E8E8;
+  --color-dark: #D8D8D8;
+  --color-mid: rgba(255,255,255,0.5);
+  --color-gray: rgba(255,255,255,0.3);
+  --color-light: rgba(255,255,255,0.1);
+  --color-lighter: rgba(255,255,255,0.05);
+  --color-bg: #111111;
+  --color-white: #1A1A1A;
 
   /* Semantic Colors */
-  --color-danger: #D94045;
-  --color-warning: #D4870A;
-  --color-trust-high: #3D8A78;
-  --color-trust-mid: #C49B5C;
-  --color-trust-low: #D94045;
+  --color-danger: #E05555;
+  --color-warning: #D4A030;
+  --color-trust-high: #6BBF80;
+  --color-trust-mid: #D4A030;
+  --color-trust-low: #E05555;
 
   /* Typography */
-  --font-heading: "Varela Round", "BIZ UDPGothic", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
-  --font-heading-en: "Varela Round", "Helvetica Neue", Arial, sans-serif;
-  --font-primary: "Varela Round", "BIZ UDPGothic", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
+  --font-heading: "Helvetica Neue", Arial, "Noto Sans JP", sans-serif;
+  --font-heading-en: "Helvetica Neue", Arial, sans-serif;
+  --font-primary: "Helvetica Neue", Arial, "Noto Sans JP", sans-serif;
   --font-mono: "Fira Code", "Courier New", monospace;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
@@ -51,9 +51,9 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
 
   /* Transitions */
   --transition: 0.2s ease;

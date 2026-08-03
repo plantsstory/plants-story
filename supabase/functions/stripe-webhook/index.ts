@@ -13,7 +13,7 @@ async function sendErrorAlert(subject: string, details: string) {
       method: "POST",
       headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "Plants Story <noreply@plantsstory.com>",
+        from: "Aroid Origins <noreply@plantsstory.com>",
         to: [alertEmail],
         subject: `[Stripe Webhook Alert] ${subject}`,
         text: `Stripe webhook error detected:\n\n${details}\n\nTimestamp: ${new Date().toISOString()}`,

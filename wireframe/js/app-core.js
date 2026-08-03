@@ -284,7 +284,7 @@ psExport('guardSubmit', guardSubmit);
 // Page navigation — detect custom domain vs GitHub Pages
 var _isCustomDomain = location.hostname !== 'plantsstory.github.io';
 var _siteBase = _isCustomDomain ? 'https://plantsstory.com/' : 'https://plantsstory.github.io/plants-story/';
-var _defaultTitle = 'ひなたぼっこぷらんつ - Plants Story';
+var _defaultTitle = 'Aroid Origins';
 var _defaultDesc = 'アロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォーム';
 
 function updateMeta(opts) {
@@ -653,12 +653,12 @@ function navigateTo(page, options, pushHistory) {
       top: _defaultDesc,
       favorites: 'お気に入りに追加した品種の一覧です',
       contribute: 'アロイド植物の品種情報を投稿して、コミュニティに貢献しましょう',
-      about: 'ひなたぼっこぷらんつ（Plants Story）について - アロイド植物の由来・歴史を共有するプラットフォーム',
-      terms: 'ひなたぼっこぷらんつ（Plants Story）の利用規約',
-      privacy: 'ひなたぼっこぷらんつ（Plants Story）のプライバシーポリシー',
+      about: 'Aroid Originsについて - アロイド植物の由来・歴史を共有するプラットフォーム',
+      terms: 'Aroid Originsの利用規約',
+      privacy: 'Aroid Originsのプライバシーポリシー',
       guide: '品種情報の閲覧・投稿・編集方法と、原種/ハイブリッド/クローン/実生の違いを解説',
-      tokushoho: 'ひなたぼっこぷらんつ（Plants Story）の特定商取引法に基づく表記',
-      contact: 'ひなたぼっこぷらんつ（Plants Story）へのお問い合わせ',
+      tokushoho: 'Aroid Originsの特定商取引法に基づく表記',
+      contact: 'Aroid Originsへのお問い合わせ',
       search: 'アロイド植物の品種名で検索 - Anthurium, Monstera, Philodendronなど',
       mypost: 'あなたが投稿した品種の履歴'
     };

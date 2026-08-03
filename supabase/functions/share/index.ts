@@ -86,7 +86,7 @@ serve(async (req: Request) => {
   };
   const typeLabel = typeLabels[type] || "";
 
-  const title = displayName + " - " + genus + " | ひなたぼっこぷらんつ - Plants Story";
+  const title = displayName + " - " + genus + " | Aroid Origins";
   const desc = description || displayName + " (" + genus + " " + typeLabel + ") の由来・歴史情報";
   const genusSlug = (genus || displayName.split(" ")[0]).toLowerCase();
   const rest = displayName.replace(/^\S+\s*/, "");
@@ -107,7 +107,7 @@ serve(async (req: Request) => {
 <meta property="og:type" content="article">
 <meta property="og:url" content="${esc(spaUrl)}">
 <meta property="og:image" content="${esc(ogImage)}">
-<meta property="og:site_name" content="ひなたぼっこぷらんつ - Plants Story">
+<meta property="og:site_name" content="Aroid Origins">
 <meta property="og:locale" content="ja_JP">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
@@ -117,7 +117,7 @@ serve(async (req: Request) => {
 <meta http-equiv="refresh" content="0;url=${esc(spaUrl)}">
 </head>
 <body>
-<p>Redirecting to <a href="${esc(spaUrl)}">${esc(displayName)} - Plants Story</a>...</p>
+<p>Redirecting to <a href="${esc(spaUrl)}">${esc(displayName)} - Aroid Origins</a>...</p>
 <script>window.location.replace(${JSON.stringify(spaUrl)});</script>
 </body>
 </html>`;

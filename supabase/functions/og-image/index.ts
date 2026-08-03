@@ -68,7 +68,7 @@ serve(async (req: Request) => {
   <path d="M950 50C850 10 720 60 700 180C680 300 820 420 950 500C1080 420 1200 300 1180 180C1160 60 1050 10 950 50Z" fill="#52B788" opacity="0.12"/>
   <path d="M950 70V480" stroke="#F5F7F2" stroke-width="3" fill="none" opacity="0.08"/>
   <!-- Site name -->
-  <text x="80" y="80" font-family="sans-serif" font-size="22" fill="#52B788" opacity="0.8">ひなたぼっこぷらんつ - Plants Story</text>
+  <text x="80" y="80" font-family="sans-serif" font-size="22" fill="#52B788" opacity="0.8">Aroid Origins</text>
   <!-- Type badge -->
   <rect x="80" y="200" width="${tc.label.length * 14 + 40}" height="40" rx="20" fill="${tc.color}"/>
   <text x="100" y="226" font-family="sans-serif" font-size="18" fill="#ffffff" font-weight="bold">${tc.label}</text>

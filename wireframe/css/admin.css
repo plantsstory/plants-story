@@ -284,9 +284,9 @@ body {
 .badge-failed { background: var(--color-danger); color: #fff; }
 /* Cultivar type badges (matching components.css) */
 .badge--species {
-  border: 1px solid var(--color-primary);
-  color: var(--color-primary);
-  background: rgba(27, 67, 50, 0.05);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--color-dark);
+  background: rgba(255,255,255,0.05);
 }
 .badge--hybrid {
   background: var(--color-primary);
@@ -294,14 +294,14 @@ body {
   border: 1px solid var(--color-primary);
 }
 .badge--clone {
-  background: rgba(212, 163, 115, 0.12);
+  background: rgba(196, 155, 92, 0.15);
   border: 1px solid var(--color-accent-warm);
-  color: #8B6B3D;
+  color: var(--color-accent-warm);
 }
 .badge--seedling {
-  background: rgba(76, 175, 80, 0.12);
+  background: rgba(76, 175, 80, 0.15);
   border: 1px solid #4CAF50;
-  color: #2E7D32;
+  color: #6BBF80;
 }
 .badge--type-sm {
   font-size: 0.65rem;
@@ -428,9 +428,9 @@ body {
 .adm-grid-2col-var { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm); }
 .adm-grid-3col { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: end; }
 .adm-grid-formula { display: grid; grid-template-columns: 3fr 1fr 1fr; gap: var(--space-sm); }
-.adm-img-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #ddd; }
+.adm-img-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(255,255,255,0.1); }
 .adm-img-cover { width: 100%; height: 160px; object-fit: cover; display: block; }
-.adm-img-sm { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; }
+.adm-img-sm { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
 .adm-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
 .adm-input-sm { width: 100%; font-size: 0.75rem; padding: 3px 6px; border: 1px solid var(--color-light); border-radius: 4px; box-sizing: border-box; }
 .adm-text-truncate { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -439,5 +439,5 @@ body {
 .adm-btn-delete { margin-top: 6px; color: #c62828; border-color: #c62828; width: 100%; }
 .adm-text-xs { font-size: 0.65rem; }
 .adm-text-center-gray { text-align: center; color: var(--color-gray); }
-.adm-bg-light { background: #f5f5f5; }
+.adm-bg-light { background: rgba(255,255,255,0.04); }
 .adm-stat-value { font-size: var(--font-size-lg); font-weight: 700; }

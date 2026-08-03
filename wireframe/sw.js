@@ -1,5 +1,5 @@
-// Service Worker for Plants Story PWA
-var CACHE_VERSION = 'plants-story-v46';
+// Service Worker for Aroid Origins PWA
+var CACHE_VERSION = 'aroid-origins-v1';
 var OFFLINE_PAGE = './offline.html';
 var STATIC_ASSETS = [
   './',
