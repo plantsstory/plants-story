@@ -1177,6 +1177,17 @@ function updateCultivarDetail(cultivarName, rowEl) {
   // Short name for breadcrumb
   var shortName = cultivarName.replace(' [Seedling]', '').replace(genusName + ' ', '').replace(/'/g, '');
 
+  // Resolve the cultivar record up front — type detection, meta, JSON-LD and
+  // the sections further down all read from it.
+  // Try exact key, then seedling variant (with [Seedling] suffix)
+  var cData = cultivarData[cultivarName] || cultivarData[cultivarName + ' [Seedling]'];
+  if (!cData && cultivarName.indexOf(' [Seedling]') === -1) {
+    // Also try matching by display name (without [Seedling])
+    Object.keys(cultivarData).forEach(function(k) {
+      if (!cData && k.replace(' [Seedling]', '') === cultivarName) cData = cultivarData[k];
+    });
+  }
+
   // Get badge info from row, or fallback to cultivarData._type
   var detectedType = 'species';
   var badgeEl = rowEl ? rowEl.querySelector('.badge') : null;
@@ -1184,14 +1195,8 @@ function updateCultivarDetail(cultivarName, rowEl) {
     if (badgeEl.classList.contains('badge--hybrid')) detectedType = 'hybrid';
     else if (badgeEl.classList.contains('badge--clone')) detectedType = 'clone';
     else if (badgeEl.classList.contains('badge--seedling')) detectedType = 'seedling';
-  } else {
-    var _tempData = cultivarData[cultivarName] || cultivarData[cultivarName + ' [Seedling]'];
-    if (!_tempData) {
-      Object.keys(cultivarData).forEach(function(k) {
-        if (!_tempData && k.replace(' [Seedling]', '') === cultivarName) _tempData = cultivarData[k];
-      });
-    }
-    if (_tempData && _tempData._type) detectedType = _tempData._type;
+  } else if (cData && cData._type) {
+    detectedType = cData._type;
   }
   var bi = getBadgeInfo(detectedType, cultivarName);
 
@@ -1239,14 +1244,6 @@ function updateCultivarDetail(cultivarName, rowEl) {
 
   // Update created_at date
   var createdAtEl = document.getElementById('detail-created-at');
-  // Try exact key, then seedling variant (with [Seedling] suffix)
-  var cData = cultivarData[cultivarName] || cultivarData[cultivarName + ' [Seedling]'];
-  if (!cData && cultivarName.indexOf(' [Seedling]') === -1) {
-    // Also try matching by display name (without [Seedling])
-    Object.keys(cultivarData).forEach(function(k) {
-      if (!cData && k.replace(' [Seedling]', '') === cultivarName) cData = cultivarData[k];
-    });
-  }
 
   // Store cultivar ID and DB name on the page for edit/delete buttons
   var _cId = (cData && cData._id) ? cData._id : '';

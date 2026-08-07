@@ -2531,6 +2531,15 @@ if (false) {
         // Mark full data as loaded
         _dataFullyLoaded = true;
         window._dataFullyLoaded = true;
+        // Landing directly on a cultivar URL renders the detail before this
+        // fetch resolves, so type/badge/meta fall back to 'species'. Re-render
+        // now that the real record is in memory.
+        if (_currentPageId === 'cultivar' && typeof updateCultivarDetail === 'function') {
+          var _detailPage = document.getElementById('page-cultivar');
+          var _detailH1 = _detailPage ? _detailPage.querySelector('h1') : null;
+          var _detailName = _detailH1 ? _detailH1.textContent.trim() : '';
+          if (_detailName) updateCultivarDetail(_detailName, null);
+        }
         // Re-render all genus pages from data store
         (window._generaData || []).forEach(function(gObj) {
           var section = document.getElementById('genus-' + gObj.slug);
