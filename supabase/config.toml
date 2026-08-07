@@ -4,6 +4,16 @@
 # working directory name when running `supabase init`.
 project_id = "Plants_story"
 
+# Public functions consumed by crawlers/browsers without a Supabase JWT
+[functions.share]
+verify_jwt = false
+
+[functions.sitemap]
+verify_jwt = false
+
+[functions.og-image]
+verify_jwt = false
+
 [api]
 enabled = true
 # Port to use for the API URL.
