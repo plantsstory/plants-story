@@ -1,6 +1,8 @@
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('./sw.js').catch(function() {});
+    // Absolute path so registration works from static stub pages (/genus/name/)
+    var swRoot = location.hostname === 'plantsstory.github.io' ? '/plants-story/' : '/';
+    navigator.serviceWorker.register(swRoot + 'sw.js').catch(function() {});
   });
   navigator.serviceWorker.addEventListener('message', function(e) {
     if (e.data && e.data.type === 'SW_UPDATED') {

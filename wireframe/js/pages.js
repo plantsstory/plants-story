@@ -109,8 +109,8 @@
     var searchEl = document.getElementById('profile-post-search');
     if (searchEl) searchEl.value = '';
 
-    // Fetch profile
-    sb.from('profiles').select('*').eq('id', userId).single()
+    // Fetch profile (explicit columns: stripe_customer_id is not client-readable)
+    sb.from('profiles').select('id, display_name, avatar_url, bio, sns_instagram, sns_twitter, username, created_at').eq('id', userId).single()
       .then(function(res) {
         if (res.error || !res.data) {
           document.getElementById('profile-display-name').textContent = '名前未設定';
@@ -256,7 +256,7 @@
       });
     }
 
-    sb.from('profiles').select('*').eq('id', userId).single()
+    sb.from('profiles').select('id, display_name, avatar_url, bio, sns_instagram, sns_twitter, username, created_at').eq('id', userId).single()
       .then(function(res) {
         if (res.data) {
           document.getElementById('edit-display-name').value = res.data.display_name || '';
@@ -946,6 +946,12 @@ function renderOrigins(cultivarName) {
     });
 }
 
+// Only allow http(s) URLs in generated href attributes (blocks javascript: etc.)
+function safeUrl(u) {
+  u = String(u || '');
+  return /^https?:\/\//i.test(u) ? u : '';
+}
+
 // Render structured origin fields as HTML
 function renderStructuredOrigin(s) {
   var h = '';
@@ -958,7 +964,7 @@ function renderStructuredOrigin(s) {
     // 分類詳細（サブカテゴリ）
     if (s.species_subcategory && s.species_subcategory !== 'species') {
       var subLabels = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
-      h += '<div class="structured-field"><span class="structured-field__label">分類</span><span class="structured-field__value" style="font-style:italic;">' + (subLabels[s.species_subcategory] || s.species_subcategory) + '</span></div>';
+      h += '<div class="structured-field"><span class="structured-field__label">分類</span><span class="structured-field__value" style="font-style:italic;">' + escHtml(subLabels[s.species_subcategory] || s.species_subcategory) + '</span></div>';
     }
     // 記載情報
     var hasPublication = s.species_name || s.author_name || s.publication_year;
@@ -966,9 +972,9 @@ function renderStructuredOrigin(s) {
       h += '<div class="structured-section">';
       h += '<div class="structured-section__title">記載情報</div>';
       h += '<div class="structured-fields">';
-      if (s.species_name) h += '<div class="structured-field"><span class="structured-field__label">種名</span><span class="structured-field__value">' + s.species_name + '</span></div>';
-      if (s.author_name) h += '<div class="structured-field"><span class="structured-field__label">発表者</span><span class="structured-field__value">' + s.author_name + '</span></div>';
-      if (s.publication_year) h += '<div class="structured-field"><span class="structured-field__label">発表年</span><span class="structured-field__value">' + s.publication_year + '</span></div>';
+      if (s.species_name) h += '<div class="structured-field"><span class="structured-field__label">種名</span><span class="structured-field__value">' + escHtml(s.species_name) + '</span></div>';
+      if (s.author_name) h += '<div class="structured-field"><span class="structured-field__label">発表者</span><span class="structured-field__value">' + escHtml(s.author_name) + '</span></div>';
+      if (s.publication_year) h += '<div class="structured-field"><span class="structured-field__label">発表年</span><span class="structured-field__value">' + escHtml(s.publication_year) + '</span></div>';
       h += '</div></div>';
     }
     // 採取情報
@@ -977,31 +983,31 @@ function renderStructuredOrigin(s) {
       h += '<div class="structured-section">';
       h += '<div class="structured-section__title">採取情報</div>';
       h += '<div class="structured-fields">';
-      if (s.collector) h += '<div class="structured-field"><span class="structured-field__label">発見者</span><span class="structured-field__value">' + s.collector + '</span></div>';
-      if (s.collection_year) h += '<div class="structured-field"><span class="structured-field__label">採取年</span><span class="structured-field__value">' + s.collection_year + '</span></div>';
-      if (s.type_locality) h += '<div class="structured-field"><span class="structured-field__label">採取地</span><span class="structured-field__value">' + s.type_locality + '</span></div>';
+      if (s.collector) h += '<div class="structured-field"><span class="structured-field__label">発見者</span><span class="structured-field__value">' + escHtml(s.collector) + '</span></div>';
+      if (s.collection_year) h += '<div class="structured-field"><span class="structured-field__label">採取年</span><span class="structured-field__value">' + escHtml(s.collection_year) + '</span></div>';
+      if (s.type_locality) h += '<div class="structured-field"><span class="structured-field__label">採取地</span><span class="structured-field__value">' + escHtml(s.type_locality) + '</span></div>';
       h += '</div></div>';
     }
-    if (s.known_habitats) h += '<div class="structured-section"><div class="structured-section__title">生息地</div><div class="structured-field__value">' + s.known_habitats + '</div></div>';
+    if (s.known_habitats) h += '<div class="structured-section"><div class="structured-section__title">生息地</div><div class="structured-field__value">' + escHtml(s.known_habitats) + '</div></div>';
   } else if (s.origin_type === 'clone') {
-    if (s.namer) h += '<div class="structured-field"><span class="structured-field__label">名付けた人物</span><span class="structured-field__value">' + s.namer + '</span></div>';
-    if (s.naming_year) h += '<div class="structured-field"><span class="structured-field__label">名付けた年</span><span class="structured-field__value">' + s.naming_year + '</span></div>';
+    if (s.namer) h += '<div class="structured-field"><span class="structured-field__label">名付けた人物</span><span class="structured-field__value">' + escHtml(s.namer) + '</span></div>';
+    if (s.naming_year) h += '<div class="structured-field"><span class="structured-field__label">名付けた年</span><span class="structured-field__value">' + escHtml(s.naming_year) + '</span></div>';
   } else if (s.origin_type === 'hybrid') {
     if (s.breeder) h += '<div class="structured-field"><span class="structured-field__label">作出者</span><span class="structured-field__value"><a href="#" class="text-primary no-decoration breeder-link" data-breeder="' + escHtml(s.breeder) + '">' + escHtml(s.breeder) + '</a></span></div>';
-    if (s.naming_year) h += '<div class="structured-field"><span class="structured-field__label">名付けた年</span><span class="structured-field__value">' + s.naming_year + '</span></div>';
+    if (s.naming_year) h += '<div class="structured-field"><span class="structured-field__label">名付けた年</span><span class="structured-field__value">' + escHtml(s.naming_year) + '</span></div>';
   } else if (s.origin_type === 'seedling') {
     if (s.breeder) h += '<div class="structured-field"><span class="structured-field__label">作出者</span><span class="structured-field__value"><a href="#" class="text-primary no-decoration breeder-link" data-breeder="' + escHtml(s.breeder) + '">' + escHtml(s.breeder) + '</a></span></div>';
-    if (s.sowing_date) h += '<div class="structured-field"><span class="structured-field__label">播種日</span><span class="structured-field__value">' + s.sowing_date + '</span></div>';
+    if (s.sowing_date) h += '<div class="structured-field"><span class="structured-field__label">播種日</span><span class="structured-field__value">' + escHtml(s.sowing_date) + '</span></div>';
   }
   // 補足欄 (all types)
-  if (s.notes) h += '<div class="structured-section"><div class="structured-section__title">補足</div><div class="structured-field__value">' + s.notes + '</div></div>';
+  if (s.notes) h += '<div class="structured-section"><div class="structured-section__title">補足</div><div class="structured-field__value">' + escHtml(s.notes) + '</div></div>';
   // 引用リンク (all types)
   if (s.citation_links && s.citation_links.length > 0) {
     h += '<div class="structured-section"><div class="structured-section__title">引用</div>';
     s.citation_links.forEach(function(link) {
-      var url = typeof link === 'string' ? link : link.url;
+      var url = safeUrl(typeof link === 'string' ? link : link.url);
       var label = (typeof link === 'object' && link.label) ? link.label : url;
-      if (url) h += '<div class="structured-citation"><a href="' + url + '" target="_blank" rel="noopener">' + label + '</a></div>';
+      if (url) h += '<div class="structured-citation"><a href="' + escHtml(url) + '" target="_blank" rel="noopener">' + escHtml(label) + '</a></div>';
     });
     h += '</div>';
   }
@@ -1024,7 +1030,7 @@ function buildFormulaHtml(data, isSeedling, _sb) {
     }
     h += '<div class="min-w-0">';
     h += '<div class="text-xs text-muted mb-xs">' + label + '</div>';
-    h += '<span class="formula-parent formula-parent-display">' + (name || '') + '</span>';
+    h += '<span class="formula-parent formula-parent-display">' + escHtml(name || '') + '</span>';
     h += '</div></div>';
     return h;
   }
@@ -1056,20 +1062,21 @@ function renderOriginsInner(cultivarName, container) {
   }
 
   origins.forEach(function(origin, i) {
-    var trustLevel = getTrustClass(origin.trust);
+    var trustNum = Math.max(0, Math.min(100, parseInt(origin.trust, 10) || 0));
+    var trustLevel = getTrustClass(trustNum);
     html += '<div class="origin-card">';
     if (!isSeedling) {
       html += '<div class="origin-card__header">';
       html += '<span class="origin-card__rank">#' + (i + 1) + '</span>';
       html += '<div class="trust trust--lg" style="flex:1;margin-left:var(--space-md);" data-trust-idx="' + i + '">';
-      html += '<div class="trust__bar"><div class="trust__fill ' + trustLevel + '" style="width:' + origin.trust + '%"></div></div>';
-      html += '<span class="trust__label">' + origin.trust + '%</span>';
+      html += '<div class="trust__bar"><div class="trust__fill ' + trustLevel + '" style="width:' + trustNum + '%"></div></div>';
+      html += '<span class="trust__label">' + trustNum + '%</span>';
       html += '</div></div>';
     }
     if (origin.structured) {
       html += '<div class="origin-card__body">' + renderStructuredOrigin(origin.structured) + '</div>';
     } else {
-      html += '<div class="origin-card__body"><p>' + origin.body + '</p></div>';
+      html += '<div class="origin-card__body"><p>' + escHtml(origin.body) + '</p></div>';
     }
     // Verification details
     if (origin.source_type === 'user_verified' && origin.verification) {
@@ -1078,26 +1085,28 @@ function renderOriginsInner(cultivarName, container) {
       html += '<div class="verification-details">';
       html += '<button class="verification-toggle" onclick="document.getElementById(\'' + vid + '\').classList.toggle(\'d-none\');">検証詳細</button>';
       html += '<div id="' + vid + '" class="variation-detail d-none">';
-      if (v.summary_jp) html += '<div class="text-sm variation-summary">' + v.summary_jp + '</div>';
+      if (v.summary_jp) html += '<div class="text-sm variation-summary">' + escHtml(v.summary_jp) + '</div>';
       if (v.claims && v.claims.length > 0) {
         v.claims.forEach(function(c) {
           var si = '?', sc = 'claim--unverifiable';
           if (c.status === 'verified') { si = '\u2713'; sc = 'claim--verified'; }
           else if (c.status === 'partially_verified') { si = '~'; sc = 'claim--partial'; }
           else if (c.status === 'contradicted') { si = '\u26A0'; sc = 'claim--contradicted'; }
-          html += '<div class="claim ' + sc + '">' + si + ' ' + c.claim;
-          if (c.source) html += ' <span class="text-gray text-xs">(' + c.source + ')</span>';
+          html += '<div class="claim ' + sc + '">' + si + ' ' + escHtml(c.claim);
+          if (c.source) html += ' <span class="text-gray text-xs">(' + escHtml(c.source) + ')</span>';
           html += '</div>';
         });
       }
       if (v.warnings && v.warnings.length > 0) {
-        v.warnings.forEach(function(w) { html += '<div class="verification-warnings">&#x26A0; ' + w + '</div>'; });
+        v.warnings.forEach(function(w) { html += '<div class="verification-warnings">&#x26A0; ' + escHtml(w) + '</div>'; });
       }
       if (v.found_sources && v.found_sources.length > 0) {
         html += '<div class="text-sm font-bold mt-sm">AIが発見したリンク:</div>';
         v.found_sources.forEach(function(fs) {
           var rc = fs.reliability === 'high' ? '#2D6A4F' : fs.reliability === 'medium' ? '#D4A373' : '#6c757d';
-          html += '<div class="found-source"><a href="' + fs.url + '" target="_blank" rel="noopener">' + (fs.label || fs.url) + '</a> <span style="font-size:0.75rem;color:' + rc + ';">(' + fs.reliability + ')</span></div>';
+          var fsUrl = safeUrl(fs.url);
+          if (!fsUrl) return;
+          html += '<div class="found-source"><a href="' + escHtml(fsUrl) + '" target="_blank" rel="noopener">' + escHtml(fs.label || fsUrl) + '</a> <span style="font-size:0.75rem;color:' + rc + ';">(' + escHtml(fs.reliability) + ')</span></div>';
         });
       }
       html += '</div></div>';
@@ -1110,21 +1119,21 @@ function renderOriginsInner(cultivarName, container) {
     }
     var srcList = origin.sources || [];
     srcList.forEach(function(src) {
-      var icon = src.icon || '&#x1F310;';
+      var icon = src.icon ? escHtml(src.icon) : '&#x1F310;';
       var text = src.text || src.label || src.url || '';
-      var href = src.url || '#';
+      var href = safeUrl(src.url);
       if (!text) return;
       html += '<div class="origin-card__source-item"><span class="source-link__icon">' + icon + '</span>';
-      if (href && href !== '#') {
-        html += '<a href="' + href + '" target="_blank" rel="noopener">' + text + '</a>';
+      if (href) {
+        html += '<a href="' + escHtml(href) + '" target="_blank" rel="noopener">' + escHtml(text) + '</a>';
       } else {
-        html += '<span>' + text + '</span>';
+        html += '<span>' + escHtml(text) + '</span>';
       }
       html += '</div>';
     });
-    if (!srcList.length && origin.source_url) {
+    if (!srcList.length && origin.source_url && safeUrl(origin.source_url)) {
       html += '<div class="origin-card__source-item"><span class="source-link__icon">&#x1F310;</span>';
-      html += '<a href="' + origin.source_url + '" target="_blank" rel="noopener">' + origin.source_url + '</a></div>';
+      html += '<a href="' + escHtml(safeUrl(origin.source_url)) + '" target="_blank" rel="noopener">' + escHtml(origin.source_url) + '</a></div>';
     }
     html += '</div>';
     // Footer
@@ -1136,9 +1145,9 @@ function renderOriginsInner(cultivarName, container) {
     } else if (origin.author && origin.author.isAI) {
       html += '<span class="badge badge--hybrid badge--type-sm">&#x1F916; AI</span>';
     } else {
-      html += '<span>&#x1F464;</span><span>' + (origin.author ? origin.author.name : 'User') + '</span>';
+      html += '<span>&#x1F464;</span><span>' + escHtml(origin.author ? origin.author.name : 'User') + '</span>';
     }
-    html += '<span class="text-gray">' + (origin.author ? origin.author.date : '') + '</span>';
+    html += '<span class="text-gray">' + escHtml(origin.author ? origin.author.date : '') + '</span>';
     html += '</div><div class="vote-group">';
     html += renderVoteButtons(i, origin.votes);
     html += '</div></div>';

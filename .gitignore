@@ -13,5 +13,11 @@ verify_results.mjs
 # Supabase temp files
 supabase/.temp/
 
+# SEO stub pages (generated in CI by scripts/generate-static-pages.js)
+wireframe/anthurium/
+wireframe/monstera/
+wireframe/philodendron/
+wireframe/platycerium/
+
 # Private notes
 ログイン情報メモ.txt

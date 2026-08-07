@@ -11,14 +11,14 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
  * Usage: https://<project>.supabase.co/functions/v1/share?name=Anthurium%20crystallinum
  */
 
-const SITE_URL = "https://plantsstory.github.io/plants-story/";
+const SITE_URL = "https://plantsstory.com/";
 
 serve(async (req: Request) => {
   const url = new URL(req.url);
   const name = url.searchParams.get("name") || "";
 
-  if (!name) {
-    return new Response("Missing name parameter", { status: 400 });
+  if (!name || name.length > 200) {
+    return new Response("Invalid name parameter", { status: 400 });
   }
 
   // Build Supabase client (service role for public read)
@@ -88,7 +88,9 @@ serve(async (req: Request) => {
 
   const title = displayName + " - " + genus + " | Aroid Origins";
   const desc = description || displayName + " (" + genus + " " + typeLabel + ") の由来・歴史情報";
-  const genusSlug = (genus || displayName.split(" ")[0]).toLowerCase();
+  // encodeURIComponent on BOTH segments: genusSlug can derive from the
+  // query string, so it must never reach the HTML/JS below unencoded (XSS)
+  const genusSlug = encodeURIComponent((genus || displayName.split(" ")[0]).toLowerCase());
   const rest = displayName.replace(/^\S+\s*/, "");
   const spaUrl = SITE_URL + genusSlug + "/" + encodeURIComponent(rest);
 
@@ -118,7 +120,7 @@ serve(async (req: Request) => {
 </head>
 <body>
 <p>Redirecting to <a href="${esc(spaUrl)}">${esc(displayName)} - Aroid Origins</a>...</p>
-<script>window.location.replace(${JSON.stringify(spaUrl)});</script>
+<script>window.location.replace(${JSON.stringify(spaUrl).replace(/</g, "\\u003c")});</script>
 </body>
 </html>`;
 

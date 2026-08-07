@@ -1510,6 +1510,13 @@ if (false) {
           window.history.replaceState({}, '', _basePath);
           if (typeof navigateTo === 'function') navigateTo('top');
         }
+        // Resume checkout selected before login (paywall -> OAuth -> Stripe)
+        var pendingPlan = localStorage.getItem('pending_checkout_plan');
+        if (pendingPlan) {
+          localStorage.removeItem('pending_checkout_plan');
+          showToast('決済画面へ移動します...');
+          setTimeout(function() { startCheckout(pendingPlan); }, 800);
+        }
       }
     });
     supabase.auth.getSession().then(function(res) {
@@ -1571,6 +1578,56 @@ if (false) {
     });
   }
 
+  // Handle return from Stripe Checkout (?subscription=success / canceled)
+  function handleSubscriptionReturn() {
+    var search = window.location.search || '';
+    var m = search.match(/[?&]subscription=(success|canceled)/);
+    if (!m) return;
+    var result = m[1];
+
+    // Clean the query string but keep path + hash (legacy #/profile-edit etc.)
+    var cleaned = search.replace(/[?&]subscription=(success|canceled)/, '').replace(/^&/, '?');
+    if (cleaned === '?') cleaned = '';
+    window.history.replaceState({}, '', window.location.pathname + cleaned + window.location.hash);
+
+    if (result === 'canceled') {
+      showToast('決済をキャンセルしました。年額プランなら2ヶ月分お得です');
+      return;
+    }
+
+    // success: report conversion, then wait for the webhook to land
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'subscription_checkout_success', { method: 'stripe_checkout' });
+    }
+    var attempts = 0;
+    var poll = function() {
+      attempts++;
+      // Session restore is async on page load: wait for the user first
+      if (!window._currentUser) {
+        if (attempts < 10) setTimeout(poll, 1000);
+        return;
+      }
+      checkSubscription().then(function(isSub) {
+        if (isSub) {
+          var msg = '🌱 プレミアムへようこそ！シードリングが閲覧できるようになりました';
+          if (window._subscriptionStatus === 'trialing' && window._subscriptionEnd) {
+            var d = new Date(window._subscriptionEnd);
+            msg = '🌱 30日間の無料トライアルを開始しました（' + (d.getMonth() + 1) + '/' + d.getDate() + ' まで）';
+          }
+          showToast(msg);
+          if (typeof refreshSeedlingPreview === 'function') refreshSeedlingPreview();
+        } else if (attempts < 10) {
+          // Stripe webhook may take a few seconds to update the DB
+          setTimeout(poll, 2000);
+        } else {
+          showToast('決済を確認しました。反映まで少しお待ちください');
+        }
+      });
+    };
+    poll();
+  }
+  handleSubscriptionReturn();
+
   // Start Stripe checkout
   psExport('startCheckout', startCheckout);
   var _checkoutInProgress = false;
@@ -1578,7 +1635,22 @@ if (false) {
     if (_checkoutInProgress) return;
     var sb = window._supabaseClient;
     if (!sb || !window._currentUser) {
-      showToast('ログインが必要です', true);
+      // Not logged in: remember the selected plan, send to Google OAuth,
+      // and resume checkout automatically on return (SIGNED_IN handler)
+      if (supabase) {
+        localStorage.setItem('pending_checkout_plan', plan === 'annual' ? 'annual' : 'monthly');
+        localStorage.setItem('login_return_path', window.location.pathname || _basePath);
+        showToast('ログイン後、そのまま決済画面へ進みます');
+        supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin + _basePath,
+            queryParams: { prompt: 'select_account' }
+          }
+        });
+      } else {
+        showToast('ログインが必要です', true);
+      }
       return;
     }
 

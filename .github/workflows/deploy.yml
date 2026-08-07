@@ -3,6 +3,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [master, main]
+  schedule:
+    # Daily 03:00 JST — keeps sitemap & SEO stubs fresh as cultivars are added
+    - cron: '0 18 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -26,6 +30,8 @@ jobs:
           node-version: '20'
       - name: Generate sitemap from Supabase
         run: node scripts/generate-sitemap.js
+      - name: Generate static SEO stub pages
+        run: node scripts/generate-static-pages.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -1,8 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SITE_URL = "https://plantsstory.github.io/plants-story/";
-const SHARE_URL = "https://jpgbehsrglsiwijglhjo.supabase.co/functions/v1/share";
+const SITE_URL = "https://plantsstory.com/";
 
 serve(async (_req: Request) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
@@ -17,10 +16,12 @@ serve(async (_req: Request) => {
   // Static pages
   const staticPages = [
     { loc: SITE_URL, priority: "1.0", changefreq: "daily" },
-    { loc: SITE_URL + "#/about", priority: "0.5", changefreq: "monthly" },
-    { loc: SITE_URL + "#/terms", priority: "0.3", changefreq: "monthly" },
-    { loc: SITE_URL + "#/privacy", priority: "0.3", changefreq: "monthly" },
-    { loc: SITE_URL + "#/contact", priority: "0.3", changefreq: "monthly" },
+    { loc: SITE_URL + "about", priority: "0.5", changefreq: "monthly" },
+    { loc: SITE_URL + "guide", priority: "0.5", changefreq: "monthly" },
+    { loc: SITE_URL + "terms", priority: "0.3", changefreq: "monthly" },
+    { loc: SITE_URL + "privacy", priority: "0.3", changefreq: "monthly" },
+    { loc: SITE_URL + "tokushoho", priority: "0.3", changefreq: "monthly" },
+    { loc: SITE_URL + "contact", priority: "0.3", changefreq: "monthly" },
   ];
 
   // Genus pages from DB
@@ -54,13 +55,18 @@ serve(async (_req: Request) => {
 
   // Genus pages
   for (const g of genera) {
-    xml += urlEntry(SITE_URL + "#/" + g.slug, today, "daily", "0.9");
+    xml += urlEntry(SITE_URL + g.slug, today, "daily", "0.9");
   }
 
-  // Cultivar pages (use share URL for crawlers — it serves real HTML with OG tags)
+  // Cultivar pages (path URLs matching the static site; skip paywalled seedlings)
   for (const c of cultivars) {
-    const shareUrl = SHARE_URL + "?name=" + encodeURIComponent(c.cultivar_name);
-    xml += urlEntry(shareUrl, today, "weekly", "0.8");
+    if (c.cultivar_name.includes("[Seedling]")) continue;
+    const genus = c.genus || "Anthurium";
+    const genusSlug = genus.toLowerCase();
+    const rest = c.cultivar_name.startsWith(genus + " ")
+      ? c.cultivar_name.slice(genus.length + 1)
+      : c.cultivar_name;
+    xml += urlEntry(SITE_URL + genusSlug + "/" + encodeURIComponent(rest), today, "weekly", "0.8");
   }
 
   xml += "</urlset>";

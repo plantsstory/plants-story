@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob:; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co; object-src 'none'; base-uri 'self';">
   <title>Aroid Origins - Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1235,7 +1237,7 @@ function originTypeBadge(t, structured) {
     var subMap = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
     label += ' (' + (subMap[structured.species_subcategory] || structured.species_subcategory) + ')';
   }
-  return '<span class="badge ' + cls + ' badge--type-sm">' + label + '</span>';
+  return '<span class="badge ' + cls + ' badge--type-sm">' + escapeHtml(label) + '</span>';
 }
 
 function structuredSummaryHtml(s, cType, origin) {
@@ -1253,21 +1255,21 @@ function structuredSummaryHtml(s, cType, origin) {
     if (cType === 'species') {
       if (s.species_subcategory && s.species_subcategory !== 'species') {
         var subLabels = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
-        parts.push('<b>分類:</b> ' + (subLabels[s.species_subcategory] || s.species_subcategory));
+        parts.push('<b>分類:</b> ' + escapeHtml(subLabels[s.species_subcategory] || s.species_subcategory));
       }
       if (s.author_name) parts.push('<b>発表者:</b> ' + escapeHtml(s.author_name));
-      if (s.publication_year) parts.push('<b>発表年:</b> ' + s.publication_year);
+      if (s.publication_year) parts.push('<b>発表年:</b> ' + escapeHtml(s.publication_year));
       if (s.collector) parts.push('<b>発見者:</b> ' + escapeHtml(s.collector));
-      if (s.collection_year) parts.push('<b>採取年:</b> ' + s.collection_year);
+      if (s.collection_year) parts.push('<b>採取年:</b> ' + escapeHtml(s.collection_year));
       if (s.type_locality) parts.push('<b>採取地:</b> ' + escapeHtml(s.type_locality));
       if (s.known_habitats) parts.push('<b>生息地:</b> ' + escapeHtml(s.known_habitats));
     } else if (cType === 'clone') {
       if (s.namer) parts.push('<b>命名者:</b> ' + escapeHtml(s.namer));
-      if (s.naming_year) parts.push('<b>命名年:</b> ' + s.naming_year);
+      if (s.naming_year) parts.push('<b>命名年:</b> ' + escapeHtml(s.naming_year));
       if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
     } else if (cType === 'hybrid') {
       if (s.breeder) parts.push('<b>作出者:</b> ' + escapeHtml(s.breeder));
-      if (s.naming_year) parts.push('<b>命名年:</b> ' + s.naming_year);
+      if (s.naming_year) parts.push('<b>命名年:</b> ' + escapeHtml(s.naming_year));
       if (s.formula) parts.push('<b>交配式:</b> ' + escapeHtml((s.formula.parentA || '?') + ' × ' + (s.formula.parentB || '?')));
     } else if (cType === 'seedling') {
       if (s.breeder) parts.push('<b>作出者:</b> ' + escapeHtml(s.breeder));
@@ -1349,7 +1351,7 @@ function loadOrigins() {
       } else {
         authorLabel = '<span class="badge badge--seedling badge--type-sm">&#x1F464; User</span>';
       }
-      var trustPct = o.trust || 0;
+      var trustPct = Math.max(0, Math.min(100, parseInt(o.trust, 10) || 0));
       var tColor = trustColor(trustPct);
       var s = o.structured || {};
       var oType = s.origin_type || cType;

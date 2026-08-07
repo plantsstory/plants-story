@@ -1346,6 +1346,32 @@ serve(async (req: Request) => {
       cultivar_name: cultivar_name,
     });
 
+    // ── manual_origins can replace existing origins wholesale, so only the
+    //    cultivar owner or an admin may supply them. The origin-contribution
+    //    flow never sends manual_origins (it uses the DB-preserve path). ──
+    if (manual_origins) {
+      if (!Array.isArray(manual_origins) || manual_origins.length > 50 ||
+          JSON.stringify(manual_origins).length > 100000) {
+        return new Response(
+          JSON.stringify({ error: "Invalid manual_origins payload" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (cultivar_id && !isAdmin) {
+        const { data: ownRow } = await serviceClient
+          .from("cultivars")
+          .select("user_id")
+          .eq("id", cultivar_id)
+          .single();
+        if (!ownRow || !ownRow.user_id || ownRow.user_id !== authUser.id) {
+          return new Response(
+            JSON.stringify({ error: "Permission denied: only the cultivar owner can supply manual_origins" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+    }
+
     // Skip AI research for seedlings
     if (type === "seedling") {
       return new Response(
