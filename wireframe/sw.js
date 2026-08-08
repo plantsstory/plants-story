@@ -1,5 +1,5 @@
 // Service Worker for Aroid Origins PWA
-var CACHE_VERSION = 'aroid-origins-v7';
+var CACHE_VERSION = 'aroid-origins-v8';
 var OFFLINE_PAGE = './offline.html';
 var STATIC_ASSETS = [
   './',

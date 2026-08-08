@@ -2,7 +2,7 @@
    PAGE: TOP / LANDING
    ======================================== */
 .hero {
-  background: linear-gradient(135deg, #1A5548 0%, #25685A 50%, #558A7A 100%);
+  background: #16241B url('../images/hero-mist.jpg') center / cover no-repeat;
   padding: var(--space-3xl) 0 var(--space-2xl);
   position: relative;
   overflow: hidden;
