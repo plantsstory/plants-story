@@ -1260,20 +1260,22 @@ if (false) {
     if (!supabase) {
       // Fallback: hardcoded genera if Supabase is not available
       window._generaData = [
-        { name: 'Anthurium', slug: 'anthurium', display_order: 1, has_seedlings: true, card_image_path: 'anthurium.png' },
-        { name: 'Monstera', slug: 'monstera', display_order: 2, has_seedlings: false, card_image_path: 'monstera.png' },
-        { name: 'Philodendron', slug: 'philodendron', display_order: 3, has_seedlings: false, card_image_path: 'philodendron.png' }
+        { name: 'Anthurium', slug: 'anthurium', display_order: 1, has_seedlings: true, card_image_path: 'anthurium.png' }
       ];
       applyGeneraData();
       return Promise.resolve();
     }
-    return supabase.from('genera').select('*').order('display_order').then(function(res) {
+    return supabase.from('genera').select('*').eq('is_visible', true).order('display_order').then(function(res) {
+      if (res.error) {
+        // is_visible column may not exist yet — retry unfiltered
+        return supabase.from('genera').select('*').order('display_order');
+      }
+      return res;
+    }).then(function(res) {
       if (res.error || !res.data || res.data.length === 0) {
         console.warn('Failed to load genera, using fallback:', res.error);
         window._generaData = [
-          { name: 'Anthurium', slug: 'anthurium', display_order: 1, has_seedlings: true, card_image_path: 'anthurium.png' },
-          { name: 'Monstera', slug: 'monstera', display_order: 2, has_seedlings: false, card_image_path: 'monstera.png' },
-          { name: 'Philodendron', slug: 'philodendron', display_order: 3, has_seedlings: false, card_image_path: 'philodendron.png' }
+          { name: 'Anthurium', slug: 'anthurium', display_order: 1, has_seedlings: true, card_image_path: 'anthurium.png' }
         ];
       } else {
         window._generaData = res.data;
@@ -2317,9 +2319,12 @@ if (false) {
 
     if (supabase) {
       grid.innerHTML = skeletonCards(5);
-      supabase.from('cultivars')
+      var visibleNames = (window._generaData || []).map(function(g) { return g.name; });
+      var recentQuery = supabase.from('cultivars')
         .select('id, cultivar_name, genus, type, origins, updated_at')
-        .neq('type', 'seedling')
+        .neq('type', 'seedling');
+      if (visibleNames.length > 0) recentQuery = recentQuery.in('genus', visibleNames);
+      recentQuery
         .order('updated_at', { ascending: false, nullsFirst: false })
         .limit(5)
         .then(function(res) {

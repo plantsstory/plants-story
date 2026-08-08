@@ -102,8 +102,14 @@ function safeDirName(name) {
 async function main() {
   const template = fs.readFileSync(path.join(WIREFRAME, 'index.html'), 'utf8');
 
-  const genera = await fetchJSON('/rest/v1/genera?select=slug,name&order=display_order');
-  const cultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,origins,updated_at&order=genus,cultivar_name');
+  let genera = await fetchJSON('/rest/v1/genera?select=slug,name&is_visible=eq.true&order=display_order');
+  if (!Array.isArray(genera)) {
+    // is_visible column may not exist yet — retry unfiltered
+    genera = await fetchJSON('/rest/v1/genera?select=slug,name&order=display_order');
+  }
+  const visibleGenusNames = new Set(genera.map(g => g.name));
+  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,origins,updated_at&order=genus,cultivar_name');
+  const cultivars = allCultivars.filter(c => visibleGenusNames.has(c.genus || 'Anthurium'));
   const images = await fetchJSON('/rest/v1/cultivar_images?select=cultivar_name,storage_path&order=display_order');
 
   const imageMap = {};

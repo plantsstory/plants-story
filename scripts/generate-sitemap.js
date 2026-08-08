@@ -25,10 +25,16 @@ function fetchJSON(urlPath) {
 }
 
 async function main() {
-  // Fetch genera
-  const genera = await fetchJSON('/rest/v1/genera?select=slug,name&order=display_order');
+  // Fetch genera (public site shows visible genera only)
+  let genera = await fetchJSON('/rest/v1/genera?select=slug,name&is_visible=eq.true&order=display_order');
+  if (!Array.isArray(genera)) {
+    // is_visible column may not exist yet — retry unfiltered
+    genera = await fetchJSON('/rest/v1/genera?select=slug,name&order=display_order');
+  }
+  const visibleGenusNames = new Set(genera.map(g => g.name));
   // Fetch cultivars (non-seedling only for public sitemap)
-  const cultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,updated_at&order=genus,cultivar_name');
+  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,updated_at&order=genus,cultivar_name');
+  const cultivars = allCultivars.filter(c => visibleGenusNames.has(c.genus || 'Anthurium'));
 
   const SITE = 'https://plantsstory.com';
   const today = new Date().toISOString().split('T')[0];

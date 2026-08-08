@@ -1673,9 +1673,12 @@ function globalSearch(query) {
   if (!q) return;
   trackEvent('search', { search_term: q });
 
-  // -- Cultivar search (data-driven from _genusItems) --
+  // -- Cultivar search (data-driven from _genusItems, visible genera only) --
+  var visibleSlugs = {};
+  (window._generaData || []).forEach(function(g) { visibleSlugs[g.slug] = true; });
   var cultivarResults = [];
   Object.keys(_genusItems).forEach(function(slug) {
+    if (!visibleSlugs[slug]) return;
     (_genusItems[slug] || []).forEach(function(item) {
       if (item.fullName.toLowerCase().indexOf(q) !== -1) {
         cultivarResults.push(item);

@@ -24,15 +24,21 @@ serve(async (_req: Request) => {
     { loc: SITE_URL + "contact", priority: "0.3", changefreq: "monthly" },
   ];
 
-  // Genus pages from DB
-  let genera: { slug: string }[] = [];
+  // Genus pages from DB (visible genera only)
+  let genera: { slug: string; name: string }[] = [];
   try {
-    const { data } = await sb
+    let { data } = await sb
       .from("genera")
-      .select("slug")
+      .select("slug, name")
+      .eq("is_visible", true)
       .order("display_order");
+    if (!data) {
+      // is_visible column may not exist yet — retry unfiltered
+      ({ data } = await sb.from("genera").select("slug, name").order("display_order"));
+    }
     if (data) genera = data;
   } catch (_e) { /* fallback: empty */ }
+  const visibleGenusNames = new Set(genera.map((g) => g.name));
 
   // All cultivar names from DB
   let cultivars: { cultivar_name: string; genus: string }[] = [];
@@ -62,6 +68,7 @@ serve(async (_req: Request) => {
   for (const c of cultivars) {
     if (c.cultivar_name.includes("[Seedling]")) continue;
     const genus = c.genus || "Anthurium";
+    if (!visibleGenusNames.has(genus)) continue;
     const genusSlug = genus.toLowerCase();
     const rest = c.cultivar_name.startsWith(genus + " ")
       ? c.cultivar_name.slice(genus.length + 1)

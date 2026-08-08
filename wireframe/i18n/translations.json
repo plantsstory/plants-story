@@ -213,7 +213,7 @@
   "tokushoho_env_label": { "jp": "動作環境", "en": "System Requirements" },
   "tokushoho_env_value": { "jp": "モダンブラウザ（Chrome、Safari、Firefox、Edge の最新版）", "en": "Modern browsers (latest versions of Chrome, Safari, Firefox, Edge)" },
   "about_title": { "jp": "About Aroid Origins", "en": "About Aroid Origins" },
-  "about_mission_text": { "jp": "植物の品種には、それぞれ独自の物語があります。Aroid Originsは、アロイド植物（Anthurium、Monstera、Philodendron等）の品種の由来や歴史を、みんなで集めて共有するプラットフォームです。", "en": "Every plant cultivar has its own unique story. Aroid Origins is a community platform for collecting and sharing the origins and history of aroid cultivars (Anthurium, Monstera, Philodendron, and more)." },
+  "about_mission_text": { "jp": "植物の品種には、それぞれ独自の物語があります。Aroid Originsは、Anthuriumをはじめとするアロイド植物の品種の由来や歴史を、みんなで集めて共有するプラットフォームです。", "en": "Every plant cultivar has its own unique story. Aroid Origins is a community platform for collecting and sharing the origins and history of aroid cultivars, starting with Anthurium." },
   "about_features_title": { "jp": "主な特徴", "en": "Key Features" },
   "about_features_list": { "jp": "コミュニティによる品種由来情報の収集と検証\n信頼度スコアによる情報の可視化\nAIによる由来情報の自動生成支援\n画像のReal/Fake投票による品質管理\n日本語・英語バイリンガル対応", "en": "Community-driven cultivar origin collection and verification\nTrust score visualization for information reliability\nAI-assisted origin information generation\nImage quality control through Real/Fake voting\nBilingual support (Japanese/English)" },
   "about_operator_title": { "jp": "運営情報", "en": "Operator Information" },
