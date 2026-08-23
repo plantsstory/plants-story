@@ -1055,5 +1055,17 @@
   "about_plan_features": {
     "jp": "My Seedlings：実生（交配）記録の無制限投稿\nコレクションアーカイブとしての継続的な記録・編集",
     "en": "My Seedlings: unlimited posting of seedling (cross) records\nOngoing recording and editing as your collection archive"
+  },
+  "hero_desc": {
+    "jp": "アンスリウムなどアロイド品種の由来・交配情報を、学術データベースとコミュニティで検証する図鑑",
+    "en": "A botanical register verifying the origins and crosses of Anthurium and other aroids with academic databases and community review."
+  },
+  "nav_contribute": {
+    "jp": "+ 投稿",
+    "en": "+ Contribute"
+  },
+  "nav_contribute_mobile": {
+    "jp": "📝 品種を投稿",
+    "en": "📝 Contribute"
   }
 }

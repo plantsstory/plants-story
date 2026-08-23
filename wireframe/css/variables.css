@@ -1,9 +1,10 @@
 :root {
   /* Tropical Shade — Light Theme */
-  --color-primary: #3D8A78;
+  /* #34786A: white text passes WCAG AA (was #3D8A78 at 4.11:1) */
+  --color-primary: #34786A;
   --color-primary-dark: #1A5548;
   --color-primary-light: #6AB0A0;
-  --color-accent: #3D8A78;
+  --color-accent: #34786A;
   --color-accent-warm: #C49B5C;
 
   --color-black: #283532;
@@ -17,14 +18,29 @@
   --color-bg: #F2F5F4;
   --color-white: #FFFFFF;
 
-  /* Semantic Colors */
-  --color-danger: #D94045;
+  /* Semantic Colors (single source for every red on the site) */
+  --color-danger: #C03A3F;
+  --color-danger-bg: #F7E7E6;
   --color-warning: #D4870A;
-  --color-trust-high: #3D8A78;
+  --color-trust-high: #34786A;
   --color-trust-mid: #C49B5C;
-  --color-trust-low: #D94045;
+  --color-trust-low: #C03A3F;
+
+  /* Badge / chip palette — one tonal family (botanical-label look) */
+  --badge-species-bg: #E3EDE9;
+  --badge-species-fg: #1A5548;
+  --badge-hybrid-bg: #F2E8D4;
+  --badge-hybrid-fg: #77571C;
+  --badge-clone-bg: #DDEBEB;
+  --badge-clone-fg: #17595E;
+  --badge-seedling-bg: #E6F0DC;
+  --badge-seedling-fg: #3D6317;
+  --badge-ai-bg: #ECEAF4;
+  --badge-ai-fg: #4C4680;
 
   /* Typography */
+  /* Display serif: botanical-atlas mood — Cormorant for Latin, Shippori for JP */
+  --font-display: "Cormorant Garamond", "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
   --font-heading: "Varela Round", "BIZ UDPGothic", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
   --font-heading-en: "Varela Round", "Helvetica Neue", Arial, sans-serif;
   --font-primary: "Varela Round", "BIZ UDPGothic", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;

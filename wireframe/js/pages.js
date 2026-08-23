@@ -874,7 +874,8 @@ function getTrustClass(pct) {
   return pct >= 70 ? 'trust--high' : (pct >= 40 ? 'trust--mid' : 'trust--low');
 }
 
-var TIER_COLORS = { S: '#8b5cf6', A: '#3b82f6', B: '#10b981', C: '#f59e0b', D: '#ef4444' };
+// Darkened so white text passes WCAG AA on every tier chip
+var TIER_COLORS = { S: '#6d28d9', A: '#1d4ed8', B: '#047857', C: '#b45309', D: '#b91c1c' };
 function renderTierBadge(tier, name, labelJp) {
   var color = TIER_COLORS[tier] || '#6b7280';
   var h = '<div class="origin-card__source-item mb-xs">';

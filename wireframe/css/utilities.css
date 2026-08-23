@@ -81,7 +81,7 @@
 
 /* JS-generated element helpers */
 .loading-text { text-align: center; color: var(--color-gray); }
-.error-text { color: red; }
+.error-text { color: var(--color-danger); }
 .empty-state { padding: var(--space-xl); text-align: center; }
 .badge--inline { font-size: 0.65rem; padding: 1px 6px; }
 .badge--type-sm { font-size: 0.7rem; padding: 2px 6px; margin-right: 6px; }
@@ -106,7 +106,7 @@ button:focus-visible,
 .max-w-600 { max-width: 600px; }
 .max-w-400 { max-width: 400px; }
 .max-w-200 { max-width: 200px; }
-.text-danger-border { color: #dc3545; border: 1px solid #dc3545; background: transparent; }
+.text-danger-border { color: var(--color-danger); border: 1px solid var(--color-danger); background: transparent; }
 .font-xs-btn { font-size: 0.8rem; }
 .whitespace-pre-wrap { white-space: pre-wrap; }
 .ml-xs { margin-left: var(--space-xs); }
@@ -145,7 +145,6 @@ button:focus-visible,
 .dialog-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .dialog-textarea { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; margin-bottom: 16px; resize: vertical; }
 .dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
-.btn--danger { background: #dc3545; color: #fff; border: none; }
 
 /* Favorite remove button (star overlay) */
 .fav-remove-btn { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 1.1rem; color: #f5c518; cursor: pointer; line-height: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
@@ -153,7 +152,7 @@ button:focus-visible,
 /* Photo preview (contribution form) */
 .photo-preview { position: relative; display: inline-block; }
 .photo-preview__img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid var(--color-light); cursor: pointer; }
-.photo-preview__remove { position: absolute; top: -6px; right: -6px; background: #dc3545; color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; line-height: 1; padding: 0; }
+.photo-preview__remove { position: absolute; top: -6px; right: -6px; background: var(--color-danger); color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; line-height: 1; padding: 0; }
 
 /* Avatar sizes */
 .avatar-sm { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
@@ -186,7 +185,7 @@ button:focus-visible,
 .input-icon-right { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; }
 
 /* Required indicator */
-.text-required { color: #dc3545; }
+.text-required { color: var(--color-danger); }
 
 /* Disabled input */
 .form-input--disabled { background: var(--color-lighter); cursor: not-allowed; }

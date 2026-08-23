@@ -1313,17 +1313,29 @@ if (false) {
 
   function renderMobileNavGenera() {
     var container = document.getElementById('mobile-nav-genera');
-    if (!container) return;
-    var html = '';
-    window._generaData.forEach(function(g) {
-      html += '<a href="#" data-nav="genus" data-genus="' + g.slug + '">&#x1F33F; ' + g.name + '</a>';
-    });
-    container.innerHTML = html;
+    if (container) {
+      var html = '';
+      window._generaData.forEach(function(g) {
+        html += '<a href="#" data-nav="genus" data-genus="' + g.slug + '">&#x1F33F; ' + g.name + '</a>';
+      });
+      container.innerHTML = html;
+    }
+    // Desktop header nav gets the same genus links
+    var headerNav = document.getElementById('header-nav-genera');
+    if (headerNav) {
+      var hhtml = '';
+      window._generaData.forEach(function(g) {
+        hhtml += '<a href="' + _basePath + g.slug + '/" class="header__nav-link" data-nav="genus" data-genus="' + g.slug + '">' + g.name + '</a>';
+      });
+      headerNav.innerHTML = hhtml;
+    }
   }
 
   function renderGenusCards() {
     var grid = document.getElementById('genus-cards-grid');
     if (!grid) return;
+    // A single visible genus in a 3-column grid looks abandoned — center it
+    grid.classList.toggle('grid--single', window._generaData.length === 1);
     var html = '';
     window._generaData.forEach(function(g) {
       var imgSrc = g.card_image_path ? _basePath + 'images/' + g.card_image_path : '';
@@ -1335,6 +1347,9 @@ if (false) {
       html += '<div class="genus-card__count" data-genus-count="' + g.slug + '">- 品種</div>';
       html += '</a>';
     });
+    if (window._generaData.length === 1) {
+      html += '<p class="text-sm text-muted grid-full text-center mt-sm">Monstera・Philodendron など他の属も順次公開予定です</p>';
+    }
     grid.innerHTML = html;
   }
 
