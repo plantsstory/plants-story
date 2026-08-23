@@ -207,9 +207,84 @@ async function scrapeIpniTypeData(ipniId: string): Promise<IpniTypeData | null> 
   }
 }
 
-// Combined: get all botanical data for a species
-async function queryBotanicalDBs(genus: string, species: string): Promise<BotanicalResult | null> {
-  console.log(`[DB] Searching POWO for ${genus} ${species}...`);
+// ============================================================
+// GBIF: bot-friendly replacement for POWO/IPNI (both are now behind
+// Cloudflare bot protection and unreachable from server-side fetch).
+// GBIF's backbone taxonomy mirrors Kew data and its API stays open.
+// ============================================================
+async function queryGBIF(genus: string, species: string): Promise<(BotanicalResult & { gbifKey?: number }) | null> {
+  try {
+    const q = encodeURIComponent(`${genus} ${species}`);
+    const matchRes = await fetch(`https://api.gbif.org/v1/species/match?name=${q}`);
+    if (!matchRes.ok) return null;
+    const match = await matchRes.json();
+    if (!match?.usageKey || match.matchType === "NONE" || match.rank !== "SPECIES") return null;
+    // Follow synonyms to the accepted taxon
+    const key = match.acceptedUsageKey || match.usageKey;
+    console.log(`[GBIF] Matched ${match.scientificName} (key: ${key}, ${match.status})`);
+
+    const [detailRes, typeRes, facetRes] = await Promise.all([
+      fetch(`https://api.gbif.org/v1/species/${key}`),
+      fetch(`https://api.gbif.org/v1/occurrence/search?taxonKey=${key}&typeStatus=Holotype&typeStatus=Lectotype&typeStatus=Isotype&limit=1`),
+      fetch(`https://api.gbif.org/v1/occurrence/search?taxonKey=${key}&limit=0&facet=country`),
+    ]);
+
+    const detail = detailRes.ok ? await detailRes.json() : {};
+    const publishedIn: string = detail?.publishedIn || "";
+    const yearMatch = publishedIn.match(/\((\d{4})\)/) || publishedIn.match(/\b(1[6-9]\d\d|20\d\d)\b/);
+
+    let collectorTeam = "", collectionDate = "", typeLocality = "", typeRemarks = "";
+    if (typeRes.ok) {
+      const typeData = await typeRes.json();
+      const t = (typeData?.results || [])[0];
+      if (t) {
+        collectorTeam = t.recordedBy || "";
+        collectionDate = t.year ? String(t.year) : "";
+        typeLocality = [t.locality, t.stateProvince, t.country].filter(Boolean).join(", ");
+        typeRemarks = t.typeStatus ? `${t.typeStatus} at ${t.institutionCode || "herbarium"}` : "";
+        console.log(`[GBIF] Type specimen: ${collectorTeam} (${collectionDate}) — ${typeLocality.substring(0, 60)}`);
+      }
+    }
+
+    let countries: string[] = [];
+    if (facetRes.ok) {
+      const facetData = await facetRes.json();
+      const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+      countries = (facetData?.facets?.[0]?.counts || [])
+        .filter((c: any) => c.count >= 2 && c.name !== "ZZ")
+        .slice(0, 6)
+        .map((c: any) => { try { return regionNames.of(c.name) || c.name; } catch { return c.name; } });
+    }
+
+    return {
+      name: detail?.canonicalName || match.canonicalName || `${genus} ${species}`,
+      authors: detail?.authorship || match.scientificName?.replace(match.canonicalName || "", "").trim() || "",
+      fqId: "",
+      gbifKey: key,
+      nativeDistribution: countries,
+      publicationYear: yearMatch ? yearMatch[1] : "",
+      publication: publishedIn,
+      referenceCollation: "",
+      collectorTeam,
+      collectionDate,
+      typeLocality,
+      typeRemarks,
+      typeDistribution: "",
+    };
+  } catch (e) {
+    console.log("[GBIF] Error:", String(e));
+    return null;
+  }
+}
+
+// Combined: get all botanical data for a species (GBIF first; POWO/IPNI legacy fallback)
+async function queryBotanicalDBs(genus: string, species: string): Promise<(BotanicalResult & { gbifKey?: number }) | null> {
+  const gbif = await queryGBIF(genus, species);
+  if (gbif && gbif.authors) {
+    console.log(`[DB] GBIF: ${gbif.name} by ${gbif.authors}, published: ${gbif.publication}`);
+    return gbif;
+  }
+  console.log(`[DB] GBIF incomplete, trying legacy POWO for ${genus} ${species}...`);
   const powoSearch = await searchPOWO(genus, species);
   if (!powoSearch) {
     console.log(`[DB] POWO search: no results`);
@@ -571,30 +646,85 @@ function buildExternalDataContext(ext: ExternalData): string {
 }
 
 // ============================================================
-// Helper: Call Gemini API
+// Helper: Call Gemini API (with optional Google Search grounding)
 // ============================================================
-async function callGemini(apiKey: string, prompt: string, maxTokens = 2048) {
+// Model is env-overridable so future models can be adopted without a deploy:
+//   supabase secrets set GEMINI_MODEL=gemini-x.y-...
+const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") || "gemini-3.6-flash";
+
+interface GeminiResponse {
+  text: string;
+  // Real URLs the model actually visited via Google Search grounding
+  sources: { url: string; label: string }[];
+}
+
+async function callGemini(
+  apiKey: string,
+  prompt: string,
+  maxTokens = 2048,
+  useSearch = false
+): Promise<GeminiResponse> {
+  const body: Record<string, unknown> = {
+    contents: [{ parts: [{ text: prompt }] }],
+    // 2.5+ models spend output tokens on internal reasoning too — give headroom
+    generationConfig: { temperature: 0.15, maxOutputTokens: Math.max(maxTokens * 2, 6144) },
+  };
+  if (useSearch) {
+    body.tools = [{ google_search: {} }];
+  }
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.15, maxOutputTokens: maxTokens },
-      }),
+      body: JSON.stringify(body),
     }
   );
   const data = await response.json();
   if (data?.error) {
     throw new Error(data.error.message || "Gemini API error");
   }
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  const cand = data?.candidates?.[0];
+  // Join text parts, skipping thought parts from reasoning models
+  const text = (cand?.content?.parts || [])
+    .filter((p: any) => p.text && !p.thought)
+    .map((p: any) => p.text)
+    .join("");
+
+  const chunks = cand?.groundingMetadata?.groundingChunks || [];
+  const seen = new Set<string>();
+  const sources: { url: string; label: string }[] = [];
+  for (const c of chunks) {
+    const uri = c?.web?.uri;
+    if (uri && !seen.has(uri)) {
+      seen.add(uri);
+      sources.push({ url: uri, label: c.web.title || uri });
+    }
+  }
+  if (useSearch) {
+    console.log(`[Gemini ${GEMINI_MODEL}] grounded search: ${sources.length} web sources`);
+  }
+  return { text, sources };
 }
+
+// Search directive appended to prompts when grounding is enabled
+const SEARCH_INSTRUCTIONS = `
+
+=== LIVE WEB SEARCH (Google Search grounding is ENABLED) ===
+You can and SHOULD search the web before answering. Actively search for:
+- The exact cultivar/species name + "origin", "breeder", "parentage", "history", "protologue", "type specimen", "patent USPP"
+- "International Aroid Society", "Aroideana" + the name
+- The breeder's own website / Instagram / YouTube announcements (primary sources)
+Cross-check what you find against your training knowledge. Base your answer on the
+BEST evidence found, and put the REAL URLs of pages you actually found into the
+source_url / found_sources / citation_links fields. NEVER invent URLs.
+If web search finds nothing reliable, say so honestly via a low tier/confidence.`;
 
 // ============================================================
 // Helper: Call Groq API (fallback)
 // ============================================================
+const GROQ_MODEL = Deno.env.get("GROQ_MODEL") || "openai/gpt-oss-120b";
+
 async function callGroq(
   apiKey: string,
   model: string,
@@ -626,38 +756,64 @@ async function callGroq(
 }
 
 // ============================================================
-// Helper: Call OpenAI API (GPT-4o mini fallback)
+// Helper: Call OpenAI Responses API (primary — supports live web search)
 // ============================================================
+// Env-overridable so future models can be adopted without a deploy:
+//   supabase secrets set OPENAI_MODEL=gpt-...
+const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-5-mini";
+
 async function callOpenAI(
   apiKey: string,
   systemPrompt: string,
   userPrompt: string,
-  maxTokens = 2048
-) {
-  const response = await fetch(
-    "https://api.openai.com/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.15,
-        max_tokens: maxTokens,
-      }),
-    }
-  );
+  maxTokens = 2048,
+  useSearch = false
+): Promise<GeminiResponse> {
+  const body: Record<string, unknown> = {
+    model: OPENAI_MODEL,
+    instructions: systemPrompt,
+    input: userPrompt,
+    // Reasoning models spend output tokens on internal thinking — give headroom
+    max_output_tokens: Math.max(maxTokens * 3, 8192),
+  };
+  if (useSearch) {
+    body.tools = [{ type: "web_search" }];
+  }
+  const response = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  });
   const data = await response.json();
   if (data?.error) {
     throw new Error(data.error.message || "OpenAI API error");
   }
-  return data?.choices?.[0]?.message?.content || "";
+  let text = "";
+  const seen = new Set<string>();
+  const sources: { url: string; label: string }[] = [];
+  for (const item of data?.output || []) {
+    if (item.type !== "message") continue;
+    for (const c of item.content || []) {
+      if (c.type !== "output_text") continue;
+      text += c.text || "";
+      // Real URLs the model actually visited via web search
+      for (const a of c.annotations || []) {
+        if (a.type === "url_citation" && a.url && !seen.has(a.url)) {
+          seen.add(a.url);
+          // Strip tracking params added by the search tool
+          const cleanUrl = a.url.replace(/[?&]utm_source=openai\b/, "");
+          sources.push({ url: cleanUrl, label: a.title || cleanUrl });
+        }
+      }
+    }
+  }
+  if (useSearch) {
+    console.log(`[OpenAI ${OPENAI_MODEL}] web search: ${sources.length} cited sources`);
+  }
+  return { text, sources };
 }
 
 // ============================================================
@@ -1444,22 +1600,27 @@ serve(async (req: Request) => {
         researchSource = "ipni-powo";
 
         // AI structured data: collector, collection_year, type_locality, known_habitats, notes
-        const structuredPrompt = buildSpeciesStructuredPrompt(botResult);
+        const structuredPrompt = buildSpeciesStructuredPrompt(botResult) + SEARCH_INSTRUCTIONS;
         let aiStructured: any = null;
+        let speciesGrounding: { url: string; label: string }[] = [];
 
-        // LLM cascade: Gemini (free) → Groq (free) → GPT-4o mini (paid, last resort)
-        if (geminiApiKey) {
+        // LLM cascade: OpenAI w/ web search (primary) → Groq → Gemini (grounded, last resort)
+        if (openaiApiKey) {
           try {
-            console.log("[Structured] Trying Gemini...");
-            const text = await callGemini(geminiApiKey, structuredPrompt);
-            console.log("[Structured] Gemini raw length:", text?.length, "first 100:", text?.substring(0, 100));
+            console.log("[Structured] Trying OpenAI (web search)...");
+            const { text, sources: oSources } = await callOpenAI(
+              openaiApiKey,
+              "You are a botanical researcher. Return ONLY valid JSON, no markdown.",
+              structuredPrompt, 2000, true
+            );
             const parsed = extractJson(text);
             if (parsed?.notes) {
               aiStructured = parsed;
-              console.log("[Structured] Gemini OK");
+              speciesGrounding = oSources.slice(0, 3);
+              console.log("[Structured] OpenAI OK");
             }
           } catch (e) {
-            console.log("[Structured] Gemini FAILED:", String(e));
+            console.log("[Structured] OpenAI FAILED:", String(e));
           }
         }
 
@@ -1467,7 +1628,7 @@ serve(async (req: Request) => {
           try {
             console.log("[Structured] Trying Groq...");
             const text = await callGroq(
-              groqApiKey, "llama-3.3-70b-versatile",
+              groqApiKey, GROQ_MODEL,
               "You are a botanical researcher. Return ONLY valid JSON, no markdown.",
               structuredPrompt, 2000
             );
@@ -1481,21 +1642,18 @@ serve(async (req: Request) => {
           }
         }
 
-        if (!aiStructured && openaiApiKey) {
+        if (!aiStructured && geminiApiKey) {
           try {
-            console.log("[Structured] Trying GPT-4o mini (last resort)...");
-            const text = await callOpenAI(
-              openaiApiKey,
-              "You are a botanical researcher. Return ONLY valid JSON, no markdown.",
-              structuredPrompt, 2000
-            );
+            console.log("[Structured] Trying Gemini (grounded, last resort)...");
+            const { text, sources: gSources } = await callGemini(geminiApiKey, structuredPrompt, 2048, true);
             const parsed = extractJson(text);
             if (parsed?.notes) {
               aiStructured = parsed;
-              console.log("[Structured] GPT-4o mini OK");
+              speciesGrounding = gSources.slice(0, 3);
+              console.log("[Structured] Gemini OK");
             }
           } catch (e) {
-            console.log("[Structured] GPT-4o mini FAILED:", String(e));
+            console.log("[Structured] Gemini FAILED:", String(e));
           }
         }
 
@@ -1508,6 +1666,20 @@ serve(async (req: Request) => {
 
         const tierInfo = TIER_CONFIG.S;
         const ipniId = botResult.fqId.replace("urn:lsid:ipni.org:names:", "");
+        // DB links: GBIF species page when matched via GBIF, legacy IPNI/POWO otherwise
+        const gbifKey = (botResult as any).gbifKey;
+        const dbLinks = gbifKey
+          ? [
+              { url: `https://www.gbif.org/species/${gbifKey}`, label: "GBIF (Kew Backbone)" },
+              { url: `https://powo.science.kew.org/results?q=${encodeURIComponent(botResult.name)}`, label: "POWO (Kew)" },
+            ]
+          : [
+              { url: `https://www.ipni.org/n/${ipniId}`, label: "IPNI" },
+              { url: `https://powo.science.kew.org/taxon/${botResult.fqId}`, label: "POWO (Kew)" },
+            ];
+        const dbSourceUrl = gbifKey
+          ? `https://www.gbif.org/species/${gbifKey}`
+          : `https://powo.science.kew.org/taxon/${botResult.fqId}`;
         originEntries.push({
           body: bodyJp,
           body_en: bodyEn,
@@ -1517,8 +1689,8 @@ serve(async (req: Request) => {
           source_tier: "S",
           source_tier_label_en: tierInfo.label_en,
           source_tier_label_jp: tierInfo.label_jp,
-          source_name: "IPNI / POWO (Kew Gardens)",
-          source_url: `https://powo.science.kew.org/taxon/${botResult.fqId}`,
+          source_name: gbifKey ? "GBIF / Kew Backbone Taxonomy" : "IPNI / POWO (Kew Gardens)",
+          source_url: dbSourceUrl,
           source_language: "en",
           parentage: null,
           discovery_year: botResult.publicationYear ? parseInt(botResult.publicationYear) : null,
@@ -1544,21 +1716,15 @@ serve(async (req: Request) => {
               type_locality: known(aiStructured?.type_locality) || ipniLocality || botResult.nativeDistribution[0] || "不明",
               known_habitats: botResult.typeDistribution || dist || "不明",
               notes: "",
-              citation_links: [
-                { url: `https://www.ipni.org/n/${ipniId}`, label: "IPNI" },
-                { url: `https://powo.science.kew.org/taxon/${botResult.fqId}`, label: "POWO (Kew)" },
-              ],
+              citation_links: [...dbLinks, ...speciesGrounding],
             };
           })(),
           author: {
-            name: "IPNI / POWO",
+            name: gbifKey ? "GBIF / Kew" : "IPNI / POWO",
             isAI: true,
             date: new Date().toISOString().split("T")[0],
           },
-          sources: [
-            { url: `https://www.ipni.org/n/${ipniId}`, label: "IPNI" },
-            { url: `https://powo.science.kew.org/taxon/${botResult.fqId}`, label: "POWO (Kew)" },
-          ],
+          sources: [...dbLinks, ...speciesGrounding],
           votes: { agree: 0, disagree: 0 },
           verified: true,
         });
@@ -1607,48 +1773,51 @@ serve(async (req: Request) => {
           }
 
           // Build keyword research prompt — allows community/SNS sources for clone/hybrid
-          const researchPrompt = buildKeywordResearchPrompt(cultivar_name, effectiveGenus, plantType, keywordsText, externalData) + youtubeContext;
+          const researchPrompt = buildKeywordResearchPrompt(cultivar_name, effectiveGenus, plantType, keywordsText, externalData) + youtubeContext + SEARCH_INSTRUCTIONS;
 
           let researchResult: any = null;
+          let researchGrounding: { url: string; label: string }[] = [];
 
-          if (geminiApiKey) {
+          if (openaiApiKey) {
             try {
-              console.log("[KeywordResearch] Trying Gemini...");
-              const text = await callGemini(geminiApiKey, researchPrompt, 3000);
+              console.log("[KeywordResearch] Trying OpenAI (web search)...");
+              const { text, sources: oSources } = await callOpenAI(openaiApiKey,
+                "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
+                researchPrompt, 3000, true);
               researchResult = extractJson(text);
               if (researchResult?.origins?.length) {
-                researchSource = "gemini";
-                console.log(`[KeywordResearch] Gemini OK: ${researchResult.origins.length} origins`);
+                researchSource = "openai-web-search";
+                researchGrounding = oSources.slice(0, 5);
+                console.log(`[KeywordResearch] OpenAI OK: ${researchResult.origins.length} origins`);
               } else { researchResult = null; }
-            } catch (e) { console.log("[KeywordResearch] Gemini failed:", String(e)); }
+            } catch (e) { console.log("[KeywordResearch] OpenAI failed:", String(e)); }
           }
 
           if (!researchResult && groqApiKey) {
             try {
               console.log("[KeywordResearch] Trying Groq...");
-              const text = await callGroq(groqApiKey, "llama-3.3-70b-versatile",
+              const text = await callGroq(groqApiKey, GROQ_MODEL,
                 "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
                 researchPrompt, 3000);
               researchResult = extractJson(text);
               if (researchResult?.origins?.length) {
-                researchSource = "groq-llama3.3-70b";
+                researchSource = "groq";
                 console.log(`[KeywordResearch] Groq OK`);
               }
             } catch (e) { console.log("[KeywordResearch] Groq failed:", String(e)); }
           }
 
-          if (!researchResult && openaiApiKey) {
+          if (!researchResult && geminiApiKey) {
             try {
-              console.log("[KeywordResearch] Trying GPT-4o mini...");
-              const text = await callOpenAI(openaiApiKey,
-                "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
-                researchPrompt, 3000);
+              console.log("[KeywordResearch] Trying Gemini (grounded)...");
+              const { text, sources: gSources } = await callGemini(geminiApiKey, researchPrompt, 3000, true);
               researchResult = extractJson(text);
               if (researchResult?.origins?.length) {
-                researchSource = "gpt-4o-mini";
-                console.log(`[KeywordResearch] GPT-4o mini OK`);
-              }
-            } catch (e) { console.log("[KeywordResearch] GPT-4o mini failed:", String(e)); }
+                researchSource = "gemini-grounded";
+                researchGrounding = gSources.slice(0, 5);
+                console.log(`[KeywordResearch] Gemini OK`);
+              } else { researchResult = null; }
+            } catch (e) { console.log("[KeywordResearch] Gemini failed:", String(e)); }
           }
 
           if (researchResult?.origins?.length) {
@@ -1668,6 +1837,10 @@ serve(async (req: Request) => {
               else if (trust >= 40) trustClass = "trust--mid";
 
               const sourcesArr: any[] = origin.source_url ? [{ url: origin.source_url, label: origin.source_name }] : [];
+              // Real pages found via Google Search grounding
+              for (const gs of researchGrounding) {
+                sourcesArr.push(gs);
+              }
               if (externalData.wikidata) {
                 sourcesArr.push({ url: externalData.wikidata.wikidataUrl, label: "Wikidata" });
               }
@@ -1719,7 +1892,7 @@ serve(async (req: Request) => {
                 first_description: origin.first_description || null,
                 structured: structuredEntry,
                 author: {
-                  name: researchSource === "gemini" ? "AI (Gemini 2.0 Flash)" : researchSource === "gpt-4o-mini" ? "AI (GPT-4o mini)" : "AI (Llama 3.3 70B)",
+                  name: researchSource.startsWith("openai") ? "AI (" + OPENAI_MODEL + " + Web検索)" : researchSource.startsWith("gemini") ? "AI (" + GEMINI_MODEL + ")" : "AI (" + GROQ_MODEL + ")",
                   isAI: true,
                   date: new Date().toISOString().split("T")[0],
                 },
@@ -1767,21 +1940,27 @@ serve(async (req: Request) => {
           );
 
           let verifyResult: any = null;
+          let verifyGrounding: { url: string; label: string }[] = [];
 
-          // LLM cascade for verification
-          if (geminiApiKey) {
+          // LLM cascade for verification (primary model gets live web search)
+          if (openaiApiKey) {
             try {
-              console.log("[Verify] Trying Gemini...");
-              const text = await callGemini(geminiApiKey, verifyPrompt, 3000);
+              console.log("[Verify] Trying OpenAI (web search)...");
+              const { text, sources: oSources } = await callOpenAI(
+                openaiApiKey,
+                "You are a botanical fact-checker. Respond ONLY with valid JSON, no markdown.",
+                verifyPrompt + SEARCH_INSTRUCTIONS, 3000, true
+              );
               verifyResult = extractJson(text);
               if (verifyResult?.verification_tier) {
-                researchSource = "gemini-verify";
-                console.log(`[Verify] Gemini OK: tier=${verifyResult.verification_tier}`);
+                researchSource = "openai-verify-web";
+                verifyGrounding = oSources.slice(0, 5);
+                console.log(`[Verify] OpenAI OK: tier=${verifyResult.verification_tier}`);
               } else {
                 verifyResult = null;
               }
             } catch (e) {
-              console.log("[Verify] Gemini failed:", String(e));
+              console.log("[Verify] OpenAI failed:", String(e));
             }
           }
 
@@ -1789,7 +1968,7 @@ serve(async (req: Request) => {
             try {
               console.log("[Verify] Trying Groq...");
               const text = await callGroq(
-                groqApiKey, "llama-3.3-70b-versatile",
+                groqApiKey, GROQ_MODEL,
                 "You are a botanical fact-checker. Respond ONLY with valid JSON, no markdown.",
                 verifyPrompt, 3000
               );
@@ -1803,21 +1982,20 @@ serve(async (req: Request) => {
             }
           }
 
-          if (!verifyResult && openaiApiKey) {
+          if (!verifyResult && geminiApiKey) {
             try {
-              console.log("[Verify] Trying GPT-4o mini...");
-              const text = await callOpenAI(
-                openaiApiKey,
-                "You are a botanical fact-checker. Respond ONLY with valid JSON, no markdown.",
-                verifyPrompt, 3000
-              );
+              console.log("[Verify] Trying Gemini (grounded)...");
+              const { text, sources: gSources } = await callGemini(geminiApiKey, verifyPrompt + SEARCH_INSTRUCTIONS, 3000, true);
               verifyResult = extractJson(text);
               if (verifyResult?.verification_tier) {
-                researchSource = "gpt4o-mini-verify";
-                console.log(`[Verify] GPT-4o mini OK: tier=${verifyResult.verification_tier}`);
+                researchSource = "gemini-verify-grounded";
+                verifyGrounding = gSources.slice(0, 5);
+                console.log(`[Verify] Gemini OK: tier=${verifyResult.verification_tier}`);
+              } else {
+                verifyResult = null;
               }
             } catch (e) {
-              console.log("[Verify] GPT-4o mini failed:", String(e));
+              console.log("[Verify] Gemini failed:", String(e));
             }
           }
 
@@ -1832,11 +2010,14 @@ serve(async (req: Request) => {
             if (trust >= 70) trustClass = "trust--high";
             else if (trust >= 40) trustClass = "trust--mid";
 
-            // Build sources: user sources + AI-found sources + external DB sources
+            // Build sources: user sources + AI-found sources + grounded search pages + external DB sources
             const sourcesArr: any[] = effectiveUserSources.map(u => ({ url: u, label: u }));
             const foundSources = verifyResult.found_sources || [];
             for (const fs of foundSources) {
               if (fs.url) sourcesArr.push({ url: fs.url, label: fs.label || fs.url });
+            }
+            for (const gs of verifyGrounding) {
+              sourcesArr.push(gs);
             }
             if (externalData.wikidata) {
               sourcesArr.push({ url: externalData.wikidata.wikidataUrl, label: "Wikidata" });
@@ -1852,21 +2033,25 @@ serve(async (req: Request) => {
             );
 
             // LLM cascade for structured extraction
-            if (geminiApiKey) {
+            if (openaiApiKey) {
               try {
-                console.log("[CultivarStructured] Trying Gemini...");
-                const text = await callGemini(geminiApiKey, structPrompt);
+                console.log("[CultivarStructured] Trying OpenAI...");
+                const { text } = await callOpenAI(
+                  openaiApiKey,
+                  "You are a botanical researcher. Return ONLY valid JSON, no markdown.",
+                  structPrompt, 2000
+                );
                 cultivarStructured = extractJson(text);
-                if (cultivarStructured) console.log("[CultivarStructured] Gemini OK");
+                if (cultivarStructured) console.log("[CultivarStructured] OpenAI OK");
               } catch (e) {
-                console.log("[CultivarStructured] Gemini FAILED:", String(e));
+                console.log("[CultivarStructured] OpenAI FAILED:", String(e));
               }
             }
             if (!cultivarStructured && groqApiKey) {
               try {
                 console.log("[CultivarStructured] Trying Groq...");
                 const text = await callGroq(
-                  groqApiKey, "llama-3.3-70b-versatile",
+                  groqApiKey, GROQ_MODEL,
                   "You are a botanical researcher. Return ONLY valid JSON, no markdown.",
                   structPrompt, 2000
                 );
@@ -1876,18 +2061,14 @@ serve(async (req: Request) => {
                 console.log("[CultivarStructured] Groq FAILED:", String(e));
               }
             }
-            if (!cultivarStructured && openaiApiKey) {
+            if (!cultivarStructured && geminiApiKey) {
               try {
-                console.log("[CultivarStructured] Trying GPT-4o mini...");
-                const text = await callOpenAI(
-                  openaiApiKey,
-                  "You are a botanical researcher. Return ONLY valid JSON, no markdown.",
-                  structPrompt, 2000
-                );
+                console.log("[CultivarStructured] Trying Gemini...");
+                const { text } = await callGemini(geminiApiKey, structPrompt);
                 cultivarStructured = extractJson(text);
-                if (cultivarStructured) console.log("[CultivarStructured] GPT-4o mini OK");
+                if (cultivarStructured) console.log("[CultivarStructured] Gemini OK");
               } catch (e) {
-                console.log("[CultivarStructured] GPT-4o mini FAILED:", String(e));
+                console.log("[CultivarStructured] Gemini FAILED:", String(e));
               }
             }
 
@@ -2020,54 +2201,60 @@ serve(async (req: Request) => {
         console.log(`[Research] AI research for: ${cultivar_name} (type: ${plantType})`);
 
         let externalData: ExternalData = { wikidata: null, papers: [] };
-        const researchPrompt = buildCultivarResearchPrompt(cultivar_name, effectiveGenus, plantType);
+        const researchPrompt = buildCultivarResearchPrompt(cultivar_name, effectiveGenus, plantType) + SEARCH_INSTRUCTIONS;
 
         let researchResult: any = null;
+        let fallbackGrounding: { url: string; label: string }[] = [];
 
-        if (geminiApiKey) {
+        if (openaiApiKey) {
           try {
-            console.log("Trying Gemini for cultivar research...");
-            const text = await callGemini(geminiApiKey, researchPrompt, 3000);
+            console.log("Trying OpenAI (web search) for cultivar research...");
+            const { text, sources: oSources } = await callOpenAI(
+              openaiApiKey,
+              "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
+              researchPrompt, 3000, true
+            );
             researchResult = extractJson(text);
             if (researchResult?.origins?.length) {
-              researchSource = "gemini";
+              researchSource = "openai-web-search";
+              fallbackGrounding = oSources.slice(0, 5);
             } else {
               researchResult = null;
             }
           } catch (e) {
-            console.log("Gemini failed:", String(e));
+            console.log("OpenAI failed:", String(e));
           }
         }
 
         if (!researchResult && groqApiKey) {
           try {
             const text = await callGroq(
-              groqApiKey, "llama-3.3-70b-versatile",
+              groqApiKey, GROQ_MODEL,
               "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
               researchPrompt, 3000
             );
             researchResult = extractJson(text);
             if (researchResult?.origins?.length) {
-              researchSource = "groq-llama3.3-70b";
+              researchSource = "groq";
             }
           } catch (e) {
             console.error("Groq error:", e);
           }
         }
 
-        if (!researchResult && openaiApiKey) {
+        if (!researchResult && geminiApiKey) {
           try {
-            const text = await callOpenAI(
-              openaiApiKey,
-              "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
-              researchPrompt, 3000
-            );
+            console.log("Trying Gemini (grounded) for cultivar research...");
+            const { text, sources: gSources } = await callGemini(geminiApiKey, researchPrompt, 3000, true);
             researchResult = extractJson(text);
             if (researchResult?.origins?.length) {
-              researchSource = "gpt-4o-mini";
+              researchSource = "gemini-grounded";
+              fallbackGrounding = gSources.slice(0, 5);
+            } else {
+              researchResult = null;
             }
           } catch (e) {
-            console.error("GPT-4o mini error:", e);
+            console.log("Gemini failed:", String(e));
           }
         }
 
@@ -2088,11 +2275,14 @@ serve(async (req: Request) => {
             else if (trust >= 40) trustClass = "trust--mid";
 
             const sourcesArr: any[] = origin.source_url ? [{ url: origin.source_url, label: origin.source_name }] : [];
+            for (const gs of fallbackGrounding) {
+              sourcesArr.push(gs);
+            }
 
             // Build structured fields from AI research result — adapt to plantType
-            const citLinks = origin.source_url
-              ? [{ url: origin.source_url, label: origin.source_name || origin.source_url }]
-              : [];
+            const citLinks = sourcesArr
+              .filter((s: any) => s.url)
+              .map((s: any) => ({ url: s.url, label: s.label || s.url }));
             const structuredEntry: any = { origin_type: plantType, notes: plantType === "species" ? "" : bodyJp, citation_links: citLinks };
 
             if (plantType === "species") {
@@ -2144,7 +2334,7 @@ serve(async (req: Request) => {
               first_description: origin.first_description || null,
               structured: structuredEntry,
               author: {
-                name: researchSource === "gemini" ? "AI (Gemini 2.0 Flash)" : researchSource === "gpt-4o-mini" ? "AI (GPT-4o mini)" : "AI (Llama 3.3 70B)",
+                name: researchSource.startsWith("openai") ? "AI (" + OPENAI_MODEL + " + Web検索)" : researchSource.startsWith("gemini") ? "AI (" + GEMINI_MODEL + ")" : "AI (" + GROQ_MODEL + ")",
                 isAI: true,
                 date: new Date().toISOString().split("T")[0],
               },
