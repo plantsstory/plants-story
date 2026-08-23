@@ -42,15 +42,15 @@ async function main() {
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
-  // Static pages
+  // Static pages (trailing slash = the URL GitHub Pages actually serves after 301)
   const staticPages = [
     { loc: '/', changefreq: 'daily', priority: '1.0' },
-    { loc: '/about', changefreq: 'monthly', priority: '0.5' },
-    { loc: '/guide', changefreq: 'monthly', priority: '0.5' },
-    { loc: '/terms', changefreq: 'monthly', priority: '0.3' },
-    { loc: '/privacy', changefreq: 'monthly', priority: '0.3' },
-    { loc: '/tokushoho', changefreq: 'monthly', priority: '0.3' },
-    { loc: '/contact', changefreq: 'monthly', priority: '0.3' },
+    { loc: '/about/', changefreq: 'monthly', priority: '0.5' },
+    { loc: '/guide/', changefreq: 'monthly', priority: '0.5' },
+    { loc: '/terms/', changefreq: 'monthly', priority: '0.3' },
+    { loc: '/privacy/', changefreq: 'monthly', priority: '0.3' },
+    { loc: '/tokushoho/', changefreq: 'monthly', priority: '0.3' },
+    { loc: '/contact/', changefreq: 'monthly', priority: '0.3' },
   ];
   for (const p of staticPages) {
     xml += `  <url>\n    <loc>${SITE}${p.loc}</loc>\n    <changefreq>${p.changefreq}</changefreq>\n    <priority>${p.priority}</priority>\n  </url>\n`;
@@ -58,7 +58,7 @@ async function main() {
 
   // Genus pages
   for (const g of genera) {
-    xml += `  <url>\n    <loc>${SITE}/${g.slug}</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
+    xml += `  <url>\n    <loc>${SITE}/${g.slug}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
   }
 
   // Cultivar pages
@@ -72,7 +72,7 @@ async function main() {
     const encodedRest = encodeURIComponent(rest);
     const lastmod = c.updated_at ? new Date(c.updated_at).toISOString().split('T')[0] : today;
 
-    xml += `  <url>\n    <loc>${SITE}/${genusSlug}/${encodedRest}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+    xml += `  <url>\n    <loc>${SITE}/${genusSlug}/${encodedRest}/</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
   }
 
   xml += '</urlset>\n';

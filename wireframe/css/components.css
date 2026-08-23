@@ -322,6 +322,15 @@
 }
 
 /* Genus Card — Sleek */
+/* Genus cards are real <a> links; row cards are keyboard-focusable divs */
+a.genus-card { display: block; text-decoration: none; color: inherit; }
+.cultivar-row:focus-visible,
+.card--clickable:focus-visible,
+a.genus-card:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
 .genus-card {
   text-align: center;
   padding: var(--space-xl) var(--space-lg);
@@ -571,7 +580,7 @@
 /* Verification details */
 .verification-details {
   margin-top: 8px;
-  border-top: 1px solid var(--color-border, #e0e0e0);
+  border-top: 1px solid var(--color-light);
   padding-top: 8px;
 }
 
@@ -1385,6 +1394,10 @@
   border: 1px solid var(--color-light);
   border-radius: var(--radius-full);
   font-size: var(--font-size-sm);
+  /* Chips are <button> elements — normalize UA button styles */
+  font-family: inherit;
+  color: inherit;
+  line-height: inherit;
   cursor: pointer;
   transition: all var(--transition);
   background: var(--color-white);
@@ -2324,6 +2337,9 @@ dialog.parent-photo-dialog .dialog-label {
   padding: var(--space-xl) var(--space-lg);
   max-width: 440px;
   width: 100%;
+  /* Small screens + soft keyboard: keep the pay button reachable */
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
   box-shadow: var(--shadow-lg);
   text-align: center;
 }

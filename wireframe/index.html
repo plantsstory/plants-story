@@ -9,7 +9,7 @@
     document.head.appendChild(base);
   })();
   </script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://*.rakuten.co.jp https://*.amazon.co.jp https://*.media-amazon.com https://*.yahoo.co.jp; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Google tag (gtag.js) -->
@@ -30,7 +30,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M16 2C11 0 5 3 4 10C3 17 10 24 16 28C22 24 29 17 28 10C27 3 21 0 16 2Z' fill='%231B4332'/></svg>" type="image/svg+xml">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1B4332">
-  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180.png">
   <link rel="canonical" id="canonical-link" href="https://plantsstory.com/">
   <link rel="alternate" hreflang="ja" id="hreflang-ja" href="https://plantsstory.com/">
   <link rel="alternate" hreflang="en" id="hreflang-en" href="https://plantsstory.com/">
@@ -43,12 +43,7 @@
     "alternateName": "Aroid Origins",
     "url": "https://plantsstory.com/",
     "description": "アロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォーム",
-    "inLanguage": "ja",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://plantsstory.com/search?q={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
+    "inLanguage": "ja"
   }
   </script>
   <script type="application/ld+json">
@@ -60,17 +55,18 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20260823a">
-  <link rel="stylesheet" href="css/reset.css?v=20260823a">
-  <link rel="stylesheet" href="css/layout.css?v=20260823a">
-  <link rel="stylesheet" href="css/components.css?v=20260823a">
-  <link rel="stylesheet" href="css/pages.css?v=20260823a">
-  <link rel="stylesheet" href="css/utilities.css?v=20260823a">
+  <link rel="stylesheet" href="css/variables.css?v=20260823b">
+  <link rel="stylesheet" href="css/reset.css?v=20260823b">
+  <link rel="stylesheet" href="css/layout.css?v=20260823b">
+  <link rel="stylesheet" href="css/components.css?v=20260823b">
+  <link rel="stylesheet" href="css/pages.css?v=20260823b">
+  <link rel="stylesheet" href="css/utilities.css?v=20260823b">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Varela+Round&family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://jpgbehsrglsiwijglhjo.supabase.co" crossorigin>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1"></script>
 </head>
 <body>
 
@@ -81,7 +77,7 @@
        ======================================== -->
   <header class="header">
     <div class="container header__inner">
-      <a class="header__logo" data-nav="top">AROID ORIGINS</a>
+      <a class="header__logo" href="/" data-nav="top">AROID ORIGINS</a>
       <div class="header__actions">
         <button class="header__lang" data-i18n="lang_toggle">EN / JP</button>
         <a id="header-profile-btn" href="#" class="header__btn d-none" data-nav="profile">プロフィール</a>
@@ -120,7 +116,7 @@
         <p class="hero__subtitle">一葉に、千の物語。</p>
         <p class="hero__subtitle-en text-sm mt-sm">A thousand stories in a single leaf.</p>
         <div class="search-bar mt-lg">
-          <input type="text" class="search-bar__input" placeholder="品種名・ユーザー名を検索..." data-i18n-placeholder="search_placeholder" aria-label="品種名・ユーザー名を検索">
+          <input type="search" enterkeyhint="search" class="search-bar__input" placeholder="品種名・ユーザー名を検索..." data-i18n-placeholder="search_placeholder" aria-label="品種名・ユーザー名を検索">
           <button class="search-bar__btn" data-nav="search" aria-label="検索">&#x1F50D;</button>
         </div>
       </div>
@@ -237,7 +233,7 @@
         </div>
         <div class="flex gap-sm flex-align-center flex-wrap mt-sm">
           <button id="fav-btn" class="btn btn--sm btn--secondary cursor-pointer font-xs-btn whitespace-nowrap" title="お気に入り">&#x2606; お気に入り追加</button>
-          <button id="share-btn" class="btn btn--sm btn--secondary cursor-pointer font-xs-btn whitespace-nowrap" title="シェア" aria-label="この品種をシェア">&#x1F517; シェア</button>
+          <button id="share-btn" class="btn btn--sm btn--secondary cursor-pointer font-xs-btn whitespace-nowrap" title="シェア" aria-label="この品種をシェア" aria-expanded="false" aria-haspopup="true">&#x1F517; シェア</button>
           <div id="share-menu" class="hidden share-menu-popup"></div>
           <div class="flex gap-sm flex-align-center" id="edit-key-section">
             <button class="btn btn--secondary btn--sm font-xs-btn" id="detail-edit-btn">&#x270F; 編集</button>
@@ -491,11 +487,11 @@
           <div id="species-subcategory" class="species-subcategory d-none">
             <label class="form-label text-sm mb-xs">分類詳細</label>
             <div class="chips">
-              <span class="chip active" data-subcategory="species">原種</span>
-              <span class="chip" data-subcategory="sp">sp.</span>
-              <span class="chip" data-subcategory="ssp">ssp.</span>
-              <span class="chip" data-subcategory="cf">cf.</span>
-              <span class="chip" data-subcategory="aff">aff.</span>
+              <button type="button" class="chip active" aria-pressed="true" data-subcategory="species">原種</button>
+              <button type="button" class="chip" aria-pressed="false" data-subcategory="sp">sp.</button>
+              <button type="button" class="chip" aria-pressed="false" data-subcategory="ssp">ssp.</button>
+              <button type="button" class="chip" aria-pressed="false" data-subcategory="cf">cf.</button>
+              <button type="button" class="chip" aria-pressed="false" data-subcategory="aff">aff.</button>
             </div>
           </div>
         </div>
@@ -675,7 +671,7 @@
         <h2 class="section-heading">品種</h2>
         <!-- Filter chips -->
         <div class="chips mb-lg" id="search-chips">
-          <span class="chip active" data-genus="all" data-i18n="filter_all">すべて</span>
+          <button type="button" class="chip active" aria-pressed="true" data-genus="all" data-i18n="filter_all">すべて</button>
         </div>
 
         <div id="search-cultivar-list" class="card card--no-pad"></div>
@@ -701,20 +697,20 @@
       <p class="legal-date" data-i18n="terms_updated">最終更新日: 2026年4月1日</p>
 
       <h2 data-i18n="terms_1_title">第1条 適用範囲</h2>
-      <p data-i18n="terms_1_body">本規約は、Aroid Origins（以下「本サービス」）を利用するすべてのユーザーに適用されます。本サービスを利用した時点で、本規約に同意したものとみなします。本サービスはアカウント登録を必要としないため、サイトの閲覧・利用をもって同意が成立します。</p>
+      <p data-i18n="terms_1_body">本規約は、Aroid Origins（以下「本サービス」）を利用するすべてのユーザーに適用されます。本サービスを利用した時点で、本規約に同意したものとみなします。閲覧はアカウント登録なしで利用でき、投稿などの一部機能にはGoogleアカウントによるログインが必要です。</p>
 
       <h2 data-i18n="terms_2_title">第2条 サービスの内容</h2>
       <p data-i18n="terms_2_body">本サービスは、植物の品種（原種・ハイブリッド・クローン）の由来情報を収集・共有するプラットフォームです。主な機能は以下の通りです：</p>
       <ul class="terms-list" data-i18n-list="terms_2_list">
         <li>品種由来情報の閲覧</li>
-        <li>由来情報の投稿（匿名）</li>
+        <li>由来情報の投稿（要ログイン・ニックネーム表示）</li>
         <li>品種画像のアップロード</li>
         <li>投票による情報の信頼性評価</li>
         <li>関連商品へのアフィリエイトリンク</li>
       </ul>
 
       <h2 data-i18n="terms_3_title">第3条 ユーザー投稿コンテンツ</h2>
-      <p data-i18n="terms_3_body">ユーザーは品種の由来情報、交配式、情報元URLなどを匿名で投稿できます。投稿にあたり、以下の事項に同意するものとします：</p>
+      <p data-i18n="terms_3_body">ユーザーはGoogleアカウントでログインの上、品種の由来情報、交配式、情報元URLなどを投稿できます（表示名はニックネームを利用できます）。投稿にあたり、以下の事項に同意するものとします：</p>
       <ul class="terms-list" data-i18n-list="terms_3_list">
         <li>投稿内容の正確性について、投稿者自身が責任を負います</li>
         <li>投稿内容について、Aroid Origins運営チームに対し非独占的かつ無償の利用許諾を付与します</li>
@@ -807,12 +803,12 @@
       <p class="legal-date" data-i18n="privacy_updated">最終更新日: 2026年4月1日</p>
 
       <h2 data-i18n="privacy_1_title">1. はじめに</h2>
-      <p data-i18n="privacy_1_body">Aroid Origins運営チーム（運営責任者: 久恒 佑太）は、ユーザーのプライバシーを尊重します。本ポリシーでは、本サービスで収集する情報とその取り扱いについて説明します。本サービスはアカウント登録を必要とせず、すべての投稿は匿名で行われます。</p>
+      <p data-i18n="privacy_1_body">Aroid Origins運営チーム（運営責任者: 久恒 佑太）は、ユーザーのプライバシーを尊重します。本ポリシーでは、本サービスで収集する情報とその取り扱いについて説明します。閲覧はアカウント登録なしで利用できます。投稿にはGoogleアカウントによるログインが必要で、公開されるのはニックネーム等のプロフィール情報のみです。</p>
 
       <h2 data-i18n="privacy_2_title">2. 収集する情報</h2>
       <p data-i18n="privacy_2_body">本サービスでは以下の情報を収集する場合があります：</p>
       <ul class="terms-list" data-i18n-list="privacy_2_list">
-        <li>ユーザーが任意で提供する情報: 品種名、由来説明、交配式、情報元URL、アップロード画像（すべて匿名）</li>
+        <li>ユーザーが任意で提供する情報: 品種名、由来説明、交配式、情報元URL、アップロード画像</li>
         <li>Googleアカウント情報（OAuth認証利用時）: メールアドレス、表示名、プロフィール画像URL</li>
         <li>自動的に収集される情報: ブラウザの種類、言語設定、アクセスしたページ、IPアドレス（サーバーログおよび投稿時のデータベース記録。不正投稿防止のため最大180日間保存後、自動削除されます）</li>
         <li>決済関連情報: PAY.JP顧客ID、サブスクリプション状態（クレジットカード番号等の決済情報はPAY.JP（株式会社PAY）が管理し、当サイトのサーバーには保存されません）</li>
@@ -857,7 +853,7 @@
       <p data-i18n="privacy_7_body">アップロードされた画像は本サービス上で公開されます。画像にはEXIF情報（撮影場所、端末情報等）が含まれている場合があります。プライバシーを保護するため、アップロード前にEXIF情報を削除することを推奨します。</p>
 
       <h2 data-i18n="privacy_8_title">8. 未成年のユーザー</h2>
-      <p data-i18n="privacy_8_body">本サービスはアカウント登録を必要とせず、投稿はすべて匿名のため、年齢確認は行っていません。保護者の方には、未成年のインターネット利用を適切に監督していただくようお願いいたします。</p>
+      <p data-i18n="privacy_8_body">本サービスでは年齢確認は行っていません。保護者の方には、未成年のインターネット利用を適切に監督していただくようお願いいたします。</p>
 
       <h2 data-i18n="privacy_9_title">9. 国際ユーザー</h2>
       <p data-i18n="privacy_9_body">本サービスは日本から運営されており、日本法に基づいてデータを処理します。EU/EEA地域のユーザーは、ご自身が投稿したコンテンツの削除をお問い合わせページからリクエストできます。</p>
@@ -963,10 +959,10 @@
       </ul>
 
       <h2 data-i18n="about_plan_title">料金プラン</h2>
-      <p data-i18n="about_plan_desc">品種情報の閲覧・検索は無料でご利用いただけます。有料プラン（サブスクリプション）にご登録いただくと、以下の追加機能をご利用いただけます。</p>
+      <p data-i18n="about_plan_desc">品種情報・実生の閲覧・検索はすべて無料でご利用いただけます。実生（My Seedlings）の投稿は5件まで無料で、有料プラン（サブスクリプション）にご登録いただくと以下をご利用いただけます。</p>
       <ul class="terms-list" data-i18n-list="about_plan_features">
-        <li>My Seedlings：実生（交配）の詳細情報（交配式・画像・作出者情報）の閲覧</li>
-        <li>実生情報の投稿・編集・記録</li>
+        <li>My Seedlings：実生（交配）記録の無制限投稿</li>
+        <li>コレクションアーカイブとしての継続的な記録・編集</li>
       </ul>
       <p class="text-sm text-muted mt-sm" data-i18n="about_plan_pricing">月額プラン: 240円（税込）／ 年額プラン: 2,500円（税込）<br>お支払いはクレジットカード（PAY.JP経由）のみとなります。</p>
 
@@ -1008,10 +1004,9 @@
         <li>画像があればアップロードします（最大3枚、JPG/PNG、各20MB以下で自動圧縮されます）。</li>
         <li>由来情報を入力します。タイプによって入力フィールドが異なります。</li>
         <li>引用リンク（参考URL）があれば追加します。</li>
-        <li><strong>編集キー</strong>（4桁の数字）を設定すると、ログインしていなくても後から編集できます。</li>
         <li>「投稿する」ボタンで送信します。</li>
       </ol>
-      <p class="text-sm text-muted">※ Googleアカウントでログインすると、編集キーなしで自分の投稿を編集できます。</p>
+      <p class="text-sm text-muted">※ 投稿にはGoogleアカウントでのログインが必要です。自分の投稿は後からいつでも編集・削除できます。</p>
 
       <!-- タイプ別説明 -->
       <h2>&#x1F331; 品種タイプの違い</h2>
@@ -1070,11 +1065,11 @@
       <!-- 編集方法 -->
       <h2>&#x270F; 品種情報の編集</h2>
       <ol class="terms-list">
-        <li>品種の<strong>詳細ページ</strong>を開きます。</li>
-        <li>投稿時に設定した<strong>編集キー（4桁）</strong>を入力し、「編集」ボタンをタップします。</li>
+        <li>投稿したときと同じGoogleアカウントでログインします。</li>
+        <li>自分が投稿した品種の<strong>詳細ページ</strong>を開き、「編集」ボタンをタップします。</li>
         <li>投稿フォームが編集モードで開くので、情報を修正して再送信します。</li>
       </ol>
-      <p class="text-sm text-muted">※ Googleアカウントでログイン済みの場合、自分の投稿は編集キーなしで編集できます。</p>
+      <p class="text-sm text-muted">※ 編集・削除ができるのは自分が投稿した品種のみです。</p>
 
       <!-- 由来の追加 -->
       <h2>&#x1F4DA; 由来情報の追加</h2>
@@ -1157,7 +1152,7 @@
           <textarea class="form-textarea" id="contact-message" rows="6"></textarea>
         </div>
         <button class="btn btn--primary btn--block" id="contact-submit" data-i18n="contact_submit">送信する</button>
-        <p class="text-sm text-muted mt-sm" data-i18n="contact_note">※ 現在バックエンドは未実装のため、送信機能はデモ表示です。</p>
+        <p class="text-sm text-muted mt-sm" data-i18n="contact_note">内容は運営チームに送信されます。返信が必要な場合は正しいメールアドレスをご記入ください。</p>
       </div>
     </div>
   </section>
@@ -1224,7 +1219,7 @@
       <div class="mt-xl">
         <h2 class="section-title">My Seedlings</h2>
         <div class="search-bar mt-md mb-md max-w-400">
-          <input type="text" class="search-bar__input" id="profile-post-search" placeholder="品種名で検索...">
+          <input type="search" enterkeyhint="search" class="search-bar__input" id="profile-post-search" placeholder="品種名で検索...">
           <button class="search-bar__btn" aria-label="検索">&#x1F50D;</button>
         </div>
         <div id="profile-posts-grid" class="card-grid"></div>
@@ -1363,9 +1358,9 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/app-core.js?v=20260823a"></script>
-  <script src="js/pages.js?v=20260823a"></script>
-  <script src="js/forms.js?v=20260823a"></script>
+  <script src="js/app-core.js?v=20260823b"></script>
+  <script src="js/pages.js?v=20260823b"></script>
+  <script src="js/forms.js?v=20260823b"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1375,7 +1370,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20260823a"></script>
+  <script src="js/dialogs.js?v=20260823b"></script>
 
   <!-- Deletion Request Dialog -->
   <dialog id="delete-request-dialog" class="dialog-clean" aria-labelledby="delete-dialog-title">

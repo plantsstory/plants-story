@@ -9,7 +9,9 @@
   --color-black: #283532;
   --color-dark: #283532;
   --color-mid: #5E736D;
-  --color-gray: #8A9E98;
+  --color-gray: #8A9E98; /* decorative only — fails AA contrast for text */
+  --color-gray-dark: #4A5D57;
+  --color-text-muted: var(--color-mid);
   --color-light: #D2DBD7;
   --color-lighter: #E8EDEB;
   --color-bg: #F2F5F4;
@@ -53,6 +55,7 @@
   /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
 
   /* Transitions */

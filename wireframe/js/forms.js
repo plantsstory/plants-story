@@ -49,10 +49,24 @@ document.addEventListener('click', function(e) {
   paginateGenus(genusContent, 1);
 });
 
-// Hamburger menu
-document.getElementById('hamburger').addEventListener('click', function() {
-  document.getElementById('mobileNav').classList.toggle('open');
-});
+// Hamburger menu (with ARIA state + Escape to close)
+(function() {
+  var hamburger = document.getElementById('hamburger');
+  var mobileNav = document.getElementById('mobileNav');
+  hamburger.setAttribute('aria-expanded', 'false');
+  hamburger.setAttribute('aria-controls', 'mobileNav');
+  hamburger.addEventListener('click', function() {
+    var open = mobileNav.classList.toggle('open');
+    hamburger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && mobileNav.classList.contains('open')) {
+      mobileNav.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      hamburger.focus();
+    }
+  });
+})();
 
 // ---- Genus search input listeners (event delegation, debounced for server-side) ----
 var _genusSearchTimer = null;
@@ -119,9 +133,13 @@ document.addEventListener('click', function(e) {
   if (!chip) return;
   var group = chip.closest('.chips');
   if (group) {
-    group.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('active'); });
+    group.querySelectorAll('.chip').forEach(function(c) {
+      c.classList.remove('active');
+      c.setAttribute('aria-pressed', 'false');
+    });
   }
   chip.classList.add('active');
+  chip.setAttribute('aria-pressed', 'true');
 });
 
 // Vote button handler (persists to Supabase with server-side duplicate prevention)
@@ -2033,6 +2051,17 @@ var affiliateProducts = [];
   });
 })();
 
+// Affiliate click tracking (delegated so it covers all banner locations)
+document.addEventListener('click', function(e) {
+  var link = e.target.closest('.affiliate-card a');
+  if (link && typeof gtag === 'function') {
+    gtag('event', 'affiliate_click', {
+      shop: (link.className.match(/--(rakuten|amazon|yahoo)/) || [])[1] || 'image',
+      product: (link.closest('.affiliate-card').querySelector('.affiliate-card__name') || {}).textContent || ''
+    });
+  }
+});
+
 // Render affiliate cards in banner style
 function renderAffiliateBanner(containerOrId, options) {
   var container = typeof containerOrId === 'string' ? document.getElementById(containerOrId) : containerOrId;
@@ -2870,7 +2899,7 @@ if (window._pageCleanups) {
 }
 
 // ========================================
-// CONTACT FORM - Demo handler
+// CONTACT FORM - real submission (contact_messages table via RPC)
 // ========================================
 (function() {
   var submitBtn = document.getElementById('contact-submit');
@@ -2879,10 +2908,12 @@ if (window._pageCleanups) {
     e.preventDefault();
     var nameEl = document.getElementById('contact-name');
     var emailEl = document.getElementById('contact-email');
+    var categoryEl = document.getElementById('contact-category');
     var messageEl = document.getElementById('contact-message');
     var name = nameEl.value.trim();
     var email = emailEl.value.trim();
     var message = messageEl.value.trim();
+    var category = categoryEl ? categoryEl.value : 'general';
     // Clear previous validation
     clearAllFieldErrors(document.querySelector('.contact-form') || submitBtn.parentNode);
     var hasErr = false;
@@ -2890,9 +2921,38 @@ if (window._pageCleanups) {
     if (!email) { showFieldError(emailEl, 'メールアドレスを入力してください'); if (!hasErr) { emailEl.focus(); hasErr = true; } }
     if (!message) { showFieldError(messageEl, 'メッセージを入力してください'); if (!hasErr) { messageEl.focus(); hasErr = true; } }
     if (hasErr) return;
-    showToast(t('contact_success'));
-    nameEl.value = '';
-    emailEl.value = '';
-    messageEl.value = '';
+
+    var sb = window._supabaseClient;
+    if (!sb) {
+      // Offline fallback: open the user's mail app with the message prefilled
+      var subject = encodeURIComponent('[Aroid Origins] お問い合わせ (' + category + ')');
+      var body = encodeURIComponent('お名前: ' + name + '\n\n' + message);
+      window.location.href = 'mailto:plantsstory2026@gmail.com?subject=' + subject + '&body=' + body;
+      return;
+    }
+
+    submitBtn.disabled = true;
+    sb.rpc('submit_contact_message', {
+      p_name: name,
+      p_email: email,
+      p_category: category,
+      p_message: message
+    }).then(function(res) {
+      submitBtn.disabled = false;
+      var r = res.data;
+      if (res.error || !r || !r.success) {
+        var err = (r && r.error) || (res.error && res.error.message) || '';
+        if (err === 'Rate limited') {
+          showToast('送信回数の上限に達しました。しばらくしてからお試しください', true);
+        } else {
+          showToast('送信に失敗しました。時間をおいてお試しください', true);
+        }
+        return;
+      }
+      showToast(t('contact_success'));
+      nameEl.value = '';
+      emailEl.value = '';
+      messageEl.value = '';
+    });
   });
 })();

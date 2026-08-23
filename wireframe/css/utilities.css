@@ -56,7 +56,8 @@
 .text-xs { font-size: var(--font-size-xs); }
 .text-sm { font-size: var(--font-size-sm); }
 .text-base { font-size: var(--font-size-base); }
-.text-muted { color: var(--color-gray); }
+/* Matches layout.css definition — --color-gray (2.6:1) fails WCAG AA for text */
+.text-muted { color: var(--color-mid); }
 .text-dark { color: var(--color-dark); }
 .text-primary { color: var(--color-dark); }
 .text-danger { color: var(--color-danger); }

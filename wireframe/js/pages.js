@@ -677,12 +677,12 @@ document.addEventListener('click', function(e) {
 });
 
 // ---- Share button ----
-// Build clean site URL for sharing
+// Share the OGP prerendering Edge Function URL: SNS crawlers don't execute JS,
+// so the SPA URL shows no card. The function serves OG tags and redirects
+// human visitors to the real page.
 function getShareUrl(cultivarName) {
-  var parts = cultivarName.split(' ');
-  var genus = parts[0].toLowerCase();
-  var rest = parts.slice(1).join(' ');
-  return _siteBase + genus + '/' + encodeURIComponent(rest);
+  var base = window._SUPABASE_URL || 'https://jpgbehsrglsiwijglhjo.supabase.co';
+  return base + '/functions/v1/share?name=' + encodeURIComponent(cultivarName);
 }
 
 document.addEventListener('click', function(e) {
@@ -690,14 +690,22 @@ document.addEventListener('click', function(e) {
   if (!btn) {
     // Close share menu if clicking elsewhere
     var menu = document.getElementById('share-menu');
-    if (menu && !e.target.closest('#share-menu')) menu.classList.add('hidden');
+    if (menu && !e.target.closest('#share-menu')) {
+      menu.classList.add('hidden');
+      var sbEl = document.getElementById('share-btn');
+      if (sbEl) sbEl.setAttribute('aria-expanded', 'false');
+    }
     return;
   }
   var h1 = document.querySelector('#page-cultivar h1');
   if (!h1) return;
   var name = h1.textContent;
-  var shareUrl = getShareUrl(name);
+  // Use the DB name (includes " [Seedling]" suffix) so the OGP function finds the record
+  var detailPageEl = document.getElementById('page-cultivar');
+  var dbName = (detailPageEl && detailPageEl.getAttribute('data-cultivar-dbname')) || name;
+  var shareUrl = getShareUrl(dbName);
   var text = name + ' - Aroid Origins';
+  if (typeof gtag === 'function') gtag('event', 'share_click', { cultivar: name });
 
   // Try native share API first (mobile)
   if (navigator.share) {
@@ -716,6 +724,7 @@ document.addEventListener('click', function(e) {
     '<a href="https://line.me/R/msg/text/' + encodeURIComponent(text + '\n' + shareUrl) + '" target="_blank" rel="noopener" class="btn btn--sm btn--secondary text-xs">LINE</a>' +
     '<button class="btn btn--sm btn--secondary share-copy-btn text-xs">URLコピー</button>';
   menu.classList.toggle('hidden');
+  btn.setAttribute('aria-expanded', menu.classList.contains('hidden') ? 'false' : 'true');
 
   // Copy URL handler
   menu.querySelector('.share-copy-btn').addEventListener('click', function() {
@@ -735,7 +744,7 @@ function renderFavoritesPage() {
   if (!window._currentUser) {
     grid.innerHTML = '<div class="text-center grid-full p-xl">' +
       '<p class="text-muted mb-md">お気に入り機能を使うにはログインしてください</p>' +
-      '<button class="btn btn--primary" onclick="document.getElementById(\'btn-login\').click()">Googleでログイン</button>' +
+      '<button class="btn btn--primary" onclick="startGoogleLogin(\'/favorites\')">Googleでログイン</button>' +
       '</div>';
     return;
   }
@@ -779,7 +788,7 @@ function renderFavoritesPage() {
       var trustPct = hasOrigins ? cData.origins.reduce(function(max, o) { return Math.max(max, o.trust || 0); }, 0) : 0;
       var trustClass = getTrustClass(trustPct);
 
-      html += '<div class="card card--clickable" data-nav="cultivar" data-key="' + escHtml(name) + '" style="position:relative">';
+      html += '<div class="card card--clickable" role="link" tabindex="0" data-nav="cultivar" data-key="' + escHtml(name) + '" style="position:relative">';
 
       // Thumbnail or plant icon
       if (thumbMap[displayName] && baseUrl) {
@@ -1432,11 +1441,13 @@ function paginateGenusFromServer(genusEl, page) {
   var slug = genusEl.id.replace('genus-', '');
   var genusName = slug.charAt(0).toUpperCase() + slug.slice(1);
 
-  // Determine sort/filter/search from UI
+  // Determine sort/filter/search from UI (data-sort attr; text fallback for old cached markup)
   var sortChips = scope.querySelectorAll('.chip:not(.filter-chip)');
   var sortMode = 'name';
   sortChips.forEach(function(c) {
     if (c.classList.contains('active')) {
+      var ds = c.getAttribute('data-sort');
+      if (ds) { sortMode = ds; return; }
       var txt = c.textContent.trim();
       if (txt.indexOf('信頼') !== -1 || txt.indexOf('Trust') !== -1) sortMode = 'trust';
       else if (txt.indexOf('新着') !== -1 || txt.indexOf('Newest') !== -1) sortMode = 'newest';
@@ -1535,11 +1546,13 @@ function paginateGenusFromMemory(genusEl, page) {
   var allItems = _genusItems[slug] || [];
   var filtered = getFilteredItems(genusEl);
 
-  // Sort based on active sort chip
+  // Sort based on active sort chip (data-sort attr; text fallback for old cached markup)
   var sortChips = scope.querySelectorAll('.chip:not(.filter-chip)');
   var sortMode = 'name';
   sortChips.forEach(function(c) {
     if (c.classList.contains('active')) {
+      var ds = c.getAttribute('data-sort');
+      if (ds) { sortMode = ds; return; }
       var txt = c.textContent.trim();
       if (txt.indexOf('信頼') !== -1 || txt.indexOf('Trust') !== -1) sortMode = 'trust';
       else if (txt.indexOf('新着') !== -1 || txt.indexOf('Newest') !== -1) sortMode = 'newest';
@@ -1843,7 +1856,18 @@ document.addEventListener('click', function(e) {
 
     // Close mobile nav
     document.getElementById('mobileNav').classList.remove('open');
+    var hamburgerEl = document.getElementById('hamburger');
+    if (hamburgerEl) hamburgerEl.setAttribute('aria-expanded', 'false');
   }
+});
+
+// Keyboard activation for div-based link rows (role="link" + tabindex)
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  var el = e.target.closest ? e.target.closest('[data-nav][role="link"]') : null;
+  if (!el || e.target.matches('a, button, input, select, textarea')) return;
+  e.preventDefault();
+  el.click();
 });
 
 // Edit button on cultivar detail page - require login

@@ -1,22 +1,25 @@
 // Service Worker for Aroid Origins PWA
-var CACHE_VERSION = 'aroid-origins-v9';
+var CACHE_VERSION = 'aroid-origins-v10';
+// Must match the ?v= cache buster in index.html — otherwise the precache
+// URLs never match real requests and every asset downloads twice.
+var ASSET_VERSION = '20260823b';
 var OFFLINE_PAGE = './offline.html';
 var STATIC_ASSETS = [
   './',
   './index.html',
   OFFLINE_PAGE,
-  './js/app-core.js',
-  './js/pages.js',
-  './js/forms.js',
-  './js/dialogs.js',
+  './js/app-core.js?v=' + ASSET_VERSION,
+  './js/pages.js?v=' + ASSET_VERSION,
+  './js/forms.js?v=' + ASSET_VERSION,
+  './js/dialogs.js?v=' + ASSET_VERSION,
   './js/gtag-init.js',
   './js/sw-register.js',
-  './css/variables.css',
-  './css/reset.css',
-  './css/layout.css',
-  './css/components.css',
-  './css/pages.css',
-  './css/utilities.css',
+  './css/variables.css?v=' + ASSET_VERSION,
+  './css/reset.css?v=' + ASSET_VERSION,
+  './css/layout.css?v=' + ASSET_VERSION,
+  './css/components.css?v=' + ASSET_VERSION,
+  './css/pages.css?v=' + ASSET_VERSION,
+  './css/utilities.css?v=' + ASSET_VERSION,
   './manifest.json',
   './icons/icon-192.svg',
   './icons/icon-512.svg'

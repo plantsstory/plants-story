@@ -13,8 +13,10 @@ gtag('config', 'G-KJK72JH471', { send_page_view: true });
       non_interaction: true
     });
   }
+  // Self-hosted (unpkg.com is blocked by CSP); absolute path works from static stub pages too
+  var vitalsRoot = location.hostname === 'plantsstory.github.io' ? '/plants-story/' : '/';
   var s = document.createElement('script');
-  s.src = 'https://unpkg.com/web-vitals@4/dist/web-vitals.iife.js';
+  s.src = vitalsRoot + 'js/vendor/web-vitals.iife.js';
   s.async = true;
   s.onload = function() {
     if (window.webVitals) {

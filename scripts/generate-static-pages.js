@@ -28,6 +28,8 @@ function fetchJSON(urlPath) {
       }
     };
     https.get(url.toString(), options, (res) => {
+      // Without utf8 encoding, multi-byte chars split across chunks become U+FFFD
+      res.setEncoding('utf8');
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => resolve(JSON.parse(data)));
@@ -128,12 +130,44 @@ async function main() {
 
   let written = 0, skipped = 0;
 
+  // ---- Static SPA routes (previously HTTP 404 despite being in the sitemap) ----
+  const staticRoutes = [
+    { dir: 'about', title: 'Aroid Originsについて | Aroid Origins', description: 'アロイド品種の由来・交配情報を学術データベースとコミュニティで検証するサイト「Aroid Origins」の概要・料金・運営情報。' },
+    { dir: 'guide', title: '使い方ガイド | Aroid Origins', description: '品種の検索・由来の閲覧・投稿・画像アップロードなど、Aroid Originsの使い方を解説します。' },
+    { dir: 'terms', title: '利用規約 | Aroid Origins', description: 'Aroid Originsの利用規約。投稿コンテンツの取り扱い、サブスクリプション、禁止行為について定めています。' },
+    { dir: 'privacy', title: 'プライバシーポリシー | Aroid Origins', description: 'Aroid Originsの個人情報・Cookie・決済情報の取り扱いについて説明します。' },
+    { dir: 'contact', title: 'お問い合わせ | Aroid Origins', description: 'Aroid Originsへのお問い合わせ・不具合報告・コンテンツ削除要請の窓口です。' },
+  ];
+  for (const r of staticRoutes) {
+    const url = SITE + '/' + r.dir + '/';
+    const html = buildStub(template, {
+      title: r.title,
+      description: r.description,
+      url: url,
+      ogType: 'website',
+    });
+    const dir = path.join(WIREFRAME, r.dir);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
+    written++;
+  }
+
   // ---- Genus pages ----
   for (const g of genera) {
     const slug = safeDirName(g.slug);
     if (!slug) { skipped++; continue; }
     const count = countByGenus[g.name] || 0;
-    const url = SITE + '/' + slug;
+    // Trailing slash: GitHub Pages 301s /slug -> /slug/, so canonical points at the final URL
+    const url = SITE + '/' + slug + '/';
+    // Crawlable link list to every cultivar page (the SPA removes #static-seo-links on boot)
+    const genusLinks = publicCultivars
+      .filter(c => (c.genus || 'Anthurium') === g.name)
+      .map(c => {
+        const rest = String(c.cultivar_name).startsWith(g.name + ' ')
+          ? String(c.cultivar_name).slice(g.name.length + 1)
+          : String(c.cultivar_name);
+        return '<li><a href="' + SITE + '/' + slug + '/' + encodeURIComponent(rest) + '/">' + escAttr(c.cultivar_name) + '</a></li>';
+      }).join('');
     const html = buildStub(template, {
       title: g.name + 'の品種一覧（' + count + '品種）| Aroid Origins',
       description: g.name + 'の品種' + count + '件の由来・歴史情報。原種・Hybrid・Cloneの来歴を学術データベースとコミュニティで検証しています。',
@@ -148,9 +182,13 @@ async function main() {
         ]
       }]
     });
+    // Inject the crawlable cultivar link list right after <main> opens
+    const htmlWithLinks = genusLinks
+      ? html.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="' + escAttr(g.name) + ' cultivars"><ul>' + genusLinks + '</ul></nav>')
+      : html;
     const dir = path.join(WIREFRAME, slug);
     fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
+    fs.writeFileSync(path.join(dir, 'index.html'), htmlWithLinks, 'utf8');
     written++;
   }
 
@@ -164,11 +202,13 @@ async function main() {
     const restDir = safeDirName(rest);
     if (!restDir || !safeDirName(slug)) { skipped++; continue; }
 
-    const url = SITE + '/' + slug + '/' + encodeURIComponent(rest);
+    const url = SITE + '/' + slug + '/' + encodeURIComponent(rest) + '/';
     const desc = originDescription(c.origins) ||
       (c.cultivar_name + ' の由来・来歴・交配情報。学術データベースとコミュニティ投票で信頼度を検証しています。');
+    // Storage paths may contain spaces/quotes — encode each path segment for a valid og:image URL
     const img = imageMap[c.cultivar_name]
-      ? SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + imageMap[c.cultivar_name]
+      ? SUPABASE_URL + '/storage/v1/object/public/gallery-images/' +
+        String(imageMap[c.cultivar_name]).split('/').map(encodeURIComponent).join('/')
       : null;
 
     const html = buildStub(template, {
@@ -182,7 +222,7 @@ async function main() {
         '@type': 'BreadcrumbList',
         'itemListElement': [
           { '@type': 'ListItem', 'position': 1, 'name': 'Aroid Origins', 'item': SITE + '/' },
-          { '@type': 'ListItem', 'position': 2, 'name': genus, 'item': SITE + '/' + slug },
+          { '@type': 'ListItem', 'position': 2, 'name': genus, 'item': SITE + '/' + slug + '/' },
           { '@type': 'ListItem', 'position': 3, 'name': c.cultivar_name, 'item': url }
         ]
       }, {

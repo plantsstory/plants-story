@@ -718,7 +718,7 @@ function navigateTo(page, options, pushHistory) {
 
   // Accessibility: focus the page heading after SPA navigation
   setTimeout(function() {
-    var visiblePage = document.querySelector('[id^="page-"]:not([style*="display: none"]):not([style*="display:none"])');
+    var visiblePage = document.querySelector('.page.active');
     if (visiblePage) {
       var heading = visiblePage.querySelector('h1, h2');
       if (heading) {
@@ -1304,9 +1304,9 @@ if (false) {
   function renderSearchChips() {
     var container = document.getElementById('search-chips');
     if (!container) return;
-    var html = '<span class="chip active" data-genus="all" data-i18n="filter_all">すべて</span>';
+    var html = '<button type="button" class="chip active" aria-pressed="true" data-genus="all" data-i18n="filter_all">すべて</button>';
     window._generaData.forEach(function(g) {
-      html += '<span class="chip" data-genus="' + g.slug + '">' + g.name + '</span>';
+      html += '<button type="button" class="chip" aria-pressed="false" data-genus="' + g.slug + '">' + g.name + '</button>';
     });
     container.innerHTML = html;
   }
@@ -1327,13 +1327,13 @@ if (false) {
     var html = '';
     window._generaData.forEach(function(g) {
       var imgSrc = g.card_image_path ? _basePath + 'images/' + g.card_image_path : '';
-      html += '<div class="card genus-card card--clickable" data-nav="genus" data-genus="' + g.slug + '">';
+      html += '<a class="card genus-card card--clickable" href="' + _basePath + g.slug + '/" data-nav="genus" data-genus="' + g.slug + '">';
       html += '<div class="genus-card__img">';
       if (imgSrc) html += '<img src="' + imgSrc + '" alt="' + g.name + '" class="genus-card__photo">';
       html += '</div>';
       html += '<div class="genus-card__title">' + g.name + '</div>';
       html += '<div class="genus-card__count" data-genus-count="' + g.slug + '">- 品種</div>';
-      html += '</div>';
+      html += '</a>';
     });
     grid.innerHTML = html;
   }
@@ -1364,19 +1364,19 @@ if (false) {
       if (g.has_seedlings) html += '<div data-genus-view="species-clones">';
       html += '<div class="sort-bar">';
       html += '<div class="search-bar search-bar--inline">';
-      html += '<input type="text" class="search-bar__input" placeholder="属内を検索..." data-i18n-placeholder="genus_search">';
+      html += '<input type="search" enterkeyhint="search" class="search-bar__input" placeholder="属内を検索..." data-i18n-placeholder="genus_search">';
       html += '<button class="search-bar__btn" aria-label="検索">&#x1F50D;</button>';
       html += '</div>';
       html += '<div class="chips">';
-      html += '<span class="chip active" data-i18n="sort_name">名前順</span>';
-      html += '<span class="chip" data-i18n="sort_trust">信頼度順</span>';
-      html += '<span class="chip" data-i18n="sort_newest">新着順</span>';
+      html += '<button type="button" class="chip active" aria-pressed="true" data-sort="name" data-i18n="sort_name">名前順</button>';
+      html += '<button type="button" class="chip" aria-pressed="false" data-sort="trust" data-i18n="sort_trust">信頼度順</button>';
+      html += '<button type="button" class="chip" aria-pressed="false" data-sort="newest" data-i18n="sort_newest">新着順</button>';
       html += '</div>';
       html += '<div class="chips filter-chips">';
-      html += '<span class="chip filter-chip active" data-filter-type="all" data-i18n="filter_all_type">すべて</span>';
-      html += '<span class="chip filter-chip" data-filter-type="species" data-i18n="filter_species">原種</span>';
-      html += '<span class="chip filter-chip" data-filter-type="hybrid" data-i18n="filter_hybrid">Hybrid</span>';
-      html += '<span class="chip filter-chip" data-filter-type="clone" data-i18n="filter_clone">Clone</span>';
+      html += '<button type="button" class="chip filter-chip active" aria-pressed="true" data-filter-type="all" data-i18n="filter_all_type">すべて</button>';
+      html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="species" data-i18n="filter_species">原種</button>';
+      html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="hybrid" data-i18n="filter_hybrid">Hybrid</button>';
+      html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="clone" data-i18n="filter_clone">Clone</button>';
       html += '</div>';
       html += '<a href="#" class="btn btn--primary btn--sm" data-nav="contribute" data-genus="' + g.name + '" data-i18n="add_cultivar" class="btn--ml-auto">+ 品種を追加</a>';
       html += '</div>';
@@ -1396,7 +1396,7 @@ if (false) {
         html += '<div data-genus-view="seedlings" style="display:none;">';
         html += '<div class="sort-bar">';
         html += '<div class="search-bar search-bar--inline">';
-        html += '<input type="text" class="search-bar__input seedling-search" placeholder="実生を検索...">';
+        html += '<input type="search" enterkeyhint="search" class="search-bar__input seedling-search" placeholder="実生を検索...">';
         html += '<button class="search-bar__btn" aria-label="検索">&#x1F50D;</button>';
         html += '</div>';
         html += '<a href="#" class="btn btn--primary btn--sm btn--ml-auto" data-nav="contribute" data-genus="' + g.name + '" data-contribute-type="seedling">+ 実生を追加</a>';
@@ -1642,6 +1642,10 @@ if (false) {
   // Step 2 of the paywall modal: card input for the chosen plan
   function showCardStep(plan) {
     _selectedPlan = plan === 'annual' ? 'annual' : 'monthly';
+    if (typeof gtag === 'function') {
+      gtag('event', 'plan_select', { plan: _selectedPlan });
+      gtag('event', 'checkout_card_step', { plan: _selectedPlan });
+    }
     var planSelect = document.getElementById('paywall-plan-select');
     var cardSection = document.getElementById('paywall-card-section');
     var planLabel = document.getElementById('paywall-selected-plan');
@@ -1793,6 +1797,8 @@ if (false) {
     // Always start from the plan selection step
     if (typeof window.resetPaywallSteps === 'function') window.resetPaywallSteps();
     modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    if (typeof gtag === 'function') gtag('event', 'paywall_view');
     // Focus the close button for keyboard users
     var closeBtn = document.getElementById('paywall-close-btn');
     if (closeBtn) setTimeout(function() { closeBtn.focus(); }, 50);
@@ -1802,6 +1808,7 @@ if (false) {
     var modal = document.getElementById('paywall-modal');
     if (!modal) return;
     modal.style.display = 'none';
+    document.body.style.overflow = '';
     // Restore focus to the element that opened the modal
     if (_paywallPreviousFocus && _paywallPreviousFocus.focus) {
       _paywallPreviousFocus.focus();
@@ -1850,7 +1857,10 @@ if (false) {
     if (e.key === 'Tab') {
       var content = modal.querySelector('.paywall-modal__content');
       if (!content) return;
-      var focusable = content.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      var focusable = Array.prototype.filter.call(
+        content.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'),
+        function(el) { return el.offsetParent !== null && !el.disabled; }
+      );
       if (focusable.length === 0) return;
       var first = focusable[0];
       var last = focusable[focusable.length - 1];
@@ -1883,6 +1893,20 @@ if (false) {
     });
   }
 
+  // Shared Google login entry point (also used by empty states in pages.js)
+  psExport('startGoogleLogin', startGoogleLogin);
+  function startGoogleLogin(returnPath) {
+    if (!supabase) { showToast('ログインが必要です', true); return; }
+    localStorage.setItem('login_return_path', returnPath || window.location.pathname || _basePath);
+    supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + _basePath,
+        queryParams: { prompt: 'select_account' }
+      }
+    });
+  }
+
   // Header auth button (login/logout)
   var headerAuthBtn = document.getElementById('header-auth-btn');
   if (headerAuthBtn && supabase) {
@@ -1896,14 +1920,7 @@ if (false) {
           showToast('ログアウトしました');
         });
       } else {
-        localStorage.setItem('login_return_path', window.location.pathname || _basePath);
-        supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: window.location.origin + _basePath,
-            queryParams: { prompt: 'select_account' }
-          }
-        });
+        startGoogleLogin();
       }
     });
   }
@@ -2288,7 +2305,8 @@ if (false) {
     var trustPct = hasDesc ? entry.origins[0].trust : 0;
     var displayName = isSeedling ? fullName.replace(' [Seedling]', '') : fullName;
 
-    var h = '<div class="' + cls + '"' + (locked ? '' : ' data-nav="cultivar"') + ' data-genus="' + meta.genus.toLowerCase() + '" data-type="' + meta.type + '"' + (meta.created_at ? ' data-created="' + meta.created_at + '"' : '') + '>';
+    // role=link + tabindex for keyboard access (a real <a> would nest the poster-link anchor, which is invalid HTML)
+    var h = '<div class="' + cls + '"' + (locked ? '' : ' data-nav="cultivar" role="link" tabindex="0"') + ' data-genus="' + meta.genus.toLowerCase() + '" data-type="' + meta.type + '"' + (meta.created_at ? ' data-created="' + meta.created_at + '"' : '') + '>';
     var thumbKey = isSeedling ? displayName : displayName;
     var thumbPath = _thumbMap[thumbKey];
     var thumbContent = thumbPath
@@ -2302,7 +2320,7 @@ if (false) {
     h += '<span class="badge ' + bi.cls + '">' + bi.txt + '</span>';
     if (locked) h += '<span class="badge badge--locked"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>';
     if (!isSeedling && !hasDesc) h += '<span class="badge badge--ai">' + t('ai_pending_badge') + '</span>';
-    if (!isSeedling) h += '<div class="trust"><div class="trust__bar"><div class="trust__fill trust--low" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + (hasDesc ? trustPct + '%' : '-') + '</span></div>';
+    if (!isSeedling) h += '<div class="trust"><div class="trust__bar"><div class="trust__fill ' + getTrustClass(trustPct) + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + (hasDesc ? trustPct + '%' : '-') + '</span></div>';
     h += '</div>';
     if (entry.formula && !locked) {
       h += '<div class="text-sm text-muted mt-sm"><span class="formula-parent formula-parent--sm">' + escHtml(entry.formula.parentA) + '</span><span class="formula-operator formula-operator--sm">&times;</span><span class="formula-parent formula-parent--sm">' + escHtml(entry.formula.parentB) + '</span></div>';
@@ -2451,7 +2469,7 @@ if (false) {
         var type = item.type || '';
         var bi = getBadgeInfo(type, name);
 
-        html += '<div class="card card--clickable" data-nav="cultivar" data-key="' + escHtml(name) + '">';
+        html += '<div class="card card--clickable" role="link" tabindex="0" data-nav="cultivar" data-key="' + escHtml(name) + '">';
 
         // Thumbnail or fallback icon
         if (thumbMap[displayName] && baseUrl) {
@@ -2511,7 +2529,7 @@ if (false) {
             var genus = displayName.split(' ')[0];
 
             html += '<div class="card card--clickable"';
-            html += ' data-nav="cultivar" data-key="' + escHtml(name) + '"';
+            html += ' role="link" tabindex="0" data-nav="cultivar" data-key="' + escHtml(name) + '"';
             html += '>';
 
             // Thumbnail (same card-img-container as recently updated for size consistency)
@@ -2550,7 +2568,7 @@ if (false) {
       if (section) paginateGenus(section, 1);
     });
     refreshGenusUI();
-    refreshRecentlyUpdated();
+    // refreshRecentlyUpdated() is already issued by startApp() — do not query twice
     refreshSeedlingPreview();
 
     // Profile cache for poster names
@@ -2653,6 +2671,9 @@ if (false) {
 
   // Run after DOM is ready — load genera first, then cultivars
   function startApp() {
+    // Static SEO stubs carry a crawler-only link list — remove it once the SPA takes over
+    var seoLinks = document.getElementById('static-seo-links');
+    if (seoLinks) seoLinks.remove();
     window._generaLoaded = loadGenera().then(function() {
       // Fast: fetch top page data from RPCs (genus counts + recent cultivars)
       refreshRecentlyUpdated();
