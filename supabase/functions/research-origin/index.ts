@@ -662,7 +662,8 @@ async function callGemini(
   apiKey: string,
   prompt: string,
   maxTokens = 2048,
-  useSearch = false
+  useSearch = false,
+  purpose = ""
 ): Promise<GeminiResponse> {
   const body: Record<string, unknown> = {
     contents: [{ parts: [{ text: prompt }] }],
@@ -704,6 +705,15 @@ async function callGemini(
   if (useSearch) {
     console.log(`[Gemini ${GEMINI_MODEL}] grounded search: ${sources.length} web sources`);
   }
+  logAiUsage({
+    provider: "gemini",
+    model: GEMINI_MODEL,
+    purpose,
+    cultivar_name: _usageCultivar,
+    input_tokens: data?.usageMetadata?.promptTokenCount || 0,
+    output_tokens: data?.usageMetadata?.candidatesTokenCount || 0,
+    web_search_calls: useSearch ? 1 : 0,
+  });
   return { text, sources };
 }
 
@@ -762,12 +772,38 @@ async function callGroq(
 //   supabase secrets set OPENAI_MODEL=gpt-...
 const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-5-mini";
 
+// Fire-and-forget usage logging so the admin dashboard can estimate spend
+let _usageClient: any = null;
+function logAiUsage(entry: {
+  provider: string; model: string; purpose?: string; cultivar_name?: string;
+  input_tokens?: number; output_tokens?: number; web_search_calls?: number;
+}) {
+  try {
+    if (!_usageClient) {
+      _usageClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+    }
+    _usageClient.from("ai_usage_log").insert(entry).then(
+      (r: any) => { if (r.error) console.log("[UsageLog] insert error:", r.error.message); },
+      (e: any) => console.log("[UsageLog] failed:", String(e))
+    );
+  } catch (e) {
+    console.log("[UsageLog] failed:", String(e));
+  }
+}
+
+// Per-request context for usage attribution (set once at request start)
+let _usageCultivar = "";
+
 async function callOpenAI(
   apiKey: string,
   systemPrompt: string,
   userPrompt: string,
   maxTokens = 2048,
-  useSearch = false
+  useSearch = false,
+  purpose = ""
 ): Promise<GeminiResponse> {
   const body: Record<string, unknown> = {
     model: OPENAI_MODEL,
@@ -813,6 +849,18 @@ async function callOpenAI(
   if (useSearch) {
     console.log(`[OpenAI ${OPENAI_MODEL}] web search: ${sources.length} cited sources`);
   }
+
+  const searchCalls = (data?.output || []).filter((o: any) => o.type === "web_search_call").length;
+  logAiUsage({
+    provider: "openai",
+    model: data?.model || OPENAI_MODEL,
+    purpose,
+    cultivar_name: _usageCultivar,
+    input_tokens: data?.usage?.input_tokens || 0,
+    output_tokens: data?.usage?.output_tokens || 0,
+    web_search_calls: searchCalls,
+  });
+
   return { text, sources };
 }
 
@@ -1467,6 +1515,7 @@ serve(async (req: Request) => {
     }
 
     const { cultivar_id, genus, cultivar_name, type, manual_origins, user_text, user_sources, preview, keywords, youtube_channels } = await req.json();
+    _usageCultivar = cultivar_name || "";
 
     if ((!cultivar_id && !preview) || !cultivar_name) {
       return new Response(
@@ -1611,7 +1660,7 @@ serve(async (req: Request) => {
             const { text, sources: oSources } = await callOpenAI(
               openaiApiKey,
               "You are a botanical researcher. Return ONLY valid JSON, no markdown.",
-              structuredPrompt, 2000, true
+              structuredPrompt, 2000, true, "species-structured"
             );
             const parsed = extractJson(text);
             if (parsed?.notes) {
@@ -1783,7 +1832,7 @@ serve(async (req: Request) => {
               console.log("[KeywordResearch] Trying OpenAI (web search)...");
               const { text, sources: oSources } = await callOpenAI(openaiApiKey,
                 "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
-                researchPrompt, 3000, true);
+                researchPrompt, 3000, true, "keyword-research");
               researchResult = extractJson(text);
               if (researchResult?.origins?.length) {
                 researchSource = "openai-web-search";
@@ -1810,7 +1859,7 @@ serve(async (req: Request) => {
           if (!researchResult && geminiApiKey) {
             try {
               console.log("[KeywordResearch] Trying Gemini (grounded)...");
-              const { text, sources: gSources } = await callGemini(geminiApiKey, researchPrompt, 3000, true);
+              const { text, sources: gSources } = await callGemini(geminiApiKey, researchPrompt, 3000, true, "keyword-research");
               researchResult = extractJson(text);
               if (researchResult?.origins?.length) {
                 researchSource = "gemini-grounded";
@@ -1949,7 +1998,7 @@ serve(async (req: Request) => {
               const { text, sources: oSources } = await callOpenAI(
                 openaiApiKey,
                 "You are a botanical fact-checker. Respond ONLY with valid JSON, no markdown.",
-                verifyPrompt + SEARCH_INSTRUCTIONS, 3000, true
+                verifyPrompt + SEARCH_INSTRUCTIONS, 3000, true, "verify"
               );
               verifyResult = extractJson(text);
               if (verifyResult?.verification_tier) {
@@ -2039,7 +2088,7 @@ serve(async (req: Request) => {
                 const { text } = await callOpenAI(
                   openaiApiKey,
                   "You are a botanical researcher. Return ONLY valid JSON, no markdown.",
-                  structPrompt, 2000
+                  structPrompt, 2000, false, "cultivar-structured"
                 );
                 cultivarStructured = extractJson(text);
                 if (cultivarStructured) console.log("[CultivarStructured] OpenAI OK");
@@ -2212,7 +2261,7 @@ serve(async (req: Request) => {
             const { text, sources: oSources } = await callOpenAI(
               openaiApiKey,
               "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
-              researchPrompt, 3000, true
+              researchPrompt, 3000, true, "fallback-research"
             );
             researchResult = extractJson(text);
             if (researchResult?.origins?.length) {
@@ -2245,7 +2294,7 @@ serve(async (req: Request) => {
         if (!researchResult && geminiApiKey) {
           try {
             console.log("Trying Gemini (grounded) for cultivar research...");
-            const { text, sources: gSources } = await callGemini(geminiApiKey, researchPrompt, 3000, true);
+            const { text, sources: gSources } = await callGemini(geminiApiKey, researchPrompt, 3000, true, "keyword-research");
             researchResult = extractJson(text);
             if (researchResult?.origins?.length) {
               researchSource = "gemini-grounded";

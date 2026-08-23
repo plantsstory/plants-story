@@ -119,6 +119,36 @@
           </div>
         </div>
 
+        <!-- AI usage / estimated OpenAI spend -->
+        <h3 class="section-heading">🤖 AI利用状況（今月）</h3>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-ai-calls">-</div>
+            <div class="stat-label">AI調査回数（今月）</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-ai-tokens">-</div>
+            <div class="stat-label">トークン（入力+出力）</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-ai-searches">-</div>
+            <div class="stat-label">Web検索回数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-ai-cost">-</div>
+            <div class="stat-label">OpenAI概算コスト（今月）</div>
+          </div>
+        </div>
+        <div class="stat-grid" style="margin-top:var(--space-md);">
+          <div class="stat-card" style="grid-column:1/-1;">
+            <div id="ai-usage-breakdown" style="font-size:var(--font-size-sm);"></div>
+            <p style="font-size:var(--font-size-xs);color:var(--color-gray);margin:var(--space-sm) 0 0;">
+              ※ 概算はサイト側で記録したトークン数×公開単価から算出（gpt-5-mini: 入力$0.25/100万・出力$2.00/100万・Web検索$10/1000回で計算）。正確な請求額はOpenAIのダッシュボードで確認してください。
+            </p>
+            <a href="https://platform.openai.com/usage" target="_blank" rel="noopener" class="btn btn-primary btn-sm" style="margin-top:var(--space-sm);">OpenAI Usageを開く →</a>
+          </div>
+        </div>
+
         <h3 class="section-heading">Tier分布</h3>
         <div id="tier-distribution" class="d-flex gap-sm mb-xl flex-wrap"></div>
         <h3 class="section-heading">属別品種数</h3>
@@ -944,6 +974,78 @@ async function loadDashboard() {
 
   // Load site stats (users, images, storage, subscribers)
   loadSiteStats();
+  loadAiUsage();
+}
+
+// AI usage summary: this month's token spend from ai_usage_log
+// Unit prices (USD, editable): gpt-5-mini public pricing as of 2025-08
+var AI_PRICING = {
+  input_per_1m: 0.25,
+  output_per_1m: 2.00,
+  web_search_per_1k: 10.00
+};
+
+async function loadAiUsage() {
+  try {
+    var monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    var res = await sb.from('ai_usage_log')
+      .select('provider,model,purpose,input_tokens,output_tokens,web_search_calls,created_at')
+      .gte('created_at', monthStart.toISOString())
+      .order('created_at', { ascending: false })
+      .limit(2000);
+    if (res.error) {
+      document.getElementById('stat-ai-cost').textContent = '-';
+      return;
+    }
+    var rows = res.data || [];
+    var openai = rows.filter(function(r) { return r.provider === 'openai'; });
+    var inTok = 0, outTok = 0, searches = 0;
+    var byModel = {};
+    openai.forEach(function(r) {
+      inTok += r.input_tokens || 0;
+      outTok += r.output_tokens || 0;
+      searches += r.web_search_calls || 0;
+      var m = r.model || '?';
+      if (!byModel[m]) byModel[m] = { calls: 0, inTok: 0, outTok: 0, searches: 0 };
+      byModel[m].calls++;
+      byModel[m].inTok += r.input_tokens || 0;
+      byModel[m].outTok += r.output_tokens || 0;
+      byModel[m].searches += r.web_search_calls || 0;
+    });
+
+    var cost = (inTok / 1e6) * AI_PRICING.input_per_1m
+             + (outTok / 1e6) * AI_PRICING.output_per_1m
+             + (searches / 1000) * AI_PRICING.web_search_per_1k;
+
+    document.getElementById('stat-ai-calls').textContent = openai.length;
+    document.getElementById('stat-ai-tokens').textContent =
+      (inTok + outTok) >= 1e6 ? ((inTok + outTok) / 1e6).toFixed(2) + 'M' : Math.round((inTok + outTok) / 1000) + 'K';
+    document.getElementById('stat-ai-searches').textContent = searches;
+    document.getElementById('stat-ai-cost').textContent = '$' + cost.toFixed(2);
+
+    // Per-model breakdown table
+    var bd = document.getElementById('ai-usage-breakdown');
+    if (bd) {
+      var models = Object.keys(byModel);
+      if (models.length === 0) {
+        bd.innerHTML = '<span style="color:var(--color-gray);">今月のOpenAI利用はまだありません。</span>';
+      } else {
+        var html = '<table style="width:100%;border-collapse:collapse;">';
+        html += '<tr style="text-align:left;color:var(--color-gray);"><th style="padding:4px 8px;">モデル</th><th style="padding:4px 8px;">回数</th><th style="padding:4px 8px;">入力</th><th style="padding:4px 8px;">出力</th><th style="padding:4px 8px;">検索</th><th style="padding:4px 8px;">概算</th></tr>';
+        models.forEach(function(m) {
+          var s = byModel[m];
+          var c = (s.inTok / 1e6) * AI_PRICING.input_per_1m + (s.outTok / 1e6) * AI_PRICING.output_per_1m + (s.searches / 1000) * AI_PRICING.web_search_per_1k;
+          html += '<tr><td style="padding:4px 8px;">' + escapeHtml(m) + '</td><td style="padding:4px 8px;">' + s.calls + '</td><td style="padding:4px 8px;">' + s.inTok.toLocaleString() + '</td><td style="padding:4px 8px;">' + s.outTok.toLocaleString() + '</td><td style="padding:4px 8px;">' + s.searches + '</td><td style="padding:4px 8px;">$' + c.toFixed(3) + '</td></tr>';
+        });
+        html += '</table>';
+        bd.innerHTML = html;
+      }
+    }
+  } catch (e) {
+    document.getElementById('stat-ai-cost').textContent = '-';
+  }
 }
 
 async function loadSiteStats() {
