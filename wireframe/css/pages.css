@@ -11,7 +11,7 @@
 }
 
 .hero__title {
-  font-family: var(--font-heading);
+  font-family: var(--font-display);
   font-size: 2rem;
   letter-spacing: 0.04em;
   color: #fff;
@@ -70,7 +70,7 @@
 
 /* Section titles with heading font */
 .section-title {
-  font-family: var(--font-heading);
+  font-family: var(--font-display);
   color: var(--color-dark);
 }
 
@@ -87,7 +87,7 @@
    PAGE: GENUS LIST
    ======================================== */
 #page-genus .section-title {
-  font-family: var(--font-heading);
+  font-family: var(--font-display);
 }
 
 #page-genus .card {
@@ -104,7 +104,7 @@
 }
 
 #page-cultivar h1 {
-  font-family: var(--font-heading);
+  font-family: var(--font-display);
 }
 
 /* ========================================
@@ -115,7 +115,7 @@
 }
 
 #page-contribute .section-title {
-  font-family: var(--font-heading);
+  font-family: var(--font-display);
 }
 
 /* ========================================
@@ -134,7 +134,7 @@
 }
 
 .legal-page h1 {
-  font-family: var(--font-heading);
+  font-family: var(--font-display);
   color: var(--color-dark);
   margin-bottom: var(--space-sm);
 }
