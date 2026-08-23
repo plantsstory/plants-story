@@ -1229,6 +1229,9 @@ if (false) {
 (function() {
   var STORAGE_KEY = 'plants-story-user-cultivars';
   var SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
+  // PAY.JP public key (pk_test_... / pk_live_...): set after creating the PAY.JP account.
+  // Empty = payment UI shows "under preparation".
+  window._PAYJP_PUBLIC_KEY = '';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
 
   // --- IP address helper (cached per session, global) ---
@@ -1512,12 +1515,15 @@ if (false) {
           window.history.replaceState({}, '', _basePath);
           if (typeof navigateTo === 'function') navigateTo('top');
         }
-        // Resume checkout selected before login (paywall -> OAuth -> Stripe)
+        // Resume checkout selected before login (paywall -> OAuth -> card form)
         var pendingPlan = localStorage.getItem('pending_checkout_plan');
         if (pendingPlan) {
           localStorage.removeItem('pending_checkout_plan');
-          showToast('決済画面へ移動します...');
-          setTimeout(function() { startCheckout(pendingPlan); }, 800);
+          showToast('カード情報を入力してください');
+          setTimeout(function() {
+            showPaywallModal();
+            startCheckout(pendingPlan);
+          }, 800);
         }
       }
     });
@@ -1580,61 +1586,36 @@ if (false) {
     });
   }
 
-  // Handle return from Stripe Checkout (?subscription=success / canceled)
-  function handleSubscriptionReturn() {
-    var search = window.location.search || '';
-    var m = search.match(/[?&]subscription=(success|canceled)/);
-    if (!m) return;
-    var result = m[1];
-
-    // Clean the query string but keep path + hash (legacy #/profile-edit etc.)
-    var cleaned = search.replace(/[?&]subscription=(success|canceled)/, '').replace(/^&/, '?');
-    if (cleaned === '?') cleaned = '';
-    window.history.replaceState({}, '', window.location.pathname + cleaned + window.location.hash);
-
-    if (result === 'canceled') {
-      showToast('決済をキャンセルしました。年額プランなら2ヶ月分お得です');
-      return;
-    }
-
-    // success: report conversion, then wait for the webhook to land
-    if (typeof window.gtag === 'function') {
-      window.gtag('event', 'subscription_checkout_success', { method: 'stripe_checkout' });
-    }
-    var attempts = 0;
-    var poll = function() {
-      attempts++;
-      // Session restore is async on page load: wait for the user first
-      if (!window._currentUser) {
-        if (attempts < 10) setTimeout(poll, 1000);
-        return;
-      }
-      checkSubscription().then(function(isSub) {
-        if (isSub) {
-          var msg = '🌱 プレミアムへようこそ！シードリングが閲覧できるようになりました';
-          if (window._subscriptionStatus === 'trialing' && window._subscriptionEnd) {
-            var d = new Date(window._subscriptionEnd);
-            msg = '🌱 30日間の無料トライアルを開始しました（' + (d.getMonth() + 1) + '/' + d.getDate() + ' まで）';
-          }
-          showToast(msg);
-          if (typeof refreshSeedlingPreview === 'function') refreshSeedlingPreview();
-        } else if (attempts < 10) {
-          // Stripe webhook may take a few seconds to update the DB
-          setTimeout(poll, 2000);
-        } else {
-          showToast('決済を確認しました。反映まで少しお待ちください');
-        }
-      });
-    };
-    poll();
-  }
-  handleSubscriptionReturn();
-
-  // Start Stripe checkout
-  psExport('startCheckout', startCheckout);
+  // ========================================
+  // PAY.JP CHECKOUT (inline card form in the paywall modal)
+  // ========================================
+  var _payjpInstance = null;
+  var _payjpCardElement = null;
+  var _selectedPlan = null;
   var _checkoutInProgress = false;
+
+  // Lazy-load payjp.js v2 only when the card form is first shown
+  function loadPayjpJs() {
+    if (window.Payjp) return Promise.resolve();
+    return new Promise(function(resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://js.pay.jp/v2/pay.js';
+      s.onload = function() { resolve(); };
+      s.onerror = function() { reject(new Error('payjp.js load failed')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function mountPayjpCard() {
+    if (_payjpCardElement) return;
+    _payjpInstance = window.Payjp(window._PAYJP_PUBLIC_KEY);
+    var elements = _payjpInstance.elements();
+    _payjpCardElement = elements.create('card');
+    _payjpCardElement.mount('#payjp-card-element');
+  }
+
+  psExport('startCheckout', startCheckout);
   function startCheckout(plan) {
-    if (_checkoutInProgress) return;
     var sb = window._supabaseClient;
     if (!sb || !window._currentUser) {
       // Not logged in: remember the selected plan, send to Google OAuth,
@@ -1642,7 +1623,7 @@ if (false) {
       if (supabase) {
         localStorage.setItem('pending_checkout_plan', plan === 'annual' ? 'annual' : 'monthly');
         localStorage.setItem('login_return_path', window.location.pathname || _basePath);
-        showToast('ログイン後、そのまま決済画面へ進みます');
+        showToast('ログイン後、そのままカード入力へ進みます');
         supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
@@ -1655,61 +1636,123 @@ if (false) {
       }
       return;
     }
+    showCardStep(plan);
+  }
 
-    // Show loading state on plan buttons
-    _checkoutInProgress = true;
-    var planBtns = document.querySelectorAll('#plan-monthly, #plan-annual');
-    planBtns.forEach(function(btn) { btn.disabled = true; btn.classList.add('is-loading'); });
-    var clickedBtn = document.getElementById(plan === 'annual' ? 'plan-annual' : 'plan-monthly');
-    var originalText = '';
-    if (clickedBtn) {
-      var priceEl = clickedBtn.querySelector('.pricing-card__price');
-      if (priceEl) { originalText = priceEl.textContent; priceEl.textContent = '処理中...'; }
+  // Step 2 of the paywall modal: card input for the chosen plan
+  function showCardStep(plan) {
+    _selectedPlan = plan === 'annual' ? 'annual' : 'monthly';
+    var planSelect = document.getElementById('paywall-plan-select');
+    var cardSection = document.getElementById('paywall-card-section');
+    var planLabel = document.getElementById('paywall-selected-plan');
+    var errEl = document.getElementById('payjp-card-error');
+    if (!cardSection) return;
+    if (planLabel) {
+      planLabel.textContent = _selectedPlan === 'annual'
+        ? '年額プラン: 2,500円/年'
+        : '月額プラン: 240円/月';
     }
+    if (errEl) errEl.textContent = '';
+    if (planSelect) planSelect.classList.add('d-none');
+    cardSection.classList.remove('d-none');
 
-    function resetLoading() {
-      _checkoutInProgress = false;
-      planBtns.forEach(function(btn) { btn.disabled = false; btn.classList.remove('is-loading'); });
-      if (clickedBtn && originalText) {
-        var priceEl = clickedBtn.querySelector('.pricing-card__price');
-        if (priceEl) priceEl.textContent = originalText;
-      }
+    if (!window._PAYJP_PUBLIC_KEY) {
+      if (errEl) errEl.textContent = '決済システムは現在準備中です。今しばらくお待ちください。';
+      var payBtn = document.getElementById('paywall-pay-btn');
+      if (payBtn) payBtn.disabled = true;
+      return;
     }
-
-    sb.auth.getSession().then(function(res) {
-      if (!res.data || !res.data.session) { showToast('セッションエラー', true); resetLoading(); return; }
-      var token = res.data.session.access_token;
-      fetch(window._SUPABASE_URL + '/functions/v1/create-checkout', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + token,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ plan: plan })
-      })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data.url) {
-          window.location.href = data.url;
-          // Don't reset — page is navigating away
-        } else {
-          showToast('チェックアウトエラー: ' + (data.error || 'Unknown'), true);
-          resetLoading();
-        }
-      })
-      .catch(function(err) { showToast('エラー: ' + err.message, true); resetLoading(); });
+    var payBtn2 = document.getElementById('paywall-pay-btn');
+    if (payBtn2) payBtn2.disabled = false;
+    loadPayjpJs().then(function() {
+      mountPayjpCard();
+    }).catch(function() {
+      if (errEl) errEl.textContent = '決済モジュールの読み込みに失敗しました。再読み込みしてお試しください。';
     });
   }
 
-  // Open Stripe Customer Portal
-  psExport('openCustomerPortal', openCustomerPortal);
-  function openCustomerPortal() {
+  // Back to plan selection
+  function showPlanStep() {
+    var planSelect = document.getElementById('paywall-plan-select');
+    var cardSection = document.getElementById('paywall-card-section');
+    if (planSelect) planSelect.classList.remove('d-none');
+    if (cardSection) cardSection.classList.add('d-none');
+    _selectedPlan = null;
+  }
+  psExport('resetPaywallSteps', showPlanStep);
+
+  // Tokenize the card and create the subscription server-side
+  function submitPayment() {
+    if (_checkoutInProgress || !_payjpInstance || !_payjpCardElement) return;
+    var errEl = document.getElementById('payjp-card-error');
+    var payBtn = document.getElementById('paywall-pay-btn');
+    _checkoutInProgress = true;
+    if (payBtn) { payBtn.disabled = true; payBtn.textContent = '処理中...'; }
+    if (errEl) errEl.textContent = '';
+
+    function resetBtn() {
+      _checkoutInProgress = false;
+      if (payBtn) { payBtn.disabled = false; payBtn.textContent = '登録して支払う'; }
+    }
+
+    _payjpInstance.createToken(_payjpCardElement).then(function(result) {
+      if (result.error) {
+        if (errEl) errEl.textContent = result.error.message || 'カード情報を確認してください';
+        resetBtn();
+        return;
+      }
+      var sb = window._supabaseClient;
+      sb.auth.getSession().then(function(res) {
+        if (!res.data || !res.data.session) { showToast('セッションエラー', true); resetBtn(); return; }
+        var token = res.data.session.access_token;
+        fetch(window._SUPABASE_URL + '/functions/v1/payjp-subscribe', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ card_token: result.id, plan: _selectedPlan })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success) {
+            if (typeof window.gtag === 'function') {
+              window.gtag('event', 'subscription_checkout_success', { method: 'payjp_inline' });
+            }
+            hidePaywallModal();
+            showPlanStep();
+            checkSubscription().then(function() {
+              showToast('🌱 サブスクリプションを開始しました！実生を無制限に投稿できます');
+              if (typeof refreshSeedlingPreview === 'function') refreshSeedlingPreview();
+            });
+            resetBtn();
+          } else {
+            if (errEl) errEl.textContent = data.error || '決済に失敗しました';
+            resetBtn();
+          }
+        })
+        .catch(function(err) {
+          if (errEl) errEl.textContent = 'エラー: ' + err.message;
+          resetBtn();
+        });
+      });
+    });
+  }
+
+  // Cancel subscription (stops renewal; access lasts until the period end)
+  psExport('cancelSubscription', cancelSubscription);
+  function cancelSubscription() {
     var sb = window._supabaseClient;
     if (!sb || !window._currentUser) return;
+    var endDate = window._subscriptionEnd ? new Date(window._subscriptionEnd) : null;
+    var endStr = endDate ? (endDate.getFullYear() + '/' + (endDate.getMonth() + 1) + '/' + endDate.getDate()) : '期間終了日';
+    if (!window.confirm('サブスクリプションを解約しますか？\n' + endStr + ' までは引き続きご利用いただけます。以降の更新・請求は停止されます。')) {
+      return;
+    }
     sb.auth.getSession().then(function(res) {
       if (!res.data || !res.data.session) return;
       var token = res.data.session.access_token;
-      fetch(window._SUPABASE_URL + '/functions/v1/create-portal', {
+      fetch(window._SUPABASE_URL + '/functions/v1/payjp-cancel', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer ' + token,
@@ -1719,11 +1762,26 @@ if (false) {
       })
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        if (data.url) window.location.href = data.url;
-        else showToast('ポータルエラー: ' + (data.error || 'Unknown'), true);
-      });
+        if (data.success) {
+          showToast('解約を受け付けました。期間終了までご利用いただけます');
+          checkSubscription().then(function() {
+            if (typeof renderProfileEditPage === 'function') renderProfileEditPage();
+          });
+        } else {
+          showToast('解約エラー: ' + (data.error || 'Unknown'), true);
+        }
+      })
+      .catch(function(err) { showToast('エラー: ' + err.message, true); });
     });
   }
+
+  // Card form buttons
+  (function() {
+    var payBtn = document.getElementById('paywall-pay-btn');
+    var backBtn = document.getElementById('paywall-back-btn');
+    if (payBtn) payBtn.addEventListener('click', submitPayment);
+    if (backBtn) backBtn.addEventListener('click', showPlanStep);
+  })();
 
   // Show paywall modal with focus trap and keyboard support
   var _paywallPreviousFocus = null;
@@ -1732,6 +1790,8 @@ if (false) {
     var modal = document.getElementById('paywall-modal');
     if (!modal) return;
     _paywallPreviousFocus = document.activeElement;
+    // Always start from the plan selection step
+    if (typeof window.resetPaywallSteps === 'function') window.resetPaywallSteps();
     modal.style.display = 'flex';
     // Focus the close button for keyboard users
     var closeBtn = document.getElementById('paywall-close-btn');
@@ -1765,6 +1825,16 @@ if (false) {
   document.addEventListener('click', function(e) {
     var btn = e.target.closest('[data-action="show-paywall"]');
     if (btn) showPaywallModal();
+    // "View all seedlings": free viewing - go to the genus seedlings tab
+    var viewBtn = e.target.closest('[data-action="view-seedlings"]');
+    if (viewBtn) {
+      var slug = (window.SEEDLING_GENERA && window.SEEDLING_GENERA[0]) || 'anthurium';
+      navigateTo('genus', { genus: slug });
+      setTimeout(function() {
+        var tab = document.querySelector('#genus-tabs-' + slug + ' [data-tab="seedlings"]');
+        if (tab) tab.click();
+      }, 100);
+    }
   });
 
   // Escape key closes paywall modal; focus trap keeps Tab inside
@@ -1792,12 +1862,10 @@ if (false) {
     }
   });
 
-  // Check seedling access for a given cultivar
+  // Seedling viewing is free for everyone (posting is quota-gated instead)
   psExport('canAccessSeedling', canAccessSeedling);
-  function canAccessSeedling(entry) {
-    if (window._isSubscribed) return 'full';
-    if (window._currentUser && entry && entry._userId === window._currentUser.id) return 'owner';
-    return 'locked';
+  function canAccessSeedling() {
+    return 'full';
   }
 
   // Logout button
@@ -2435,37 +2503,29 @@ if (false) {
             return map;
           });
 
-        // Check if user is subscribed
-        var isSubscribed = window._currentUser && window._subscriptionStatus &&
-          (window._subscriptionStatus === 'active' || window._subscriptionStatus === 'trialing');
-
         thumbPromise.then(function(thumbMap) {
           var html = '';
           items.forEach(function(item, idx) {
             var name = item.cultivar_name;
             var displayName = name.replace(' [Seedling]', '');
             var genus = displayName.split(' ')[0];
-            var shouldBlur = !isSubscribed; // Non-subscribers see all seedlings blurred
 
-            html += '<div class="card' + (shouldBlur ? ' card--seedling-locked' : ' card--clickable') + '"';
-            if (!shouldBlur) html += ' data-nav="cultivar" data-key="' + escHtml(name) + '"';
+            html += '<div class="card card--clickable"';
+            html += ' data-nav="cultivar" data-key="' + escHtml(name) + '"';
             html += '>';
 
             // Thumbnail (same card-img-container as recently updated for size consistency)
             if (thumbMap[displayName] && baseUrl) {
               var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
-              html += '<div class="card-img-container' + (shouldBlur ? ' seedling-mosaic' : '') + '"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '" width="260" height="160" decoding="async"></div>';
+              html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '" width="260" height="160" decoding="async"></div>';
             } else {
-              html += '<div class="card-img-container recent-card__placeholder' + (shouldBlur ? ' seedling-mosaic' : '') + '">';
+              html += '<div class="card-img-container recent-card__placeholder">';
               html += '<svg viewBox="0 0 80 60" width="80" height="60"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
               html += '</div>';
             }
-            if (shouldBlur) {
-              html += '<div class="seedling-lock-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><span>' + t('subscribe_to_view') + '</span></div>';
-            }
 
             html += '<div class="p-sm">';
-            html += '<div class="font-bold text-sm">' + (shouldBlur ? '●●●●●●' : escHtml(displayName)) + '</div>';
+            html += '<div class="font-bold text-sm">' + escHtml(displayName) + '</div>';
             html += '<div class="text-xs text-muted">' + escHtml(genus) + ' <span class="badge badge--seedling badge--inline">seedling</span></div>';
             html += '</div>';
             html += '</div>';

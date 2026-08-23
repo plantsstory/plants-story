@@ -368,21 +368,19 @@
 
         <div class="card-grid">
 
-          <!-- Stripe -->
+          <!-- PAY.JP -->
           <div class="stat-card">
             <div class="svc-card-header">
               <span class="adm-icon">💳</span>
-              <h3 class="adm-m-0">Stripe</h3>
+              <h3 class="adm-m-0">PAY.JP</h3>
             </div>
             <p class="svc-card-desc">決済・サブスクリプション管理</p>
             <div class="svc-card-links">
-              <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener" class="btn btn-primary btn-link">ダッシュボード</a>
-              <a href="https://dashboard.stripe.com/products" target="_blank" rel="noopener" class="btn btn-link">商品・価格</a>
-              <a href="https://dashboard.stripe.com/subscriptions" target="_blank" rel="noopener" class="btn btn-link">サブスクリプション一覧</a>
-              <a href="https://dashboard.stripe.com/customers" target="_blank" rel="noopener" class="btn btn-link">顧客一覧</a>
-              <a href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener" class="btn btn-link">Webhook設定</a>
-              <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener" class="btn btn-link">APIキー</a>
-              <a href="https://dashboard.stripe.com/settings/billing/portal" target="_blank" rel="noopener" class="btn btn-link">カスタマーポータル設定</a>
+              <a href="https://pay.jp/d/" target="_blank" rel="noopener" class="btn btn-primary btn-link">ダッシュボード</a>
+              <a href="https://pay.jp/d/plans" target="_blank" rel="noopener" class="btn btn-link">プラン一覧</a>
+              <a href="https://pay.jp/d/subscriptions" target="_blank" rel="noopener" class="btn btn-link">定期課金一覧</a>
+              <a href="https://pay.jp/d/customers" target="_blank" rel="noopener" class="btn btn-link">顧客一覧</a>
+              <a href="https://pay.jp/d/settings" target="_blank" rel="noopener" class="btn btn-link">APIキー・Webhook設定</a>
             </div>
           </div>
 
@@ -539,7 +537,7 @@
         <table class="adm-table" style="max-width:700px;">
           <thead><tr><th>サービス</th><th>URL</th></tr></thead>
           <tbody>
-            <tr><td>Stripe</td><td><a href="https://dashboard.stripe.com/" target="_blank" rel="noopener">dashboard.stripe.com</a></td></tr>
+            <tr><td>PAY.JP</td><td><a href="https://pay.jp/d/" target="_blank" rel="noopener">pay.jp/d</a></td></tr>
             <tr><td>Supabase</td><td><a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo" target="_blank" rel="noopener">supabase.com/dashboard</a></td></tr>
             <tr><td>GitHub</td><td><a href="https://github.com/plantsstory/plants-story" target="_blank" rel="noopener">github.com/plantsstory</a></td></tr>
             <tr><td>Google Cloud</td><td><a href="https://console.cloud.google.com/" target="_blank" rel="noopener">console.cloud.google.com</a></td></tr>
@@ -2166,7 +2164,7 @@ function loadUsers() {
       } else if (u.subscription_status !== 'active') {
         actions = '<button class="btn btn-sm btn-primary" data-action="grant" data-uid="' + u.id + '">無料付与</button>';
       } else {
-        actions = '<span class="text-sm text-muted">Stripe管理</span> <button class="btn btn-sm btn-outline" data-action="grant" data-uid="' + u.id + '">無期限付与</button>';
+        actions = '<span class="text-sm text-muted">PAY.JP管理</span> <button class="btn btn-sm btn-outline" data-action="grant" data-uid="' + u.id + '">無期限付与</button>';
       }
 
       html += '<tr>';

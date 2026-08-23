@@ -991,20 +991,40 @@ document.addEventListener('click', function(e) {
     if (parentPhotosSection) parentPhotosSection.style.display = type === 'seedling' ? '' : 'none';
     updateAiAutofillVisibility();
   }
+  // Revert the type selection back to species (used when seedling is not allowed)
+  function revertToSpecies(radio) {
+    radio.checked = false;
+    var speciesRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="species"]');
+    if (speciesRadio) { speciesRadio.checked = true; }
+    showTypeFields('species');
+  }
+
   document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(radio) {
     radio.addEventListener('change', function() {
-      // Gate seedling type behind subscription
-      if (this.value === 'seedling' && !window._isSubscribed) {
-        this.checked = false;
-        var speciesRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="species"]');
-        if (speciesRadio) { speciesRadio.checked = true; }
-        showTypeFields('species');
+      // Seedling posting: login required; first 5 posts free, then subscription
+      if (this.value === 'seedling') {
         if (!window._currentUser) {
-          showToast('実生の投稿にはログインとサブスクリプションが必要です', true);
-        } else {
-          showPaywallModal();
+          revertToSpecies(this);
+          showToast('実生の投稿にはログインが必要です', true);
+          return;
         }
-        return;
+        if (!window._isSubscribed && window._supabaseClient) {
+          var self = this;
+          showTypeFields('seedling');
+          window._supabaseClient.rpc('get_seedling_quota').then(function(res) {
+            var q = res.data;
+            if (!q || !q.success) return; // On error, server-side check still enforces the quota
+            if (!q.can_post) {
+              revertToSpecies(self);
+              showToast('無料投稿枠（' + q.free_limit + '件）を使い切りました', true);
+              showPaywallModal();
+            } else {
+              var remaining = q.free_limit - q.used;
+              showToast('無料投稿枠: あと' + remaining + '件投稿できます');
+            }
+          });
+          return;
+        }
       }
       showTypeFields(this.value);
     });
@@ -1731,7 +1751,13 @@ document.addEventListener('click', function(e) {
         }
       }).catch(function(err) {
         console.error('Submit error details:', err);
-        handleSubmitError('エラー: ' + (err.message || err));
+        var msg = err.message || String(err);
+        if (msg.indexOf('Seedling quota exceeded') !== -1) {
+          handleSubmitError('無料投稿枠（5件）を使い切りました。続けて投稿するにはサブスクリプションが必要です');
+          showPaywallModal();
+        } else {
+          handleSubmitError('エラー: ' + msg);
+        }
       });
     });
   }

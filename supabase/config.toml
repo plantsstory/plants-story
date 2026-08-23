@@ -14,6 +14,10 @@ verify_jwt = false
 [functions.og-image]
 verify_jwt = false
 
+# PAY.JP webhook: server-to-server, authenticated by URL token + API re-fetch
+[functions.payjp-webhook]
+verify_jwt = false
+
 [api]
 enabled = true
 # Port to use for the API URL.

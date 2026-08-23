@@ -195,15 +195,15 @@
                 html += '<div class="text-xs text-muted mt-xs">次回更新: ' + endStr + '</div>';
               }
             }
-            if (isOwnProfile) {
-              html += '<div class="mt-sm"><button class="btn btn--secondary btn--sm" onclick="openCustomerPortal()">サブスクリプションを管理</button></div>';
+            if (isOwnProfile && sub.plan !== 'granted' && !sub.cancel_at_period_end) {
+              html += '<div class="mt-sm"><button class="btn btn--secondary btn--sm" onclick="cancelSubscription()">サブスクリプションを解約</button></div>';
             }
             subContent.innerHTML = html;
           } else {
             // Free user
             var html = '<div class="flex-center-sm">';
             html += '<span class="profile-sub-badge profile-sub-badge--free sub-badge-static">Free</span>';
-            html += '<span class="text-sm text-muted">My Seedlings の詳細閲覧・投稿にはサブスクリプションが必要です</span>';
+            html += '<span class="text-sm text-muted">実生の投稿は5件まで無料（閲覧は無料・無制限）</span>';
             html += '</div>';
             if (isOwnProfile) {
               html += '<div class="mt-sm"><button class="btn btn--primary btn--sm" data-action="show-paywall">サブスクリプションを開始</button></div>';
@@ -222,7 +222,7 @@
           subSection.style.display = '';
           var html = '<div class="flex-center-sm">';
           html += '<span class="profile-sub-badge profile-sub-badge--free sub-badge-static">Free</span>';
-          html += '<span class="text-sm text-muted">My Seedlings の詳細閲覧・投稿にはサブスクリプションが必要です</span>';
+          html += '<span class="text-sm text-muted">実生の投稿は5件まで無料（閲覧は無料・無制限）</span>';
           html += '</div>';
           if (isOwnProfile) {
             html += '<div class="mt-sm"><button class="btn btn--primary btn--sm" data-action="show-paywall">サブスクリプションを開始</button></div>';
@@ -344,15 +344,15 @@
             }
           }
           subStatusEl.innerHTML = statusHtml;
-          if (plan !== 'granted') {
-            subActionsEl.innerHTML = '<button class="btn btn--secondary btn--sm" id="manage-subscription-btn">サブスクリプションを管理</button>';
-            document.getElementById('manage-subscription-btn').addEventListener('click', openCustomerPortal);
+          if (plan !== 'granted' && !cancelAtEnd) {
+            subActionsEl.innerHTML = '<button class="btn btn--secondary btn--sm" id="manage-subscription-btn">サブスクリプションを解約</button>';
+            document.getElementById('manage-subscription-btn').addEventListener('click', cancelSubscription);
           } else {
             subActionsEl.innerHTML = '';
           }
         } else {
           subStatusEl.innerHTML = '<div class="text-sm text-muted">現在のプラン: <strong>Free</strong></div>' +
-            '<div class="text-xs text-muted mt-xs">My Seedlings（実生の詳細閲覧・投稿・編集）にはサブスクリプションが必要です。</div>';
+            '<div class="text-xs text-muted mt-xs">実生の投稿は5件まで無料。6件目以降の投稿にはサブスクリプションが必要です。</div>';
           subActionsEl.innerHTML = '<button class="btn btn--primary btn--sm mt-sm" id="start-subscription-btn">サブスクリプションを開始</button>';
           document.getElementById('start-subscription-btn').addEventListener('click', showPaywallModal);
         }
@@ -1266,42 +1266,14 @@ function updateCultivarDetail(cultivarName, rowEl) {
   // Determine if this is a seedling (used by multiple sections below)
   var isSeedlingDetail = cData && cData._type === 'seedling';
 
-  // Seedling paywall gating
-  var seedlingDetailAccess = isSeedlingDetail ? canAccessSeedling(cData) : 'full';
+  // Seedling viewing is free: remove any legacy paywall overlay and show all sections
   var paywallOverlay = document.getElementById('detail-paywall-overlay');
   if (paywallOverlay) paywallOverlay.remove();
 
-  if (isSeedlingDetail && seedlingDetailAccess === 'locked') {
-    // Show limited info with paywall overlay
-    var overlay = document.createElement('div');
-    overlay.id = 'detail-paywall-overlay';
-    overlay.className = 'paywall-overlay';
-    overlay.innerHTML = '<div class="paywall-cta">' +
-      '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>' +
-      '<h3>My Seedlings</h3>' +
-      '<p>実生の詳細情報（交配式・画像・作出者情報）の閲覧にはサブスクリプションが必要です。</p>' +
-      '<button class="btn btn--primary" data-action="show-paywall">サブスクリプションを見る</button>' +
-      '</div>';
-    var originsContainer = document.getElementById('origins-container');
-    if (originsContainer) originsContainer.parentNode.insertBefore(overlay, originsContainer);
-  }
-
-  // Hide detail sections for locked seedlings
   var originsContainer = document.getElementById('origins-container');
   var gallerySection = detailPage.querySelector('.gallery');
-  if (isSeedlingDetail && seedlingDetailAccess === 'locked') {
-    if (originsContainer) originsContainer.style.display = 'none';
-    if (gallerySection) gallerySection.style.display = 'none';
-  } else {
-    if (originsContainer) originsContainer.style.display = '';
-    if (gallerySection) gallerySection.style.display = '';
-  }
-
-  // For owner without subscription: show content but hide edit, show delete only
-  if (isSeedlingDetail && seedlingDetailAccess === 'owner') {
-    var detailEditBtn = document.getElementById('detail-edit-btn');
-    if (detailEditBtn) detailEditBtn.style.display = 'none';
-  }
+  if (originsContainer) originsContainer.style.display = '';
+  if (gallerySection) gallerySection.style.display = '';
 
   // Hide creator name next to title (shown in origins section instead)
   var creatorNameEl = document.getElementById('detail-creator-name');
@@ -1860,13 +1832,10 @@ document.addEventListener('click', function(e) {
       }
     }
     if (page === 'contribute' && navEl.getAttribute('data-contribute-type') === 'seedling') {
-      if (!window._isSubscribed) {
-        if (!window._currentUser) {
-          showToast('実生の投稿にはログインとサブスクリプションが必要です', true);
-        } else {
-          showPaywallModal();
-        }
+      if (!window._currentUser) {
+        showToast('実生の投稿にはログインが必要です', true);
       } else {
+        // Quota (5 free posts) is checked by the radio change handler / server
         var seedlingRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="seedling"]');
         if (seedlingRadio) { seedlingRadio.checked = true; seedlingRadio.dispatchEvent(new Event('change')); }
       }

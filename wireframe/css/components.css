@@ -2369,6 +2369,15 @@ dialog.parent-photo-dialog .dialog-label {
   line-height: 1.6;
 }
 
+/* PAY.JP card input (payjp.js v2 mounts an iframe inside) */
+.payjp-card-element {
+  padding: var(--space-sm) var(--space-md);
+  border: 2px solid var(--color-light);
+  border-radius: var(--radius-md);
+  background: #fff;
+  margin-bottom: var(--space-xs);
+}
+
 /* Pricing cards inside modal */
 .paywall-modal__plans {
   display: flex;
