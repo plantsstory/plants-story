@@ -646,7 +646,7 @@ var currentSession = null;
 // ========================================
 // SHA-256 hash of access code — change this when you change the code
 // Current code hash is set via: crypto.subtle.digest('SHA-256', new TextEncoder().encode('YOUR_CODE'))
-var ACCESS_CODE_HASH = '83731201055793877183c2ef99bdcd6efb233d787d61be8c548892dc94540b76';
+var ACCESS_CODE_HASH = '14438b9e3bf65f61e89443ff1ccee7f52a65af06154c1429d58784e846d445ce';
 
 // On page load, check if gate was already passed in this session
 (function() {
@@ -1277,9 +1277,12 @@ async function reresearchCultivar(id) {
   var c = allCultivars.find(function(x) { return x.id === id; });
   if (!c) return;
   var actionLabel = (c.type === 'clone' || c.type === 'hybrid') ? 'AI検証' : 'AI由来リサーチ';
-  if (!confirm('「' + c.cultivar_name + '」の' + actionLabel + 'を再実行しますか？')) return;
+  if (!confirm('「' + c.cultivar_name + '」の' + actionLabel + 'を再実行しますか？\n（Web検索を行うため30〜90秒かかります）')) return;
 
-  toast(actionLabel + 'を開始...');
+  // Show progress on the button — the research takes 30-90s with web search
+  var btn = document.getElementById('rr-btn-' + id);
+  if (btn) { btn.disabled = true; btn.textContent = '調査中…'; }
+  toast(actionLabel + 'を開始しました（30〜90秒お待ちください）');
   // For CLONE/hybrid, extract user text from existing origins for re-verification
   var payload = { cultivar_id: c.id, cultivar_name: c.cultivar_name, genus: c.genus, type: c.type };
   if (c.type === 'clone' || c.type === 'hybrid') {
@@ -1301,14 +1304,15 @@ async function reresearchCultivar(id) {
     });
     var data = await res.json();
     if (data.success) {
-      toast('リサーチ完了: ' + (data.origins_count || 0) + '件の由来');
+      toast('✅ ' + actionLabel + '完了: ' + (data.origins_count || 0) + '件の由来を更新しました');
     } else {
       toast('リサーチ失敗: ' + (data.error || 'Unknown'));
     }
   } catch (e) {
     toast('エラー: ' + e.message);
   }
-  loadAllCultivars();
+  if (btn) { btn.disabled = false; btn.textContent = 'AI再調査'; }
+  await loadAllCultivars();
   loadDashboard();
 }
 
@@ -1317,12 +1321,14 @@ async function reresearchCultivar(id) {
 // ========================================
 function populateOriginSelect() {
   var sel = document.getElementById('origin-cultivar-select');
+  var prev = sel.value; // keep the admin's current filter across data reloads
   var html = '<option value="">すべての品種</option>';
   allCultivars.forEach(function(c) {
     var cnt = (c.origins || []).length;
     html += '<option value="' + c.id + '">' + escapeHtml(c.cultivar_name) + ' (' + cnt + '件)</option>';
   });
   sel.innerHTML = html;
+  if (prev && sel.querySelector('option[value="' + prev + '"]')) sel.value = prev;
 }
 
 document.getElementById('origin-cultivar-select').addEventListener('change', loadOrigins);
