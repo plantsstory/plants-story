@@ -143,7 +143,7 @@ button:focus-visible,
 .dialog-title { margin: 0 0 8px 0; font-size: 1.1rem; }
 .dialog-subtitle { margin: 0 0 16px 0; font-size: 0.9rem; color: #666; }
 .dialog-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-.dialog-textarea { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; margin-bottom: 16px; resize: vertical; }
+.dialog-textarea { width: 100%; box-sizing: border-box; padding: 8px; border: 1.5px solid var(--color-light); border-radius: var(--radius-md); font-size: 0.9rem; margin-bottom: 16px; resize: vertical; }
 .dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
 
 /* Favorite remove button (star overlay) */
