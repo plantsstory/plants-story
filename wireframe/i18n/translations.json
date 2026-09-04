@@ -1507,5 +1507,9 @@
   "rerun_exists": {
     "jp": "この品種には受付中のリクエストがあります",
     "en": "There is already an open request for this entry"
+  },
+  "private_note_detail": {
+    "jp": "非公開の記録です。ほかの人には表示されません。",
+    "en": "Private record — nobody else can see this."
   }
 }

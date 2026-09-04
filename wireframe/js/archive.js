@@ -710,6 +710,9 @@
     renderSpecimen(d, all);
     renderRelated(d, all);
     if (window.refreshRerunButton) window.refreshRerunButton(entry);
+    if (window.refreshPrivateButton) window.refreshPrivateButton(entry);
+    var pnote = document.getElementById("detail-private-note");
+    if (pnote) pnote.classList.toggle("d-none", !entry._isPrivate);
   }
   window.onCultivarDetailRendered = function (displayName, cData, type, genusName, cultivarName) {
     _detailArgs = [displayName, cData, type, genusName, cultivarName];
@@ -957,6 +960,42 @@
   }
   // the dialog markup sits after this script tag, so wait for the DOM
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', rerunRequestsInit); else rerunRequestsInit();
+
+  /* ============================================================
+     PRIVATE SEEDLINGS: owner-only records
+     ============================================================ */
+  (function privateToggle() {
+    var btn = document.getElementById('detail-private-btn');
+    if (!btn) return;
+    var _entry = null;
+    window.refreshPrivateButton = function (entry) {
+      _entry = entry;
+      var owner = entry && window._currentUser && entry._userId === window._currentUser.id;
+      var isSeedling = entry && entry._type === 'seedling';
+      if (!owner || !isSeedling) { btn.classList.add('d-none'); return; }
+      btn.classList.remove('d-none');
+      btn.textContent = entry._isPrivate ? T('private_toggle_to_public') : T('private_toggle_to_private');
+    };
+    btn.addEventListener('click', function () {
+      var sb = window._supabaseClient;
+      var id = parseInt(document.getElementById('page-cultivar').getAttribute('data-cultivar-id'), 10);
+      if (!sb || !id || !_entry) return;
+      var next = !_entry._isPrivate;
+      btn.disabled = true;
+      sb.rpc('set_cultivar_private', { p_cultivar_id: id, p_private: next }).then(function (res) {
+        btn.disabled = false;
+        if (res.error || !res.data || !res.data.success) {
+          showToast((res.error && res.error.message) || (res.data && res.data.error) || 'error', true);
+          return;
+        }
+        _entry._isPrivate = next;
+        btn.textContent = next ? T('private_toggle_to_public') : T('private_toggle_to_private');
+        showToast(next ? T('private_on') : T('private_off'));
+        var note = document.getElementById('detail-private-note');
+        if (note) note.classList.toggle('d-none', !next);
+      });
+    });
+  })();
 
   /* ---------- interactions ---------- */
   document.addEventListener('click', function (e) {

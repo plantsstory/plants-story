@@ -2162,7 +2162,8 @@ if (false) {
           p_type: meta.type || 'Hybrid',
           p_origins: originsData,
           p_ai_status: meta.type === 'species' ? 'completed' : null,
-          p_created_ip: userIp
+          p_created_ip: userIp,
+          p_is_private: !!meta.is_private
         });
       });
 
@@ -2394,6 +2395,7 @@ if (false) {
     if (cultivarData[fullName]) return;
     entry._type = meta.type;
     entry._created_at = meta.created_at || '';
+    if (meta.is_private) entry._isPrivate = true;
     entry._userId = meta.user_id || null;
     if (meta.id) entry._id = meta.id;
     if (meta.user_id && window._profileCache && window._profileCache[meta.user_id]) {
@@ -2443,6 +2445,7 @@ if (false) {
     h += '<div class="cultivar-row__meta">';
     if (!isSeedling) h += '<span>' + t('origin_prefix') + originCount + t('origin_count_suffix') + '</span>';
     h += '<span class="badge ' + bi.cls + '">' + bi.txt + '</span>';
+    if (entry._isPrivate || meta.is_private) h += '<span class="badge badge--private">' + t('private_badge') + '</span>';
     if (locked) h += '<span class="badge badge--locked"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>';
     if (!isSeedling && !hasDesc) h += '<span class="badge badge--ai">' + t('ai_pending_badge') + '</span>';
     if (!isSeedling) h += '<div class="trust"><div class="trust__bar"><div class="trust__fill ' + getTrustClass(trustPct) + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + (hasDesc ? trustPct + '%' : '-') + '</span></div>';
@@ -2713,7 +2716,7 @@ if (false) {
     // Then load from Supabase (async, authoritative source)
     // Fetch only needed columns to reduce payload size
     if (supabase) {
-      supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, parent_a_text, parent_b_text, parent_a_id, parent_b_id').then(function(res) {
+      supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, parent_a_text, parent_b_text, parent_a_id, parent_b_id, is_private').then(function(res) {
         if (res.error || !res.data) return;
 
         // Collect unique user_ids to fetch profiles
@@ -2744,9 +2747,10 @@ if (false) {
           var entry = { origins: origins, formula: formula,
             _qualifier: row.species_qualifier || null, _aliases: row.aliases || null, _tags: row.tags || null,
             _nameStatus: row.name_status || null, _locality: row.locality || null,
-            _parents: [row.parent_a_text || null, row.parent_b_text || null], _parentIds: [row.parent_a_id || null, row.parent_b_id || null] };
+            _parents: [row.parent_a_text || null, row.parent_b_text || null], _parentIds: [row.parent_a_id || null, row.parent_b_id || null],
+            _isPrivate: !!row.is_private };
           var genus = row.genus || 'Anthurium';
-          var meta = { genus: genus, type: row.type || 'Hybrid', created_at: row.created_at || '', user_id: row.user_id || null, id: row.id };
+          var meta = { genus: genus, type: row.type || 'Hybrid', created_at: row.created_at || '', user_id: row.user_id || null, id: row.id, is_private: !!row.is_private };
           addCultivarRow(row.cultivar_name, entry, meta);
         });
         // Mark full data as loaded

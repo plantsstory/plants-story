@@ -112,7 +112,7 @@ async function main() {
     genera = await fetchJSON('/rest/v1/genera?select=slug,name&order=display_order');
   }
   const visibleGenusNames = new Set(genera.map(g => g.name));
-  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,origins,updated_at&order=genus,cultivar_name');
+  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,origins,updated_at&is_private=eq.false&order=genus,cultivar_name');
   const cultivars = allCultivars.filter(c => visibleGenusNames.has(c.genus || 'Anthurium'));
   const images = await fetchJSON('/rest/v1/cultivar_images?select=cultivar_name,storage_path&order=display_order');
 

@@ -33,11 +33,25 @@ serve(async (req: Request) => {
   let imageUrl = "";
 
   try {
-    const { data } = await supabase
+    // Seedling share links use the display name; the DB stores the [Seedling] suffix
+    const nameVariants = [name];
+    if (!name.includes("[Seedling]")) nameVariants.push(name + " [Seedling]");
+    const { data: rows } = await supabase
       .from("cultivars")
-      .select("genus, type, origins")
-      .eq("cultivar_name", name)
-      .maybeSingle();
+      .select("genus, type, origins, is_private")
+      .in("cultivar_name", nameVariants)
+      .limit(1);
+    const found = (rows || [])[0];
+
+    // Unknown or owner-only records get no share page at all: without this, any
+    // guessed name renders an OGP card and confirms that a private record exists.
+    if (!found || found.is_private) {
+      return new Response(null, {
+        status: 302,
+        headers: { Location: "https://plantsstory.com/", "Cache-Control": "no-store" },
+      });
+    }
+    const data = found;
 
     if (data) {
       genus = data.genus || "";

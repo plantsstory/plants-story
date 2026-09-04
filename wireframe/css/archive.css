@@ -641,3 +641,9 @@ a.term:hover { border-bottom-style: solid; color: var(--color-primary); }
 
 /* native dialogs stay centred (reset zeroes margins) */
 dialog.dialog-clean { margin: auto; }
+
+/* private (owner-only) records */
+.badge--private { color: var(--color-accent-warm); border-color: currentColor; }
+.private-toggle { border: 1px solid var(--color-rule); border-radius: var(--radius-sm); padding: var(--space-sm) var(--space-md); background: var(--color-paper); }
+.private-toggle .form-radio { margin: 0; }
+.private-note { color: var(--color-accent-warm); margin: calc(-1 * var(--space-sm)) 0 var(--space-md); }

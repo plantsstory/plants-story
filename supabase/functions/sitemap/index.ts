@@ -46,6 +46,8 @@ serve(async (_req: Request) => {
     const { data } = await sb
       .from("cultivars")
       .select("cultivar_name, genus")
+      // service_role bypasses RLS — owner-only records stay out of the sitemap
+      .eq("is_private", false)
       .order("cultivar_name");
     if (data) cultivars = data;
   } catch (_e) { /* fallback: empty */ }

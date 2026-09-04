@@ -35,7 +35,7 @@ async function main() {
   }
   const visibleGenusNames = new Set(genera.map(g => g.name));
   // Fetch cultivars (non-seedling only for public sitemap)
-  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,updated_at,origins&order=genus,cultivar_name');
+  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,updated_at,origins&is_private=eq.false&order=genus,cultivar_name');
   const cultivars = allCultivars.filter(c => visibleGenusNames.has(c.genus || 'Anthurium'));
 
   const SITE = 'https://plantsstory.com';

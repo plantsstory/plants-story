@@ -1750,7 +1750,8 @@ document.addEventListener('click', function(e) {
 
       // After parent photos are ready, save to DB, upload gallery images, then update UI
       photoUploadPromise.then(function() {
-        return addUserCultivar(fullName, newEntry, { genus: genus, type: type });
+        var _privEl = document.getElementById('seedling-private');
+        return addUserCultivar(fullName, newEntry, { genus: genus, type: type, is_private: type === 'seedling' && _privEl ? !!_privEl.checked : false });
       }).then(function() {
         // Upload gallery images after DB record exists
         if (galleryFiles.length > 0 && typeof window.uploadGalleryImage === 'function') {

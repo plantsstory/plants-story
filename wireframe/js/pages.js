@@ -918,7 +918,7 @@ function renderOrigins(cultivarName) {
     if (displayName.indexOf('[Seedling]') === -1) namesToTry.push(displayName + ' [Seedling]');
     if (cultivarName !== displayName && namesToTry.indexOf(cultivarName) === -1) namesToTry.push(cultivarName);
     query = _sb.from('cultivars')
-      .select('cultivar_name, origins, ai_status, type, user_id, created_at')
+      .select('cultivar_name, origins, ai_status, type, user_id, created_at, is_private')
       .in('cultivar_name', namesToTry)
       .limit(1);
   }
@@ -932,7 +932,7 @@ function renderOrigins(cultivarName) {
       var dbKey = row.cultivar_name;
       // Populate cultivarData from DB
       if (!cultivarData[dbKey]) {
-        cultivarData[dbKey] = { origins: row.origins || [], _type: row.type, _userId: row.user_id, _created_at: row.created_at, _id: row.id };
+        cultivarData[dbKey] = { origins: row.origins || [], _type: row.type, _userId: row.user_id, _created_at: row.created_at, _id: row.id, _isPrivate: !!row.is_private };
       } else {
         cultivarData[dbKey].origins = row.origins || [];
         if (!cultivarData[dbKey]._type) cultivarData[dbKey]._type = row.type;
@@ -1415,10 +1415,10 @@ function rpcRowToItem(row) {
   var origins = (row.origins || []).filter(function(o) { return !o || o._type !== 'formula'; });
   var formula = null;
   (row.origins || []).forEach(function(o) { if (o && o._type === 'formula') formula = o.formula; });
-  var entry = { origins: origins, formula: formula, _type: row.type, _created_at: row.created_at || '', _userId: row.user_id || null };
+  var entry = { origins: origins, formula: formula, _type: row.type, _created_at: row.created_at || '', _userId: row.user_id || null, _isPrivate: !!row.is_private };
   if (row.id) entry._id = row.id;
   if (formula && formula.creatorName) entry._creatorName = formula.creatorName;
-  var meta = { genus: row.genus, type: row.type || 'Hybrid', created_at: row.created_at || '', user_id: row.user_id || null, id: row.id };
+  var meta = { genus: row.genus, type: row.type || 'Hybrid', created_at: row.created_at || '', user_id: row.user_id || null, id: row.id, is_private: !!row.is_private };
   return { fullName: row.cultivar_name, entry: entry, meta: meta };
 }
 
