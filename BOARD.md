@@ -116,7 +116,7 @@
 ## 7. オーナー待ちタスク（手順つき）
 
 1. **Field Archive の承認**（15分・最優先）: Claude Code が出すプレビュー URL を PC と iPhone で見る → トップ / 品種詳細 / 属ページ / 投稿フォーム の4画面 → 「OK」または気になる点を箇条書きで返信。これが無いと本番は旧デザインのまま。
-2. **Stripe 申請（PAY.JP より先）**（30分 + 審査）: `docs/stripe-application.md` §0 でアカウントの状態を確認 → §2 の文面で入力・提出（制限中なら要求情報の提出、却下なら §4 の再審査依頼）→ 承認後 §3 の設定と鍵の受け渡し。特商法の所在地・電話番号を実値にするか決める。
+2. **Stripe 申請（PAY.JP より先）**（30分 + 審査）: `docs/stripe-application.md` §0 でアカウントの状態を確認 → §2 の文面で入力・提出（制限中なら要求情報の提出、却下なら §4 の再審査依頼）→ 承認後 §3 の設定と鍵の受け渡し。特商法の所在地・電話番号は **非公開（請求があれば開示）で確定（09-05 オーナー回答）**。Stripe から掲載を求められた場合のみ再検討。
 2b. **PAY.JP 本番化（Stripe 不承認の場合のみ）**（申請30分 + 審査待ち）: pay.jp でアカウント作成 → 本人確認・住所・特商法 URL `https://plantsstory.com/tokushoho/` を提出 → 審査通過後、ダッシュボードで **プラン4つ**を作成（`monthly` 240円 / `annual` 2,500円 / `supporter_monthly` 500円 / `supporter_annual` 5,000円）→ 公開鍵・秘密鍵・プランIDを **チャットに貼らず** Supabase Secrets と `app-core.js` 設定に入れる（画面共有で Claude Code が案内）。テストキーで表示確認 → 本番キー。
 3. **分類の2件回答**（5分）: (a) 回答済: Clone のまま (b) 回答済: 'Angels dream' は現状のまま。あわせて §3 の ★既定回答に異論があれば。
 4. **写真**（1〜2時間）: 図版用の葉写真 6〜10 枚（自撮影、長辺 2000px 以上、葉1枚正面、無地背景）— 優先 crystallinum / clarinervium / veitchii / warocqueanum / magnificum + 交配種 2〜3。写真なし原種（clarinervium, regale, luxurians, moronense, nutibarense, sagittatum）は手元の株だけでよい。`images/anthurium.png` と `images/og-default.png` の出所（自作か AI か）を一言で。
