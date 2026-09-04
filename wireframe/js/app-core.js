@@ -2523,7 +2523,7 @@ if (false) {
     if (!section || !grid || !supabase) return;
 
     supabase.from('cultivars')
-      .select('id, cultivar_name, genus, type, created_at, user_id')
+      .select('id, cultivar_name, genus, type, created_at, user_id, origins')
       .eq('type', 'seedling')
       .order('created_at', { ascending: false })
       .limit(6)
