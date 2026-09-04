@@ -1,50 +1,58 @@
 :root {
-  /* Tropical Shade — Light Theme */
-  /* #34786A: white text passes WCAG AA (was #3D8A78 at 4.11:1) */
-  --color-primary: #34786A;
-  --color-primary-dark: #1A5548;
-  --color-primary-light: #6AB0A0;
-  --color-accent: #34786A;
-  --color-accent-warm: #C49B5C;
+  /* ========================================
+     FIELD ARCHIVE — paper, ink, one green, one ochre
+     A botanical archive, not a SaaS landing page.
+     ======================================== */
+  --color-paper: #F4F1EA;      /* page ground */
+  --color-paper-2: #FBF9F4;    /* sheets / cards */
+  --color-ink: #1E2622;
+  --color-rule: #D9D3C5;       /* hairlines */
+  --color-rule-strong: #B9B1A0;
 
-  --color-black: #283532;
-  --color-dark: #283532;
-  --color-mid: #5E736D;
-  --color-gray: #8A9E98; /* decorative only — fails AA contrast for text */
-  --color-gray-dark: #4A5D57;
+  --color-primary: #2F5D4A;    /* deep leaf green (white text 7.0:1) */
+  --color-primary-dark: #1F4234;
+  --color-primary-light: #7FA593;
+  --color-accent: #2F5D4A;
+  --color-accent-warm: #A8712E; /* ochre for numerals & years */
+
+  --color-black: var(--color-ink);
+  --color-dark: var(--color-ink);
+  --color-mid: #5B655F;
+  --color-gray: #8E958F; /* decorative only — fails AA contrast for text */
+  --color-gray-dark: #454E49;
   --color-text-muted: var(--color-mid);
-  --color-light: #D2DBD7;
-  --color-lighter: #E8EDEB;
-  --color-bg: #F2F5F4;
-  --color-white: #FFFFFF;
+  --color-light: var(--color-rule);
+  --color-lighter: #EAE5D9;
+  --color-bg: var(--color-paper);
+  --color-white: var(--color-paper-2);
 
   /* Semantic Colors (single source for every red on the site) */
-  --color-danger: #C03A3F;
-  --color-danger-bg: #F7E7E6;
-  --color-warning: #D4870A;
-  --color-trust-high: #34786A;
-  --color-trust-mid: #C49B5C;
-  --color-trust-low: #C03A3F;
+  --color-danger: #A63A3A;
+  --color-danger-bg: #F4E4E1;
+  --color-warning: #A8712E;
+  --color-trust-high: #2F5D4A;
+  --color-trust-mid: #A8712E;
+  --color-trust-low: #B9B1A0;
 
-  /* Badge / chip palette — one tonal family (botanical-label look) */
-  --badge-species-bg: #E3EDE9;
-  --badge-species-fg: #1A5548;
-  --badge-hybrid-bg: #F2E8D4;
-  --badge-hybrid-fg: #77571C;
-  --badge-clone-bg: #DDEBEB;
-  --badge-clone-fg: #17595E;
-  --badge-seedling-bg: #E6F0DC;
-  --badge-seedling-fg: #3D6317;
-  --badge-ai-bg: #ECEAF4;
-  --badge-ai-fg: #4C4680;
+  /* Badge / chip palette — typographic labels, one ink each */
+  --badge-species-bg: transparent;
+  --badge-species-fg: #2F5D4A;
+  --badge-hybrid-bg: transparent;
+  --badge-hybrid-fg: #8A5A1E;
+  --badge-clone-bg: transparent;
+  --badge-clone-fg: #2C5F63;
+  --badge-seedling-bg: transparent;
+  --badge-seedling-fg: #5B6B21;
+  --badge-ai-bg: transparent;
+  --badge-ai-fg: #5A5670;
 
   /* Typography */
-  /* Display serif: botanical-atlas mood — Cormorant for Latin, Shippori for JP */
+  /* Display serif: Cormorant for Latin, Shippori for JP */
   --font-display: "Cormorant Garamond", "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
-  --font-heading: "Varela Round", "BIZ UDPGothic", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
-  --font-heading-en: "Varela Round", "Helvetica Neue", Arial, sans-serif;
-  --font-primary: "Varela Round", "BIZ UDPGothic", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "Fira Code", "Courier New", monospace;
+  --font-heading: "Noto Sans JP", "BIZ UDPGothic", "Helvetica Neue", Arial, sans-serif;
+  --font-heading-en: "Cormorant Garamond", Georgia, serif;
+  --font-primary: "Noto Sans JP", "BIZ UDPGothic", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", "Fira Code", "Courier New", monospace;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
@@ -62,18 +70,18 @@
   --space-2xl: 48px;
   --space-3xl: 64px;
 
-  /* Border Radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  /* Border Radius — printed matter has corners */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  /* Shadows — almost none; paper lies flat */
+  --shadow-sm: 0 1px 0 rgba(30, 38, 34, 0.06);
+  --shadow: 0 1px 2px rgba(30, 38, 34, 0.08);
+  --shadow-md: 0 2px 6px rgba(30, 38, 34, 0.10);
+  --shadow-lg: 0 6px 18px rgba(30, 38, 34, 0.12);
 
   /* Transitions */
-  --transition: 0.2s ease;
+  --transition: 0.15s ease;
 }

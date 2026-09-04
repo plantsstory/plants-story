@@ -91,8 +91,8 @@ document.addEventListener('input', function(e) {
 
 // ---- Top page global search ----
 (function() {
-  var heroSearch = document.querySelector('.hero .search-bar__input');
-  var heroBtn = document.querySelector('.hero .search-bar__btn');
+  var heroSearch = document.querySelector('.masthead .search-bar__input');
+  var heroBtn = document.querySelector('.masthead .search-bar__btn');
   if (heroSearch) {
     heroSearch.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {

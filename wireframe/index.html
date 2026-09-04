@@ -14,7 +14,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://*.rakuten.co.jp https://*.amazon.co.jp https://*.media-amazon.com https://*.yahoo.co.jp; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJK72JH471"></script>
-  <script src="js/gtag-init.js?v=20260823e"></script>
+  <script src="js/gtag-init.js?v=20260904a"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="Aroid Origins は、Anthuriumなどアロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォームです。">
   <meta property="og:title" content="Aroid Origins">
@@ -55,16 +55,16 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20260823e">
-  <link rel="stylesheet" href="css/reset.css?v=20260823e">
-  <link rel="stylesheet" href="css/layout.css?v=20260823e">
-  <link rel="stylesheet" href="css/components.css?v=20260823e">
-  <link rel="stylesheet" href="css/pages.css?v=20260823e">
-  <link rel="stylesheet" href="css/utilities.css?v=20260823e">
+  <link rel="stylesheet" href="css/variables.css?v=20260904a">
+  <link rel="stylesheet" href="css/reset.css?v=20260904a">
+  <link rel="stylesheet" href="css/layout.css?v=20260904a">
+  <link rel="stylesheet" href="css/components.css?v=20260904a">
+  <link rel="stylesheet" href="css/pages.css?v=20260904a">
+  <link rel="stylesheet" href="css/utilities.css?v=20260904a">
+  <link rel="stylesheet" href="css/archive.css?v=20260904a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Varela+Round&family=Noto+Sans+JP:wght@400;600;700&family=Cormorant+Garamond:wght@600;700&family=Shippori+Mincho:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="images/hero-mist.jpg" fetchpriority="high">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://jpgbehsrglsiwijglhjo.supabase.co" crossorigin>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1"></script>
@@ -115,78 +115,83 @@
   <section id="page-top" class="page active">
     <div class="container">
 
-      <!-- Hero -->
-      <div class="hero text-center">
-
-
-        <h1 class="hero__title">AROID ORIGINS</h1>
-        <p class="hero__subtitle">一葉に、千の物語。</p>
-        <p class="hero__subtitle-en text-sm mt-sm">A thousand stories in a single leaf.</p>
-        <p class="hero__desc" data-i18n="hero_desc">アンスリウムなどアロイド品種の由来・交配情報を、学術データベースとコミュニティで検証する図鑑</p>
-        <div class="search-bar mt-lg">
-          <input type="search" enterkeyhint="search" class="search-bar__input" placeholder="品種名・ユーザー名を検索..." data-i18n-placeholder="search_placeholder" aria-label="品種名・ユーザー名を検索">
-          <button class="search-bar__btn" data-nav="search" aria-label="検索"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></button>
+      <!-- Masthead -->
+      <header class="masthead">
+        <div class="masthead__main">
+          <p class="mono masthead__kicker" data-i18n="mast_kicker">Anthurium — 品種の由来・記載史アーカイブ</p>
+          <h1 class="masthead__title">Aroid<br>Origins</h1>
+          <p class="masthead__tagline">一葉に、千の物語。</p>
+          <p class="masthead__desc" data-i18n="hero_desc">アンスリウムなどアロイド品種の由来・交配情報を、学術データベースとコミュニティで検証する図鑑</p>
+          <div class="search-bar">
+            <input type="search" enterkeyhint="search" class="search-bar__input" placeholder="品種名・ユーザー名を検索..." data-i18n-placeholder="search_placeholder" aria-label="品種名・ユーザー名を検索">
+            <button class="search-bar__btn" data-nav="search" aria-label="検索"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></button>
+          </div>
+          <div class="masthead__meta" id="masthead-genera"></div>
         </div>
+        <figure class="masthead__plate">
+          <div class="plate"><img src="images/anthurium.png" alt="Anthurium の葉脈図" width="472" height="756" decoding="async"></div>
+          <figcaption class="mono"><span data-i18n="plate_caption">図版 I — 葉脈</span><i>Anthurium</i></figcaption>
+        </figure>
+        <dl class="ledger masthead__ledger">
+          <div><dt data-i18n="ledger_entries">収録品種</dt><dd id="ledger-count">—</dd></div>
+          <div><dt data-i18n="ledger_years">記載年</dt><dd id="ledger-years">—</dd></div>
+          <div><dt data-i18n="ledger_localities">産地（国）</dt><dd id="ledger-localities">—</dd></div>
+          <div><dt data-i18n="ledger_updated">最終収録</dt><dd id="ledger-updated">—</dd></div>
+        </dl>
+      </header>
+
+      <!-- Front page: story of the day + index -->
+      <div class="front">
+        <article class="story" id="story-of-day">
+          <div class="story__label"><span class="mono" data-i18n="story_label">今日の一葉</span><span class="mono" id="story-date"></span></div>
+          <div id="story-body"><div class="loading-text p-xl">…</div></div>
+        </article>
+        <aside class="index" id="archive-index">
+          <div class="index__head"><h2 data-i18n="index_title">索引</h2><span class="mono" data-i18n="index_hint">項目を開くと品種が並びます</span></div>
+          <div id="archive-index-body"><div class="loading-text p-xl">…</div></div>
+        </aside>
       </div>
 
-      <!-- Genus Cards -->
-      <div class="mt-2xl">
-        <h2 class="section-title text-center" data-i18n="browse_genus">属から探す</h2>
-        <div class="grid grid--3" id="genus-cards-grid">
-          <div class="text-center text-muted grid-full">読み込み中...</div>
-        </div>
-        <div class="text-center mt-lg">
-          <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="add_cultivar">+ 品種を追加</a>
-        </div>
-      </div>
+      <!-- Timeline of first descriptions -->
+      <section class="timeline" id="archive-timeline">
+        <div class="timeline__head"><h2 data-i18n="timeline_title">記載史年表</h2><span class="mono" data-i18n="timeline_hint">原種が学名として発表された年</span></div>
+        <div id="archive-timeline-body"><div class="loading-text p-xl">…</div></div>
+      </section>
 
-      <!-- Recently Updated -->
-      <div class="mt-2xl">
-        <h2 class="section-title" data-i18n="recently_updated">最近更新された品種</h2>
-        <div class="grid grid--5" id="recently-updated-grid">
-          <div class="text-center text-muted grid-full p-xl">読み込み中...</div>
-        </div>
-      </div>
+      <!-- Entries ledger -->
+      <section class="mt-2xl">
+        <h2 class="section-title"><span data-i18n="recently_updated">最近更新された品種</span><a href="#" class="mono" id="ledger-all-link" data-nav="genus" data-genus="anthurium" data-i18n="ledger_all">全収録品種 →</a></h2>
+        <div id="recently-updated-grid"><div class="loading-text p-xl">…</div></div>
+      </section>
 
-      <!-- Seedling Feed Preview -->
-      <div class="mt-2xl" id="seedling-preview-section" style="display:none;">
-        <h2 class="section-title" data-i18n="seedling_preview_title">新着シードリング</h2>
-        <p class="text-muted text-sm mb-md" data-i18n="seedling_preview_desc">コレクターが登録した交配個体の最新投稿</p>
+      <!-- Seedling notes -->
+      <section class="mt-2xl" id="seedling-preview-section" style="display:none;">
+        <h2 class="section-title"><span data-i18n="seedling_preview_title">実生ノート</span><span class="mono" data-i18n="seedling_preview_desc">コレクターが登録した交配個体</span></h2>
         <div class="grid grid--3" id="seedling-preview-grid"></div>
-        <div class="text-center mt-md">
-          <button class="btn btn--outline" data-action="view-seedlings" data-i18n="seedling_preview_cta">すべてのシードリングを見る</button>
+        <div class="mt-md">
+          <button class="btn btn--outline btn--sm" data-action="view-seedlings" data-i18n="seedling_preview_cta">すべての実生を見る</button>
         </div>
-      </div>
+      </section>
 
-      <!-- How it works (explains the site before ads) -->
-      <div class="mt-2xl">
-        <h2 class="section-title text-center" data-i18n="how_it_works">仕組み</h2>
-        <div class="steps">
-          <div class="step">
-            <div class="step__number">1</div>
-            <div class="step__content">
-              <h3 data-i18n="step1_title">学術DBから自動取得</h3>
-              <p data-i18n="step1_desc">IPNI・POWO（キュー王立植物園）の学術データベースから由来情報を自動取得します</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step__number">2</div>
-            <div class="step__content">
-              <h3 data-i18n="step2_title">コミュニティで検証</h3>
-              <p data-i18n="step2_desc">ユーザーが由来の賛否を投票し、情報を追加・修正します</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step__number">3</div>
-            <div class="step__content">
-              <h3 data-i18n="step3_title">信頼度スコア</h3>
-              <p data-i18n="step3_desc">学術データとコミュニティの投票から信頼度が算出されます</p>
-            </div>
+      <!-- Colophon: what this archive is -->
+      <section class="colophon">
+        <h2 data-i18n="colophon_title">この図鑑について</h2>
+        <div>
+          <p data-i18n="colophon_p1">Aroid Origins は、アンスリウムを中心としたアロイド植物の「由来」を記録する図鑑です。原種は学名の記載者・発表年・タイプ産地を Kew／GBIF の学名データベースと一次文献で照合し、交配種・栽培品種は作出者や交配式をコレクターの投稿から集めています。</p>
+          <p data-i18n="colophon_p2">掲載された由来には出典と信頼度を付け、閲覧者の投票で検証を重ねます。写真は栽培者自身の投稿のみを掲載し、削除依頼には即時対応します。</p>
+          <dl>
+            <dt data-i18n="colophon_k1">収録範囲</dt><dd data-i18n="colophon_v1">Anthurium（Monstera・Philodendron は準備中）</dd>
+            <dt data-i18n="colophon_k2">一次資料</dt><dd data-i18n="colophon_v2">IPNI・POWO・GBIF、原記載論文、育種家の公開情報</dd>
+            <dt data-i18n="colophon_k3">信頼度</dt><dd data-i18n="colophon_v3">出典の階層（S〜D）と投票から算出</dd>
+          </dl>
+          <div class="colophon__actions">
+            <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="add_cultivar">+ 品種を追加</a>
+            <a href="#" class="btn btn--secondary" data-nav="guide" data-i18n="footer_guide">使い方</a>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Affiliate Banner on Top Page -->
+      <!-- Tools shelf (affiliate) -->
       <div class="affiliate-section" id="top-affiliate">
         <div class="affiliate-banner">
           <div class="affiliate-banner__title" data-i18n="affiliate_top_title">管理人おすすめアイテム</div>
@@ -250,6 +255,8 @@
           <button class="btn btn--sm cursor-pointer text-danger-border font-xs-btn" id="detail-delete-request-btn">&#x1F5D1; 削除依頼</button>
         </div>
       </div>
+
+      <div id="specimen-label"></div>
 
       <!-- Image Gallery (Carousel) -->
       <div class="mb-lg">
@@ -389,6 +396,12 @@
           </div>
         </div>
       </div>
+
+      <!-- Related entries (rendered by archive.js) -->
+      <section class="related d-none" id="related-section">
+        <h2 class="section-title"><span data-i18n="related_title">関連する品種</span></h2>
+        <div id="related-container"></div>
+      </section>
 
       <!-- Ad placement -->
       <div class="ad-placeholder mt-lg">
@@ -1366,9 +1379,10 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/app-core.js?v=20260823e"></script>
-  <script src="js/pages.js?v=20260823e"></script>
-  <script src="js/forms.js?v=20260823e"></script>
+  <script src="js/app-core.js?v=20260904a"></script>
+  <script src="js/pages.js?v=20260904a"></script>
+  <script src="js/forms.js?v=20260904a"></script>
+  <script src="js/archive.js?v=20260904a"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1378,7 +1392,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20260823e"></script>
+  <script src="js/dialogs.js?v=20260904a"></script>
 
   <!-- Deletion Request Dialog -->
   <dialog id="delete-request-dialog" class="dialog-clean" aria-labelledby="delete-dialog-title">
@@ -1392,6 +1406,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20260823e"></script>
+<script src="js/sw-register.js?v=20260904a"></script>
 </body>
 </html>

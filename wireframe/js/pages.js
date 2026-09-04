@@ -1077,7 +1077,7 @@ function renderOriginsInner(cultivarName, container) {
     html += '<div class="origin-card">';
     if (!isSeedling) {
       html += '<div class="origin-card__header">';
-      html += '<span class="origin-card__rank">#' + (i + 1) + '</span>';
+      html += '<span class="origin-card__rank">' + (currentLang === 'en' ? 'Record ' : '記録 ') + (i + 1) + '</span>';
       html += '<div class="trust trust--lg" style="flex:1;margin-left:var(--space-md);" data-trust-idx="' + i + '">';
       html += '<div class="trust__bar"><div class="trust__fill ' + trustLevel + '" style="width:' + trustNum + '%"></div></div>';
       html += '<span class="trust__label">' + trustNum + '%</span>';
@@ -1356,6 +1356,11 @@ function updateCultivarDetail(cultivarName, rowEl) {
 
   // Render origins dynamically
   renderOrigins(cultivarName);
+
+  // Archive layer: specimen label + related entries
+  if (window.onCultivarDetailRendered) {
+    try { window.onCultivarDetailRendered(displayName, cData, detectedType, genusName, cultivarName); } catch (e) { console.warn('archive hook', e); }
+  }
 }
 
 // ---- Genus search (filter within genus) ----

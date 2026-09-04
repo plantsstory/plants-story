@@ -441,16 +441,16 @@
     "en": "※ These are affiliate links. Purchases help support site operations."
   },
   "seedling_preview_title": {
-    "jp": "新着シードリング",
-    "en": "Latest Seedlings"
+    "jp": "実生ノート",
+    "en": "Seedling notes"
   },
   "seedling_preview_desc": {
-    "jp": "コレクターが登録した交配個体の最新投稿",
-    "en": "Recent hybrid registrations from collectors"
+    "jp": "コレクターが登録した交配個体",
+    "en": "Crosses raised and registered by collectors"
   },
   "seedling_preview_cta": {
-    "jp": "すべてのシードリングを見る",
-    "en": "View All Seedlings"
+    "jp": "すべての実生を見る",
+    "en": "See all seedlings"
   },
   "affiliate_top_title": {
     "jp": "🌿 管理人おすすめアイテム",
@@ -1067,5 +1067,221 @@
   "nav_contribute_mobile": {
     "jp": "📝 品種を投稿",
     "en": "📝 Contribute"
+  },
+  "mast_kicker": {
+    "jp": "Anthurium — 品種の由来・記載史アーカイブ",
+    "en": "Anthurium — an archive of cultivar origins & first descriptions"
+  },
+  "plate_caption": {
+    "jp": "図版 I — 葉脈",
+    "en": "Plate I — venation"
+  },
+  "ledger_entries": {
+    "jp": "収録品種",
+    "en": "Entries"
+  },
+  "ledger_years": {
+    "jp": "記載年",
+    "en": "Described"
+  },
+  "ledger_localities": {
+    "jp": "産地（国）",
+    "en": "Type localities"
+  },
+  "ledger_updated": {
+    "jp": "最終収録",
+    "en": "Latest entry"
+  },
+  "story_label": {
+    "jp": "今日の一葉",
+    "en": "Story of the day"
+  },
+  "story_more": {
+    "jp": "全文と出典を読む →",
+    "en": "Read the full record →"
+  },
+  "index_title": {
+    "jp": "索引",
+    "en": "Index"
+  },
+  "index_hint": {
+    "jp": "項目を開くと品種が並びます",
+    "en": "Open an item to list its entries"
+  },
+  "index_localities": {
+    "jp": "産地でたどる",
+    "en": "By type locality"
+  },
+  "index_people": {
+    "jp": "人物でたどる",
+    "en": "By person"
+  },
+  "index_types": {
+    "jp": "区分でたどる",
+    "en": "By category"
+  },
+  "timeline_title": {
+    "jp": "記載史年表",
+    "en": "Timeline of first descriptions"
+  },
+  "timeline_hint": {
+    "jp": "原種が学名として発表された年",
+    "en": "Year each species was validly published"
+  },
+  "timeline_empty": {
+    "jp": "発表年の記録がまだありません",
+    "en": "No publication years recorded yet"
+  },
+  "ledger_all": {
+    "jp": "全収録品種 →",
+    "en": "All entries →"
+  },
+  "ledger_no": {
+    "jp": "No.",
+    "en": "No."
+  },
+  "ledger_name": {
+    "jp": "名前",
+    "en": "Name"
+  },
+  "ledger_type": {
+    "jp": "区分",
+    "en": "Type"
+  },
+  "ledger_year": {
+    "jp": "年",
+    "en": "Year"
+  },
+  "ledger_meta": {
+    "jp": "記載者・産地 / 作出者",
+    "en": "Author · locality / breeder"
+  },
+  "ledger_trust": {
+    "jp": "信頼度",
+    "en": "Trust"
+  },
+  "colophon_title": {
+    "jp": "この図鑑について",
+    "en": "About this archive"
+  },
+  "colophon_p1": {
+    "jp": "Aroid Origins は、アンスリウムを中心としたアロイド植物の「由来」を記録する図鑑です。原種は学名の記載者・発表年・タイプ産地を Kew／GBIF の学名データベースと一次文献で照合し、交配種・栽培品種は作出者や交配式をコレクターの投稿から集めています。",
+    "en": "Aroid Origins records where aroids — Anthurium first — actually come from. For species we cross-check the describing author, year and type locality against the Kew/GBIF name backbone and primary literature; for hybrids and cultivars we gather breeders and parentage from collector contributions."
+  },
+  "colophon_p2": {
+    "jp": "掲載された由来には出典と信頼度を付け、閲覧者の投票で検証を重ねます。写真は栽培者自身の投稿のみを掲載し、削除依頼には即時対応します。",
+    "en": "Every record carries its sources and a trust score, refined by reader votes. Photos are contributed only by the growers themselves, and takedown requests are honoured immediately."
+  },
+  "colophon_k1": {
+    "jp": "収録範囲",
+    "en": "Scope"
+  },
+  "colophon_v1": {
+    "jp": "Anthurium（Monstera・Philodendron は準備中）",
+    "en": "Anthurium (Monstera and Philodendron in preparation)"
+  },
+  "colophon_k2": {
+    "jp": "一次資料",
+    "en": "Sources"
+  },
+  "colophon_v2": {
+    "jp": "IPNI・POWO・GBIF、原記載論文、育種家の公開情報",
+    "en": "IPNI · POWO · GBIF, protologues, breeders’ published notes"
+  },
+  "colophon_k3": {
+    "jp": "信頼度",
+    "en": "Trust score"
+  },
+  "colophon_v3": {
+    "jp": "出典の階層（S〜D）と投票から算出",
+    "en": "Derived from source tier (S–D) and votes"
+  },
+  "related_title": {
+    "jp": "関連する品種",
+    "en": "Related entries"
+  },
+  "related_same_locality": {
+    "jp": "同じ産地の原種",
+    "en": "Species from the same country"
+  },
+  "related_same_person": {
+    "jp": "同じ人物による品種",
+    "en": "By the same person"
+  },
+  "related_children": {
+    "jp": "この品種を親に持つ交配",
+    "en": "Crosses with this plant as a parent"
+  },
+  "related_siblings": {
+    "jp": "交配親を共有する品種",
+    "en": "Sharing a parent"
+  },
+  "related_prev": {
+    "jp": "前の品種",
+    "en": "Previous"
+  },
+  "related_next": {
+    "jp": "次の品種",
+    "en": "Next"
+  },
+  "spec_author": {
+    "jp": "記載者",
+    "en": "Author"
+  },
+  "spec_pub_year": {
+    "jp": "発表年",
+    "en": "Published"
+  },
+  "spec_collector": {
+    "jp": "採集者",
+    "en": "Collector"
+  },
+  "spec_col_year": {
+    "jp": "採集年",
+    "en": "Collected"
+  },
+  "spec_locality": {
+    "jp": "タイプ産地",
+    "en": "Type locality"
+  },
+  "spec_habitat": {
+    "jp": "分布",
+    "en": "Distribution"
+  },
+  "spec_breeder": {
+    "jp": "作出者",
+    "en": "Breeder"
+  },
+  "spec_namer": {
+    "jp": "命名者",
+    "en": "Named by"
+  },
+  "spec_year": {
+    "jp": "年",
+    "en": "Year"
+  },
+  "spec_parents": {
+    "jp": "交配式",
+    "en": "Parentage"
+  },
+  "spec_sowing": {
+    "jp": "播種",
+    "en": "Sown"
+  },
+  "cite_breeder": {
+    "jp": "作出",
+    "en": "bred by"
+  },
+  "cite_namer": {
+    "jp": "命名",
+    "en": "named by"
+  },
+  "entries_unit": {
+    "jp": "種",
+    "en": "entries"
+  },
+  "countries_unit": {
+    "jp": "か国",
+    "en": "countries"
   }
 }

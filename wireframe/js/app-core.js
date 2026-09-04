@@ -2326,7 +2326,7 @@ if (false) {
     var thumbPath = _thumbMap[thumbKey];
     var thumbContent = thumbPath
       ? '<img data-src="' + (window._SUPABASE_URL || '') + '/storage/v1/object/public/gallery-images/' + thumbPath + '" class="thumb-img" alt="' + escHtml(displayName) + '" width="60" height="60" decoding="async">'
-      : '<svg viewBox="0 0 40 40" width="32" height="32"><path d="M20 4C13 1 5 5 4 14C3 23 12 32 20 38C28 32 37 23 36 14C35 5 27 1 20 4Z" fill="#2D6A4F" opacity="0.35"/><path d="M20 4V38" stroke="#1B4332" stroke-width="1" fill="none" opacity="0.4"/></svg>';
+      : '<span class="thumb-mono" aria-hidden="true">' + escHtml((displayName.split(' ').slice(1).join(' ').replace(/[^A-Za-z]/g, '').charAt(0) || displayName.charAt(0)).toLowerCase()) + '</span>';
     h += '<div class="cultivar-row__thumb' + (locked ? ' seedling-thumb--locked' : '') + '">' + thumbContent + '</div>';
     h += '<div class="cultivar-row__info">';
     h += '<div class="cultivar-row__name" data-key="' + escHtml(fullName) + '">' + escHtml(displayName) + '</div>';
@@ -2337,6 +2337,10 @@ if (false) {
     if (!isSeedling && !hasDesc) h += '<span class="badge badge--ai">' + t('ai_pending_badge') + '</span>';
     if (!isSeedling) h += '<div class="trust"><div class="trust__bar"><div class="trust__fill ' + getTrustClass(trustPct) + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + (hasDesc ? trustPct + '%' : '-') + '</span></div>';
     h += '</div>';
+    if (!isSeedling && window.entryCiteLine) {
+      var _cite = window.entryCiteLine(fullName, entry, meta.type);
+      if (_cite) h += '<div class="cultivar-row__cite">' + _cite + '</div>';
+    }
     if (entry.formula && !locked) {
       h += '<div class="text-sm text-muted mt-sm"><span class="formula-parent formula-parent--sm">' + escHtml(entry.formula.parentA) + '</span><span class="formula-operator formula-operator--sm">&times;</span><span class="formula-parent formula-parent--sm">' + escHtml(entry.formula.parentB) + '</span></div>';
     }
@@ -2427,7 +2431,7 @@ if (false) {
       if (visibleNames.length > 0) recentQuery = recentQuery.in('genus', visibleNames);
       recentQuery
         .order('updated_at', { ascending: false, nullsFirst: false })
-        .limit(5)
+        .limit(8)
         .then(function(res) {
           if (res.error || !res.data || res.data.length === 0) {
             grid.innerHTML = '<div class="text-center text-muted grid-full empty-state">まだ品種が登録されていません。</div>';
@@ -2476,6 +2480,11 @@ if (false) {
     }
 
     thumbPromise.then(function(thumbMap) {
+      // Archive layer renders these as a ledger table when present
+      if (window.renderEntriesLedger && grid.id === 'recently-updated-grid') {
+        window.renderEntriesLedger(grid, items, thumbMap);
+        return;
+      }
       var html = '';
       items.forEach(function(item) {
         var name = item.cultivar_name;
