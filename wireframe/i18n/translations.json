@@ -769,8 +769,8 @@
     "en": "Seller"
   },
   "tokushoho_seller_value": {
-    "jp": "Aroid Origins運営チーム",
-    "en": "Aroid Origins Team"
+    "jp": "久恒 佑太（屋号: Aroid Origins）",
+    "en": "Yuta Hisatsune (trading as Aroid Origins)"
   },
   "tokushoho_manager_label": {
     "jp": "運営責任者",
@@ -817,8 +817,8 @@
     "en": "Payment Method"
   },
   "tokushoho_payment_value": {
-    "jp": "クレジットカード（PAY.JP経由）",
-    "en": "Credit card (via PAY.JP)"
+    "jp": "クレジットカード・デビットカード（決済代行: Stripe）",
+    "en": "Credit card (via Stripe)"
   },
   "tokushoho_timing_label": {
     "jp": "支払時期",
@@ -1439,5 +1439,9 @@
   "spec_working_name": {
     "jp": "名前の由来",
     "en": "Name origin"
+  },
+  "pricing_title": {
+    "jp": "料金とサービス内容",
+    "en": "Pricing & service"
   }
 }

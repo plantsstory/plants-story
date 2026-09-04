@@ -18,6 +18,9 @@ verify_jwt = false
 [functions.payjp-webhook]
 verify_jwt = false
 
+[functions.stripe-webhook]
+verify_jwt = false
+
 [api]
 enabled = true
 # Port to use for the API URL.

@@ -14,7 +14,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.amazon.co.jp https://*.media-amazon.com https://*.yahoo.co.jp; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJK72JH471"></script>
-  <script src="js/gtag-init.js?v=20260904f"></script>
+  <script src="js/gtag-init.js?v=20260905a"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="Aroid Origins は、Anthuriumなどアロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォームです。">
   <meta property="og:title" content="Aroid Origins">
@@ -55,13 +55,13 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20260904f">
-  <link rel="stylesheet" href="css/reset.css?v=20260904f">
-  <link rel="stylesheet" href="css/layout.css?v=20260904f">
-  <link rel="stylesheet" href="css/components.css?v=20260904f">
-  <link rel="stylesheet" href="css/pages.css?v=20260904f">
-  <link rel="stylesheet" href="css/utilities.css?v=20260904f">
-  <link rel="stylesheet" href="css/archive.css?v=20260904f">
+  <link rel="stylesheet" href="css/variables.css?v=20260905a">
+  <link rel="stylesheet" href="css/reset.css?v=20260905a">
+  <link rel="stylesheet" href="css/layout.css?v=20260905a">
+  <link rel="stylesheet" href="css/components.css?v=20260905a">
+  <link rel="stylesheet" href="css/pages.css?v=20260905a">
+  <link rel="stylesheet" href="css/utilities.css?v=20260905a">
+  <link rel="stylesheet" href="css/archive.css?v=20260905a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -771,7 +771,7 @@
       <p data-i18n="terms_9a_body">本サービスの一部機能（My Seedlings：実生の6件目以降の投稿）は、有料のサブスクリプション契約が必要です。</p>
       <ul class="terms-list" data-i18n-list="terms_9a_list">
         <li>料金: 月額240円（税込）または年額2,500円（税込）</li>
-        <li>決済はPAY.JP（株式会社PAY提供）の決済基盤を利用します</li>
+        <li>決済は Stripe（Stripe, Inc. および Stripe Japan 株式会社）の決済基盤を利用します</li>
         <li>実生の閲覧は無料です。実生の投稿は1ユーザーにつき5件まで無料で、6件目以降の投稿にはサブスクリプションが必要です</li>
         <li>原種・ハイブリッド・クローンの閲覧・投稿は無料で利用できます</li>
         <li>運営チームの判断により、特定のユーザーに無料でサブスクリプションを付与する場合があります。付与・取消は運営チームの裁量によります</li>
@@ -835,7 +835,7 @@
         <li>ユーザーが任意で提供する情報: 品種名、由来説明、交配式、情報元URL、アップロード画像</li>
         <li>Googleアカウント情報（OAuth認証利用時）: メールアドレス、表示名、プロフィール画像URL</li>
         <li>自動的に収集される情報: ブラウザの種類、言語設定、アクセスしたページ、IPアドレス（サーバーログおよび投稿時のデータベース記録。不正投稿防止のため最大180日間保存後、自動削除されます）</li>
-        <li>決済関連情報: PAY.JP顧客ID、サブスクリプション状態（クレジットカード番号等の決済情報はPAY.JP（株式会社PAY）が管理し、当サイトのサーバーには保存されません）</li>
+        <li>決済関連情報: 決済代行会社（Stripe）の顧客ID、サブスクリプション状態（クレジットカード番号等の決済情報は Stripe が管理し、当サイトのサーバーには保存されません）</li>
         <li>ブラウザに保存されるデータ: 言語設定、ユーザーが追加した品種データ（localStorageを使用、端末内のみ）</li>
       </ul>
 
@@ -852,10 +852,10 @@
       <h2 data-i18n="privacy_4a_title">4a. 決済情報の取り扱い</h2>
       <p data-i18n="privacy_4a_body">サブスクリプションの決済処理について、以下の通り取り扱います：</p>
       <ul class="terms-list" data-i18n-list="privacy_4a_list">
-        <li>決済処理はPAY.JP（株式会社PAY、日本）が行います</li>
-        <li>クレジットカード情報はPAY.JPのサーバーに直接送信され、当サイトのサーバーには一切保存されません</li>
-        <li>PAY.JPによる情報の取り扱いについては、PAY.JPのプライバシーポリシー（https://pay.jp/legal/privacy）が適用されます</li>
-        <li>当サイトが保持する決済関連情報は、PAY.JP顧客IDおよびサブスクリプションの契約状態（プラン種別、ステータス、契約期間）のみです</li>
+        <li>決済処理は Stripe（Stripe, Inc. / Stripe Japan 株式会社）が行います</li>
+        <li>クレジットカード情報は Stripe の決済ページで入力され Stripe のサーバーに直接送信されます。当サイトのサーバーには一切保存されません</li>
+        <li>Stripe による情報の取り扱いについては、Stripe のプライバシーポリシー（https://stripe.com/jp/privacy）が適用されます</li>
+        <li>当サイトが保持する決済関連情報は、Stripe の顧客IDおよびサブスクリプションの契約状態（プラン種別、ステータス、契約期間）のみです</li>
       </ul>
 
       <h2 data-i18n="privacy_5_title">5. 情報の利用目的</h2>
@@ -908,7 +908,7 @@
       <table class="tokushoho-table">
         <tr>
           <th data-i18n="tokushoho_seller_label">販売業者</th>
-          <td data-i18n="tokushoho_seller_value">Aroid Origins運営チーム</td>
+          <td data-i18n="tokushoho_seller_value">久恒 佑太（屋号: Aroid Origins）</td>
         </tr>
         <tr>
           <th data-i18n="tokushoho_manager_label">運営責任者</th>
@@ -932,7 +932,7 @@
         </tr>
         <tr>
           <th data-i18n="tokushoho_price_label">販売価格</th>
-          <td data-i18n="tokushoho_price_value">月額プラン: 240円（税込）／ 年額プラン: 2,500円（税込）</td>
+          <td data-i18n="tokushoho_price_value">My Seedlings サブスクリプション（実生投稿の上限解除）: 月額プラン 240円（税込）／ 年額プラン 2,500円（税込）。詳細は<a href="#" data-nav="pricing">料金とサービス内容</a></td>
         </tr>
         <tr>
           <th data-i18n="tokushoho_extra_fee_label">追加手数料</th>
@@ -940,7 +940,7 @@
         </tr>
         <tr>
           <th data-i18n="tokushoho_payment_label">支払方法</th>
-          <td data-i18n="tokushoho_payment_value">クレジットカード（PAY.JP経由）</td>
+          <td data-i18n="tokushoho_payment_value">クレジットカード・デビットカード（決済代行: Stripe）</td>
         </tr>
         <tr>
           <th data-i18n="tokushoho_timing_label">支払時期</th>
@@ -952,7 +952,7 @@
         </tr>
         <tr>
           <th data-i18n="tokushoho_cancel_label">返品・キャンセル</th>
-          <td data-i18n="tokushoho_cancel_value">デジタルサービスのため返品はお受けできません。解約はプロフィール編集ページから随時可能です。解約後も現在の契約期間終了まではサービスをご利用いただけます</td>
+          <td data-i18n="tokushoho_cancel_value">デジタルサービスの性質上、決済後の返金・日割り返金は行いません。解約はログイン後のプロフィール編集ページから随時可能で、解約後も現在の契約期間の満了日までご利用いただけます。当サイトの不具合によりサービスを提供できなかった場合は個別に対応します</td>
         </tr>
         <tr>
           <th data-i18n="tokushoho_env_label">動作環境</th>
@@ -988,11 +988,11 @@
         <li>My Seedlings：実生（交配）記録の無制限投稿</li>
         <li>コレクションアーカイブとしての継続的な記録・編集</li>
       </ul>
-      <p class="text-sm text-muted mt-sm" data-i18n="about_plan_pricing">月額プラン: 240円（税込）／ 年額プラン: 2,500円（税込）<br>お支払いはクレジットカード（PAY.JP経由）のみとなります。</p>
+      <p class="text-sm text-muted mt-sm" data-i18n="about_plan_pricing">月額プラン: 240円（税込）／ 年額プラン: 2,500円（税込）<br>お支払いはクレジットカード・デビットカード（決済代行: Stripe）のみとなります。詳細は<a href="#" data-nav="pricing">料金とサービス内容</a>をご覧ください。</p>
 
       <h2 data-i18n="about_operator_title">運営情報</h2>
       <div class="legal-operator" data-i18n-html="about_operator_body">
-        <p>運営名称: Aroid Origins運営チーム</p>
+        <p>運営名称: Aroid Origins（個人事業）</p>
         <p>運営責任者: 久恒 佑太</p>
         <p>お問い合わせ: plantsstory2026@gmail.com</p>
       </div>
@@ -1200,6 +1200,43 @@
   <!-- ========================================
        PAGE: FAVORITES
        ======================================== -->
+  <!-- ========================================
+       PAGE: PRICING (料金とサービス内容)
+       ======================================== -->
+  <section id="page-pricing" class="page">
+    <div class="container container--narrow legal-page">
+      <nav class="breadcrumb" aria-label="パンくずリスト"><a href="/" data-nav="top">Home</a><span class="breadcrumb__sep">/</span><span data-i18n="pricing_title">料金とサービス内容</span></nav>
+      <h1 data-i18n="pricing_title">料金とサービス内容</h1>
+      <p class="legal-date">最終更新日: 2026年9月5日</p>
+
+      <h2>Aroid Origins とは</h2>
+      <p>Aroid Origins（運営: 久恒 佑太）は、アンスリウムなどアロイド植物の品種について「どこから来たか」を記録する日本語のウェブ図鑑です。原種の記載者・発表年・タイプ産地、交配種・クローンの作出者や交配式を、学名データベースと一次資料、コレクターの投稿から集め、出典と信頼度つきで掲載しています。</p>
+
+      <h2>無料でご利用いただけるもの</h2>
+      <ul class="terms-list">
+        <li>すべての品種ページ・由来記録・写真・人物索引・産地索引・年表の閲覧</li>
+        <li>原種・ハイブリッド・クローンの投稿、由来の追加、写真の投稿、投票</li>
+        <li>実生（My Seedlings）の閲覧と、1ユーザーにつき5件までの実生投稿</li>
+      </ul>
+
+      <h2>有料サービス: My Seedlings サブスクリプション</h2>
+      <p>実生（ご自身で交配・播種した株の記録）を <strong>6件目以降も無制限に投稿</strong>できるようになる定期購読サービスです。閲覧に課金することはありません。</p>
+      <table class="tokushoho-table">
+        <tr><th>プラン</th><td>月額プラン 240円（税込）／ 年額プラン 2,500円（税込）</td></tr>
+        <tr><th>提供内容</th><td>実生（My Seedlings）投稿数の上限解除（親株写真・交配式・播種日の記録、公開ページと系統図への掲載）</td></tr>
+        <tr><th>提供時期</th><td>決済完了後ただちに有効になります（デジタルサービスのため配送はありません）</td></tr>
+        <tr><th>支払方法</th><td>クレジットカード・デビットカード（決済代行: Stripe）。カード情報は Stripe のページで入力され、当サイトのサーバーには保存されません</td></tr>
+        <tr><th>支払時期</th><td>お申込み時に初回分を決済。以後、契約期間の満了日に同じプラン・同じ料金で自動更新され、その日に翌期間分が請求されます</td></tr>
+        <tr><th>契約期間</th><td>月額プランは1か月、年額プランは1年（自動更新）</td></tr>
+        <tr><th>解約方法</th><td>ログイン後、プロフィール編集ページの「サブスクリプションを解約」からいつでも解約できます。解約後も現在の契約期間の満了日までご利用いただけ、以降の請求は発生しません</td></tr>
+        <tr><th>返金</th><td>デジタルサービスの性質上、決済後の返金・日割り返金は行いません。ただし、当サイトの不具合によりサービスを提供できなかった場合は、お問い合わせのうえ個別に対応します</td></tr>
+        <tr><th>お問い合わせ</th><td>plantsstory2026@gmail.com（<a href="#" data-nav="contact">お問い合わせフォーム</a>からも受け付けます。3営業日以内に返信します）</td></tr>
+      </table>
+      <p class="text-sm text-muted mt-md">お申込み前に <a href="#" data-nav="tokushoho">特定商取引法に基づく表記</a> と <a href="#" data-nav="terms">利用規約</a> をご確認ください。</p>
+      <div class="mt-lg"><button class="btn btn--primary" type="button" data-action="open-paywall">プランを選んで申し込む</button></div>
+    </div>
+  </section>
+
   <!-- ========================================
        PAGE: LOCALITY (タイプ産地の索引)
        ======================================== -->
@@ -1461,7 +1498,7 @@
         <div class="paywall-modal__legal text-xs" id="paywall-legal">
           <p><strong>お申込み内容の確認</strong>（特定商取引法に基づく表示）</p>
           <ul class="terms-list">
-            <li>料金: 月額プラン 240円（税込）／年額プラン 2,500円（税込）。決済はカード払いのみ。</li>
+            <li>料金: 月額プラン 240円（税込）／年額プラン 2,500円（税込）。カード払いのみ（決済代行: Stripe）。</li>
             <li>契約期間: 月額は1か月、年額は1年。<strong>期間満了時に同じ条件で自動更新</strong>され、更新日に翌期間分が請求されます。</li>
             <li>解約: プロフィール編集ページの「サブスクリプションを解約」からいつでも解約できます。解約後も当期間の終了日まで利用でき、日割り返金はありません。</li>
             <li>提供内容: 実生（My Seedlings）投稿の上限解除。閲覧はどなたでも無料です。</li>
@@ -1471,7 +1508,7 @@
         <button class="btn btn--primary" id="paywall-pay-btn" type="button" style="width:100%;">上記に同意して登録・支払う</button>
         <button class="btn btn--outline mt-sm" id="paywall-back-btn" type="button" style="width:100%;">プラン選択に戻る</button>
       </div>
-      <p class="paywall-modal__note">決済はPAY.JPにより安全に処理されます。カード情報は当サイトのサーバーには保存されません。解約後も投稿済みの実生は閲覧・削除が可能です。</p>
+      <p class="paywall-modal__note">決済は Stripe の安全な決済ページで処理されます。カード情報は当サイトのサーバーには保存されません。解約後も投稿済みの実生は閲覧・削除が可能です。<a href="#" data-nav="pricing">料金とサービス内容</a></p>
     </div>
   </div>
   </main>
@@ -1481,6 +1518,7 @@
       <div class="footer__links">
         <a href="#" data-nav="about" data-i18n="footer_about">About</a>
         <a href="#" data-nav="guide" data-i18n="footer_guide">使い方</a>
+        <a href="/pricing/" data-nav="pricing" data-i18n="pricing_title">料金</a>
         <a href="/glossary/" data-nav="glossary" data-i18n="glossary_title">用語集</a>
         <a href="/people/" data-nav="people" data-i18n="people_title">人物索引</a>
         <a href="/locality/" data-nav="locality" data-i18n="locality_title">産地索引</a>
@@ -1496,10 +1534,10 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/app-core.js?v=20260904f"></script>
-  <script src="js/pages.js?v=20260904f"></script>
-  <script src="js/forms.js?v=20260904f"></script>
-  <script src="js/archive.js?v=20260904f"></script>
+  <script src="js/app-core.js?v=20260905a"></script>
+  <script src="js/pages.js?v=20260905a"></script>
+  <script src="js/forms.js?v=20260905a"></script>
+  <script src="js/archive.js?v=20260905a"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1509,7 +1547,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20260904f"></script>
+  <script src="js/dialogs.js?v=20260905a"></script>
 
   <!-- Deletion Request Dialog -->
   <dialog id="delete-request-dialog" class="dialog-clean" aria-labelledby="delete-dialog-title">
@@ -1523,6 +1561,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20260904f"></script>
+<script src="js/sw-register.js?v=20260905a"></script>
 </body>
 </html>

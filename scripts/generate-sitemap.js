@@ -54,6 +54,7 @@ async function main() {
     { loc: '/tokushoho/', changefreq: 'monthly', priority: '0.3' },
     { loc: '/contact/', changefreq: 'monthly', priority: '0.3' },
     { loc: '/glossary/', changefreq: 'monthly', priority: '0.5' },
+    { loc: '/pricing/', changefreq: 'monthly', priority: '0.6' },
   ];
   for (const p of staticPages) {
     xml += `  <url>\n    <loc>${SITE}${p.loc}</loc>\n    <changefreq>${p.changefreq}</changefreq>\n    <priority>${p.priority}</priority>\n  </url>\n`;

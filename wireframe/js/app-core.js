@@ -508,7 +508,7 @@ function showGenus(genusName) {
 
 // ---- Path-based routing (History API) ----
 // Known simple pages (no sub-parameters)
-var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'favorites', 'mypost', 'guide', 'glossary'];
+var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'favorites', 'mypost', 'guide', 'glossary', 'pricing'];
 // Known genus names for URL mapping
 var knownGenera = []; // Populated dynamically from genera table
 // Base path: '/' on custom domain, '/plants-story/' on GitHub Pages
@@ -662,6 +662,7 @@ function navigateTo(page, options, pushHistory) {
       people: '人物索引 - ' + _defaultTitle,
       locality: '産地索引 - ' + _defaultTitle,
       glossary: '由来の用語集 - ' + _defaultTitle,
+      pricing: '料金とサービス内容 - ' + _defaultTitle,
       'profile-edit': 'プロフィール編集 - ' + _defaultTitle
     };
     var pageDescriptions = {
@@ -678,7 +679,8 @@ function navigateTo(page, options, pushHistory) {
       mypost: 'あなたが投稿した品種の履歴',
       people: 'アロイド品種の記載者・採集者・作出者の索引。人物ごとに関連する品種をたどれます',
       locality: 'タイプ産地（国）ごとに原種をたどる索引。コロンビア、パナマ、ペルーなど',
-      glossary: 'sp. / aff. / cf.、記載者、タイプ産地、交配式、F1、クローン、TC など由来を読むための用語集'
+      glossary: 'sp. / aff. / cf.、記載者、タイプ産地、交配式、F1、クローン、TC など由来を読むための用語集',
+      pricing: 'Aroid Origins の料金とサービス内容。閲覧は無料、実生（My Seedlings）投稿は5件まで無料、6件目以降は月額240円または年額2,500円のサブスクリプション'
     };
     if (page === 'genus' && options.genus) {
       var gName = options.genus.charAt(0).toUpperCase() + options.genus.slice(1);
@@ -1250,6 +1252,9 @@ if (false) {
   // PAY.JP public key (pk_test_... / pk_live_...): set after creating the PAY.JP account.
   // Empty = payment UI shows "under preparation".
   window._PAYJP_PUBLIC_KEY = '';
+  // Payment provider in use: 'stripe' (Checkout redirect) or 'payjp' (inline card form).
+  // Stripe first (BOARD 09-05); PAY.JP stays deployed as the fallback.
+  window._PAYMENT_PROVIDER = 'stripe';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
 
   // --- IP address helper (cached per session, global) ---
@@ -1672,6 +1677,64 @@ if (false) {
     showCardStep(plan);
   }
 
+  // Stripe: confirmation step, then redirect to Stripe Checkout
+  function startStripeCheckout() {
+    if (_checkoutInProgress) return;
+    var errEl = document.getElementById('payjp-card-error');
+    var payBtn = document.getElementById('paywall-pay-btn');
+    _checkoutInProgress = true;
+    if (payBtn) { payBtn.disabled = true; payBtn.textContent = '決済ページへ移動中...'; }
+    if (errEl) errEl.textContent = '';
+    supabase.auth.getSession().then(function(res) {
+      if (!res.data || !res.data.session) { showToast('セッションエラー', true); _checkoutInProgress = false; if (payBtn) { payBtn.disabled = false; } return; }
+      return fetch(window._SUPABASE_URL + '/functions/v1/create-checkout', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + res.data.session.access_token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: _selectedPlan })
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        if (data && data.url) {
+          if (typeof gtag === 'function') gtag('event', 'begin_checkout', { method: 'stripe_checkout', plan: _selectedPlan });
+          window.location.href = data.url;
+          return;
+        }
+        if (errEl) errEl.textContent = (data && data.error) || '決済ページを開けませんでした。時間をおいてお試しください。';
+        _checkoutInProgress = false;
+        if (payBtn) { payBtn.disabled = false; payBtn.textContent = '上記に同意して決済ページへ進む'; }
+      });
+    }).catch(function(err) {
+      if (errEl) errEl.textContent = 'エラー: ' + err.message;
+      _checkoutInProgress = false;
+      if (payBtn) { payBtn.disabled = false; payBtn.textContent = '上記に同意して決済ページへ進む'; }
+    });
+  }
+
+  // After returning from Stripe Checkout: confirm the subscription (webhook may lag a few seconds)
+  (function handleCheckoutReturn() {
+    var params = new URLSearchParams(window.location.search);
+    var result = params.get('subscription');
+    if (!result) return;
+    var clean = window.location.pathname + window.location.hash;
+    try { history.replaceState(history.state, '', clean); } catch (e) {}
+    if (result === 'canceled') { setTimeout(function() { showToast('決済はキャンセルされました'); }, 800); return; }
+    if (result !== 'success') return;
+    var tries = 0;
+    (function poll() {
+      if (!window._currentUser) { if (++tries < 40) return setTimeout(poll, 500); return; }
+      checkSubscription().then(function(ok) {
+        if (ok) {
+          if (typeof gtag === 'function') gtag('event', 'subscription_checkout_success', { method: 'stripe_checkout' });
+          showToast('サブスクリプションを開始しました。実生を無制限に投稿できます');
+          if (typeof renderProfileEditPage === 'function') renderProfileEditPage();
+          if (typeof refreshSeedlingPreview === 'function') refreshSeedlingPreview();
+        } else if (++tries < 40) {
+          setTimeout(poll, 1500);
+        } else {
+          showToast('決済の反映に時間がかかっています。数分後に再読み込みしてください', true);
+        }
+      });
+    })();
+  })();
+
   // Step 2 of the paywall modal: card input for the chosen plan
   function showCardStep(plan) {
     _selectedPlan = plan === 'annual' ? 'annual' : 'monthly';
@@ -1692,6 +1755,17 @@ if (false) {
     if (errEl) errEl.textContent = '';
     if (planSelect) planSelect.classList.add('d-none');
     cardSection.classList.remove('d-none');
+
+    var cardEl = document.getElementById('payjp-card-element');
+    var payBtnS = document.getElementById('paywall-pay-btn');
+    if (window._PAYMENT_PROVIDER === 'stripe') {
+      // Card details are entered on Stripe's hosted page, not here
+      if (cardEl) cardEl.classList.add('d-none');
+      if (payBtnS) { payBtnS.disabled = false; payBtnS.textContent = '上記に同意して決済ページへ進む'; }
+      return;
+    }
+    if (cardEl) cardEl.classList.remove('d-none');
+    if (payBtnS) payBtnS.textContent = '上記に同意して登録・支払う';
 
     if (!window._PAYJP_PUBLIC_KEY) {
       if (errEl) errEl.textContent = '決済システムは現在準備中です。今しばらくお待ちください。';
@@ -1720,6 +1794,7 @@ if (false) {
 
   // Tokenize the card and create the subscription server-side
   function submitPayment() {
+    if (window._PAYMENT_PROVIDER === 'stripe') { startStripeCheckout(); return; }
     if (_checkoutInProgress || !_payjpInstance || !_payjpCardElement) return;
     var errEl = document.getElementById('payjp-card-error');
     var payBtn = document.getElementById('paywall-pay-btn');
@@ -1781,6 +1856,21 @@ if (false) {
   function cancelSubscription() {
     var sb = window._supabaseClient;
     if (!sb || !window._currentUser) return;
+    if (window._PAYMENT_PROVIDER === 'stripe' && window._subscriptionPlan !== 'granted') {
+      // Stripe: the hosted customer portal handles cancellation, card updates and invoices
+      sb.auth.getSession().then(function(res) {
+        if (!res.data || !res.data.session) return;
+        return fetch(window._SUPABASE_URL + '/functions/v1/create-portal', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + res.data.session.access_token, 'Content-Type': 'application/json' },
+          body: '{}'
+        }).then(function(r) { return r.json(); }).then(function(data) {
+          if (data && data.url) { window.location.href = data.url; return; }
+          showToast('管理ページを開けませんでした: ' + ((data && data.error) || 'Unknown'), true);
+        });
+      }).catch(function(err) { showToast('エラー: ' + err.message, true); });
+      return;
+    }
     var endDate = window._subscriptionEnd ? new Date(window._subscriptionEnd) : null;
     var endStr = endDate ? (endDate.getFullYear() + '/' + (endDate.getMonth() + 1) + '/' + endDate.getDate()) : '期間終了日';
     if (!window.confirm('サブスクリプションを解約しますか？\n' + endStr + ' までは引き続きご利用いただけます。以降の更新・請求は停止されます。')) {
@@ -1866,6 +1956,8 @@ if (false) {
     var btn = e.target.closest('[data-action="show-paywall"]');
     if (btn) showPaywallModal();
     // "View all seedlings": free viewing - go to the genus seedlings tab
+    var openPaywall = e.target.closest('[data-action="open-paywall"]');
+    if (openPaywall) { e.preventDefault(); showPaywallModal(); return; }
     var viewBtn = e.target.closest('[data-action="view-seedlings"]');
     if (viewBtn) {
       var slug = (window.SEEDLING_GENERA && window.SEEDLING_GENERA[0]) || 'anthurium';
