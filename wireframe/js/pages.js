@@ -1161,6 +1161,7 @@ function renderOriginsInner(cultivarName, container) {
   });
 
   container.innerHTML = html;
+  if (window.linkGlossaryTerms) window.linkGlossaryTerms(container);
 }
 
 // ---- Update cultivar detail page dynamically ----

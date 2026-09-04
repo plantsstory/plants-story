@@ -297,6 +297,7 @@
     html += '<p class="story__body' + (/^[A-Za-z]/.test(ex) ? ' story__body--dropcap' : '') + '">' + esc(ex) + '</p>';
     html += link(d, esc(T('story_more')), 'story__more');
     body.innerHTML = html;
+    if (window.linkGlossaryTerms) window.linkGlossaryTerms(body.querySelector('.story__body'), 3);
   }
 
   function groupBy(list, keyFn) {
@@ -717,6 +718,190 @@
     if (section) section.classList.add('d-none');
     waitForData(renderDetail);
   };
+
+  /* ============================================================
+     CONTRIBUTION FORM: split name builder (BOARD §3 notation rules)
+     Composes the registered name from epithet / qualifier / cultivar
+     name / locality or label, and writes it into #cultivar-name-input
+     so the existing duplicate check, AI autofill and submit code keep working.
+     ============================================================ */
+  (function nameBuilder() {
+    var $ = function (id) { return document.getElementById(id); };
+    var result = $('cultivar-name-input');
+    if (!result || !$('name-builder')) return;
+    var epithet = $('nb-epithet'), extra = $('nb-extra'), cultivarName = $('nb-cultivar'), seedLabel = $('nb-seedlabel');
+    var epithetLabel = $('nb-epithet-label'), extraLabel = $('nb-extra-label'), cultivarLabel = $('nb-cultivar-label');
+    var seeded = false; // true right after edit-mode prefill: keep the stored name until the user edits
+
+    function currentType() {
+      var r = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
+      return r ? r.value : 'species';
+    }
+    function qualifier() {
+      var a = document.querySelector('#species-subcategory .chip.active');
+      var q = a ? a.getAttribute('data-subcategory') : 'species';
+      return q === 'species' ? '' : q;
+    }
+    function quoteD(v) { v = clean(v).replace(/^["“”]+|["“”]+$/g, ''); return v ? '"' + v + '"' : ''; }
+    function quoteS(v) { v = clean(v).replace(/^['‘’]+|['‘’]+$/g, ''); return v ? "'" + v + "'" : ''; }
+    function stripGenus(v) {
+      var g = ($('contribute-genus-select') || {}).value || '';
+      v = clean(v);
+      if (g && v.toLowerCase().indexOf(g.toLowerCase() + ' ') === 0) v = v.slice(g.length + 1);
+      return v;
+    }
+    function compose() {
+      var type = currentType();
+      var name = '';
+      if (type === 'species') {
+        var q = qualifier(), ep = clean(epithet.value).toLowerCase().replace(/\s+/g, ''), ex = clean(extra.value);
+        if (q === 'sp') name = joinParts2(['sp.', quoteD(ex)]);
+        else if (q === 'aff' || q === 'cf') name = ep ? joinParts2([q + '. ' + ep, quoteD(ex)]) : '';
+        else if (q === 'ssp' || q === 'var') name = ep && ex ? ep + ' ' + q + '. ' + clean(ex).toLowerCase() : (ep || '');
+        else name = joinParts2([ep, quoteD(ex)]);
+      } else if (type === 'clone') {
+        var cn = quoteS(cultivarName.value), ep2 = clean(epithet.value).toLowerCase().replace(/\s+/g, '');
+        name = cn ? joinParts2([ep2, cn]) : '';
+      } else if (type === 'hybrid') {
+        name = quoteS(cultivarName.value);
+      } else if (type === 'seedling') {
+        var box = $('seedling-formula-inputs');
+        var inputs = box ? box.querySelectorAll('input') : [];
+        var unknown = $('seedling-formula-unknown');
+        var a = inputs[0] ? stripGenus(inputs[0].value) : '', b = inputs[1] ? stripGenus(inputs[1].value) : '';
+        var lab = quoteD(seedLabel.value);
+        if (unknown && unknown.checked) name = lab;
+        else if (a && b) name = joinParts2([a + ' × ' + b, lab]);
+        else name = '';
+      }
+      result.value = name;
+      result.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    function joinParts2(parts) { return parts.filter(Boolean).join(' '); }
+
+    function refreshVisibility() {
+      var type = currentType(), q = qualifier();
+      document.querySelectorAll('#name-builder [data-for]').forEach(function (el) {
+        var ok = el.getAttribute('data-for').split(' ').indexOf(type) !== -1;
+        if (el.id === 'nb-epithet-row' && type === 'species' && q === 'sp') ok = false;
+        el.hidden = !ok;
+      });
+      if (epithetLabel) epithetLabel.textContent = type === 'clone' ? T('nb_epithet_optional') : T('nb_epithet');
+      if (extraLabel) extraLabel.textContent = q === 'sp' ? T('nb_extra_sp') : (q === 'ssp' || q === 'var') ? T('nb_extra_sub') : T('nb_extra_locality');
+      if (extra) extra.placeholder = (q === 'ssp' || q === 'var') ? '例: variegatum' : '例: Peru';
+      if (cultivarLabel) cultivarLabel.textContent = type === 'hybrid' ? T('nb_hybrid_name') : T('nb_clone_name');
+      var dis = !!result.disabled;
+      [epithet, extra, cultivarName, seedLabel].forEach(function (i) { if (i) i.disabled = dis; });
+      document.querySelectorAll('#species-subcategory .chip').forEach(function (c) { c.disabled = dis; });
+    }
+    function onUserInput() { seeded = false; compose(); }
+    [epithet, extra, cultivarName, seedLabel].forEach(function (i) { if (i) i.addEventListener('input', onUserInput); });
+    document.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('#species-subcategory .chip')) setTimeout(function () { refreshVisibility(); onUserInput(); }, 0);
+    });
+    document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function (r) {
+      r.addEventListener('change', function () { setTimeout(function () { refreshVisibility(); if (!seeded) compose(); }, 0); });
+    });
+    var genusSel = $('contribute-genus-select');
+    if (genusSel) genusSel.addEventListener('change', function () { if (!seeded) compose(); });
+    var seedBox = $('seedling-formula-inputs');
+    if (seedBox) seedBox.querySelectorAll('input').forEach(function (i) { i.addEventListener('input', onUserInput); });
+    var seedUnknown = $('seedling-formula-unknown');
+    if (seedUnknown) seedUnknown.addEventListener('change', onUserInput);
+
+    // Edit mode: fill the parts from the stored short name (without recomposing)
+    window.nameBuilderParse = function (shortName, type) {
+      seeded = true;
+      var s = clean(shortName);
+      [epithet, extra, cultivarName, seedLabel].forEach(function (i) { if (i) i.value = ''; });
+      var m;
+      if (type === 'species') {
+        if ((m = s.match(/^sp\.\s*"?([^"]*)"?$/))) { extra.value = m[1].trim(); }
+        else if ((m = s.match(/^(aff|cf)\.\s*(\S+)\s*(?:"([^"]*)")?$/))) { epithet.value = m[2]; extra.value = m[3] || ''; }
+        else if ((m = s.match(/^(\S+)\s+(ssp|var)\.\s+(\S+)$/))) { epithet.value = m[1]; extra.value = m[3]; }
+        else if ((m = s.match(/^(\S+)\s*(?:"([^"]*)")?$/))) { epithet.value = m[1]; extra.value = m[2] || ''; }
+      } else if (type === 'clone') {
+        if ((m = s.match(/^(?:(\S+)\s+)?'(.+)'$/))) { epithet.value = m[1] || ''; cultivarName.value = m[2]; }
+        else cultivarName.value = s.replace(/^'+|'+$/g, '');
+      } else if (type === 'hybrid') {
+        cultivarName.value = s.replace(/^'+|'+$/g, '');
+      } else if (type === 'seedling') {
+        if ((m = s.match(/"([^"]*)"\s*$/))) seedLabel.value = m[1];
+      }
+      setTimeout(refreshVisibility, 0);
+    };
+    window.nameBuilderReset = function () {
+      seeded = false;
+      [epithet, extra, cultivarName, seedLabel].forEach(function (i) { if (i) i.value = ''; });
+      setTimeout(refreshVisibility, 0);
+    };
+    window.nameBuilderPrimaryField = function (type) {
+      if (type === 'species') return qualifier() === 'sp' ? extra : epithet;
+      if (type === 'seedling') { var box = $('seedling-formula-inputs'); return box ? box.querySelector('input') : result; }
+      return cultivarName;
+    };
+    refreshVisibility();
+  })();
+
+  /* ============================================================
+     GLOSSARY: link the first mention of each term inside origin text
+     ============================================================ */
+  var GLOSSARY_TERMS = [
+    ['ソマクローナル変異', 'g-tc'], ['組織培養', 'g-tc'], ['タイプ標本', 'g-type-locality'], ['タイプ産地', 'g-type-locality'],
+    ['産地フォーム', 'g-ecotype'], ['エコタイプ', 'g-ecotype'], ['原記載', 'g-kisai'], ['記載者', 'g-kisaisha'], ['採集者', 'g-saishusha'],
+    ['シノニム', 'g-synonym'], ['異名', 'g-synonym'], ['旧綴り', 'g-synonym'], ['交配式', 'g-formula'], ['選抜個体', 'g-original'],
+    ['オリジナル個体', 'g-original'], ['流通名', 'g-trade-name'], ['斑入り', 'g-variegata'], ['ハイブリッド', 'g-hybrid'], ['交配種', 'g-hybrid'],
+    ['クローン', 'g-clone'], ['実生', 'g-seedling'], ['学名', 'g-gakumei'], ['信頼度', 'g-trust'],
+    ['ssp.', 'g-ssp-var'], ['var.', 'g-ssp-var'], ['aff.', 'g-aff'], ['cf.', 'g-cf'], ['sp.', 'g-sp'],
+    ['IPNI', 'g-databases'], ['POWO', 'g-databases'], ['GBIF', 'g-databases'], ['F1', 'g-f1'], ['F2', 'g-f1'], ['self', 'g-f1'], ['TC', 'g-tc']
+  ];
+  function termRegex(term) {
+    var e = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return /^[A-Za-z0-9.]+$/.test(term) ? new RegExp('(^|[^A-Za-z0-9])(' + e + ')(?![A-Za-z0-9])') : new RegExp('()(' + e + ')');
+  }
+  window.linkGlossaryTerms = function (root, max) {
+    if (!root) return;
+    max = max || 6;
+    var done = {};
+    var count = 0;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        var p = n.parentNode;
+        while (p && p !== root) { if (p.tagName === 'A' || p.tagName === 'BUTTON' || p.tagName === 'INPUT' || p.tagName === 'TEXTAREA') return NodeFilter.FILTER_REJECT; p = p.parentNode; }
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(function (node) {
+      if (count >= max) return;
+      var text = node.nodeValue, i, frag = null, rest = text;
+      for (i = 0; i < GLOSSARY_TERMS.length && count < max; i++) {
+        var term = GLOSSARY_TERMS[i][0], id = GLOSSARY_TERMS[i][1];
+        if (done[id]) continue;
+        var m = rest.match(termRegex(term));
+        if (!m) continue;
+        var idx = m.index + m[1].length;
+        frag = frag || document.createDocumentFragment();
+        frag.appendChild(document.createTextNode(rest.slice(0, idx)));
+        var a = document.createElement('a');
+        a.className = 'term'; a.href = base + 'glossary/#' + id; a.setAttribute('data-nav', 'glossary'); a.setAttribute('data-anchor', id);
+        a.title = T('glossary_title'); a.textContent = m[2];
+        frag.appendChild(a);
+        rest = rest.slice(idx + m[2].length);
+        done[id] = true; count++;
+        i = -1; // restart scan on the remaining text
+      }
+      if (frag) { frag.appendChild(document.createTextNode(rest)); node.parentNode.replaceChild(frag, node); }
+    });
+  };
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a.term[data-anchor]') : null;
+    if (!a) return;
+    var id = a.getAttribute('data-anchor');
+    setTimeout(function () { var el = document.getElementById(id); if (el) { el.scrollIntoView({ block: 'start', behavior: 'smooth' }); el.classList.add('glossary__hit'); } }, 350);
+  });
 
   /* ---------- interactions ---------- */
   document.addEventListener('click', function (e) {

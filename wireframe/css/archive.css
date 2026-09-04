@@ -622,3 +622,19 @@ a.lineage__node:hover { border-color: var(--color-ink); }
 .glossary dd { margin: 4px 0 0; line-height: 1.9; color: var(--color-ink); }
 .glossary dd a { text-decoration: underline; }
 .legal-page .breadcrumb { margin-bottom: var(--space-md); }
+
+/* ---------- contribution form: name builder ---------- */
+.name-builder__grid { display: grid; grid-template-columns: 1fr; gap: var(--space-sm) var(--space-md); }
+@media (min-width: 640px) { .name-builder__grid { grid-template-columns: 1fr 1fr; } }
+.name-builder [data-for][hidden] { display: none !important; }
+.name-builder__result { background: var(--color-paper); font-family: var(--font-display); font-weight: 600; font-size: 1.15rem; color: var(--color-ink); }
+.name-builder__result:read-only { cursor: default; }
+.name-builder .species-subcategory { margin: 0 0 var(--space-sm); }
+.name-builder .chips { border-bottom: 0; gap: 4px; flex-wrap: wrap; }
+.name-builder .chip { border: 1px solid var(--color-rule-strong); border-radius: var(--radius-sm); padding: 5px 10px; margin: 0; text-transform: none; letter-spacing: 0.02em; font-family: var(--font-primary); font-size: 0.8rem; }
+.name-builder .chip.active { background: var(--color-ink); color: var(--color-paper); border-color: var(--color-ink); }
+
+/* glossary term links inside origin text */
+a.term { text-decoration: none; border-bottom: 1px dotted var(--color-accent-warm); color: inherit; }
+a.term:hover { border-bottom-style: solid; color: var(--color-primary); }
+.glossary__hit { color: var(--color-primary); }

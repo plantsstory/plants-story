@@ -1443,5 +1443,33 @@
   "pricing_title": {
     "jp": "料金とサービス内容",
     "en": "Pricing & service"
+  },
+  "nb_epithet": {
+    "jp": "種小名",
+    "en": "Species epithet"
+  },
+  "nb_epithet_optional": {
+    "jp": "種小名（単一の原種由来なら入力）",
+    "en": "Species epithet (if derived from one species)"
+  },
+  "nb_extra_locality": {
+    "jp": "産地・入手元（任意）",
+    "en": "Locality / source (optional)"
+  },
+  "nb_extra_sp": {
+    "jp": "産地・入手元（sp. には必須）",
+    "en": "Locality / source (required for sp.)"
+  },
+  "nb_extra_sub": {
+    "jp": "亜種・変種名",
+    "en": "Subspecies / variety epithet"
+  },
+  "nb_clone_name": {
+    "jp": "クローン名",
+    "en": "Clone name"
+  },
+  "nb_hybrid_name": {
+    "jp": "ハイブリッド名",
+    "en": "Hybrid name"
   }
 }

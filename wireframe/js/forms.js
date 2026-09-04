@@ -587,8 +587,9 @@ document.addEventListener('click', function(e) {
       contributeGenus.dispatchEvent(new Event('change'));
     }
 
-    // Pre-fill name
+    // Pre-fill name (and the split name builder)
     if (contributeName) contributeName.value = shortName;
+    if (window.nameBuilderParse) window.nameBuilderParse(shortName, type);
 
     // Pre-fill type
     var typeRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="' + type + '"]');
@@ -826,6 +827,7 @@ document.addEventListener('click', function(e) {
 
     // Reset form
     if (contributeName) contributeName.value = '';
+    if (window.nameBuilderReset) window.nameBuilderReset();
     if (contributeDesc) contributeDesc.value = '';
     if (contributeGenus) contributeGenus.selectedIndex = 0;
     var speciesRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="species"]');
@@ -1254,8 +1256,9 @@ document.addEventListener('click', function(e) {
         if (!hasError && contributeGenus) { contributeGenus.focus(); hasError = true; }
       }
       if (!name) {
-        showFieldError(contributeName, t('error_name_required'));
-        if (!hasError && contributeName) { contributeName.focus(); hasError = true; }
+        var nbTarget = (window.nameBuilderPrimaryField && window.nameBuilderPrimaryField(type)) || contributeName;
+        showFieldError(nbTarget, t('error_name_required'));
+        if (!hasError && nbTarget) { nbTarget.focus(); hasError = true; }
       }
       if (hasError) return;
 
