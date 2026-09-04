@@ -1212,6 +1212,9 @@ Return ONLY valid JSON (no markdown):
   ]
 }
 - Return exactly 1 origin. confidence = how well the sources agree (0.0-1.0).
+- working_name_origin, introduced_by, origin_region and closest_species are LABEL fields: write them in
+  Japanese, each at most 60 characters, names and places in Latin letters (e.g. "Jay Vannini が採集者 Rory Antolak に献名した暫定名",
+  "2020年頃に Tezula Plants などを経て流通"). Put the full story in description_jp instead.
 - NEVER invent an author citation, a protologue, a collector number or a type locality for an undescribed plant.
 - 日本語は自然で簡潔に。「信頼できる情報源が見つからなかったため…」のような前置きは書かない。`;
 }

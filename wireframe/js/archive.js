@@ -442,7 +442,7 @@
       cells += cell('spec_status', esc(T(stKey)));
       cells += cell('spec_region', esc(d.originRegion || d.habitat));
       cells += cell('spec_closest', esc(d.closestSpecies));
-      cells += cell('spec_introduced_by', linkPeople(d.introducedBy));
+      cells += cell('spec_introduced_by', esc(d.introducedBy));
       cells += cell('spec_trade_names', esc(d.tradeNames.join(' / ')));
       cells += cell('spec_working_name', esc(d.workingNameOrigin));
     } else if (d.type === 'species') {
