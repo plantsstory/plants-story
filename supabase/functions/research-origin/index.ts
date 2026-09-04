@@ -860,6 +860,8 @@ async function callOpenAI(
   };
   if (useSearch) {
     body.tools = [{ type: "web_search" }];
+    // Each search call is billed (~¥1.5); 8 is enough for a thorough run
+    body.max_tool_calls = parseInt(Deno.env.get("RESEARCH_MAX_SEARCHES") || "8", 10);
   }
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
@@ -1674,6 +1676,67 @@ serve(async (req: Request) => {
           JSON.stringify({ error: "この品種の AI 調査は1日3回までです。時間をおいてお試しください。" }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
+      }
+    }
+    // Cost guardrails (each run costs roughly ¥15–20 in web searches):
+    //  - a non-admin user gets 5 runs per day
+    //  - the whole site stops at RESEARCH_DAILY_CAP runs per day (default 30) and alerts the owner
+    //  - a cultivar researched by the AI within the last 30 days is not re-researched by non-admins
+    const oneDayAgoAll = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    if (!isAdmin) {
+      const { count: userDayCount } = await serviceClient
+        .from("research_origin_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", authUser.id)
+        .gte("requested_at", oneDayAgoAll);
+      if ((userDayCount ?? 0) >= 5) {
+        return new Response(
+          JSON.stringify({ error: "AI 調査は1日5回までです。明日以降にお試しください。" }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const dailyCap = parseInt(Deno.env.get("RESEARCH_DAILY_CAP") || "30", 10);
+      const { count: siteDayCount } = await serviceClient
+        .from("research_origin_requests")
+        .select("id", { count: "exact", head: true })
+        .gte("requested_at", oneDayAgoAll);
+      if ((siteDayCount ?? 0) >= dailyCap) {
+        // Alert once per day (first refusal after the cap is hit)
+        if ((siteDayCount ?? 0) === dailyCap) {
+          const resendKey = Deno.env.get("RESEND_API_KEY");
+          if (resendKey) {
+            try {
+              await fetch("https://api.resend.com/emails", {
+                method: "POST",
+                headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  from: "Aroid Origins <noreply@plantsstory.com>",
+                  to: [Deno.env.get("ALERT_EMAIL") || "plantsstory2026@gmail.com"],
+                  subject: "[Aroid Origins] AI 調査の1日上限に達しました",
+                  text: `本日の AI 調査回数がサイト全体の上限 ${dailyCap} 回に達したため、一般ユーザーの調査を停止しました（管理者は引き続き可能）。上限は Supabase Secrets の RESEARCH_DAILY_CAP で変更できます。`,
+                }),
+              });
+            } catch { /* best effort */ }
+          }
+        }
+        return new Response(
+          JSON.stringify({ error: "本日の AI 調査枠が上限に達しました。明日以降にお試しください（登録自体は可能です）。" }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (cultivar_id) {
+        const { data: recentRow } = await serviceClient
+          .from("cultivars")
+          .select("ai_research_data")
+          .eq("id", cultivar_id)
+          .maybeSingle();
+        const researchedAt = recentRow?.ai_research_data?.researched_at;
+        if (researchedAt && Date.now() - new Date(researchedAt).getTime() < 30 * 24 * 60 * 60 * 1000) {
+          return new Response(
+            JSON.stringify({ error: "この品種は30日以内に AI 調査済みです。内容の修正は「由来を追加」からお願いします。" }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
       }
     }
 
