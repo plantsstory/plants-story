@@ -1287,5 +1287,13 @@
   "related_parents": {
     "jp": "交配親",
     "en": "Parents"
+  },
+  "tab_species_clones": {
+    "jp": "収録品種",
+    "en": "Species & Cultivars"
+  },
+  "tab_seedlings": {
+    "jp": "実生ノート",
+    "en": "Seedling notes"
   }
 }

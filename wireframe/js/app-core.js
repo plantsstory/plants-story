@@ -1370,8 +1370,8 @@ if (false) {
       if (g.has_seedlings) {
         // Pattern 1: with seedlings tab
         html += '<div class="genus-tabs" id="genus-tabs-' + g.slug + '">';
-        html += '<button class="genus-tab active" data-tab="species-clones">Species / Clones</button>';
-        html += '<button class="genus-tab" data-tab="seedlings">My Seedlings</button>';
+        html += '<button class="genus-tab active" data-tab="species-clones" data-i18n="tab_species_clones">収録品種</button>';
+        html += '<button class="genus-tab" data-tab="seedlings" data-i18n="tab_seedlings">実生ノート</button>';
         html += '</div>';
       }
 
