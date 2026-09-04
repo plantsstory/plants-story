@@ -28,6 +28,41 @@ const TIER_CONFIG: Record<string, { base_min: number; base_max: number; label_en
   D: { base_min: 20, base_max: 35,  label_en: "Unknown / Unverified", label_jp: "不明・未検証" },
 };
 
+// Source-domain → tier. Computed from URLs the model actually cited, so the
+// tier is not left to the model's self-assessment.
+const DOMAIN_TIERS: Array<[RegExp, string]> = [
+  [/(^|\.)(phytotaxa|biotaxa|jstor|bioone|doi|springer|wiley|tandfonline|cambridge|sciencedirect|mobot|tropicos|ipni|kew|gbif|plantsoftheworldonline|biodiversitylibrary)\.(org|com|net)$/i, "A"],
+  [/aroideana/i, "A"],
+  [/(^|\.)(aroid|exoticrainforest|internationalaroidsociety)\.(org|com)$/i, "B"],
+  [/(^|\.)(researchgate|academia|semanticscholar)\.(net|edu|org)$/i, "B"],
+  [/(^|\.)(ecuagenera|nsetropicals|carnivero|aroidgreenhouses|tezulaplants|steves-leaves|logees|gabriellaplants)\.(com|net)$/i, "C"],
+  [/(^|\.)(instagram|facebook|youtube|youtu|reddit|threads|tiktok|x|twitter|wikipedia|wikimedia)\.(com|be|org)$/i, "C"],
+];
+function tierOfUrl(url: string): string {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    for (const [re, tier] of DOMAIN_TIERS) if (re.test(host) || re.test(url)) return tier;
+    if (/(^|\.)(yahoo\.co\.jp|mercari|ebay|etsy|amazon)\./i.test(host)) return "D";
+    return "C"; // an identifiable page still beats nothing
+  } catch { return "D"; }
+}
+const TIER_RANK: Record<string, number> = { S: 5, A: 4, B: 3, C: 2, D: 1 };
+function bestTier(...tiers: (string | undefined)[]): string {
+  return tiers.filter((t): t is string => !!t && !!TIER_RANK[t]).sort((a, b) => TIER_RANK[b] - TIER_RANK[a])[0] || "D";
+}
+// Tier earned by the evidence itself: best domain, with a bump when several
+// independent community-grade sources agree (C → C-high handled via confidence).
+function tierFromUrls(urls: (string | undefined)[]): { tier: string; distinctHosts: number } {
+  const hosts = new Set<string>();
+  let best = "D";
+  for (const u of urls) {
+    if (!u || !/^https?:\/\//i.test(u)) continue;
+    try { hosts.add(new URL(u).hostname.replace(/^www\./, "")); } catch { continue; }
+    best = bestTier(best, tierOfUrl(u));
+  }
+  return { tier: best, distinctHosts: hosts.size };
+}
+
 // ============================================================
 // POWO + IPNI: Search and get botanical data
 // ============================================================
@@ -217,8 +252,19 @@ async function queryGBIF(genus: string, species: string): Promise<(BotanicalResu
     const q = encodeURIComponent(`${genus} ${species}`);
     const matchRes = await fetch(`https://api.gbif.org/v1/species/match?name=${q}`);
     if (!matchRes.ok) return null;
-    const match = await matchRes.json();
-    if (!match?.usageKey || match.matchType === "NONE" || match.rank !== "SPECIES") return null;
+    let match = await matchRes.json();
+    if (!match?.usageKey || match.matchType === "NONE" || match.rank !== "SPECIES") {
+      // /match sometimes stops at the genus (HIGHERRANK) for recently published names
+      // that the backbone search does know — look the exact canonical name up directly.
+      const canonical = `${genus} ${species}`.toLowerCase();
+      const searchRes = await fetch(`https://api.gbif.org/v1/species/search?q=${q}&rank=SPECIES&limit=10`);
+      const found = searchRes.ok ? (await searchRes.json())?.results || [] : [];
+      const hit = found.find((r: any) => String(r.canonicalName || "").toLowerCase() === canonical && r.nubKey)
+        || found.find((r: any) => String(r.canonicalName || "").toLowerCase() === canonical);
+      if (!hit) return null;
+      match = { usageKey: hit.nubKey || hit.key, acceptedUsageKey: hit.acceptedKey, scientificName: hit.scientificName, canonicalName: hit.canonicalName, status: hit.taxonomicStatus, rank: "SPECIES" };
+      console.log(`[GBIF] /match missed; backbone search found ${hit.scientificName}`);
+    }
     // Follow synonyms to the accepted taxon
     const key = match.acceptedUsageKey || match.usageKey;
     console.log(`[GBIF] Matched ${match.scientificName} (key: ${key}, ${match.status})`);
@@ -1054,8 +1100,12 @@ function buildCultivarResearchPrompt(cultivarName: string, genus: string, type: 
    c. Verified breeder records with published evidence
    d. NOTHING ELSE is reliable for factual claims about origin.
 
-5. NEVER use information from: nursery product pages, Instagram, Reddit,
-   Facebook groups, Japanese blogs, Yahoo Auctions JP, Mercari JP.
+5. ADMISSIBLE non-academic evidence (cite the real page): the breeder's or namer's OWN website,
+   Instagram, YouTube or interviews (primary witness, tier B); International Aroid Society and named
+   experts' articles (tier B); the nursery that INTRODUCED the plant documenting that introduction, and
+   collector forums where several independent people agree (tier C).
+   NEVER use: marketplaces (Yahoo Auctions JP, Mercari JP, eBay, Etsy), anonymous listicles, AI-written blogs,
+   or a reseller's product page as evidence of who CREATED the plant.
 
 6. If a cultivar was formally described as a species (e.g., trade name "El Choco Red"
    = Philodendron rubrijuvenile Croat & Kaufmann 2022), cite the formal description.
@@ -1101,6 +1151,69 @@ CRITICAL: In ALL Japanese text fields, the following MUST be written in Latin/En
 - Species/cultivar names: Use Latin scientific names ONLY. Write "Anthurium luxurians", NEVER katakana.
 - Person names: Use English alphabet ONLY. Write "T. B. Croat", NEVER katakana.
 - Place/region names: Use English alphabet ONLY. Write "Colombia", NEVER katakana.`;
+}
+
+// ============================================================
+// Undescribed / informally named species (no IPNI/POWO/GBIF record)
+// ============================================================
+function buildUndescribedSpeciesPrompt(cultivarName: string, genus: string): string {
+  return `You are an aroid taxonomist and historian researching "${cultivarName}" (genus: ${genus}).
+This name was NOT found in IPNI / POWO / GBIF, so it is probably an UNDESCRIBED species, a provisional
+(working) name, or an unresolved horticultural name. Your job is to document what is reliably known
+about where this plant comes from and how its name arose — NOT to invent a formal description.
+
+=== FIRST, CHECK ===
+Search IPNI / POWO / Tropicos / Aroideana for a valid publication of this name. If it WAS validly
+published, return species_status "described" with the real author, year and journal, and nothing else invented.
+
+=== SOURCES YOU MAY USE (a ranked list — cite the REAL pages you read) ===
+A. Aroideana, Phytotaxa, other peer-reviewed papers; IPNI/POWO/GBIF/Tropicos.
+B. International Aroid Society (aroid.org) articles and newsletters; Jay Vannini's and other named experts'
+   articles (e.g. exoticrainforest.com, "Velvet-leaf anthuriums in cultivation"); monographs and books.
+C. Specialist nurseries and collectors who INTRODUCED the plant (NSE Tropicals, Ecuagenera, Carnivero,
+   named collectors) — as witnesses to introduction and provenance, and their own Instagram/YouTube posts;
+   collector forums where several independent people agree.
+NEVER use: marketplaces (Yahoo Auctions, Mercari, eBay, Etsy), anonymous listicles, AI-written blogs.
+A nursery is a WITNESS, not the discoverer, unless it documents its own collection trip.
+
+=== WHAT TO ESTABLISH (only what sources support; use null otherwise) ===
+- species_status: "undescribed" (known to be a new species not yet published), "provisional_name"
+  (a working epithet used in the trade/literature), "unresolved" (identity unclear), or "described".
+- working_name_origin: who coined the working name and when, and what it refers to (a person, place, trait).
+- trade_names: other names the same plant circulates under (e.g. "BVEP", "Black Velvet Eastern Panama").
+- origin_region: the region/country it is reported from (as specific as sources allow).
+- introduced_by: collector or nursery credited with bringing it into cultivation, with year if known.
+- closest_species: the described species it is compared to or thought closest to (write as "aff. X" if sources say so).
+- Where sources DISAGREE, say so briefly in the description and lower confidence.
+
+=== OUTPUT FORMAT ===
+Return ONLY valid JSON (no markdown):
+{
+  "origins": [
+    {
+      "species_status": "undescribed | provisional_name | unresolved | described",
+      "working_name_origin": "string or null",
+      "trade_names": ["string"],
+      "origin_region": "string or null",
+      "introduced_by": "string or null",
+      "first_seen_year": null,
+      "closest_species": "string or null",
+      "first_description": "Author, journal, year — ONLY if species_status is described, else null",
+      "discoverer_or_breeder": "describing author ONLY if described, else null",
+      "discovery_year": null,
+      "native_region": "same as origin_region",
+      "description_jp": "日本語 150-300文字。冒頭で「正式な学名記載はまだない（未記載種／暫定名）」など名前の状態を一言で示し、次に産地・導入の経緯・名前の由来・流通名・近縁種を、出典の確からしさに応じて述べる。「由来は不明」で始めない。学名・人名・地名は英語アルファベットのまま。サイズの記述はしない。",
+      "description_en": "English 100-220 words, same content.",
+      "source_tier": "A | B | C | D — the best source you actually read",
+      "source_name": "Name of the best source",
+      "source_url": "Its URL (a real page you read) or empty string",
+      "confidence": 0.0
+    }
+  ]
+}
+- Return exactly 1 origin. confidence = how well the sources agree (0.0-1.0).
+- NEVER invent an author citation, a protologue, a collector number or a type locality for an undescribed plant.
+- 日本語は自然で簡潔に。「信頼できる情報源が見つからなかったため…」のような前置きは書かない。`;
 }
 
 // ============================================================
@@ -2250,7 +2363,9 @@ serve(async (req: Request) => {
         console.log(`[Research] AI research for: ${cultivar_name} (type: ${plantType})`);
 
         let externalData: ExternalData = { wikidata: null, papers: [] };
-        const researchPrompt = buildCultivarResearchPrompt(cultivar_name, effectiveGenus, plantType) + SEARCH_INSTRUCTIONS;
+        const researchPrompt = (plantType === "species"
+          ? buildUndescribedSpeciesPrompt(cultivar_name, effectiveGenus)
+          : buildCultivarResearchPrompt(cultivar_name, effectiveGenus, plantType)) + SEARCH_INSTRUCTIONS;
 
         let researchResult: any = null;
         let fallbackGrounding: { url: string; label: string }[] = [];
@@ -2309,11 +2424,16 @@ serve(async (req: Request) => {
 
         if (researchResult?.origins?.length) {
           for (const origin of researchResult.origins) {
-            const tier = origin.source_tier || "D";
-            const aiConf = Math.max(0, Math.min(1, origin.confidence || 0));
+            // Tier is earned by the pages actually cited; the model's own tier can only lower it to what it read.
+            const evidence = tierFromUrls([origin.source_url, ...fallbackGrounding.map((g) => g.url)]);
+            let tier = evidence.distinctHosts > 0 ? bestTier(evidence.tier, origin.source_tier) : (origin.source_tier || "D");
+            if (evidence.distinctHosts === 0 && TIER_RANK[tier] > TIER_RANK.C) tier = "C"; // no page read → cannot claim A/B
+            let aiConf = Math.max(0, Math.min(1, origin.confidence || 0));
+            if (evidence.distinctHosts >= 3) aiConf = Math.max(aiConf, 0.6); // several independent pages agree
             const tierInfo = TIER_CONFIG[tier] || TIER_CONFIG.D;
             let trust = Math.round(tierInfo.base_min + (tierInfo.base_max - tierInfo.base_min) * aiConf);
             trust = Math.max(tierInfo.base_min, Math.min(tierInfo.base_max, trust));
+            console.log(`[Research] tier ${tier} (model ${origin.source_tier || "-"}, evidence ${evidence.tier} from ${evidence.distinctHosts} hosts) → trust ${trust}`);
 
             let bodyJp = origin.description_jp || "";
             const bodyEn = origin.description_en || "";
@@ -2335,12 +2455,20 @@ serve(async (req: Request) => {
             const structuredEntry: any = { origin_type: plantType, notes: plantType === "species" ? "" : bodyJp, citation_links: citLinks };
 
             if (plantType === "species") {
-              structuredEntry.author_name = origin.discoverer_or_breeder || "不明";
-              structuredEntry.publication_year = origin.discovery_year || null;
-              structuredEntry.collector = "不明";
+              const st = origin.species_status || (origin.first_description ? "described" : "unresolved");
+              structuredEntry.species_status = st;
+              structuredEntry.author_name = st === "described" ? (origin.discoverer_or_breeder || null) : null;
+              structuredEntry.publication_year = st === "described" ? (origin.discovery_year || null) : null;
+              structuredEntry.collector = null;
               structuredEntry.collection_year = null;
-              structuredEntry.type_locality = origin.native_region || "不明";
-              structuredEntry.known_habitats = origin.native_region || "不明";
+              structuredEntry.type_locality = st === "described" ? (origin.native_region || null) : null;
+              structuredEntry.known_habitats = origin.origin_region || origin.native_region || null;
+              structuredEntry.origin_region = origin.origin_region || origin.native_region || null;
+              structuredEntry.working_name_origin = origin.working_name_origin || null;
+              structuredEntry.trade_names = Array.isArray(origin.trade_names) ? origin.trade_names.filter((x: any) => typeof x === "string" && x.trim()) : [];
+              structuredEntry.introduced_by = origin.introduced_by || null;
+              structuredEntry.first_seen_year = origin.first_seen_year || null;
+              structuredEntry.closest_species = origin.closest_species || null;
             } else if (plantType === "clone") {
               structuredEntry.namer = origin.discoverer_or_breeder || "不明";
               structuredEntry.naming_year = origin.discovery_year || null;

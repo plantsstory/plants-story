@@ -1403,5 +1403,41 @@
   "colophon_k4": {
     "jp": "読み方",
     "en": "How to read"
+  },
+  "spec_status": {
+    "jp": "名前の状態",
+    "en": "Name status"
+  },
+  "status_undescribed": {
+    "jp": "未記載種（正式な学名記載なし）",
+    "en": "Undescribed species (not yet published)"
+  },
+  "status_provisional": {
+    "jp": "暫定名（流通・文献上の仮の名前）",
+    "en": "Provisional (working) name"
+  },
+  "status_unresolved": {
+    "jp": "未解決（同定・名前が確定していない）",
+    "en": "Unresolved identity"
+  },
+  "spec_region": {
+    "jp": "報告されている産地",
+    "en": "Reported origin"
+  },
+  "spec_closest": {
+    "jp": "近縁とされる種",
+    "en": "Closest species"
+  },
+  "spec_introduced_by": {
+    "jp": "導入者",
+    "en": "Introduced by"
+  },
+  "spec_trade_names": {
+    "jp": "流通名",
+    "en": "Trade names"
+  },
+  "spec_working_name": {
+    "jp": "名前の由来",
+    "en": "Name origin"
   }
 }

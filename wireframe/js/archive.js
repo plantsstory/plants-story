@@ -115,6 +115,12 @@
     var dbp = entry._parents || [];
     d.parentA = clean(dbp[0]) || clean((d.formula && d.formula.parentA) || sf.parentA || s.parentA || s.parent_a);
     d.parentB = clean(dbp[1]) || clean((d.formula && d.formula.parentB) || sf.parentB || s.parentB || s.parent_b);
+    d.speciesStatus = clean(s.species_status);
+    d.originRegion = clean(s.origin_region);
+    d.workingNameOrigin = clean(s.working_name_origin);
+    d.tradeNames = Array.isArray(s.trade_names) ? s.trade_names.map(clean).filter(Boolean) : [];
+    d.introducedBy = clean(s.introduced_by);
+    d.closestSpecies = clean(s.closest_species);
     d.qualifier = entry._qualifier || null;
     d.aliases = entry._aliases || [];
     d.tags = entry._tags || [];
@@ -430,7 +436,16 @@
     var el = document.getElementById('specimen-label');
     if (!el) return;
     var cells = '';
-    if (d.type === 'species') {
+    var undescribed = d.type === 'species' && d.speciesStatus && d.speciesStatus !== 'described';
+    if (undescribed) {
+      var stKey = { undescribed: 'status_undescribed', provisional_name: 'status_provisional', unresolved: 'status_unresolved' }[d.speciesStatus] || 'status_unresolved';
+      cells += cell('spec_status', esc(T(stKey)));
+      cells += cell('spec_region', esc(d.originRegion || d.habitat));
+      cells += cell('spec_closest', esc(d.closestSpecies));
+      cells += cell('spec_introduced_by', linkPeople(d.introducedBy));
+      cells += cell('spec_trade_names', esc(d.tradeNames.join(' / ')));
+      cells += cell('spec_working_name', esc(d.workingNameOrigin));
+    } else if (d.type === 'species') {
       cells += cell('spec_author', linkPeople(d.author));
       cells += cell('spec_pub_year', yearSpan(d.pubYear));
       cells += cell('spec_collector', linkPeople(d.collector));
