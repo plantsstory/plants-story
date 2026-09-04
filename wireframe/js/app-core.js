@@ -2161,7 +2161,7 @@ if (false) {
           p_cultivar_name: fullName,
           p_type: meta.type || 'Hybrid',
           p_origins: originsData,
-          p_ai_status: meta.type === 'species' ? 'completed' : null,
+          p_ai_status: meta.type === 'clone' ? null : 'completed',
           p_created_ip: userIp,
           p_is_private: !!meta.is_private
         });
@@ -2181,10 +2181,11 @@ if (false) {
         try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
         saved[fullName] = { entry: entry, meta: meta };
         safeLSSet(STORAGE_KEY, JSON.stringify(saved));
-        // Trigger AI research for non-species types only
-        // Species uses the AI auto-fill button before registration instead
-        var isSpecies = meta.type === 'species';
-        if (!isSpecies) {
+        // AI research runs on registration for CLONES only (owner decision 2026-09-05).
+        // Species uses the AI auto-fill button before registration; hybrids can be
+        // researched later through an admin-approved request; seedlings never are.
+        var autoResearch = meta.type === 'clone';
+        if (autoResearch) {
           var insertedId = rpcResult && rpcResult.id;
           if (insertedId) {
             var manualOrigins = (entry.origins || []).filter(function(o) {

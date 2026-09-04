@@ -1642,6 +1642,16 @@ serve(async (req: Request) => {
       );
     }
 
+    // ── Seedlings are personal records: never spend an AI run on them ──
+    // (owner decision 2026-09-05: research is for species and clones; hybrids
+    //  only through an admin-approved re-research request.)
+    if ((type || "").toLowerCase() === "seedling") {
+      return new Response(
+        JSON.stringify({ error: "実生は AI 調査の対象外です" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // ── Rate limiting ──
     const serviceClient = createClient(
       Deno.env.get("SUPABASE_URL")!,

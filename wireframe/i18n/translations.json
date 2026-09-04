@@ -549,8 +549,8 @@
     "en": "Article 4: AI-Generated Content"
   },
   "terms_4_body": {
-    "jp": "ユーザーが由来情報を入力しなかった場合、AIが公開情報に基づいて由来情報を自動生成する場合があります。AI生成コンテンツには「AI生成待ち」バッジが表示されます。運営チームはAI生成コンテンツの正確性を保証しません。重要な判断に利用する場合は、独自に情報を検証してください。",
-    "en": "When users do not provide origin information, AI may automatically generate it based on publicly available sources. AI-generated content is labeled with an \"AI Pending\" badge. The team does not guarantee the accuracy of AI-generated content. Please verify information independently before relying on it for important decisions."
+    "jp": "原種およびクローンについては、AIが公開情報および学名データベースに基づいて由来情報を自動生成・検証する場合があります。ハイブリッドは投稿内容をそのまま掲載し、AI調査は運営が承認したリクエストに対してのみ実行します。実生（My Seedlings）にAI調査は行いません。AIが関与した記録には「AI」の表示と出典・信頼度を併記します。運営チームはAI生成コンテンツの正確性を保証しません。重要な判断に利用する場合は、独自に情報を検証してください。",
+    "en": "For species and clones, AI may draft or verify origin records from public information and botanical name databases. Hybrid entries are published as submitted; AI research runs only on requests approved by the operator. No AI research is performed on seedling records. Records involving AI are labelled and shown with their sources and trust score. The operator does not guarantee the accuracy of AI-generated content; verify independently before relying on it."
   },
   "terms_5_title": {
     "jp": "第5条 画像の投稿と著作権",

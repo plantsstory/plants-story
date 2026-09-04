@@ -1002,9 +1002,12 @@ document.addEventListener('click', function(e) {
       if (type === 'species') setSubcategory('species');
     }
     if (originAiHint) {
-      if (type === 'species') { originAiHint.textContent = 'AIが自動で由来を調査します'; originAiHint.classList.remove('d-none'); }
-      else if (type === 'seedling') { originAiHint.classList.add('d-none'); }
-      else { originAiHint.textContent = '由来を記入するとAIが内容を検証し、信頼度スコアを算出します'; originAiHint.classList.remove('d-none'); }
+      // AI research covers species (auto-fill button) and clones (on registration).
+      // Hybrids are researched only on request; seedlings never are.
+      if (type === 'species') { originAiHint.textContent = '「AI自動記入」で学名データベースから記載者・発表年・産地を取得できます'; originAiHint.classList.remove('d-none'); }
+      else if (type === 'clone') { originAiHint.textContent = '由来を記入すると、投稿後にAIが内容を検証し信頼度を算出します'; originAiHint.classList.remove('d-none'); }
+      else if (type === 'hybrid') { originAiHint.textContent = 'ハイブリッドはご記入いただいた内容をそのまま掲載します。AI調査が必要な場合は、投稿後に品種ページから「AI再調査をリクエスト」してください'; originAiHint.classList.remove('d-none'); }
+      else { originAiHint.classList.add('d-none'); }
     }
     // Show/hide parent photos section for seedlings
     var parentPhotosSection = document.getElementById('parent-photos-section');

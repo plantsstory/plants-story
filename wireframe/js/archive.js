@@ -924,10 +924,11 @@
     }
     // Called after the detail page renders: show the button only for entries that already had an AI run
     window.refreshRerunButton = function (cData) {
+      // Seedlings are personal records and never researched; every other type
+      // can be requested (hybrids are no longer researched automatically).
       var id = cultivarId();
       var isSeedling = cData && cData._type === 'seedling';
-      var hadAi = cData && (cData.origins || []).some(function (o) { return o && o.author && o.author.isAI; });
-      if (!id || isSeedling || !hadAi || !sb()) { btn.classList.add('d-none'); status.classList.add('d-none'); return; }
+      if (!id || isSeedling || !sb()) { btn.classList.add('d-none'); status.classList.add('d-none'); return; }
       sb().from('research_requests').select('status').eq('cultivar_id', id).in('status', ['pending', 'approved']).limit(1)
         .then(function (res) { setStatus(res.data && res.data[0] ? res.data[0].status : 'none'); })
         .catch(function () { setStatus('none'); });
