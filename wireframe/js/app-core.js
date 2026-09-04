@@ -534,6 +534,7 @@ function buildPath(page, options) {
     return _basePath + g + '/' + encodeURIComponent(rest);
   }
   if (page === 'search' && options.q) return _basePath + 'search?q=' + encodeURIComponent(options.q);
+  if (page === 'people') return _basePath + 'people' + (options.person ? '/' + encodeURIComponent(options.person) : '');
   if (simplePages.indexOf(page) !== -1) return _basePath + page;
   return _basePath;
 }
@@ -579,6 +580,11 @@ function parseRoute() {
     return { page: 'genus', genus: first };
   }
 
+  // People index / person page
+  if (first === 'people') {
+    return segments[1] ? { page: 'people', person: segments[1] } : { page: 'people' };
+  }
+
   // Check simple pages
   if (first === 'search') {
     var searchParams = new URLSearchParams(location.search);
@@ -600,6 +606,7 @@ function navigateTo(page, options, pushHistory) {
     window.exitEditMode();
   }
   if (page === 'favorites') renderFavoritesPage();
+  if (page === 'people' && typeof window.renderPeoplePage === 'function') window.renderPeoplePage(options.person || '');
   if (page === 'genus' && options.genus) showGenus(options.genus);
   if (page === 'cultivar' && options.cultivar && !options._skipUpdate) {
     // Find the cultivar row to pass badge info (used by popstate)
@@ -647,6 +654,7 @@ function navigateTo(page, options, pushHistory) {
       contact: 'お問い合わせ - ' + _defaultTitle,
       search: '検索結果 - ' + _defaultTitle,
       mypost: '投稿履歴 - ' + _defaultTitle,
+      people: '人物索引 - ' + _defaultTitle,
       'profile-edit': 'プロフィール編集 - ' + _defaultTitle
     };
     var pageDescriptions = {
@@ -660,7 +668,8 @@ function navigateTo(page, options, pushHistory) {
       tokushoho: 'Aroid Originsの特定商取引法に基づく表記',
       contact: 'Aroid Originsへのお問い合わせ',
       search: 'アロイド植物の品種名で検索 - Anthurium, Monstera, Philodendronなど',
-      mypost: 'あなたが投稿した品種の履歴'
+      mypost: 'あなたが投稿した品種の履歴',
+      people: 'アロイド品種の記載者・採集者・作出者の索引。人物ごとに関連する品種をたどれます'
     };
     if (page === 'genus' && options.genus) {
       var gName = options.genus.charAt(0).toUpperCase() + options.genus.slice(1);
@@ -709,7 +718,7 @@ function navigateTo(page, options, pushHistory) {
     history.replaceState(currentState, '');
 
     var routePath = buildPath(page, options);
-    history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar, userId: options.userId, username: options.username, q: options.q }, '', routePath);
+    history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar, userId: options.userId, username: options.username, q: options.q, person: options.person }, '', routePath);
     // Send GA4 page view for SPA navigation
     if (typeof gtag === 'function') {
       gtag('event', 'page_view', { page_location: location.href, page_title: document.title });
@@ -758,7 +767,7 @@ function handleInitialRoute() {
     navigateTo(state.page, state, false);
   }
   // Record initial state so back button works from first navigation
-  history.replaceState({ page: state.page, genus: state.genus, cultivar: state.cultivar, userId: state.userId, q: state.q }, '', buildPath(state.page, state));
+  history.replaceState({ page: state.page, genus: state.genus, cultivar: state.cultivar, userId: state.userId, q: state.q, person: state.person }, '', buildPath(state.page, state));
 }
 // Wait for genera to load before routing (genera create the DOM targets)
 if (window._generaLoaded) {
@@ -2603,7 +2612,7 @@ if (false) {
     // Then load from Supabase (async, authoritative source)
     // Fetch only needed columns to reduce payload size
     if (supabase) {
-      supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id').then(function(res) {
+      supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, parent_a_text, parent_b_text, parent_a_id, parent_b_id').then(function(res) {
         if (res.error || !res.data) return;
 
         // Collect unique user_ids to fetch profiles
@@ -2631,7 +2640,10 @@ if (false) {
             if (o && o._type === 'formula') { formula = o.formula; return false; }
             return true;
           });
-          var entry = { origins: origins, formula: formula };
+          var entry = { origins: origins, formula: formula,
+            _qualifier: row.species_qualifier || null, _aliases: row.aliases || null, _tags: row.tags || null,
+            _nameStatus: row.name_status || null, _locality: row.locality || null,
+            _parents: [row.parent_a_text || null, row.parent_b_text || null], _parentIds: [row.parent_a_id || null, row.parent_b_id || null] };
           var genus = row.genus || 'Anthurium';
           var meta = { genus: genus, type: row.type || 'Hybrid', created_at: row.created_at || '', user_id: row.user_id || null, id: row.id };
           addCultivarRow(row.cultivar_name, entry, meta);

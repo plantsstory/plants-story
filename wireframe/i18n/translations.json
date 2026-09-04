@@ -1295,5 +1295,85 @@
   "tab_seedlings": {
     "jp": "実生ノート",
     "en": "Seedling notes"
+  },
+  "nav_people": {
+    "jp": "人物",
+    "en": "People"
+  },
+  "people_title": {
+    "jp": "人物索引",
+    "en": "People"
+  },
+  "people_intro": {
+    "jp": "原種を記載・採集した植物学者と、交配種・クローンを作出・命名した人物の索引です。名前を開くと関連する品種が並びます。",
+    "en": "Botanists who described or collected the species, and the breeders and namers behind hybrids and clones. Open a name to see their entries."
+  },
+  "role_author": {
+    "jp": "記載者",
+    "en": "Author"
+  },
+  "role_collector": {
+    "jp": "採集者",
+    "en": "Collector"
+  },
+  "role_breeder": {
+    "jp": "作出者",
+    "en": "Breeder"
+  },
+  "role_namer": {
+    "jp": "命名者",
+    "en": "Namer"
+  },
+  "people_entries": {
+    "jp": "関連する品種",
+    "en": "Entries"
+  },
+  "people_none": {
+    "jp": "この人物の記録はまだありません",
+    "en": "No entries recorded for this person yet"
+  },
+  "people_years": {
+    "jp": "活動年",
+    "en": "Active"
+  },
+  "people_localities": {
+    "jp": "産地",
+    "en": "Localities"
+  },
+  "lineage_title": {
+    "jp": "系統",
+    "en": "Lineage"
+  },
+  "lineage_parents": {
+    "jp": "交配親",
+    "en": "Parents"
+  },
+  "lineage_children": {
+    "jp": "この品種を親に持つ品種",
+    "en": "Offspring"
+  },
+  "lineage_unknown": {
+    "jp": "不明",
+    "en": "unknown"
+  },
+  "spec_aliases": {
+    "jp": "別名・旧綴り",
+    "en": "Also known as"
+  },
+  "spec_form_locality": {
+    "jp": "産地",
+    "en": "Locality"
+  },
+  "name_status_disputed": {
+    "jp": "親・作出者に異説あり",
+    "en": "Parentage or origin disputed"
+  },
+  "name_status_trade": {
+    "jp": "流通名",
+    "en": "Trade name"
+  },
+  "name_status_informal": {
+    "jp": "非公式名",
+    "en": "Informal name"
   }
 }

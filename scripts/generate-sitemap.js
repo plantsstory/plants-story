@@ -3,6 +3,7 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const people = require('./lib/people');
 
 const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
@@ -33,7 +34,7 @@ async function main() {
   }
   const visibleGenusNames = new Set(genera.map(g => g.name));
   // Fetch cultivars (non-seedling only for public sitemap)
-  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,updated_at&order=genus,cultivar_name');
+  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,updated_at,origins&order=genus,cultivar_name');
   const cultivars = allCultivars.filter(c => visibleGenusNames.has(c.genus || 'Anthurium'));
 
   const SITE = 'https://plantsstory.com';
@@ -73,6 +74,12 @@ async function main() {
     const lastmod = c.updated_at ? new Date(c.updated_at).toISOString().split('T')[0] : today;
 
     xml += `  <url>\n    <loc>${SITE}/${genusSlug}/${encodedRest}/</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+  }
+
+  // People pages
+  xml += `  <url>\n    <loc>${SITE}/people/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+  for (const p of people.peopleIndex(cultivars.filter(c => !c.cultivar_name.includes('[Seedling]')))) {
+    xml += `  <url>\n    <loc>${SITE}/people/${encodeURIComponent(p.slug)}/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
   }
 
   xml += '</urlset>\n';

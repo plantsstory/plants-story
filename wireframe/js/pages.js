@@ -1819,6 +1819,10 @@ document.addEventListener('click', function(e) {
     if (page === 'genus' && genus) {
       navOptions.genus = genus.toLowerCase();
     }
+    if (page === 'people') {
+      var personSlug = navEl.getAttribute('data-person');
+      if (personSlug) navOptions.person = personSlug;
+    }
 
     if (page === 'profile') {
       var userid = navEl.getAttribute('data-userid');

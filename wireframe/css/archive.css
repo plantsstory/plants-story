@@ -575,3 +575,43 @@ a { color: inherit; text-underline-offset: 0.18em; text-decoration-thickness: 1p
 .mono:lang(ja) { font-size: 0.76rem; letter-spacing: 0.04em; }
 /* seedling notes ledger keeps its own spacing */
 #seedling-preview-grid .ledger-table { margin-bottom: var(--space-sm); }
+
+/* ---------- people pages ---------- */
+.people__intro { color: var(--color-mid); line-height: 1.9; max-width: 64ch; margin-bottom: var(--space-xl); }
+.people__grid { display: grid; grid-template-columns: 1fr; gap: var(--space-xl); }
+@media (min-width: 700px) { .people__grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-2xl); } }
+.people__group h2 { border-bottom: 1px solid var(--color-ink); padding-bottom: 4px; margin: 0 0 var(--space-sm); font-weight: 500; }
+.people__list { list-style: none; margin: 0; padding: 0; }
+.people__list li { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-md); padding: 8px 0; border-bottom: 1px dotted var(--color-rule); }
+.people__list a { font-family: var(--font-display); font-weight: 600; font-size: 1.15rem; text-decoration: none; }
+.people__list a:hover { text-decoration: underline; }
+.people__list .mono { white-space: nowrap; font-size: 0.64rem; }
+.people__roles { margin: calc(-1 * var(--space-md)) 0 var(--space-lg); }
+.people__facts { grid-template-columns: repeat(3, auto); justify-content: start; column-gap: var(--space-2xl); margin-bottom: var(--space-2xl); }
+.people__facts-small { font-size: 1rem !important; font-family: var(--font-primary) !important; padding-top: 6px; }
+#page-people .section-title { font-size: 1.25rem; }
+.specimen__v a { text-decoration: none; border-bottom: 1px solid var(--color-rule-strong); }
+.specimen__v a:hover { border-color: var(--color-ink); }
+.specimen__note { margin: calc(-1 * var(--space-sm)) 0 var(--space-lg); color: var(--color-accent-warm); }
+.index__group h3 a { color: inherit; text-decoration: none; }
+.index__group h3 a:hover { color: var(--color-ink); text-decoration: underline; }
+
+/* ---------- lineage tree ---------- */
+.lineage { margin-bottom: var(--space-2xl); }
+.lineage__title { margin-bottom: var(--space-md); }
+.lineage__row { display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch; gap: var(--space-sm); }
+.lineage__node { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 150px; max-width: 260px; padding: 10px 14px; border: 1px solid var(--color-rule-strong); border-radius: var(--radius-sm); background: var(--color-paper-2); text-decoration: none; color: var(--color-ink); }
+a.lineage__node:hover { border-color: var(--color-ink); }
+.lineage__node--self { border: 1.5px solid var(--color-ink); background: var(--color-paper); }
+.lineage__node--text { border-style: dashed; color: var(--color-mid); }
+.lineage__name { font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; line-height: 1.25; }
+.lineage__meta { font-size: 0.62rem; margin-top: 3px; }
+.lineage__sub { font-size: 0.72rem; color: var(--color-mid); margin-top: 4px; line-height: 1.4; }
+.lineage__x { align-self: center; font-family: var(--font-display); font-size: 1.4rem; color: var(--color-mid); padding: 0 4px; }
+.lineage__joint { width: 1px; height: 22px; margin: 0 auto; background: var(--color-ink); position: relative; }
+.lineage__joint--down::after { content: ""; position: absolute; left: -3px; bottom: -1px; width: 7px; height: 7px; border-right: 1px solid var(--color-ink); border-bottom: 1px solid var(--color-ink); transform: rotate(45deg); }
+.lineage__row--children .lineage__node { min-width: 130px; }
+@media (max-width: 480px) { .lineage__node { min-width: 0; flex: 1 1 40%; padding: 8px 10px; } .lineage__name { font-size: 1rem; } }
+
+/* self node: parents already drawn above */
+.lineage__row--parents + .lineage__joint + .lineage__row .lineage__node--self .lineage__sub { display: none; }

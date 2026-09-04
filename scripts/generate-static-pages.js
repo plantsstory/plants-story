@@ -12,6 +12,7 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const people = require('./lib/people');
 
 const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
@@ -242,8 +243,60 @@ async function main() {
     });
 
     const dir = path.join(WIREFRAME, slug, restDir);
-    fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
+      written++;
+    } catch (e) {
+      // Windows refuses names with quotes; CI (Linux) writes them fine
+      console.warn('skip ' + c.cultivar_name + ': ' + e.code);
+      skipped++;
+    }
+  }
+
+  // ---- People pages (/people/ and /people/<slug>/) ----
+  const ROLE_JP = { author: '記載者', collector: '採集者', breeder: '作出者', namer: '命名者' };
+  const personList = people.peopleIndex(cultivars);
+  const peopleUrl = SITE + '/people/';
+  const peopleLinks = personList.map(p => '<li><a href="' + peopleUrl + encodeURIComponent(p.slug) + '/">' + escAttr(p.key) + '</a></li>').join('');
+  let html = buildStub(template, {
+    title: '人物索引 — 記載者・採集者・作出者 | Aroid Origins',
+    description: 'アロイド品種の原種を記載・採集した植物学者と、交配種・クローンを作出・命名した人物の索引。人物ごとに関連する品種をたどれます。',
+    url: peopleUrl,
+    ogType: 'website',
+    jsonLd: [{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': [
+      { '@type': 'ListItem', 'position': 1, 'name': 'Aroid Origins', 'item': SITE + '/' },
+      { '@type': 'ListItem', 'position': 2, 'name': '人物索引', 'item': peopleUrl } ] }]
+  });
+  html = html.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="people"><ul>' + peopleLinks + '</ul></nav>');
+  fs.mkdirSync(path.join(WIREFRAME, 'people'), { recursive: true });
+  fs.writeFileSync(path.join(WIREFRAME, 'people', 'index.html'), html, 'utf8');
+  written++;
+  for (const p of personList) {
+    const dir = safeDirName(p.slug);
+    if (!dir) { skipped++; continue; }
+    const url = peopleUrl + encodeURIComponent(p.slug) + '/';
+    const roles = Object.keys(ROLE_JP).filter(r => p.roles[r]).map(r => ROLE_JP[r] + ' ' + p.roles[r] + '種').join('・');
+    const names = p.rows.map(r => r.cultivar_name);
+    const links = p.rows.map(r => {
+      const g = r.genus || 'Anthurium';
+      const rest = String(r.cultivar_name).startsWith(g + ' ') ? String(r.cultivar_name).slice(g.length + 1) : String(r.cultivar_name);
+      return '<li><a href="' + SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(rest) + '/">' + escAttr(r.cultivar_name) + '</a></li>';
+    }).join('');
+    let ph = buildStub(template, {
+      title: p.key + ' — 関連する品種 ' + p.rows.length + '件 | Aroid Origins',
+      description: p.key + '（' + roles + '）に関連するアロイド品種: ' + names.slice(0, 6).join('、') + (names.length > 6 ? ' ほか' : '') + '。記載者・採集者・作出者から品種の由来をたどる索引。',
+      url: url,
+      ogType: 'profile',
+      jsonLd: [{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': [
+        { '@type': 'ListItem', 'position': 1, 'name': 'Aroid Origins', 'item': SITE + '/' },
+        { '@type': 'ListItem', 'position': 2, 'name': '人物索引', 'item': peopleUrl },
+        { '@type': 'ListItem', 'position': 3, 'name': p.key, 'item': url } ] },
+        { '@context': 'https://schema.org', '@type': 'Person', 'name': p.key, 'url': url, 'description': roles }]
+    });
+    ph = ph.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="' + escAttr(p.key) + '"><ul>' + links + '</ul></nav>');
+    fs.mkdirSync(path.join(WIREFRAME, 'people', dir), { recursive: true });
+    fs.writeFileSync(path.join(WIREFRAME, 'people', dir, 'index.html'), ph, 'utf8');
     written++;
   }
 

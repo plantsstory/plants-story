@@ -112,8 +112,14 @@
     d.text = clean(s.notes) || clean(o && o.body) || '';
     d.textEn = clean(o && o.body_en) || d.text;
     var sf = (s.formula && typeof s.formula === 'object') ? s.formula : {};
-    d.parentA = clean((d.formula && d.formula.parentA) || sf.parentA || s.parentA || s.parent_a);
-    d.parentB = clean((d.formula && d.formula.parentB) || sf.parentB || s.parentB || s.parent_b);
+    var dbp = entry._parents || [];
+    d.parentA = clean(dbp[0]) || clean((d.formula && d.formula.parentA) || sf.parentA || s.parentA || s.parent_a);
+    d.parentB = clean(dbp[1]) || clean((d.formula && d.formula.parentB) || sf.parentB || s.parentB || s.parent_b);
+    d.qualifier = entry._qualifier || null;
+    d.aliases = entry._aliases || [];
+    d.tags = entry._tags || [];
+    d.nameStatus = entry._nameStatus || null;
+    d.formLocality = clean(entry._locality);
     d.creator = clean(d.formula && d.formula.creatorName);
     d.href = base + genus.toLowerCase() + '/' + encodeURIComponent(epithet);
     return d;
@@ -143,6 +149,39 @@
       splitPeople(v).forEach(function (p) { if (out.indexOf(p) === -1) out.push(p); });
     });
     return out;
+  }
+  // [{key, role}] — role order matters for the people index
+  function peopleRolesOf(d) {
+    var out = [];
+    function push(v, role) { splitPeople(v).forEach(function (p) { if (!out.some(function (x) { return x.key === p; })) out.push({ key: p, role: role }); }); }
+    push(d.author, 'author'); push(d.collector, 'collector'); push(d.breeder, 'breeder'); push(d.namer, 'namer'); push(d.creator, 'breeder');
+    return out;
+  }
+  function personSlug(name) {
+    return String(name).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '');
+  }
+  function peopleIndex(all) {
+    var map = {};
+    all.forEach(function (d) {
+      peopleRolesOf(d).forEach(function (pr) {
+        var p = map[pr.key] || (map[pr.key] = { key: pr.key, slug: personSlug(pr.key), roles: {}, entries: [] });
+        p.roles[pr.role] = (p.roles[pr.role] || 0) + 1;
+        if (p.entries.indexOf(d) === -1) p.entries.push(d);
+      });
+    });
+    return Object.keys(map).map(function (k) { return map[k]; })
+      .sort(function (a, b) { return b.entries.length - a.entries.length || a.key.localeCompare(b.key); });
+  }
+  // Wrap each person in an author string with a link to their page ("Croat & O.Ortiz" -> two links)
+  function linkPeople(raw) {
+    raw = clean(raw);
+    if (!raw) return '';
+    return raw.split(/(\s*(?:&|,|;|\/|\bex\b|\bet\b)\s*)/).map(function (part, i) {
+      if (i % 2 === 1) return esc(part);
+      var key = personKey(part.replace(/\([^)]*\)/g, ' ').trim());
+      if (key.length < 2) return esc(part);
+      return '<a href="' + esc(base + 'people/' + encodeURIComponent(personSlug(key))) + '" data-nav="people" data-person="' + esc(personSlug(key)) + '">' + esc(part) + '</a>';
+    }).join('');
   }
   function collectAll() {
     var vis = visibleSlugs();
@@ -264,9 +303,10 @@
     return Object.keys(map).map(function (k) { return { key: k, items: map[k] }; })
       .sort(function (a, b) { return b.items.length - a.items.length || a.key.localeCompare(b.key); });
   }
-  function indexGroupHtml(title, groups, limit) {
+  function indexGroupHtml(title, groups, limit, titleHref) {
     if (!groups.length) return '';
-    var html = '<div class="index__group"><h3>' + esc(title) + '</h3><ul class="index__list">';
+    var head = titleHref ? '<a href="' + esc(titleHref) + '" data-nav="people">' + esc(title) + ' →</a>' : esc(title);
+    var html = '<div class="index__group"><h3>' + head + '</h3><ul class="index__list">';
     groups.slice(0, limit || 999).forEach(function (g) {
       html += '<li class="index__item"><button type="button" class="index__toggle" aria-expanded="false"><span class="index__name">' + esc(g.key) + '</span><span class="index__count">' + g.items.length + '</span></button><ul class="index__sub">';
       g.items.slice().sort(function (a, b) { return (a.year || 9999) - (b.year || 9999) || a.displayName.localeCompare(b.displayName); }).forEach(function (d) {
@@ -283,7 +323,7 @@
     var byCountry = groupBy(all.filter(function (d) { return d.type === 'species'; }), function (d) { return d.country; });
     var byPerson = groupBy(all, peopleOf);
     var byType = groupBy(all, function (d) { var l = TYPE_LABEL[d.type]; return l ? (lang() === 'en' ? l[1] : l[0]) : ''; });
-    el.innerHTML = indexGroupHtml(T('index_localities'), byCountry) + indexGroupHtml(T('index_people'), byPerson, 12) + indexGroupHtml(T('index_types'), byType);
+    el.innerHTML = indexGroupHtml(T('index_localities'), byCountry) + indexGroupHtml(T('index_people'), byPerson, 12, base + 'people/') + indexGroupHtml(T('index_types'), byType);
   }
 
   function renderTimeline(all) {
@@ -391,19 +431,22 @@
     if (!el) return;
     var cells = '';
     if (d.type === 'species') {
-      cells += cell('spec_author', esc(d.author));
+      cells += cell('spec_author', linkPeople(d.author));
       cells += cell('spec_pub_year', yearSpan(d.pubYear));
-      cells += cell('spec_collector', esc(d.collector));
+      cells += cell('spec_collector', linkPeople(d.collector));
       cells += cell('spec_col_year', yearSpan(d.colYear));
       cells += cell('spec_locality', esc(d.locality));
+      if (!d.locality && d.formLocality) cells += cell('spec_form_locality', esc(d.formLocality));
       cells += cell('spec_habitat', esc(d.habitat));
     } else {
-      if (d.type === 'clone' && !d.breeder && d.namer) cells += cell('spec_namer', esc(d.namer));
-      else cells += cell('spec_breeder', esc(d.breeder || d.namer || d.creator));
+      if (d.type === 'clone' && !d.breeder && d.namer) cells += cell('spec_namer', linkPeople(d.namer));
+      else cells += cell('spec_breeder', linkPeople(d.breeder || d.namer || d.creator));
       cells += cell(d.type === 'seedling' ? 'spec_sowing' : 'spec_year', d.type === 'seedling' ? esc(d.sowing) : yearSpan(d.year));
-      if (d.parentA || d.parentB) cells += cell('spec_parents', parentHtml(all, d.parentA) + ' × ' + parentHtml(all, d.parentB));
+      if (d.parentA || d.parentB) cells += cell('spec_parents', parentHtml(all, d.parentA || T('lineage_unknown')) + ' × ' + parentHtml(all, d.parentB || T('lineage_unknown')));
     }
-    el.innerHTML = cells ? '<div class="specimen">' + cells + '</div>' : '';
+    if (d.aliases && d.aliases.length) cells += cell('spec_aliases', esc(d.aliases.join(' / ')));
+    var note = d.nameStatus === 'disputed' ? T('name_status_disputed') : d.nameStatus === 'trade' ? T('name_status_trade') : d.nameStatus === 'informal' ? T('name_status_informal') : '';
+    el.innerHTML = (cells ? '<div class="specimen">' + cells + '</div>' : '') + (note ? '<p class="specimen__note mono">' + esc(note) + '</p>' : '');
   }
   function normParent(p) { return clean(p).replace(/^['"‘’“”]+|['"‘’“”]+$/g, '').toLowerCase().replace(/^(anthurium|monstera|philodendron)\s+/, ''); }
   function relatedGroupHtml(titleKey, list) {
@@ -449,9 +492,8 @@
     var prev = idx > 0 ? group[idx - 1] : null;
     var next = idx >= 0 && idx < group.length - 1 ? group[idx + 1] : null;
 
-    var html = '<div class="related__grid">'
-      + relatedGroupHtml('related_parents', parents)
-      + relatedGroupHtml('related_children', children)
+    var html = lineageHtml(d, all, children)
+      + '<div class="related__grid">'
       + relatedGroupHtml('related_siblings', siblings)
       + relatedGroupHtml('related_same_locality', sameCountry)
       + relatedGroupHtml('related_same_person', samePerson)
@@ -466,6 +508,120 @@
     el.innerHTML = any ? html : '';
     section.classList.toggle('d-none', !any);
   }
+  /* lineage tree: parents (with their own parents when known) → this plant → offspring */
+  function lineageNode(all, name, extraClass) {
+    var d = typeof name === 'object' ? name : findByEpithet(all, name);
+    var label = d ? d.displayName : clean(name);
+    if (!label) label = T('lineage_unknown');
+    var inner = '<span class="lineage__name">' + esc(label) + '</span>';
+    if (d) {
+      var meta = d.type === 'species' ? joinParts([d.pubYear, d.country]) : joinParts([TYPE_LABEL[d.type] ? (lang() === 'en' ? TYPE_LABEL[d.type][1] : TYPE_LABEL[d.type][0]) : '', d.year]);
+      if (meta) inner += '<span class="lineage__meta mono">' + esc(meta) + '</span>';
+      if (d.type !== 'species' && (d.parentA || d.parentB)) inner += '<span class="lineage__sub">' + esc(clean(d.parentA) || T('lineage_unknown')) + ' × ' + esc(clean(d.parentB) || T('lineage_unknown')) + '</span>';
+    }
+    var cls = 'lineage__node' + (extraClass ? ' ' + extraClass : '') + (d ? '' : ' lineage__node--text');
+    return d && !extraClass ? link(d, inner, cls) : '<div class="' + cls + '">' + inner + '</div>';
+  }
+  function lineageHtml(d, all, children) {
+    var hasParents = d.type !== 'species' && (d.parentA || d.parentB);
+    if (!hasParents && !children.length) return '';
+    var html = '<div class="lineage"><h3 class="lineage__title mono">' + esc(T('lineage_title')) + '</h3>';
+    if (hasParents) {
+      html += '<div class="lineage__row lineage__row--parents">' + lineageNode(all, d.parentA) + '<span class="lineage__x">×</span>' + lineageNode(all, d.parentB) + '</div>';
+      html += '<div class="lineage__joint lineage__joint--down"></div>';
+    }
+    html += '<div class="lineage__row">' + lineageNode(all, d, 'lineage__node--self') + '</div>';
+    if (children.length) {
+      html += '<div class="lineage__joint lineage__joint--down"></div>';
+      html += '<div class="lineage__row lineage__row--children">' + children.slice(0, 8).map(function (c) { return lineageNode(all, c); }).join('') + '</div>';
+    }
+    return html + '</div>';
+  }
+
+  /* ============================================================
+     PEOPLE: /people/ index and /people/<slug>/ pages
+     ============================================================ */
+  var ROLE_KEYS = { author: 'role_author', collector: 'role_collector', breeder: 'role_breeder', namer: 'role_namer' };
+  function rolesLine(p) {
+    return Object.keys(ROLE_KEYS).filter(function (r) { return p.roles[r]; })
+      .map(function (r) { return esc(T(ROLE_KEYS[r])) + ' ' + p.roles[r]; }).join(' · ');
+  }
+  function toLedgerItems(entries) {
+    var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
+    return entries.map(function (d) {
+      var e = store[d.fullName] || {};
+      var origins = (e.origins || []).slice();
+      if (e.formula) origins.push({ _type: 'formula', formula: e.formula });
+      return { id: d.id, cultivar_name: d.fullName, type: d.type, origins: origins };
+    });
+  }
+  var _peopleSlug = null;
+  function renderPeoplePageInner() {
+    var body = document.getElementById('people-body');
+    var title = document.getElementById('people-title');
+    var crumbName = document.getElementById('people-crumb-name');
+    var crumbSep = document.getElementById('people-crumb-sep');
+    if (!body) return;
+    var all = collectAll();
+    var people = peopleIndex(all);
+    var slug = _peopleSlug ? decodeURIComponent(_peopleSlug) : '';
+    if (!slug) {
+      if (title) title.textContent = T('people_title');
+      if (crumbName) crumbName.textContent = '';
+      if (crumbSep) crumbSep.classList.add('d-none');
+      var groups = {};
+      people.forEach(function (p) {
+        var main = Object.keys(ROLE_KEYS).sort(function (a, b) { return (p.roles[b] || 0) - (p.roles[a] || 0); })[0];
+        (groups[main] = groups[main] || []).push(p);
+      });
+      var html = '<p class="people__intro">' + esc(T('people_intro')) + '</p><div class="people__grid">';
+      ['author', 'collector', 'breeder', 'namer'].forEach(function (r) {
+        if (!groups[r]) return;
+        html += '<div class="people__group"><h2 class="mono">' + esc(T(ROLE_KEYS[r])) + '</h2><ul class="people__list">';
+        groups[r].forEach(function (p) {
+          html += '<li><a href="' + esc(base + 'people/' + encodeURIComponent(p.slug)) + '" data-nav="people" data-person="' + esc(p.slug) + '">' + esc(p.key) + '</a><span class="mono">' + rolesLine(p) + '</span></li>';
+        });
+        html += '</ul></div>';
+      });
+      body.innerHTML = html + '</div>';
+      return;
+    }
+    var p = people.filter(function (x) { return x.slug === slug; })[0];
+    if (!p) {
+      if (title) title.textContent = slug;
+      body.innerHTML = '<p class="empty-state">' + esc(T('people_none')) + '</p>';
+      return;
+    }
+    if (title) title.textContent = p.key;
+    if (crumbName) crumbName.textContent = p.key;
+    if (crumbSep) crumbSep.classList.remove('d-none');
+    var years = p.entries.map(function (d) { return d.year; }).filter(Boolean);
+    var countries = [];
+    p.entries.forEach(function (d) { if (d.country && countries.indexOf(d.country) === -1) countries.push(d.country); });
+    var facts = '<dl class="ledger people__facts">';
+    facts += '<div><dt>' + esc(T('people_entries')) + '</dt><dd>' + p.entries.length + '</dd></div>';
+    if (years.length) facts += '<div><dt>' + esc(T('people_years')) + '</dt><dd>' + Math.min.apply(null, years) + (years.length > 1 ? '–' + Math.max.apply(null, years) : '') + '</dd></div>';
+    if (countries.length) facts += '<div><dt>' + esc(T('people_localities')) + '</dt><dd class="people__facts-small">' + esc(countries.join(', ')) + '</dd></div>';
+    facts += '</dl>';
+    var html = '<p class="people__roles mono">' + rolesLine(p) + '</p>' + facts + '<h2 class="section-title"><span>' + esc(T('people_entries')) + '</span></h2><div id="people-ledger"></div>';
+    body.innerHTML = html;
+    var sorted = p.entries.slice().sort(function (a, b) { return (a.year || 9999) - (b.year || 9999) || a.displayName.localeCompare(b.displayName); });
+    var thumbs = {};
+    sorted.forEach(function (d) { var u = (typeof _thumbMap !== 'undefined') ? _thumbMap[d.displayName] : null; if (u) thumbs[d.displayName] = u; });
+    window.renderEntriesLedger(document.getElementById('people-ledger'), toLedgerItems(sorted), thumbs);
+    if (typeof updateMeta === 'function') {
+      setTimeout(function () {
+        updateMeta({ title: p.key + ' — ' + T('people_entries') + ' ' + p.entries.length + ' | Aroid Origins', description: p.key + ': ' + rolesLine(p).replace(/<[^>]+>/g, '') + (years.length ? ' (' + Math.min.apply(null, years) + '–' + Math.max.apply(null, years) + ')' : ''), path: 'people/' + encodeURIComponent(p.slug) });
+      }, 0);
+    }
+  }
+  window.renderPeoplePage = function (slug) {
+    _peopleSlug = slug || '';
+    var body = document.getElementById('people-body');
+    if (body && !window._dataFullyLoaded) body.innerHTML = '<div class="loading-text p-xl">…</div>';
+    waitForData(function () { if (document.getElementById('page-people').classList.contains('active')) renderPeoplePageInner(); });
+  };
+
   function renderDetail() {
     if (!_detailArgs) return;
     var displayName = _detailArgs[0];
