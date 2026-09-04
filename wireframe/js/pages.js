@@ -1129,7 +1129,7 @@ function renderOriginsInner(cultivarName, container) {
     }
     var srcList = origin.sources || [];
     srcList.forEach(function(src) {
-      var icon = src.icon ? escHtml(src.icon) : '&#x1F310;';
+      var icon = src.icon ? escHtml(src.icon) : '&rarr;';
       var text = src.text || src.label || src.url || '';
       var href = safeUrl(src.url);
       if (!text) return;
@@ -1142,20 +1142,20 @@ function renderOriginsInner(cultivarName, container) {
       html += '</div>';
     });
     if (!srcList.length && origin.source_url && safeUrl(origin.source_url)) {
-      html += '<div class="origin-card__source-item"><span class="source-link__icon">&#x1F310;</span>';
+      html += '<div class="origin-card__source-item"><span class="source-link__icon">&rarr;</span>';
       html += '<a href="' + escHtml(safeUrl(origin.source_url)) + '" target="_blank" rel="noopener">' + escHtml(origin.source_url) + '</a></div>';
     }
     html += '</div>';
     // Footer
     html += '<div class="origin-card__footer"><div class="origin-card__author">';
     if (origin.source_type === 'ipni_powo') {
-      html += '<span class="badge badge--species badge--type-sm">&#x1F4DA; IPNI/Kew</span>';
+      html += '<span class="badge badge--species badge--type-sm">IPNI/Kew</span>';
     } else if (origin.source_type === 'user_verified') {
-      html += '<span class="badge badge--clone badge--type-sm">&#x2705; AI検証済</span>';
+      html += '<span class="badge badge--clone badge--type-sm">AI検証済</span>';
     } else if (origin.author && origin.author.isAI) {
-      html += '<span class="badge badge--hybrid badge--type-sm">&#x1F916; AI</span>';
+      html += '<span class="badge badge--hybrid badge--type-sm">AI</span>';
     } else {
-      html += '<span>&#x1F464;</span><span>' + escHtml(origin.author ? origin.author.name : 'User') + '</span>';
+      html += '<span>' + escHtml(origin.author ? origin.author.name : 'User') + '</span>';
     }
     html += '<span class="text-gray">' + escHtml(origin.author ? origin.author.date : '') + '</span>';
     html += '</div><div class="vote-group">';

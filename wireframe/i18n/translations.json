@@ -28,8 +28,8 @@
     "en": "Search"
   },
   "nav_favorites": {
-    "jp": "&#x2606; お気に入り",
-    "en": "&#x2606; Favorites"
+    "jp": "お気に入り",
+    "en": "Favorites"
   },
   "favorites_title": {
     "jp": "お気に入り",
@@ -1065,8 +1065,8 @@
     "en": "+ Contribute"
   },
   "nav_contribute_mobile": {
-    "jp": "📝 品種を投稿",
-    "en": "📝 Contribute"
+    "jp": "品種を投稿",
+    "en": "Contribute"
   },
   "mast_kicker": {
     "jp": "Anthurium — 品種の由来・記載史アーカイブ",

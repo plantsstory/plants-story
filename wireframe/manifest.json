@@ -4,8 +4,8 @@
   "description": "アロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォーム",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#1B4332",
-  "theme_color": "#1B4332",
+  "background_color": "#F4F1EA",
+  "theme_color": "#F4F1EA",
   "lang": "ja",
   "icons": [
     {
