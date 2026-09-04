@@ -2305,10 +2305,10 @@ if (false) {
       }
     });
     // Also update detail page if it's open
-    if (currentPage === 'page-cultivar') {
-      var detailName = document.querySelector('.detail-name');
-      if (detailName && detailName.textContent === cultivarName) {
-        showCultivarDetail(cultivarName);
+    if (_currentPageId === 'cultivar') {
+      var detailH1 = document.querySelector('#page-cultivar h1');
+      if (detailH1 && detailH1.textContent.trim() === cultivarName.replace(' [Seedling]', '')) {
+        updateCultivarDetail(cultivarName, null);
       }
     }
   }

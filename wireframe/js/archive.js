@@ -709,6 +709,7 @@
     var d = describe(key in store ? key : (store[displayName] ? displayName : (store[displayName + ' [Seedling]'] ? displayName + ' [Seedling]' : key)), entry, entry._type || _detailArgs[2]);
     renderSpecimen(d, all);
     renderRelated(d, all);
+    if (window.refreshRerunButton) window.refreshRerunButton(entry);
   }
   window.onCultivarDetailRendered = function (displayName, cData, type, genusName, cultivarName) {
     _detailArgs = [displayName, cData, type, genusName, cultivarName];
@@ -902,6 +903,60 @@
     var id = a.getAttribute('data-anchor');
     setTimeout(function () { var el = document.getElementById(id); if (el) { el.scrollIntoView({ block: 'start', behavior: 'smooth' }); el.classList.add('glossary__hit'); } }, 350);
   });
+
+  /* ============================================================
+     AI RE-RESEARCH REQUESTS (free; admin approves in admin.html)
+     ============================================================ */
+  function rerunRequestsInit() {
+    var btn = $id('detail-rerun-btn'), status = $id('detail-rerun-status'), dlg = $id('research-request-dialog');
+    if (!btn || !dlg) return;
+    var reason = $id('research-request-reason'), submit = $id('research-request-submit'), cancel = $id('research-request-cancel');
+    function $id(i) { return document.getElementById(i); }
+    function sb() { return window._supabaseClient; }
+    function cultivarId() { return parseInt(document.getElementById('page-cultivar').getAttribute('data-cultivar-id'), 10) || null; }
+    function setStatus(kind) {
+      btn.classList.toggle('d-none', kind !== 'none');
+      status.classList.toggle('d-none', kind === 'none');
+      status.textContent = kind === 'pending' ? T('rerun_pending') : kind === 'approved' ? T('rerun_approved') : '';
+    }
+    // Called after the detail page renders: show the button only for entries that already had an AI run
+    window.refreshRerunButton = function (cData) {
+      var id = cultivarId();
+      var isSeedling = cData && cData._type === 'seedling';
+      var hadAi = cData && (cData.origins || []).some(function (o) { return o && o.author && o.author.isAI; });
+      if (!id || isSeedling || !hadAi || !sb()) { btn.classList.add('d-none'); status.classList.add('d-none'); return; }
+      sb().from('research_requests').select('status').eq('cultivar_id', id).in('status', ['pending', 'approved']).limit(1)
+        .then(function (res) { setStatus(res.data && res.data[0] ? res.data[0].status : 'none'); })
+        .catch(function () { setStatus('none'); });
+    };
+    btn.addEventListener('click', function () {
+      if (!window._currentUser) { showToast(T('rerun_login'), true); return; }
+      var h1 = document.querySelector('#page-cultivar h1');
+      $id('research-request-target').textContent = h1 ? h1.textContent : '';
+      reason.value = '';
+      dlg.showModal();
+    });
+    cancel.addEventListener('click', function () { dlg.close(); });
+    submit.addEventListener('click', function () {
+      var id = cultivarId(), h1 = document.querySelector('#page-cultivar h1');
+      if (!id || !sb() || !window._currentUser) return;
+      submit.disabled = true;
+      sb().from('research_requests').insert({ cultivar_id: id, cultivar_name: h1 ? h1.textContent.trim() : '', user_id: window._currentUser.id, reason: reason.value.trim() || null })
+        .then(function (res) {
+          submit.disabled = false;
+          if (res.error) {
+            var msg = /one_open|duplicate key/i.test(res.error.message) ? T('rerun_exists') : res.error.message;
+            showToast(msg, true); return;
+          }
+          dlg.close();
+          showToast(T('rerun_sent'));
+          setStatus('pending');
+          if (typeof gtag === 'function') gtag('event', 'rerun_request', { cultivar_id: id });
+        });
+    });
+  }
+  // the dialog markup sits after this script tag, so wait for the DOM
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', rerunRequestsInit); else rerunRequestsInit();
 
   /* ---------- interactions ---------- */
   document.addEventListener('click', function (e) {

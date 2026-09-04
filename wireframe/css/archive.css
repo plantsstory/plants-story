@@ -638,3 +638,6 @@ a.lineage__node:hover { border-color: var(--color-ink); }
 a.term { text-decoration: none; border-bottom: 1px dotted var(--color-accent-warm); color: inherit; }
 a.term:hover { border-bottom-style: solid; color: var(--color-primary); }
 .glossary__hit { color: var(--color-primary); }
+
+/* native dialogs stay centred (reset zeroes margins) */
+dialog.dialog-clean { margin: auto; }

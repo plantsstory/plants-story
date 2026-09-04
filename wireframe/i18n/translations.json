@@ -1471,5 +1471,41 @@
   "nb_hybrid_name": {
     "jp": "ハイブリッド名",
     "en": "Hybrid name"
+  },
+  "rerun_request_btn": {
+    "jp": "AI再調査をリクエスト",
+    "en": "Request AI re-research"
+  },
+  "rerun_title": {
+    "jp": "AI再調査をリクエスト",
+    "en": "Request AI re-research"
+  },
+  "rerun_desc": {
+    "jp": "管理者が内容を確認して承認すると、Web検索つきの AI 調査がもう一度実行されます。気になる点（誤り・追加してほしい出典など）があれば書いてください。",
+    "en": "Once the admin approves, the AI research (with web search) runs again for this entry. Tell us what looks wrong or which sources to check."
+  },
+  "rerun_submit": {
+    "jp": "リクエストを送る",
+    "en": "Send request"
+  },
+  "rerun_pending": {
+    "jp": "再調査リクエスト受付中（承認待ち）",
+    "en": "Re-research requested (awaiting approval)"
+  },
+  "rerun_approved": {
+    "jp": "再調査を実行中",
+    "en": "Re-research in progress"
+  },
+  "rerun_sent": {
+    "jp": "リクエストを送りました。承認されると自動で再調査が走ります",
+    "en": "Request sent. Research runs once approved."
+  },
+  "rerun_login": {
+    "jp": "リクエストにはログインが必要です",
+    "en": "Sign in to request re-research"
+  },
+  "rerun_exists": {
+    "jp": "この品種には受付中のリクエストがあります",
+    "en": "There is already an open request for this entry"
   }
 }

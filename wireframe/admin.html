@@ -60,6 +60,7 @@
       <a href="#" data-section="origins">由来管理</a>
       <a href="#" data-section="images">画像管理</a>
       <a href="#" data-section="delete-requests">削除依頼</a>
+      <a href="#" data-section="research-requests">再調査リクエスト <span id="rr-badge" class="d-none" style="background:#A8712E;color:#fff;border-radius:10px;padding:0 6px;font-size:0.7rem;"></span></a>
       <a href="#" data-section="affiliates">アフィリエイト</a>
       <a href="#" data-section="users">ユーザー管理</a>
       <a href="#" data-section="bulk">一括操作</a>
@@ -270,6 +271,16 @@
           <div id="dr-image-list" class="d-grid gap-md"></div>
           <p id="dr-image-empty" class="desc-text">画像の削除依頼はありません</p>
         </div>
+      </section>
+
+      <!-- ---- AI RE-RESEARCH REQUESTS ---- -->
+      <section id="sec-research-requests" class="hidden">
+        <h2 class="section-title">AI再調査リクエスト</h2>
+        <p class="desc-text">ユーザーからの再調査リクエストです。承認すると Web検索つきの AI 調査がその場で実行されます（1回 約15円・30〜90秒）。</p>
+        <div id="rr-list" class="d-grid gap-md"></div>
+        <p id="rr-empty" class="desc-text">受付中のリクエストはありません</p>
+        <h3 class="text-base font-bold mt-lg">最近の処理済み</h3>
+        <div id="rr-done-list" class="d-grid gap-md"></div>
       </section>
 
       <!-- ---- AFFILIATES ---- -->
@@ -2212,9 +2223,79 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
   link.addEventListener('click', function() {
     if (this.getAttribute('data-section') === 'images') loadImages();
     if (this.getAttribute('data-section') === 'delete-requests') loadDeletionRequests();
+    if (this.getAttribute('data-section') === 'research-requests') loadResearchRequests();
     if (this.getAttribute('data-section') === 'users') loadUsers();
   });
 });
+
+// ========================================
+// AI Re-research Requests (owner approves; approval runs the research)
+// ========================================
+async function loadResearchRequests() {
+  var listEl = document.getElementById('rr-list'), emptyEl = document.getElementById('rr-empty'), doneEl = document.getElementById('rr-done-list');
+  var res = await sb.from('research_requests').select('*').order('created_at', { ascending: false }).limit(100);
+  if (res.error) { toast('リクエスト取得エラー: ' + res.error.message); return; }
+  var rows = res.data || [];
+  var open = rows.filter(function(r) { return r.status === 'pending' || r.status === 'approved'; });
+  var done = rows.filter(function(r) { return r.status !== 'pending' && r.status !== 'approved'; }).slice(0, 20);
+  var badge = document.getElementById('rr-badge');
+  if (badge) { badge.textContent = open.length; badge.classList.toggle('d-none', open.length === 0); }
+  emptyEl.style.display = open.length ? 'none' : '';
+  // requester names
+  var ids = []; rows.forEach(function(r) { if (r.user_id && ids.indexOf(r.user_id) === -1) ids.push(r.user_id); });
+  var names = {};
+  if (ids.length) { var pr = await sb.from('profiles').select('id, display_name').in('id', ids); (pr.data || []).forEach(function(x) { names[x.id] = x.display_name || x.id.slice(0, 8); }); }
+  function card(r, withActions) {
+    var d = new Date(r.created_at).toLocaleString('ja-JP');
+    var st = { pending: '承認待ち', approved: '実行中', done: '完了', failed: '失敗', rejected: '却下' }[r.status] || r.status;
+    var html = '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-md);flex-wrap:wrap;">';
+    html += '<div style="min-width:0;flex:1;"><div style="font-weight:600;margin-bottom:4px;">' + escapeHtml(r.cultivar_name) + ' <span style="font-size:0.7rem;color:var(--color-gray);">#' + r.cultivar_id + '</span></div>';
+    html += '<div style="font-size:var(--font-size-sm);margin-bottom:4px;white-space:pre-wrap;">' + (r.reason ? escapeHtml(r.reason) : '<span style="color:var(--color-gray)">（理由なし）</span>') + '</div>';
+    html += '<div style="font-size:var(--font-size-xs);color:var(--color-gray);">' + escapeHtml(names[r.user_id] || r.user_id.slice(0, 8)) + ' · ' + d + ' · ' + st + (r.admin_note ? ' · ' + escapeHtml(r.admin_note) : '') + '</div></div>';
+    if (withActions) {
+      html += '<div style="display:flex;gap:var(--space-sm);flex-shrink:0;">';
+      html += '<button class="btn btn-sm btn-primary" data-rr-approve="' + r.id + '" data-rr-cid="' + r.cultivar_id + '" id="rr-approve-' + r.id + '"' + (r.status === 'approved' ? ' disabled' : '') + '>' + (r.status === 'approved' ? '実行中…' : '承認して再調査') + '</button>';
+      html += '<button class="btn btn-sm" style="background:var(--color-gray);color:#fff;border:none;" data-rr-reject="' + r.id + '">却下</button></div>';
+    }
+    return html + '</div>';
+  }
+  listEl.innerHTML = ''; doneEl.innerHTML = '';
+  open.forEach(function(r) { var c = document.createElement('div'); c.style.cssText = 'background:var(--color-white);border:1px solid var(--color-light);border-radius:var(--radius-md);padding:var(--space-md);'; c.innerHTML = card(r, true); listEl.appendChild(c); });
+  done.forEach(function(r) { var c = document.createElement('div'); c.style.cssText = 'background:var(--color-bg);border:1px solid var(--color-lighter);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);opacity:0.8;'; c.innerHTML = card(r, false); doneEl.appendChild(c); });
+}
+
+document.getElementById('sec-research-requests').addEventListener('click', async function(e) {
+  var ap = e.target.closest('[data-rr-approve]'), rj = e.target.closest('[data-rr-reject]');
+  if (rj) {
+    var rid = parseInt(rj.getAttribute('data-rr-reject'));
+    var note = prompt('却下理由（任意・ユーザーには表示されません）', '') || null;
+    await sb.from('research_requests').update({ status: 'rejected', admin_note: note, decided_at: new Date().toISOString(), decided_by: await adminUid() }).eq('id', rid);
+    toast('却下しました'); loadResearchRequests(); return;
+  }
+  if (!ap) return;
+  var reqId = parseInt(ap.getAttribute('data-rr-approve')), cid = parseInt(ap.getAttribute('data-rr-cid'));
+  if (!confirm('承認して AI 再調査を実行しますか？（約15円・30〜90秒）')) return;
+  ap.disabled = true; ap.textContent = '実行中…';
+  await sb.from('research_requests').update({ status: 'approved', decided_at: new Date().toISOString(), decided_by: await adminUid() }).eq('id', reqId);
+  if (!allCultivars || !allCultivars.length) await loadAllCultivars();
+  var c = allCultivars.find(function(x) { return x.id === cid; });
+  if (!c) { toast('品種が見つかりません'); await sb.from('research_requests').update({ status: 'failed', admin_note: 'cultivar not found' }).eq('id', reqId); loadResearchRequests(); return; }
+  var ok = false, err = '';
+  try {
+    var payload = { cultivar_id: c.id, cultivar_name: c.cultivar_name, genus: c.genus, type: c.type };
+    if (c.type === 'clone' || c.type === 'hybrid') {
+      var uo = (c.origins || []).find(function(o) { return o.source_type === 'user_verified' || o.source_type === 'manual' || (o.author && o.author.isAI === false); });
+      if (uo) { payload.user_text = uo.body || ''; payload.user_sources = (uo.sources || []).map(function(s) { return s.url || s.text || ''; }).filter(Boolean); }
+    }
+    var session = (await sb.auth.getSession()).data.session;
+    var r = await fetch(SUPABASE_URL + '/functions/v1/research-origin', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (session ? session.access_token : SUPABASE_ANON_KEY) }, body: JSON.stringify(payload) });
+    var data = await r.json(); ok = !!data.success; err = data.error || '';
+  } catch (ex) { err = ex.message; }
+  await sb.from('research_requests').update({ status: ok ? 'done' : 'failed', admin_note: ok ? null : ('error: ' + err).slice(0, 200) }).eq('id', reqId);
+  toast(ok ? '✅ 再調査が完了しました' : '再調査に失敗: ' + err);
+  await loadAllCultivars(); loadResearchRequests();
+});
+async function adminUid() { try { var s = (await sb.auth.getSession()).data.session; return s && s.user ? s.user.id : null; } catch (e) { return null; } }
 
 // ========================================
 // User Management
