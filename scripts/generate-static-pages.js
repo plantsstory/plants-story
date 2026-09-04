@@ -139,6 +139,7 @@ async function main() {
     { dir: 'terms', title: '利用規約 | Aroid Origins', description: 'Aroid Originsの利用規約。投稿コンテンツの取り扱い、サブスクリプション、禁止行為について定めています。' },
     { dir: 'privacy', title: 'プライバシーポリシー | Aroid Origins', description: 'Aroid Originsの個人情報・Cookie・決済情報の取り扱いについて説明します。' },
     { dir: 'contact', title: 'お問い合わせ | Aroid Origins', description: 'Aroid Originsへのお問い合わせ・不具合報告・コンテンツ削除要請の窓口です。' },
+    { dir: 'tokushoho', title: '特定商取引法に基づく表記 | Aroid Origins', description: 'Aroid Origins（運営: 久恒 佑太）の特定商取引法に基づく表記。販売業者・連絡先・販売価格・支払方法・支払時期・提供時期・解約と返金の条件。' },
     { dir: 'pricing', title: '料金とサービス内容 | Aroid Origins', description: 'Aroid Origins の料金とサービス内容。閲覧は無料、実生（My Seedlings）投稿は5件まで無料。6件目以降は月額240円（税込）または年額2,500円（税込）のサブスクリプション。支払方法・自動更新・解約・返金の条件を掲載。' },
     { dir: 'glossary', title: '由来の用語集 — sp. / aff. / cf.、記載者、タイプ産地、交配式、クローン | Aroid Origins', description: 'アロイド品種の由来を読むための用語集。学名と記載、sp./aff./cf.、タイプ産地、交配式、F1、オリジナル個体、クローン、TC、流通名、信頼度 Tier の意味を解説します。' },
   ];
