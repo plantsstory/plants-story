@@ -1370,8 +1370,8 @@ if (false) {
       if (g.has_seedlings) {
         // Pattern 1: with seedlings tab
         html += '<div class="genus-tabs" id="genus-tabs-' + g.slug + '">';
-        html += '<button class="genus-tab active" data-tab="species-clones">&#x1F4D6; Species / Clones</button>';
-        html += '<button class="genus-tab" data-tab="seedlings">&#x1F331; My Seedlings</button>';
+        html += '<button class="genus-tab active" data-tab="species-clones">Species / Clones</button>';
+        html += '<button class="genus-tab" data-tab="seedlings">My Seedlings</button>';
         html += '</div>';
       }
 
@@ -1380,7 +1380,7 @@ if (false) {
       html += '<div class="sort-bar">';
       html += '<div class="search-bar search-bar--inline">';
       html += '<input type="search" enterkeyhint="search" class="search-bar__input" placeholder="属内を検索..." data-i18n-placeholder="genus_search">';
-      html += '<button class="search-bar__btn" aria-label="検索">&#x1F50D;</button>';
+      html += '<button class="search-bar__btn" aria-label="検索"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></button>';
       html += '</div>';
       html += '<div class="chips">';
       html += '<button type="button" class="chip active" aria-pressed="true" data-sort="name" data-i18n="sort_name">名前順</button>';
@@ -1412,7 +1412,7 @@ if (false) {
         html += '<div class="sort-bar">';
         html += '<div class="search-bar search-bar--inline">';
         html += '<input type="search" enterkeyhint="search" class="search-bar__input seedling-search" placeholder="実生を検索...">';
-        html += '<button class="search-bar__btn" aria-label="検索">&#x1F50D;</button>';
+        html += '<button class="search-bar__btn" aria-label="検索"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></button>';
         html += '</div>';
         html += '<a href="#" class="btn btn--primary btn--sm btn--ml-auto" data-nav="contribute" data-genus="' + g.name + '" data-contribute-type="seedling">+ 実生を追加</a>';
         html += '</div>';
