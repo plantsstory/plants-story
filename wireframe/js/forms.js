@@ -1271,7 +1271,8 @@ document.addEventListener('click', function(e) {
       if (type === 'species') {
         fullName = genus + ' ' + name;
       } else if (type === 'seedling') {
-        fullName = genus + " '" + name + "' [Seedling]";
+        // Seedlings are named by their cross (母 × 父); never wrap the whole formula in quotes
+        fullName = genus + ' ' + name.replace(/\s*[x×X]\s*(?=[A-Za-z'"])/g, ' × ').replace(/\s+/g, ' ').trim() + ' [Seedling]';
       } else {
         fullName = genus + " '" + name + "'";
       }
