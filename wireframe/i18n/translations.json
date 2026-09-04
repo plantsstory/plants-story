@@ -1283,5 +1283,9 @@
   "countries_unit": {
     "jp": "か国",
     "en": "countries"
+  },
+  "related_parents": {
+    "jp": "交配親",
+    "en": "Parents"
   }
 }

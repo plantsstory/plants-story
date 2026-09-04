@@ -111,8 +111,9 @@
     d.year = d.pubYear || d.namingYear || yearOf(d.sowing);
     d.text = clean(s.notes) || clean(o && o.body) || '';
     d.textEn = clean(o && o.body_en) || d.text;
-    d.parentA = clean((d.formula && d.formula.parentA) || s.parentA || s.parent_a);
-    d.parentB = clean((d.formula && d.formula.parentB) || s.parentB || s.parent_b);
+    var sf = (s.formula && typeof s.formula === 'object') ? s.formula : {};
+    d.parentA = clean((d.formula && d.formula.parentA) || sf.parentA || s.parentA || s.parent_a);
+    d.parentB = clean((d.formula && d.formula.parentB) || sf.parentB || s.parentB || s.parent_b);
     d.creator = clean(d.formula && d.formula.creatorName);
     d.href = base + genus.toLowerCase() + '/' + encodeURIComponent(epithet);
     return d;
@@ -434,9 +435,9 @@
       var ps = [normParent(x.parentA), normParent(x.parentB)].filter(Boolean);
       return ps.some(function (p) { return myParents.indexOf(p) !== -1; });
     }) : [];
-    if (d.type !== 'species' && d.parentA && d.parentB) {
-      // show the parents themselves first among "siblings" context
-      [d.parentA, d.parentB].forEach(function (p) { var pd = findByEpithet(others, p); if (pd && siblings.indexOf(pd) === -1) siblings.unshift(pd); });
+    var parents = [];
+    if (d.type !== 'species' && (d.parentA || d.parentB)) {
+      [d.parentA, d.parentB].forEach(function (p) { var pd = findByEpithet(others, p); if (pd && parents.indexOf(pd) === -1) parents.push(pd); });
     }
 
     // previous / next within the same genus and the same broad group
@@ -448,6 +449,7 @@
     var next = idx >= 0 && idx < group.length - 1 ? group[idx + 1] : null;
 
     var html = '<div class="related__grid">'
+      + relatedGroupHtml('related_parents', parents)
       + relatedGroupHtml('related_children', children)
       + relatedGroupHtml('related_siblings', siblings)
       + relatedGroupHtml('related_same_locality', sameCountry)
@@ -459,7 +461,7 @@
       if (next) html += link(next, '<span class="mono">' + esc(T('related_next')) + ' →</span><span class="related__nav-name">' + esc(next.displayName) + '</span>', 'related__nav--next');
       html += '</nav>';
     }
-    var any = children.length || siblings.length || sameCountry.length || samePerson.length || prev || next;
+    var any = parents.length || children.length || siblings.length || sameCountry.length || samePerson.length || prev || next;
     el.innerHTML = any ? html : '';
     section.classList.toggle('d-none', !any);
   }

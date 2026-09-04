@@ -48,11 +48,12 @@ serve(async (req: Request) => {
       if (Array.isArray(origins) && origins.length > 0) {
         // Sort by trust desc, take best one
         const sorted = [...origins].sort((a: any, b: any) => (b.trust || 0) - (a.trust || 0));
-        const best = sorted[0];
-        if (best.description_jp) {
-          description = best.description_jp.substring(0, 200);
-        } else if (best.description) {
-          description = best.description.substring(0, 200);
+        const best = sorted.find((o: any) => o && !o._type) || sorted[0];
+        // Origins store prose in `body` (legacy) or `structured.notes` (current schema)
+        const text = best.body || (best.structured && best.structured.notes) || best.body_en ||
+          best.description_jp || best.description || "";
+        if (typeof text === "string" && text.trim()) {
+          description = text.replace(/\s+/g, " ").trim().substring(0, 200);
         }
       }
     }
