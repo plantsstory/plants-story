@@ -1660,6 +1660,22 @@ serve(async (req: Request) => {
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    // Same name, same user: at most 3 runs per day (each run costs ~¥20 in web searches)
+    if (!isAdmin && cultivar_name) {
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { count: sameNameCount } = await serviceClient
+        .from("research_origin_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", authUser.id)
+        .eq("cultivar_name", cultivar_name)
+        .gte("requested_at", oneDayAgo);
+      if ((sameNameCount ?? 0) >= 3) {
+        return new Response(
+          JSON.stringify({ error: "この品種の AI 調査は1日3回までです。時間をおいてお試しください。" }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
 
     // Log this request for rate limiting
     await serviceClient.from("research_origin_requests").insert({
