@@ -395,7 +395,7 @@ a { color: inherit; text-underline-offset: 0.18em; text-decoration-thickness: 1p
 .story__cite { margin-bottom: var(--space-md); }
 .story__cite .year { color: var(--color-accent-warm); }
 .story__body { font-size: var(--font-size-base); line-height: 1.95; color: var(--color-ink); max-width: 62ch; }
-.story__body::first-letter { font-family: var(--font-display); font-size: 2.2em; line-height: 0.8; float: left; padding: 0.12em 0.12em 0 0; color: var(--color-ink); }
+.story__body--dropcap::first-letter { font-family: var(--font-display); font-size: 2.2em; line-height: 0.8; float: left; padding: 0.12em 0.12em 0 0; color: var(--color-ink); }
 .story__more { display: inline-block; margin-top: var(--space-md); font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid var(--color-ink); padding-bottom: 2px; }
 .story__more:hover { color: var(--color-primary); border-color: var(--color-primary); }
 .story__figure { margin: 0 0 var(--space-md); border: 1px solid var(--color-rule); background: var(--color-paper-2); aspect-ratio: 3 / 2; overflow: hidden; }
@@ -569,3 +569,9 @@ a { color: inherit; text-underline-offset: 0.18em; text-decoration-thickness: 1p
 /* profile / favorites cards inherit the sheet look */
 .profile-avatar { border: 1px solid var(--color-rule); }
 .contact-link__icon--instagram { background: var(--color-ink); }
+/* text-gray was declared decorative-only; keep body copy readable */
+.text-gray, .desc-text, .form-hint, .legal-date, .contact-link__value, .gallery-carousel__counter { color: var(--color-mid); }
+/* mono labels that carry Japanese fall back to the body face — give them room */
+.mono:lang(ja) { font-size: 0.76rem; letter-spacing: 0.04em; }
+/* seedling notes ledger keeps its own spacing */
+#seedling-preview-grid .ledger-table { margin-bottom: var(--space-sm); }

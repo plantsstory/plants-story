@@ -2546,6 +2546,7 @@ if (false) {
           });
 
         thumbPromise.then(function(thumbMap) {
+          if (window.renderEntriesLedger) { window.renderEntriesLedger(grid, items, thumbMap); return; }
           var html = '';
           items.forEach(function(item, idx) {
             var name = item.cultivar_name;

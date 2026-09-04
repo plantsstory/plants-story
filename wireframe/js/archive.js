@@ -248,7 +248,8 @@
     html += '<h2 class="story__title">' + link(d, esc(d.displayName)) + '</h2>';
     var cite = citeHtml(d);
     if (cite) html += '<p class="story__cite mono">' + cite + '</p>';
-    html += '<p class="story__body">' + esc(excerpt(text, lang() === 'en' ? 320 : 170)) + '</p>';
+    var ex = excerpt(text, lang() === 'en' ? 320 : 170);
+    html += '<p class="story__body' + (/^[A-Za-z]/.test(ex) ? ' story__body--dropcap' : '') + '">' + esc(ex) + '</p>';
     html += link(d, esc(T('story_more')), 'story__more');
     body.innerHTML = html;
   }
