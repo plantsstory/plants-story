@@ -285,7 +285,7 @@ psExport('guardSubmit', guardSubmit);
 var _isCustomDomain = location.hostname !== 'plantsstory.github.io';
 var _siteBase = _isCustomDomain ? 'https://plantsstory.com/' : 'https://plantsstory.github.io/plants-story/';
 var _defaultTitle = 'Aroid Origins';
-var _defaultDesc = 'アロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォーム';
+var _defaultDesc = '誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。';
 
 function updateMeta(opts) {
   opts = opts || {};
@@ -508,7 +508,7 @@ function showGenus(genusName) {
 
 // ---- Path-based routing (History API) ----
 // Known simple pages (no sub-parameters)
-var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'favorites', 'mypost', 'guide', 'glossary', 'pricing'];
+var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'mypost', 'guide', 'glossary', 'pricing'];
 // Known genus names for URL mapping
 var knownGenera = []; // Populated dynamically from genera table
 // Base path: '/' on custom domain, '/plants-story/' on GitHub Pages
@@ -609,7 +609,6 @@ function navigateTo(page, options, pushHistory) {
   if (page === 'contribute' && !options._editFlow && typeof window.exitEditMode === 'function') {
     window.exitEditMode();
   }
-  if (page === 'favorites') renderFavoritesPage();
   if (page === 'people' && typeof window.renderPeoplePage === 'function') window.renderPeoplePage(options.person || '');
   if (page === 'locality' && typeof window.renderLocalityPage === 'function') window.renderLocalityPage(options.place || '');
   if (page === 'genus' && options.genus) showGenus(options.genus);
@@ -1339,7 +1338,7 @@ if (false) {
     if (container) {
       var html = '';
       window._generaData.forEach(function(g) {
-        html += '<a href="#" data-nav="genus" data-genus="' + g.slug + '">&#x1F33F; ' + g.name + '</a>';
+        html += '<a href="#" data-nav="genus" data-genus="' + g.slug + '">' + g.name + '</a>';
       });
       container.innerHTML = html;
     }
@@ -1422,11 +1421,6 @@ if (false) {
       html += '<div class="card card--no-pad"></div>';
       html += '<div class="pagination"></div>';
 
-      html += '<div class="ad-placeholder mt-lg">';
-      html += '<span class="ad-placeholder__label" data-i18n="ad_label">広告</span>';
-      html += '<div class="ad-placeholder__slot">Google AdSense</div>';
-      html += '</div>';
-
       if (g.has_seedlings) html += '</div>';
 
       if (g.has_seedlings) {
@@ -1503,7 +1497,7 @@ if (false) {
         headerAuthBtn.title = 'Googleでログイン';
         headerAuthBtn.classList.remove('d-none');
       }
-      if (navAuth) { navAuth.innerHTML = '&#x1F511; ログイン'; navAuth.classList.remove('d-none'); }
+      if (navAuth) { navAuth.textContent = 'ログイン'; navAuth.classList.remove('d-none'); }
       if (navProfile) navProfile.classList.add('d-none');
     }
     // Show/hide 投稿履歴 menu item
@@ -2448,8 +2442,13 @@ if (false) {
     h += '<span class="badge ' + bi.cls + '">' + bi.txt + '</span>';
     if (entry._isPrivate || meta.is_private) h += '<span class="badge badge--private">' + t('private_badge') + '</span>';
     if (locked) h += '<span class="badge badge--locked"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>';
-    if (!isSeedling && !hasDesc) h += '<span class="badge badge--ai">' + t('ai_pending_badge') + '</span>';
-    if (!isSeedling) h += '<div class="trust"><div class="trust__bar"><div class="trust__fill ' + getTrustClass(trustPct) + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + (hasDesc ? trustPct + '%' : '-') + '</span></div>';
+    if (!isSeedling) {
+      // No separate "AI pending" badge: the state column carries it
+      var pending = meta.ai_status === 'pending' || meta.ai_status === 'researching';
+      h += hasDesc
+        ? '<div class="trust"><div class="trust__bar"><div class="trust__fill ' + getTrustClass(trustPct) + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + trustPct + '%</span></div>'
+        : '<span class="mono cultivar-row__state">' + (pending ? t('state_researching') : t('state_unrecorded')) + '</span>';
+    }
     h += '</div>';
     if (!isSeedling && window.entryCiteLine) {
       var _cite = window.entryCiteLine(fullName, entry, meta.type);
@@ -2539,12 +2538,14 @@ if (false) {
     if (supabase) {
       grid.innerHTML = skeletonCards(5);
       var visibleNames = (window._generaData || []).map(function(g) { return g.name; });
+      // "New entries" includes seedlings: the ledger is the record of the archive growing
       var recentQuery = supabase.from('cultivars')
         .select('id, cultivar_name, genus, type, origins, updated_at')
         .neq('type', 'seedling');
       if (visibleNames.length > 0) recentQuery = recentQuery.in('genus', visibleNames);
       recentQuery
-        .order('updated_at', { ascending: false, nullsFirst: false })
+        // 「新着記録」= 収録が増えた順（更新順ではなく登録順）
+        .order('created_at', { ascending: false, nullsFirst: false })
         .limit(8)
         .then(function(res) {
           if (res.error || !res.data || res.data.length === 0) {
@@ -2596,7 +2597,7 @@ if (false) {
     thumbPromise.then(function(thumbMap) {
       // Archive layer renders these as a ledger table when present
       if (window.renderEntriesLedger && grid.id === 'recently-updated-grid') {
-        window.renderEntriesLedger(grid, items, thumbMap);
+        window.renderEntriesLedger(grid, items, thumbMap, { showDate: true });
         return;
       }
       var html = '';
@@ -2717,7 +2718,7 @@ if (false) {
     // Then load from Supabase (async, authoritative source)
     // Fetch only needed columns to reduce payload size
     if (supabase) {
-      supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, parent_a_text, parent_b_text, parent_a_id, parent_b_id, is_private').then(function(res) {
+      supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, parent_a_text, parent_b_text, parent_a_id, parent_b_id, is_private, ai_status').then(function(res) {
         if (res.error || !res.data) return;
 
         // Collect unique user_ids to fetch profiles
@@ -2751,7 +2752,7 @@ if (false) {
             _parents: [row.parent_a_text || null, row.parent_b_text || null], _parentIds: [row.parent_a_id || null, row.parent_b_id || null],
             _isPrivate: !!row.is_private };
           var genus = row.genus || 'Anthurium';
-          var meta = { genus: genus, type: row.type || 'Hybrid', created_at: row.created_at || '', user_id: row.user_id || null, id: row.id, is_private: !!row.is_private };
+          var meta = { genus: genus, type: row.type || 'Hybrid', created_at: row.created_at || '', user_id: row.user_id || null, id: row.id, is_private: !!row.is_private, ai_status: row.ai_status || null };
           addCultivarRow(row.cultivar_name, entry, meta);
         });
         // Mark full data as loaded

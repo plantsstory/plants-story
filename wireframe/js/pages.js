@@ -720,8 +720,6 @@ document.addEventListener('click', function(e) {
   var encodedText = encodeURIComponent(text);
   menu.innerHTML =
     '<a href="https://twitter.com/intent/tweet?text=' + encodedText + '&url=' + encodedUrl + '&hashtags=PlantsStory' + '" target="_blank" rel="noopener" class="btn btn--sm btn--secondary text-xs">X</a>' +
-    '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodedUrl + '" target="_blank" rel="noopener" class="btn btn--sm btn--secondary text-xs">Facebook</a>' +
-    '<a href="https://line.me/R/msg/text/' + encodeURIComponent(text + '\n' + shareUrl) + '" target="_blank" rel="noopener" class="btn btn--sm btn--secondary text-xs">LINE</a>' +
     '<button class="btn btn--sm btn--secondary share-copy-btn text-xs">URLコピー</button>';
   menu.classList.toggle('hidden');
   btn.setAttribute('aria-expanded', menu.classList.contains('hidden') ? 'false' : 'true');
@@ -1678,11 +1676,18 @@ function globalSearch(query) {
   var title = document.getElementById('search-title');
   if (title) title.textContent = '"' + query + '" の検索結果';
 
+  var summaryEl = document.getElementById('search-summary');
+  if (summaryEl) summaryEl.textContent = t('results_count').replace('{n}', cultivarResults.length);
+
   // Render cultivar results from data (not DOM cloning)
   var cultivarList = document.getElementById('search-cultivar-list');
   if (cultivarList) {
     if (cultivarResults.length === 0) {
-      cultivarList.innerHTML = '<div class="text-muted empty-state">' + t('no_results') + '</div>';
+      cultivarList.innerHTML = '<div class="sheet sheet--search">'
+        + '<p class="sheet__title">' + t('no_results') + '</p>'
+        + '<p class="sheet__note mono">' + t('search_no_results_hint') + '</p>'
+        + '<a href="#" class="sheet__cta" data-nav="contribute">' + t('add_cultivar') + '</a>'
+        + '</div>';
     } else {
       var html = '';
       cultivarResults.forEach(function(item) {
@@ -1697,67 +1702,6 @@ function globalSearch(query) {
   var searchPag = document.querySelector('#page-search .pagination');
   if (searchPag) {
     searchPag.innerHTML = '<a class="page-link active">1</a>';
-  }
-
-  // -- User search (Supabase RPC) --
-  var userSection = document.getElementById('search-user-results');
-  var userList = document.getElementById('search-user-list');
-  var summary = document.getElementById('search-summary');
-
-  // Show cultivar count immediately
-  if (summary) summary.textContent = '品種 ' + cultivarResults.length + '件';
-
-  // Hide user section initially
-  if (userSection) userSection.style.display = 'none';
-
-  var sb = window._supabaseClient;
-  if (sb) {
-    sb.rpc('search_profiles', { p_query: q, p_limit: 10 }).then(function(res) {
-      if (res.error) {
-        console.error('search_profiles RPC error:', res.error);
-        if (userSection) userSection.style.display = 'none';
-        return;
-      }
-      if (!res.data || res.data.length === 0) {
-        if (userSection) userSection.style.display = 'none';
-        return;
-      }
-      var users = res.data;
-      // Update summary with both counts
-      if (summary) summary.textContent = '品種 ' + cultivarResults.length + '件 / ユーザー ' + users.length + '件';
-
-      // Render user results
-      var html = '';
-      users.forEach(function(u) {
-        var profileUrl = u.username ? _basePath + 'profile/@' + escHtml(u.username) : _basePath + 'profile/' + escHtml(u.id);
-        var avatarHtml = '';
-        if (u.avatar_url) {
-          avatarHtml = '<img src="' + escHtml(u.avatar_url) + '" class="avatar-sm" alt="' + escHtml(u.display_name || 'User') + '">';
-        } else {
-          avatarHtml = '<div class="avatar-placeholder-sm">' + (u.display_name ? escHtml(u.display_name.charAt(0).toUpperCase()) : '?') + '</div>';
-        }
-        html += '<a href="' + profileUrl + '" class="user-list-item">';
-        html += avatarHtml;
-        html += '<div class="flex-1 min-w-0">';
-        html += '<div class="font-semibold">' + escHtml(u.display_name || t('name_not_set')) + '</div>';
-        if (u.username) {
-          html += '<div class="text-sm text-muted">@' + escHtml(u.username) + '</div>';
-        }
-        if (u.bio) {
-          var bioShort = u.bio.length > 60 ? u.bio.substring(0, 60) + '...' : u.bio;
-          html += '<div class="font-xs-btn text-muted" style="margin-top:2px">' + escHtml(bioShort) + '</div>';
-        }
-        html += '</div>';
-        html += '<div class="font-xs-btn text-muted whitespace-nowrap">' + escHtml(u.post_count) + ' 投稿</div>';
-        html += '</a>';
-      });
-      if (userList) userList.innerHTML = html;
-      if (userSection) { userSection.classList.remove('d-none'); userSection.style.display = ''; }
-    }).catch(function(err) {
-      console.error('search_profiles exception:', err);
-      if (userSection) userSection.style.display = 'none';
-      showToast(t('toast_user_search_failed'), true);
-    });
   }
 
   navigateTo('search', { q: query });

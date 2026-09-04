@@ -148,16 +148,16 @@
     "en": "Images"
   },
   "request_delete": {
-    "jp": "🚩 削除依頼",
-    "en": "🚩 Report"
+    "jp": "削除依頼",
+    "en": "Report"
   },
   "upload_image": {
     "jp": "画像をアップロード",
     "en": "Upload Image"
   },
   "image_policy": {
-    "jp": "※ Fake投票が多い画像は自動削除されます。削除依頼は即時対応します。",
-    "en": "※ Images with many Fake votes are auto-removed. Deletion requests are handled immediately."
+    "jp": "※ 画像は栽培者自身の投稿のみを掲載しています。権利や内容に問題がある場合は「削除依頼」からご連絡ください。即時対応します。",
+    "en": "Photos are contributed by the growers themselves. If there is a rights or content problem, use \"Request removal\" — we act immediately."
   },
   "origins": {
     "jp": "由来 (信頼度順)",
@@ -204,8 +204,8 @@
     "en": "Edit cultivar information."
   },
   "btn_update": {
-    "jp": "📤 更新する",
-    "en": "📤 Update"
+    "jp": "更新する",
+    "en": "Update"
   },
   "edit_key_title": {
     "jp": "編集キー",
@@ -289,8 +289,8 @@
     "en": "Drag & Drop or Click"
   },
   "btn_submit": {
-    "jp": "📤 投稿する",
-    "en": "📤 Submit"
+    "jp": "投稿する",
+    "en": "Submit"
   },
   "search_results": {
     "jp": "検索結果",
@@ -381,8 +381,8 @@
     "en": "Search results for \"{q}\""
   },
   "results_count": {
-    "jp": "{n}件の結果",
-    "en": "{n} results"
+    "jp": "{n}件の品種が見つかりました",
+    "en": "{n} entries found"
   },
   "no_results": {
     "jp": "該当する品種が見つかりませんでした",
@@ -453,12 +453,12 @@
     "en": "See all seedlings"
   },
   "affiliate_top_title": {
-    "jp": "🌿 管理人おすすめアイテム",
-    "en": "🌿 Staff Picks"
+    "jp": "管理人おすすめアイテム",
+    "en": "Staff Picks"
   },
   "affiliate_detail_title": {
-    "jp": "🌿 管理人おすすめアイテム",
-    "en": "🌿 Staff Picks"
+    "jp": "管理人おすすめアイテム",
+    "en": "Staff Picks"
   },
   "affiliate_context": {
     "jp": "この植物のお世話に",
@@ -569,8 +569,8 @@
     "en": "Article 6: Voting System"
   },
   "terms_6_body": {
-    "jp": "本サービスの投票システム（由来への賛成/反対、画像のReal/Fake）はコミュニティによる情報評価を目的としています。ボット、スクリプト、組織的な不正投票など、投票結果を人為的に操作する行為は禁止します。運営チームは不正が検出された場合、投票のリセットやアクセス制限を行う権利を有します。",
-    "en": "The voting system (agree/disagree on origins, real/fake on images) exists for community evaluation of information. Manipulation of votes through bots, scripts, or coordinated actions is prohibited. The team reserves the right to reset votes and restrict access when manipulation is detected."
+    "jp": "由来情報に対する評価（正確／疑問）はコミュニティによる情報の検証を目的としています。ボット、スクリプト、組織的な不正投票など、評価結果を人為的に操作する行為は禁止します。運営チームは不正が検出された場合、評価のリセットやアクセス制限を行う権利を有します。",
+    "en": "Ratings on origin records (accurate / questionable) exist so the community can verify information. Manipulating results with bots, scripts or coordinated voting is prohibited. The operator may reset ratings or restrict access when abuse is detected."
   },
   "terms_7_title": {
     "jp": "第7条 植物情報の免責事項",
@@ -857,8 +857,8 @@
     "en": "About Aroid Origins"
   },
   "about_mission_text": {
-    "jp": "植物の品種には、それぞれ独自の物語があります。Aroid Originsは、Anthuriumをはじめとするアロイド植物の品種の由来や歴史を、みんなで集めて共有するプラットフォームです。",
-    "en": "Every plant cultivar has its own unique story. Aroid Origins is a community platform for collecting and sharing the origins and history of aroid cultivars, starting with Anthurium."
+    "jp": "誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。",
+    "en": "Who named it, when, and where — a sourced archive of aroid origins."
   },
   "about_features_title": {
     "jp": "主な特徴",
@@ -1057,8 +1057,8 @@
     "en": "My Seedlings: unlimited posting of seedling (cross) records\nOngoing recording and editing as your collection archive"
   },
   "hero_desc": {
-    "jp": "アンスリウムなどアロイド品種の由来・交配情報を、学術データベースとコミュニティで検証する図鑑",
-    "en": "A botanical register verifying the origins and crosses of Anthurium and other aroids with academic databases and community review."
+    "jp": "誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。",
+    "en": "Who named it, when, and where — a sourced archive of aroid origins."
   },
   "nav_contribute": {
     "jp": "+ 投稿",
@@ -1133,8 +1133,8 @@
     "en": "No publication years recorded yet"
   },
   "ledger_all": {
-    "jp": "全収録品種 →",
-    "en": "All entries →"
+    "jp": "台帳をすべて見る →",
+    "en": "See the full ledger →"
   },
   "ledger_no": {
     "jp": "No.",
@@ -1165,12 +1165,8 @@
     "en": "About this archive"
   },
   "colophon_p1": {
-    "jp": "Aroid Origins は、アンスリウムを中心としたアロイド植物の「由来」を記録する図鑑です。原種は学名の記載者・発表年・タイプ産地を Kew／GBIF の学名データベースと一次文献で照合し、交配種・栽培品種は作出者や交配式をコレクターの投稿から集めています。",
-    "en": "Aroid Origins records where aroids — Anthurium first — actually come from. For species we cross-check the describing author, year and type locality against the Kew/GBIF name backbone and primary literature; for hybrids and cultivars we gather breeders and parentage from collector contributions."
-  },
-  "colophon_p2": {
-    "jp": "掲載された由来には出典と信頼度を付け、閲覧者の投票で検証を重ねます。写真は栽培者自身の投稿のみを掲載し、削除依頼には即時対応します。",
-    "en": "Every record carries its sources and a trust score, refined by reader votes. Photos are contributed only by the growers themselves, and takedown requests are honoured immediately."
+    "jp": "誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。原種は記載者・発表年・タイプ産地を学名データベースと一次文献で照合し、交配種・クローンは作出者や交配式をコレクターの投稿から集めています。すべての記録に出典と信頼度を付けています。",
+    "en": "Who named it, when, and where — a sourced archive of aroid origins. Species are cross-checked against botanical name databases and primary literature for author, year and type locality; hybrids and clones gather breeders and parentage from collector contributions. Every record carries its sources and a trust score."
   },
   "colophon_k1": {
     "jp": "収録範囲",
@@ -1511,5 +1507,45 @@
   "private_note_detail": {
     "jp": "非公開の記録です。ほかの人には表示されません。",
     "en": "Private record — nobody else can see this."
+  },
+  "search_no_results_hint": {
+    "jp": "表記ゆれや別名でも探しています。まだ収録されていない品種かもしれません。",
+    "en": "We also match alternative spellings and synonyms. This entry may not be recorded yet."
+  },
+  "state_unrecorded": {
+    "jp": "未収録",
+    "en": "Unrecorded"
+  },
+  "state_researching": {
+    "jp": "調査中",
+    "en": "Researching"
+  },
+  "new_entries_title": {
+    "jp": "新着記録",
+    "en": "New entries"
+  },
+  "new_entries_week": {
+    "jp": "今週 +{n} 件",
+    "en": "+{n} this week"
+  },
+  "colophon_cta": {
+    "jp": "あなたの交配を系統図に残す →",
+    "en": "Put your cross on the lineage tree →"
+  },
+  "lineage_add_parent": {
+    "jp": "登録する →",
+    "en": "Add this entry →"
+  },
+  "lineage_missing": {
+    "jp": "未収録",
+    "en": "Not recorded"
+  },
+  "ledger_date": {
+    "jp": "日付",
+    "en": "Date"
+  },
+  "nav_locality": {
+    "jp": "産地",
+    "en": "Localities"
   }
 }

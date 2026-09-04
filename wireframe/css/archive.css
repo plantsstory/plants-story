@@ -647,3 +647,32 @@ dialog.dialog-clean { margin: auto; }
 .private-toggle { border: 1px solid var(--color-rule); border-radius: var(--radius-sm); padding: var(--space-sm) var(--space-md); background: var(--color-paper); }
 .private-toggle .form-radio { margin: 0; }
 .private-note { color: var(--color-accent-warm); margin: calc(-1 * var(--space-sm)) 0 var(--space-md); }
+
+/* new-entries ledger + missing parent CTA */
+#new-entries-count { color: var(--color-accent-warm); }
+.lineage__add { display: inline-block; margin-top: 5px; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid var(--color-accent-warm); color: var(--color-accent-warm); }
+.lineage__add:hover { color: var(--color-ink); border-color: var(--color-ink); }
+.cultivar-row__state { font-size: 0.66rem; color: var(--color-mid); }
+.footer__lang { margin-top: var(--space-sm); }
+.footer__lang .header__lang { border-color: var(--color-rule-strong); color: var(--color-mid); }
+
+/* unified "unrecorded" sheet */
+.sheet { border: 1px dashed var(--color-rule-strong); border-radius: var(--radius-sm); background: var(--color-paper-2); padding: var(--space-xl) var(--space-lg); text-align: center; }
+.sheet__title { font-family: var(--font-display); font-weight: 600; font-size: 1.2rem; margin: 0 0 var(--space-xs); color: var(--color-ink); }
+.sheet__note { margin: 0 0 var(--space-md); color: var(--color-mid); }
+.sheet__cta { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid var(--color-ink); padding-bottom: 2px; }
+.sheet__cta:hover { color: var(--color-primary); border-color: var(--color-primary); }
+
+/* mobile: 44px targets on touch devices (M-C) */
+@media (pointer: coarse) {
+  .chip, .page-link, .index__toggle, .genus-tab, .footer__links a, .header__hamburger, .gallery-carousel__arrow { min-height: 44px; }
+  .chip, .page-link { display: inline-flex; align-items: center; }
+  .gallery-carousel__arrow { min-width: 44px; }
+}
+/* M-B: the trust bar is noise on a narrow row — keep the number only */
+@media (max-width: 640px) {
+  .cultivar-row__meta .trust__bar { display: none; }
+  .ledger-table .trust__bar { display: none; }
+}
+/* timeline axis hidden a bit earlier (design M) */
+@media (max-width: 700px) { .timeline__axis { display: none; } }

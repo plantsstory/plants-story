@@ -386,12 +386,21 @@
      ENTRIES LEDGER (replaces "recently updated" cards)
      ============================================================ */
   var _ledgerArgs = null;
-  window.renderEntriesLedger = function (grid, items, thumbMap) {
-    _ledgerArgs = [grid, items, thumbMap];
+  window.renderEntriesLedger = function (grid, items, thumbMap, opts) {
+    _ledgerArgs = [grid, items, thumbMap, opts];
     thumbMap = thumbMap || {};
+    opts = opts || {};
     var baseUrl = window._SUPABASE_URL || '';
+    // The front page ledger is a record of the archive growing: show the date
+    var withDate = !!opts.showDate;
+    if (withDate) {
+      var weekAgo = Date.now() - 7 * 864e5;
+      var week = items.filter(function (it) { return new Date(it.created_at || it.updated_at || 0).getTime() >= weekAgo; }).length;
+      var countEl = document.getElementById('new-entries-count');
+      if (countEl) countEl.textContent = week > 0 ? T('new_entries_week').replace('{n}', week) : '';
+    }
     var html = '<div class="overflow-auto"><table class="ledger-table"><thead><tr>'
-      + '<th>' + esc(T('ledger_no')) + '</th><th>' + esc(T('ledger_name')) + '</th><th class="ledger-table__cell-type">' + esc(T('ledger_type')) + '</th>'
+      + '<th>' + esc(T(withDate ? 'ledger_date' : 'ledger_no')) + '</th><th>' + esc(T('ledger_name')) + '</th><th class="ledger-table__cell-type">' + esc(T('ledger_type')) + '</th>'
       + '<th>' + esc(T('ledger_meta')) + '</th><th class="right">' + esc(T('ledger_trust')) + '</th></tr></thead><tbody>';
     items.forEach(function (item, i) {
       var origins = (item.origins || []);
@@ -401,9 +410,13 @@
       var bi = (typeof getBadgeInfo === 'function') ? getBadgeInfo(d.type, d.fullName) : { cls: 'badge--' + d.type, txt: d.type };
       var trustCls = (typeof getTrustClass === 'function') ? getTrustClass(d.trust) : '';
       var no = d.id ? String(d.id).padStart(3, '0') : String(i + 1).padStart(2, '0');
+      if (withDate) {
+        var stamp = item.created_at || item.updated_at || '';
+        no = stamp ? fmtDate(stamp).slice(5) : '—';   // MM.DD
+      }
       var thumb = thumbMap[d.displayName] && baseUrl ? baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[d.displayName] : '';
       html += '<tr role="link" tabindex="0" data-nav="cultivar" data-key="' + esc(d.fullName) + '">';
-      html += '<td class="ledger-table__no">' + no + '</td>';
+      html += '<td class="ledger-table__no">' + esc(no) + '</td>';
       html += '<td class="ledger-table__cell-name"><div class="flex-center-sm">' + (thumb ? '<img class="ledger-table__thumb" src="' + esc(thumb) + '" alt="" loading="lazy" decoding="async">' : '') + '<span class="ledger-table__name">' + esc(d.displayName) + '</span></div></td>';
       html += '<td class="ledger-table__cell-type"><span class="badge ' + esc(bi.cls) + '">' + esc(bi.txt) + '</span></td>';
       var cite = citeHtml(d);
@@ -530,6 +543,11 @@
     var label = d ? d.displayName : clean(name);
     if (!label) label = T('lineage_unknown');
     var inner = '<span class="lineage__name">' + esc(label) + '</span>';
+    // A parent that is only a name: invite the reader to record it
+    if (!d && label !== T('lineage_unknown')) {
+      inner += '<span class="lineage__meta mono">' + esc(T('lineage_missing')) + '</span>'
+        + '<a class="lineage__add" href="' + esc(base + 'contribute') + '" data-nav="contribute" data-prefill="' + esc(label) + '">' + esc(T('lineage_add_parent')) + '</a>';
+    }
     if (d) {
       var meta = d.type === 'species' ? joinParts([d.pubYear, d.country]) : joinParts([TYPE_LABEL[d.type] ? (lang() === 'en' ? TYPE_LABEL[d.type][1] : TYPE_LABEL[d.type][0]) : '', d.year]);
       if (meta) inner += '<span class="lineage__meta mono">' + esc(meta) + '</span>';
