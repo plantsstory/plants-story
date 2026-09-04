@@ -1008,7 +1008,7 @@
       </div>
 
       <!-- 閲覧方法 -->
-      <h2>&#x1F50D; 品種情報の閲覧</h2>
+      <h2>品種情報の閲覧</h2>
       <ol class="terms-list">
         <li><strong>トップページ</strong>で属（Genus）を選択します。現在はAnthuriumを掲載しています（今後拡充予定）。</li>
         <li>品種一覧から気になる品種をタップすると、<strong>詳細ページ</strong>が開きます。</li>
@@ -1017,7 +1017,7 @@
       </ol>
 
       <!-- 投稿方法 -->
-      <h2>&#x1F4DD; 品種情報の投稿</h2>
+      <h2>品種情報の投稿</h2>
       <ol class="terms-list">
         <li>ナビゲーションの「<strong>投稿</strong>」をタップして投稿ページを開きます。</li>
         <li><strong>属</strong>を選択し、<strong>品種名</strong>を入力します。</li>
@@ -1030,11 +1030,21 @@
       <p class="text-sm text-muted">※ 投稿にはGoogleアカウントでのログインが必要です。自分の投稿は後からいつでも編集・削除できます。</p>
 
       <!-- タイプ別説明 -->
-      <h2>&#x1F331; 品種タイプの違い</h2>
+      <h2>品種タイプの違い</h2>
+      <p>4つの区分は「その名前が何を指しているか」で決まります。迷ったら次の順に確認してください。</p>
+      <ol class="terms-list">
+        <li>学術的に発表された学名（属名＋種小名）か、sp. / aff. / cf. 付きの未同定株 → <strong>原種</strong></li>
+        <li>'クォート' 付きの園芸名で、その名前を名乗る株が <strong>1個体を株分け・組織培養で増やしたものだけ</strong> → <strong>クローン</strong></li>
+        <li>'クォート' 付きの園芸名で、<strong>同じ交配式の実生兄弟がまとめて</strong>その名前で流通している → <strong>ハイブリッド</strong></li>
+        <li>まだ名前が無く、自分が播いた実生の記録として登録したい → <strong>実生</strong></li>
+      </ol>
+      <p class="text-sm text-muted">覚え方: 「その名前の株を種から増やしても同じ名前で売られているか」。売られていればハイブリッド、売られていなければクローンです。</p>
 
       <div class="card mb-md">
-        <h3>&#x1F33F; 原種（Species）</h3>
-        <p>学術的に記載された種のほか、未記載種（sp.）、亜種（ssp.）、近縁種（cf.）、類似種（aff.）も含みます。</p>
+        <h3>原種（Species）</h3>
+        <p>自然界に存在する種、およびその種と考えられる株です。学術的に記載され学名が付いた種（例: <i>Anthurium crystallinum</i>）のほか、未記載の株（sp.）、既知種に近縁だが別種と思われる株（aff.）、既知種と思われるが確定できない株（cf.）、亜種・変種（ssp. / var.）を含みます。人が交配して作った株は、親が同じ種どうしでも原種ではありません。</p>
+        <p class="text-sm mt-sm"><strong>名前の書き方:</strong> 属名＋種小名（<i>Anthurium crystallinum</i>）。未同定株は <i>Anthurium</i> sp. "Peru" のように sp. の後に産地や入手元をダブルクォートで添えます。sp. / aff. / cf. の後には半角スペースを入れます。</p>
+        <p class="text-sm mt-sm"><strong>判定例:</strong> <i>Anthurium crystallinum</i>（Linden &amp; André, 1873 記載）→ 原種。<i>Anthurium</i> aff. <i>besseae</i>（besseae に近いが別物と考えられる株）→ 原種（aff.）。名前は推測せず aff. のまま登録します。<i>Monstera obliqua</i> "Peru" → 原種の産地フォームであってクローン名ではありません。</p>
         <p class="text-sm font-bold mt-sm">入力項目:</p>
         <ul class="terms-list">
           <li><strong>発表者（Author）</strong> — 学名を発表した人物（例: Engl.）</li>
@@ -1049,8 +1059,10 @@
       </div>
 
       <div class="card mb-md">
-        <h3>&#x1F33A; ハイブリッド（Hybrid）</h3>
-        <p>交配式につく品種名です。特定の親の組み合わせで作られたF1世代の、不特定多数の選抜個体につけられる名前を指します。</p>
+        <h3>ハイブリッド（Hybrid）</h3>
+        <p>特定の交配式（母親 × 父親）から得られた<strong>実生群</strong>に付けられた名前です。同じ名前を名乗る株が複数あり、それぞれ遺伝的に異なる兄弟株です。交配者が選抜個体に名前を付けたあとも、同じ交配を繰り返して同じ名前で流通させる場合はこちらに当たります。</p>
+        <p class="text-sm mt-sm"><strong>名前の書き方:</strong> 属名＋'ハイブリッド名'（<i>Anthurium</i> 'Mystique A88'）。交配式は必須で、親が登録済みならその品種ページにリンクされます。</p>
+        <p class="text-sm mt-sm"><strong>判定例:</strong> <i>Anthurium</i> 'Mystique A88'（'Dorayaki' × 'Red Crystallinum'、Mr. Chandra 作出。流通株は同じ交配式の F1 兄弟）→ ハイブリッド。<i>Philodendron</i> 'Glorious'（<i>gloriosum</i> × <i>melanochrysum</i>、種子・組織培養で大量流通）→ ハイブリッド。名前の付いていない「'Dark Mama' × <i>papillilaminum</i>」のような交配式そのものは、ハイブリッドではなく実生として登録します。</p>
         <p class="text-sm font-bold mt-sm">入力項目:</p>
         <ul class="terms-list">
           <li><strong>作出者/ナーセリー</strong> — 交配を行った人物や園芸場（例: Ecuagenera）</li>
@@ -1061,8 +1073,10 @@
       </div>
 
       <div class="card mb-md">
-        <h3>&#x1F3F7; クローン（Clone）</h3>
-        <p>特定の個体につけられた品種名です。self交配やF2以降の個体の画像も掲載可能です。</p>
+        <h3>クローン（Clone）</h3>
+        <p><strong>たった1個体</strong>に付けられた名前です。その名前を名乗ってよいのは、その個体を株分け・挿し木・組織培養で増やした株だけです。交配親が判明していても、名前が「その交配の全兄弟」ではなく「選抜された1株とそのコピー」を指すならクローンです。原種の中から選ばれた特別な個体（斑入り、暗色個体）や、組織培養で生じた変異個体もクローンです。</p>
+        <p class="text-sm mt-sm"><strong>名前の書き方:</strong> 属名［＋種小名］＋'クローン名'。単一の原種に由来する場合は種小名を必ず含めます（<i>Monstera deliciosa</i> 'Thai Constellation'）。種間交配や親不明の場合は属名＋'クローン名'（<i>Anthurium</i> 'Ace of Spades'）。</p>
+        <p class="text-sm mt-sm"><strong>判定例:</strong> <i>Anthurium</i> 'Dark Mama'（母株からの株分け・クローンとして流通。'Dark Mama' の自家受粉実生は 'Dark Mama' ではなく「'Dark Mama' self」の実生）→ クローン。<i>Anthurium</i> 'Ace of Spades'（Denis Rotolante が実生から1株を選抜・命名。交配式は不明でよい）→ クローン。<i>Monstera deliciosa</i> 'Thai Constellation'（組織培養で生じた斑入り変異個体）→ クローン。</p>
         <p class="text-sm font-bold mt-sm">入力項目:</p>
         <ul class="terms-list">
           <li><strong>名付けた人物</strong> — クローン名をつけた人物</li>
@@ -1073,8 +1087,10 @@
       </div>
 
       <div class="card mb-md">
-        <h3>&#x1F331; 実生（Seedling）</h3>
-        <p>趣味家の播種記録を公開するためのタイプです。自分で交配・播種した実生の記録を共有できます。</p>
+        <h3>実生（Seedling）</h3>
+        <p>趣味家が自分で交配・播種した株の<strong>記録</strong>です。名前はまだ無く、交配式と播種日、親株の写真で識別します。将来その中の1株に名前を付けて株分けで配布するなら、その時点でクローンとして新規登録します。実生群全体に名前を付けて同じ交配を繰り返し流通させるならハイブリッドです。</p>
+        <p class="text-sm mt-sm"><strong>名前の書き方:</strong> 属名＋交配式（<i>Anthurium forgetii</i> × 'Titanium'）。交配式全体をクォートで囲まないでください。自分の管理番号（HR1 など）はダブルクォートで添えます。</p>
+        <p class="text-sm mt-sm"><strong>判定例:</strong> <i>Anthurium carlablackiae</i> "HR1" × <i>carlablackiae</i> "HR2"（同種どうしの交配でも原種ではない）→ 実生。<i>Anthurium forgetii</i> × 'Titanium' → 実生。ナーセリーが同じ交配を毎年繰り返して 'Galaxy' の名で販売 → ハイブリッド。</p>
         <p class="text-sm font-bold mt-sm">入力項目:</p>
         <ul class="terms-list">
           <li><strong>作出者（Creator/Breeder）</strong> — 播種した人物</li>
@@ -1084,7 +1100,7 @@
       </div>
 
       <!-- 編集方法 -->
-      <h2>&#x270F; 品種情報の編集</h2>
+      <h2>品種情報の編集</h2>
       <ol class="terms-list">
         <li>投稿したときと同じGoogleアカウントでログインします。</li>
         <li>自分が投稿した品種の<strong>詳細ページ</strong>を開き、「編集」ボタンをタップします。</li>
@@ -1093,7 +1109,7 @@
       <p class="text-sm text-muted">※ 編集・削除ができるのは自分が投稿した品種のみです。</p>
 
       <!-- 由来の追加 -->
-      <h2>&#x1F4DA; 由来情報の追加</h2>
+      <h2>由来情報の追加</h2>
       <p>既存の品種に新しい由来情報を追加できます:</p>
       <ol class="terms-list">
         <li>品種の詳細ページで「<strong>+ 由来を追加</strong>」ボタンをタップします。</li>
@@ -1103,7 +1119,7 @@
       </ol>
 
       <!-- 画像追加 -->
-      <h2>&#x1F4F7; 画像の追加</h2>
+      <h2>画像の追加</h2>
       <ol class="terms-list">
         <li>品種詳細ページの「<strong>画像追加</strong>」ボタンをタップします。</li>
         <li>画像をアップロードし、キャプション（説明）やSNSリンクを入力します。</li>
@@ -1111,7 +1127,7 @@
       </ol>
 
       <!-- その他の機能 -->
-      <h2>&#x2B50; その他の機能</h2>
+      <h2>その他の機能</h2>
       <ul class="terms-list">
         <li><strong>お気に入り</strong> — 気になる品種をお気に入りに追加して、後からすぐにアクセスできます。</li>
         <li><strong>シェア</strong> — 品種ページをSNSで共有できます（X、LINE、コピー）。</li>
@@ -1354,7 +1370,17 @@
         <p class="text-sm mb-sm" id="paywall-selected-plan"></p>
         <div id="payjp-card-element" class="payjp-card-element"></div>
         <p id="payjp-card-error" class="text-sm" style="color:#c0392b;min-height:1.2em;margin:6px 0;"></p>
-        <button class="btn btn--primary" id="paywall-pay-btn" type="button" style="width:100%;">登録して支払う</button>
+        <div class="paywall-modal__legal text-xs" id="paywall-legal">
+          <p><strong>お申込み内容の確認</strong>（特定商取引法に基づく表示）</p>
+          <ul class="terms-list">
+            <li>料金: 月額プラン 240円（税込）／年額プラン 2,500円（税込）。決済はカード払いのみ。</li>
+            <li>契約期間: 月額は1か月、年額は1年。<strong>期間満了時に同じ条件で自動更新</strong>され、更新日に翌期間分が請求されます。</li>
+            <li>解約: プロフィール編集ページの「サブスクリプションを解約」からいつでも解約できます。解約後も当期間の終了日まで利用でき、日割り返金はありません。</li>
+            <li>提供内容: 実生（My Seedlings）投稿の上限解除。閲覧はどなたでも無料です。</li>
+            <li>詳細は <a href="#" data-nav="tokushoho">特定商取引法に基づく表記</a> と <a href="#" data-nav="terms">利用規約</a> をご確認ください。</li>
+          </ul>
+        </div>
+        <button class="btn btn--primary" id="paywall-pay-btn" type="button" style="width:100%;">上記に同意して登録・支払う</button>
         <button class="btn btn--outline mt-sm" id="paywall-back-btn" type="button" style="width:100%;">プラン選択に戻る</button>
       </div>
       <p class="paywall-modal__note">決済はPAY.JPにより安全に処理されます。カード情報は当サイトのサーバーには保存されません。解約後も投稿済みの実生は閲覧・削除が可能です。</p>
