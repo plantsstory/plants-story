@@ -130,8 +130,8 @@
 | ID | タスク | 担当 | 期限 | 効果 |
 |---|---|---|---|---|
 | T20 | **AI 再調査リクエスト**: migration 適用、詳細ページのボタン + 理由入力、admin「再調査リクエスト」タブ（承認→`research-origin` 実行、却下+note）、会員は48h/一般7日の表示、`RESEARCH_DAILY_CAP=15`、一般の登録起点 3回/日・10回/月（`research-origin/index.ts`, `admin.html`, `pages.js`） | Claude Code | 9/7 | 由来無料の約束を機能にする |
-| T21 | **削除バッチ1 + モバイル**: お気に入り・画像投票・トップ道具棚・トップ実生区画・AdSense 枠・YouTube 検索・ユーザー名検索・i18n 死にキー・`trial-reminder`・Amazon リンク・共有 FB/LINE・`hero-mist.jpg`・AI バッジ → 状態列、EN/使い方をフッターへ、M-A/M-B/M-C、規約5・6条とガイドの投票文言 → プレビュー → 本番 | Claude Code → オーナー確認 | 9/9 | 「参加装置」より「記録」 |
-| T22 | **定義文 + 新着記録 + 未収録の親 CTA**: `hero_desc`/`about_mission_text`/`colophon_p1`/meta/og/静的スタブ既定文を §0 に置換、`#recently-updated-grid` → 新着記録台帳（実生含む、今週 +n）、系統ブロックの未リンク親に「登録する →」、colophon 縮約、検索0件 `.sheet--search` | Claude Code | 9/10 | 戻る理由・投稿導線 |
+| T21 | **完了 09-05**（YouTube 検索は管理者専用・未使用時は無コストのため保留） 削除バッチ1 + モバイル: お気に入り・画像投票・トップ道具棚・トップ実生区画・AdSense 枠・YouTube 検索・ユーザー名検索・i18n 死にキー・`trial-reminder`・Amazon リンク・共有 FB/LINE・`hero-mist.jpg`・AI バッジ → 状態列、EN/使い方をフッターへ、M-A/M-B/M-C、規約5・6条とガイドの投票文言 → プレビュー → 本番 | Claude Code → オーナー確認 | 9/9 | 「参加装置」より「記録」 |
+| T22 | **完了 09-05** 定義文 + 新着記録 + 未収録の親 CTA: `hero_desc`/`about_mission_text`/`colophon_p1`/meta/og/静的スタブ既定文を §0 に置換、`#recently-updated-grid` → 新着記録台帳（実生含む、今週 +n）、系統ブロックの未リンク親に「登録する →」、colophon 縮約、検索0件 `.sheet--search` | Claude Code | 9/10 | 戻る理由・投稿導線 |
 | T23 | **品質ゲート + 折り畳み + Phase A 残 P1〜P3 + データ修正**: `scripts/lib/record-gate.js`、台帳「未収録」、詳細の記録未収録シート + noindex、sitemap 除外、属カード件数、AI 単独 <40 の `<details>`、admin「未収録一覧」タブ、`species_qualifier` バッジ、`p_meta` RPC、`#formula-complex`、`origin_type` 廃止、§3 の [即] 修正 SQL、`cultivar_images` 名寄せ | Claude Code | 9/13 | 信頼（判断基準②） |
 | T24 | **Anthurium 20件**: 原種9件を管理者で一括登録（GBIF 経路、≈200円）→ オーナー投稿5件の誤り確認 → 第3週8件 → antolakii aliases | Claude Code + オーナー | 9/20 | 検索需要の直撃 |
 | T25 | **別名・誤称ページ `/names/`** + P4（`aliases` 検索・旧綴り URL 解決・JSON-LD・台帳の `= debilis` 行）+ 静的スタブ・sitemap | Claude Code | 9/17 | 購入前検索 |
