@@ -1689,13 +1689,13 @@ serve(async (req: Request) => {
         .select("id", { count: "exact", head: true })
         .eq("user_id", authUser.id)
         .gte("requested_at", oneDayAgoAll);
-      if ((userDayCount ?? 0) >= 5) {
+      if ((userDayCount ?? 0) >= 3) {
         return new Response(
-          JSON.stringify({ error: "AI 調査は1日5回までです。明日以降にお試しください。" }),
+          JSON.stringify({ error: "AI 調査は1日3回までです。明日以降にお試しください。" }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      const dailyCap = parseInt(Deno.env.get("RESEARCH_DAILY_CAP") || "30", 10);
+      const dailyCap = parseInt(Deno.env.get("RESEARCH_DAILY_CAP") || "15", 10);
       const { count: siteDayCount } = await serviceClient
         .from("research_origin_requests")
         .select("id", { count: "exact", head: true })
