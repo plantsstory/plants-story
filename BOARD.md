@@ -55,6 +55,8 @@
 
 表記ルール（ICNCP 準拠）: 属名・種小名はイタリック、修飾子（sp. aff. cf.）はローマン + 半角スペース、栽培品種名は **半角シングルクォート・各語頭大文字**、非公式名・管理番号・産地は **ダブルクォート**、交配式は `母 × 父`（× は U+00D7、前後スペース）、異名・旧綴りは `aliases`、和名は `japanese_name`（10月）、英語 UI は Species / Hybrid / Clone / Seedling（"Original species" は使わない）、由来文にサイズ・生育速度を書かない、不明は NULL（表示で「不明」）、推測名を作らない。
 
+**未記載種・非公式名の扱い（09-04 決定）**: IPNI/POWO/GBIF に無い名前は「未記載種 / 暫定名 / 未解決」として登録し、記載者・発表年・タイプ産地は空欄のまま（捏造しない）。代わりに **名前の状態・報告産地・近縁種・導入者・流通名・名前の由来** を記録する。情報源は A 学術誌 → B IAS・Vannini 等の専門家記事（aroid.org / exoticrainforest / exoticaesoterica）→ C 導入ナーセリー・ブリーダー本人の発信・複数の独立したコレクター証言、の順で採用し、**Tier は実際に引用した URL のドメインから機械的に決める**（モデルの自己申告より下げることはあっても上げない）。マーケットプレイスと匿名ブログは不採用。実装: research-origin の `buildUndescribedSpeciesPrompt` / `tierFromUrls`。例: *A.* "antolakii"（Vannini & Croat ined.、BVEP、aff. papillilaminum、Tier B 67）。
+
 「種小名必須」ルールの適用範囲: **単一の原種に由来する品種のみ必須**。種間交配・親不明の Clone/Hybrid は属名 + '名前'。
 
 スキーマ: **Phase A（9月）** `cultivars` に NULL 許容で追加 — `species_qualifier`, `aliases[]`, `tags[]`, `name_status`, `locality`, `parent_a_id/parent_b_id`, `parent_a_text/parent_b_text`, `formula_status`, `selected_from_id`。バッジは `species_qualifier` から表示、`structured.origin_type` は廃止し `cultivars.type` を正とする。**Phase B（10月）** `species_epithet`, `cultivar_epithet`, `display_name`, `propagation`, `japanese_name` と投稿フォームの分割入力（属 / 種小名 / 修飾子 / 品種名 / 管理番号）。
@@ -137,5 +139,6 @@
 
 ## 9. 決定履歴
 
+- **2026-09-04（夜）**: 未記載種・非公式名の調査経路と出典ドメインによる Tier 判定を導入（antolakii 23→67）。GBIF 照合の取りこぼし（rubrijuvenile）を修正。
 - **2026-09-04（同日追記）**: オーナー承認で Field Archive を本番反映。オーナー方針「開業届・PAY.JP より先にクオリティ」を受け、課金系 T4/T11 は後回し。T2 データ修正・スキーマ Phase A・人物ページ・系統図・産地索引・用語集を同日デプロイ。'King of Spades' は Clone 確定（名前はオリジナル個体を指す一般則）、'Angels dream' は綴り現状維持。
 - **2026-09-04（第1回）**: 目標 月1万円を12月末に設定。閲覧永久無料を確定。支援者プラン 500/5,000円を新設決定。由来調査リクエスト 500円・ショップ掲載 1,000円/月を10月開始と決定。AdSense・Amazon は当面見送り。4区分維持と判定軸・ICNCP 表記ルール・スキーマ2段階を採択。育て方は書かない。9月コンテンツ順（人物→系統図→産地→用語集→誤称→英語）。Field Archive をサイトのデザイン方針として採択（本番反映はオーナー承認後）。Monstera 公開は10月、Platycerium は保留。

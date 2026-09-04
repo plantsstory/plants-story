@@ -33,7 +33,7 @@ const TIER_CONFIG: Record<string, { base_min: number; base_max: number; label_en
 const DOMAIN_TIERS: Array<[RegExp, string]> = [
   [/(^|\.)(phytotaxa|biotaxa|jstor|bioone|doi|springer|wiley|tandfonline|cambridge|sciencedirect|mobot|tropicos|ipni|kew|gbif|plantsoftheworldonline|biodiversitylibrary)\.(org|com|net)$/i, "A"],
   [/aroideana/i, "A"],
-  [/(^|\.)(aroid|exoticrainforest|internationalaroidsociety)\.(org|com)$/i, "B"],
+  [/(^|\.)(aroid|exoticrainforest|exoticaesoterica|internationalaroidsociety)\.(org|com)$/i, "B"],
   [/(^|\.)(researchgate|academia|semanticscholar)\.(net|edu|org)$/i, "B"],
   [/(^|\.)(ecuagenera|nsetropicals|carnivero|aroidgreenhouses|tezulaplants|steves-leaves|logees|gabriellaplants)\.(com|net)$/i, "C"],
   [/(^|\.)(instagram|facebook|youtube|youtu|reddit|threads|tiktok|x|twitter|wikipedia|wikimedia)\.(com|be|org)$/i, "C"],
