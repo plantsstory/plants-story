@@ -15,9 +15,9 @@ if ('serviceWorker' in navigator) {
       var banner = document.createElement('div');
       banner.id = 'sw-update-banner';
       banner.setAttribute('role', 'status');
-      banner.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:10000;background:#283532;color:#fff;padding:10px 16px;border-radius:999px;display:flex;gap:12px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,0.25);font-size:14px;';
+      banner.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:10000;background:#1E2622;color:#F4F1EA;padding:10px 16px;border-radius:2px;display:flex;gap:12px;align-items:center;box-shadow:0 6px 18px rgba(30,38,34,0.25);font-size:13px;font-family:inherit;';
       banner.innerHTML = '<span>新しいバージョンがあります</span>' +
-        '<button type="button" style="background:#34786A;color:#fff;border:none;border-radius:999px;padding:6px 14px;font-weight:600;cursor:pointer;">更新</button>' +
+        '<button type="button" style="background:#F4F1EA;color:#1E2622;border:1px solid #F4F1EA;border-radius:2px;padding:5px 12px;font-weight:600;cursor:pointer;font-family:inherit;">更新</button>' +
         '<button type="button" aria-label="閉じる" style="background:none;border:none;color:#fff;cursor:pointer;font-size:16px;">&times;</button>';
       var btns = banner.querySelectorAll('button');
       btns[0].addEventListener('click', function() { window.location.reload(); });
