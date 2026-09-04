@@ -26,3 +26,6 @@ wireframe/contact/
 
 # Private notes
 ログイン情報メモ.txt
+
+# generated people stubs (CI)
+wireframe/people/
