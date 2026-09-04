@@ -508,7 +508,7 @@ function showGenus(genusName) {
 
 // ---- Path-based routing (History API) ----
 // Known simple pages (no sub-parameters)
-var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'favorites', 'mypost', 'guide'];
+var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'favorites', 'mypost', 'guide', 'glossary'];
 // Known genus names for URL mapping
 var knownGenera = []; // Populated dynamically from genera table
 // Base path: '/' on custom domain, '/plants-story/' on GitHub Pages
@@ -535,6 +535,7 @@ function buildPath(page, options) {
   }
   if (page === 'search' && options.q) return _basePath + 'search?q=' + encodeURIComponent(options.q);
   if (page === 'people') return _basePath + 'people' + (options.person ? '/' + encodeURIComponent(options.person) : '');
+  if (page === 'locality') return _basePath + 'locality' + (options.place ? '/' + encodeURIComponent(options.place) : '');
   if (simplePages.indexOf(page) !== -1) return _basePath + page;
   return _basePath;
 }
@@ -584,6 +585,9 @@ function parseRoute() {
   if (first === 'people') {
     return segments[1] ? { page: 'people', person: segments[1] } : { page: 'people' };
   }
+  if (first === 'locality') {
+    return segments[1] ? { page: 'locality', place: segments[1] } : { page: 'locality' };
+  }
 
   // Check simple pages
   if (first === 'search') {
@@ -607,6 +611,7 @@ function navigateTo(page, options, pushHistory) {
   }
   if (page === 'favorites') renderFavoritesPage();
   if (page === 'people' && typeof window.renderPeoplePage === 'function') window.renderPeoplePage(options.person || '');
+  if (page === 'locality' && typeof window.renderLocalityPage === 'function') window.renderLocalityPage(options.place || '');
   if (page === 'genus' && options.genus) showGenus(options.genus);
   if (page === 'cultivar' && options.cultivar && !options._skipUpdate) {
     // Find the cultivar row to pass badge info (used by popstate)
@@ -655,6 +660,8 @@ function navigateTo(page, options, pushHistory) {
       search: '検索結果 - ' + _defaultTitle,
       mypost: '投稿履歴 - ' + _defaultTitle,
       people: '人物索引 - ' + _defaultTitle,
+      locality: '産地索引 - ' + _defaultTitle,
+      glossary: '由来の用語集 - ' + _defaultTitle,
       'profile-edit': 'プロフィール編集 - ' + _defaultTitle
     };
     var pageDescriptions = {
@@ -669,7 +676,9 @@ function navigateTo(page, options, pushHistory) {
       contact: 'Aroid Originsへのお問い合わせ',
       search: 'アロイド植物の品種名で検索 - Anthurium, Monstera, Philodendronなど',
       mypost: 'あなたが投稿した品種の履歴',
-      people: 'アロイド品種の記載者・採集者・作出者の索引。人物ごとに関連する品種をたどれます'
+      people: 'アロイド品種の記載者・採集者・作出者の索引。人物ごとに関連する品種をたどれます',
+      locality: 'タイプ産地（国）ごとに原種をたどる索引。コロンビア、パナマ、ペルーなど',
+      glossary: 'sp. / aff. / cf.、記載者、タイプ産地、交配式、F1、クローン、TC など由来を読むための用語集'
     };
     if (page === 'genus' && options.genus) {
       var gName = options.genus.charAt(0).toUpperCase() + options.genus.slice(1);
@@ -718,7 +727,7 @@ function navigateTo(page, options, pushHistory) {
     history.replaceState(currentState, '');
 
     var routePath = buildPath(page, options);
-    history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar, userId: options.userId, username: options.username, q: options.q, person: options.person }, '', routePath);
+    history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar, userId: options.userId, username: options.username, q: options.q, person: options.person, place: options.place }, '', routePath);
     // Send GA4 page view for SPA navigation
     if (typeof gtag === 'function') {
       gtag('event', 'page_view', { page_location: location.href, page_title: document.title });
@@ -767,7 +776,7 @@ function handleInitialRoute() {
     navigateTo(state.page, state, false);
   }
   // Record initial state so back button works from first navigation
-  history.replaceState({ page: state.page, genus: state.genus, cultivar: state.cultivar, userId: state.userId, q: state.q, person: state.person }, '', buildPath(state.page, state));
+  history.replaceState({ page: state.page, genus: state.genus, cultivar: state.cultivar, userId: state.userId, q: state.q, person: state.person, place: state.place }, '', buildPath(state.page, state));
 }
 // Wait for genera to load before routing (genera create the DOM targets)
 if (window._generaLoaded) {

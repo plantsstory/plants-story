@@ -13,6 +13,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const people = require('./lib/people');
+const geo = require('./lib/geo');
 
 const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
@@ -138,6 +139,7 @@ async function main() {
     { dir: 'terms', title: '利用規約 | Aroid Origins', description: 'Aroid Originsの利用規約。投稿コンテンツの取り扱い、サブスクリプション、禁止行為について定めています。' },
     { dir: 'privacy', title: 'プライバシーポリシー | Aroid Origins', description: 'Aroid Originsの個人情報・Cookie・決済情報の取り扱いについて説明します。' },
     { dir: 'contact', title: 'お問い合わせ | Aroid Origins', description: 'Aroid Originsへのお問い合わせ・不具合報告・コンテンツ削除要請の窓口です。' },
+    { dir: 'glossary', title: '由来の用語集 — sp. / aff. / cf.、記載者、タイプ産地、交配式、クローン | Aroid Origins', description: 'アロイド品種の由来を読むための用語集。学名と記載、sp./aff./cf.、タイプ産地、交配式、F1、オリジナル個体、クローン、TC、流通名、信頼度 Tier の意味を解説します。' },
   ];
   for (const r of staticRoutes) {
     const url = SITE + '/' + r.dir + '/';
@@ -297,6 +299,48 @@ async function main() {
     ph = ph.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="' + escAttr(p.key) + '"><ul>' + links + '</ul></nav>');
     fs.mkdirSync(path.join(WIREFRAME, 'people', dir), { recursive: true });
     fs.writeFileSync(path.join(WIREFRAME, 'people', dir, 'index.html'), ph, 'utf8');
+    written++;
+  }
+
+  // ---- Locality pages (/locality/ and /locality/<slug>/) ----
+  const localityUrl = SITE + '/locality/';
+  const localities = geo.localityIndex(publicCultivars);
+  let lh = buildStub(template, {
+    title: '産地索引 — タイプ産地でたどる原種 | Aroid Origins',
+    description: '原種のタイプ産地（国）ごとの索引。' + localities.map(l => l.key + ' ' + l.rows.length + '種').join('、') + '。',
+    url: localityUrl,
+    ogType: 'website',
+    jsonLd: [{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': [
+      { '@type': 'ListItem', 'position': 1, 'name': 'Aroid Origins', 'item': SITE + '/' },
+      { '@type': 'ListItem', 'position': 2, 'name': '産地索引', 'item': localityUrl } ] }]
+  });
+  lh = lh.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="localities"><ul>' + localities.map(l => '<li><a href="' + localityUrl + encodeURIComponent(l.slug) + '/">' + escAttr(l.key) + '</a></li>').join('') + '</ul></nav>');
+  fs.mkdirSync(path.join(WIREFRAME, 'locality'), { recursive: true });
+  fs.writeFileSync(path.join(WIREFRAME, 'locality', 'index.html'), lh, 'utf8');
+  written++;
+  for (const l of localities) {
+    const dir = safeDirName(l.slug);
+    if (!dir) { skipped++; continue; }
+    const url = localityUrl + encodeURIComponent(l.slug) + '/';
+    const names = l.rows.map(r => r.cultivar_name);
+    const links = l.rows.map(r => {
+      const g = r.genus || 'Anthurium';
+      const rest = String(r.cultivar_name).startsWith(g + ' ') ? String(r.cultivar_name).slice(g.length + 1) : String(r.cultivar_name);
+      return '<li><a href="' + SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(rest) + '/">' + escAttr(r.cultivar_name) + '</a></li>';
+    }).join('');
+    let ph = buildStub(template, {
+      title: l.key + ' をタイプ産地とする原種 ' + l.rows.length + '種 | Aroid Origins',
+      description: l.key + ' で採集されたタイプ標本に基づいて記載されたアロイド原種: ' + names.slice(0, 6).join('、') + (names.length > 6 ? ' ほか' : '') + '。記載者・発表年・産地から由来をたどる索引。',
+      url: url,
+      ogType: 'website',
+      jsonLd: [{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': [
+        { '@type': 'ListItem', 'position': 1, 'name': 'Aroid Origins', 'item': SITE + '/' },
+        { '@type': 'ListItem', 'position': 2, 'name': '産地索引', 'item': localityUrl },
+        { '@type': 'ListItem', 'position': 3, 'name': l.key, 'item': url } ] }]
+    });
+    ph = ph.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="' + escAttr(l.key) + '"><ul>' + links + '</ul></nav>');
+    fs.mkdirSync(path.join(WIREFRAME, 'locality', dir), { recursive: true });
+    fs.writeFileSync(path.join(WIREFRAME, 'locality', dir, 'index.html'), ph, 'utf8');
     written++;
   }
 

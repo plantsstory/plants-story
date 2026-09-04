@@ -14,7 +14,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.amazon.co.jp https://*.media-amazon.com https://*.yahoo.co.jp; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJK72JH471"></script>
-  <script src="js/gtag-init.js?v=20260904c"></script>
+  <script src="js/gtag-init.js?v=20260904d"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="Aroid Origins は、Anthuriumなどアロイド植物の品種の由来や歴史をコミュニティで収集・共有するプラットフォームです。">
   <meta property="og:title" content="Aroid Origins">
@@ -55,13 +55,13 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20260904c">
-  <link rel="stylesheet" href="css/reset.css?v=20260904c">
-  <link rel="stylesheet" href="css/layout.css?v=20260904c">
-  <link rel="stylesheet" href="css/components.css?v=20260904c">
-  <link rel="stylesheet" href="css/pages.css?v=20260904c">
-  <link rel="stylesheet" href="css/utilities.css?v=20260904c">
-  <link rel="stylesheet" href="css/archive.css?v=20260904c">
+  <link rel="stylesheet" href="css/variables.css?v=20260904d">
+  <link rel="stylesheet" href="css/reset.css?v=20260904d">
+  <link rel="stylesheet" href="css/layout.css?v=20260904d">
+  <link rel="stylesheet" href="css/components.css?v=20260904d">
+  <link rel="stylesheet" href="css/pages.css?v=20260904d">
+  <link rel="stylesheet" href="css/utilities.css?v=20260904d">
+  <link rel="stylesheet" href="css/archive.css?v=20260904d">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -185,6 +185,7 @@
             <dt data-i18n="colophon_k1">収録範囲</dt><dd data-i18n="colophon_v1">Anthurium（Monstera・Philodendron は準備中）</dd>
             <dt data-i18n="colophon_k2">一次資料</dt><dd data-i18n="colophon_v2">IPNI・POWO・GBIF、原記載論文、育種家の公開情報</dd>
             <dt data-i18n="colophon_k3">信頼度</dt><dd data-i18n="colophon_v3">出典の階層（S〜D）と投票から算出</dd>
+            <dt data-i18n="colophon_k4">読み方</dt><dd><a href="/glossary/" data-nav="glossary" data-i18n="glossary_title">由来の用語集</a></dd>
           </dl>
           <div class="colophon__actions">
             <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="add_cultivar">+ 品種を追加</a>
@@ -1200,6 +1201,74 @@
        PAGE: FAVORITES
        ======================================== -->
   <!-- ========================================
+       PAGE: LOCALITY (タイプ産地の索引)
+       ======================================== -->
+  <section id="page-locality" class="page">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="パンくずリスト">
+        <a href="/" data-nav="top">Home</a>
+        <span class="breadcrumb__sep">/</span>
+        <a href="/locality/" data-nav="locality" data-i18n="locality_title">産地索引</a>
+        <span class="breadcrumb__sep d-none" id="locality-crumb-sep">/</span>
+        <span id="locality-crumb-name"></span>
+      </nav>
+      <h1 class="section-title" id="locality-title">産地索引</h1>
+      <div id="locality-body"><div class="loading-text p-xl">…</div></div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       PAGE: GLOSSARY (由来を読むための用語集)
+       ======================================== -->
+  <section id="page-glossary" class="page">
+    <div class="container container--narrow legal-page">
+      <nav class="breadcrumb" aria-label="パンくずリスト"><a href="/" data-nav="top">Home</a><span class="breadcrumb__sep">/</span><span data-i18n="glossary_title">用語集</span></nav>
+      <h1 data-i18n="glossary_title">由来の用語集</h1>
+      <p class="legal-date" data-i18n="glossary_intro">品種の由来ページに出てくる言葉を、このサイトでの使い方に沿って説明します。</p>
+
+      <h2>学名と記載</h2>
+      <dl class="glossary">
+        <dt>学名</dt><dd>属名＋種小名からなるラテン語の名前（例: <i>Anthurium crystallinum</i>）。属名は大文字で始め、両方をイタリックで書きます。</dd>
+        <dt>記載（原記載）</dt><dd>その種を新種として初めて学術的に発表すること。その出版物を原記載（protologue）と呼びます。このサイトの「発表年」は原記載が出版された年です。</dd>
+        <dt>記載者</dt><dd>学名を発表した人。学名の後ろに略記で添えます（例: T.Moore、Croat）。括弧付きの記載者（例: (Sims) G.Don）は、別の属や種として最初に発表した人で、括弧の外がいまの名前に組み替えた人です。</dd>
+        <dt>タイプ標本・タイプ産地</dt><dd>学名の基準として指定された標本と、それが採集された場所。タイプ産地は「その種が最初に見つかった場所」であって、分布の全体ではありません。</dd>
+        <dt>採集者</dt><dd>タイプ標本を採集した人。採集番号とともに標本ラベルに記録されます。</dd>
+        <dt>分布（生息地）</dt><dd>現在知られている自生範囲。タイプ産地より広いのが普通です。</dd>
+        <dt>異名（シノニム）・旧綴り</dt><dd>同じ植物に対して過去に使われた別の学名や綴り（例: <i>debilis</i> → <i>debile</i>）。このサイトでは「別名・旧綴り」欄に残します。</dd>
+      </dl>
+
+      <h2>未同定・近縁を示す記号</h2>
+      <dl class="glossary">
+        <dt>sp.</dt><dd>種が特定できていない株（species の略）。産地や入手元をダブルクォートで添えます（例: <i>Anthurium</i> sp. "Peru"）。名前を推測して付けることはしません。</dd>
+        <dt>aff.</dt><dd>既知の種に近縁だが、別種と考えられる株（affinis）。例: <i>Anthurium</i> aff. <i>besseae</i>。</dd>
+        <dt>cf.</dt><dd>既知の種と思われるが、確定できていない株（confer）。aff. より「その種である可能性が高い」ときに使います。</dd>
+        <dt>ssp. / var. / f.</dt><dd>亜種・変種・品種（forma）。種の下位の階級です。園芸上の「品種」（cultivar）とは別の概念です。</dd>
+        <dt>産地フォーム（エコタイプ）</dt><dd>同じ種のうち、特定の地域の個体群に見られる特徴的な姿。「<i>Monstera obliqua</i> "Peru"」のように産地を添えて区別しますが、独立した品種名ではありません。</dd>
+      </dl>
+
+      <h2>交配と品種</h2>
+      <dl class="glossary">
+        <dt>交配式</dt><dd>母親 × 父親 の形で書きます。母（種子親）を先に、× は前後に半角スペースを入れて書きます（例: <i>Anthurium warocqueanum</i> × <i>A. papillilaminum</i>）。</dd>
+        <dt>F1 / F2 / self</dt><dd>F1 は交配で得られた第1世代、F2 は F1 同士を交配した第2世代、self は同じ株の自家受粉から得られた実生です。</dd>
+        <dt>オリジナル（原個体）・選抜個体</dt><dd>実生群の中から選ばれ、名前を付けられた1株。その名前はオリジナル個体を指し、オリジナルの実生（F 個体）は同じ名前で流通していてもオリジナルではありません。</dd>
+        <dt>クローン</dt><dd>1個体を株分け・挿し木・組織培養で増やしたもの。遺伝的に同一です。<a href="#" data-nav="guide">使い方ガイド</a>の区分の説明も参照してください。</dd>
+        <dt>ハイブリッド（交配種）</dt><dd>特定の交配式から得られた実生群に付けられた名前。同じ名前でも個体ごとに遺伝的に異なります。</dd>
+        <dt>実生</dt><dd>種子から育てた株、およびその記録。このサイトでは趣味家の播種記録を「実生」として登録します。</dd>
+        <dt>TC（組織培養）・ソマクローナル変異</dt><dd>組織の一部から無菌培養で増殖する方法（tissue culture）。培養中に生じる変異をソマクローナル変異と呼び、斑入り個体などがこの経路で生まれることがあります。</dd>
+        <dt>流通名（商品名）</dt><dd>正式な学名や品種名とは別に、市場で付けられた名前（例: 'El Choco Red' = <i>Philodendron rubrijuvenile</i>）。正式名がわかったものは正式名を主表示にします。</dd>
+        <dt>斑入り（variegata）</dt><dd>葉の一部の葉緑素が欠けて白や黄色の模様になった個体。原種にもクローンにも起こるため、区分ではなくタグで表します。</dd>
+      </dl>
+
+      <h2>このサイトの指標</h2>
+      <dl class="glossary">
+        <dt>信頼度</dt><dd>由来記録の確からしさを 0〜100 で示します。出典の階層（Tier）を土台に、閲覧者の投票で上下します。</dd>
+        <dt>Tier S〜D</dt><dd>S: 学名データベース・原記載（IPNI・POWO・GBIF・原論文）／ A: 学術文献／ B: 専門書・植物園・専門ナーセリーの公式情報／ C: コレクター・コミュニティ情報／ D: 出典なし・未検証。</dd>
+        <dt>IPNI / POWO / GBIF</dt><dd>IPNI（国際植物名索引）は学名と原記載の索引、POWO（Plants of the World Online、キュー王立植物園）は受け入れ名と分布、GBIF は標本・観察記録のデータベースです。原種の記載者・発表年・タイプ産地はこれらと照合しています。</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ========================================
        PAGE: PEOPLE (記載者・採集者・作出者の索引)
        ======================================== -->
   <section id="page-people" class="page">
@@ -1412,6 +1481,9 @@
       <div class="footer__links">
         <a href="#" data-nav="about" data-i18n="footer_about">About</a>
         <a href="#" data-nav="guide" data-i18n="footer_guide">使い方</a>
+        <a href="/glossary/" data-nav="glossary" data-i18n="glossary_title">用語集</a>
+        <a href="/people/" data-nav="people" data-i18n="people_title">人物索引</a>
+        <a href="/locality/" data-nav="locality" data-i18n="locality_title">産地索引</a>
         <a href="#" data-nav="terms" data-i18n="footer_terms">利用規約</a>
         <a href="#" data-nav="privacy" data-i18n="footer_privacy">プライバシー</a>
         <a href="#" data-nav="tokushoho" data-i18n="footer_tokushoho">特定商取引法</a>
@@ -1424,10 +1496,10 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/app-core.js?v=20260904c"></script>
-  <script src="js/pages.js?v=20260904c"></script>
-  <script src="js/forms.js?v=20260904c"></script>
-  <script src="js/archive.js?v=20260904c"></script>
+  <script src="js/app-core.js?v=20260904d"></script>
+  <script src="js/pages.js?v=20260904d"></script>
+  <script src="js/forms.js?v=20260904d"></script>
+  <script src="js/archive.js?v=20260904d"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1437,7 +1509,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20260904c"></script>
+  <script src="js/dialogs.js?v=20260904d"></script>
 
   <!-- Deletion Request Dialog -->
   <dialog id="delete-request-dialog" class="dialog-clean" aria-labelledby="delete-dialog-title">
@@ -1451,6 +1523,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20260904c"></script>
+<script src="js/sw-register.js?v=20260904d"></script>
 </body>
 </html>

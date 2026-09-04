@@ -1375,5 +1375,33 @@
   "name_status_informal": {
     "jp": "非公式名",
     "en": "Informal name"
+  },
+  "locality_title": {
+    "jp": "産地索引",
+    "en": "Type localities"
+  },
+  "locality_intro": {
+    "jp": "原種のタイプ産地（学名の基準となった標本が採集された国）ごとの索引です。国を開くと記載年順に原種が並びます。",
+    "en": "Species grouped by the country of their type locality — where the specimen that anchors the name was collected. Open a country to see its species in order of description."
+  },
+  "locality_species": {
+    "jp": "原種",
+    "en": "Species"
+  },
+  "locality_none": {
+    "jp": "この産地の記録はまだありません",
+    "en": "No species recorded for this locality yet"
+  },
+  "glossary_title": {
+    "jp": "由来の用語集",
+    "en": "Glossary"
+  },
+  "glossary_intro": {
+    "jp": "品種の由来ページに出てくる言葉を、このサイトでの使い方に沿って説明します。",
+    "en": "Terms used on origin pages, as this site uses them."
+  },
+  "colophon_k4": {
+    "jp": "読み方",
+    "en": "How to read"
   }
 }

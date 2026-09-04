@@ -36,6 +36,11 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://plantsstory.com/glossary/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://plantsstory.com/anthurium/</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -66,7 +71,7 @@
   </url>
   <url>
     <loc>https://plantsstory.com/anthurium/'King%20of%20Spades'/</loc>
-    <lastmod>2026-04-02</lastmod>
+    <lastmod>2026-09-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -361,6 +366,41 @@
   </url>
   <url>
     <loc>https://plantsstory.com/people/vannini/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://plantsstory.com/locality/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://plantsstory.com/locality/colombia/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://plantsstory.com/locality/panama/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://plantsstory.com/locality/peru/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://plantsstory.com/locality/ecuador/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://plantsstory.com/locality/french-guiana/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://plantsstory.com/locality/mexico/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

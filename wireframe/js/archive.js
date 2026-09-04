@@ -303,9 +303,9 @@
     return Object.keys(map).map(function (k) { return { key: k, items: map[k] }; })
       .sort(function (a, b) { return b.items.length - a.items.length || a.key.localeCompare(b.key); });
   }
-  function indexGroupHtml(title, groups, limit, titleHref) {
+  function indexGroupHtml(title, groups, limit, titleHref, navPage) {
     if (!groups.length) return '';
-    var head = titleHref ? '<a href="' + esc(titleHref) + '" data-nav="people">' + esc(title) + ' →</a>' : esc(title);
+    var head = titleHref ? '<a href="' + esc(titleHref) + '" data-nav="' + esc(navPage || 'people') + '">' + esc(title) + ' →</a>' : esc(title);
     var html = '<div class="index__group"><h3>' + head + '</h3><ul class="index__list">';
     groups.slice(0, limit || 999).forEach(function (g) {
       html += '<li class="index__item"><button type="button" class="index__toggle" aria-expanded="false"><span class="index__name">' + esc(g.key) + '</span><span class="index__count">' + g.items.length + '</span></button><ul class="index__sub">';
@@ -323,7 +323,7 @@
     var byCountry = groupBy(all.filter(function (d) { return d.type === 'species'; }), function (d) { return d.country; });
     var byPerson = groupBy(all, peopleOf);
     var byType = groupBy(all, function (d) { var l = TYPE_LABEL[d.type]; return l ? (lang() === 'en' ? l[1] : l[0]) : ''; });
-    el.innerHTML = indexGroupHtml(T('index_localities'), byCountry) + indexGroupHtml(T('index_people'), byPerson, 12, base + 'people/') + indexGroupHtml(T('index_types'), byType);
+    el.innerHTML = indexGroupHtml(T('index_localities'), byCountry, 999, base + 'locality/', 'locality') + indexGroupHtml(T('index_people'), byPerson, 12, base + 'people/', 'people') + indexGroupHtml(T('index_types'), byType);
   }
 
   function renderTimeline(all) {
@@ -615,6 +615,64 @@
       }, 0);
     }
   }
+  /* ---------- locality pages: /locality/ and /locality/<country>/ ---------- */
+  function countrySlug(c) { return String(c).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, ''); }
+  var _placeSlug = null;
+  function renderLocalityPageInner() {
+    var body = document.getElementById('locality-body');
+    var title = document.getElementById('locality-title');
+    var crumbName = document.getElementById('locality-crumb-name');
+    var crumbSep = document.getElementById('locality-crumb-sep');
+    if (!body) return;
+    var all = collectAll();
+    var groups = groupBy(all.filter(function (d) { return d.type === 'species'; }), function (d) { return d.country; });
+    var slug = _placeSlug ? decodeURIComponent(_placeSlug) : '';
+    if (!slug) {
+      if (title) title.textContent = T('locality_title');
+      if (crumbName) crumbName.textContent = '';
+      if (crumbSep) crumbSep.classList.add('d-none');
+      var html = '<p class="people__intro">' + esc(T('locality_intro')) + '</p><div class="people__grid"><div class="people__group"><ul class="people__list">';
+      groups.forEach(function (g) {
+        var years = g.items.map(function (d) { return d.pubYear; }).filter(Boolean);
+        var y0 = years.length ? Math.min.apply(null, years) : 0, y1 = years.length ? Math.max.apply(null, years) : 0;
+        var meta = g.items.length + ' ' + T('locality_species') + (years.length ? ' · ' + (y0 === y1 ? y0 : y0 + '–' + y1) : '');
+        html += '<li><a href="' + esc(base + 'locality/' + encodeURIComponent(countrySlug(g.key))) + '" data-nav="locality" data-place="' + esc(countrySlug(g.key)) + '">' + esc(g.key) + '</a><span class="mono">' + esc(meta) + '</span></li>';
+      });
+      body.innerHTML = html + '</ul></div></div>';
+      return;
+    }
+    var g = groups.filter(function (x) { return countrySlug(x.key) === slug; })[0];
+    if (!g) { if (title) title.textContent = slug; body.innerHTML = '<p class="empty-state">' + esc(T('locality_none')) + '</p>'; return; }
+    if (title) title.textContent = g.key;
+    if (crumbName) crumbName.textContent = g.key;
+    if (crumbSep) crumbSep.classList.remove('d-none');
+    var years = g.items.map(function (d) { return d.pubYear; }).filter(Boolean);
+    var authors = {};
+    g.items.forEach(function (d) { splitPeople(d.author).forEach(function (p) { authors[p] = (authors[p] || 0) + 1; }); });
+    var topAuthors = Object.keys(authors).sort(function (a, b) { return authors[b] - authors[a]; }).slice(0, 4);
+    var facts = '<dl class="ledger people__facts">';
+    facts += '<div><dt>' + esc(T('locality_species')) + '</dt><dd>' + g.items.length + '</dd></div>';
+    if (years.length) facts += '<div><dt>' + esc(T('ledger_years')) + '</dt><dd>' + Math.min.apply(null, years) + (years.length > 1 ? '–' + Math.max.apply(null, years) : '') + '</dd></div>';
+    if (topAuthors.length) facts += '<div><dt>' + esc(T('role_author')) + '</dt><dd class="people__facts-small">' + topAuthors.map(function (p) { return linkPeople(p); }).join(', ') + '</dd></div>';
+    facts += '</dl>';
+    body.innerHTML = facts + '<h2 class="section-title"><span>' + esc(T('locality_species')) + '</span></h2><div id="locality-ledger"></div>';
+    var sorted = g.items.slice().sort(function (a, b) { return (a.pubYear || 9999) - (b.pubYear || 9999) || a.displayName.localeCompare(b.displayName); });
+    var thumbs = {};
+    sorted.forEach(function (d) { var u = (typeof _thumbMap !== 'undefined') ? _thumbMap[d.displayName] : null; if (u) thumbs[d.displayName] = u; });
+    window.renderEntriesLedger(document.getElementById('locality-ledger'), toLedgerItems(sorted), thumbs);
+    if (typeof updateMeta === 'function') {
+      setTimeout(function () {
+        updateMeta({ title: g.key + ' — ' + T('locality_species') + ' ' + g.items.length + ' | Aroid Origins', description: g.key + ' をタイプ産地とするアロイド原種 ' + g.items.length + '種: ' + sorted.slice(0, 6).map(function (d) { return d.displayName; }).join('、'), path: 'locality/' + encodeURIComponent(countrySlug(g.key)) });
+      }, 0);
+    }
+  }
+  window.renderLocalityPage = function (slug) {
+    _placeSlug = slug || '';
+    var body = document.getElementById('locality-body');
+    if (body && !window._dataFullyLoaded) body.innerHTML = '<div class="loading-text p-xl">…</div>';
+    waitForData(function () { if (document.getElementById('page-locality').classList.contains('active')) renderLocalityPageInner(); });
+  };
+
   window.renderPeoplePage = function (slug) {
     _peopleSlug = slug || '';
     var body = document.getElementById('people-body');

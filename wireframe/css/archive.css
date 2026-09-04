@@ -615,3 +615,10 @@ a.lineage__node:hover { border-color: var(--color-ink); }
 
 /* self node: parents already drawn above */
 .lineage__row--parents + .lineage__joint + .lineage__row .lineage__node--self .lineage__sub { display: none; }
+
+/* ---------- glossary ---------- */
+.glossary { margin: 0 0 var(--space-lg); }
+.glossary dt { font-family: var(--font-display); font-weight: 600; font-size: 1.15rem; margin-top: var(--space-md); color: var(--color-ink); }
+.glossary dd { margin: 4px 0 0; line-height: 1.9; color: var(--color-ink); }
+.glossary dd a { text-decoration: underline; }
+.legal-page .breadcrumb { margin-bottom: var(--space-md); }

@@ -965,11 +965,7 @@ function safeUrl(u) {
 // Render structured origin fields as HTML
 function renderStructuredOrigin(s) {
   var h = '';
-  // Show origin type badge matching cultivar list style
-  if (s.origin_type) {
-    var bi = getBadgeInfo(s.origin_type, '');
-    h += '<div class="mb-sm"><span class="badge ' + bi.cls + ' badge--type-sm">' + bi.txt + '</span></div>';
-  }
+  // (origin_type badge dropped: cultivars.type is the single source of truth — BOARD §3)
   if (s.origin_type === 'species') {
     // 分類詳細（サブカテゴリ）
     if (s.species_subcategory && s.species_subcategory !== 'species') {
@@ -1822,6 +1818,10 @@ document.addEventListener('click', function(e) {
     if (page === 'people') {
       var personSlug = navEl.getAttribute('data-person');
       if (personSlug) navOptions.person = personSlug;
+    }
+    if (page === 'locality') {
+      var placeSlug = navEl.getAttribute('data-place');
+      if (placeSlug) navOptions.place = placeSlug;
     }
 
     if (page === 'profile') {

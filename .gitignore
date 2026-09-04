@@ -29,3 +29,5 @@ wireframe/contact/
 
 # generated people stubs (CI)
 wireframe/people/
+wireframe/locality/
+wireframe/glossary/

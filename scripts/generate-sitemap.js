@@ -4,6 +4,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const people = require('./lib/people');
+const geo = require('./lib/geo');
 
 const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
@@ -34,7 +35,7 @@ async function main() {
   }
   const visibleGenusNames = new Set(genera.map(g => g.name));
   // Fetch cultivars (non-seedling only for public sitemap)
-  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,updated_at,origins&order=genus,cultivar_name');
+  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,updated_at,origins&order=genus,cultivar_name');
   const cultivars = allCultivars.filter(c => visibleGenusNames.has(c.genus || 'Anthurium'));
 
   const SITE = 'https://plantsstory.com';
@@ -52,6 +53,7 @@ async function main() {
     { loc: '/privacy/', changefreq: 'monthly', priority: '0.3' },
     { loc: '/tokushoho/', changefreq: 'monthly', priority: '0.3' },
     { loc: '/contact/', changefreq: 'monthly', priority: '0.3' },
+    { loc: '/glossary/', changefreq: 'monthly', priority: '0.5' },
   ];
   for (const p of staticPages) {
     xml += `  <url>\n    <loc>${SITE}${p.loc}</loc>\n    <changefreq>${p.changefreq}</changefreq>\n    <priority>${p.priority}</priority>\n  </url>\n`;
@@ -80,6 +82,12 @@ async function main() {
   xml += `  <url>\n    <loc>${SITE}/people/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
   for (const p of people.peopleIndex(cultivars.filter(c => !c.cultivar_name.includes('[Seedling]')))) {
     xml += `  <url>\n    <loc>${SITE}/people/${encodeURIComponent(p.slug)}/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
+  }
+
+  // Locality pages
+  xml += `  <url>\n    <loc>${SITE}/locality/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+  for (const l of geo.localityIndex(cultivars.filter(c => !c.cultivar_name.includes('[Seedling]')))) {
+    xml += `  <url>\n    <loc>${SITE}/locality/${encodeURIComponent(l.slug)}/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
   }
 
   xml += '</urlset>\n';
