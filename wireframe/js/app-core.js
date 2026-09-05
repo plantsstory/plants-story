@@ -286,6 +286,7 @@ var _isCustomDomain = location.hostname !== 'plantsstory.github.io';
 var _siteBase = _isCustomDomain ? 'https://plantsstory.com/' : 'https://plantsstory.github.io/plants-story/';
 var _defaultTitle = 'Aroid Origins';
 var _defaultDesc = '誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。';
+var _defaultOgImage = 'https://plantsstory.com/images/og-default-2026-09.png';
 
 function updateMeta(opts) {
   opts = opts || {};
@@ -683,9 +684,7 @@ function navigateTo(page, options, pushHistory) {
     };
     if (page === 'genus' && options.genus) {
       var gName = options.genus.charAt(0).toUpperCase() + options.genus.slice(1);
-      var genusOgImage = window._SUPABASE_URL
-        ? window._SUPABASE_URL + '/functions/v1/og-image?name=' + encodeURIComponent(gName) + '&genus=' + encodeURIComponent(gName) + '&type=species'
-        : '';
+      var genusOgImage = _defaultOgImage;
       updateMeta({
         title: gName + ' - ' + _defaultTitle,
         description: gName + 'の品種一覧 - 由来・歴史情報をコミュニティで共有',
@@ -1537,6 +1536,12 @@ if (false) {
         if (editLink) editLink.style.display = isOwn ? '' : 'none';
       }
       if (event === 'SIGNED_IN' && window.location.search.indexOf('code=') !== -1) {
+        // GA: distinguish a first login (account created just now) from a returning one
+        if (typeof gtag === 'function') {
+          var _createdAt = session && session.user && session.user.created_at ? new Date(session.user.created_at).getTime() : 0;
+          var _isNewUser = _createdAt > 0 && (Date.now() - _createdAt) < 120000;
+          gtag('event', _isNewUser ? 'sign_up' : 'login', { method: 'google' });
+        }
         var returnPath = localStorage.getItem('login_return_path');
         localStorage.removeItem('login_return_path');
         if (returnPath) {
@@ -2540,8 +2545,8 @@ if (false) {
       var visibleNames = (window._generaData || []).map(function(g) { return g.name; });
       // "New entries" includes seedlings: the ledger is the record of the archive growing
       var recentQuery = supabase.from('cultivars')
-        .select('id, cultivar_name, genus, type, origins, updated_at')
-        .neq('type', 'seedling');
+        .select('id, cultivar_name, genus, type, origins, updated_at, created_at')
+        .eq('is_private', false);
       if (visibleNames.length > 0) recentQuery = recentQuery.in('genus', visibleNames);
       recentQuery
         // 「新着記録」= 収録が増えた順（更新順ではなく登録順）

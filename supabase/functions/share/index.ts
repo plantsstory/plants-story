@@ -109,8 +109,8 @@ serve(async (req: Request) => {
   const rest = displayName.replace(/^\S+\s*/, "");
   const spaUrl = SITE_URL + genusSlug + "/" + encodeURIComponent(rest);
 
-  // Fallback OG image: use og-image Edge Function
-  const ogImage = imageUrl || (supabaseUrl + "/functions/v1/og-image?name=" + encodeURIComponent(displayName) + "&genus=" + encodeURIComponent(genus) + "&type=" + encodeURIComponent(type));
+  // Fallback OG image: the static Field Archive card (the og-image function was never deployed)
+  const ogImage = imageUrl || (SITE_URL + "images/og-default-2026-09.png");
 
   // Return HTML with OG meta tags + auto-redirect for human visitors
   const html = `<!DOCTYPE html>

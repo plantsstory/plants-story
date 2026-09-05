@@ -704,12 +704,22 @@ document.addEventListener('click', function(e) {
   var detailPageEl = document.getElementById('page-cultivar');
   var dbName = (detailPageEl && detailPageEl.getAttribute('data-cultivar-dbname')) || name;
   var shareUrl = getShareUrl(dbName);
-  var text = name + ' - Aroid Origins';
-  if (typeof gtag === 'function') gtag('event', 'share_click', { cultivar: name });
+  // Share text = name + cite line (記載者 · 年 · 産地 / 作出者 · 年) when we have one
+  var cite = '';
+  try {
+    var _entry = window.cultivarData && cultivarData[dbName];
+    var _etype = _entry && (_entry._type || (_entry._meta && _entry._meta.type));
+    if (_entry && window.entryCiteLine) cite = String(window.entryCiteLine(dbName, _entry, _etype || 'species') || '').replace(/<[^>]+>/g, '').trim();
+  } catch (e) { cite = ''; }
+  var text = cite ? name + ' — ' + cite + ' | Aroid Origins' : name + ' | Aroid Origins';
+  function trackShare(channel) {
+    if (typeof gtag === 'function') gtag('event', 'share_click', { cultivar: name, channel: channel });
+  }
 
-  // Try native share API first (mobile)
+  // Mobile: the OS share sheet (LINE, Instagram, etc. live there)
   if (navigator.share) {
-    navigator.share({ title: text, url: shareUrl }).catch(function() {});
+    trackShare('native');
+    navigator.share({ title: text, text: text, url: shareUrl }).catch(function() {});
     return;
   }
 
@@ -718,9 +728,16 @@ document.addEventListener('click', function(e) {
   if (!menu) return;
   var encodedUrl = encodeURIComponent(shareUrl);
   var encodedText = encodeURIComponent(text);
+  // PC: one mono row — X · Facebook · URLコピー (Facebook = the groups where primary sources live)
   menu.innerHTML =
-    '<a href="https://twitter.com/intent/tweet?text=' + encodedText + '&url=' + encodedUrl + '&hashtags=PlantsStory' + '" target="_blank" rel="noopener" class="btn btn--sm btn--secondary text-xs">X</a>' +
-    '<button class="btn btn--sm btn--secondary share-copy-btn text-xs">URLコピー</button>';
+    '<a href="https://twitter.com/intent/tweet?text=' + encodedText + '&url=' + encodedUrl + '" target="_blank" rel="noopener" class="share-menu__link mono" data-channel="x">X</a>' +
+    '<span class="share-menu__sep mono" aria-hidden="true">·</span>' +
+    '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodedUrl + '" target="_blank" rel="noopener" class="share-menu__link mono" data-channel="facebook">Facebook</a>' +
+    '<span class="share-menu__sep mono" aria-hidden="true">·</span>' +
+    '<button type="button" class="share-menu__link mono share-copy-btn" data-channel="copy">URLコピー</button>';
+  menu.querySelectorAll('[data-channel]').forEach(function(el) {
+    el.addEventListener('click', function() { trackShare(el.getAttribute('data-channel')); });
+  });
   menu.classList.toggle('hidden');
   btn.setAttribute('aria-expanded', menu.classList.contains('hidden') ? 'false' : 'true');
 
@@ -1213,9 +1230,7 @@ function updateCultivarDetail(cultivarName, rowEl) {
   // Update SEO meta tags
   var typeLabel = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: 'Seedling' }[detectedType] || '';
   var metaDesc = displayName + ' (' + genusName + ' ' + typeLabel + ') の由来・歴史情報 - Aroid Origins';
-  var ogImageUrl = window._SUPABASE_URL
-    ? window._SUPABASE_URL + '/functions/v1/og-image?name=' + encodeURIComponent(displayName) + '&genus=' + encodeURIComponent(genusName) + '&type=' + encodeURIComponent(detectedType)
-    : '';
+  var ogImageUrl = _defaultOgImage;
   updateMeta({
     title: displayName + ' - ' + genusName + ' | ' + _defaultTitle,
     description: metaDesc,

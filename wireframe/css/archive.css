@@ -676,3 +676,9 @@ dialog.dialog-clean { margin: auto; }
 }
 /* timeline axis hidden a bit earlier (design M) */
 @media (max-width: 700px) { .timeline__axis { display: none; } }
+
+/* Share menu (PC): one mono row, paper + hairline, no shadow */
+.share-menu-popup { background: var(--color-paper); border: 1px solid var(--color-ink); border-radius: 2px; box-shadow: none; padding: 4px 10px; gap: 8px; align-items: center; }
+.share-menu__link { font-size: 0.72rem; letter-spacing: 0.06em; color: var(--color-ink); text-decoration: none; background: none; border: 0; padding: 6px 2px; min-height: 32px; cursor: pointer; font-family: var(--font-mono); }
+.share-menu__link:hover { color: var(--color-green); text-decoration: underline; text-underline-offset: 3px; }
+.share-menu__sep { color: var(--color-mid); font-size: 0.72rem; }

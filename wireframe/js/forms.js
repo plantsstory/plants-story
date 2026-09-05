@@ -267,7 +267,8 @@ if (formulaUnknown && formulaInputs) {
 // i18n TRANSLATION SYSTEM
 // ========================================
 var translations = {};
-var currentLang = localStorage.getItem('plants-story-lang') || (navigator.language && navigator.language.startsWith('ja') ? 'jp' : (navigator.language && navigator.language.startsWith('en') ? 'en' : 'jp'));
+// Default language: Japanese only for ja* browsers; every other locale starts in English
+var currentLang = localStorage.getItem('plants-story-lang') || (String(navigator.language || '').toLowerCase().indexOf('ja') === 0 ? 'jp' : 'en');
 
 // Load translations asynchronously (non-blocking)
 var _translationsReady = fetch('i18n/translations.json')
