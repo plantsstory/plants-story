@@ -387,6 +387,8 @@ function refreshDynamicText() {
 // (count text is now handled inside paginateGenus directly)
 
 // Wire up language toggle button
+var _mastLang = document.getElementById('masthead-lang');
+if (_mastLang) _mastLang.addEventListener('click', function(e) { e.preventDefault(); document.querySelector('.header__lang').click(); });
 document.querySelector('.header__lang').addEventListener('click', function() {
   applyLanguage(currentLang === 'jp' ? 'en' : 'jp');
 });

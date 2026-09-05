@@ -1547,5 +1547,9 @@
   "nav_locality": {
     "jp": "産地",
     "en": "Localities"
+  },
+  "mast_lang": {
+    "jp": "ENGLISH",
+    "en": "日本語"
   }
 }

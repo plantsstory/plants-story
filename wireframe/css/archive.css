@@ -90,6 +90,13 @@ a { color: inherit; text-underline-offset: 0.18em; text-decoration-thickness: 1p
 .header__user-icon { background: var(--color-ink); color: var(--color-paper); border-radius: var(--radius-sm); }
 
 .header__logo, .header__btn, .header__lang, .header__nav-link { white-space: nowrap; }
+/* Mobile header: the primary action (+ 投稿) is visible; login lives in the menu */
+.header__contribute { display: none; }
+@media (max-width: 767px) {
+  .header__actions .header__contribute { display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; background: var(--color-ink); color: var(--color-paper); border-color: var(--color-ink); }
+  .header__contribute:hover { background: var(--color-green); border-color: var(--color-green); }
+  #header-auth-btn { display: none !important; }
+}
 @media (max-width: 480px) {
   .header__logo { font-size: 0.95rem; letter-spacing: 0.1em; }
   .header__lang { padding: 5px 8px; font-size: 0.62rem; }
@@ -350,8 +357,13 @@ a { color: inherit; text-underline-offset: 0.18em; text-decoration-thickness: 1p
   color: var(--color-ink);
   margin: 0 0 var(--space-md);
 }
-.masthead__tagline { font-family: var(--font-display); font-size: 1.35rem; font-weight: 600; letter-spacing: 0.06em; color: var(--color-ink); margin-bottom: var(--space-sm); }
-.masthead__desc { color: var(--color-mid); font-size: var(--font-size-sm); line-height: 1.8; max-width: 520px; }
+/* Hierarchy: the value statement is the sentence to read; the tagline is the annotation above it */
+.masthead__tagline { font-family: var(--font-display); font-size: 1rem; font-weight: 500; letter-spacing: 0.1em; color: var(--color-mid); margin-bottom: var(--space-xs); }
+.masthead__desc { color: var(--color-ink); font-size: 1rem; line-height: 1.8; max-width: 560px; }
+.masthead__kicker { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-md); flex-wrap: wrap; }
+.masthead__lang { color: var(--color-mid); text-decoration: none; border-bottom: 1px solid var(--color-rule); padding: 6px 0; min-height: 0; }
+.masthead__lang:hover { color: var(--color-green); border-color: var(--color-green); }
+@media (max-width: 480px) { .masthead__desc { font-size: 0.95rem; } }
 .masthead .search-bar { margin: var(--space-lg) 0 0; max-width: 520px; }
 .masthead__meta { display: flex; gap: var(--space-md); flex-wrap: wrap; margin-top: var(--space-md); }
 .masthead__meta a { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-mid); }
