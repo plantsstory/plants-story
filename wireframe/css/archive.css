@@ -795,3 +795,7 @@ dialog.dialog-clean { margin: auto; }
   #page-genus .cultivar-row { padding-left: 0; padding-right: 0; }
   #page-genus .cultivar-row__info { min-width: 0; }
 }
+
+/* Contribute form: a type option the chosen genus does not accept stays visible but muted */
+.form-radio--disabled { opacity: 0.45; cursor: not-allowed; }
+.form-radio--disabled input { cursor: not-allowed; }

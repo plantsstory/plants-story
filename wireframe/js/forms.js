@@ -962,8 +962,17 @@ document.addEventListener('click', function(e) {
   if (seedlingRadioLabel) seedlingRadioLabel = seedlingRadioLabel.closest('label');
   function updateSeedlingVisibility() {
     var genus = contributeGenus ? contributeGenus.value.toLowerCase() : '';
-    var hasSeedlings = SEEDLING_GENERA.indexOf(genus) !== -1;
-    if (seedlingRadioLabel) seedlingRadioLabel.style.display = hasSeedlings ? '' : 'none';
+    var list = window.SEEDLING_GENERA || SEEDLING_GENERA || [];
+    // The option stays visible. It is only disabled when a genus is chosen that keeps no seedling notes
+    // (before the genera table has loaded, or with no genus chosen yet, leave it enabled).
+    var hasSeedlings = !genus || list.length === 0 || list.indexOf(genus) !== -1;
+    if (seedlingRadioLabel) {
+      seedlingRadioLabel.style.display = '';
+      seedlingRadioLabel.classList.toggle('form-radio--disabled', !hasSeedlings);
+      var input = seedlingRadioLabel.querySelector('input');
+      if (input) input.disabled = !hasSeedlings;
+      seedlingRadioLabel.title = hasSeedlings ? '' : 'この属では実生ノートを受け付けていません';
+    }
     // If seedling is selected but genus doesn't support it, switch to species
     var checked = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
     if (checked && checked.value === 'seedling' && !hasSeedlings) {
@@ -974,6 +983,7 @@ document.addEventListener('click', function(e) {
   if (contributeGenus) {
     contributeGenus.addEventListener('change', updateSeedlingVisibility);
   }
+  window.updateSeedlingVisibility = updateSeedlingVisibility;
   updateSeedlingVisibility();
 
   // Show/hide structured fields based on type

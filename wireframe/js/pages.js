@@ -1809,7 +1809,9 @@ document.addEventListener('click', function(e) {
         if (typeof window.exitEditMode === 'function') window.exitEditMode();
         var genusSelect = document.querySelector('#page-contribute .form-select');
         if (genusSelect) {
-          if (genus) { genusSelect.value = genus; } else { genusSelect.selectedIndex = 0; }
+          if (genus) { genusSelect.value = genus; }
+          else if (genusSelect.options.length === 2) { genusSelect.selectedIndex = 1; } // placeholder + one genus: keep it chosen
+          else { genusSelect.selectedIndex = 0; }
           genusSelect.dispatchEvent(new Event('change'));
         }
       }

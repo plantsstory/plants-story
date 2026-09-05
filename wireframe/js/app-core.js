@@ -1458,6 +1458,12 @@ if (false) {
       opt.textContent = g.name;
       sel.appendChild(opt);
     });
+    // A single visible genus needs no choosing: preselect it so the type options (incl. 実生) reflect it
+    if (window._generaData.length === 1) {
+      sel.value = window._generaData[0].name;
+      sel.dispatchEvent(new Event('change'));
+    }
+    if (typeof window.updateSeedlingVisibility === 'function') window.updateSeedlingVisibility();
   }
 
   // --- Auth: session management ---
