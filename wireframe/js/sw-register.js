@@ -15,7 +15,7 @@ if ('serviceWorker' in navigator) {
       var banner = document.createElement('div');
       banner.id = 'sw-update-banner';
       banner.setAttribute('role', 'status');
-      banner.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:10000;background:#1E2622;color:#F4F1EA;padding:10px 16px;border-radius:2px;display:flex;gap:12px;align-items:center;box-shadow:0 6px 18px rgba(30,38,34,0.25);font-size:13px;font-family:inherit;';
+      banner.style.cssText = 'position:fixed;bottom:12px;left:12px;right:12px;max-width:480px;margin:0 auto;z-index:10000;background:#1E2622;color:#F4F1EA;padding:8px 8px 8px 14px;border-radius:2px;display:flex;gap:12px;align-items:center;justify-content:space-between;font-size:12px;letter-spacing:0.04em;font-family:"IBM Plex Mono",ui-monospace,monospace;white-space:nowrap;';
       banner.innerHTML = '<span>新しいバージョンがあります</span>' +
         '<button type="button" style="background:#F4F1EA;color:#1E2622;border:1px solid #F4F1EA;border-radius:2px;padding:5px 12px;font-weight:600;cursor:pointer;font-family:inherit;">更新</button>' +
         '<button type="button" aria-label="閉じる" style="background:none;border:none;color:#fff;cursor:pointer;font-size:16px;">&times;</button>';
