@@ -410,8 +410,10 @@ a { color: inherit; text-underline-offset: 0.18em; text-decoration-thickness: 1p
 .story__body--dropcap::first-letter { font-family: var(--font-display); font-size: 2.2em; line-height: 0.8; float: left; padding: 0.12em 0.12em 0 0; color: var(--color-ink); }
 .story__more { display: inline-block; margin-top: var(--space-md); font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid var(--color-ink); padding-bottom: 2px; }
 .story__more:hover { color: var(--color-primary); border-color: var(--color-primary); }
-.story__figure { margin: 0 0 var(--space-md); border: 1px solid var(--color-rule); background: var(--color-paper-2); aspect-ratio: 3 / 2; overflow: hidden; }
-.story__figure img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* The photo is shown whole (never cropped), mounted on a paper-2 mat */
+.story__figure { margin: 0 0 var(--space-md); border: 1px solid var(--color-rule); background: var(--color-paper-2); aspect-ratio: 4 / 3; overflow: hidden; padding: 10px; }
+.story__figure a { display: block; width: 100%; height: 100%; }
+.story__figure img { width: 100%; height: 100%; object-fit: contain; display: block; }
 
 /* index (localities / people / types) */
 .index { border-top: 1px solid var(--color-ink); padding-top: var(--space-sm); }

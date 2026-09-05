@@ -549,6 +549,7 @@ function loadCultivarThumbnails() {
           _thumbMap[img.cultivar_name] = img.storage_path;
         }
       });
+      if (typeof window.renderStoryOfDay === 'function') window.renderStoryOfDay();
       // Re-render all genus pages to apply thumbnails
       (window._generaData || []).forEach(function(gObj) {
         var section = document.getElementById('genus-' + gObj.slug);

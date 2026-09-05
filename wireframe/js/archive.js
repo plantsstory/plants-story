@@ -281,8 +281,16 @@
     var dateEl = document.getElementById('story-date');
     if (!body) return;
     if (dateEl) dateEl.textContent = fmtDate(new Date().toISOString());
-    var pool = all.filter(function (d) { return d.type === 'species' && d.trust >= 70 && d.text.length >= 60; });
-    if (!pool.length) pool = all.filter(function (d) { return d.text.length >= 60; });
+    // Candidates in order of preference; within each tier, entries with a photo come first
+    // (the front page is a plate, so a story without an image is the last resort).
+    var hasThumb = function (d) { return !!thumbUrl(d.displayName); };
+    var tiers = [
+      all.filter(function (d) { return d.type === 'species' && d.trust >= 70 && d.text.length >= 60; }),
+      all.filter(function (d) { return d.text.length >= 60; })
+    ];
+    var pool = [];
+    for (var ti = 0; ti < tiers.length && !pool.length; ti++) pool = tiers[ti].filter(hasThumb);
+    for (ti = 0; ti < tiers.length && !pool.length; ti++) pool = tiers[ti];
     if (!pool.length) { body.innerHTML = ''; return; }
     pool.sort(function (a, b) { return a.displayName.localeCompare(b.displayName); });
     var d = pool[Math.floor(Date.now() / 864e5) % pool.length];
@@ -371,6 +379,8 @@
   }
 
   var _front = null;
+  // Thumbnails load separately from the records; when they arrive, pick the story again
+  window.renderStoryOfDay = function () { if (_front) renderStory(_front); };
   function renderFront() {
     if (!document.getElementById('story-body')) return;
     var all = collectAll();
