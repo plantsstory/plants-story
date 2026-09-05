@@ -2459,14 +2459,15 @@ if (false) {
       var _cite = window.entryCiteLine(fullName, entry, meta.type);
       if (_cite) h += '<div class="cultivar-row__cite">' + _cite + '</div>';
     }
-    if (entry.formula && !locked) {
+    // Seedling names already are the cross, so the formula line would repeat it
+    if (entry.formula && !locked && !isSeedling) {
       h += '<div class="text-sm text-muted mt-sm"><span class="formula-parent formula-parent--sm">' + escHtml(entry.formula.parentA) + '</span><span class="formula-operator formula-operator--sm">&times;</span><span class="formula-parent formula-parent--sm">' + escHtml(entry.formula.parentB) + '</span></div>';
     }
     if (isSeedling && entry._creatorName && !locked) {
       h += '<div class="text-xs text-muted mt-xs">' + t('creator_label') + escHtml(entry._creatorName) + '</div>';
     }
     if (isSeedling && entry._userId && entry._posterName && !locked) {
-      h += '<div class="text-xs mt-xs"><a href="' + _basePath + 'profile/' + escHtml(entry._userId) + '" class="poster-link" data-nav="profile" data-userid="' + escHtml(entry._userId) + '">&#x1F464; ' + escHtml(entry._posterName) + '</a></div>';
+      h += '<div class="text-xs mt-xs"><a href="' + _basePath + 'profile/' + escHtml(entry._userId) + '" class="poster-link" data-nav="profile" data-userid="' + escHtml(entry._userId) + '"><span class="mono">投稿</span> ' + escHtml(entry._posterName) + '</a></div>';
     }
     h += '</div></div>';
     return h;

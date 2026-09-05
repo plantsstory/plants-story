@@ -784,3 +784,14 @@ dialog.dialog-clean { margin: auto; }
   .related__grid { gap: var(--space-md); }
   .related__group li a { font-size: 0.98rem; min-width: 0; }
 }
+
+/* Genus page on phones: everything shares one left edge (16px), ragged right.
+   Search box and add button no longer stretch to the right margin; list rows
+   drop the card frame so their text lines up with the headings. */
+@media (max-width: 640px) {
+  .sort-bar .search-bar--inline { max-width: 280px; align-self: flex-start; width: 100%; }
+  .sort-bar .btn { align-self: flex-start; width: auto; }
+  #page-genus .card--no-pad { border-left: 0; border-right: 0; border-radius: 0; }
+  #page-genus .cultivar-row { padding-left: 0; padding-right: 0; }
+  #page-genus .cultivar-row__info { min-width: 0; }
+}
