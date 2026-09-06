@@ -505,6 +505,38 @@
     var note = d.nameStatus === 'disputed' ? T('name_status_disputed') : d.nameStatus === 'trade' ? T('name_status_trade') : d.nameStatus === 'informal' ? T('name_status_informal') : '';
     el.innerHTML = (cells ? '<div class="specimen">' + cells + '</div>' : '') + (note ? '<p class="specimen__note mono">' + esc(note) + '</p>' : '');
   }
+  /* share text: {name} — {describer or breeder} {year}、{type locality or parentage}｜Aroid Origins {URL} */
+  window.shareTextFor = function (d) {
+    var who = d.type === 'species' ? d.author : (d.breeder || d.namer || d.creator);
+    var where = d.type === 'species' ? (d.locality || d.habitat) : ((d.parentA || d.parentB) ? (clean(d.parentA) || T('lineage_unknown')) + ' × ' + (clean(d.parentB) || T('lineage_unknown')) : '');
+    var head = [who, d.year].filter(Boolean).join(' ');
+    var mid = [head, where].filter(Boolean).join('、');
+    // canonical page URL: the static stubs carry the OGP tags, so no proxy is needed in the text
+    var url = 'https://plantsstory.com/' + d.genus.toLowerCase() + '/' + encodeURIComponent(d.epithet);
+    return d.displayName + (mid ? ' — ' + mid : '') + '｜Aroid Origins ' + url;
+  };
+  /* one-time band after a registration: 収録しました · この台紙を共有 */
+  function renderShareBand(d, entry) {
+    var el = document.getElementById('share-band');
+    if (!el) return;
+    var flag = null;
+    try { flag = sessionStorage.getItem('just_recorded'); } catch (e) {}
+    if (!flag || flag !== d.fullName) { el.classList.add('d-none'); el.innerHTML = ''; return; }
+    try { sessionStorage.removeItem('just_recorded'); } catch (e) {}
+    var text = window.shareTextFor(d);
+    el.innerHTML = '<p class="share-band__title mono">' + esc(T('share_band_title')) + '</p>'
+      + '<p class="share-band__text">' + esc(text) + '</p>'
+      + '<p class="share-band__actions mono"><button type="button" class="share-band__btn" id="share-band-copy">' + esc(T('share_band_copy')) + '</button>'
+      + '<a class="share-band__btn" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '" id="share-band-x">' + esc(T('share_band_x')) + '</a>'
+      + '<button type="button" class="share-band__close" id="share-band-close" aria-label="close">×</button></p>';
+    el.classList.remove('d-none');
+    var track = function (ch) { if (typeof gtag === 'function') gtag('event', 'share_click', { cultivar: d.displayName, channel: ch, source: 'submit' }); };
+    document.getElementById('share-band-copy').addEventListener('click', function () {
+      navigator.clipboard.writeText(text).then(function () { showToast(T('share_band_copied')); track('copy'); });
+    });
+    document.getElementById('share-band-x').addEventListener('click', function () { track('x'); });
+    document.getElementById('share-band-close').addEventListener('click', function () { el.classList.add('d-none'); });
+  }
   /* record gate on the detail page: a sheet naming what is missing, and noindex until it is recorded */
   function renderGateNote(d) {
     var el = document.getElementById('record-gate');
@@ -823,6 +855,7 @@
     renderRelated(d, all);
     renderIndividuals(d, all);
     renderGateNote(d);
+    renderShareBand(d, entry);
     if (window.refreshRerunButton) window.refreshRerunButton(entry);
     if (window.refreshPrivateButton) window.refreshPrivateButton(entry);
     var pnote = document.getElementById("detail-private-note");

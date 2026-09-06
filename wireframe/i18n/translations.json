@@ -1795,5 +1795,21 @@
   "search_request_invalid": {
     "jp": "名前は3文字以上で入力してください",
     "en": "Enter at least 3 characters"
+  },
+  "share_band_title": {
+    "jp": "収録しました · この台紙を共有",
+    "en": "Recorded · share this sheet"
+  },
+  "share_band_copy": {
+    "jp": "共有文をコピー",
+    "en": "Copy text"
+  },
+  "share_band_x": {
+    "jp": "X で共有",
+    "en": "Share on X"
+  },
+  "share_band_copied": {
+    "jp": "共有文をコピーしました",
+    "en": "Share text copied"
   }
 }

@@ -1752,6 +1752,8 @@ document.addEventListener('click', function(e) {
         var fakeRow = document.createElement('div');
         fakeRow.innerHTML = '<span class="badge badge--' + type + '"></span>';
         if (type === 'species') fakeRow.innerHTML = '<span class="badge badge--species"></span>';
+        // The entry's page shows a one-time share band for what was just recorded
+        try { sessionStorage.setItem('just_recorded', fullName); } catch (e) {}
         updateCultivarDetail(fullName, fakeRow);
         navigateTo('cultivar', { cultivar: fullName, _skipUpdate: true }, true);
 
