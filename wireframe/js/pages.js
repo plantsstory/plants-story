@@ -1088,12 +1088,13 @@ function renderOriginsInner(cultivarName, container) {
       .map(function(p) { return '<p>' + escHtml(p).replace(/\n/g, '<br>') + '</p>'; }).join('');
   }
   origins.forEach(function(origin, i) {
+    var rh = '';
     var trustNum = Math.max(0, Math.min(100, parseInt(origin.trust, 10) || 0));
     var isDb = origin.source_type === 'ipni_powo';
     var isUser = origin.source_type === 'manual' || (origin.author && origin.author.isAI === false && !isDb);
     var srcList = (origin.sources || []).filter(function(s) { return s && (s.url || s.text || s.label); });
     var hasSources = isDb || srcList.some(function(s) { return !!safeUrl(s.url); }) || !!safeUrl(origin.source_url || '');
-    html += '<article class="record" data-record-idx="' + i + '">';
+    rh += '<article class="record" data-record-idx="' + i + '">';
     if (!isSeedling) {
       // header: 記録 N · who wrote it · tier · trust (the % only when there is something to base it on)
       var meta = [];
@@ -1102,26 +1103,26 @@ function renderOriginsInner(cultivarName, container) {
       else meta.push(t('record_by_user'));
       if (hasSources && origin.source_tier) meta.push('Tier ' + origin.source_tier + (origin.source_tier_label_jp && currentLang !== 'en' ? ' · ' + origin.source_tier_label_jp : (origin.source_tier_label_en && currentLang === 'en' ? ' · ' + origin.source_tier_label_en : '')));
       if (!hasSources) meta.push(t('record_no_sources'));
-      html += '<header class="record__head mono">';
-      html += '<span class="record__rank">' + (currentLang === 'en' ? 'Record ' : '記録 ') + (i + 1) + '</span>';
-      html += '<span class="record__meta">' + meta.map(escHtml).join(' · ') + '</span>';
+      rh += '<header class="record__head mono">';
+      rh += '<span class="record__rank">' + (currentLang === 'en' ? 'Record ' : '記録 ') + (i + 1) + '</span>';
+      rh += '<span class="record__meta">' + meta.map(escHtml).join(' · ') + '</span>';
       if (hasSources) html += '<span class="record__trust ' + getTrustClass(trustNum) + '" data-trust-idx="' + i + '">' + trustNum + '%</span>';
-      html += '</header>';
+      rh += '</header>';
     }
     // body: the prose is the record; the field table only stands in when there is no prose
     var bodyText = (currentLang === 'en' && origin.body_en) ? origin.body_en : origin.body;
     if (bodyText && String(bodyText).trim()) {
-      html += '<div class="record__body">' + recordParagraphs(bodyText) + '</div>';
+      rh += '<div class="record__body">' + recordParagraphs(bodyText) + '</div>';
     } else if (origin.structured) {
-      html += '<div class="record__body record__body--fields">' + renderStructuredOrigin(origin.structured) + '</div>';
+      rh += '<div class="record__body record__body--fields">' + renderStructuredOrigin(origin.structured) + '</div>';
     }
     // Verification details (AI-verified records only; a contributor's own record carries no AI verdict)
     if (origin.source_type === 'user_verified' && origin.verification && !isUser) {
       var v = origin.verification;
       var vid = 'verify-detail-' + i;
-      html += '<div class="verification-details">';
-      html += '<button class="verification-toggle mono" onclick="document.getElementById(\'' + vid + '\').classList.toggle(\'d-none\');">' + (currentLang === 'en' ? 'Verification' : '検証詳細') + '</button>';
-      html += '<div id="' + vid + '" class="variation-detail d-none">';
+      rh += '<div class="verification-details">';
+      rh += '<button class="verification-toggle mono" onclick="document.getElementById(\'' + vid + '\').classList.toggle(\'d-none\');">' + (currentLang === 'en' ? 'Verification' : '検証詳細') + '</button>';
+      rh += '<div id="' + vid + '" class="variation-detail d-none">';
       if (v.summary_jp) html += '<div class="text-sm variation-summary">' + escHtml(v.summary_jp) + '</div>';
       if (v.claims && v.claims.length > 0) {
         v.claims.forEach(function(c) {
@@ -1129,15 +1130,15 @@ function renderOriginsInner(cultivarName, container) {
           if (c.status === 'verified') { si = '\u2713'; sc = 'claim--verified'; }
           else if (c.status === 'partially_verified') { si = '~'; sc = 'claim--partial'; }
           else if (c.status === 'contradicted') { si = '!'; sc = 'claim--contradicted'; }
-          html += '<div class="claim ' + sc + '">' + si + ' ' + escHtml(c.claim);
+          rh += '<div class="claim ' + sc + '">' + si + ' ' + escHtml(c.claim);
           if (c.source) html += ' <span class="text-gray text-xs">(' + escHtml(c.source) + ')</span>';
-          html += '</div>';
+          rh += '</div>';
         });
       }
       if (v.warnings && v.warnings.length > 0) {
         v.warnings.forEach(function(w) { html += '<div class="verification-warnings">' + escHtml(w) + '</div>'; });
       }
-      html += '</div></div>';
+      rh += '</div></div>';
     }
     // Sources: one mono label, then the links
     var srcHtml = '';
@@ -1153,9 +1154,15 @@ function renderOriginsInner(cultivarName, container) {
     if (srcHtml) html += '<div class="record__sources"><span class="record__label mono">' + t('source_label') + '</span>' + srcHtml + '</div>';
     // Footer: who recorded it and when · votes (正確 / 疑問)
     var who = isDb ? 'IPNI / Kew' : (origin.author && origin.author.isAI ? (origin.author.name || 'AI') : (origin.author && origin.author.name && origin.author.name !== 'User' ? origin.author.name : t('record_by_user')));
-    html += '<footer class="record__foot mono"><span>' + escHtml(who) + (origin.author && origin.author.date ? ' · ' + escHtml(origin.author.date) : '') + '</span>';
-    html += '<span class="vote-group">' + renderVoteButtons(i, origin.votes) + '</span></footer>';
-    html += '</article>';
+    rh += '<footer class="record__foot mono"><span>' + escHtml(who) + (origin.author && origin.author.date ? ' · ' + escHtml(origin.author.date) : '') + '</span>';
+    rh += '<span class="vote-group">' + renderVoteButtons(i, origin.votes) + '</span></footer>';
+    rh += '</article>';
+    // AI text without a citable source and low trust is a draft: folded, not a record
+    if (window.RecordGate && window.RecordGate.isDraft(origin)) {
+      html += '<details class="record record--draft"><summary class="mono">' + t('draft_label').replace('{n}', trustNum) + '</summary>' + rh.replace('class="record"', 'class="record record__inner"') + '</details>';
+    } else {
+      html += rh;
+    }
   });
 
   container.innerHTML = html;
@@ -1219,7 +1226,7 @@ function updateCultivarDetail(cultivarName, rowEl) {
     description: metaDesc,
     path: genusKey + '/' + encodeURIComponent(displayName.replace(genusName + ' ', '')),
     image: ogImageUrl,
-    noindex: detectedType === 'seedling'
+    noindex: detectedType === 'seedling' || (typeof window.recordStateOf === 'function' && cData && window.recordStateOf(cultivarName, cData, { type: detectedType }) !== 'ok')
   });
   // Pass extra structured data for rich JSON-LD
   var jsonLdExtra = { image: ogImageUrl };

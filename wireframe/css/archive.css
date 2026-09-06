@@ -855,3 +855,15 @@ dialog.dialog-clean { margin: auto; }
 .individual-form__preview { font-size: 0.7rem; margin: 6px 0 0; color: var(--color-mid); min-height: 1em; }
 .individual-form__grid { display: grid; grid-template-columns: 1fr 120px; gap: var(--space-md); }
 .individual-form__actions { display: flex; gap: var(--space-sm); margin-top: var(--space-md); }
+
+/* ---------- record gate: drafts folded, state labels, sheet on the detail page ---------- */
+.record--draft { border-top: 1px solid var(--color-rule); padding: 0; }
+.record--draft > summary { list-style: none; cursor: pointer; padding: 12px 0; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-mid); }
+.record--draft > summary::-webkit-details-marker { display: none; }
+.record--draft > summary:hover { color: var(--color-ink); }
+.record--draft[open] > summary { border-bottom: 1px dotted var(--color-rule); }
+.record--draft .record__inner { border-top: 0; padding-top: var(--space-md); opacity: 0.85; }
+.cultivar-row__state--none, .ledger-table__state { color: var(--color-mid); }
+.cultivar-row__state--unrecorded { color: var(--color-accent-warm); }
+.sheet--gate { margin: 0 0 var(--space-lg); }
+#record-gate.d-none { display: none; }

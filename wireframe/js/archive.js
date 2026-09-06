@@ -125,6 +125,9 @@
     d.aliases = entry._aliases || [];
     d.tags = entry._tags || [];
     d.selectedFrom = entry._selectedFrom || null;
+    // Record gate (shared module): 'ok' | 'unrecorded' | 'researching' | 'none'
+    d.state = (window.RecordGate && typeof window.recForGate === 'function' && type !== 'seedling') ? window.RecordGate.state(window.recForGate(fullName, entry, { type: type })) : 'ok';
+    d.missing = (d.state === 'unrecorded' && window.RecordGate) ? window.RecordGate.gate(window.recForGate(fullName, entry, { type: type })).missing : [];
     d.isIndividual = d.tags.indexOf('individual') !== -1 || (!!d.selectedFrom && type === 'clone');
     d.nameStatus = entry._nameStatus || null;
     d.formLocality = clean(entry._locality);
@@ -245,7 +248,7 @@
     var el = document.getElementById('masthead-genera');
     if (!el) return;
     var counts = {};
-    all.forEach(function (d) { if (d.type !== 'seedling') counts[d.genus.toLowerCase()] = (counts[d.genus.toLowerCase()] || 0) + 1; });
+    all.forEach(function (d) { if (d.type !== 'seedling' && d.state === 'ok') counts[d.genus.toLowerCase()] = (counts[d.genus.toLowerCase()] || 0) + 1; });
     var html = '';
     (window._generaData || []).forEach(function (g) {
       html += '<a href="' + esc(base + g.slug + '/') + '" data-nav="genus" data-genus="' + esc(g.slug) + '">' + esc(g.name) + ' · ' + (counts[g.slug] || 0) + ' ' + esc(T('entries_unit')) + '</a>';
@@ -261,7 +264,7 @@
   }
 
   function renderLedgerStats(all) {
-    var entries = all.filter(function (d) { return d.type !== 'seedling'; });
+    var entries = all.filter(function (d) { return d.type !== 'seedling' && d.state === 'ok'; });
     var years = entries.map(function (d) { return d.type === 'species' ? d.pubYear : null; }).filter(Boolean);
     var countries = {};
     entries.forEach(function (d) { if (d.country) countries[d.country] = 1; });
@@ -427,6 +430,7 @@
       var bi = (typeof getBadgeInfo === 'function') ? getBadgeInfo(d.type, d.fullName) : { cls: 'badge--' + d.type, txt: d.type };
       if (d.isIndividual) bi = { cls: 'badge--clone', txt: T('type_individual') };
       var trustCls = (typeof getTrustClass === 'function') ? getTrustClass(d.trust) : '';
+      var rowState = d.type === 'seedling' ? 'ok' : d.state;
       var no = d.id ? String(d.id).padStart(3, '0') : String(i + 1).padStart(2, '0');
       if (withDate) {
         var stamp = item.created_at || item.updated_at || '';
@@ -439,7 +443,8 @@
       html += '<td class="ledger-table__cell-type"><span class="badge ' + esc(bi.cls) + '">' + esc(bi.txt) + '</span></td>';
       var cite = citeHtml(d);
       html += '<td class="ledger-table__cell-meta ledger-table__meta">' + (cite ? '<span class="mono">' + cite + '</span>' : '') + (d.parentA && d.parentB ? '<div class="text-xs">' + esc(d.parentA) + ' × ' + esc(d.parentB) + '</div>' : '') + '</td>';
-      html += '<td class="ledger-table__cell-trust right">' + (d.trust > 0 ? '<div class="trust"><div class="trust__bar"><div class="trust__fill ' + trustCls + '" style="width:' + d.trust + '%"></div></div><span class="trust__label">' + d.trust + '%</span></div>' : '<span class="mono">—</span>') + '</td>';
+      if (rowState !== 'ok') html += '<td class="ledger-table__cell-trust right"><span class="mono ledger-table__state">' + esc(T('state_' + rowState)) + '</span></td>';
+      else html += '<td class="ledger-table__cell-trust right">' + (d.trust > 0 ? '<div class="trust"><div class="trust__bar"><div class="trust__fill ' + trustCls + '" style="width:' + d.trust + '%"></div></div><span class="trust__label">' + d.trust + '%</span></div>' : '<span class="mono">—</span>') + '</td>';
       html += '</tr>';
     });
     html += '</tbody></table></div>';
@@ -498,6 +503,25 @@
     if (d.aliases && d.aliases.length) cells += cell('spec_aliases', esc(d.aliases.join(' / ')));
     var note = d.nameStatus === 'disputed' ? T('name_status_disputed') : d.nameStatus === 'trade' ? T('name_status_trade') : d.nameStatus === 'informal' ? T('name_status_informal') : '';
     el.innerHTML = (cells ? '<div class="specimen">' + cells + '</div>' : '') + (note ? '<p class="specimen__note mono">' + esc(note) + '</p>' : '');
+  }
+  /* record gate on the detail page: a sheet naming what is missing, and noindex until it is recorded */
+  function renderGateNote(d) {
+    var el = document.getElementById('record-gate');
+    if (!el) return;
+    var st = d.type === 'seedling' ? 'ok' : d.state;
+    if (st === 'ok') { el.innerHTML = ''; el.classList.add('d-none'); }
+    else {
+      var missing = (d.missing || []).map(function (k) { return T('gate_missing_' + k); }).join(' · ');
+      el.innerHTML = '<div class="sheet sheet--gate"><p class="sheet__title">' + esc(T(st === 'unrecorded' ? 'gate_title_unrecorded' : st === 'researching' ? 'gate_title_researching' : 'gate_title_none')) + '</p>'
+        + (missing ? '<p class="sheet__note mono">' + esc(T('gate_missing_label')) + ' ' + esc(missing) + '</p>' : '<p class="sheet__note mono">' + esc(T('gate_note')) + '</p>')
+        + '<a href="#add-origin-section" class="sheet__cta" id="gate-cta">' + esc(T('gate_cta')) + '</a></div>';
+      el.classList.remove('d-none');
+      var cta = document.getElementById('gate-cta');
+      if (cta) cta.addEventListener('click', function (e) { e.preventDefault(); var b = document.getElementById('btn-add-origin'); if (b) { b.scrollIntoView({ behavior: 'smooth', block: 'center' }); } });
+    }
+    // Unrecorded pages stay out of the index until they carry a real record
+    var robots = document.querySelector('meta[name="robots"]');
+    if (robots) robots.setAttribute('content', (st === 'ok' && d.type !== 'seedling') ? 'index, follow' : 'noindex, follow');
   }
   /* individuals of a species: numbered or named single plants ('HR1', 'Dark Star') */
   function individualsOf(d, all) {
@@ -783,6 +807,7 @@
     renderSpecimen(d, all);
     renderRelated(d, all);
     renderIndividuals(d, all);
+    renderGateNote(d);
     if (window.refreshRerunButton) window.refreshRerunButton(entry);
     if (window.refreshPrivateButton) window.refreshPrivateButton(entry);
     var pnote = document.getElementById("detail-private-note");

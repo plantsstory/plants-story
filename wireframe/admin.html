@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="css/utilities.css">
   <link rel="stylesheet" href="css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/record-gate.js?v=20260907c"></script>
 </head>
 <body>
 
@@ -62,6 +63,7 @@
       <a href="#" data-section="delete-requests">削除依頼</a>
       <a href="#" data-section="research-requests">再調査リクエスト <span id="rr-badge" class="d-none" style="background:#A8712E;color:#fff;border-radius:10px;padding:0 6px;font-size:0.7rem;"></span></a>
       <a href="#" data-section="genus-requests">属の追加依頼</a>
+      <a href="#" data-section="gate">未収録一覧</a>
       <a href="#" data-section="affiliates">アフィリエイト</a>
       <a href="#" data-section="users">ユーザー管理</a>
       <a href="#" data-section="bulk">一括操作</a>
@@ -290,6 +292,14 @@
         <p class="desc-text">来訪者からの「この属も収録してほしい」依頼です。件数が集まった属から、genera テーブルの is_visible を立てて公開します（非表示の Monstera / Philodendron / Platycerium はデータ修正を済ませてから）。</p>
         <div id="gr-list" class="d-grid gap-md"></div>
         <p id="gr-empty" class="desc-text">依頼はまだありません</p>
+      </section>
+
+      <!-- ---- RECORD GATE ---- -->
+      <section id="sec-gate" class="hidden">
+        <h2 class="section-title">未収録一覧（品質ゲート）</h2>
+        <p class="desc-text">記録はあるが区分別の必須項目を満たしていないもの（未収録）、記録が無いもの、AI 調査が 72 時間を超えて終わっていないもの（調査失敗）。告知ゲート M3 はこの一覧がゼロになることです。</p>
+        <div id="gate-list" class="d-grid gap-md"></div>
+        <p id="gate-empty" class="desc-text">すべて収録済みです</p>
       </section>
 
       <!-- ---- AFFILIATES ---- -->
@@ -2234,6 +2244,7 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
     if (this.getAttribute('data-section') === 'delete-requests') loadDeletionRequests();
     if (this.getAttribute('data-section') === 'research-requests') loadResearchRequests();
     if (this.getAttribute('data-section') === 'genus-requests') loadGenusRequests();
+    if (this.getAttribute('data-section') === 'gate') loadGateList();
     if (this.getAttribute('data-section') === 'users') loadUsers();
   });
 });
@@ -2241,6 +2252,30 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
 // ========================================
 // AI Re-research Requests (owner approves; approval runs the research)
 // ========================================
+async function loadGateList() {
+  var listEl = document.getElementById('gate-list'), emptyEl = document.getElementById('gate-empty');
+  var res = await sb.from('cultivars').select('id, cultivar_name, genus, type, origins, updated_at, parent_a_text, parent_b_text, formula_status, species_qualifier, selected_from_id, tags, locality, ai_status, is_private').order('genus').order('cultivar_name');
+  if (res.error) { toast('取得エラー: ' + res.error.message); return; }
+  var MISS = { record: '記録', author: '記載者', year: '年', place: '産地/分布', source: '出典', locality: '産地', context: '近縁種/導入者/補足', parents: '親', person: '作出者/命名者', evidence: '出典/補足', clone_facts: '事実2項目', sowing: '播種日', breeder: '作出者' };
+  var rows = (res.data || []).filter(function(r) { return r.type !== 'seedling' || !r.is_private; }).map(function(r) {
+    var st = RecordGate.state(r);
+    var failed = (r.ai_status === 'pending' || r.ai_status === 'researching') && st === 'none';
+    return { r: r, st: failed ? 'failed' : st, missing: st === 'unrecorded' ? RecordGate.gate(r).missing : [] };
+  }).filter(function(x) { return x.st !== 'ok'; });
+  emptyEl.style.display = rows.length ? 'none' : '';
+  listEl.innerHTML = '';
+  var LABEL = { unrecorded: '未収録', none: '記録なし', researching: '調査中', failed: '調査失敗' };
+  rows.forEach(function(x) {
+    var c = document.createElement('div');
+    c.style.cssText = 'background:var(--color-white);border:1px solid var(--color-light);border-radius:var(--radius-md);padding:var(--space-md);display:flex;justify-content:space-between;gap:var(--space-md);flex-wrap:wrap;align-items:baseline;';
+    var rest = String(x.r.cultivar_name).replace(x.r.genus + ' ', '').replace(' [Seedling]', '');
+    c.innerHTML = '<div><a href="/' + x.r.genus.toLowerCase() + '/' + encodeURIComponent(rest) + '" target="_blank" style="font-weight:600;">' + escapeHtml(x.r.cultivar_name) + '</a> <span style="font-size:0.75rem;color:var(--color-gray);">#' + x.r.id + ' · ' + x.r.genus + ' · ' + x.r.type + '</span>'
+      + (x.missing.length ? '<div style="font-size:var(--font-size-sm);margin-top:4px;">不足: ' + x.missing.map(function(k) { return MISS[k] || k; }).join(' · ') + '</div>' : '') + '</div>'
+      + '<span style="font-size:0.75rem;padding:2px 8px;border:1px solid var(--color-light);border-radius:10px;">' + LABEL[x.st] + '</span>';
+    listEl.appendChild(c);
+  });
+}
+
 async function loadGenusRequests() {
   var listEl = document.getElementById('gr-list'), emptyEl = document.getElementById('gr-empty');
   var res = await sb.rpc('genus_request_summary');

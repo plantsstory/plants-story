@@ -14,6 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const people = require('./lib/people');
 const geo = require('./lib/geo');
+const RecordGate = require('../wireframe/js/record-gate');
 
 const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
@@ -72,6 +73,7 @@ function originDescription(origins) {
 function buildStub(template, meta) {
   let html = template;
   html = html.replace(/<title>[^<]*<\/title>/, '<title>' + escAttr(meta.title) + '</title>');
+  if (meta.noindex) html = html.replace('</head>', '<meta name="robots" content="noindex, follow">\n</head>');
   html = html.replace(/(<meta name="description" content=")[^"]*(">)/, '$1' + escAttr(meta.description) + '$2');
   html = html.replace(/(<meta property="og:title" content=")[^"]*(">)/, '$1' + escAttr(meta.title) + '$2');
   html = html.replace(/(<meta property="og:description" content=")[^"]*(">)/, '$1' + escAttr(meta.description) + '$2');
@@ -112,7 +114,7 @@ async function main() {
     genera = await fetchJSON('/rest/v1/genera?select=slug,name&order=display_order');
   }
   const visibleGenusNames = new Set(genera.map(g => g.name));
-  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,origins,updated_at&is_private=eq.false&order=genus,cultivar_name');
+  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,origins,updated_at,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=genus,cultivar_name');
   const cultivars = allCultivars.filter(c => visibleGenusNames.has(c.genus || 'Anthurium'));
   const images = await fetchJSON('/rest/v1/cultivar_images?select=cultivar_name,storage_path&order=display_order');
 
@@ -126,6 +128,7 @@ async function main() {
 
   const countByGenus = {};
   for (const c of publicCultivars) {
+    if ((c.tags || []).includes('individual') || RecordGate.state(c) !== 'ok') continue; // recorded entries only
     const g = c.genus || 'Anthurium';
     countByGenus[g] = (countByGenus[g] || 0) + 1;
   }
@@ -217,6 +220,7 @@ async function main() {
       : null;
 
     const html = buildStub(template, {
+      noindex: RecordGate.state(c) !== 'ok',
       title: c.cultivar_name + 'の由来・歴史 | Aroid Origins',
       description: desc,
       url: url,

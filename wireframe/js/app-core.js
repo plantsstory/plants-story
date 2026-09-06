@@ -100,6 +100,20 @@ function paginateGenus(genusEl, page) {}
 // An "individual" is a numbered/named single plant of a species ('HR1'); it lives on the species page, not in lists
 function isIndividualItem(it) { var tg = it && it.entry && it.entry._tags; return !!(tg && tg.indexOf('individual') !== -1); }
 window.isIndividualItem = isIndividualItem;
+// Row-like object for the shared record gate (wireframe/js/record-gate.js)
+function recForGate(fullName, entry, meta) {
+  entry = entry || {}; meta = meta || {};
+  var ps = entry._parents || [];
+  return { cultivar_name: fullName, type: entry._type || meta.type || 'species', origins: entry.origins || [], formula: entry.formula || null,
+    parent_a_text: ps[0] || null, parent_b_text: ps[1] || null, formula_status: entry._formulaStatus || null,
+    species_qualifier: entry._qualifier || null, selected_from_id: entry._selectedFrom || null, tags: entry._tags || [],
+    locality: entry._locality || null, ai_status: entry._aiStatus || meta.ai_status || null, updated_at: entry._updatedAt || null };
+}
+function recordStateOf(fullName, entry, meta) {
+  if (!window.RecordGate) return (entry && entry.origins && entry.origins.length) ? 'ok' : 'none';
+  return window.RecordGate.state(recForGate(fullName, entry, meta));
+}
+window.recForGate = recForGate; window.recordStateOf = recordStateOf;
 function filterGenusRows(container, query) {}
 function renderFavoritesPage() {}
 function updateCultivarDetail(key, row) {}
@@ -2411,6 +2425,7 @@ if (false) {
     entry._created_at = meta.created_at || '';
     if (meta.is_private) entry._isPrivate = true;
     entry._userId = meta.user_id || null;
+    entry._aiStatus = meta.ai_status || null;
     if (meta.id) entry._id = meta.id;
     if (meta.user_id && window._profileCache && window._profileCache[meta.user_id]) {
       entry._posterName = window._profileCache[meta.user_id];
@@ -2442,7 +2457,10 @@ if (false) {
     var cls = 'cultivar-row' + (locked ? ' cultivar-row--locked' : '');
     var bi = getBadgeInfo(meta.type, fullName);
     var hasDesc = entry.origins.length > 0 && entry.origins[0].trust > 0;
-    var originCount = hasDesc ? entry.origins.length : 0;
+    // Record state: ok (trust shown) / unrecorded (gate failed) / researching / none. Drafts are not counted.
+    var recState = isSeedling ? 'ok' : recordStateOf(fullName, entry, meta);
+    var originCount = window.RecordGate ? window.RecordGate.visibleCount({ origins: entry.origins }) : (hasDesc ? entry.origins.length : 0);
+    if (recState !== 'ok') hasDesc = false;
     var trustPct = hasDesc ? entry.origins[0].trust : 0;
     var displayName = isSeedling ? fullName.replace(' [Seedling]', '') : fullName;
 
@@ -2463,10 +2481,9 @@ if (false) {
     if (locked) h += '<span class="badge badge--locked"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>';
     if (!isSeedling) {
       // No separate "AI pending" badge: the state column carries it
-      var pending = meta.ai_status === 'pending' || meta.ai_status === 'researching';
       h += hasDesc
         ? '<div class="trust"><div class="trust__bar"><div class="trust__fill ' + getTrustClass(trustPct) + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + trustPct + '%</span></div>'
-        : '<span class="mono cultivar-row__state">' + (pending ? t('state_researching') : t('state_unrecorded')) + '</span>';
+        : '<span class="mono cultivar-row__state cultivar-row__state--' + recState + '">' + t('state_' + recState) + '</span>';
     }
     h += '</div>';
     if (!isSeedling && window.entryCiteLine) {
@@ -2503,7 +2520,8 @@ if (false) {
       if (card) {
         var countEl = card.querySelector('.genus-card__count');
         if (countEl) {
-          var total = (_genusItems[g] || []).filter(function(it) { return it.meta.type !== 'seedling' && !isIndividualItem(it); }).length;
+          // genus cards count recorded entries only (BOARD gate)
+          var total = (_genusItems[g] || []).filter(function(it) { return it.meta.type !== 'seedling' && !isIndividualItem(it) && recordStateOf(it.fullName, it.entry, it.meta) === 'ok'; }).length;
           countEl.textContent = total + (currentLang === 'en' ? ' Cultivars' : ' 品種');
         }
       }
@@ -2744,7 +2762,7 @@ if (false) {
     // Then load from Supabase (async, authoritative source)
     // Fetch only needed columns to reduce payload size
     if (supabase) {
-      supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, parent_a_text, parent_b_text, parent_a_id, parent_b_id, is_private, ai_status, selected_from_id').then(function(res) {
+      supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, parent_a_text, parent_b_text, parent_a_id, parent_b_id, is_private, ai_status, selected_from_id, updated_at, formula_status').then(function(res) {
         if (res.error || !res.data) return;
 
         // Collect unique user_ids to fetch profiles
@@ -2776,7 +2794,8 @@ if (false) {
             _qualifier: row.species_qualifier || null, _aliases: row.aliases || null, _tags: row.tags || null,
             _nameStatus: row.name_status || null, _locality: row.locality || null,
             _parents: [row.parent_a_text || null, row.parent_b_text || null], _parentIds: [row.parent_a_id || null, row.parent_b_id || null],
-            _isPrivate: !!row.is_private, _selectedFrom: row.selected_from_id || null };
+            _isPrivate: !!row.is_private, _selectedFrom: row.selected_from_id || null,
+            _updatedAt: row.updated_at || null, _formulaStatus: row.formula_status || null };
           var genus = row.genus || 'Anthurium';
           var meta = { genus: genus, type: row.type || 'Hybrid', created_at: row.created_at || '', user_id: row.user_id || null, id: row.id, is_private: !!row.is_private, ai_status: row.ai_status || null };
           addCultivarRow(row.cultivar_name, entry, meta);

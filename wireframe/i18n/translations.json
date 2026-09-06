@@ -1679,5 +1679,93 @@
   "individual_saved": {
     "jp": "個体を登録しました",
     "en": "Individual recorded"
+  },
+  "state_none": {
+    "jp": "記録なし",
+    "en": "No record"
+  },
+  "state_ok": {
+    "jp": "収録済み",
+    "en": "Recorded"
+  },
+  "draft_label": {
+    "jp": "AI 下書き（未検証・信頼度 {n}%）— 開く",
+    "en": "AI draft (unverified, trust {n}%) — open"
+  },
+  "gate_title_unrecorded": {
+    "jp": "記録未収録",
+    "en": "Not yet recorded"
+  },
+  "gate_title_researching": {
+    "jp": "AI 調査中",
+    "en": "Research in progress"
+  },
+  "gate_title_none": {
+    "jp": "由来の記録はまだありません",
+    "en": "No origin record yet"
+  },
+  "gate_missing_label": {
+    "jp": "不足している項目:",
+    "en": "Missing:"
+  },
+  "gate_note": {
+    "jp": "この名前は登録されていますが、由来として示せる記録がまだありません。",
+    "en": "The name is registered, but no origin record can be shown yet."
+  },
+  "gate_cta": {
+    "jp": "記録を追加する →",
+    "en": "Add a record →"
+  },
+  "gate_missing_record": {
+    "jp": "出典のある記録",
+    "en": "a sourced record"
+  },
+  "gate_missing_author": {
+    "jp": "記載者",
+    "en": "author"
+  },
+  "gate_missing_year": {
+    "jp": "記載年",
+    "en": "year"
+  },
+  "gate_missing_place": {
+    "jp": "タイプ産地または分布",
+    "en": "type locality or distribution"
+  },
+  "gate_missing_source": {
+    "jp": "出典（IPNI / POWO / 論文）",
+    "en": "a source (IPNI / POWO / paper)"
+  },
+  "gate_missing_locality": {
+    "jp": "産地",
+    "en": "locality"
+  },
+  "gate_missing_context": {
+    "jp": "近縁種・導入者・補足のいずれか",
+    "en": "closest species, introducer or notes"
+  },
+  "gate_missing_parents": {
+    "jp": "交配式（親）",
+    "en": "parentage"
+  },
+  "gate_missing_person": {
+    "jp": "作出者・命名者・命名年のいずれか",
+    "en": "breeder, namer or year"
+  },
+  "gate_missing_evidence": {
+    "jp": "出典または80字以上の説明",
+    "en": "a source or 80+ characters of notes"
+  },
+  "gate_missing_clone_facts": {
+    "jp": "命名者・年・親・説明・出典のうち2つ",
+    "en": "two of namer, year, parent, notes, source"
+  },
+  "gate_missing_sowing": {
+    "jp": "播種日",
+    "en": "sowing date"
+  },
+  "gate_missing_breeder": {
+    "jp": "作出者",
+    "en": "breeder"
   }
 }
