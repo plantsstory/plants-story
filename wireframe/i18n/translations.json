@@ -1509,8 +1509,8 @@
     "en": "Private record — nobody else can see this."
   },
   "search_no_results_hint": {
-    "jp": "表記ゆれや別名でも探しています。まだ収録されていない品種かもしれません。",
-    "en": "We also match alternative spellings and synonyms. This entry may not be recorded yet."
+    "jp": "学名・品種名・カタカナで探せます。収録されていなければ、依頼するか自分で登録できます。",
+    "en": "Search by scientific name, cultivar name or katakana. If it is not here yet, ask for it or record it yourself."
   },
   "state_unrecorded": {
     "jp": "未収録",
@@ -1779,5 +1779,21 @@
   "formula_disputed": {
     "jp": "交配式は係争中（複数の説があります）",
     "en": "Parentage disputed (more than one account)"
+  },
+  "search_request_name": {
+    "jp": "「{q}」の収録を依頼する →",
+    "en": "Ask for \"{q}\" to be recorded →"
+  },
+  "search_request_sent": {
+    "jp": "依頼を受け付けました（{n} 件目）",
+    "en": "Request received ({n} so far)"
+  },
+  "search_request_duplicate": {
+    "jp": "この名前はすでに依頼済みです",
+    "en": "You have already requested this name"
+  },
+  "search_request_invalid": {
+    "jp": "名前は3文字以上で入力してください",
+    "en": "Enter at least 3 characters"
   }
 }

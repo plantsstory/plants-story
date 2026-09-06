@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="css/utilities.css">
   <link rel="stylesheet" href="css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/record-gate.js?v=20260907f"></script>
+  <script src="js/record-gate.js?v=20260907g"></script>
 </head>
 <body>
 
@@ -288,8 +288,8 @@
 
       <!-- ---- GENUS REQUESTS ---- -->
       <section id="sec-genus-requests" class="hidden">
-        <h2 class="section-title">属の追加依頼</h2>
-        <p class="desc-text">来訪者からの「この属も収録してほしい」依頼です。件数が集まった属から、genera テーブルの is_visible を立てて公開します（非表示の Monstera / Philodendron / Platycerium はデータ修正を済ませてから）。</p>
+        <h2 class="section-title">属・名前の収録依頼</h2>
+        <p class="desc-text">来訪者からの「この属も収録してほしい」「この名前を収録してほしい（検索0件）」の依頼です。次に登録する品種の順番はこの一覧で決めます。件数が集まった属から、genera テーブルの is_visible を立てて公開します（非表示の Monstera / Philodendron / Platycerium はデータ修正を済ませてから）。</p>
         <div id="gr-list" class="d-grid gap-md"></div>
         <p id="gr-empty" class="desc-text">依頼はまだありません</p>
       </section>
@@ -2288,7 +2288,7 @@ async function loadGenusRequests() {
     c.style.cssText = 'background:var(--color-white);border:1px solid var(--color-light);border-radius:var(--radius-md);padding:var(--space-md);';
     var notes = (r.notes || []).map(function(n) { return '<li>' + escapeHtml(n) + '</li>'; }).join('');
     c.innerHTML = '<div style="display:flex;justify-content:space-between;gap:var(--space-md);flex-wrap:wrap;align-items:baseline;">'
-      + '<div style="font-weight:600;font-size:1.05rem;">' + escapeHtml(r.genus) + ' <span style="font-size:0.8rem;color:var(--color-gray);">' + r.count + ' 件（ログイン ' + r.signed_in + '）</span></div>'
+      + '<div style="font-weight:600;font-size:1.05rem;"><span style="font-size:0.7rem;color:var(--color-gray);margin-right:6px;">' + (r.kind === 'name' ? '名前' : '属') + '</span>' + escapeHtml(r.genus) + ' <span style="font-size:0.8rem;color:var(--color-gray);">' + r.count + ' 件（ログイン ' + r.signed_in + '）</span></div>'
       + '<div style="font-size:var(--font-size-xs);color:var(--color-gray);">最新 ' + new Date(r.last_at).toLocaleString('ja-JP') + '</div></div>'
       + (notes ? '<ul style="margin:var(--space-sm) 0 0 var(--space-md);font-size:var(--font-size-sm);">' + notes + '</ul>' : '');
     listEl.appendChild(c);

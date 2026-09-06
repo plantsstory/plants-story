@@ -1686,11 +1686,31 @@ function globalSearch(query) {
   var cultivarList = document.getElementById('search-cultivar-list');
   if (cultivarList) {
     if (cultivarResults.length === 0) {
+      trackEvent('search_zero', { search_term: q });
       cultivarList.innerHTML = '<div class="sheet sheet--search">'
         + '<p class="sheet__title">' + t('no_results') + '</p>'
         + '<p class="sheet__note mono">' + t('search_no_results_hint') + '</p>'
+        + '<p class="sheet__actions">'
+        + '<a href="#" class="sheet__cta" id="search-request-name" data-name="' + escHtml(query.trim()) + '">' + t('search_request_name').replace('{q}', escHtml(query.trim())) + '</a>'
         + '<a href="#" class="sheet__cta" data-nav="contribute">' + t('add_cultivar') + '</a>'
-        + '</div>';
+        + '</p></div>';
+      var reqLink = document.getElementById('search-request-name');
+      if (reqLink) reqLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        var sb = window._supabaseClient; if (!sb) return;
+        var name = this.getAttribute('data-name'); var self = this;
+        sb.rpc('request_name', { p_name: name, p_note: null }).then(function(res) {
+          var r = res.data;
+          if (res.error || !r || !r.success) {
+            var code = (r && r.error) || 'error';
+            showToast(code === 'duplicate' ? t('search_request_duplicate') : code === 'invalid_name' ? t('search_request_invalid') : (res.error ? res.error.message : t('search_request_invalid')), true);
+            return;
+          }
+          self.textContent = t('search_request_sent').replace('{n}', r.count);
+          self.classList.add('sheet__cta--done');
+          trackEvent('name_request', { search_term: name });
+        });
+      });
     } else {
       var html = '';
       cultivarResults.forEach(function(item) {

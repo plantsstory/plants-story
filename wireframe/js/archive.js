@@ -965,6 +965,7 @@
      GLOSSARY: link the first mention of each term inside origin text
      ============================================================ */
   var GLOSSARY_TERMS = [
+    ['管理番号', 'g-code'], ['未収録', 'g-unrecorded'], ['AI 下書き', 'g-draft'], ['系統', 'g-line'],
     ['ソマクローナル変異', 'g-tc'], ['組織培養', 'g-tc'], ['タイプ標本', 'g-type-locality'], ['タイプ産地', 'g-type-locality'],
     ['産地フォーム', 'g-ecotype'], ['エコタイプ', 'g-ecotype'], ['原記載', 'g-kisai'], ['記載者', 'g-kisaisha'], ['採集者', 'g-saishusha'],
     ['シノニム', 'g-synonym'], ['異名', 'g-synonym'], ['旧綴り', 'g-synonym'], ['交配式', 'g-formula'], ['選抜個体', 'g-original'],

@@ -872,3 +872,7 @@ dialog.dialog-clean { margin: auto; }
 .specimen__flag { display: block; margin-top: 4px; font-size: 0.62rem; letter-spacing: 0.08em; color: var(--color-accent-warm); }
 .people__abbr { font-size: 0.62rem; margin-left: 6px; color: var(--color-mid); }
 .people__note { color: var(--color-mid); max-width: 64ch; margin: calc(-1 * var(--space-sm)) 0 var(--space-lg); line-height: 1.8; }
+
+/* search-zero sheet: two mono actions */
+.sheet__actions { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0; }
+.sheet__cta--done { color: var(--color-green); border-color: var(--color-green); pointer-events: none; }

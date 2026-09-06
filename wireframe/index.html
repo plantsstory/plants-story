@@ -14,7 +14,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.yahoo.co.jp; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJK72JH471"></script>
-  <script src="js/gtag-init.js?v=20260907f"></script>
+  <script src="js/gtag-init.js?v=20260907g"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -55,13 +55,13 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20260907f">
-  <link rel="stylesheet" href="css/reset.css?v=20260907f">
-  <link rel="stylesheet" href="css/layout.css?v=20260907f">
-  <link rel="stylesheet" href="css/components.css?v=20260907f">
-  <link rel="stylesheet" href="css/pages.css?v=20260907f">
-  <link rel="stylesheet" href="css/utilities.css?v=20260907f">
-  <link rel="stylesheet" href="css/archive.css?v=20260907f">
+  <link rel="stylesheet" href="css/variables.css?v=20260907g">
+  <link rel="stylesheet" href="css/reset.css?v=20260907g">
+  <link rel="stylesheet" href="css/layout.css?v=20260907g">
+  <link rel="stylesheet" href="css/components.css?v=20260907g">
+  <link rel="stylesheet" href="css/pages.css?v=20260907g">
+  <link rel="stylesheet" href="css/utilities.css?v=20260907g">
+  <link rel="stylesheet" href="css/archive.css?v=20260907g">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1040,135 +1040,45 @@
       <h1 data-i18n="guide_title">使い方ガイド</h1>
 
       <div class="about-mission">
-        <p>Aroid Originsは、アロイド植物の品種の由来・歴史情報をコミュニティで収集・共有するプラットフォームです。このページでは、品種情報の閲覧・投稿・編集方法を解説します。</p>
+        <p>この図鑑は「誰が、いつ、どこで名付けたか」を出典つきで記録します。ここでは、名前の書き方、記録の読み方、投稿のしかたを説明します。言葉の定義は<a href="/glossary/" data-nav="glossary">用語集</a>にあります。</p>
       </div>
 
-      <!-- 閲覧方法 -->
-      <h2>品種情報の閲覧</h2>
+      <h2>区分と名前の書き方</h2>
+      <p>区分は4つ。判定の軸はひとつ、「その名前を名乗る株は、1個体の栄養繁殖由来だけか」です。</p>
+      <dl class="glossary">
+        <dt>原種（Species）</dt><dd>自然界の種。学名データベース（IPNI / POWO）に照らして、記載者・記載年・タイプ産地・分布を記録します。未同定は sp.、近縁は aff.、要確認は cf. を付けます（例: <i>Anthurium</i> sp. "Peru"）。</dd>
+        <dt>Hybrid</dt><dd>特定の交配式から得た実生群の名前。交配式（母 × 父）が必須です。作出者と命名年を添えます。例: <i>Anthurium</i> 'Mystique A88'。</dd>
+        <dt>Clone</dt><dd>1個体の名前。オリジナル個体を指し、その分け株・組織培養株も同じ名前です。実生（F 個体）は別の株なので、その名前は名乗りません。例: <i>Anthurium</i> 'King of Spades'。</dd>
+        <dt>実生（Seedling）</dt><dd>自分で播いた記録。交配式・播種日・作出者で識別します。ログインした人は5件まで無料で、非公開にもできます。</dd>
+        <dt>個体（原種の株）</dt><dd>原種の1株に付けた番号や名前（例: <i>carlablackiae</i> 'HR1'、'Dark Star'）。Clone の一種として、その原種のページの「個体」欄に載ります。一覧や件数には数えません。</dd>
+      </dl>
+      <p><strong>引用符</strong>: 品種名・個体名・管理番号はシングルクォート（'King of Spades'、'HR1'）。産地や非公式名はダブルクォート（sp. "Peru"）。× は前後に半角スペースを入れます。</p>
+
+      <h2>記録の読み方</h2>
+      <dl class="glossary">
+        <dt>標本ラベル</dt><dd>品種名の下にある表。原種なら記載者・記載年・採集者・タイプ産地・分布、交配種なら作出者・年・交配式。ここが要約です。</dd>
+        <dt>記録 1、記録 2 …</dt><dd>写真の下に並ぶ、出典つきの記録です。見出しの「IPNI / POWO · Tier S · 95%」は、誰が書いた記録か、出典の階層（S〜D）、信頼度を示します。信頼度が高い順に並びます。</dd>
+        <dt>投稿者の記録 · 出典なし</dt><dd>栽培者や作出者本人が書いた記録で、出典 URL が無いもの。信頼度の数字は付けません。内容が正しくないと思ったら「疑問」の投票か「報告」から知らせてください。</dd>
+        <dt>AI 下書き</dt><dd>出典が無く信頼度の低い AI 生成文は、折り畳んで「下書き」と表示します。記録には数えません。</dd>
+        <dt>未収録</dt><dd>名前は登録されているが、区分ごとの必須項目（記載者・年・出典、交配式・作出者、播種日など）が揃っていない状態。点線のシートに不足している項目が出ます。「記録を追加」で埋められます。</dd>
+        <dt>検証済</dt><dd>管理者が出典と照合した記録に付く印です（準備中）。</dd>
+      </dl>
+
+      <h2>投稿</h2>
       <ol class="terms-list">
-        <li><strong>トップページ</strong>で属（Genus）を選択します。現在はAnthuriumを掲載しています（今後拡充予定）。</li>
-        <li>品種一覧から気になる品種をタップすると、<strong>詳細ページ</strong>が開きます。</li>
-        <li>詳細ページでは、由来情報（交配式・発見者・作出者など）、画像ギャラリー、信頼度スコアが確認できます。</li>
-        <li>上部の<strong>検索バー</strong>で品種名やユーザー名を直接検索することもできます。</li>
+        <li>Google でログインします（閲覧にログインは要りません）。</li>
+        <li>ヘッダーの「+ 投稿」から、属・区分・名前を入れます。原種は学名を入れると記載者・年・分布が自動で埋まります（IPNI / POWO / WCVP）。Clone は登録時に1回だけ、Web 検索つきの AI 調査が走ります。</li>
+        <li>写真は栽培者本人が撮ったものだけを載せます。登録後、ページの「写真を追加」から何枚でも。</li>
+        <li>既存のページには「記録を追加」で出典つきの記録を書き足せます。項目を分けて書くこともできます。</li>
+        <li>原種のページの「個体を追加」で、自分の株の番号や名前を記録できます。実生の親に指定すると系統図につながります。</li>
+        <li>内容に疑問があるときは「再調査を依頼」。管理者が承認すると AI 調査がもう一度走ります。</li>
       </ol>
 
-      <!-- 投稿方法 -->
-      <h2>品種情報の投稿</h2>
-      <ol class="terms-list">
-        <li>ナビゲーションの「<strong>投稿</strong>」をタップして投稿ページを開きます。</li>
-        <li><strong>属</strong>を選択し、<strong>品種名</strong>を入力します。</li>
-        <li><strong>タイプ</strong>（原種/ハイブリッド/クローン/実生）を選択します（詳細は下記）。</li>
-        <li>画像があればアップロードします（最大3枚、JPG/PNG、各20MB以下で自動圧縮されます）。</li>
-        <li>由来情報を入力します。タイプによって入力フィールドが異なります。</li>
-        <li>引用リンク（参考URL）があれば追加します。</li>
-        <li>「投稿する」ボタンで送信します。</li>
-      </ol>
-      <p class="text-sm text-muted">※ 投稿にはGoogleアカウントでのログインが必要です。自分の投稿は後からいつでも編集・削除できます。</p>
+      <h2>標本ラベルの印刷</h2>
+      <p>品種ページから、名前・記載者・年・QR コードを入れた標本ラベルを印刷できるようにします（準備中。9 月末に公開予定）。</p>
 
-      <!-- タイプ別説明 -->
-      <h2>品種タイプの違い</h2>
-      <p>4つの区分は「その名前が何を指しているか」で決まります。迷ったら次の順に確認してください。</p>
-      <ol class="terms-list">
-        <li>学術的に発表された学名（属名＋種小名）か、sp. / aff. / cf. 付きの未同定株 → <strong>原種</strong></li>
-        <li>'クォート' 付きの園芸名で、その名前を名乗る株が <strong>1個体を株分け・組織培養で増やしたものだけ</strong> → <strong>クローン</strong></li>
-        <li>'クォート' 付きの園芸名で、<strong>同じ交配式の実生兄弟がまとめて</strong>その名前で流通している → <strong>ハイブリッド</strong></li>
-        <li>まだ名前が無く、自分が播いた実生の記録として登録したい → <strong>実生</strong></li>
-      </ol>
-      <p class="text-sm text-muted">覚え方: 「その名前の株を種から増やしても同じ名前で売られているか」。売られていればハイブリッド、売られていなければクローンです。</p>
-
-      <div class="card mb-md">
-        <h3>原種（Species）</h3>
-        <p>自然界に存在する種、およびその種と考えられる株です。学術的に記載され学名が付いた種（例: <i>Anthurium crystallinum</i>）のほか、未記載の株（sp.）、既知種に近縁だが別種と思われる株（aff.）、既知種と思われるが確定できない株（cf.）、亜種・変種（ssp. / var.）を含みます。人が交配して作った株は、親が同じ種どうしでも原種ではありません。</p>
-        <p class="text-sm mt-sm"><strong>名前の書き方:</strong> 属名＋種小名（<i>Anthurium crystallinum</i>）。未同定株は <i>Anthurium</i> sp. "Peru" のように sp. の後に産地や入手元をダブルクォートで添えます。sp. / aff. / cf. の後には半角スペースを入れます。</p>
-        <p class="text-sm mt-sm"><strong>判定例:</strong> <i>Anthurium crystallinum</i>（Linden &amp; André, 1873 記載）→ 原種。<i>Anthurium</i> aff. <i>besseae</i>（besseae に近いが別物と考えられる株）→ 原種（aff.）。名前は推測せず aff. のまま登録します。<i>Monstera obliqua</i> "Peru" → 原種の産地フォームであってクローン名ではありません。</p>
-        <p class="text-sm font-bold mt-sm">入力項目:</p>
-        <ul class="terms-list">
-          <li><strong>発表者（Author）</strong> — 学名を発表した人物（例: Engl.）</li>
-          <li><strong>発表年（Year）</strong> — 記載論文の発表年</li>
-          <li><strong>発見者（Collector）</strong> — 最初に採取した人物</li>
-          <li><strong>採取年</strong> — 採取された年</li>
-          <li><strong>採取地（Type locality）</strong> — 最初に採取された場所</li>
-          <li><strong>生息地</strong> — 現在わかっている自生地</li>
-        </ul>
-        <p class="text-sm text-muted mt-sm">※ 原種を選択すると、分類詳細チップ（原種/sp./ssp./cf./aff.）が表示されます。</p>
-        <p class="text-sm text-muted">※ 「AI自動記入」ボタンで、学名データベース（IPNI・POWO・GBIF）から記載者・発表年・タイプ産地を取得できます。AI調査を行うのは原種とクローンのみで、ハイブリッドは品種ページからのリクエストを運営が承認したときに実行し、実生には行いません。</p>
-      </div>
-
-      <div class="card mb-md">
-        <h3>ハイブリッド（Hybrid）</h3>
-        <p>特定の交配式（母親 × 父親）から得られた<strong>実生群</strong>に付けられた名前です。同じ名前を名乗る株が複数あり、それぞれ遺伝的に異なる兄弟株です。交配者が選抜個体に名前を付けたあとも、同じ交配を繰り返して同じ名前で流通させる場合はこちらに当たります。</p>
-        <p class="text-sm mt-sm"><strong>名前の書き方:</strong> 属名＋'ハイブリッド名'（<i>Anthurium</i> 'Mystique A88'）。交配式は必須で、親が登録済みならその品種ページにリンクされます。</p>
-        <p class="text-sm mt-sm"><strong>判定例:</strong> <i>Anthurium</i> 'Mystique A88'（'Dorayaki' × 'Red Crystallinum'、Mr. Chandra 作出。流通株は同じ交配式の F1 兄弟）→ ハイブリッド。<i>Philodendron</i> 'Glorious'（<i>gloriosum</i> × <i>melanochrysum</i>、種子・組織培養で大量流通）→ ハイブリッド。名前の付いていない「'Dark Mama' × <i>papillilaminum</i>」のような交配式そのものは、ハイブリッドではなく実生として登録します。</p>
-        <p class="text-sm font-bold mt-sm">入力項目:</p>
-        <ul class="terms-list">
-          <li><strong>作出者/ナーセリー</strong> — 交配を行った人物や園芸場（例: Ecuagenera）</li>
-          <li><strong>名付けた年</strong> — ハイブリッド名がつけられた年</li>
-          <li><strong>交配式（必須）</strong> — Parent A（母）× Parent B（父）</li>
-        </ul>
-        <p class="text-sm text-muted mt-sm">※ ハイブリッドでは交配式の入力が<strong>必須</strong>です。</p>
-      </div>
-
-      <div class="card mb-md">
-        <h3>クローン（Clone）</h3>
-        <p><strong>たった1個体</strong>に付けられた名前です。その名前を名乗ってよいのは、その個体を株分け・挿し木・組織培養で増やした株だけです。交配親が判明していても、名前が「その交配の全兄弟」ではなく「選抜された1株とそのコピー」を指すならクローンです。原種の中から選ばれた特別な個体（斑入り、暗色個体）や、組織培養で生じた変異個体もクローンです。</p>
-        <p class="text-sm mt-sm"><strong>名前の書き方:</strong> 属名［＋種小名］＋'クローン名'。単一の原種に由来する場合は種小名を必ず含めます（<i>Monstera deliciosa</i> 'Thai Constellation'）。種間交配や親不明の場合は属名＋'クローン名'（<i>Anthurium</i> 'Ace of Spades'）。</p>
-        <p class="text-sm mt-sm"><strong>判定例:</strong> <i>Anthurium</i> 'Dark Mama'（母株からの株分け・クローンとして流通。'Dark Mama' の自家受粉実生は 'Dark Mama' ではなく「'Dark Mama' self」の実生）→ クローン。<i>Anthurium</i> 'Ace of Spades'（Denis Rotolante が実生から1株を選抜・命名。交配式は不明でよい）→ クローン。<i>Monstera deliciosa</i> 'Thai Constellation'（組織培養で生じた斑入り変異個体）→ クローン。<i>Anthurium</i> 'King of Spades'（Haji Ulih 氏が命名したオリジナル個体がある）→ クローン。流通しているオリジナルの実生は同じ名前で呼ばれていても F 個体であり、本クローンではありません。</p>
-        <p class="text-sm font-bold mt-sm">入力項目:</p>
-        <ul class="terms-list">
-          <li><strong>名付けた人物</strong> — クローン名をつけた人物</li>
-          <li><strong>名付けた年</strong></li>
-          <li><strong>交配式</strong> — 親が分かっていれば入力（不明の場合はチェックボックスで「交配式が不明」を選択）</li>
-        </ul>
-        <p class="text-sm text-muted mt-sm">※ 画像はSNSリンクと合わせて投稿すると、どの個体の写真か判別しやすくなります。</p>
-      </div>
-
-      <div class="card mb-md">
-        <h3>実生（Seedling）</h3>
-        <p>趣味家が自分で交配・播種した株の<strong>記録</strong>です。名前はまだ無く、交配式と播種日、親株の写真で識別します。将来その中の1株に名前を付けて株分けで配布するなら、その時点でクローンとして新規登録します。実生群全体に名前を付けて同じ交配を繰り返し流通させるならハイブリッドです。</p>
-        <p class="text-sm mt-sm"><strong>名前の書き方:</strong> 属名＋交配式（<i>Anthurium forgetii</i> × 'Titanium'）。交配式全体をクォートで囲まないでください。自分の管理番号（HR1 など）はダブルクォートで添えます。</p>
-        <p class="text-sm mt-sm"><strong>判定例:</strong> <i>Anthurium carlablackiae</i> "HR1" × <i>carlablackiae</i> "HR2"（同種どうしの交配でも原種ではない）→ 実生。<i>Anthurium forgetii</i> × 'Titanium' → 実生。ナーセリーが同じ交配を毎年繰り返して 'Galaxy' の名で販売 → ハイブリッド。</p>
-        <p class="text-sm font-bold mt-sm">入力項目:</p>
-        <ul class="terms-list">
-          <li><strong>作出者（Creator/Breeder）</strong> — 播種した人物</li>
-          <li><strong>播種日</strong> — 種をまいた日付</li>
-          <li><strong>交配式</strong> — 親が分かっていれば入力（不明の場合はチェックボックスで選択）</li>
-        </ul>
-      </div>
-
-      <!-- 編集方法 -->
-      <h2>品種情報の編集</h2>
-      <ol class="terms-list">
-        <li>投稿したときと同じGoogleアカウントでログインします。</li>
-        <li>自分が投稿した品種の<strong>詳細ページ</strong>を開き、「編集」ボタンをタップします。</li>
-        <li>投稿フォームが編集モードで開くので、情報を修正して再送信します。</li>
-      </ol>
-      <p class="text-sm text-muted">※ 編集・削除ができるのは自分が投稿した品種のみです。</p>
-
-      <!-- 由来の追加 -->
-      <h2>由来情報の追加</h2>
-      <p>既存の品種に新しい由来情報を追加できます:</p>
-      <ol class="terms-list">
-        <li>品種の詳細ページで「<strong>+ 由来を追加</strong>」ボタンをタップします。</li>
-        <li>補足情報・引用リンクを入力して送信します。</li>
-        <li>追加された由来は、既存の由来と並んで表示されます。</li>
-        <li>各由来には信頼度を示す投票（Agree/Disagree）機能があります。</li>
-      </ol>
-
-      <!-- 画像追加 -->
-      <h2>画像の追加</h2>
-      <ol class="terms-list">
-        <li>品種詳細ページの「<strong>画像追加</strong>」ボタンをタップします。</li>
-        <li>画像をアップロードし、キャプション（説明）やSNSリンクを入力します。</li>
-        <li>掲載された画像に問題がある場合は、画像の「削除依頼」から運営にご連絡ください。</li>
-      </ol>
-
-      <!-- その他の機能 -->
-      <h2>その他の機能</h2>
-      <ul class="terms-list">
-        <li><strong>シェア</strong> — 品種ページを共有できます（PC: X・Facebook・URLコピー。スマホ: 端末の共有メニューから LINE や Instagram へ）。</li>
-        <li><strong>プロフィール</strong> — Googleログイン後、ユーザー名やアバターを設定できます。</li>
-        <li><strong>投稿履歴</strong> — 自分が投稿した品種を一覧で確認できます。</li>
-      </ul>
+      <h2>会員</h2>
+      <p>閲覧と投稿は無料です。実生ノートを6件目以降も残したい人、非公開の記録を増やしたい人のために会員があります。内容と料金は<a href="/pricing/" data-nav="pricing">料金ページ</a>をご覧ください。</p>
     </div>
   </section>
 
@@ -1326,6 +1236,15 @@
         <dt id="g-tc">TC（組織培養）・ソマクローナル変異</dt><dd>組織の一部から無菌培養で増殖する方法（tissue culture）。培養中に生じる変異をソマクローナル変異と呼び、斑入り個体などがこの経路で生まれることがあります。</dd>
         <dt id="g-trade-name">流通名（商品名）</dt><dd>正式な学名や品種名とは別に、市場で付けられた名前（例: 'El Choco Red' = <i>Philodendron rubrijuvenile</i>）。正式名がわかったものは正式名を主表示にします。</dd>
         <dt id="g-variegata">斑入り（variegata）</dt><dd>葉の一部の葉緑素が欠けて白や黄色の模様になった個体。原種にもクローンにも起こるため、区分ではなくタグで表します。</dd>
+      </dl>
+
+      <h2>個体・系統・収録</h2>
+      <dl class="glossary">
+        <dt id="g-individual">個体</dt><dd>原種の1株に付けた番号や名前（'HR1' など）。株分けや組織培養で増えた株も同じ個体。実生で生まれた子は別の個体で、親の名前を引き継がない。その原種のページの「個体」欄に載り、一覧や件数には数えない。</dd>
+        <dt id="g-line">系統（line）</dt><dd>同じ名前で世代を重ねた実生が流通している集団。遺伝的に異なる株を含むため、その名前は1個体ではなく「系統」を指す。このサイトではタグ line で示す。</dd>
+        <dt id="g-code">管理番号</dt><dd>生産者や愛好家が個体の識別に付ける番号（'HR1'・'A88'）。品種名と同じシングルクォートで書き、命名者と命名年を添える。番号だけでは種を示さない。</dd>
+        <dt id="g-unrecorded">未収録</dt><dd>記録はあるが、区分ごとの必須項目（記載者・年・出典、交配式・作出者、播種日など）が揃わず品質ゲートを通っていない状態。検索エンジンと件数には出さない。「記録を追加」で埋められる。</dd>
+        <dt id="g-draft">AI 下書き</dt><dd>出典 URL が無く信頼度 40 未満の AI 生成文。折り畳んで表示し、記録には数えない。人の記録か出典が付けば記録になる。</dd>
       </dl>
 
       <h2>このサイトの指標</h2>
@@ -1559,11 +1478,11 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/record-gate.js?v=20260907f"></script>
-  <script src="js/app-core.js?v=20260907f"></script>
-  <script src="js/pages.js?v=20260907f"></script>
-  <script src="js/forms.js?v=20260907f"></script>
-  <script src="js/archive.js?v=20260907f"></script>
+  <script src="js/record-gate.js?v=20260907g"></script>
+  <script src="js/app-core.js?v=20260907g"></script>
+  <script src="js/pages.js?v=20260907g"></script>
+  <script src="js/forms.js?v=20260907g"></script>
+  <script src="js/archive.js?v=20260907g"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1573,7 +1492,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20260907f"></script>
+  <script src="js/dialogs.js?v=20260907g"></script>
 
   <!-- AI re-research request dialog -->
   <dialog id="research-request-dialog" class="dialog-clean" aria-labelledby="research-request-title">
@@ -1612,6 +1531,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20260907f"></script>
+<script src="js/sw-register.js?v=20260907g"></script>
 </body>
 </html>
