@@ -367,6 +367,7 @@ function updateCultivarJsonLd(name, genus, type, description, extraData) {
       'url': _siteBase + genus.toLowerCase()
     }
   };
+  if (extraData.alternateName && extraData.alternateName.length) data['alternateName'] = extraData.alternateName;
   // Add image if available
   if (extraData.image) {
     data['image'] = extraData.image;
@@ -1565,7 +1566,9 @@ if (false) {
         if (typeof gtag === 'function') {
           var _createdAt = session && session.user && session.user.created_at ? new Date(session.user.created_at).getTime() : 0;
           var _isNewUser = _createdAt > 0 && (Date.now() - _createdAt) < 120000;
-          gtag('event', _isNewUser ? 'sign_up' : 'login', { method: 'google' });
+          var _loginSource = 'header';
+          try { _loginSource = localStorage.getItem('login_source') || 'header'; localStorage.removeItem('login_source'); } catch (e) {}
+          gtag('event', _isNewUser ? 'sign_up' : 'login', { method: 'google', source: _loginSource });
         }
         var returnPath = localStorage.getItem('login_return_path');
         localStorage.removeItem('login_return_path');
@@ -1583,7 +1586,7 @@ if (false) {
           localStorage.removeItem('pending_checkout_plan');
           showToast('カード情報を入力してください');
           setTimeout(function() {
-            showPaywallModal();
+            showPaywallModal('seedling_quota');
             startCheckout(pendingPlan);
           }, 800);
         }
@@ -1937,7 +1940,7 @@ if (false) {
   // Show paywall modal with focus trap and keyboard support
   var _paywallPreviousFocus = null;
   psExport('showPaywallModal', showPaywallModal);
-  function showPaywallModal() {
+  function showPaywallModal(source) {
     var modal = document.getElementById('paywall-modal');
     if (!modal) return;
     _paywallPreviousFocus = document.activeElement;
@@ -1945,7 +1948,7 @@ if (false) {
     if (typeof window.resetPaywallSteps === 'function') window.resetPaywallSteps();
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
-    if (typeof gtag === 'function') gtag('event', 'paywall_view');
+    if (typeof gtag === 'function') gtag('event', 'paywall_view', { source: source || 'unknown' });
     // Focus the close button for keyboard users
     var closeBtn = document.getElementById('paywall-close-btn');
     if (closeBtn) setTimeout(function() { closeBtn.focus(); }, 50);
@@ -1978,10 +1981,10 @@ if (false) {
   // Delegated click handler for dynamically rendered paywall CTA buttons
   document.addEventListener('click', function(e) {
     var btn = e.target.closest('[data-action="show-paywall"]');
-    if (btn) showPaywallModal();
+    if (btn) showPaywallModal('pricing');
     // "View all seedlings": free viewing - go to the genus seedlings tab
     var openPaywall = e.target.closest('[data-action="open-paywall"]');
-    if (openPaywall) { e.preventDefault(); showPaywallModal(); return; }
+    if (openPaywall) { e.preventDefault(); showPaywallModal('pricing_link'); return; }
     var viewBtn = e.target.closest('[data-action="view-seedlings"]');
     if (viewBtn) {
       var slug = (window.SEEDLING_GENERA && window.SEEDLING_GENERA[0]) || 'anthurium';
@@ -2044,9 +2047,10 @@ if (false) {
 
   // Shared Google login entry point (also used by empty states in pages.js)
   psExport('startGoogleLogin', startGoogleLogin);
-  function startGoogleLogin(returnPath) {
+  function startGoogleLogin(returnPath, source) {
     if (!supabase) { showToast('ログインが必要です', true); return; }
     localStorage.setItem('login_return_path', returnPath || window.location.pathname || _basePath);
+    try { localStorage.setItem('login_source', source || 'header'); } catch (e) {}
     supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {

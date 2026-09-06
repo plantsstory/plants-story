@@ -161,7 +161,7 @@
         // Badge next to name
         if (subBadge) {
           if (isActive) {
-            var badgeLabel = isTrial ? 'Trial' : 'Member';
+            var badgeLabel = 'Member';
             subBadge.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> ' + badgeLabel;
             subBadge.className = 'profile-sub-badge profile-sub-badge--active';
             subBadge.style.display = '';
@@ -177,16 +177,12 @@
           subSection.style.display = '';
           if (isActive) {
             var planLabel = sub.plan === 'granted' ? '無料付与' : (sub.plan === 'seedling_annual' ? '年額プラン' : '月額プラン');
-            var badgeLabel2 = isTrial ? 'Trial' : 'Member';
+            var badgeLabel2 = 'Member';
             var html = '<div class="flex-center-sm">';
             html += '<span class="profile-sub-badge profile-sub-badge--active sub-badge-static"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> ' + badgeLabel2 + '</span>';
             html += '<span class="text-sm font-semibold">' + planLabel + '</span>';
             html += '</div>';
-            if (isTrial && sub.current_period_end) {
-              var trialEnd = new Date(sub.current_period_end);
-              var trialEndStr = trialEnd.getFullYear() + '/' + String(trialEnd.getMonth() + 1).padStart(2, '0') + '/' + String(trialEnd.getDate()).padStart(2, '0');
-              html += '<div class="text-xs mt-xs text-warning">無料お試し期間: ' + trialEndStr + ' まで</div>';
-            } else if (sub.current_period_end && sub.plan !== 'granted') {
+            if (sub.current_period_end && sub.plan !== 'granted') {
               var endDate = new Date(sub.current_period_end);
               var endStr = endDate.getFullYear() + '/' + String(endDate.getMonth() + 1).padStart(2, '0') + '/' + String(endDate.getDate()).padStart(2, '0');
               if (sub.cancel_at_period_end) {
@@ -327,15 +323,12 @@
         if (window._isSubscribed) {
           var isTrial = status === 'trialing';
           var planLabel = plan === 'granted' ? '無料付与' : (plan === 'seedling_annual' ? '年額プラン' : '月額プラン');
-          var badgeText = isTrial ? 'Trial' : 'Active';
+          var badgeText = 'Member';
           var statusHtml = '<div class="flex-center-sm mb-sm">';
           statusHtml += '<span class="badge badge--seedling font-xs-btn">' + badgeText + '</span>';
           statusHtml += '<span class="font-semibold">' + planLabel + '</span>';
           statusHtml += '</div>';
-          if (isTrial && endDate) {
-            var trialEndStr = endDate.getFullYear() + '/' + String(endDate.getMonth() + 1).padStart(2, '0') + '/' + String(endDate.getDate()).padStart(2, '0');
-            statusHtml += '<div class="text-sm text-warning">無料お試し期間: ' + trialEndStr + ' まで</div>';
-          } else if (endDate && plan !== 'granted') {
+          if (endDate && plan !== 'granted') {
             var endStr = endDate.getFullYear() + '/' + String(endDate.getMonth() + 1).padStart(2, '0') + '/' + String(endDate.getDate()).padStart(2, '0');
             if (cancelAtEnd) {
               statusHtml += '<div class="text-sm text-warning">解約予定: ' + endStr + ' まで利用可能</div>';
@@ -760,7 +753,7 @@ function renderFavoritesPage() {
   if (!window._currentUser) {
     grid.innerHTML = '<div class="text-center grid-full p-xl">' +
       '<p class="text-muted mb-md">お気に入り機能を使うにはログインしてください</p>' +
-      '<button class="btn btn--primary" onclick="startGoogleLogin(\'/favorites\')">Googleでログイン</button>' +
+      '<button class="btn btn--primary" onclick="startGoogleLogin(window.location.pathname, \'favorites\')">Googleでログイン</button>' +
       '</div>';
     return;
   }
@@ -1219,7 +1212,10 @@ function updateCultivarDetail(cultivarName, rowEl) {
 
   // Update SEO meta tags
   var typeLabel = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: 'Seedling' }[detectedType] || '';
-  var metaDesc = displayName + ' (' + genusName + ' ' + typeLabel + ') の由来・歴史情報 - Aroid Origins';
+  var _recState = (typeof window.recordStateOf === 'function' && cData) ? window.recordStateOf(cultivarName, cData, { type: detectedType }) : 'ok';
+  var metaDesc = (_recState === 'ok' || detectedType === 'seedling')
+    ? displayName + ' (' + genusName + ' ' + typeLabel + ') の由来・歴史情報 - Aroid Origins'
+    : displayName + ' — 記録なし · 出典募集中 | Aroid Origins';
   var ogImageUrl = _defaultOgImage;
   updateMeta({
     title: displayName + ' - ' + genusName + ' | ' + _defaultTitle,
@@ -1229,7 +1225,7 @@ function updateCultivarDetail(cultivarName, rowEl) {
     noindex: detectedType === 'seedling' || (typeof window.recordStateOf === 'function' && cData && window.recordStateOf(cultivarName, cData, { type: detectedType }) !== 'ok')
   });
   // Pass extra structured data for rich JSON-LD
-  var jsonLdExtra = { image: ogImageUrl };
+  var jsonLdExtra = { image: ogImageUrl, alternateName: (cData && cData._aliases) || [] };
   if (cData && cData.origins && cData.origins.length > 0) {
     var maxTrust = cData.origins.reduce(function(m, o) { return Math.max(m, o.trust || 0); }, 0);
     jsonLdExtra.trustPct = maxTrust;
@@ -1394,7 +1390,7 @@ function getFilteredItems(genusEl) {
     if (!isSeedlingView && isIndividualItem(item)) return false; // folded under the species row
     if (filterType !== 'all' && item.meta.type !== filterType) return false;
     if (q) {
-      var nameMatch = item.fullName.toLowerCase().indexOf(q) !== -1;
+      var nameMatch = item.fullName.toLowerCase().indexOf(q) !== -1 || (item.entry._aliases || []).some(function(a) { return String(a).toLowerCase().indexOf(q) !== -1; });
       var creatorMatch = item.entry._creatorName && item.entry._creatorName.toLowerCase().indexOf(q) !== -1;
       var posterMatch = item.entry._posterName && item.entry._posterName.toLowerCase().indexOf(q) !== -1;
       if (!nameMatch && !creatorMatch && !posterMatch) return false;
@@ -1528,7 +1524,7 @@ function paginateGenusFromServer(genusEl, page) {
           row.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            showPaywallModal();
+            showPaywallModal('seedling_locked');
           });
         });
       }
@@ -1607,7 +1603,7 @@ function paginateGenusFromMemory(genusEl, page) {
         row.addEventListener('click', function(e) {
           e.preventDefault();
           e.stopPropagation();
-          showPaywallModal();
+          showPaywallModal('seedling_locked');
         });
       });
     }
@@ -1672,7 +1668,8 @@ function globalSearch(query) {
   Object.keys(_genusItems).forEach(function(slug) {
     if (!visibleSlugs[slug]) return;
     (_genusItems[slug] || []).forEach(function(item) {
-      if (item.fullName.toLowerCase().indexOf(q) !== -1) {
+      var aliasHit = (item.entry._aliases || []).some(function(a) { return String(a).toLowerCase().indexOf(q) !== -1; });
+      if (item.fullName.toLowerCase().indexOf(q) !== -1 || aliasHit) {
         cultivarResults.push(item);
       }
     });
@@ -1817,6 +1814,10 @@ document.addEventListener('click', function(e) {
       }
     }
 
+    if (page === 'contribute' && typeof gtag === 'function') {
+      var _src = navEl.getAttribute('data-contribute-type') || (navEl.classList.contains('header__nav-link') ? 'header' : navEl.closest('#mobileNav') ? 'mobile_nav' : navEl.classList.contains('lineage__add') ? 'lineage' : navEl.classList.contains('sheet__cta') ? 'sheet' : navEl.closest('.colophon') ? 'colophon' : navEl.closest('.sort-bar') ? 'genus_list' : 'other');
+      gtag('event', 'contribute_start', { source: _src });
+    }
     // "+ 個体を追加" from a species page: compact form with the species fixed
     if (page === 'contribute' && typeof window.setIndividualMode === 'function') {
       var indMode = navEl.getAttribute('data-contribute-type') === 'individual';

@@ -867,3 +867,8 @@ dialog.dialog-clean { margin: auto; }
 .cultivar-row__state--unrecorded { color: var(--color-accent-warm); }
 .sheet--gate { margin: 0 0 var(--space-lg); }
 #record-gate.d-none { display: none; }
+
+/* disputed parentage flag on the specimen label; people authority extras */
+.specimen__flag { display: block; margin-top: 4px; font-size: 0.62rem; letter-spacing: 0.08em; color: var(--color-accent-warm); }
+.people__abbr { font-size: 0.62rem; margin-left: 6px; color: var(--color-mid); }
+.people__note { color: var(--color-mid); max-width: 64ch; margin: calc(-1 * var(--space-sm)) 0 var(--space-lg); line-height: 1.8; }

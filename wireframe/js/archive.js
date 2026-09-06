@@ -125,6 +125,7 @@
     d.aliases = entry._aliases || [];
     d.tags = entry._tags || [];
     d.selectedFrom = entry._selectedFrom || null;
+    d.formulaStatus = entry._formulaStatus || null;
     // Record gate (shared module): 'ok' | 'unrecorded' | 'researching' | 'none'
     d.state = (window.RecordGate && typeof window.recForGate === 'function' && type !== 'seedling') ? window.RecordGate.state(window.recForGate(fullName, entry, { type: type })) : 'ok';
     d.missing = (d.state === 'unrecorded' && window.RecordGate) ? window.RecordGate.gate(window.recForGate(fullName, entry, { type: type })).missing : [];
@@ -494,7 +495,7 @@
       if (d.type === 'clone' && !d.breeder && d.namer) cells += cell('spec_namer', linkPeople(d.namer));
       else cells += cell('spec_breeder', linkPeople(d.breeder || d.namer || d.creator));
       cells += cell(d.type === 'seedling' ? 'spec_sowing' : 'spec_year', d.type === 'seedling' ? esc(d.sowing) : yearSpan(d.year));
-      if (d.parentA || d.parentB) cells += cell('spec_parents', parentHtml(all, d.parentA || T('lineage_unknown')) + ' × ' + parentHtml(all, d.parentB || T('lineage_unknown')));
+      if (d.parentA || d.parentB) cells += cell('spec_parents', parentHtml(all, d.parentA || T('lineage_unknown')) + ' × ' + parentHtml(all, d.parentB || T('lineage_unknown')) + (d.formulaStatus === 'disputed' ? '<span class="specimen__flag mono">' + esc(T('formula_disputed')) + '</span>' : ''));
     }
     if (d.isIndividual) {
       var parentSp = all.filter(function (x) { return x.id && x.id === d.selectedFrom; })[0];
@@ -655,6 +656,16 @@
      PEOPLE: /people/ index and /people/<slug>/ pages
      ============================================================ */
   var ROLE_KEYS = { author: 'role_author', collector: 'role_collector', breeder: 'role_breeder', namer: 'role_namer', grower: 'role_grower' };
+  /* people authority (wireframe/data/people-authority.json): IPNI abbreviation → full name, years, note */
+  var _authority = null;
+  function loadAuthority(cb) {
+    if (_authority) { cb(_authority); return; }
+    fetch(base + 'data/people-authority.json?v=' + (window._assetVersion || '1')).then(function (r) { return r.ok ? r.json() : {}; })
+      .then(function (j) { _authority = j || {}; cb(_authority); })
+      .catch(function () { _authority = {}; cb(_authority); });
+  }
+  function authorityOf(key) { return (_authority && _authority[key]) || null; }
+  function personLabel(p) { var a = authorityOf(p.key); return a && a.name ? a.name : p.key; }
   function rolesLine(p) {
     return Object.keys(ROLE_KEYS).filter(function (r) { return p.roles[r]; })
       .map(function (r) { return esc(T(ROLE_KEYS[r])) + ' ' + p.roles[r]; }).join(' · ');
@@ -670,6 +681,7 @@
   }
   var _peopleSlug = null;
   function renderPeoplePageInner() {
+    if (!_authority) { loadAuthority(function () { renderPeoplePageInner(); }); return; }
     var body = document.getElementById('people-body');
     var title = document.getElementById('people-title');
     var crumbName = document.getElementById('people-crumb-name');
@@ -692,7 +704,8 @@
         if (!groups[r]) return;
         html += '<div class="people__group"><h2 class="mono">' + esc(T(ROLE_KEYS[r])) + '</h2><ul class="people__list">';
         groups[r].forEach(function (p) {
-          html += '<li><a href="' + esc(base + 'people/' + encodeURIComponent(p.slug)) + '" data-nav="people" data-person="' + esc(p.slug) + '">' + esc(p.key) + '</a><span class="mono">' + rolesLine(p) + '</span></li>';
+          var a = authorityOf(p.key);
+          html += '<li><a href="' + esc(base + 'people/' + encodeURIComponent(p.slug)) + '" data-nav="people" data-person="' + esc(p.slug) + '">' + esc(personLabel(p)) + (a && a.name && a.name !== p.key ? ' <span class="people__abbr mono">' + esc(p.key) + '</span>' : '') + '</a><span class="mono">' + rolesLine(p) + '</span></li>';
         });
         html += '</ul></div>';
       });
@@ -705,8 +718,9 @@
       body.innerHTML = '<p class="empty-state">' + esc(T('people_none')) + '</p>';
       return;
     }
-    if (title) title.textContent = p.key;
-    if (crumbName) crumbName.textContent = p.key;
+    var auth = authorityOf(p.key);
+    if (title) title.textContent = personLabel(p);
+    if (crumbName) crumbName.textContent = personLabel(p);
     if (crumbSep) crumbSep.classList.remove('d-none');
     var years = p.entries.map(function (d) { return d.year; }).filter(Boolean);
     var countries = [];
@@ -716,7 +730,8 @@
     if (years.length) facts += '<div><dt>' + esc(T('people_years')) + '</dt><dd>' + Math.min.apply(null, years) + (years.length > 1 ? '–' + Math.max.apply(null, years) : '') + '</dd></div>';
     if (countries.length) facts += '<div><dt>' + esc(T('people_localities')) + '</dt><dd class="people__facts-small">' + esc(countries.join(', ')) + '</dd></div>';
     facts += '</dl>';
-    var html = '<p class="people__roles mono">' + rolesLine(p) + '</p>' + facts + '<h2 class="section-title"><span>' + esc(T('people_entries')) + '</span></h2><div id="people-ledger"></div>';
+    var authLine = auth ? [auth.name && auth.name !== p.key ? p.key : '', auth.years, auth.ipni && auth.ipni !== p.key ? 'IPNI: ' + auth.ipni : ''].filter(Boolean).join(' · ') : '';
+    var html = '<p class="people__roles mono">' + rolesLine(p) + (authLine ? ' · ' + esc(authLine) : '') + '</p>' + (auth && auth.note ? '<p class="people__note">' + esc(auth.note) + '</p>' : '') + facts + '<h2 class="section-title"><span>' + esc(T('people_entries')) + '</span></h2><div id="people-ledger"></div>';
     body.innerHTML = html;
     var sorted = p.entries.slice().sort(function (a, b) { return (a.year || 9999) - (b.year || 9999) || a.displayName.localeCompare(b.displayName); });
     var thumbs = {};
@@ -724,7 +739,7 @@
     window.renderEntriesLedger(document.getElementById('people-ledger'), toLedgerItems(sorted), thumbs);
     if (typeof updateMeta === 'function') {
       setTimeout(function () {
-        updateMeta({ title: p.key + ' — ' + T('people_entries') + ' ' + p.entries.length + ' | Aroid Origins', description: p.key + ': ' + rolesLine(p).replace(/<[^>]+>/g, '') + (years.length ? ' (' + Math.min.apply(null, years) + '–' + Math.max.apply(null, years) + ')' : ''), path: 'people/' + encodeURIComponent(p.slug) });
+        updateMeta({ title: personLabel(p) + ' — ' + T('people_entries') + ' ' + p.entries.length + ' | Aroid Origins', description: p.key + ': ' + rolesLine(p).replace(/<[^>]+>/g, '') + (years.length ? ' (' + Math.min.apply(null, years) + '–' + Math.max.apply(null, years) + ')' : ''), path: 'people/' + encodeURIComponent(p.slug) });
       }, 0);
     }
   }

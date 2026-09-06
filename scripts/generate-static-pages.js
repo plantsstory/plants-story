@@ -126,6 +126,10 @@ async function main() {
   const publicCultivars = cultivars.filter(c =>
     c.type !== 'seedling' && !String(c.cultivar_name).includes('[Seedling]'));
 
+  // Generated directories only: clear them so renamed or removed entries leave no stale stub behind
+  for (const g of genera) { if (safeDirName(g.slug)) fs.rmSync(path.join(WIREFRAME, g.slug), { recursive: true, force: true }); }
+  for (const d of ['people', 'locality']) fs.rmSync(path.join(WIREFRAME, d), { recursive: true, force: true });
+
   const countByGenus = {};
   for (const c of publicCultivars) {
     if ((c.tags || []).includes('individual') || RecordGate.state(c) !== 'ok') continue; // recorded entries only
@@ -211,8 +215,9 @@ async function main() {
     if (!restDir || !safeDirName(slug)) { skipped++; continue; }
 
     const url = SITE + '/' + slug + '/' + encodeURIComponent(rest) + '/';
-    const desc = originDescription(c.origins) ||
-      (c.cultivar_name + ' の由来・来歴・交配情報。学術データベースとコミュニティ投票で信頼度を検証しています。');
+    const desc = RecordGate.state(c) !== 'ok'
+      ? c.cultivar_name + ' — 記録なし · 出典募集中 | Aroid Origins'
+      : (originDescription(c.origins) || (c.cultivar_name + ' の由来・来歴・交配情報。学術データベースとコミュニティ投票で信頼度を検証しています。'));
     // Storage paths may contain spaces/quotes — encode each path segment for a valid og:image URL
     const img = imageMap[c.cultivar_name]
       ? SUPABASE_URL + '/storage/v1/object/public/gallery-images/' +

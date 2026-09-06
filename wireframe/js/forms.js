@@ -1124,7 +1124,7 @@ document.addEventListener('click', function(e) {
             if (!q.can_post) {
               revertToSpecies(self);
               showToast('無料投稿枠（' + q.free_limit + '件）を使い切りました', true);
-              showPaywallModal();
+              showPaywallModal('seedling_radio');
             } else {
               var remaining = q.free_limit - q.used;
               showToast('無料投稿枠: あと' + remaining + '件投稿できます');
@@ -1867,7 +1867,7 @@ document.addEventListener('click', function(e) {
         var msg = err.message || String(err);
         if (msg.indexOf('Seedling quota exceeded') !== -1) {
           handleSubmitError('無料投稿枠（5件）を使い切りました。続けて投稿するにはサブスクリプションが必要です');
-          showPaywallModal();
+          showPaywallModal('contribute_quota');
         } else {
           handleSubmitError('エラー: ' + msg);
         }
