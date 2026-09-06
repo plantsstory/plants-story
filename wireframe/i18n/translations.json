@@ -160,8 +160,8 @@
     "en": "Photos are contributed by the growers themselves. If there is a rights or content problem, use \"Request removal\" — we act immediately."
   },
   "origins": {
-    "jp": "由来 (信頼度順)",
-    "en": "Origins (by Trust)"
+    "jp": "由来の記録",
+    "en": "Origin records"
   },
   "add_origin": {
     "jp": "+ 由来を追加",
@@ -1591,5 +1591,17 @@
   "genus_request_invalid": {
     "jp": "属名はアルファベットで入力してください（例: Monstera）。",
     "en": "Enter the genus in Latin letters (e.g. Monstera)."
+  },
+  "role_grower": {
+    "jp": "実生の記録者",
+    "en": "Seedling growers"
+  },
+  "record_by_user": {
+    "jp": "投稿者の記録",
+    "en": "Contributor record"
+  },
+  "record_no_sources": {
+    "jp": "出典なし",
+    "en": "no sources"
   }
 }

@@ -212,6 +212,7 @@ document.addEventListener('click', function(e) {
           fill.className = 'trust__fill ' + getTrustClass(result.new_trust);
         }
         if (label) label.textContent = result.new_trust + '%';
+        else if (trustEl.classList.contains('record__trust')) { trustEl.textContent = result.new_trust + '%'; trustEl.className = 'record__trust ' + getTrustClass(result.new_trust); }
       }
     }
     btn.disabled = false;

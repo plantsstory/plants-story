@@ -1083,29 +1083,44 @@ function renderOriginsInner(cultivarName, container) {
     html += buildFormulaHtml(data, isSeedling, _sb);
   }
 
+  function recordParagraphs(text) {
+    return String(text || '').split(/\n\s*\n/).map(function(p) { return p.trim(); }).filter(Boolean)
+      .map(function(p) { return '<p>' + escHtml(p).replace(/\n/g, '<br>') + '</p>'; }).join('');
+  }
   origins.forEach(function(origin, i) {
     var trustNum = Math.max(0, Math.min(100, parseInt(origin.trust, 10) || 0));
-    var trustLevel = getTrustClass(trustNum);
-    html += '<div class="origin-card">';
+    var isDb = origin.source_type === 'ipni_powo';
+    var isUser = origin.source_type === 'manual' || (origin.author && origin.author.isAI === false && !isDb);
+    var srcList = (origin.sources || []).filter(function(s) { return s && (s.url || s.text || s.label); });
+    var hasSources = isDb || srcList.some(function(s) { return !!safeUrl(s.url); }) || !!safeUrl(origin.source_url || '');
+    html += '<article class="record" data-record-idx="' + i + '">';
     if (!isSeedling) {
-      html += '<div class="origin-card__header">';
-      html += '<span class="origin-card__rank">' + (currentLang === 'en' ? 'Record ' : '記録 ') + (i + 1) + '</span>';
-      html += '<div class="trust trust--lg" style="flex:1;margin-left:var(--space-md);" data-trust-idx="' + i + '">';
-      html += '<div class="trust__bar"><div class="trust__fill ' + trustLevel + '" style="width:' + trustNum + '%"></div></div>';
-      html += '<span class="trust__label">' + trustNum + '%</span>';
-      html += '</div></div>';
+      // header: 記録 N · who wrote it · tier · trust (the % only when there is something to base it on)
+      var meta = [];
+      if (isDb) meta.push('IPNI / POWO');
+      else if (origin.author && origin.author.isAI) meta.push('AI');
+      else meta.push(t('record_by_user'));
+      if (hasSources && origin.source_tier) meta.push('Tier ' + origin.source_tier + (origin.source_tier_label_jp && currentLang !== 'en' ? ' · ' + origin.source_tier_label_jp : (origin.source_tier_label_en && currentLang === 'en' ? ' · ' + origin.source_tier_label_en : '')));
+      if (!hasSources) meta.push(t('record_no_sources'));
+      html += '<header class="record__head mono">';
+      html += '<span class="record__rank">' + (currentLang === 'en' ? 'Record ' : '記録 ') + (i + 1) + '</span>';
+      html += '<span class="record__meta">' + meta.map(escHtml).join(' · ') + '</span>';
+      if (hasSources) html += '<span class="record__trust ' + getTrustClass(trustNum) + '" data-trust-idx="' + i + '">' + trustNum + '%</span>';
+      html += '</header>';
     }
-    if (origin.structured) {
-      html += '<div class="origin-card__body">' + renderStructuredOrigin(origin.structured) + '</div>';
-    } else {
-      html += '<div class="origin-card__body"><p>' + escHtml(origin.body) + '</p></div>';
+    // body: the prose is the record; the field table only stands in when there is no prose
+    var bodyText = (currentLang === 'en' && origin.body_en) ? origin.body_en : origin.body;
+    if (bodyText && String(bodyText).trim()) {
+      html += '<div class="record__body">' + recordParagraphs(bodyText) + '</div>';
+    } else if (origin.structured) {
+      html += '<div class="record__body record__body--fields">' + renderStructuredOrigin(origin.structured) + '</div>';
     }
-    // Verification details
-    if (origin.source_type === 'user_verified' && origin.verification) {
+    // Verification details (AI-verified records only; a contributor's own record carries no AI verdict)
+    if (origin.source_type === 'user_verified' && origin.verification && !isUser) {
       var v = origin.verification;
       var vid = 'verify-detail-' + i;
       html += '<div class="verification-details">';
-      html += '<button class="verification-toggle" onclick="document.getElementById(\'' + vid + '\').classList.toggle(\'d-none\');">検証詳細</button>';
+      html += '<button class="verification-toggle mono" onclick="document.getElementById(\'' + vid + '\').classList.toggle(\'d-none\');">' + (currentLang === 'en' ? 'Verification' : '検証詳細') + '</button>';
       html += '<div id="' + vid + '" class="variation-detail d-none">';
       if (v.summary_jp) html += '<div class="text-sm variation-summary">' + escHtml(v.summary_jp) + '</div>';
       if (v.claims && v.claims.length > 0) {
@@ -1113,67 +1128,34 @@ function renderOriginsInner(cultivarName, container) {
           var si = '?', sc = 'claim--unverifiable';
           if (c.status === 'verified') { si = '\u2713'; sc = 'claim--verified'; }
           else if (c.status === 'partially_verified') { si = '~'; sc = 'claim--partial'; }
-          else if (c.status === 'contradicted') { si = '\u26A0'; sc = 'claim--contradicted'; }
+          else if (c.status === 'contradicted') { si = '!'; sc = 'claim--contradicted'; }
           html += '<div class="claim ' + sc + '">' + si + ' ' + escHtml(c.claim);
           if (c.source) html += ' <span class="text-gray text-xs">(' + escHtml(c.source) + ')</span>';
           html += '</div>';
         });
       }
       if (v.warnings && v.warnings.length > 0) {
-        v.warnings.forEach(function(w) { html += '<div class="verification-warnings">&#x26A0; ' + escHtml(w) + '</div>'; });
-      }
-      if (v.found_sources && v.found_sources.length > 0) {
-        html += '<div class="text-sm font-bold mt-sm">AIが発見したリンク:</div>';
-        v.found_sources.forEach(function(fs) {
-          var rc = fs.reliability === 'high' ? '#2D6A4F' : fs.reliability === 'medium' ? '#D4A373' : '#6c757d';
-          var fsUrl = safeUrl(fs.url);
-          if (!fsUrl) return;
-          html += '<div class="found-source"><a href="' + escHtml(fsUrl) + '" target="_blank" rel="noopener">' + escHtml(fs.label || fsUrl) + '</a> <span style="font-size:0.75rem;color:' + rc + ';">(' + escHtml(fs.reliability) + ')</span></div>';
-        });
+        v.warnings.forEach(function(w) { html += '<div class="verification-warnings">' + escHtml(w) + '</div>'; });
       }
       html += '</div></div>';
     }
-    // Sources
-    html += '<div class="origin-card__sources">';
-    html += '<div class="text-sm font-bold mb-sm">' + t('source_label') + '</div>';
-    if (origin.source_tier && origin.source_name) {
-      html += renderTierBadge(origin.source_tier, origin.source_name, origin.source_tier_label_jp);
-    }
-    var srcList = origin.sources || [];
+    // Sources: one mono label, then the links
+    var srcHtml = '';
     srcList.forEach(function(src) {
-      var icon = src.icon ? escHtml(src.icon) : '&rarr;';
       var text = src.text || src.label || src.url || '';
       var href = safeUrl(src.url);
       if (!text) return;
-      html += '<div class="origin-card__source-item"><span class="source-link__icon">' + icon + '</span>';
-      if (href) {
-        html += '<a href="' + escHtml(href) + '" target="_blank" rel="noopener">' + escHtml(text) + '</a>';
-      } else {
-        html += '<span>' + escHtml(text) + '</span>';
-      }
-      html += '</div>';
+      srcHtml += '<span class="record__source">' + (href ? '<a href="' + escHtml(href) + '" target="_blank" rel="noopener">' + escHtml(text) + '</a>' : escHtml(text)) + '</span>';
     });
     if (!srcList.length && origin.source_url && safeUrl(origin.source_url)) {
-      html += '<div class="origin-card__source-item"><span class="source-link__icon">&rarr;</span>';
-      html += '<a href="' + escHtml(safeUrl(origin.source_url)) + '" target="_blank" rel="noopener">' + escHtml(origin.source_url) + '</a></div>';
+      srcHtml += '<span class="record__source"><a href="' + escHtml(safeUrl(origin.source_url)) + '" target="_blank" rel="noopener">' + escHtml(origin.source_name || origin.source_url) + '</a></span>';
     }
-    html += '</div>';
-    // Footer
-    html += '<div class="origin-card__footer"><div class="origin-card__author">';
-    if (origin.source_type === 'ipni_powo') {
-      html += '<span class="badge badge--species badge--type-sm">IPNI/Kew</span>';
-    } else if (origin.source_type === 'user_verified') {
-      html += '<span class="badge badge--clone badge--type-sm">AI検証済</span>';
-    } else if (origin.author && origin.author.isAI) {
-      html += '<span class="badge badge--hybrid badge--type-sm">AI</span>';
-    } else {
-      html += '<span>' + escHtml(origin.author ? origin.author.name : 'User') + '</span>';
-    }
-    html += '<span class="text-gray">' + escHtml(origin.author ? origin.author.date : '') + '</span>';
-    html += '</div><div class="vote-group">';
-    html += renderVoteButtons(i, origin.votes);
-    html += '</div></div>';
-    html += '</div>';
+    if (srcHtml) html += '<div class="record__sources"><span class="record__label mono">' + t('source_label') + '</span>' + srcHtml + '</div>';
+    // Footer: who recorded it and when · votes (正確 / 疑問)
+    var who = isDb ? 'IPNI / Kew' : (origin.author && origin.author.isAI ? (origin.author.name || 'AI') : (origin.author && origin.author.name && origin.author.name !== 'User' ? origin.author.name : t('record_by_user')));
+    html += '<footer class="record__foot mono"><span>' + escHtml(who) + (origin.author && origin.author.date ? ' · ' + escHtml(origin.author.date) : '') + '</span>';
+    html += '<span class="vote-group">' + renderVoteButtons(i, origin.votes) + '</span></footer>';
+    html += '</article>';
   });
 
   container.innerHTML = html;

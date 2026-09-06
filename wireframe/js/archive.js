@@ -160,7 +160,9 @@
   function peopleRolesOf(d) {
     var out = [];
     function push(v, role) { splitPeople(v).forEach(function (p) { if (!out.some(function (x) { return x.key === p; })) out.push({ key: p, role: role }); }); }
-    push(d.author, 'author'); push(d.collector, 'collector'); push(d.breeder, 'breeder'); push(d.namer, 'namer'); push(d.creator, 'breeder');
+    // Seedling notes are personal records: their growers are listed apart from breeders of named plants
+    var breederRole = d.type === 'seedling' ? 'grower' : 'breeder';
+    push(d.author, 'author'); push(d.collector, 'collector'); push(d.breeder, breederRole); push(d.namer, 'namer'); push(d.creator, breederRole);
     return out;
   }
   function personSlug(name) {
@@ -587,7 +589,7 @@
   /* ============================================================
      PEOPLE: /people/ index and /people/<slug>/ pages
      ============================================================ */
-  var ROLE_KEYS = { author: 'role_author', collector: 'role_collector', breeder: 'role_breeder', namer: 'role_namer' };
+  var ROLE_KEYS = { author: 'role_author', collector: 'role_collector', breeder: 'role_breeder', namer: 'role_namer', grower: 'role_grower' };
   function rolesLine(p) {
     return Object.keys(ROLE_KEYS).filter(function (r) { return p.roles[r]; })
       .map(function (r) { return esc(T(ROLE_KEYS[r])) + ' ' + p.roles[r]; }).join(' · ');
@@ -621,7 +623,7 @@
         (groups[main] = groups[main] || []).push(p);
       });
       var html = '<p class="people__intro">' + esc(T('people_intro')) + '</p><div class="people__grid">';
-      ['author', 'collector', 'breeder', 'namer'].forEach(function (r) {
+      ['author', 'collector', 'breeder', 'namer', 'grower'].forEach(function (r) {
         if (!groups[r]) return;
         html += '<div class="people__group"><h2 class="mono">' + esc(T(ROLE_KEYS[r])) + '</h2><ul class="people__list">';
         groups[r].forEach(function (p) {

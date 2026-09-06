@@ -807,3 +807,28 @@ dialog.dialog-clean { margin: auto; }
 .genus-request-link:hover { color: var(--color-green); border-color: var(--color-green); }
 #genus-request-dialog .form-input { margin-top: 4px; }
 #genus-request-dialog .form-label { display: block; margin-top: var(--space-sm); }
+
+/* ---------- Origin records under the photo: entries on the paper, no cards ---------- */
+.record { background: transparent; border: 0; border-top: 1px solid var(--color-ink); border-radius: 0; padding: var(--space-md) 0 var(--space-lg); margin: 0; }
+.record + .record { border-top: 1px solid var(--color-rule); }
+.record__head { display: flex; align-items: baseline; gap: var(--space-md); flex-wrap: wrap; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-mid); margin-bottom: var(--space-sm); }
+.record__rank { color: var(--color-ink); font-weight: 500; }
+.record__trust { margin-left: auto; color: var(--color-ink); font-weight: 500; }
+.record__trust.trust--low { color: var(--color-danger); }
+.record__body { line-height: 1.95; max-width: 68ch; }
+.record__body p { margin: 0 0 0.8em; }
+.record__body p:last-child { margin-bottom: 0; }
+.record__body--fields .structured-section { background: transparent; border: 0; padding: 0; margin: 0 0 var(--space-sm); }
+.record__body--fields .structured-fields { gap: 4px var(--space-lg); }
+.record__sources { margin-top: var(--space-md); display: flex; flex-wrap: wrap; gap: 4px var(--space-md); align-items: baseline; }
+.record__label { font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-mid); }
+.record__source a { color: var(--color-mid); text-decoration: underline; text-underline-offset: 3px; font-size: var(--font-size-sm); }
+.record__source a:hover { color: var(--color-ink); }
+.record__foot { display: flex; justify-content: space-between; align-items: center; gap: var(--space-md); margin-top: var(--space-md); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-mid); }
+.record .vote-group { display: flex; gap: 6px; }
+.record .vote-btn { border: 1px solid var(--color-rule); background: transparent; color: var(--color-mid); padding: 4px 8px; min-height: 32px; min-width: 32px; }
+.record .vote-btn:hover { border-color: var(--color-ink); color: var(--color-ink); }
+.record .verification-details { margin-top: var(--space-sm); }
+.record .verification-toggle { background: none; border: 0; border-bottom: 1px solid var(--color-rule); padding: 4px 0; font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-mid); cursor: pointer; }
+.record .variation-detail { margin-top: var(--space-sm); padding: var(--space-sm) 0 0; border-top: 1px dotted var(--color-rule); font-size: var(--font-size-sm); }
+#page-cultivar .structured-section { background: transparent; border-color: var(--color-rule); }
