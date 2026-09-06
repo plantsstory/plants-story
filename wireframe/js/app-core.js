@@ -97,6 +97,9 @@ var currentLang = 'jp';
 function getTrustClass(pct) { return pct >= 70 ? 'trust--high' : pct >= 40 ? 'trust--mid' : 'trust--low'; }
 function getBadgeInfo(type, name) { return { cls: 'badge--' + (type || 'species'), txt: type || 'species' }; }
 function paginateGenus(genusEl, page) {}
+// An "individual" is a numbered/named single plant of a species ('HR1'); it lives on the species page, not in lists
+function isIndividualItem(it) { var tg = it && it.entry && it.entry._tags; return !!(tg && tg.indexOf('individual') !== -1); }
+window.isIndividualItem = isIndividualItem;
 function filterGenusRows(container, query) {}
 function renderFavoritesPage() {}
 function updateCultivarDetail(key, row) {}
@@ -610,6 +613,8 @@ function navigateTo(page, options, pushHistory) {
   if (page === 'contribute' && !options._editFlow && typeof window.exitEditMode === 'function') {
     window.exitEditMode();
   }
+  // The compact 'add an individual' form only stays when a species page linked here; any other entry resets it
+  if (page === 'contribute' && !options.individual && typeof window.setIndividualMode === 'function') window.setIndividualMode(null);
   if (page === 'people' && typeof window.renderPeoplePage === 'function') window.renderPeoplePage(options.person || '');
   if (page === 'locality' && typeof window.renderLocalityPage === 'function') window.renderLocalityPage(options.place || '');
   if (page === 'genus' && options.genus) showGenus(options.genus);
@@ -2168,7 +2173,8 @@ if (false) {
           p_origins: originsData,
           p_ai_status: meta.type === 'clone' ? null : 'completed',
           p_created_ip: userIp,
-          p_is_private: !!meta.is_private
+          p_is_private: !!meta.is_private,
+          p_meta: meta.meta || null
         });
       });
 
@@ -2189,7 +2195,8 @@ if (false) {
         // AI research runs on registration for CLONES only (owner decision 2026-09-05).
         // Species uses the AI auto-fill button before registration; hybrids can be
         // researched later through an admin-approved request; seedlings never are.
-        var autoResearch = meta.type === 'clone';
+        var isIndividual = !!(meta.meta && meta.meta.tags && meta.meta.tags.indexOf('individual') !== -1);
+        var autoResearch = meta.type === 'clone' && !isIndividual;
         if (autoResearch) {
           var insertedId = rpcResult && rpcResult.id;
           if (insertedId) {
@@ -2205,6 +2212,7 @@ if (false) {
             triggerAIResearch(insertedId, meta.genus, fullName, meta.type || 'Hybrid', manualOrigins, userText, userSources);
           }
         }
+        return rpcResult;
       });
     } else {
       var saved = {};
@@ -2465,6 +2473,12 @@ if (false) {
       var _cite = window.entryCiteLine(fullName, entry, meta.type);
       if (_cite) h += '<div class="cultivar-row__cite">' + _cite + '</div>';
     }
+    // Species row: how many individuals hang off it (they are listed on the species page)
+    if (meta.type === 'species' && entry._id) {
+      var nInd = 0;
+      Object.keys(cultivarData).forEach(function(k) { if (cultivarData[k]._selectedFrom === entry._id) nInd++; });
+      if (nInd) h += '<div class="cultivar-row__individuals mono">' + t('individuals_count').replace('{n}', nInd) + '</div>';
+    }
     // Seedling names already are the cross, so the formula line would repeat it
     if (entry.formula && !locked && !isSeedling) {
       h += '<div class="text-sm text-muted mt-sm"><span class="formula-parent formula-parent--sm">' + escHtml(entry.formula.parentA) + '</span><span class="formula-operator formula-operator--sm">&times;</span><span class="formula-parent formula-parent--sm">' + escHtml(entry.formula.parentB) + '</span></div>';
@@ -2489,7 +2503,7 @@ if (false) {
       if (card) {
         var countEl = card.querySelector('.genus-card__count');
         if (countEl) {
-          var total = (_genusItems[g] || []).filter(function(it) { return it.meta.type !== 'seedling'; }).length;
+          var total = (_genusItems[g] || []).filter(function(it) { return it.meta.type !== 'seedling' && !isIndividualItem(it); }).length;
           countEl.textContent = total + (currentLang === 'en' ? ' Cultivars' : ' 品種');
         }
       }
@@ -2501,7 +2515,7 @@ if (false) {
   function refreshGenusStats(slug) {
     var statsEl = document.getElementById('genus-stats-' + slug);
     if (!statsEl) return;
-    var items = (_genusItems[slug] || []).filter(function(it) { return it.meta.type !== 'seedling'; });
+    var items = (_genusItems[slug] || []).filter(function(it) { return it.meta.type !== 'seedling' && !isIndividualItem(it); });
     if (items.length === 0) { statsEl.style.display = 'none'; return; }
 
     var speciesCount = 0, hybridCount = 0, cloneCount = 0;
@@ -2730,7 +2744,7 @@ if (false) {
     // Then load from Supabase (async, authoritative source)
     // Fetch only needed columns to reduce payload size
     if (supabase) {
-      supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, parent_a_text, parent_b_text, parent_a_id, parent_b_id, is_private, ai_status').then(function(res) {
+      supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, parent_a_text, parent_b_text, parent_a_id, parent_b_id, is_private, ai_status, selected_from_id').then(function(res) {
         if (res.error || !res.data) return;
 
         // Collect unique user_ids to fetch profiles
@@ -2762,7 +2776,7 @@ if (false) {
             _qualifier: row.species_qualifier || null, _aliases: row.aliases || null, _tags: row.tags || null,
             _nameStatus: row.name_status || null, _locality: row.locality || null,
             _parents: [row.parent_a_text || null, row.parent_b_text || null], _parentIds: [row.parent_a_id || null, row.parent_b_id || null],
-            _isPrivate: !!row.is_private };
+            _isPrivate: !!row.is_private, _selectedFrom: row.selected_from_id || null };
           var genus = row.genus || 'Anthurium';
           var meta = { genus: genus, type: row.type || 'Hybrid', created_at: row.created_at || '', user_id: row.user_id || null, id: row.id, is_private: !!row.is_private, ai_status: row.ai_status || null };
           addCultivarRow(row.cultivar_name, entry, meta);

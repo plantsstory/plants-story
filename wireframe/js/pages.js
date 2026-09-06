@@ -1384,6 +1384,7 @@ function getFilteredItems(genusEl) {
     var isSeedling = item.meta.type === 'seedling';
     if (isSeedlingView && !isSeedling) return false;
     if (!isSeedlingView && isSeedling) return false;
+    if (!isSeedlingView && isIndividualItem(item)) return false; // folded under the species row
     if (filterType !== 'all' && item.meta.type !== filterType) return false;
     if (q) {
       var nameMatch = item.fullName.toLowerCase().indexOf(q) !== -1;
@@ -1807,6 +1808,12 @@ document.addEventListener('click', function(e) {
         var seedlingRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="seedling"]');
         if (seedlingRadio) { seedlingRadio.checked = true; seedlingRadio.dispatchEvent(new Event('change')); }
       }
+    }
+
+    // "+ 個体を追加" from a species page: compact form with the species fixed
+    if (page === 'contribute' && typeof window.setIndividualMode === 'function') {
+      var indMode = navEl.getAttribute('data-contribute-type') === 'individual';
+      window.setIndividualMode(indMode ? { id: navEl.getAttribute('data-species-id'), name: navEl.getAttribute('data-species-name'), genus: navEl.getAttribute('data-genus') } : null);
     }
 
     // Close mobile nav

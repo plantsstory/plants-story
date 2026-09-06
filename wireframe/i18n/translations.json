@@ -1603,5 +1603,81 @@
   "record_no_sources": {
     "jp": "出典なし",
     "en": "no sources"
+  },
+  "individuals_title": {
+    "jp": "個体",
+    "en": "Individuals"
+  },
+  "individuals_count": {
+    "jp": "個体 {n}",
+    "en": "{n} individuals"
+  },
+  "individuals_add": {
+    "jp": "+ 個体を追加",
+    "en": "+ Add an individual"
+  },
+  "individuals_empty": {
+    "jp": "この原種の個体（番号つきの株・名前つきの株）はまだ記録されていません。",
+    "en": "No numbered or named individuals of this species are recorded yet."
+  },
+  "type_individual": {
+    "jp": "個体",
+    "en": "Individual"
+  },
+  "spec_selected_from": {
+    "jp": "原種",
+    "en": "Species"
+  },
+  "individual_form_title": {
+    "jp": "個体を登録",
+    "en": "Record an individual"
+  },
+  "individual_form_desc": {
+    "jp": "原種の1株に付けた番号や名前を記録します。名前はシングルクォートで表示されます（例: carlablackiae 'HR1'）。",
+    "en": "Record a number or name given to one plant of a species. Names are shown in single quotes (e.g. carlablackiae 'HR1')."
+  },
+  "individual_species": {
+    "jp": "原種",
+    "en": "Species"
+  },
+  "individual_code": {
+    "jp": "個体名・番号",
+    "en": "Name or number"
+  },
+  "individual_namer": {
+    "jp": "命名者",
+    "en": "Named by"
+  },
+  "individual_year": {
+    "jp": "命名年",
+    "en": "Year"
+  },
+  "individual_note": {
+    "jp": "説明（任意）",
+    "en": "Notes (optional)"
+  },
+  "individual_photos_hint": {
+    "jp": "写真は登録後、個体のページの「画像追加」から載せられます。",
+    "en": "Photos can be added from the individual's page after saving."
+  },
+  "individual_submit": {
+    "jp": "個体を登録",
+    "en": "Save individual"
+  },
+  "individual_login": {
+    "jp": "個体の登録にはログインが必要です",
+    "en": "Sign in to record an individual"
+  },
+  "individual_code_required": {
+    "jp": "個体名か番号を入力してください",
+    "en": "Enter a name or number"
+  },
+  "individual_dup": {
+    "jp": "その個体名はすでに登録されています",
+    "en": "That individual is already recorded"
+  },
+  "individual_saved": {
+    "jp": "個体を登録しました",
+    "en": "Individual recorded"
   }
 }

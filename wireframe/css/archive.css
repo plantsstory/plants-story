@@ -832,3 +832,26 @@ dialog.dialog-clean { margin: auto; }
 .record .verification-toggle { background: none; border: 0; border-bottom: 1px solid var(--color-rule); padding: 4px 0; font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-mid); cursor: pointer; }
 .record .variation-detail { margin-top: var(--space-sm); padding: var(--space-sm) 0 0; border-top: 1px dotted var(--color-rule); font-size: var(--font-size-sm); }
 #page-cultivar .structured-section { background: transparent; border-color: var(--color-rule); }
+
+/* ---------- Individuals of a species ---------- */
+.individuals { margin-top: var(--space-2xl); }
+.individuals__list { list-style: none; margin: 0 0 var(--space-md); padding: 0; }
+.individuals__list li { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-md); padding: 8px 0; border-bottom: 1px dotted var(--color-rule); }
+.individuals__list a { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; text-decoration: none; }
+.individuals__list a:hover { text-decoration: underline; }
+.individuals__list .mono { font-size: 0.66rem; white-space: nowrap; }
+.individuals__empty { font-size: 0.7rem; letter-spacing: 0.06em; margin: 0 0 var(--space-md); }
+.individuals__add { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; border: 1px solid var(--color-ink); padding: 8px 12px; color: var(--color-ink); min-height: 36px; }
+.individuals__add:hover { background: var(--color-ink); color: var(--color-paper); }
+.cultivar-row__individuals { font-size: 0.64rem; letter-spacing: 0.08em; color: var(--color-mid); margin-top: 2px; }
+/* compact add form: replaces the full form while the page carries .contribute--individual */
+#individual-form { display: none; }
+.contribute--individual #individual-form { display: block; }
+.contribute--individual .container > .card, .contribute--individual #contribute-submit-btn, .contribute--individual .container > form { display: none !important; }
+.individual-form { border-top: 1px solid var(--color-ink); padding-top: var(--space-md); max-width: 560px; }
+.individual-form__row { display: flex; gap: var(--space-md); align-items: baseline; margin-bottom: var(--space-md); }
+.individual-form__k { font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-mid); }
+.individual-form__species { font-family: var(--font-display); font-weight: 600; font-size: 1.3rem; font-style: italic; }
+.individual-form__preview { font-size: 0.7rem; margin: 6px 0 0; color: var(--color-mid); min-height: 1em; }
+.individual-form__grid { display: grid; grid-template-columns: 1fr 120px; gap: var(--space-md); }
+.individual-form__actions { display: flex; gap: var(--space-sm); margin-top: var(--space-md); }

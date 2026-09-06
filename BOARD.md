@@ -80,9 +80,10 @@
 | 原種 Species | 自然界の種。sp. / aff. / cf. / ssp. / var. を含む | *Anthurium crystallinum* ／ *Anthurium* sp. "Peru" |
 | Hybrid | 特定の交配式から得た**実生群**の名前。交配式必須（不明・複合は `formula_status`） | *Anthurium* 'Mystique A88' |
 | Clone | **1個体**の名前。単一原種由来なら種小名必須 | *Monstera deliciosa* 'Thai Constellation' |
+| 個体 Individual（09-07） | 原種の**1株**に付けた番号・名前（'HR1'・'Dark Star'）。Clone の一種で `tags:['individual']` + `selected_from_id`。原種ページの「個体」欄と「+ 個体を追加」から登録（種固定・個体名・命名者・命名年・説明のみ）。一覧・件数・索引からは除外、AI 調査なし。同名で複数の実生が流通するなら個体ではなく原種 + tag `line` | *Anthurium carlablackiae* 'HR1' |
 | Seedling | 自分の播種記録。交配式 + 播種日で識別 | *Anthurium forgetii* × 'Titanium' |
 
-表記（ICNCP）: 属・種小名イタリック、修飾子ローマン、栽培品種名は '半角シングルクォート・語頭大文字'、非公式名・管理番号・産地は "ダブルクォート"、× は U+00D7、異名は `aliases`、和名は `japanese_name`（Phase B）、英語 UI は Species / Hybrid / Clone / Seedling、由来文にサイズ・生育速度を書かない、不明は NULL、推測名を作らない。
+表記（ICNCP）: 属・種小名イタリック、修飾子ローマン、栽培品種名は '半角シングルクォート・語頭大文字'、個体番号・個体名は '半角シングルクォート'（09-07 オーナー決定: 管理番号も品種名と同じ扱い）、非公式名・産地は "ダブルクォート"、× は U+00D7、異名は `aliases`、和名は `japanese_name`（Phase B）、英語 UI は Species / Hybrid / Clone / Seedling、由来文にサイズ・生育速度を書かない、不明は NULL、推測名を作らない。
 
 未記載種・非公式名: IPNI/POWO/GBIF に無い名前は「未記載 / 暫定名 / 未解決」で登録し記載者・年・タイプ産地は空欄。情報源 A 学術誌 → B IAS・Vannini 等 → C 導入ナーセリー・ブリーダー本人。**Tier は引用 URL のドメインで機械判定**（`tierFromUrls`）。マーケットプレイス・匿名ブログは不採用。'Black Velvet' は新規登録せず antolakii の `aliases`（BVEP）+ 別名ページで「2つの別の植物」と説明。villenaorum は GBIF 無し → `sp. "villenaorum"` 暫定名。
 

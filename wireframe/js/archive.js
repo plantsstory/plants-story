@@ -124,6 +124,8 @@
     d.qualifier = entry._qualifier || null;
     d.aliases = entry._aliases || [];
     d.tags = entry._tags || [];
+    d.selectedFrom = entry._selectedFrom || null;
+    d.isIndividual = d.tags.indexOf('individual') !== -1 || (!!d.selectedFrom && type === 'clone');
     d.nameStatus = entry._nameStatus || null;
     d.formLocality = clean(entry._locality);
     d.creator = clean(d.formula && d.formula.creatorName);
@@ -389,11 +391,12 @@
     if (!document.getElementById('story-body')) return;
     var all = collectAll();
     _front = all;
-    renderMastheadGenera(all);
-    renderLedgerStats(all);
+    var pub = all.filter(function (d) { return !d.isIndividual; }); // individuals are not separate entries
+    renderMastheadGenera(pub);
+    renderLedgerStats(pub);
     renderStory(all);
-    renderIndex(all);
-    renderTimeline(all);
+    renderIndex(pub);
+    renderTimeline(pub);
   }
 
   /* ============================================================
@@ -422,6 +425,7 @@
       origins = origins.filter(function (o) { if (o && o._type === 'formula') { formula = o.formula; return false; } return true; });
       var d = describe(item.cultivar_name, { origins: origins, formula: formula, _type: item.type, _id: item.id }, item.type);
       var bi = (typeof getBadgeInfo === 'function') ? getBadgeInfo(d.type, d.fullName) : { cls: 'badge--' + d.type, txt: d.type };
+      if (d.isIndividual) bi = { cls: 'badge--clone', txt: T('type_individual') };
       var trustCls = (typeof getTrustClass === 'function') ? getTrustClass(d.trust) : '';
       var no = d.id ? String(d.id).padStart(3, '0') : String(i + 1).padStart(2, '0');
       if (withDate) {
@@ -487,9 +491,46 @@
       cells += cell(d.type === 'seedling' ? 'spec_sowing' : 'spec_year', d.type === 'seedling' ? esc(d.sowing) : yearSpan(d.year));
       if (d.parentA || d.parentB) cells += cell('spec_parents', parentHtml(all, d.parentA || T('lineage_unknown')) + ' × ' + parentHtml(all, d.parentB || T('lineage_unknown')));
     }
+    if (d.isIndividual) {
+      var parentSp = all.filter(function (x) { return x.id && x.id === d.selectedFrom; })[0];
+      if (parentSp) cells = cell('spec_selected_from', link(parentSp, esc(parentSp.displayName))) + cells;
+    }
     if (d.aliases && d.aliases.length) cells += cell('spec_aliases', esc(d.aliases.join(' / ')));
     var note = d.nameStatus === 'disputed' ? T('name_status_disputed') : d.nameStatus === 'trade' ? T('name_status_trade') : d.nameStatus === 'informal' ? T('name_status_informal') : '';
     el.innerHTML = (cells ? '<div class="specimen">' + cells + '</div>' : '') + (note ? '<p class="specimen__note mono">' + esc(note) + '</p>' : '');
+  }
+  /* individuals of a species: numbered or named single plants ('HR1', 'Dark Star') */
+  function individualsOf(d, all) {
+    var self = normParent(d.epithet);
+    return all.filter(function (x) {
+      if (!x.isIndividual || x.fullName === d.fullName) return false;
+      if (d.id && x.selectedFrom === d.id) return true;
+      return !!self && normParent(x.epithet).indexOf(self + " '") === 0;
+    }).sort(function (a, b) { return a.displayName.localeCompare(b.displayName, undefined, { numeric: true, sensitivity: 'base' }); });
+  }
+  function renderIndividuals(d, all) {
+    var section = document.getElementById('individuals-section');
+    var el = document.getElementById('individuals-container');
+    var count = document.getElementById('individuals-count');
+    if (!section || !el) return;
+    if (d.type !== 'species' || d.isIndividual) { section.classList.add('d-none'); return; }
+    var list = individualsOf(d, all);
+    var html = '';
+    if (list.length) {
+      html += '<ul class="individuals__list">';
+      list.forEach(function (x) {
+        var code = x.epithet.indexOf(d.epithet) === 0 ? x.epithet.slice(d.epithet.length).trim() : x.epithet;
+        var meta = joinParts([x.namer || x.breeder, x.year]);
+        html += '<li>' + link(x, esc(code)) + (meta ? '<span class="mono">' + esc(meta) + '</span>' : '') + '</li>';
+      });
+      html += '</ul>';
+    } else {
+      html += '<p class="individuals__empty mono">' + esc(T('individuals_empty')) + '</p>';
+    }
+    html += '<a href="' + esc(base + 'contribute') + '" class="individuals__add" data-nav="contribute" data-contribute-type="individual" data-species-id="' + esc(d.id || '') + '" data-species-name="' + esc(d.displayName) + '" data-genus="' + esc(d.genus) + '">' + esc(T('individuals_add')) + '</a>';
+    if (count) count.textContent = list.length ? String(list.length) : '';
+    el.innerHTML = html;
+    section.classList.remove('d-none');
   }
   function normParent(p) { return clean(p).replace(/^['"‘’“”]+|['"‘’“”]+$/g, '').toLowerCase().replace(/^(anthurium|monstera|philodendron)\s+/, ''); }
   function relatedGroupHtml(titleKey, list) {
@@ -741,6 +782,7 @@
     var d = describe(key in store ? key : (store[displayName] ? displayName : (store[displayName + ' [Seedling]'] ? displayName + ' [Seedling]' : key)), entry, entry._type || _detailArgs[2]);
     renderSpecimen(d, all);
     renderRelated(d, all);
+    renderIndividuals(d, all);
     if (window.refreshRerunButton) window.refreshRerunButton(entry);
     if (window.refreshPrivateButton) window.refreshPrivateButton(entry);
     var pnote = document.getElementById("detail-private-note");
@@ -805,7 +847,7 @@
         var inputs = box ? box.querySelectorAll('input') : [];
         var unknown = $('seedling-formula-unknown');
         var a = inputs[0] ? stripGenus(inputs[0].value) : '', b = inputs[1] ? stripGenus(inputs[1].value) : '';
-        var lab = quoteD(seedLabel.value);
+        var lab = quoteS(seedLabel.value); // numbers/labels take single quotes (owner decision 2026-09-07)
         if (unknown && unknown.checked) name = lab;
         else if (a && b) name = joinParts2([a + ' × ' + b, lab]);
         else name = '';

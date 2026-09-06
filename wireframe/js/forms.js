@@ -1036,6 +1036,76 @@ document.addEventListener('click', function(e) {
     showTypeFields('species');
   }
 
+  // ---- Individuals: "+ 個体を追加" on a species page opens this compact form (species fixed) ----
+  (function individualForm() {
+    var page = document.getElementById('page-contribute'), form = document.getElementById('individual-form');
+    if (!page || !form) return;
+    var target = null;
+    var $ = function(id) { return document.getElementById(id); };
+    window.setIndividualMode = function(tgt) {
+      target = tgt;
+      page.classList.toggle('contribute--individual', !!tgt);
+      var title = $('contribute-page-title'), desc = $('contribute-page-desc');
+      if (tgt) {
+        $('ind-species').textContent = tgt.name;
+        $('ind-code').value = ''; $('ind-year').value = ''; $('ind-note').value = '';
+        $('ind-namer').value = (window._currentUser && ((window._profileCache && window._profileCache[window._currentUser.id]) || (window._currentUser.user_metadata && window._currentUser.user_metadata.full_name))) || '';
+        if (title) title.textContent = t('individual_form_title');
+        if (desc) desc.textContent = t('individual_form_desc');
+        setTimeout(function() { $('ind-code').focus(); }, 60);
+      } else {
+        if (title) title.textContent = t('contribute_title');
+        if (desc) desc.textContent = t('contribute_desc');
+      }
+    };
+    $('ind-code').addEventListener('input', function() {
+      var code = this.value.replace(/^['‘’"“”]+|['‘’"“”]+$/g, '').trim();
+      $('ind-preview').textContent = target && code ? target.name + " '" + code + "'" : '';
+    });
+    $('ind-cancel').addEventListener('click', function(e) {
+      e.preventDefault();
+      if (target && target.name) navigateTo('cultivar', { cultivar: target.name }); else navigateTo('top');
+    });
+    $('ind-submit').addEventListener('click', function(e) {
+      e.preventDefault();
+      if (!target) return;
+      if (!window._currentUser) { showToast(t('individual_login'), true); return; }
+      var code = $('ind-code').value.replace(/^['‘’"“”]+|['‘’"“”]+$/g, '').trim();
+      if (!code) { showToast(t('individual_code_required'), true); $('ind-code').focus(); return; }
+      var fullName = target.name + " '" + code + "'";
+      if (cultivarData[fullName]) { showToast(t('individual_dup'), true); return; }
+      var namer = $('ind-namer').value.trim(), year = parseInt($('ind-year').value, 10) || null, note = $('ind-note').value.trim();
+      var today = new Date().toISOString().split('T')[0];
+      var bodyJp = "'" + code + "' は " + (namer ? namer + ' が' : '') + (year ? year + ' 年に' : '') + (namer || year ? '命名した ' : '') + target.name + ' の個体。' + (note ? note : '');
+      var bodyEn = "'" + code + "' is an individual plant of " + target.name + (namer ? ', named by ' + namer : '') + (year ? ' in ' + year : '') + '.' + (note ? ' ' + note : '');
+      var origin = { body: bodyJp, body_en: bodyEn, trust: 30, trustClass: 'trust--low', source_type: 'manual', source_tier: null, source_name: '', source_url: '', source_language: 'ja',
+        parentage: null, discovery_year: year, discoverer_or_breeder: namer || null, native_region: null, first_description: null,
+        structured: { origin_type: 'clone', namer: namer || null, naming_year: year, notes: note || '', citation_links: [] },
+        author: { isAI: false, name: 'User', date: today }, sources: [], votes: { agree: 0, disagree: 0 }, verified: false };
+      var entry = { origins: [origin], _tags: ['individual'], _selectedFrom: parseInt(target.id, 10) || null, _type: 'clone', _created_at: new Date().toISOString() };
+      var btn = this; btn.disabled = true;
+      addUserCultivar(fullName, entry, { genus: target.genus, type: 'clone', meta: { selected_from_id: parseInt(target.id, 10) || null, tags: ['individual'] } })
+        .then(function(rpc) {
+          btn.disabled = false;
+          entry._id = rpc && rpc.id ? rpc.id : null;
+          entry._userId = window._currentUser.id;
+          entry._posterName = (window._profileCache && window._profileCache[window._currentUser.id]) || '';
+          cultivarData[fullName] = entry;
+          var slug = String(target.genus).toLowerCase();
+          if (!_genusItems[slug]) _genusItems[slug] = [];
+          _genusItems[slug].push({ fullName: fullName, entry: entry, meta: { genus: target.genus, type: 'clone', created_at: entry._created_at, user_id: entry._userId, id: entry._id } });
+          showToast(t('individual_saved'));
+          window.setIndividualMode(null);
+          navigateTo('cultivar', { cultivar: fullName });
+        })
+        .catch(function(err) {
+          btn.disabled = false;
+          var msg = (err && err.message) || String(err);
+          showToast(/duplicate|unique/i.test(msg) ? t('individual_dup') : msg, true);
+        });
+    });
+  })();
+
   document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(radio) {
     radio.addEventListener('change', function() {
       // Seedling posting: login required; first 5 posts free, then subscription
