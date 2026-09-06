@@ -1,0 +1,97 @@
+@@ -9,7 +9,9 @@
+   else root.RecordGate = factory();
+ })(typeof self !== 'undefined' ? self : this, function () {
+   'use strict';
+-  var NULLISH = { '': 1, 'null': 1, 'undefined': 1, '不明': 1, 'unknown': 1, 'n/a': 1 };
++  var NULLISH = { '': 1, 'null': 1, 'undefined': 1, '不明': 1, '未確認': 1, '未詳': 1, 'unknown': 1, 'n/a': 1, 'none': 1, '-': 1, '—': 1 };
++  var AUTHORITY = /(^|\.)(ipni\.org|powo\.science\.kew\.org|gbif\.org|tropicos\.org|biodiversitylibrary\.org)\//i;
++  var SIZE = /\d+(?:[.,]\d+)?\s?(?:cm|mm|m)\b/;
+   var RESEARCH_HOURS = 72;
+ 
+   function clean(v) {
+@@ -26,6 +28,13 @@
+     var f = ((rec && rec.origins) || []).filter(function (o) { return o && o._type === 'formula' && o.formula; })[0];
+     return f ? f.formula : null;
+   }
++  function urlsOf(o) {
++    if (!o) return [];
++    var out = (o.sources || []).map(function (s) { return s && (s.url || s.text); });
++    out = out.concat(((o.structured && o.structured.citation_links) || []).map(function (l) { return l && l.url; }));
++    out.push(o.source_url);
++    return out.map(clean).filter(Boolean);
++  }
+   function hasSourceUrl(o) {
+     if (!o) return false;
+     if (((o.sources || []).some(function (s) { return s && clean(s.url); }))) return true;
+@@ -42,7 +51,7 @@
+   function qualifierOf(rec) {
+     var q = clean(rec && rec.species_qualifier).toLowerCase();
+     if (q) return q;
+-    var m = clean(rec && rec.cultivar_name).match(/\b(sp|aff|cf|ssp|var)\.\s/);
++    var m = clean(rec && rec.cultivar_name).match(/\b(sp|aff|cf|ssp|subsp|var)\.(?:\s|$)/);
+     return m ? m[1] : '';
+   }
+   function textLen(o) {
+@@ -51,7 +60,7 @@
+   }
+   function isIndividual(rec) {
+     var tags = (rec && rec.tags) || [];
+-    return tags.indexOf('individual') !== -1 || !!(rec && rec.selected_from_id);
++    return tags.indexOf('individual') !== -1;
+   }
+   function parentsOf(rec, s) {
+     var f = formulaOf(rec) || (s && s.formula) || {};
+@@ -68,6 +77,9 @@
+     if (!os.length) return { pass: false, missing: ['record'] };
+     var o = os[0], s = o.structured || {};
+     var anySource = os.some(hasSourceUrl);
++    var authoritySource = os.some(function (x) { return urlsOf(x).some(function (u) { return AUTHORITY.test(u); }); });
++    var humanLongest = Math.max.apply(null, os.map(function (x) { return (x.author && x.author.isAI) ? 0 : textLen(x); }));
++    var sized = os.some(function (x) { return SIZE.test(clean(x.body) + ' ' + clean(x.structured && x.structured.notes)); });
+     var longest = Math.max.apply(null, os.map(textLen));
+     var q = qualifierOf(rec);
+     var p = parentsOf(rec, s);
+@@ -83,13 +95,14 @@
+         if (!clean(s.author_name)) missing.push('author');
+         if (!(num(s.publication_year) || num(o.discovery_year))) missing.push('year');
+         if (!(clean(s.type_locality) || clean(s.known_habitats) || clean(o.native_region) || clean(rec.locality))) missing.push('place');
+-        if (!anySource) missing.push('source');
++        if (!(clean(o.first_description) || clean(s.first_description))) missing.push('publication');
++        if (!authoritySource) missing.push('source');
+       }
+     } else if (type === 'hybrid') {
+       var fs = clean(rec.formula_status).toLowerCase();
+       if (!(p.both || fs === 'unknown' || fs === 'complex')) missing.push('parents');
+       if (!(clean(s.breeder) || clean(s.namer) || num(s.naming_year) || clean(o.discoverer_or_breeder) || p.creator)) missing.push('person');
+-      if (!(anySource || longest >= 80)) missing.push('evidence');
++      if (!(anySource || humanLongest >= 80)) missing.push('evidence');
+     } else if (type === 'clone') {
+       if (isIndividual(rec)) {
+         if (!(rec.selected_from_id || p.any)) missing.push('parents');
+@@ -97,8 +110,9 @@
+         var facts = 0;
+         if (clean(s.namer) || clean(s.breeder) || clean(o.discoverer_or_breeder)) facts++;
+         if (num(s.naming_year) || num(o.discovery_year)) facts++;
+-        if (p.any || rec.selected_from_id) facts++;
+-        if (longest >= 80) facts++;
++        var disputed = ((rec.tags || []).indexOf('disputed_parentage') !== -1) || clean(rec.formula_status).toLowerCase() === 'disputed';
++        if ((p.any && !disputed) || rec.selected_from_id) facts++;
++        if (humanLongest >= 80) facts++;
+         if (anySource) facts++;
+         if (facts < 2) missing.push('clone_facts');
+       }
+@@ -107,12 +121,13 @@
+       if (!clean(s.sowing_date)) missing.push('sowing');
+       if (!(clean(s.breeder) || p.creator || clean(o.discoverer_or_breeder))) missing.push('breeder');
+     }
++    if (sized) missing.push('size');
+     return { pass: missing.length === 0, missing: missing };
+   }
+ 
+   /* state(rec) → 'ok' | 'unrecorded' | 'researching' | 'none' */
+   function state(rec, now) {
+-    var os = records(rec);
++    var os = records(rec).filter(function (o) { return !isDraft(o); });
+     if (!os.length) {
+       var st = String((rec && rec.ai_status) || '');
+       if (st === 'pending' || st === 'researching') {
