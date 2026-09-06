@@ -1767,5 +1767,17 @@
   "gate_missing_breeder": {
     "jp": "作出者",
     "en": "breeder"
+  },
+  "gate_missing_size": {
+    "jp": "サイズ記述の除去（由来にサイズは書かない）",
+    "en": "remove size statements"
+  },
+  "gate_missing_publication": {
+    "jp": "原記載の出版物",
+    "en": "the protologue citation"
+  },
+  "formula_disputed": {
+    "jp": "交配式は係争中（複数の説があります）",
+    "en": "Parentage disputed (more than one account)"
   }
 }
