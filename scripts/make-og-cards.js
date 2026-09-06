@@ -39,7 +39,9 @@ function truncateJp(text, maxCols) {
 }
 function firstSentence(text) {
   const t = String(text || '').replace(/\s+/g, ' ').trim();
-  const m = t.match(/^(.+?[。.!?])(\s|$)/);
+  const jp = t.match(/^(.+?。)/);           // Japanese prose: the first 。 ends the sentence
+  if (jp) return jp[1];
+  const m = t.match(/^(.+?[!?])(\s|$)/);   // abbreviation points ("Pomol.") must not end it
   return m ? m[1] : t;
 }
 function titleSize(name) {
