@@ -1106,7 +1106,7 @@ function renderOriginsInner(cultivarName, container) {
       rh += '<header class="record__head mono">';
       rh += '<span class="record__rank">' + (currentLang === 'en' ? 'Record ' : '記録 ') + (i + 1) + '</span>';
       rh += '<span class="record__meta">' + meta.map(escHtml).join(' · ') + '</span>';
-      if (hasSources) html += '<span class="record__trust ' + getTrustClass(trustNum) + '" data-trust-idx="' + i + '">' + trustNum + '%</span>';
+      if (hasSources) rh += '<span class="record__trust ' + getTrustClass(trustNum) + '" data-trust-idx="' + i + '">' + trustNum + '%</span>';
       rh += '</header>';
     }
     // body: the prose is the record; the field table only stands in when there is no prose
@@ -1123,7 +1123,7 @@ function renderOriginsInner(cultivarName, container) {
       rh += '<div class="verification-details">';
       rh += '<button class="verification-toggle mono" onclick="document.getElementById(\'' + vid + '\').classList.toggle(\'d-none\');">' + (currentLang === 'en' ? 'Verification' : '検証詳細') + '</button>';
       rh += '<div id="' + vid + '" class="variation-detail d-none">';
-      if (v.summary_jp) html += '<div class="text-sm variation-summary">' + escHtml(v.summary_jp) + '</div>';
+      if (v.summary_jp) rh += '<div class="text-sm variation-summary">' + escHtml(v.summary_jp) + '</div>';
       if (v.claims && v.claims.length > 0) {
         v.claims.forEach(function(c) {
           var si = '?', sc = 'claim--unverifiable';
@@ -1131,12 +1131,12 @@ function renderOriginsInner(cultivarName, container) {
           else if (c.status === 'partially_verified') { si = '~'; sc = 'claim--partial'; }
           else if (c.status === 'contradicted') { si = '!'; sc = 'claim--contradicted'; }
           rh += '<div class="claim ' + sc + '">' + si + ' ' + escHtml(c.claim);
-          if (c.source) html += ' <span class="text-gray text-xs">(' + escHtml(c.source) + ')</span>';
+          if (c.source) rh += ' <span class="text-gray text-xs">(' + escHtml(c.source) + ')</span>';
           rh += '</div>';
         });
       }
       if (v.warnings && v.warnings.length > 0) {
-        v.warnings.forEach(function(w) { html += '<div class="verification-warnings">' + escHtml(w) + '</div>'; });
+        v.warnings.forEach(function(w) { rh += '<div class="verification-warnings">' + escHtml(w) + '</div>'; });
       }
       rh += '</div></div>';
     }
@@ -1151,7 +1151,7 @@ function renderOriginsInner(cultivarName, container) {
     if (!srcList.length && origin.source_url && safeUrl(origin.source_url)) {
       srcHtml += '<span class="record__source"><a href="' + escHtml(safeUrl(origin.source_url)) + '" target="_blank" rel="noopener">' + escHtml(origin.source_name || origin.source_url) + '</a></span>';
     }
-    if (srcHtml) html += '<div class="record__sources"><span class="record__label mono">' + t('source_label') + '</span>' + srcHtml + '</div>';
+    if (srcHtml) rh += '<div class="record__sources"><span class="record__label mono">' + t('source_label') + '</span>' + srcHtml + '</div>';
     // Footer: who recorded it and when · votes (正確 / 疑問)
     var who = isDb ? 'IPNI / Kew' : (origin.author && origin.author.isAI ? (origin.author.name || 'AI') : (origin.author && origin.author.name && origin.author.name !== 'User' ? origin.author.name : t('record_by_user')));
     rh += '<footer class="record__foot mono"><span>' + escHtml(who) + (origin.author && origin.author.date ? ' · ' + escHtml(origin.author.date) : '') + '</span>';
