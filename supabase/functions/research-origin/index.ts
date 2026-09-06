@@ -155,10 +155,22 @@ async function lookupPOWO(fqId: string): Promise<{ author: string; distributions
   return null;
 }
 
+// TDWG level-3 region names → plain country names ("Mexico Southeast" → "Mexico", "Panamá" → "Panama")
+function normalizeTdwg(names: string[]): string[] {
+  const out: string[] = [];
+  for (const n of names) {
+    const c = String(n || "").replace(/\s*\([^)]*\)/g, "").replace(/Panamá/g, "Panama")
+      .replace(/\b(Mexico|Brazil|Argentina|Colombia|Venezuela|Peru|Ecuador|Bolivia|Chile) (Southeast|Southwest|Northeast|Northwest|North|South|East|West|Central|Gulf|Distrito Federal)\b/g, "$1")
+      .trim();
+    if (c && !out.includes(c)) out.push(c);
+  }
+  return out;
+}
+
 // Step 3: Try IPNI for publication year/name (supplemental)
-async function searchIPNI(genus: string, species: string): Promise<{ year: string; publication: string; collation: string; ipniId: string } | null> {
+async function searchIPNI(genus: string, species: string): Promise<{ year: string; publication: string; collation: string; ipniId: string; hasTypeData: boolean } | null> {
   const query = encodeURIComponent(`${genus} ${species}`);
-  const url = `https://beta.ipni.org/api/1/search?q=${query}&perPage=20&cursor=*`;
+  const url = `https://www.ipni.org/api/1/search?q=${query}&perPage=20&cursor=*`;
 
   try {
     const res = await fetch(url);
@@ -180,6 +192,7 @@ async function searchIPNI(genus: string, species: string): Promise<{ year: strin
         publication: match.publication || "",
         collation: match.referenceCollation || "",
         ipniId: match.id || "",
+        hasTypeData: !!match.hasTypeData,
       };
     }
     return null;
@@ -201,7 +214,7 @@ async function scrapeIpniTypeData(ipniId: string): Promise<IpniTypeData | null> 
   if (!ipniId) return null;
   const url = `https://www.ipni.org/n/${ipniId}`;
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; AroidOrigins/1.0; +https://plantsstory.com)" } });
     if (!res.ok) return null;
     const html = await res.text();
 
@@ -279,18 +292,10 @@ async function queryGBIF(genus: string, species: string): Promise<(BotanicalResu
     const publishedIn: string = detail?.publishedIn || "";
     const yearMatch = publishedIn.match(/\((\d{4})\)/) || publishedIn.match(/\b(1[6-9]\d\d|20\d\d)\b/);
 
-    let collectorTeam = "", collectionDate = "", typeLocality = "", typeRemarks = "";
-    if (typeRes.ok) {
-      const typeData = await typeRes.json();
-      const t = (typeData?.results || [])[0];
-      if (t) {
-        collectorTeam = t.recordedBy || "";
-        collectionDate = t.year ? String(t.year) : "";
-        typeLocality = [t.locality, t.stateProvince, t.country].filter(Boolean).join(", ");
-        typeRemarks = t.typeStatus ? `${t.typeStatus} at ${t.institutionCode || "herbarium"}` : "";
-        console.log(`[GBIF] Type specimen: ${collectorTeam} (${collectionDate}) — ${typeLocality.substring(0, 60)}`);
-      }
-    }
+    // Collector / type locality are NOT taken from GBIF type occurrences: those include isotypes of synonyms and
+    // mis-flagged specimens (e.g. an H.H. Smith 1898 "isotype" under A. hookeri Kunth 1841). Only the IPNI
+    // protologue record (scraped in queryBotanicalDBs) may supply them.
+    const collectorTeam = "", collectionDate = "", typeLocality = "", typeRemarks = "";
 
     let countries: string[] = [];
     if (facetRes.ok) {
@@ -307,7 +312,7 @@ async function queryGBIF(genus: string, species: string): Promise<(BotanicalResu
       authors: detail?.authorship || match.scientificName?.replace(match.canonicalName || "", "").trim() || "",
       fqId: "",
       gbifKey: key,
-      nativeDistribution: countries,
+      nativeDistribution: [], // occurrence countries (incl. cultivation) are not a distribution; POWO native fills this in queryBotanicalDBs
       publicationYear: yearMatch ? yearMatch[1] : "",
       publication: publishedIn,
       referenceCollation: "",
@@ -328,6 +333,39 @@ async function queryBotanicalDBs(genus: string, species: string): Promise<(Botan
   const gbif = await queryGBIF(genus, species);
   if (gbif && gbif.authors) {
     console.log(`[DB] GBIF: ${gbif.name} by ${gbif.authors}, published: ${gbif.publication}`);
+    // Protologue citation + IPNI id (for the IPNI/POWO links) and type-specimen data (the only allowed source of a collector)
+    try {
+      const ipni = await searchIPNI(genus, species);
+      if (ipni) {
+        if (ipni.ipniId) gbif.fqId = `urn:lsid:ipni.org:names:${ipni.ipniId}`;
+        if (ipni.year) gbif.publicationYear = ipni.year;
+        if (ipni.publication) { gbif.publication = ipni.publication; gbif.referenceCollation = ipni.collation || ""; }
+        if (ipni.ipniId && ipni.hasTypeData && !gbif.collectorTeam) {
+          const t = await scrapeIpniTypeData(ipni.ipniId);
+          if (t) {
+            gbif.collectorTeam = t.collectorTeam || "";
+            gbif.collectionDate = t.collectionDate || "";
+            gbif.typeLocality = t.locality || "";
+            gbif.typeRemarks = t.typeRemarks || "";
+            gbif.typeDistribution = t.typeDistribution || "";
+          }
+        }
+      }
+    } catch (e) { console.log("[DB] IPNI enrichment failed:", String(e)); }
+    // Native distribution: the World Checklist of Vascular Plants (the data behind POWO), read through GBIF because
+    // powo.science.kew.org itself sits behind Cloudflare. Never GBIF occurrence countries.
+    try {
+      const key = (gbif as any).gbifKey;
+      if (key) {
+        const dres = await fetch(`https://api.gbif.org/v1/species/${key}/distributions?limit=200`);
+        if (dres.ok) {
+          const dj = await dres.json();
+          const wcvp = (dj?.results || []).filter((x: any) => /WCVP/i.test(String(x.source || "")) && x.locality);
+          if (wcvp.length) gbif.nativeDistribution = normalizeTdwg(wcvp.map((x: any) => String(x.locality)));
+        }
+      }
+    } catch (e) { console.log("[DB] WCVP distribution failed:", String(e)); }
+    console.log(`[DB] enriched: ipni=${gbif.fqId || "-"} dist=${gbif.nativeDistribution.join(", ") || "-"} collector=${gbif.collectorTeam || "-"}`);
     return gbif;
   }
   console.log(`[DB] GBIF incomplete, trying legacy POWO for ${genus} ${species}...`);
@@ -976,20 +1014,14 @@ Research and return structured data about this species. Use ONLY:
 NEVER use: nursery pages, Instagram, Reddit, Facebook, blogs, Yahoo Auctions, Mercari.
 
 === CRITICAL RULES ===
-1. You MUST actively use your training knowledge of botanical literature (protologues, monographs, taxonomic revisions like Croat's Anthurium revisions, Aroideana papers, etc.) to fill in collector and type_locality. This is citing published science, NOT guessing.
-2. "不明" is a LAST RESORT — only use it when you are certain no published record exists for that field. If the species was described by a known taxonomist (e.g., Croat, Engler, Schott), protologues almost always contain collector and locality data — look it up.
-3. NEVER use unverified internet sources (nursery pages, social media, blogs).
-4. collector = the person who FIRST COLLECTED the type specimen.
-   Priority: (a) "Collector Team" from TYPE SPECIMEN DATA above, (b) your knowledge of the protologue/original description, (c) the describing author if they also collected the type.
-   Parse the collector name from the collector number (e.g., "T. B. Croat 94069" → "T. B. Croat").
-5. type_locality = the specific location where the type specimen was collected.
-   Priority: (a) "Locality" from TYPE SPECIMEN DATA above, (b) Type Remarks, (c) your knowledge of the protologue, (d) the native distribution region.
-   Be as specific as possible (department/province, country, elevation if known).
-6. Do NOT include specific size measurements in notes (plants vary by growing conditions).
-7. notes should describe the plant's APPEARANCE: leaf shape, color, texture, venation pattern, petiole characteristics. Keep it engaging for plant enthusiasts.
+1. collector and collection_year: copy them ONLY from the TYPE SPECIMEN DATA section above. If that section is absent or has no Collector Team, return null. NEVER infer a collector from the describing author, from a monograph you remember, or from any other source. A wrong collector is worse than an empty field.
+2. type_locality: use the TYPE SPECIMEN DATA "Locality" if present. Otherwise return it ONLY if a web-searched source quotes the protologue's type locality and you cite that source; else null. Never substitute the general distribution for the type locality.
+3. notes / notes_en are about ORIGIN ONLY: the etymology of the epithet (who or what it honours), the circumstances of discovery and introduction to cultivation (who, when, from where — only with a citable source), and nomenclatural notes (basionym, orthographic variants, synonyms, later re-descriptions). Do NOT describe the plant's appearance, leaf shape, colour, texture, venation, size, growth habit, or cultivation. If nothing citable is known beyond the protologue, return notes as an empty string.
+4. NEVER use unverified internet sources (nursery pages, social media, blogs, marketplaces). Peer-reviewed papers, monographs, IPNI/POWO/Tropicos/GBIF, and botanical garden records only.
+5. Never write measurements.
 
 === MANDATORY WRITING RULES FOR JAPANESE TEXT ===
-CRITICAL: In ALL Japanese text fields (notes, known_habitats, collector, type_locality, etc.), the following MUST be written in Latin/English alphabet. NEVER transliterate to katakana:
+CRITICAL: In ALL Japanese text fields (notes, type_locality, etc.), the following MUST be written in Latin/English alphabet. NEVER transliterate to katakana:
 - Species/cultivar names: Use Latin scientific names ONLY. Write "Anthurium crystallinum", NEVER "アンスリウム・クリスタリナム" or any katakana.
 - Person names: Use English alphabet ONLY. Write "T. B. Croat", NEVER "クロート".
 - Place/region names: Use English alphabet ONLY. Write "Colombia", NEVER "コロンビア".
@@ -997,11 +1029,11 @@ CRITICAL: In ALL Japanese text fields (notes, known_habitats, collector, type_lo
 === OUTPUT FORMAT ===
 Return ONLY valid JSON (no markdown, no code blocks):
 {
-  "collector": "採取者名 — English only. Example: T. B. Croat. 不明なら \"不明\"",
-  "collection_year": "採取年 (number or null, 不明ならnull)",
-  "type_locality": "タイプ産地 — English only. Example: Chocó, Colombia. 不明なら \"不明\"",
-  "notes": "日本語の補足テキスト (100-200文字)。植物の外見的特徴（葉の形状・色・質感・葉脈パターン等）を記述。人名・種名・地名は英語アルファベットで記載。",
-  "notes_en": "English supplementary text (80-150 words). Describe appearance: leaf shape, color, texture, venation, petiole."
+  "collector": "Collector Team from TYPE SPECIMEN DATA (English), or null",
+  "collection_year": "number from TYPE SPECIMEN DATA, or null",
+  "type_locality": "English only, e.g. Chocó, Colombia — from TYPE SPECIMEN DATA or a cited protologue quote, else null",
+  "notes": "日本語 60〜140 文字。由来のみ（種小名の由来・発見と導入の経緯・命名上の注記）。外見・サイズ・栽培は書かない。書けることが無ければ空文字。",
+  "notes_en": "English, 40-90 words, origin only (etymology, discovery and introduction, nomenclature). No appearance, no measurements. Empty string if nothing citable."
 }`;
 }
 
@@ -1912,28 +1944,39 @@ serve(async (req: Request) => {
         }
 
         // Build body text from structured data for backward compatibility
-        const dist = botResult.nativeDistribution.join(", ") || "不明";
-        const bodyJp = aiStructured?.notes || `${botResult.authors}が${botResult.publicationYear ? botResult.publicationYear + "年に" : ""}${botResult.publication ? botResult.publication + " " + botResult.referenceCollation + "にて" : ""}記載。${dist}原産。サトイモ科（Araceae）に属する着生または地生植物。`;
-        const yearPart = botResult.publicationYear ? ` in ${botResult.publicationYear}` : "";
-        const pubPart = botResult.publication ? ` in ${botResult.publication} ${botResult.referenceCollation}` : "";
-        const bodyEn = aiStructured?.notes_en || `${botResult.name} was described by ${botResult.authors}${yearPart}${pubPart}. Native to ${dist}. An epiphytic or terrestrial member of the family Araceae.`;
+        const dist = botResult.nativeDistribution.join(", ");
+        // Protologue citation without a repeated "(year)" (GBIF publishedIn often carries one already)
+        const pubClean = `${botResult.publication || ""} ${botResult.referenceCollation || ""}`.replace(/\s*\(\d{4}\)\s*/g, " ").replace(/^in\s+/, "").replace(/\s+/g, " ").replace(/\s*\.\s*$/, "").trim();
+        const ipniCollectorForBody = botResult.collectorTeam ? botResult.collectorTeam.replace(/\s+\d+$/, "") : "";
+        const ipniLocalityForBody = botResult.typeLocality && botResult.typeLocality !== "sine loc." ? botResult.typeLocality : "";
+        // The web-search model sometimes leaves markdown citations "([ipni.org](https://…))" in prose — the links live in sources
+        const stripMd = (t: string) => String(t || "").replace(/\s*\(\[[^\]]*\]\([^)]*\)\)/g, "").replace(/\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/\s+/g, " ").trim();
+        const aiNotesJp = stripMd(aiStructured?.notes);
+        const aiNotesEn = stripMd(aiStructured?.notes_en);
+        let bodyJp = `${botResult.name} は ${botResult.publicationYear ? botResult.publicationYear + " 年、" : ""}${botResult.authors} が${pubClean ? " " + pubClean + " で" : ""}記載した。`;
+        if (ipniLocalityForBody) bodyJp += `タイプ産地は ${ipniLocalityForBody}。`;
+        if (ipniCollectorForBody) bodyJp += `採集者は ${ipniCollectorForBody}${botResult.collectionDate ? "（" + botResult.collectionDate.replace(/^.*?(\d{4}).*$/, "$1") + " 年採集）" : ""}。`;
+        if (dist) bodyJp += `分布は ${dist}（POWO）。`;
+        if (aiNotesJp) bodyJp += aiNotesJp;
+        let bodyEn = `${botResult.name} was described by ${botResult.authors}${botResult.publicationYear ? " in " + botResult.publicationYear : ""}${pubClean ? " in " + pubClean : ""}.`;
+        if (ipniLocalityForBody) bodyEn += ` Type locality: ${ipniLocalityForBody}.`;
+        if (ipniCollectorForBody) bodyEn += ` Collected by ${ipniCollectorForBody}${botResult.collectionDate ? " (" + botResult.collectionDate.replace(/^.*?(\d{4}).*$/, "$1") + ")" : ""}.`;
+        if (dist) bodyEn += ` Distribution: ${dist} (POWO).`;
+        if (aiNotesEn) bodyEn += " " + aiNotesEn;
 
         const tierInfo = TIER_CONFIG.S;
         const ipniId = botResult.fqId.replace("urn:lsid:ipni.org:names:", "");
-        // DB links: GBIF species page when matched via GBIF, legacy IPNI/POWO otherwise
+        // DB links: IPNI + POWO taxon (LSID) whenever the id is known; GBIF species page as a third link
         const gbifKey = (botResult as any).gbifKey;
-        const dbLinks = gbifKey
-          ? [
-              { url: `https://www.gbif.org/species/${gbifKey}`, label: "GBIF (Kew Backbone)" },
-              { url: `https://powo.science.kew.org/results?q=${encodeURIComponent(botResult.name)}`, label: "POWO (Kew)" },
-            ]
-          : [
-              { url: `https://www.ipni.org/n/${ipniId}`, label: "IPNI" },
-              { url: `https://powo.science.kew.org/taxon/${botResult.fqId}`, label: "POWO (Kew)" },
-            ];
-        const dbSourceUrl = gbifKey
-          ? `https://www.gbif.org/species/${gbifKey}`
-          : `https://powo.science.kew.org/taxon/${botResult.fqId}`;
+        const dbLinks: { url: string; label: string }[] = [];
+        if (ipniId) {
+          dbLinks.push({ url: `https://www.ipni.org/n/${ipniId}`, label: "IPNI" });
+          dbLinks.push({ url: `https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:${ipniId}`, label: "POWO (Kew)" });
+        }
+        if (gbifKey) dbLinks.push({ url: `https://www.gbif.org/species/${gbifKey}`, label: "GBIF (Kew Backbone)" });
+        const dbSourceUrl = ipniId
+          ? `https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:${ipniId}`
+          : (gbifKey ? `https://www.gbif.org/species/${gbifKey}` : "");
         originEntries.push({
           body: bodyJp,
           body_en: bodyEn,
@@ -1950,9 +1993,9 @@ serve(async (req: Request) => {
           discovery_year: botResult.publicationYear ? parseInt(botResult.publicationYear) : null,
           discoverer_or_breeder: botResult.authors,
           native_region: botResult.nativeDistribution.join(", ") || null,
-          first_description: botResult.publicationYear
-            ? `${botResult.authors}, ${botResult.publication} ${botResult.referenceCollation} (${botResult.publicationYear})`
-            : `${botResult.authors}`,
+          first_description: pubClean
+            ? `${botResult.authors}, ${pubClean}${botResult.publicationYear ? " (" + botResult.publicationYear + ")" : ""}`
+            : `${botResult.authors}${botResult.publicationYear ? " (" + botResult.publicationYear + ")" : ""}`,
           structured: (() => {
             // Helper: treat "不明" as empty so fallback chain works
             const known = (v: any) => v && v !== "不明" ? v : "";
@@ -1962,15 +2005,18 @@ serve(async (req: Request) => {
               origin_type: "species" as const,
               author_name: botResult.authors || "不明",
               publication_year: botResult.publicationYear ? parseInt(botResult.publicationYear) : null,
-              collector: known(aiStructured?.collector) || ipniCollector || "不明",
-              collection_year: aiStructured?.collection_year || (() => {
-                const m = botResult.collectionDate.match(/\b(\d{4})\b/);
-                return m ? parseInt(m[1]) : null;
+              // collector / collection_year: type-specimen data only (protologue rule); the AI may not supply them
+              collector: ipniCollector || null,
+              collection_year: (() => {
+                const m = String(botResult.collectionDate || "").match(/\b(\d{4})\b/);
+                return ipniCollector && m ? parseInt(m[1]) : null;
               })(),
-              type_locality: known(aiStructured?.type_locality) || ipniLocality || botResult.nativeDistribution[0] || "不明",
-              known_habitats: botResult.typeDistribution || dist || "不明",
+              // type locality: type data first; an AI value is accepted only because the prompt requires a cited protologue quote
+              type_locality: ipniLocality || known(aiStructured?.type_locality) || null,
+              // distribution: POWO native only
+              known_habitats: dist || null,
               notes: "",
-              citation_links: [...dbLinks, ...speciesGrounding],
+              citation_links: [...dbLinks, ...speciesGrounding.filter((g) => !dbLinks.some((d) => d.url === g.url))],
             };
           })(),
           author: {
@@ -1978,7 +2024,7 @@ serve(async (req: Request) => {
             isAI: true,
             date: new Date().toISOString().split("T")[0],
           },
-          sources: [...dbLinks, ...speciesGrounding],
+          sources: [...dbLinks, ...speciesGrounding.filter((g) => !dbLinks.some((d) => d.url === g.url))],
           votes: { agree: 0, disagree: 0 },
           verified: true,
         });

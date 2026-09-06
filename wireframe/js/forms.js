@@ -1360,10 +1360,13 @@ document.addEventListener('click', function(e) {
             var subLabels = { sp: 'sp.', ssp: 'ssp.', cf: 'cf.', aff: 'aff.' };
             parts.push('分類: ' + (subLabels[s.species_subcategory] || s.species_subcategory));
           }
-          if (s.author_name) parts.push('発表者: ' + s.author_name + (s.publication_year ? ' (' + s.publication_year + ')' : ''));
-          if (s.collector) parts.push('発見者: ' + s.collector + (s.collection_year ? ' (' + s.collection_year + ')' : ''));
-          if (s.type_locality) parts.push('採取地: ' + s.type_locality);
-          if (s.known_habitats) parts.push('生息地: ' + s.known_habitats);
+          // Origin sentence (same shape as the database-generated species records)
+          var sent = [];
+          if (s.author_name) sent.push((s.publication_year ? s.publication_year + ' 年、' : '') + s.author_name + ' が記載した');
+          if (s.type_locality) sent.push('タイプ産地は ' + s.type_locality);
+          if (s.collector) sent.push('採集者は ' + s.collector + (s.collection_year ? '（' + s.collection_year + ' 年採集）' : ''));
+          if (s.known_habitats) sent.push('分布は ' + s.known_habitats);
+          if (sent.length) parts.push(sent.join('。') + '。');
         } else if (s.origin_type === 'clone') {
           if (s.namer) parts.push('名付けた人物: ' + s.namer + (s.naming_year ? ' (' + s.naming_year + ')' : ''));
         } else if (s.origin_type === 'hybrid') {
