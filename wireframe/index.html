@@ -219,10 +219,11 @@
       </nav>
 
       <!-- Cultivar Header -->
-      <div class="mb-lg">
+      <div class="mb-lg detail-head">
         <div>
+          <p class="mono detail-standard" id="detail-standard"></p>
           <h1 class="detail-title"></h1>
-          <div class="flex gap-sm mt-sm flex-align-center flex-wrap">
+          <div class="flex gap-sm mt-sm flex-align-center flex-wrap detail-badges">
             <span class="badge badge--species">原種 / Original Species</span>
             <span class="text-sm text-muted">Anthurium</span>
             <span class="text-sm text-muted ml-xs" id="detail-created-at"></span>
@@ -230,38 +231,35 @@
             <span class="text-sm ml-xs" id="detail-poster-name"></span>
           </div>
         </div>
-        <div class="flex gap-sm flex-align-center flex-wrap mt-sm">
-          <button id="share-btn" class="btn btn--sm btn--secondary cursor-pointer font-xs-btn whitespace-nowrap" title="シェア" aria-label="この品種をシェア" aria-expanded="false" aria-haspopup="true">シェア</button>
-          <div id="share-menu" class="hidden share-menu-popup"></div>
-          <div class="flex gap-sm flex-align-center" id="edit-key-section">
-            <button class="btn btn--secondary btn--sm font-xs-btn" id="detail-edit-btn">&#x270F; 編集</button>
-          </div>
-          <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn" id="detail-add-photo-btn">画像追加</button>
-          <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn d-none" id="detail-rerun-btn" data-i18n="rerun_request_btn">AI再調査をリクエスト</button>
-          <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn d-none" id="detail-private-btn"></button>
-          <span class="mono d-none" id="detail-rerun-status"></span>
-          <button class="btn btn--sm cursor-pointer text-danger-border font-xs-btn" id="detail-delete-request-btn">削除依頼</button>
-        </div>
       </div>
 
       <p class="mono private-note d-none" id="detail-private-note" data-i18n="private_note_detail">非公開の記録です。ほかの人には表示されません。</p>
       <div id="specimen-label"></div>
 
+      <!-- Actions come after the label: know what it is before you are asked to do something -->
+      <div class="detail-actions flex gap-sm flex-align-center flex-wrap" id="detail-actions">
+        <button id="share-btn" class="btn btn--sm btn--secondary cursor-pointer font-xs-btn whitespace-nowrap" title="共有" aria-label="この品種を共有" aria-expanded="false" aria-haspopup="true" data-i18n="detail_share">共有</button>
+        <div id="share-menu" class="hidden share-menu-popup"></div>
+        <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn" id="detail-add-photo-btn" data-i18n="detail_add_photo">写真を追加</button>
+        <button type="button" class="btn btn--sm btn--secondary cursor-pointer font-xs-btn" id="detail-add-record-btn" data-i18n="detail_add_record">記録を追加</button>
+        <a href="#" class="btn btn--sm btn--secondary font-xs-btn d-none" id="detail-add-individual" data-nav="contribute" data-contribute-type="individual" data-i18n="detail_add_individual">個体を追加</a>
+        <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn d-none" id="detail-rerun-btn" data-i18n="rerun_request_btn">再調査を依頼</button>
+        <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn d-none" id="detail-private-btn"></button>
+        <span class="mono d-none" id="detail-rerun-status"></span>
+        <div class="flex gap-sm flex-align-center" id="edit-key-section" style="display:none">
+          <button class="btn btn--secondary btn--sm font-xs-btn" id="detail-edit-btn" data-i18n="detail_edit">編集</button>
+        </div>
+        <button class="btn btn--sm cursor-pointer text-danger-border font-xs-btn" id="detail-delete-request-btn" data-i18n="detail_report">報告</button>
+      </div>
+
       <!-- Image Gallery (Carousel) -->
       <div class="mb-lg">
-        <h2 class="section-title" data-i18n="images">画像</h2>
         <div class="gallery-carousel" id="gallery-carousel" tabindex="0" role="region" aria-label="画像ギャラリー">
           <button class="gallery-carousel__arrow gallery-carousel__arrow--left d-none" id="gallery-prev" aria-label="前の画像">&#x2039;</button>
           <div class="gallery-carousel__viewport">
             <div class="gallery">
               <div class="gallery__empty">
-                <div class="gallery__empty-glass">
-                  <div class="gallery__empty-icon">
-                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                  </div>
-                  <div class="gallery__empty-text" data-i18n="upload_image">画像を投稿</div>
-                  <div class="gallery__empty-accent"></div>
-                </div>
+                <div class="sheet sheet--plate"><p class="sheet__title" data-i18n="plate_empty">図版未収録</p><p class="sheet__note mono" data-i18n="plate_empty_note">栽培者本人の写真を1枚。撮影者名を添えて。</p><a href="#" class="sheet__cta" id="plate-empty-cta" data-i18n="plate_empty_cta">写真を追加する →</a></div>
               </div>
               <div class="gallery__upload" id="gallery-upload">
                 <input type="file" id="gallery-file-input" accept="image/jpeg,image/png" class="d-none" aria-label="ギャラリー画像をアップロード">
@@ -274,9 +272,7 @@
           <button class="gallery-carousel__arrow gallery-carousel__arrow--right d-none" id="gallery-next" aria-label="次の画像">&#x203A;</button>
         </div>
         <div class="gallery-carousel__counter d-none" id="gallery-counter"></div>
-        <p class="text-xs text-gray mt-sm" data-i18n="image_policy">
-          ※ 画像は栽培者自身の投稿のみを掲載しています。権利や内容に問題がある場合は「削除依頼」からご連絡ください。即時対応します。
-        </p>
+        <p class="mono plate-policy" data-i18n="image_policy">栽培者本人の写真のみ · 権利や内容の問題は「報告」から</p>
       </div>
 
       <!-- Origins (dynamically populated by JS) -->
@@ -288,14 +284,22 @@
         <!-- Add origin (inline form) -->
         <div class="mt-lg" id="add-origin-section">
 
-          <div class="text-center" id="add-origin-toggle">
-            <button class="btn btn--primary" id="btn-add-origin" data-i18n="add_origin">+ 由来を追加</button>
+          <div id="add-origin-toggle">
+            <button type="button" id="btn-add-origin" class="record-add mono" data-i18n="record_add_link">この台紙に書き足す →</button>
           </div>
 
           <!-- Inline origin form (hidden by default) -->
           <div id="add-origin-form" class="d-none">
-            <h3 class="text-lg font-bold mb-md" data-i18n="add_origin_title">由来を追加</h3>
+            <h3 class="text-lg font-bold mb-md" data-i18n="add_origin_title">記録を追加</h3>
 
+            <!-- Shared: 記録本文 (leads the form) -->
+            <div class="form-group">
+              <label class="form-label" for="ao-description" data-i18n="record_body_label">記録の本文</label>
+              <textarea id="ao-description" class="form-textarea" rows="5" placeholder="誰が・いつ・どこで。分かっていることだけを、出典とともに。"></textarea>
+            </div>
+
+            <details class="record-add__details">
+            <summary class="mono" data-i18n="record_add_details">項目を分けて書く（記載者 · 年 · 産地 · 交配式）</summary>
             <!-- Species inline fields -->
             <div id="ao-species-fields" class="d-none">
               <div class="structured-fieldset">
@@ -364,11 +368,7 @@
               </div>
             </div>
 
-            <!-- Shared: 補足欄 -->
-            <div class="form-group">
-              <label class="form-label">補足欄</label>
-              <textarea id="ao-description" class="form-textarea" placeholder="補足情報があれば記入してください..."></textarea>
-            </div>
+            </details>
 
             <!-- Shared: 引用リンク -->
             <div class="form-group">
@@ -400,6 +400,8 @@
       </section>
 
       <!-- Affiliate links -->
+      <p class="mono detail-colophon" id="detail-colophon"></p>
+
       <div class="affiliate-section mt-lg">
         <div class="affiliate-banner affiliate-banner--detail">
           <div class="affiliate-banner__context">

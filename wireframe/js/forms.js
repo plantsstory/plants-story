@@ -242,6 +242,23 @@ if (btnAddOrigin) {
     if (showEl) showEl.style.display = '';
   });
 }
+// "記録を追加" in the action row and the empty plate CTA delegate to the existing buttons
+var btnAddRecord = document.getElementById('detail-add-record-btn');
+if (btnAddRecord && btnAddOrigin) {
+  btnAddRecord.addEventListener('click', function() {
+    var sec = document.getElementById('add-origin-section');
+    if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (addOriginForm && addOriginForm.style.display !== 'block') btnAddOrigin.click();
+  });
+}
+var plateEmptyCta = document.getElementById('plate-empty-cta');
+if (plateEmptyCta) {
+  plateEmptyCta.addEventListener('click', function(e) {
+    e.preventDefault();
+    var b = document.getElementById('detail-add-photo-btn');
+    if (b) b.click();
+  });
+}
 if (btnCancelOrigin) {
   btnCancelOrigin.addEventListener('click', function() {
     addOriginToggle.style.display = 'block';

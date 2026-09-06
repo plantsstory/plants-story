@@ -156,8 +156,8 @@
     "en": "Upload Image"
   },
   "image_policy": {
-    "jp": "※ 画像は栽培者自身の投稿のみを掲載しています。権利や内容に問題がある場合は「削除依頼」からご連絡ください。即時対応します。",
-    "en": "Photos are contributed by the growers themselves. If there is a rights or content problem, use \"Request removal\" — we act immediately."
+    "jp": "栽培者本人の写真のみ · 権利や内容の問題は「報告」から",
+    "en": "Growers' own photos only · rights or content issues: use Report"
   },
   "origins": {
     "jp": "由来の記録",
@@ -168,8 +168,8 @@
     "en": "+ Add Origin"
   },
   "add_origin_title": {
-    "jp": "由来を追加",
-    "en": "Add Origin"
+    "jp": "記録を追加",
+    "en": "Add a record"
   },
   "label_description": {
     "jp": "説明",
@@ -1469,8 +1469,8 @@
     "en": "Hybrid name"
   },
   "rerun_request_btn": {
-    "jp": "AI再調査をリクエスト",
-    "en": "Request AI re-research"
+    "jp": "再調査を依頼",
+    "en": "Request a re-check"
   },
   "rerun_title": {
     "jp": "AI再調査をリクエスト",
@@ -1779,5 +1779,81 @@
   "formula_disputed": {
     "jp": "交配式は係争中（複数の説があります）",
     "en": "Parentage disputed (more than one account)"
+  },
+  "detail_share": {
+    "jp": "共有",
+    "en": "Share"
+  },
+  "detail_add_photo": {
+    "jp": "写真を追加",
+    "en": "Add a photo"
+  },
+  "detail_add_record": {
+    "jp": "記録を追加",
+    "en": "Add a record"
+  },
+  "detail_add_individual": {
+    "jp": "個体を追加",
+    "en": "Add an individual"
+  },
+  "detail_edit": {
+    "jp": "編集",
+    "en": "Edit"
+  },
+  "detail_report": {
+    "jp": "報告",
+    "en": "Report"
+  },
+  "record_add_link": {
+    "jp": "この台紙に書き足す →",
+    "en": "Write on this sheet →"
+  },
+  "record_add_details": {
+    "jp": "項目を分けて書く（記載者 · 年 · 産地 · 交配式）",
+    "en": "Fill in fields instead (author · year · locality · parentage)"
+  },
+  "record_body_label": {
+    "jp": "記録の本文",
+    "en": "The record"
+  },
+  "plate_empty": {
+    "jp": "図版未収録",
+    "en": "No plate yet"
+  },
+  "plate_empty_note": {
+    "jp": "栽培者本人の写真を1枚。撮影者名を添えて。",
+    "en": "One photo by the grower, with the photographer named."
+  },
+  "plate_empty_cta": {
+    "jp": "写真を追加する →",
+    "en": "Add a photo →"
+  },
+  "related_exit_ledger": {
+    "jp": "{genus} の台帳 →",
+    "en": "{genus} ledger →"
+  },
+  "related_exit_timeline": {
+    "jp": "記載史年表 →",
+    "en": "Timeline of descriptions →"
+  },
+  "related_exit_locality": {
+    "jp": "同じ産地 {country} →",
+    "en": "Same locality: {country} →"
+  },
+  "colophon_recorded": {
+    "jp": "収録",
+    "en": "Recorded"
+  },
+  "colophon_records": {
+    "jp": "記録 {n} 件",
+    "en": "{n} records"
+  },
+  "colophon_updated": {
+    "jp": "更新",
+    "en": "Updated"
+  },
+  "colophon_poster": {
+    "jp": "投稿",
+    "en": "Posted by"
   }
 }

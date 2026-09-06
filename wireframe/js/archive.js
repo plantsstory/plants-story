@@ -505,6 +505,18 @@
     var note = d.nameStatus === 'disputed' ? T('name_status_disputed') : d.nameStatus === 'trade' ? T('name_status_trade') : d.nameStatus === 'informal' ? T('name_status_informal') : '';
     el.innerHTML = (cells ? '<div class="specimen">' + cells + '</div>' : '') + (note ? '<p class="specimen__note mono">' + esc(note) + '</p>' : '');
   }
+  /* colophon line at the foot of the sheet: 収録 · 記録 n 件 · 更新 · 投稿 */
+  function renderColophonLine(d, entry) {
+    var el = document.getElementById('detail-colophon');
+    if (!el) return;
+    var parts = [];
+    if (d.createdAt) parts.push(esc(T('colophon_recorded')) + ' ' + esc(fmtDate(d.createdAt)));
+    var n = window.RecordGate ? window.RecordGate.visibleCount({ origins: entry.origins || [] }) : (entry.origins || []).length;
+    parts.push(esc(T('colophon_records').replace('{n}', n)));
+    if (entry._updatedAt && fmtDate(entry._updatedAt) !== fmtDate(d.createdAt || '')) parts.push(esc(T('colophon_updated')) + ' ' + esc(fmtDate(entry._updatedAt)));
+    if (entry._posterName && entry._userId) parts.push(esc(T('colophon_poster')) + ' <a href="' + esc(base + 'profile/' + entry._userId) + '" data-nav="profile" data-userid="' + esc(entry._userId) + '">' + esc(entry._posterName) + '</a>');
+    el.innerHTML = parts.join('<span class="detail-colophon__sep">·</span>');
+  }
   /* record gate on the detail page: a sheet naming what is missing, and noindex until it is recorded */
   function renderGateNote(d) {
     var el = document.getElementById('record-gate');
@@ -538,8 +550,15 @@
     var el = document.getElementById('individuals-container');
     var count = document.getElementById('individuals-count');
     if (!section || !el) return;
-    if (d.type !== 'species' || d.isIndividual) { section.classList.add('d-none'); return; }
+    var addLink = document.getElementById('detail-add-individual');
+    var isSpeciesPage = d.type === 'species' && !d.isIndividual;
+    if (addLink) {
+      addLink.classList.toggle('d-none', !isSpeciesPage);
+      if (isSpeciesPage) { addLink.setAttribute('data-species-id', d.id || ''); addLink.setAttribute('data-species-name', d.displayName); addLink.setAttribute('data-genus', d.genus); addLink.setAttribute('href', base + 'contribute'); }
+    }
+    if (!isSpeciesPage) { section.classList.add('d-none'); return; }
     var list = individualsOf(d, all);
+    if (!list.length) { section.classList.add('d-none'); if (count) count.textContent = ''; return; }
     var html = '';
     if (list.length) {
       html += '<ul class="individuals__list">';
@@ -549,8 +568,6 @@
         html += '<li>' + link(x, esc(code)) + (meta ? '<span class="mono">' + esc(meta) + '</span>' : '') + '</li>';
       });
       html += '</ul>';
-    } else {
-      html += '<p class="individuals__empty mono">' + esc(T('individuals_empty')) + '</p>';
     }
     html += '<a href="' + esc(base + 'contribute') + '" class="individuals__add" data-nav="contribute" data-contribute-type="individual" data-species-id="' + esc(d.id || '') + '" data-species-name="' + esc(d.displayName) + '" data-genus="' + esc(d.genus) + '">' + esc(T('individuals_add')) + '</a>';
     if (count) count.textContent = list.length ? String(list.length) : '';
@@ -613,9 +630,14 @@
       if (next) html += link(next, '<span class="mono">' + esc(T('related_next')) + ' →</span><span class="related__nav-name">' + esc(next.displayName) + '</span>', 'related__nav--next');
       html += '</nav>';
     }
-    var any = parents.length || children.length || siblings.length || sameCountry.length || samePerson.length || prev || next;
-    el.innerHTML = any ? html : '';
-    section.classList.toggle('d-none', !any);
+    // exit line: back into the archive (ledger, timeline, same locality)
+    var exits = ['<a href="' + esc(base + d.genus.toLowerCase() + '/') + '" data-nav="genus" data-genus="' + esc(d.genus.toLowerCase()) + '">' + esc(T('related_exit_ledger').replace('{genus}', d.genus)) + '</a>',
+      '<a href="' + esc(base) + '" data-nav="top">' + esc(T('related_exit_timeline')) + '</a>'];
+    if (d.country) exits.push('<a href="' + esc(base + 'locality/' + encodeURIComponent(countrySlug(d.country))) + '" data-nav="locality" data-place="' + esc(countrySlug(d.country)) + '">' + esc(T('related_exit_locality').replace('{country}', d.country)) + '</a>');
+    html += '<p class="related__exit mono">' + exits.join('<span class="related__exit-sep">·</span>') + '</p>';
+    // the exit line alone is reason enough to show the section
+    el.innerHTML = html;
+    section.classList.remove('d-none');
   }
   /* lineage tree: parents (with their own parents when known) → this plant → offspring */
   function lineageNode(all, name, extraClass) {
@@ -823,6 +845,7 @@
     renderRelated(d, all);
     renderIndividuals(d, all);
     renderGateNote(d);
+    renderColophonLine(d, entry);
     if (window.refreshRerunButton) window.refreshRerunButton(entry);
     if (window.refreshPrivateButton) window.refreshPrivateButton(entry);
     var pnote = document.getElementById("detail-private-note");

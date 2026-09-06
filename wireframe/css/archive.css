@@ -872,3 +872,27 @@ dialog.dialog-clean { margin: auto; }
 .specimen__flag { display: block; margin-top: 4px; font-size: 0.62rem; letter-spacing: 0.08em; color: var(--color-accent-warm); }
 .people__abbr { font-size: 0.62rem; margin-left: 6px; color: var(--color-mid); }
 .people__note { color: var(--color-mid); max-width: 64ch; margin: calc(-1 * var(--space-sm)) 0 var(--space-lg); line-height: 1.8; }
+
+/* ---------- T27a: detail page reading order ---------- */
+.detail-standard { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-mid); margin: 0 0 6px; }
+.detail-badges { display: none !important; }
+.detail-head { margin-bottom: var(--space-md); }
+.detail-actions { margin: var(--space-md) 0 var(--space-lg); }
+#page-cultivar .affiliate-section { display: none; } /* until T34 limits it to species with habitat context */
+.plate-policy { font-size: 0.64rem; letter-spacing: 0.08em; color: var(--color-mid); margin: var(--space-sm) 0 0; }
+.sheet--plate { padding: var(--space-lg); text-align: left; }
+.gallery__empty { background: transparent; border: 0; padding: 0; }
+.record-add { background: none; border: 0; border-bottom: 1px solid var(--color-ink); padding: 8px 0; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-ink); cursor: pointer; min-height: 36px; }
+.record-add:hover { color: var(--color-green); border-color: var(--color-green); }
+#add-origin-section { border-top: 1px solid var(--color-rule); padding-top: var(--space-sm); }
+.record-add__details { margin: var(--space-md) 0; }
+.record-add__details > summary { cursor: pointer; list-style: none; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-mid); padding: 6px 0; border-bottom: 1px dotted var(--color-rule); }
+.record-add__details > summary::-webkit-details-marker { display: none; }
+.record-add__details[open] > summary { color: var(--color-ink); margin-bottom: var(--space-md); }
+.related__exit { margin-top: var(--space-lg); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-mid); display: flex; flex-wrap: wrap; gap: 6px 10px; }
+.related__exit a { color: var(--color-ink); text-decoration: none; border-bottom: 1px solid var(--color-rule); }
+.related__exit a:hover { color: var(--color-green); border-color: var(--color-green); }
+.related__exit-sep { color: var(--color-rule-strong); }
+.detail-colophon { margin-top: var(--space-2xl); padding-top: var(--space-sm); border-top: 1px solid var(--color-ink); font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-mid); }
+.detail-colophon a { color: var(--color-ink); text-decoration: none; text-transform: none; letter-spacing: 0.04em; }
+.detail-colophon__sep { margin: 0 8px; color: var(--color-rule-strong); }
