@@ -33,3 +33,6 @@ wireframe/locality/
 wireframe/glossary/
 wireframe/tokushoho/
 wireframe/pricing/
+
+# Share cards (rendered in CI by scripts/make-og-cards.js)
+wireframe/images/og/

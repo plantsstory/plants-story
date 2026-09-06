@@ -15,6 +15,7 @@ const path = require('path');
 const people = require('./lib/people');
 const geo = require('./lib/geo');
 const RecordGate = require('../wireframe/js/record-gate');
+const { ogSlug } = require('./lib/og-slug');
 
 const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
@@ -218,11 +219,8 @@ async function main() {
     const desc = RecordGate.state(c) !== 'ok'
       ? c.cultivar_name + ' — 記録なし · 出典募集中 | Aroid Origins'
       : (originDescription(c.origins) || (c.cultivar_name + ' の由来・来歴・交配情報。学術データベースとコミュニティ投票で信頼度を検証しています。'));
-    // Storage paths may contain spaces/quotes — encode each path segment for a valid og:image URL
-    const img = imageMap[c.cultivar_name]
-      ? SUPABASE_URL + '/storage/v1/object/public/gallery-images/' +
-        String(imageMap[c.cultivar_name]).split('/').map(encodeURIComponent).join('/')
-      : null;
+    // Share card rendered by scripts/make-og-cards.js (every public cultivar has one); raw photos are never the og:image
+    const img = SITE + '/images/og/' + ogSlug(genus, c.cultivar_name) + '.png';
 
     const html = buildStub(template, {
       noindex: RecordGate.state(c) !== 'ok',
