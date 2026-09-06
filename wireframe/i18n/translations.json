@@ -1551,5 +1551,45 @@
   "mast_lang": {
     "jp": "ENGLISH",
     "en": "日本語"
+  },
+  "genus_request_link": {
+    "jp": "属の追加を依頼 →",
+    "en": "Request another genus →"
+  },
+  "genus_request_link_form": {
+    "jp": "収録されていない属は、追加を依頼できます →",
+    "en": "Missing a genus? Ask for it →"
+  },
+  "genus_request_title": {
+    "jp": "属の追加を依頼",
+    "en": "Request a genus"
+  },
+  "genus_request_desc": {
+    "jp": "いまは Anthurium だけを収録しています。依頼が集まった属から順に、同じ基準（記載者・年・タイプ産地・出典）で追加します。ログインは不要です。",
+    "en": "The archive currently covers Anthurium only. Genera are added in order of demand, to the same standard (author, year, type locality, sources). No login needed."
+  },
+  "genus_request_genus_label": {
+    "jp": "属名（ラテン語）",
+    "en": "Genus (Latin name)"
+  },
+  "genus_request_submit": {
+    "jp": "依頼を送る",
+    "en": "Send request"
+  },
+  "genus_request_sent": {
+    "jp": "{genus} の追加依頼を受け付けました（{n} 件目）。依頼が集まった属から追加します。",
+    "en": "Request for {genus} received ({n} so far). Genera are added as demand builds."
+  },
+  "genus_request_exists": {
+    "jp": "その属はすでに収録しています。",
+    "en": "That genus is already in the archive."
+  },
+  "genus_request_duplicate": {
+    "jp": "この属はすでに依頼済みです。",
+    "en": "You have already requested this genus."
+  },
+  "genus_request_invalid": {
+    "jp": "属名はアルファベットで入力してください（例: Monstera）。",
+    "en": "Enter the genus in Latin letters (e.g. Monstera)."
   }
 }

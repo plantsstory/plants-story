@@ -246,6 +246,8 @@
     (window._generaData || []).forEach(function (g) {
       html += '<a href="' + esc(base + g.slug + '/') + '" data-nav="genus" data-genus="' + esc(g.slug) + '">' + esc(g.name) + ' · ' + (counts[g.slug] || 0) + ' ' + esc(T('entries_unit')) + '</a>';
     });
+    // The archive grows by demand: one mono link to ask for another genus
+    html += '<a href="#" class="genus-request-link" data-i18n="genus_request_link">' + esc(T('genus_request_link')) + '</a>';
     el.innerHTML = html;
     var allLink = document.getElementById('ledger-all-link');
     if (allLink && window._generaData && window._generaData[0]) {
@@ -989,6 +991,47 @@
   }
   // the dialog markup sits after this script tag, so wait for the DOM
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', rerunRequestsInit); else rerunRequestsInit();
+
+  /* ============================================================
+     GENUS REQUESTS: "add this genus" — no login needed, demand decides
+     ============================================================ */
+  function genusRequestsInit() {
+    var dlg = document.getElementById('genus-request-dialog');
+    if (!dlg) return;
+    var genusIn = document.getElementById('genus-request-genus'), noteIn = document.getElementById('genus-request-note');
+    var submit = document.getElementById('genus-request-submit'), cancel = document.getElementById('genus-request-cancel');
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('.genus-request-link');
+      if (!a) return;
+      e.preventDefault();
+      genusIn.value = ''; noteIn.value = '';
+      dlg.showModal();
+      setTimeout(function () { genusIn.focus(); }, 50);
+    });
+    cancel.addEventListener('click', function () { dlg.close(); });
+    function send() {
+      var sb = window._supabaseClient;
+      var g = genusIn.value.trim();
+      if (!sb) return;
+      if (!/^[A-Za-z]{3,40}$/.test(g)) { showToast(T('genus_request_invalid'), true); genusIn.focus(); return; }
+      submit.disabled = true;
+      sb.rpc('request_genus', { p_genus: g, p_note: noteIn.value.trim() || null }).then(function (res) {
+        submit.disabled = false;
+        var r = res.data;
+        if (res.error || !r || !r.success) {
+          var code = (r && r.error) || 'error';
+          var msg = code === 'already_visible' ? T('genus_request_exists') : code === 'duplicate' ? T('genus_request_duplicate') : code === 'invalid_genus' ? T('genus_request_invalid') : (res.error ? res.error.message : T('genus_request_invalid'));
+          showToast(msg, true); return;
+        }
+        dlg.close();
+        showToast(T('genus_request_sent').replace('{genus}', r.genus).replace('{n}', r.count));
+        if (typeof gtag === 'function') gtag('event', 'genus_request', { genus: r.genus });
+      });
+    }
+    submit.addEventListener('click', send);
+    genusIn.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); send(); } });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', genusRequestsInit); else genusRequestsInit();
 
   /* ============================================================
      PRIVATE SEEDLINGS: owner-only records

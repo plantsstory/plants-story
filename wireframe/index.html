@@ -14,7 +14,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.yahoo.co.jp; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJK72JH471"></script>
-  <script src="js/gtag-init.js?v=20260906f"></script>
+  <script src="js/gtag-init.js?v=20260906g"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -55,13 +55,13 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20260906f">
-  <link rel="stylesheet" href="css/reset.css?v=20260906f">
-  <link rel="stylesheet" href="css/layout.css?v=20260906f">
-  <link rel="stylesheet" href="css/components.css?v=20260906f">
-  <link rel="stylesheet" href="css/pages.css?v=20260906f">
-  <link rel="stylesheet" href="css/utilities.css?v=20260906f">
-  <link rel="stylesheet" href="css/archive.css?v=20260906f">
+  <link rel="stylesheet" href="css/variables.css?v=20260906g">
+  <link rel="stylesheet" href="css/reset.css?v=20260906g">
+  <link rel="stylesheet" href="css/layout.css?v=20260906g">
+  <link rel="stylesheet" href="css/components.css?v=20260906g">
+  <link rel="stylesheet" href="css/pages.css?v=20260906g">
+  <link rel="stylesheet" href="css/utilities.css?v=20260906g">
+  <link rel="stylesheet" href="css/archive.css?v=20260906g">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -449,6 +449,7 @@
           <select class="form-select" id="contribute-genus-select">
             <option value="" disabled selected data-i18n="select_genus_placeholder">-- 選択してください --</option>
           </select>
+          <p class="text-xs mt-xs"><a href="#" class="genus-request-link mono" data-i18n="genus_request_link_form">収録されていない属は、追加を依頼できます →</a></p>
         </div>
 
         <div class="form-group name-builder" id="name-builder">
@@ -1535,10 +1536,10 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/app-core.js?v=20260906f"></script>
-  <script src="js/pages.js?v=20260906f"></script>
-  <script src="js/forms.js?v=20260906f"></script>
-  <script src="js/archive.js?v=20260906f"></script>
+  <script src="js/app-core.js?v=20260906g"></script>
+  <script src="js/pages.js?v=20260906g"></script>
+  <script src="js/forms.js?v=20260906g"></script>
+  <script src="js/archive.js?v=20260906g"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1548,7 +1549,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20260906f"></script>
+  <script src="js/dialogs.js?v=20260906g"></script>
 
   <!-- AI re-research request dialog -->
   <dialog id="research-request-dialog" class="dialog-clean" aria-labelledby="research-request-title">
@@ -1559,6 +1560,19 @@
     <div class="dialog-actions">
       <button class="btn btn--secondary btn--sm" id="research-request-cancel" data-i18n="btn_cancel">キャンセル</button>
       <button class="btn btn--sm btn--primary" id="research-request-submit" data-i18n="rerun_submit">リクエストを送る</button>
+    </div>
+  </dialog>
+
+  <!-- Genus request dialog: the archive grows by demand -->
+  <dialog id="genus-request-dialog" class="dialog-clean" aria-labelledby="genus-request-title">
+    <h3 class="dialog-title" id="genus-request-title" data-i18n="genus_request_title">属の追加を依頼</h3>
+    <p class="text-sm" data-i18n="genus_request_desc">いまは Anthurium だけを収録しています。依頼が集まった属から順に、同じ基準（記載者・年・タイプ産地・出典）で追加します。ログインは不要です。</p>
+    <label class="form-label text-sm" for="genus-request-genus" data-i18n="genus_request_genus_label">属名（ラテン語）</label>
+    <input id="genus-request-genus" class="form-input" type="text" maxlength="40" placeholder="Monstera" autocomplete="off" spellcheck="false">
+    <textarea id="genus-request-note" placeholder="例: 'Thai Constellation' の由来を調べたい" rows="2" class="dialog-textarea mt-sm" maxlength="300"></textarea>
+    <div class="dialog-actions">
+      <button class="btn btn--secondary btn--sm" id="genus-request-cancel" data-i18n="btn_cancel">キャンセル</button>
+      <button class="btn btn--sm btn--primary" id="genus-request-submit" data-i18n="genus_request_submit">依頼を送る</button>
     </div>
   </dialog>
 
@@ -1574,6 +1588,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20260906f"></script>
+<script src="js/sw-register.js?v=20260906g"></script>
 </body>
 </html>

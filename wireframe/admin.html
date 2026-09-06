@@ -61,6 +61,7 @@
       <a href="#" data-section="images">画像管理</a>
       <a href="#" data-section="delete-requests">削除依頼</a>
       <a href="#" data-section="research-requests">再調査リクエスト <span id="rr-badge" class="d-none" style="background:#A8712E;color:#fff;border-radius:10px;padding:0 6px;font-size:0.7rem;"></span></a>
+      <a href="#" data-section="genus-requests">属の追加依頼</a>
       <a href="#" data-section="affiliates">アフィリエイト</a>
       <a href="#" data-section="users">ユーザー管理</a>
       <a href="#" data-section="bulk">一括操作</a>
@@ -281,6 +282,14 @@
         <p id="rr-empty" class="desc-text">受付中のリクエストはありません</p>
         <h3 class="text-base font-bold mt-lg">最近の処理済み</h3>
         <div id="rr-done-list" class="d-grid gap-md"></div>
+      </section>
+
+      <!-- ---- GENUS REQUESTS ---- -->
+      <section id="sec-genus-requests" class="hidden">
+        <h2 class="section-title">属の追加依頼</h2>
+        <p class="desc-text">来訪者からの「この属も収録してほしい」依頼です。件数が集まった属から、genera テーブルの is_visible を立てて公開します（非表示の Monstera / Philodendron / Platycerium はデータ修正を済ませてから）。</p>
+        <div id="gr-list" class="d-grid gap-md"></div>
+        <p id="gr-empty" class="desc-text">依頼はまだありません</p>
       </section>
 
       <!-- ---- AFFILIATES ---- -->
@@ -2224,6 +2233,7 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
     if (this.getAttribute('data-section') === 'images') loadImages();
     if (this.getAttribute('data-section') === 'delete-requests') loadDeletionRequests();
     if (this.getAttribute('data-section') === 'research-requests') loadResearchRequests();
+    if (this.getAttribute('data-section') === 'genus-requests') loadGenusRequests();
     if (this.getAttribute('data-section') === 'users') loadUsers();
   });
 });
@@ -2231,6 +2241,25 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
 // ========================================
 // AI Re-research Requests (owner approves; approval runs the research)
 // ========================================
+async function loadGenusRequests() {
+  var listEl = document.getElementById('gr-list'), emptyEl = document.getElementById('gr-empty');
+  var res = await sb.rpc('genus_request_summary');
+  if (res.error) { toast('依頼取得エラー: ' + res.error.message); return; }
+  var rows = res.data || [];
+  emptyEl.style.display = rows.length ? 'none' : '';
+  listEl.innerHTML = '';
+  rows.forEach(function(r) {
+    var c = document.createElement('div');
+    c.style.cssText = 'background:var(--color-white);border:1px solid var(--color-light);border-radius:var(--radius-md);padding:var(--space-md);';
+    var notes = (r.notes || []).map(function(n) { return '<li>' + escapeHtml(n) + '</li>'; }).join('');
+    c.innerHTML = '<div style="display:flex;justify-content:space-between;gap:var(--space-md);flex-wrap:wrap;align-items:baseline;">'
+      + '<div style="font-weight:600;font-size:1.05rem;">' + escapeHtml(r.genus) + ' <span style="font-size:0.8rem;color:var(--color-gray);">' + r.count + ' 件（ログイン ' + r.signed_in + '）</span></div>'
+      + '<div style="font-size:var(--font-size-xs);color:var(--color-gray);">最新 ' + new Date(r.last_at).toLocaleString('ja-JP') + '</div></div>'
+      + (notes ? '<ul style="margin:var(--space-sm) 0 0 var(--space-md);font-size:var(--font-size-sm);">' + notes + '</ul>' : '');
+    listEl.appendChild(c);
+  });
+}
+
 async function loadResearchRequests() {
   var listEl = document.getElementById('rr-list'), emptyEl = document.getElementById('rr-empty'), doneEl = document.getElementById('rr-done-list');
   var res = await sb.from('research_requests').select('*').order('created_at', { ascending: false }).limit(100);
