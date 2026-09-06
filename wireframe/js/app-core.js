@@ -1976,6 +1976,12 @@ if (false) {
     if (closeBtn) closeBtn.addEventListener('click', hidePaywallModal);
     if (planMonthly) planMonthly.addEventListener('click', function() { startCheckout('monthly'); });
     if (planAnnual) planAnnual.addEventListener('click', function() { startCheckout('annual'); });
+    // one flow: annual is the default radio, a single button continues
+    var planContinue = document.getElementById('plan-continue');
+    if (planContinue) planContinue.addEventListener('click', function() {
+      var r = document.querySelector('input[name="member-plan"]:checked');
+      startCheckout(r ? r.value : 'annual');
+    });
   })();
 
   // Delegated click handler for dynamically rendered paywall CTA buttons

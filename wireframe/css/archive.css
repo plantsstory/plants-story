@@ -885,3 +885,12 @@ dialog.dialog-clean { margin: auto; }
 .share-band__btn { background: none; border: 0; border-bottom: 1px solid var(--color-ink); padding: 6px 0; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink); cursor: pointer; text-decoration: none; min-height: 32px; }
 .share-band__btn:hover { color: var(--color-green); border-color: var(--color-green); }
 .share-band__close { margin-left: auto; background: none; border: 0; color: var(--color-mid); font-size: 1rem; cursor: pointer; }
+
+/* member plan (T30): radio plan picker */
+.paywall-modal__benefits { text-align: left; margin: 0 0 var(--space-md); }
+.paywall-modal__plans--radio { display: flex; flex-direction: column; gap: 10px; }
+.plan-radio { display: flex; align-items: baseline; gap: 10px; padding: 10px 12px; border: 1px solid var(--color-rule); border-radius: 2px; cursor: pointer; }
+.plan-radio:has(input:checked) { border-color: var(--color-ink); }
+.plan-radio__name { font-weight: 600; }
+.plan-radio__price { font-family: var(--font-display); font-size: 1.1rem; }
+.plan-radio__note { font-size: 0.62rem; color: var(--color-mid); margin-left: auto; }

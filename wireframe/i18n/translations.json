@@ -809,8 +809,8 @@
     "en": "Price"
   },
   "tokushoho_price_value": {
-    "jp": "月額プラン: 240円（税込）／ 年額プラン: 2,500円（税込）",
-    "en": "Monthly plan: ¥240 (tax included) / Annual plan: ¥2,500 (tax included)"
+    "jp": "会員（メンバー）: 年額 5,000円（税込）／ 月額 500円（税込）。詳細は<a href=\"#\" data-nav=\"pricing\">料金とサービス内容</a>をご覧ください。",
+    "en": "Membership: ¥5,000/year or ¥500/month (tax included). See <a href=\"#\" data-nav=\"pricing\">Pricing</a>."
   },
   "tokushoho_payment_label": {
     "jp": "支払方法",
@@ -1049,12 +1049,22 @@
     "en": " posts"
   },
   "about_plan_desc": {
-    "jp": "品種情報・実生の閲覧・検索はすべて無料でご利用いただけます。実生（My Seedlings）の投稿は5件まで無料で、有料プラン（サブスクリプション）にご登録いただくと以下をご利用いただけます。",
-    "en": "Browsing and searching cultivar and seedling information is completely free. Posting seedlings (My Seedlings) is free up to 5 entries; a paid subscription unlocks the following."
+    "jp": "品種情報・実生の閲覧・検索はすべて無料です。実生ノートの投稿は5件まで無料で、6件目以降と次の特典は会員（年額 5,000円・月額 500円）で使えます。会費は出典調査と収録の拡充に使います。",
+    "en": "Reading and searching are free. Seedling notes are free up to five; beyond that, and for the benefits below, there is a membership (¥5,000/year or ¥500/month). Fees fund source research and new entries."
   },
   "about_plan_features": {
-    "jp": "My Seedlings：実生（交配）記録の無制限投稿\nコレクションアーカイブとしての継続的な記録・編集",
-    "en": "My Seedlings: unlimited posting of seedling (cross) records\nOngoing recording and editing as your collection archive"
+    "jp": [
+      "実生ノートの上限解除（非公開も無制限）",
+      "標本ラベルの印刷",
+      "会員一覧への掲載（希望者）",
+      "再調査依頼の優先判定（48時間以内）"
+    ],
+    "en": [
+      "Unlimited seedling notes (private ones too)",
+      "Specimen label printing",
+      "Listing among members (optional)",
+      "Priority on re-check requests (within 48 hours)"
+    ]
   },
   "hero_desc": {
     "jp": "誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。",
@@ -1811,5 +1821,13 @@
   "share_band_copied": {
     "jp": "共有文をコピーしました",
     "en": "Share text copied"
+  },
+  "about_plan_pricing": {
+    "jp": "年額 5,000円（税込）／ 月額 500円（税込）<br>お支払いはクレジットカード・デビットカード（決済代行: Stripe）。",
+    "en": "¥5,000/year or ¥500/month (tax included)<br>Credit or debit card via Stripe."
+  },
+  "terms_9a_body": {
+    "jp": "本サービスの一部機能（実生ノートの6件目以降の投稿、標本ラベルの印刷、会員一覧への掲載、再調査依頼の優先判定）は、有料の会員契約が必要です。",
+    "en": "Some features (seedling notes beyond five, label printing, the members list, priority re-check requests) require a paid membership."
   }
 }
