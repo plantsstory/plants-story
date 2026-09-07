@@ -1811,5 +1811,21 @@
   "share_band_copied": {
     "jp": "共有文をコピーしました",
     "en": "Share text copied"
+  },
+  "textsize_label": {
+    "jp": "文字サイズ",
+    "en": "Text size"
+  },
+  "textsize_normal": {
+    "jp": "標準",
+    "en": "Normal"
+  },
+  "textsize_large": {
+    "jp": "大",
+    "en": "Large"
+  },
+  "textsize_xlarge": {
+    "jp": "特大",
+    "en": "Extra large"
   }
 }
