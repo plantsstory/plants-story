@@ -1262,6 +1262,12 @@ function updateCultivarDetail(cultivarName, rowEl) {
   }
   detailPage.setAttribute('data-cultivar-id', _cId);
   detailPage.setAttribute('data-cultivar-dbname', _cDbName || cultivarName);
+  // mono standard line: GENUS · 区分 · NO. 013 (the badge row under the title is retired)
+  var stdEl = document.getElementById('detail-standard');
+  if (stdEl) {
+    var _isInd = cData && cData._tags && cData._tags.indexOf('individual') !== -1;
+    stdEl.textContent = genusName.toUpperCase() + ' · ' + (_isInd ? t('type_individual') : (bi ? bi.txt : '')) + (_cId ? ' · NO. ' + String(_cId).padStart(3, '0') : '');
+  }
   if (createdAtEl && cData && cData._created_at) {
     var d = new Date(cData._created_at);
     createdAtEl.textContent = d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
