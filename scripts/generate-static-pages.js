@@ -15,6 +15,7 @@ const path = require('path');
 const people = require('./lib/people');
 const geo = require('./lib/geo');
 const RecordGate = require('../wireframe/js/record-gate');
+const ToolGate = require('../wireframe/js/tool-gate');
 const { ogSlug } = require('./lib/og-slug');
 
 const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
@@ -129,7 +130,7 @@ async function main() {
 
   // Generated directories only: clear them so renamed or removed entries leave no stale stub behind
   for (const g of genera) { if (safeDirName(g.slug)) fs.rmSync(path.join(WIREFRAME, g.slug), { recursive: true, force: true }); }
-  for (const d of ['people', 'locality']) fs.rmSync(path.join(WIREFRAME, d), { recursive: true, force: true });
+  for (const d of ['people', 'locality', 'tools']) fs.rmSync(path.join(WIREFRAME, d), { recursive: true, force: true });
 
   const countByGenus = {};
   for (const c of publicCultivars) {
@@ -352,6 +353,51 @@ async function main() {
     fs.writeFileSync(path.join(WIREFRAME, 'locality', dir, 'index.html'), ph, 'utf8');
     written++;
   }
+
+  // ---- Tools catalogue (/tools/ and /tools/<slug>/) — noindex until the catalogue opens (BOARD 第5回) ----
+  const toolRows = await fetchJSON('/rest/v1/affiliates?select=id,slug,genre,product_name,maker,model,price_band,summary,body,rakuten,yahoo,amazon,is_published&is_published=eq.true&order=sort_order');
+  const toolGenres = await fetchJSON('/rest/v1/tool_genres?select=slug,label&order=sort_order');
+  const tools = (Array.isArray(toolRows) ? toolRows : []).filter(t => t.slug && t.genre);
+  const genreLabel = {};
+  for (const g of (Array.isArray(toolGenres) ? toolGenres : [])) genreLabel[g.slug] = g.label;
+  const catalogueOpen = ToolGate.catalogueOpen(tools);
+  const toolsUrl = SITE + '/tools/';
+  const toolLead = '自生地の条件（雲霧林・着生・標高）に近づけるための道具を、使った記録とともに並べる目録。育て方は書きません。';
+  let th = buildStub(template, {
+    title: '道具の目録 — アロイドの自生地環境に近づける道具 | Aroid Origins',
+    description: toolLead,
+    url: toolsUrl,
+    noindex: !catalogueOpen,
+    jsonLd: [{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': [
+      { '@type': 'ListItem', 'position': 1, 'name': 'Aroid Origins', 'item': SITE + '/' },
+      { '@type': 'ListItem', 'position': 2, 'name': '道具の目録', 'item': toolsUrl } ] },
+      { '@context': 'https://schema.org', '@type': 'ItemList', 'name': '道具の目録', 'itemListElement': tools.map((t, i) => ({ '@type': 'ListItem', 'position': i + 1, 'name': t.product_name, 'url': toolsUrl + encodeURIComponent(t.slug) + '/' })) }]
+  });
+  th = th.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="tools"><ul>' + tools.map(t => '<li><a href="' + toolsUrl + encodeURIComponent(t.slug) + '/">' + escAttr(t.product_name) + '</a></li>').join('') + '</ul></nav>');
+  fs.mkdirSync(path.join(WIREFRAME, 'tools'), { recursive: true });
+  fs.writeFileSync(path.join(WIREFRAME, 'tools', 'index.html'), th, 'utf8');
+  written++;
+  for (const t of tools) {
+    const dir = safeDirName(t.slug);
+    if (!dir) { skipped++; continue; }
+    const url = toolsUrl + encodeURIComponent(t.slug) + '/';
+    const g = genreLabel[t.genre] || t.genre;
+    const desc = t.summary || String(t.body || '').replace(/\s+/g, ' ').slice(0, 110) || (t.product_name + '（' + g + '）。' + toolLead);
+    const ph = buildStub(template, {
+      title: t.product_name + ' — ' + g + ' · 道具の目録 | Aroid Origins',
+      description: desc,
+      url: url,
+      noindex: !(catalogueOpen && ToolGate.gate(t).pass),
+      jsonLd: [{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': [
+        { '@type': 'ListItem', 'position': 1, 'name': 'Aroid Origins', 'item': SITE + '/' },
+        { '@type': 'ListItem', 'position': 2, 'name': '道具の目録', 'item': toolsUrl },
+        { '@type': 'ListItem', 'position': 3, 'name': t.product_name, 'item': url } ] }]
+    });
+    fs.mkdirSync(path.join(WIREFRAME, 'tools', dir), { recursive: true });
+    fs.writeFileSync(path.join(WIREFRAME, 'tools', dir, 'index.html'), ph, 'utf8');
+    written++;
+  }
+  console.log('Tools: ' + tools.length + ' stubs, catalogue ' + (catalogueOpen ? 'open' : 'closed (noindex)'));
 
   console.log('Generated ' + written + ' static stub pages (' + skipped + ' skipped)');
 }

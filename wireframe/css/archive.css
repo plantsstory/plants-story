@@ -935,3 +935,43 @@ html[data-textsize="xlarge"] .masthead__title { font-size: clamp(3.4rem, 9vw, 6.
 .detail-colophon { margin-top: var(--space-2xl); padding-top: var(--space-sm); border-top: 1px solid var(--color-ink); font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-mid); }
 .detail-colophon a { color: var(--color-ink); text-decoration: none; text-transform: none; letter-spacing: 0.04em; }
 .detail-colophon__sep { margin: 0 8px; color: var(--color-rule-strong); }
+
+/* ---------- T46: tools catalogue (/tools/) ---------- */
+.tools-lead { font-family: var(--font-display); font-size: 1.05rem; line-height: 1.7; color: var(--color-ink); max-width: 40em; margin: 0 0 var(--space-sm); }
+.pr-line { font-size: 0.64rem; line-height: 1.7; letter-spacing: 0.04em; color: var(--color-mid); border-top: 1px solid var(--color-rule); padding-top: 6px; margin: 0 0 var(--space-lg); max-width: 64em; }
+.tools-index { margin-bottom: var(--space-lg); }
+.tools-index__code { display: inline-block; min-width: 5.6em; font-size: 0.6rem; letter-spacing: 0.1em; color: var(--color-mid); }
+.tools-index .index__item.is-current .index__name { text-decoration: underline; text-underline-offset: 3px; }
+.tools-index .index__item.is-current .tools-index__code { color: var(--color-green); }
+.tools-sortbar { margin-bottom: var(--space-md); }
+.tools-ledger__name { color: var(--color-ink); text-decoration: none; }
+.tools-ledger__summary { font-size: var(--font-size-xs); color: var(--color-mid); margin-top: 2px; line-height: 1.5; }
+.ledger-table__genre { font-size: 0.6rem; letter-spacing: 0.1em; color: var(--color-mid); }
+.ledger-table__price { font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-accent-warm); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---------- T46: one tool (/tools/<slug>/) ---------- */
+.tool-cite { font-size: 0.72rem; letter-spacing: 0.06em; color: var(--color-mid); margin: calc(-1 * var(--space-sm)) 0 var(--space-md); }
+.tool-head { display: grid; gap: var(--space-lg); margin-bottom: var(--space-lg); }
+@media (min-width: 900px) { .tool-head { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; gap: var(--space-xl); } }
+.tool-plate { margin: 0; border: 1px solid var(--color-rule); background: var(--color-paper-2); aspect-ratio: 4 / 5; max-width: 340px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-md); position: relative; }
+.tool-plate a { display: flex; align-items: center; justify-content: center; width: 100%; flex: 1; min-height: 0; }
+.tool-plate img { max-width: 100%; max-height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+.tool-plate figcaption { position: absolute; left: 10px; bottom: 8px; font-size: 0.58rem; letter-spacing: 0.06em; color: var(--color-mid); }
+.tool-plate--none p { font-size: 0.64rem; letter-spacing: 0.1em; color: var(--color-mid); margin: 0; }
+@media (max-width: 899px) { .tool-plate { max-width: none; aspect-ratio: 4 / 3; } }
+.tool-section { margin-bottom: var(--space-lg); }
+.tool-body { font-size: var(--font-size-md); line-height: 1.9; max-width: 34em; }
+.tool-body p { margin: 0 0 1em; }
+.tool-species { font-size: 0.68rem; letter-spacing: 0.06em; color: var(--color-mid); margin: 0 0 var(--space-lg); }
+.tool-species span:first-child { text-transform: uppercase; letter-spacing: 0.1em; margin-right: 6px; }
+.tool-species a { color: var(--color-ink); text-decoration: none; border-bottom: 1px solid var(--color-rule); font-family: var(--font-display); font-size: 0.95rem; letter-spacing: 0; }
+.tool-buy { display: flex; flex-wrap: wrap; align-items: center; margin: 0 0 var(--space-lg); border-top: 1px solid var(--color-ink); border-bottom: 1px solid var(--color-rule); }
+.tool-buy a { font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.08em; color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; min-height: 44px; display: inline-flex; align-items: center; padding: 0 var(--space-md) 0 0; }
+.tool-buy a + a { border-left: 1px solid var(--color-rule); padding-left: var(--space-md); }
+.tool-buy a:hover { color: var(--color-green); }
+.tool-imp { position: absolute; width: 1px; height: 1px; border: 0; opacity: 0; }
+#page-tools .detail-colophon { margin-top: var(--space-lg); }
+/* a store thumbnail is small: the frame fits it instead of leaving an empty board */
+.tool-plate--store { aspect-ratio: auto; max-width: 260px; padding: var(--space-lg) var(--space-md) calc(var(--space-lg) + 14px); }
+@media (max-width: 899px) { .tool-plate--store { aspect-ratio: auto; max-width: none; } }
+@media (max-width: 899px) { .tools-index__code { display: block; min-width: 0; margin-bottom: 1px; } .tools-index .index__toggle { align-items: flex-end; } }

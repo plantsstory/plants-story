@@ -64,9 +64,21 @@
   function label(k) { return LABELS[k] || k; }
 
   function slugify(s) {
-    return clean(s).toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '')
+    return clean(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
   }
 
-  return { gate: gate, shops: shops, shopUrl: shopUrl, impUrl: impUrl, bannedIn: bannedIn, label: label, slugify: slugify, HABITATS: HABITATS, MIN_RECORD: MIN_RECORD };
+  /* The catalogue goes public (footer link, index, sitemap) only when it reads as a catalogue
+     and not before the week after the announcement (BOARD 第5回 C3・C10). */
+  var OPEN_FROM = '2026-10-24';
+  var OPEN_MIN_ITEMS = 12, OPEN_MIN_GENRES = 6;
+  function catalogueOpen(tools, now) {
+    var pub = (tools || []).filter(function (t) { return t && t.is_published !== false && clean(t.genre) && clean(t.slug); });
+    var genres = {};
+    pub.forEach(function (t) { genres[t.genre] = 1; });
+    var today = (now ? new Date(now) : new Date()).toISOString().slice(0, 10);
+    return today >= OPEN_FROM && pub.length >= OPEN_MIN_ITEMS && Object.keys(genres).length >= OPEN_MIN_GENRES;
+  }
+
+  return { catalogueOpen: catalogueOpen, OPEN_FROM: OPEN_FROM, gate: gate, shops: shops, shopUrl: shopUrl, impUrl: impUrl, bannedIn: bannedIn, label: label, slugify: slugify, HABITATS: HABITATS, MIN_RECORD: MIN_RECORD };
 });

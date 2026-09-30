@@ -30,6 +30,7 @@ wireframe/contact/
 # generated people stubs (CI)
 wireframe/people/
 wireframe/locality/
+wireframe/tools/
 wireframe/glossary/
 wireframe/tokushoho/
 wireframe/pricing/

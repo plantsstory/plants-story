@@ -94,6 +94,17 @@ async function main() {
     xml += `  <url>\n    <loc>${SITE}/locality/${encodeURIComponent(l.slug)}/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
   }
 
+  // Tools catalogue: only once it is open, and only the pages that pass the tool gate
+  const ToolGate = require('../wireframe/js/tool-gate');
+  const toolRows = await fetchJSON('/rest/v1/affiliates?select=slug,genre,product_name,maker,model,summary,body,rakuten,yahoo,amazon,is_published,updated_at&is_published=eq.true');
+  const tools = (Array.isArray(toolRows) ? toolRows : []).filter(t => t.slug && t.genre);
+  if (ToolGate.catalogueOpen(tools)) {
+    xml += `  <url>\n    <loc>${SITE}/tools/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
+    for (const t of tools.filter(t => ToolGate.gate(t).pass)) {
+      xml += `  <url>\n    <loc>${SITE}/tools/${encodeURIComponent(t.slug)}/</loc>\n    <lastmod>${String(t.updated_at || today).slice(0, 10)}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.4</priority>\n  </url>\n`;
+    }
+  }
+
   xml += '</urlset>\n';
 
   const outPath = path.join(__dirname, '..', 'wireframe', 'sitemap.xml');

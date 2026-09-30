@@ -1797,6 +1797,12 @@ document.addEventListener('click', function(e) {
       var placeSlug = navEl.getAttribute('data-place');
       if (placeSlug) navOptions.place = placeSlug;
     }
+    if (page === 'tools') {
+      var toolSlug = navEl.getAttribute('data-tool');
+      var toolGenre = navEl.getAttribute('data-genre');
+      if (toolSlug) navOptions.tool = toolSlug;
+      else if (toolGenre) navOptions.genre = toolGenre;
+    }
 
     if (page === 'profile') {
       var userid = navEl.getAttribute('data-userid');

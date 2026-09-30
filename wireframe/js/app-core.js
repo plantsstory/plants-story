@@ -563,6 +563,7 @@ function buildPath(page, options) {
   if (page === 'search' && options.q) return _basePath + 'search?q=' + encodeURIComponent(options.q);
   if (page === 'people') return _basePath + 'people' + (options.person ? '/' + encodeURIComponent(options.person) : '');
   if (page === 'locality') return _basePath + 'locality' + (options.place ? '/' + encodeURIComponent(options.place) : '');
+  if (page === 'tools') return _basePath + 'tools/' + (options.tool ? encodeURIComponent(options.tool) + '/' : (options.genre ? '?g=' + encodeURIComponent(options.genre) : ''));
   if (simplePages.indexOf(page) !== -1) return _basePath + page;
   return _basePath;
 }
@@ -615,6 +616,9 @@ function parseRoute() {
   if (first === 'locality') {
     return segments[1] ? { page: 'locality', place: segments[1] } : { page: 'locality' };
   }
+  if (first === 'tools') {
+    return segments[1] ? { page: 'tools', tool: segments[1] } : { page: 'tools', genre: new URLSearchParams(location.search).get('g') || '' };
+  }
 
   // Check simple pages
   if (first === 'search') {
@@ -640,6 +644,7 @@ function navigateTo(page, options, pushHistory) {
   if (page === 'contribute' && !options.individual && typeof window.setIndividualMode === 'function') window.setIndividualMode(null);
   if (page === 'people' && typeof window.renderPeoplePage === 'function') window.renderPeoplePage(options.person || '');
   if (page === 'locality' && typeof window.renderLocalityPage === 'function') window.renderLocalityPage(options.place || '');
+  if (page === 'tools' && typeof window.renderToolsPage === 'function') window.renderToolsPage(options.tool || '', options.genre || '');
   if (page === 'genus' && options.genus) showGenus(options.genus);
   if (page === 'cultivar' && options.cultivar && !options._skipUpdate) {
     // Find the cultivar row to pass badge info (used by popstate)
@@ -689,6 +694,7 @@ function navigateTo(page, options, pushHistory) {
       mypost: '投稿履歴 - ' + _defaultTitle,
       people: '人物索引 - ' + _defaultTitle,
       locality: '産地索引 - ' + _defaultTitle,
+      tools: '道具の目録 - ' + _defaultTitle,
       glossary: '由来の用語集 - ' + _defaultTitle,
       pricing: '料金とサービス内容 - ' + _defaultTitle,
       'profile-edit': 'プロフィール編集 - ' + _defaultTitle
@@ -755,7 +761,7 @@ function navigateTo(page, options, pushHistory) {
     history.replaceState(currentState, '');
 
     var routePath = buildPath(page, options);
-    history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar, userId: options.userId, username: options.username, q: options.q, person: options.person, place: options.place }, '', routePath);
+    history.pushState({ page: page, genus: options.genus, cultivar: options.cultivar, userId: options.userId, username: options.username, q: options.q, person: options.person, place: options.place, tool: options.tool, genre: options.genre }, '', routePath);
     // Send GA4 page view for SPA navigation
     if (typeof gtag === 'function') {
       gtag('event', 'page_view', { page_location: location.href, page_title: document.title });
@@ -804,7 +810,7 @@ function handleInitialRoute() {
     navigateTo(state.page, state, false);
   }
   // Record initial state so back button works from first navigation
-  history.replaceState({ page: state.page, genus: state.genus, cultivar: state.cultivar, userId: state.userId, q: state.q, person: state.person, place: state.place }, '', buildPath(state.page, state));
+  history.replaceState({ page: state.page, genus: state.genus, cultivar: state.cultivar, userId: state.userId, q: state.q, person: state.person, place: state.place, tool: state.tool, genre: state.genre }, '', buildPath(state.page, state));
 }
 // Wait for genera to load before routing (genera create the DOM targets)
 if (window._generaLoaded) {
