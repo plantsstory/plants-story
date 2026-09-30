@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob:; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co; object-src 'none'; base-uri 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://thumbnail.image.rakuten.co.jp https://hbb.afl.rakuten.co.jp https://i.moshimo.com data: blob:; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co; object-src 'none'; base-uri 'self';">
   <title>Aroid Origins - Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +14,8 @@
   <link rel="stylesheet" href="css/utilities.css">
   <link rel="stylesheet" href="css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/record-gate.js?v=20260907i"></script>
+  <script src="js/record-gate.js?v=20260930a"></script>
+  <script src="js/tool-gate.js?v=20260930a"></script>
 </head>
 <body>
 
@@ -64,7 +65,7 @@
       <a href="#" data-section="research-requests">再調査リクエスト <span id="rr-badge" class="d-none" style="background:#A8712E;color:#fff;border-radius:10px;padding:0 6px;font-size:0.7rem;"></span></a>
       <a href="#" data-section="genus-requests">属の追加依頼</a>
       <a href="#" data-section="gate">未収録一覧</a>
-      <a href="#" data-section="affiliates">アフィリエイト</a>
+      <a href="#" data-section="affiliates">道具（アフィリエイト）</a>
       <a href="#" data-section="users">ユーザー管理</a>
       <a href="#" data-section="bulk">一括操作</a>
       <a href="#" data-section="error-logs">エラーログ</a>
@@ -304,7 +305,7 @@
 
       <!-- ---- AFFILIATES ---- -->
       <section id="sec-affiliates" class="hidden">
-        <h2 class="section-title">アフィリエイト管理</h2>
+        <h2 class="section-title">道具の目録（アフィリエイト）</h2>
         <div class="toolbar">
           <button class="btn btn-primary" id="btn-add-affiliate">＋ 新規追加</button>
           <button class="btn btn-outline" id="btn-refresh-affiliates">更新</button>
@@ -2647,173 +2648,217 @@ document.getElementById('sec-delete-requests').addEventListener('click', async f
 // ========================================
 var allAffiliates = [];
 
+var allToolGenres = [];
+
 async function loadAffiliates() {
-  var result = await sb.from('affiliates').select('*').order('sort_order');
-  if (result.error) { toast('アフィリエイト取得エラー'); return; }
-  allAffiliates = result.data || [];
+  var results = await Promise.all([
+    sb.from('affiliates').select('*').order('sort_order'),
+    sb.from('tool_genres').select('*').order('sort_order')
+  ]);
+  if (results[0].error) { toast('道具の取得エラー'); return; }
+  allAffiliates = results[0].data || [];
+  allToolGenres = (results[1] && results[1].data) || [];
   renderAffiliateList();
 }
+
+function toolGenreOf(slug) { return allToolGenres.filter(function(g) { return g.slug === slug; })[0] || null; }
 
 function renderAffiliateList() {
   var container = document.getElementById('affiliate-list');
   if (!allAffiliates.length) {
-    container.innerHTML = '<p style="color:var(--color-gray);padding:var(--space-lg);text-align:center;">アフィリエイト商品がありません</p>';
+    container.innerHTML = '<p style="color:var(--color-gray);padding:var(--space-lg);text-align:center;">道具がありません</p>';
     return;
   }
-  var html = '';
+  var pub = allAffiliates.filter(function(a) { return a.is_published !== false; });
+  var passCount = pub.filter(function(a) { return ToolGate.gate(a).pass; }).length;
+  var genresUsed = {};
+  pub.forEach(function(a) { if (a.genre) genresUsed[a.genre] = (genresUsed[a.genre] || 0) + 1; });
+  var html = '<div class="stat-card" style="font-size:var(--font-size-sm);">'
+    + '公開中 <strong>' + pub.length + '</strong> 点 · 検索に出す条件を満たす <strong>' + passCount + '</strong> 点 · 2点以上あるジャンル <strong>' + Object.keys(genresUsed).filter(function(k) { return genresUsed[k] >= 2; }).length + '</strong>'
+    + '<br><span style="color:var(--color-gray);">目録の公開条件（ボード第5回）: 12点・6ジャンル以上。ジャンルの絞り込みは2点以上あるジャンルだけ並びます。検索窓は20点から出ます。</span></div>';
   allAffiliates.forEach(function(a) {
     var isPub = a.is_published !== false;
-    var cardBorder = isPub ? '' : 'opacity:0.6;';
-    html += '<div class="stat-card" style="' + cardBorder + '">';
-    // Top row: image + info
+    var g = toolGenreOf(a.genre);
+    var gate = ToolGate.gate(a);
+    html += '<div class="stat-card" style="' + (isPub ? '' : 'opacity:0.6;') + '">';
     html += '<div style="display:flex;gap:var(--space-md);align-items:flex-start;">';
-    if (a.image) {
-      html += '<img src="' + escapeHtml(a.image) + '" style="width:64px;height:64px;object-fit:contain;border-radius:var(--radius-sm);background:#f5f5f5;flex-shrink:0;" alt="">';
-    } else {
-      html += '<div style="width:64px;height:64px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:#f5f5f5;border-radius:var(--radius-sm);flex-shrink:0;">' + (a.icon || '🛒') + '</div>';
-    }
+    var img = a.image_own || a.image;
+    if (img) html += '<img src="' + escapeHtml(img) + '" style="width:64px;height:64px;object-fit:contain;background:#f5f5f5;flex-shrink:0;" alt="" referrerpolicy="no-referrer">';
+    else html += '<div style="width:64px;height:64px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#999;background:#f5f5f5;flex-shrink:0;">図版なし</div>';
     html += '<div style="flex:1;min-width:0;">';
+    html += '<div style="font-size:var(--font-size-xs);color:var(--color-gray);font-family:monospace;">' + escapeHtml(g ? g.code + ' · ' + g.label : 'ジャンル未設定') + (a.slug ? ' · /tools/' + escapeHtml(a.slug) + '/' : '') + '</div>';
     html += '<div style="font-weight:700;font-size:var(--font-size-md);word-break:break-word;">' + escapeHtml(a.product_name) + '</div>';
-    html += '<div style="font-size:var(--font-size-sm);color:var(--color-gray);margin-top:2px;">' + escapeHtml(a.name) + (a.name_en ? ' / ' + escapeHtml(a.name_en) : '') + ' ｜ 順序: ' + (a.sort_order || 0) + '</div>';
+    html += '<div style="font-size:var(--font-size-sm);color:var(--color-gray);margin-top:2px;">' + escapeHtml([a.maker, a.model, a.price_band].filter(Boolean).join(' · ') || '—') + ' ｜ 順序: ' + (a.sort_order || 0) + '</div>';
+    html += '<div style="font-size:var(--font-size-xs);margin-top:4px;color:' + (gate.pass ? '#2d5016' : '#a8712e') + ';">'
+      + (gate.pass ? '検索に出します（index）' : '検索には出しません（noindex）: ' + escapeHtml(gate.missing.map(ToolGate.label).join('、'))) + '</div>';
+    html += '</div></div>';
+    html += '<div style="display:flex;gap:var(--space-sm);margin-top:var(--space-sm);flex-wrap:wrap;font-size:var(--font-size-xs);">';
+    ['rakuten', 'yahoo', 'amazon'].forEach(function(shop) {
+      var raw = (a[shop] || '').trim();
+      if (!raw) return;
+      var ok = ToolGate.shopUrl(a, shop);
+      var name = { rakuten: '楽天', yahoo: 'Yahoo!', amazon: 'Amazon' }[shop];
+      html += '<a href="' + escapeHtml(raw) + '" target="_blank" rel="noopener" style="padding:2px 8px;border:1px solid ' + (ok ? '#1e2622' : '#a8712e') + ';color:' + (ok ? '#1e2622' : '#a8712e') + ';text-decoration:none;">' + name + ' ↗' + (ok ? '' : '（表示されません' + (shop === 'amazon' ? ': もしものリンクに貼り替え' : '') + '）') + '</a>';
+    });
+    html += '<span style="color:var(--color-gray);">リンク点検: ' + (a.last_checked_at ? escapeHtml(a.last_checked_at.slice(0, 10)) : '未') + '</span>';
     html += '</div>';
-    html += '</div>';
-    // Links row
-    html += '<div style="display:flex;gap:var(--space-sm);margin-top:var(--space-sm);flex-wrap:wrap;">';
-    if (a.amazon) html += '<a href="' + escapeHtml(a.amazon) + '" target="_blank" style="font-size:var(--font-size-xs);background:#FF9900;color:#fff;padding:2px 8px;border-radius:var(--radius-sm);text-decoration:none;">Amazon ↗</a>';
-    if (a.rakuten) html += '<a href="' + escapeHtml(a.rakuten) + '" target="_blank" style="font-size:var(--font-size-xs);background:#BF0000;color:#fff;padding:2px 8px;border-radius:var(--radius-sm);text-decoration:none;">楽天 ↗</a>';
-    if (a.yahoo) html += '<a href="' + escapeHtml(a.yahoo) + '" target="_blank" style="font-size:var(--font-size-xs);background:#FF0033;color:#fff;padding:2px 8px;border-radius:var(--radius-sm);text-decoration:none;">Yahoo! ↗</a>';
-    html += '</div>';
-    // Actions row
     html += '<div style="display:flex;gap:var(--space-xs);margin-top:var(--space-md);flex-wrap:wrap;align-items:center;">';
-    if (isPub) {
-      html += '<button class="btn btn-sm" style="background:#2d5016;color:#fff;font-size:var(--font-size-xs);padding:4px 12px;" onclick="toggleAffiliatePublish(' + a.id + ',true)">公開中</button>';
-    } else {
-      html += '<button class="btn btn-sm" style="background:#999;color:#fff;font-size:var(--font-size-xs);padding:4px 12px;" onclick="toggleAffiliatePublish(' + a.id + ',false)">非公開</button>';
-    }
+    html += '<button class="btn btn-sm" style="background:' + (isPub ? '#2d5016' : '#999') + ';color:#fff;font-size:var(--font-size-xs);padding:4px 12px;" onclick="toggleAffiliatePublish(' + a.id + ',' + isPub + ')">' + (isPub ? '公開中' : '非公開') + '</button>';
     html += '<button class="btn btn-outline btn-sm" onclick="editAffiliate(' + a.id + ')">編集</button>';
+    html += '<button class="btn btn-outline btn-sm" onclick="markAffiliateChecked(' + a.id + ')" title="リンク先で商品が売られていることを確かめたら押す">点検済みにする</button>';
     html += '<button class="btn btn-danger btn-sm" onclick="deleteAffiliate(' + a.id + ',\'' + escapeHtml(a.product_name).replace(/'/g, "\\'") + '\')">削除</button>';
-    html += '</div>';
-    html += '</div>';
+    html += '</div></div>';
   });
   container.innerHTML = html;
 }
 
+async function markAffiliateChecked(id) {
+  var result = await sb.from('affiliates').update({ last_checked_at: new Date().toISOString() }).eq('id', id);
+  if (result.error) { toast('更新エラー: ' + result.error.message); return; }
+  toast('点検日を記録しました');
+  loadAffiliates();
+}
+
+var PRICE_BANDS = ['〜1,000円', '1,000〜2,000円', '2,000〜3,000円', '3,000〜5,000円', '5,000〜10,000円', '10,000〜20,000円', '20,000円〜'];
+
 function showAffiliateForm(data) {
   data = data || {};
   var isEdit = !!data.id;
-  var title = isEdit ? 'アフィリエイト編集' : 'アフィリエイト新規追加';
-  var html = '<h3 style="margin-bottom:var(--space-md);">' + title + '</h3>';
+  var html = '<h3 style="margin-bottom:var(--space-md);">' + (isEdit ? '道具を編集' : '道具を追加') + '</h3>';
+  html += '<p style="font-size:var(--font-size-xs);color:var(--color-gray);margin-bottom:var(--space-md);">載せるのは実際に使っている物だけです。使用記録には「いつから・何に使っているか・粒の大きさや水の抜け・欠点」を書きます。用量・頻度・効能（＝育て方）と価格の数字は書きません。</p>';
   html += '<form id="affiliate-form" style="display:grid;gap:var(--space-sm);">';
   html += '<div class="adm-grid-2col-var">';
-  html += '<div><label class="adm-label">カテゴリ名（日本語）*</label><input class="form-input" name="name" value="' + escapeHtml(data.name || '') + '" required></div>';
-  html += '<div><label class="adm-label">カテゴリ名（英語）</label><input class="form-input" name="name_en" value="' + escapeHtml(data.name_en || '') + '"></div>';
+  html += '<div><label class="adm-label">ジャンル *</label><select class="form-input" name="genre" required><option value="">選択</option>'
+    + allToolGenres.map(function(g) { return '<option value="' + escapeHtml(g.slug) + '"' + (data.genre === g.slug ? ' selected' : '') + '>' + escapeHtml(g.code + ' — ' + g.label) + '</option>'; }).join('') + '</select></div>';
+  html += '<div><label class="adm-label">URL名（英小文字とハイフン） *</label><input class="form-input" name="slug" value="' + escapeHtml(data.slug || '') + '" placeholder="hyuga-soil-small-18l" pattern="[a-z0-9-]+"></div>';
   html += '</div>';
   html += '<div class="adm-grid-2col-var">';
-  html += '<div><label class="adm-label">商品名（日本語）*</label><input class="form-input" name="product_name" value="' + escapeHtml(data.product_name || '') + '" required></div>';
-  html += '<div><label class="adm-label">商品名（英語）</label><input class="form-input" name="product_name_en" value="' + escapeHtml(data.product_name_en || '') + '"></div>';
+  html += '<div><label class="adm-label">道具の名前（日本語） *</label><input class="form-input" name="product_name" value="' + escapeHtml(data.product_name || '') + '" required placeholder="日向土 小粒 18L（ストアの長い商品名は使わない）"></div>';
+  html += '<div><label class="adm-label">道具の名前（英語）</label><input class="form-input" name="product_name_en" value="' + escapeHtml(data.product_name_en || '') + '"></div>';
   html += '</div>';
   html += '<div class="adm-grid-formula">';
-  html += '<div><label class="adm-label">アイコン（絵文字）</label><input class="form-input" name="icon" value="' + escapeHtml(data.icon || '🛒') + '"></div>';
-  html += '<div><label class="adm-label">バッジ（日）</label><input class="form-input" name="badge" value="' + escapeHtml(data.badge || '') + '"></div>';
-  html += '<div><label class="adm-label">バッジ（英）</label><input class="form-input" name="badge_en" value="' + escapeHtml(data.badge_en || '') + '"></div>';
+  html += '<div><label class="adm-label">メーカー（書籍は著者・出版社）</label><input class="form-input" name="maker" value="' + escapeHtml(data.maker || '') + '"></div>';
+  html += '<div><label class="adm-label">型番（書籍は ISBN・刊行年）</label><input class="form-input" name="model" value="' + escapeHtml(data.model || '') + '"></div>';
+  html += '<div><label class="adm-label">規格・容量</label><input class="form-input" name="spec" value="' + escapeHtml(data.spec || '') + '" placeholder="小粒 3〜6mm · 18L"></div>';
   html += '</div>';
+  html += '<div class="adm-grid-2col-var">';
+  html += '<div><label class="adm-label">価格帯</label><select class="form-input" name="price_band"><option value="">—</option>'
+    + PRICE_BANDS.map(function(b) { return '<option' + (data.price_band === b ? ' selected' : '') + '>' + b + '</option>'; }).join('') + '</select></div>';
+  html += '<div><label class="adm-label">一言（一覧と検索結果の説明、60字まで）</label><input class="form-input" name="summary" maxlength="60" value="' + escapeHtml(data.summary || '') + '"></div>';
+  html += '</div>';
+  html += '<div><label class="adm-label">使用記録 *（' + ToolGate.MIN_RECORD + '字以上で検索に出ます）</label><textarea class="form-input" name="body" rows="5">' + escapeHtml(data.body || '') + '</textarea>'
+    + '<div id="tool-gate-live" style="font-size:var(--font-size-xs);margin-top:4px;"></div></div>';
+  html += '<div><label class="adm-label">対応する自生地の条件</label><div style="display:flex;gap:var(--space-md);flex-wrap:wrap;font-size:var(--font-size-sm);">'
+    + ToolGate.HABITATS.map(function(h) { return '<label><input type="checkbox" name="habitat" value="' + h + '"' + ((data.habitat_tags || []).indexOf(h) !== -1 ? ' checked' : '') + '> ' + h + '</label>'; }).join('') + '</div></div>';
+  html += '<div><label class="adm-label">この道具を使っている種（品種名を改行で。3件まで。例: Anthurium warocqueanum）</label><textarea class="form-input" name="species" rows="2">' + escapeHtml((data.species || []).join('\n')) + '</textarea></div>';
   html += '<div class="adm-grid-2col-var">';
   html += '<div><label class="adm-label">表示順</label><input class="form-input" name="sort_order" type="number" value="' + (data.sort_order || 0) + '"></div>';
   html += '<div><label class="adm-label">公開状態</label><select class="form-input" name="is_published"><option value="true"' + (data.is_published !== false ? ' selected' : '') + '>公開</option><option value="false"' + (data.is_published === false ? ' selected' : '') + '>非公開</option></select></div>';
   html += '</div>';
 
   html += '<hr style="border:none;border-top:1px solid var(--color-light);margin:var(--space-sm) 0;">';
-  html += '<h4 style="font-size:var(--font-size-sm);color:var(--color-gray);">🔗 アフィリエイトURL</h4>';
-
-  // Rakuten HTML paste area
-  html += '<div style="background:var(--color-bg);border:2px dashed var(--color-light);border-radius:var(--radius-md);padding:var(--space-md);margin-bottom:var(--space-sm);">';
-  html += '<label style="font-size:var(--font-size-sm);font-weight:600;color:var(--color-primary);">📋 楽天HTMLを貼り付け（自動でURL＋画像を抽出）</label>';
-  html += '<textarea class="form-input" id="rakuten-html-paste" rows="3" placeholder="楽天アフィリエイトのHTMLコードをここに貼り付けてください..." style="margin-top:var(--space-xs);font-size:var(--font-size-xs);"></textarea>';
-  html += '<button type="button" class="btn btn-primary btn-sm" id="btn-parse-rakuten" style="margin-top:var(--space-xs);">抽出する</button>';
-  html += '<span id="rakuten-parse-result" style="font-size:var(--font-size-xs);margin-left:var(--space-sm);color:var(--color-gray);"></span>';
+  html += '<h4 style="font-size:var(--font-size-sm);color:var(--color-gray);">購入先リンク（発行されたものを1文字も変えずに使います）</h4>';
+  html += '<div style="border:1px dashed var(--color-light);padding:var(--space-md);">';
+  html += '<label style="font-size:var(--font-size-sm);font-weight:600;">楽天のHTMLを貼り付け（リンクと画像を取り出します）</label>';
+  html += '<textarea class="form-input" id="rakuten-html-paste" rows="3" style="margin-top:var(--space-xs);font-size:var(--font-size-xs);"></textarea>';
+  html += '<button type="button" class="btn btn-primary btn-sm" id="btn-parse-rakuten" style="margin-top:var(--space-xs);">取り出す</button>';
+  html += '<span id="rakuten-parse-result" style="font-size:var(--font-size-xs);margin-left:var(--space-sm);"></span>';
   html += '</div>';
-
-  html += '<div><label class="adm-label">Amazon URL</label><input class="form-input" name="amazon" value="' + escapeHtml(data.amazon || '') + '" placeholder="https://amzn.to/..."></div>';
-  html += '<div><label class="adm-label">楽天 URL</label><textarea class="form-input" name="rakuten" rows="2" placeholder="https://hb.afl.rakuten.co.jp/...">' + escapeHtml(data.rakuten || '') + '</textarea></div>';
-  html += '<div><label class="adm-label">Yahoo URL</label><input class="form-input" name="yahoo" value="' + escapeHtml(data.yahoo || '') + '" placeholder="https://yahoo.jp/..."></div>';
-  html += '<div><label class="adm-label">商品画像URL（楽天画像など）</label><textarea class="form-input" name="image" rows="2" placeholder="https://hbb.afl.rakuten.co.jp/...">' + escapeHtml(data.image || '') + '</textarea></div>';
+  html += '<div style="border:1px dashed var(--color-light);padding:var(--space-md);">';
+  html += '<label style="font-size:var(--font-size-sm);font-weight:600;">もしもアフィリエイト（Amazon）のHTMLを貼り付け（リンクと計測画像を取り出します）</label>';
+  html += '<textarea class="form-input" id="moshimo-html-paste" rows="3" style="margin-top:var(--space-xs);font-size:var(--font-size-xs);" placeholder="「テキストリンク」のHTMLを丸ごと貼る"></textarea>';
+  html += '<button type="button" class="btn btn-primary btn-sm" id="btn-parse-moshimo" style="margin-top:var(--space-xs);">取り出す</button>';
+  html += '<span id="moshimo-parse-result" style="font-size:var(--font-size-xs);margin-left:var(--space-sm);"></span>';
+  html += '</div>';
+  html += '<div><label class="adm-label">楽天 URL</label><textarea class="form-input" name="rakuten" rows="2">' + escapeHtml(data.rakuten || '') + '</textarea></div>';
+  html += '<div><label class="adm-label">Yahoo! URL</label><input class="form-input" name="yahoo" value="' + escapeHtml(data.yahoo || '') + '"></div>';
+  html += '<div><label class="adm-label">Amazon URL（もしも経由 af.moshimo.com のみ表示）</label><input class="form-input" name="amazon" value="' + escapeHtml(data.amazon || '') + '"></div>';
+  html += '<div><label class="adm-label">Amazon 計測画像（i.moshimo.com）</label><input class="form-input" name="amazon_imp" value="' + escapeHtml(data.amazon_imp || '') + '"></div>';
+  html += '<div class="adm-grid-2col-var">';
+  html += '<div><label class="adm-label">楽天の商品画像URL</label><textarea class="form-input" name="image" rows="2">' + escapeHtml(data.image || '') + '</textarea></div>';
+  html += '<div><label class="adm-label">自分で撮った写真のURL（あれば楽天画像より優先）</label><textarea class="form-input" name="image_own" rows="2">' + escapeHtml(data.image_own || '') + '</textarea></div>';
+  html += '</div>';
 
   html += '<div style="display:flex;gap:var(--space-sm);justify-content:flex-end;margin-top:var(--space-md);">';
   html += '<button type="button" class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
   html += '<button type="submit" class="btn btn-primary">' + (isEdit ? '更新' : '追加') + '</button>';
-  html += '</div>';
-  html += '</form>';
+  html += '</div></form>';
 
   showModal(html);
+  var form = document.getElementById('affiliate-form');
 
-  // Rakuten HTML parser
-  document.getElementById('btn-parse-rakuten').addEventListener('click', function() {
-    var rawHtml = document.getElementById('rakuten-html-paste').value.trim();
-    var resultEl = document.getElementById('rakuten-parse-result');
-    if (!rawHtml) { resultEl.textContent = '❌ HTMLを貼り付けてください'; resultEl.style.color = 'red'; return; }
-
-    var parser = new DOMParser();
-    var doc = parser.parseFromString(rawHtml, 'text/html');
-
-    // Extract link URL (hb.afl.rakuten.co.jp)
-    var linkUrl = '';
-    var imgUrl = '';
-    var links = doc.querySelectorAll('a[href*="hb.afl.rakuten.co.jp"]');
-    if (links.length > 0) linkUrl = links[0].getAttribute('href');
-
-    // Extract image URL (hbb.afl.rakuten.co.jp)
-    var imgs = doc.querySelectorAll('img[src*="hbb.afl.rakuten.co.jp"]');
-    if (imgs.length > 0) imgUrl = imgs[0].getAttribute('src');
-
-    // Also try to extract from src attributes if img not found
-    if (!imgUrl) {
-      var allImgs = doc.querySelectorAll('img[src]');
-      for (var i = 0; i < allImgs.length; i++) {
-        var src = allImgs[i].getAttribute('src');
-        if (src && src.indexOf('rakuten') !== -1) { imgUrl = src; break; }
-      }
-    }
-
-    var form = document.getElementById('affiliate-form');
-    var filled = 0;
-    if (linkUrl) { form.rakuten.value = linkUrl; filled++; }
-    if (imgUrl) { form.image.value = imgUrl; filled++; }
-
-    if (filled === 2) {
-      resultEl.textContent = '✅ 楽天URL + 画像URLを抽出しました！';
-      resultEl.style.color = 'green';
-    } else if (filled === 1) {
-      resultEl.textContent = '⚠️ ' + (linkUrl ? 'リンクURL' : '画像URL') + 'のみ抽出しました';
-      resultEl.style.color = 'orange';
-    } else {
-      resultEl.textContent = '❌ URLを抽出できませんでした。HTMLを確認してください';
-      resultEl.style.color = 'red';
-    }
-  });
-
-  document.getElementById('affiliate-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    var form = e.target;
-    var payload = {
-      name: form.name.value.trim(),
-      name_en: form.name_en.value.trim(),
+  function collect() {
+    var g = toolGenreOf(form.genre.value);
+    return {
+      name: g ? g.label : (data.name || '道具'),
+      name_en: g ? (g.label_en || '') : (data.name_en || ''),
+      genre: form.genre.value || null,
+      slug: form.slug.value.trim() || null,
       product_name: form.product_name.value.trim(),
       product_name_en: form.product_name_en.value.trim(),
-      icon: form.icon.value.trim() || '🛒',
-      badge: form.badge.value.trim(),
-      badge_en: form.badge_en.value.trim(),
+      maker: form.maker.value.trim() || null,
+      model: form.model.value.trim() || null,
+      spec: form.spec.value.trim() || null,
+      price_band: form.price_band.value || null,
+      summary: form.summary.value.trim() || null,
+      body: form.body.value.trim() || null,
+      habitat_tags: Array.prototype.slice.call(form.querySelectorAll('input[name="habitat"]:checked')).map(function(c) { return c.value; }),
+      species: form.species.value.split(/\n+/).map(function(x) { return x.trim(); }).filter(Boolean).slice(0, 3),
       sort_order: parseInt(form.sort_order.value) || 0,
       is_published: form.is_published.value === 'true',
-      amazon: form.amazon.value.trim(),
       rakuten: form.rakuten.value.trim(),
       yahoo: form.yahoo.value.trim(),
-      image: form.image.value.trim()
+      amazon: form.amazon.value.trim(),
+      amazon_imp: form.amazon_imp.value.trim() || null,
+      image: form.image.value.trim(),
+      image_own: form.image_own.value.trim() || null
     };
+  }
+  function refreshGate() {
+    var p = collect();
+    var r = ToolGate.gate(p);
+    var len = (p.body || '').length;
+    var el = document.getElementById('tool-gate-live');
+    el.style.color = r.pass ? '#2d5016' : '#a8712e';
+    el.textContent = len + '字 · ' + (r.pass ? '検索に出します' : '検索には出しません: ' + r.missing.map(ToolGate.label).join('、'));
+  }
+  form.addEventListener('input', refreshGate);
+  form.addEventListener('change', refreshGate);
+  form.product_name_en.addEventListener('blur', function() {
+    if (!form.slug.value.trim()) form.slug.value = ToolGate.slugify(form.product_name_en.value || form.model.value);
+    refreshGate();
+  });
+  refreshGate();
 
-    if (!payload.name || !payload.product_name) {
-      toast('カテゴリ名と商品名は必須です');
-      return;
-    }
+  document.getElementById('btn-parse-rakuten').addEventListener('click', function() {
+    var doc = new DOMParser().parseFromString(document.getElementById('rakuten-html-paste').value, 'text/html');
+    var resultEl = document.getElementById('rakuten-parse-result');
+    var a = doc.querySelector('a[href*="hb.afl.rakuten.co.jp"]');
+    var img = doc.querySelector('img[src*="hbb.afl.rakuten.co.jp"]') || doc.querySelector('img[src*="rakuten"]');
+    if (a) form.rakuten.value = a.getAttribute('href');
+    if (img) form.image.value = img.getAttribute('src');
+    resultEl.textContent = a && img ? 'リンクと画像を取り出しました' : a ? 'リンクだけ取り出しました' : img ? '画像だけ取り出しました' : '取り出せませんでした';
+    resultEl.style.color = a ? '#2d5016' : '#a8712e';
+    refreshGate();
+  });
+  document.getElementById('btn-parse-moshimo').addEventListener('click', function() {
+    var doc = new DOMParser().parseFromString(document.getElementById('moshimo-html-paste').value, 'text/html');
+    var resultEl = document.getElementById('moshimo-parse-result');
+    var a = doc.querySelector('a[href*="af.moshimo.com"]');
+    var imp = doc.querySelector('img[src*="i.moshimo.com"]');
+    if (a) form.amazon.value = a.getAttribute('href');
+    if (imp) form.amazon_imp.value = imp.getAttribute('src');
+    resultEl.textContent = a && imp ? 'リンクと計測画像を取り出しました' : a ? 'リンクだけ取り出しました（計測画像が見つかりません）' : '取り出せませんでした（af.moshimo.com のリンクが含まれていません）';
+    resultEl.style.color = a && imp ? '#2d5016' : '#a8712e';
+    refreshGate();
+  });
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var payload = collect();
+    if (!payload.genre || !payload.product_name) { toast('ジャンルと道具の名前は必須です'); return; }
+    if (payload.slug && !/^[a-z0-9-]+$/.test(payload.slug)) { toast('URL名は英小文字・数字・ハイフンだけにしてください'); return; }
+    if (payload.slug && allAffiliates.some(function(a) { return a.slug === payload.slug && a.id !== data.id; })) { toast('このURL名は使われています'); return; }
 
     // Shift sort_order of other items when order changes
     var oldOrder = isEdit ? (data.sort_order || 0) : null;

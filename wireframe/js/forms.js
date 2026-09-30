@@ -390,16 +390,7 @@ function refreshDynamicText() {
     }
   }
 
-  // Re-render affiliate banners
-  if (typeof renderAffiliateBanner === 'function') {
-    renderAffiliateBanner('top-affiliate-grid');
-    document.querySelectorAll('.genus-affiliate-grid').forEach(function(grid) {
-      renderAffiliateBanner(grid);
-    });
-    if (cultivarPage && cultivarPage.classList.contains('active')) {
-      renderAffiliateBanner('affiliate-links-grid', { showRecommend: true });
-    }
-  }
+  if (typeof window.refreshToolsLang === 'function') window.refreshToolsLang();
 }
 
 // (count text is now handled inside paginateGenus directly)
@@ -2130,114 +2121,10 @@ document.querySelectorAll('.genus-content').forEach(function(g) {
   paginateGenus(g, 1);
 });
 
-// ========================================
-// AFFILIATE LINKS
-// ========================================
-var affiliateProducts = [];
-
-// Load affiliates from Supabase
-(async function() {
-  try {
-    var sbAff = window._supabaseClient;
-    if (!sbAff) throw new Error('No supabase client');
-    var result = await sbAff.from('affiliates').select('*').eq('is_published', true).order('sort_order');
-    if (result.data && result.data.length > 0) {
-      affiliateProducts = result.data.map(function(a) {
-        // Extract direct image URL from rakuten tracking URL (hbb.afl.rakuten.co.jp)
-        var imgUrl = a.image || '';
-        if (imgUrl.indexOf('hbb.afl.rakuten.co.jp') > -1) {
-          try { var pc = new URL(imgUrl).searchParams.get('pc'); if (pc) imgUrl = pc; } catch(e) {}
-        }
-        return {
-          name: a.name, nameEn: a.name_en || a.name,
-          productName: a.product_name, productNameEn: a.product_name_en || a.product_name,
-          image: imgUrl, icon: a.icon || '🛒',
-          badge: a.badge || '', badgeEn: a.badge_en || '',
-          rakuten: a.rakuten || '', amazon: a.amazon || '', yahoo: a.yahoo || ''
-        };
-      });
-    }
-  } catch (e) { console.warn('Affiliate load error:', e); }
-  // Render after load
-  renderAffiliateBanner('top-affiliate-grid');
-  document.querySelectorAll('.genus-affiliate-grid').forEach(function(grid) {
-    renderAffiliateBanner(grid);
-  });
-})();
-
-// Affiliate click tracking (delegated so it covers all banner locations)
-document.addEventListener('click', function(e) {
-  var link = e.target.closest('.affiliate-card a');
-  if (link && typeof gtag === 'function') {
-    gtag('event', 'affiliate_click', {
-      shop: (link.className.match(/--(rakuten|amazon|yahoo)/) || [])[1] || 'image',
-      product: (link.closest('.affiliate-card').querySelector('.affiliate-card__name') || {}).textContent || ''
-    });
-  }
-});
-
-// Render affiliate cards in banner style
-function renderAffiliateBanner(containerOrId, options) {
-  var container = typeof containerOrId === 'string' ? document.getElementById(containerOrId) : containerOrId;
-  if (!container) return;
-  options = options || {};
-
-  var html = '';
-  affiliateProducts.forEach(function(product, index) {
-    var catName = currentLang === 'en' ? product.nameEn : product.name;
-    var prodName = currentLang === 'en' ? (product.productNameEn || product.nameEn) : (product.productName || product.name);
-    var badge = currentLang === 'en' ? product.badgeEn : product.badge;
-    html += '<div class="affiliate-card">';
-    if (options.showRecommend && index === 0) {
-      html += '<span class="affiliate-card__recommend">' + (currentLang === 'en' ? 'Pick' : 'おすすめ') + '</span>';
-    }
-    if (product.image) {
-      html += '<a href="' + product.rakuten + '" target="_blank" rel="nofollow sponsored noopener">';
-      html += '<img class="affiliate-card__image" src="' + product.image + '" alt="' + prodName + '" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display=\'none\';this.parentElement.insertAdjacentHTML(\'afterend\',\'<span class=affiliate-card__icon>' + (product.icon || '🛒') + '</span>\')">';
-      html += '</a>';
-    } else {
-      html += '<span class="affiliate-card__icon">' + product.icon + '</span>';
-    }
-    html += '<div class="affiliate-card__category">' + catName + '</div>';
-    html += '<div class="affiliate-card__name">' + prodName + '</div>';
-    if (badge) html += '<span class="affiliate-card__badge">' + badge + '</span>';
-    html += '<div class="affiliate-card__shops">';
-    html += '<a href="' + product.rakuten + '" class="affiliate-card__shop affiliate-card__shop--rakuten" target="_blank" rel="nofollow sponsored noopener">楽天</a>';
-    html += '<a href="' + product.yahoo + '" class="affiliate-card__shop affiliate-card__shop--yahoo" target="_blank" rel="nofollow sponsored noopener">Yahoo!</a>';
-    html += '</div>';
-    html += '</div>';
-  });
-  container.innerHTML = html;
-  // Fallback: if images don't load within 5s, show icon instead
-  setTimeout(function() {
-    container.querySelectorAll('.affiliate-card__image').forEach(function(img) {
-      if (!img.naturalWidth) {
-        img.style.display = 'none';
-        if (!img.parentElement.querySelector('.affiliate-card__icon')) {
-          img.parentElement.insertAdjacentHTML('afterend', '<span class="affiliate-card__icon">\uD83D\uDED2</span>');
-        }
-      }
-    });
-  }, 5000);
-}
-
-// Add affiliate banner containers to all genus pages (data filled by async loader above)
-document.querySelectorAll('.genus-content').forEach(function(genusEl) {
-  var section = document.createElement('div');
-  section.className = 'affiliate-section mt-lg';
-  section.innerHTML = '<div class="affiliate-banner">' +
-    '<div class="affiliate-banner__title" data-i18n="affiliate_top_title">' + t('affiliate_top_title') + '</div>' +
-    '<div class="affiliate-banner__grid genus-affiliate-grid"></div>' +
-    '<p class="affiliate-notice" data-i18n="affiliate_notice">' + t('affiliate_notice') + '</p>' +
-    '</div>';
-  genusEl.appendChild(section);
-});
-
 // Hook into updateCultivarDetail
 var _origUpdateDetail = updateCultivarDetail;
 updateCultivarDetail = function(cultivarName, rowEl) {
   _origUpdateDetail(cultivarName, rowEl);
-  renderAffiliateBanner('affiliate-links-grid', { showRecommend: true });
   // Restore gallery images for this cultivar
   if (typeof window.renderGalleryForCultivar === 'function') {
     window.renderGalleryForCultivar(cultivarName);
