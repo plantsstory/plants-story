@@ -304,6 +304,14 @@ var _siteBase = _isCustomDomain ? 'https://plantsstory.com/' : 'https://plantsst
 var _defaultTitle = 'Aroid Origins';
 var _defaultDesc = '誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。';
 var _defaultOgImage = 'https://plantsstory.com/images/og-default-2026-09.png';
+// Share card of a cultivar (scripts/lib/og-slug.js and the share function carry the same rule)
+window.ogSlug = function(genus, name) {
+  var rest = String(name || '').replace(' [Seedling]', '');
+  if (genus && rest.toLowerCase().indexOf(String(genus).toLowerCase() + ' ') === 0) rest = rest.slice(genus.length + 1);
+  var s = (String(genus || '') + ' ' + rest).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return s || 'entry';
+};
+window.ogCardUrl = function(genus, name) { return 'https://plantsstory.com/images/og/' + window.ogSlug(genus, name) + '.png'; };
 
 function updateMeta(opts) {
   opts = opts || {};

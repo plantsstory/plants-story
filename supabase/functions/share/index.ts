@@ -109,8 +109,14 @@ serve(async (req: Request) => {
   const rest = displayName.replace(/^\S+\s*/, "");
   const spaUrl = SITE_URL + genusSlug + "/" + encodeURIComponent(rest);
 
-  // Fallback OG image: the static Field Archive card (the og-image function was never deployed)
-  const ogImage = imageUrl || (SITE_URL + "images/og-default-2026-09.png");
+  // og:image is the cultivar's share card (rendered in CI); the photo is only a fallback signal that one exists
+  const ogSlug = (g: string, n: string) => {
+    let rest = n.replace(" [Seedling]", "");
+    if (g && rest.toLowerCase().startsWith(g.toLowerCase() + " ")) rest = rest.slice(g.length + 1);
+    const s = (g + " " + rest).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    return s || "entry";
+  };
+  const ogImage = type === "seedling" ? (imageUrl || (SITE_URL + "images/og-default-2026-09.png")) : (SITE_URL + "images/og/" + ogSlug(genus, displayName) + ".png");
 
   // Return HTML with OG meta tags + auto-redirect for human visitors
   const html = `<!DOCTYPE html>

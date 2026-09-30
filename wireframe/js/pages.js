@@ -1216,7 +1216,7 @@ function updateCultivarDetail(cultivarName, rowEl) {
   var metaDesc = (_recState === 'ok' || detectedType === 'seedling')
     ? displayName + ' (' + genusName + ' ' + typeLabel + ') の由来・歴史情報 - Aroid Origins'
     : displayName + ' — 記録なし · 出典募集中 | Aroid Origins';
-  var ogImageUrl = _defaultOgImage;
+  var ogImageUrl = (detectedType !== 'seedling' && window.ogCardUrl) ? window.ogCardUrl(genusName, displayName) : _defaultOgImage;
   updateMeta({
     title: displayName + ' - ' + genusName + ' | ' + _defaultTitle,
     description: metaDesc,
