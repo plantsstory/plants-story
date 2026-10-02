@@ -1045,3 +1045,12 @@ html[data-textsize="xlarge"] .masthead__title { font-size: clamp(3.4rem, 9vw, 6.
 
 /* T49: menu and footer links rule display:flex/inline, so the hidden state has to win there */
 .mobile-nav .d-none, .footer .d-none { display: none !important; }
+
+/* T51: a shared link never shows the top page first; crawler link lists stay off screen */
+html[data-boot="deep"] #page-top { display: none !important; }
+#static-seo-links { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+/* a name that is not recorded: only the title and the sheet */
+#page-cultivar.is-unrecorded .container > *:not(.breadcrumb):not(.detail-head):not(#detail-unrecorded) { display: none !important; }
+#page-cultivar.is-unrecorded .detail-standard { display: none; }
+#detail-unrecorded .sheet__actions, #page-notfound .sheet__actions { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+#detail-unrecorded .sheet__cta, #page-notfound .sheet__cta { min-height: 44px; display: inline-flex; align-items: center; }

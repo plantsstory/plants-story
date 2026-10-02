@@ -2107,5 +2107,33 @@
   "spec_selected_from_clone": {
     "jp": "元の株",
     "en": "Selected from"
+  },
+  "unrecorded_title": {
+    "jp": "この名前は未収録です",
+    "en": "This name is not recorded"
+  },
+  "unrecorded_note": {
+    "jp": "この名前の記録はまだありません。綴りを変えて探すか、検索結果から収録を依頼できます。",
+    "en": "There is no record under this name yet. Try another spelling, or ask for it to be recorded from the search page."
+  },
+  "unrecorded_search": {
+    "jp": "この名前で検索 →",
+    "en": "Search this name →"
+  },
+  "unrecorded_ledger": {
+    "jp": "Anthurium の台帳 →",
+    "en": "Anthurium ledger →"
+  },
+  "notfound_title": {
+    "jp": "ページが見つかりません",
+    "en": "Page not found"
+  },
+  "notfound_note": {
+    "jp": "この URL のページはありません。品種名で探すか、台帳から選んでください。",
+    "en": "There is no page at this address. Search by name or pick from the ledger."
+  },
+  "notfound_search": {
+    "jp": "品種名で検索 →",
+    "en": "Search by name →"
   }
 }

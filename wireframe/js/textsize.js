@@ -23,6 +23,16 @@
   // before paint
   var current = apply(stored());
 
+  // A shared link (anything but the top page) must not flash the top page while the router waits for data.
+  // showPage() clears the flag; a safety timer clears it if routing never happens.
+  try {
+    var path = location.pathname.replace(/\/(index\.html)?$/, '').replace(/^\/plants-story/, '');
+    if (path || /[?&]spa_path=/.test(location.search)) {
+      root.setAttribute('data-boot', 'deep');
+      setTimeout(function () { root.removeAttribute('data-boot'); }, 8000);
+    }
+  } catch (e) {}
+
   window.setTextSize = function (v) {
     current = apply(v);
     try { localStorage.setItem(KEY, current); } catch (e) {}

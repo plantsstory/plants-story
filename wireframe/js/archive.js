@@ -876,7 +876,8 @@
     var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
     var key = _detailArgs[4] || displayName;
     var entry = store[key] || store[displayName] || store[displayName + ' [Seedling]'] || _detailArgs[1];
-    if (!entry) return;
+    if (!entry) { if (window._dataFullyLoaded) renderUnrecorded(displayName); return; }
+    setUnrecorded(false);
     var d = describe(key in store ? key : (store[displayName] ? displayName : (store[displayName + ' [Seedling]'] ? displayName + ' [Seedling]' : key)), entry, entry._type || _detailArgs[2]);
     renderSpecimen(d, all);
     renderRelated(d, all);
@@ -889,8 +890,31 @@
     var pnote = document.getElementById("detail-private-note");
     if (pnote) pnote.classList.toggle("d-none", !entry._isPrivate);
   }
+  function setUnrecorded(on) {
+    var page = document.getElementById('page-cultivar');
+    if (page) page.classList.toggle('is-unrecorded', !!on);
+    var sheet = document.getElementById('detail-unrecorded');
+    if (sheet && !on) { sheet.classList.add('d-none'); sheet.innerHTML = ''; }
+  }
+  /* a name that is not in the archive: one plain sheet, never a made-up species page */
+  function renderUnrecorded(displayName) {
+    var sheet = document.getElementById('detail-unrecorded');
+    if (!sheet) return;
+    setUnrecorded(true);
+    var std = document.getElementById('detail-standard');
+    if (std) std.textContent = '';
+    sheet.innerHTML = '<div class="sheet sheet--search"><p class="sheet__title">' + esc(T('unrecorded_title')) + '</p>'
+      + '<p class="sheet__note">' + esc(T('unrecorded_note')) + '</p>'
+      + '<p class="sheet__actions mono"><a class="sheet__cta" href="' + esc(base + 'search?q=' + encodeURIComponent(displayName)) + '">' + esc(T('unrecorded_search')) + '</a>'
+      + '<a class="sheet__cta" href="' + esc(base + 'anthurium') + '" data-nav="genus" data-genus="Anthurium">' + esc(T('unrecorded_ledger')) + '</a></p></div>';
+    sheet.classList.remove('d-none');
+    var robots = document.querySelector('meta[name="robots"]');
+    if (robots) robots.setAttribute('content', 'noindex, follow');
+    document.title = displayName + ' — ' + T('unrecorded_title') + ' - Aroid Origins';
+  }
   window.onCultivarDetailRendered = function (displayName, cData, type, genusName, cultivarName) {
     _detailArgs = [displayName, cData, type, genusName, cultivarName];
+    setUnrecorded(false);
     var spec = document.getElementById('specimen-label');
     var section = document.getElementById('related-section');
     if (spec) spec.innerHTML = '';

@@ -1196,6 +1196,8 @@ function updateCultivarDetail(cultivarName, rowEl) {
   // Get badge info from row, or fallback to cultivarData._type
   var detectedType = 'species';
   var badgeEl = rowEl ? rowEl.querySelector('.badge') : null;
+  // opened from a link before the records are in: say nothing about the category yet (it is redrawn on load)
+  var _typeUnknown = !badgeEl && !(cData && cData._type);
   if (badgeEl) {
     if (badgeEl.classList.contains('badge--hybrid')) detectedType = 'hybrid';
     else if (badgeEl.classList.contains('badge--clone')) detectedType = 'clone';
@@ -1266,7 +1268,7 @@ function updateCultivarDetail(cultivarName, rowEl) {
   var stdEl = document.getElementById('detail-standard');
   if (stdEl) {
     var _isInd = cData && cData._tags && cData._tags.indexOf('individual') !== -1;
-    stdEl.textContent = genusName.toUpperCase() + ' · ' + (_isInd ? t('type_individual') : (bi ? bi.txt : '')) + (_cId ? ' · NO. ' + String(_cId).padStart(3, '0') : '');
+    stdEl.textContent = _typeUnknown ? genusName.toUpperCase() : genusName.toUpperCase() + ' · ' + (_isInd ? t('type_individual') : (bi ? bi.txt : '')) + (_cId ? ' · NO. ' + String(_cId).padStart(3, '0') : '');
   }
   if (createdAtEl && cData && cData._created_at) {
     var d = new Date(cData._created_at);

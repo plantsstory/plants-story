@@ -502,6 +502,7 @@ function showPage(pageId) {
   // Abort any in-flight page requests
   if (window._pageAbort) { window._pageAbort.abort(); window._pageAbort = null; }
   _currentPageId = pageId;
+  document.documentElement.removeAttribute('data-boot');
 
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   // profile-edit maps to page-profile-edit
@@ -628,7 +629,8 @@ function parseRoute() {
   }
   if (simplePages.indexOf(first) !== -1) return { page: first };
 
-  return { page: 'top' };
+  // anything else is not a page of this site (decided only once the genera are known)
+  return knownGenera.length ? { page: 'notfound' } : { page: 'top' };
 }
 // Keep parseHash as alias
 var parseHash = parseRoute;
@@ -695,6 +697,7 @@ function navigateTo(page, options, pushHistory) {
       people: '人物索引 - ' + _defaultTitle,
       locality: '産地索引 - ' + _defaultTitle,
       tools: '道具の目録 - ' + _defaultTitle,
+      notfound: 'ページが見つかりません - ' + _defaultTitle,
       glossary: '由来の用語集 - ' + _defaultTitle,
       pricing: '料金とサービス内容 - ' + _defaultTitle,
       'profile-edit': 'プロフィール編集 - ' + _defaultTitle
@@ -734,7 +737,7 @@ function navigateTo(page, options, pushHistory) {
         updateGenusJsonLd(gName, names);
       }
     } else {
-      var noindexPages = { search: true, mypost: true, favorites: true, profile: true, 'profile-edit': true };
+      var noindexPages = { search: true, mypost: true, favorites: true, profile: true, 'profile-edit': true, notfound: true };
       updateMeta({ title: pageTitles[page] || _defaultTitle, description: pageDescriptions[page] || _defaultDesc, path: page === 'top' ? '' : page, noindex: !!noindexPages[page] });
       // Remove genus JSON-LD on non-genus pages
       var gjld = document.getElementById('genus-jsonld');
