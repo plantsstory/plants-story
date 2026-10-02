@@ -244,15 +244,15 @@
     "en": "Type"
   },
   "type_species": {
-    "jp": "原種 (Original species)",
-    "en": "Original Species"
+    "jp": "原種",
+    "en": "Species"
   },
   "type_hybrid": {
-    "jp": "ハイブリッド (Hybrid)",
+    "jp": "Hybrid",
     "en": "Hybrid"
   },
   "type_clone": {
-    "jp": "クローン (Clone)",
+    "jp": "Clone",
     "en": "Clone"
   },
   "duplicate_found": {
@@ -525,8 +525,8 @@
     "en": "Article 2: Service Description"
   },
   "terms_2_body": {
-    "jp": "本サービスは、植物の品種（原種・ハイブリッド・クローン）の由来情報を収集・共有するプラットフォームです。主な機能は以下の通りです：",
-    "en": "The Service is a platform for collecting and sharing origin information about plant cultivars (species, hybrids, and clones). Key features include:"
+    "jp": "本サービスは、植物の品種（原種・Hybrid・Clone・実生）の由来情報を収集・共有するプラットフォームです。主な機能は以下の通りです：",
+    "en": "The Service is a platform for collecting and sharing origin information about plant cultivars (species, hybrids, clones and seedlings). Key features include:"
   },
   "terms_2_list": {
     "jp": "品種由来情報の閲覧\n由来情報の投稿（要ログイン・ニックネーム表示）\n品種画像のアップロード\n投票による情報の信頼性評価\n関連商品へのアフィリエイトリンク",
@@ -1081,8 +1081,8 @@
     "en": "Entries"
   },
   "ledger_years": {
-    "jp": "記載年",
-    "en": "Described"
+    "jp": "発表年",
+    "en": "Published"
   },
   "ledger_localities": {
     "jp": "産地（国）",
@@ -1913,12 +1913,12 @@
     "en": "Tools catalogue"
   },
   "tools_lead": {
-    "jp": "自生地の条件（雲霧林・着生・標高）に近づけるための道具を、部門ごとに集めました。育て方は書きません。",
-    "en": "Tools that bring a room closer to the habitat (cloud forest, epiphytic, elevation), by department. No growing advice."
+    "jp": "自生地の条件（雲霧林・着生・標高）に近づける道具を部門別に。販売実績（レビュー数・評価）と仕様で選んでいます。育て方は書きません。",
+    "en": "Tools that bring a room closer to the habitat (cloud forest, epiphytic, elevation), by department, chosen from sales record (reviews, rating) and specifications. No growing advice."
   },
   "tools_pr": {
-    "jp": "PR — このページには楽天市場・Yahoo!ショッピング・Amazon のアフィリエイトリンクを含みます。リンク経由の購入で当サイトに紹介料が入ります。「使用中」の印がある物は運営者が実際に使っている物で、そのほかは販売実績（レビュー数・評価）と仕様を確認して選んだ物です。価格・在庫は各ストアの表示が最新です。",
-    "en": "PR — This page contains affiliate links to Rakuten, Yahoo! Shopping and Amazon; purchases through them pay this site a referral fee. Items marked In use are used by the operator; the others were chosen from their sales record (reviews and rating) and specifications. Prices and stock are as shown by each store."
+    "jp": "PR — このページにはアフィリエイトリンクを含みます。リンク経由の購入で当サイトに紹介料が入ります。価格・在庫は各ストアの表示が最新です。",
+    "en": "PR — This page contains affiliate links; purchases through them pay this site a referral fee. Prices and stock are as shown by each store."
   },
   "tools_pr_amazon": {
     "jp": "Amazonのアソシエイトとして、Aroid Origins は適格販売により収入を得ています。",
@@ -2223,5 +2223,13 @@
   "verified_title": {
     "jp": "管理者が出典を確認した記録",
     "en": "Sources checked by the editor"
+  },
+  "tools_pr_used": {
+    "jp": "「使用中」の印がある物は運営者が実際に使っている物です。",
+    "en": "Items marked In use are used by the operator."
+  },
+  "tools_price_note": {
+    "jp": "価格は楽天市場の {d} 時点",
+    "en": "Rakuten prices as of {d}"
   }
 }

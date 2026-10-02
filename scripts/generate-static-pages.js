@@ -44,6 +44,36 @@ function fetchJSON(urlPath) {
   });
 }
 
+// plain first screen of a cultivar page (removed by the SPA once it renders)
+const TYPE_JP = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: '実生' };
+function sciHtml(name) {
+  return String(name).split(/('[^']*'|"[^"]*")/).map(part => {
+    if (/^['"]/.test(part)) return escAttr(part);
+    return part.split(/(\s+)/).map(w => (/^[A-Za-z][A-Za-z.-]*$/.test(w) && !/^(sp|aff|cf|var|subsp)\.$/.test(w)) ? '<i>' + escAttr(w) + '</i>' : escAttr(w)).join('');
+  }).join('').replace(/<\/i>(\s+)<i>/g, '$1');
+}
+function staticEntryHtml(c, ctx) {
+  const os = (c.origins || []).filter(o => o && !o._type).sort((a, b) => (parseInt(b.trust, 10) || 0) - (parseInt(a.trust, 10) || 0));
+  const o = os[0] || {}, s = o.structured || {};
+  const type = c.type || s.origin_type || 'species';
+  const year = String(s.publication_year || o.discovery_year || s.naming_year || '').match(/\d{4}/);
+  const who = type === 'species' ? (s.author_name || '') : (s.breeder || o.discoverer_or_breeder || '');
+  const place = type === 'species' ? (s.type_locality || '') : ((c.parent_a_text || c.parent_b_text) ? (c.parent_a_text || '?') + ' × ' + (c.parent_b_text || '?') : '');
+  const cite = [who, year ? year[0] : '', place].filter(Boolean).join(' · ');
+  let text = String(o.body || s.notes || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  if (text.length > 220) text = text.slice(0, 219) + '…';
+  const aliases = (c.aliases || []).filter(a => /[A-Za-z]/.test(a)).slice(0, 3);
+  let h = '<article id="static-entry" class="container static-entry">';
+  h += '<p class="mono detail-standard">' + escAttr((c.genus || 'Anthurium').toUpperCase() + ' · ' + (TYPE_JP[type] || '')) + '</p>';
+  h += '<h1 class="detail-title">' + sciHtml(c.cultivar_name) + '</h1>';
+  if (cite) h += '<p class="mono static-entry__cite">' + escAttr(cite) + '</p>';
+  if (aliases.length) h += '<p class="static-entry__aliases">別名: ' + escAttr(aliases.join(' / ')) + '</p>';
+  if (ctx.photo) h += '<figure class="static-entry__plate"><img src="' + escAttr(ctx.photo) + '" alt="' + escAttr(c.cultivar_name) + '" width="720" decoding="async"></figure>';
+  if (text) h += '<p class="static-entry__text">' + escAttr(text) + '</p>';
+  if (ctx.related && ctx.related.length) h += '<p class="mono static-entry__related">同じ産地: ' + ctx.related.map(r => '<a href="' + escAttr(r.url) + '">' + sciHtml(r.name) + '</a>').join(' · ') + '</p>';
+  return h + '</article>';
+}
+
 function escAttr(s) {
   return String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -255,10 +285,21 @@ async function main() {
       }]
     });
 
+    // first screen in plain HTML
+    const photoPath = imageMap[c.cultivar_name];
+    const photo = photoPath ? SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + photoPath.split('/').map(encodeURIComponent).join('/') + '?width=720&height=1440&resize=contain&quality=72' : '';
+    const country = (c.origins || []).map(o => (o && o.structured && o.structured.type_locality) || '').join(' ').match(/Colombia|Panama|Ecuador|Peru|Mexico|Costa Rica|Brazil|Bolivia|Venezuela|Guyana/);
+    const related = country ? publicCultivars.filter(x => x !== c && x.type === 'species' && JSON.stringify(x.origins || []).indexOf(country[0]) !== -1).slice(0, 3).map(x => {
+      const g2 = x.genus || 'Anthurium';
+      const r2 = String(x.cultivar_name).startsWith(g2 + ' ') ? String(x.cultivar_name).slice(g2.length + 1) : String(x.cultivar_name);
+      return { name: x.cultivar_name, url: SITE + '/' + g2.toLowerCase() + '/' + encodeURIComponent(r2) + '/' };
+    }) : [];
+    const htmlWithEntry = RecordGate.state(c) === 'ok' ? html.replace(/(<main[^>]*>)/, '$1\n' + staticEntryHtml(c, { photo, related })) : html;
+
     const dir = path.join(WIREFRAME, slug, restDir);
     try {
       fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
+      fs.writeFileSync(path.join(dir, 'index.html'), htmlWithEntry, 'utf8');
       written++;
     } catch (e) {
       // Windows refuses names with quotes; CI (Linux) writes them fine
@@ -364,7 +405,7 @@ async function main() {
   for (const g of (Array.isArray(toolGenres) ? toolGenres : [])) genreLabel[g.slug] = g.label;
   const catalogueOpen = ToolGate.catalogueOpen(tools);
   const toolsUrl = SITE + '/tools/';
-  const toolLead = '自生地の条件（雲霧林・着生・標高）に近づけるための道具を、使った記録とともに並べる目録。育て方は書きません。';
+  const toolLead = '自生地の条件（雲霧林・着生・標高）に近づける道具を部門別に。販売実績（レビュー数・評価）と仕様で選んでいます。育て方は書きません。';
   let th = buildStub(template, {
     title: '道具の目録 — アロイドの自生地環境に近づける道具 | Aroid Origins',
     description: toolLead,

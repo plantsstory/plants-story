@@ -989,7 +989,7 @@ function renderStructuredOrigin(s) {
       h += '<div class="structured-section__title">記載情報</div>';
       h += '<div class="structured-fields">';
       if (s.species_name) h += '<div class="structured-field"><span class="structured-field__label">種名</span><span class="structured-field__value">' + escHtml(s.species_name) + '</span></div>';
-      if (s.author_name) h += '<div class="structured-field"><span class="structured-field__label">発表者</span><span class="structured-field__value">' + escHtml(s.author_name) + '</span></div>';
+      if (s.author_name) h += '<div class="structured-field"><span class="structured-field__label">' + t('spec_author') + '</span><span class="structured-field__value">' + escHtml(s.author_name) + '</span></div>';
       if (s.publication_year) h += '<div class="structured-field"><span class="structured-field__label">発表年</span><span class="structured-field__value">' + escHtml(s.publication_year) + '</span></div>';
       h += '</div></div>';
     }
@@ -999,14 +999,14 @@ function renderStructuredOrigin(s) {
       h += '<div class="structured-section">';
       h += '<div class="structured-section__title">採取情報</div>';
       h += '<div class="structured-fields">';
-      if (s.collector) h += '<div class="structured-field"><span class="structured-field__label">発見者</span><span class="structured-field__value">' + escHtml(s.collector) + '</span></div>';
+      if (s.collector) h += '<div class="structured-field"><span class="structured-field__label">' + t('spec_collector') + '</span><span class="structured-field__value">' + escHtml(s.collector) + '</span></div>';
       if (s.collection_year) h += '<div class="structured-field"><span class="structured-field__label">採取年</span><span class="structured-field__value">' + escHtml(s.collection_year) + '</span></div>';
-      if (s.type_locality) h += '<div class="structured-field"><span class="structured-field__label">採取地</span><span class="structured-field__value">' + escHtml(s.type_locality) + '</span></div>';
+      if (s.type_locality) h += '<div class="structured-field"><span class="structured-field__label">' + t('spec_locality') + '</span><span class="structured-field__value">' + escHtml(s.type_locality) + '</span></div>';
       h += '</div></div>';
     }
-    if (s.known_habitats) h += '<div class="structured-section"><div class="structured-section__title">生息地</div><div class="structured-field__value">' + escHtml(s.known_habitats) + '</div></div>';
+    if (s.known_habitats) h += '<div class="structured-section"><div class="structured-section__title">' + t('spec_habitat') + '</div><div class="structured-field__value">' + escHtml(s.known_habitats) + '</div></div>';
   } else if (s.origin_type === 'clone') {
-    if (s.namer) h += '<div class="structured-field"><span class="structured-field__label">名付けた人物</span><span class="structured-field__value">' + escHtml(s.namer) + '</span></div>';
+    if (s.namer) h += '<div class="structured-field"><span class="structured-field__label">' + t('spec_namer') + '</span><span class="structured-field__value">' + escHtml(s.namer) + '</span></div>';
     if (s.naming_year) h += '<div class="structured-field"><span class="structured-field__label">名付けた年</span><span class="structured-field__value">' + escHtml(s.naming_year) + '</span></div>';
   } else if (s.origin_type === 'hybrid') {
     if (s.breeder) h += '<div class="structured-field"><span class="structured-field__label">作出者</span><span class="structured-field__value"><a href="#" class="text-primary no-decoration breeder-link" data-breeder="' + escHtml(s.breeder) + '">' + escHtml(s.breeder) + '</a></span></div>';
@@ -1213,7 +1213,7 @@ function updateCultivarDetail(cultivarName, rowEl) {
   // Update title
   var displayName = cultivarName.replace(' [Seedling]', '');
   var h1 = detailPage.querySelector('h1');
-  if (h1) h1.textContent = displayName;
+  if (h1) h1.innerHTML = sciNameHtml(displayName);
 
   // Update SEO meta tags
   var typeLabel = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: 'Seedling' }[detectedType] || '';

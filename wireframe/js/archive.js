@@ -314,11 +314,12 @@
     var text = lang() === 'en' ? d.textEn : d.text;
     var html = '';
     if (thumb) html += '<figure class="story__figure">' + link(d, '<img src="' + esc(thumb) + '" alt="' + esc(d.displayName) + '" loading="lazy" decoding="async">') + '</figure>';
-    html += '<h2 class="story__title">' + link(d, esc(d.displayName)) + '</h2>';
+    html += '<h2 class="story__title">' + link(d, sciNameHtml(d.displayName)) + '</h2>';
     var cite = citeHtml(d);
     if (cite) html += '<p class="story__cite mono">' + cite + '</p>';
     var ex = excerpt(text, lang() === 'en' ? 320 : 170);
-    html += '<p class="story__body' + (/^[A-Za-z]/.test(ex) ? ' story__body--dropcap' : '') + '">' + esc(ex) + '</p>';
+    // no drop cap: the text opens with a scientific name, and a raised first letter splits it ('A nthurium')
+    html += '<p class="story__body">' + esc(ex) + '</p>';
     html += link(d, esc(T('story_more')), 'story__more');
     body.innerHTML = html;
     if (window.linkGlossaryTerms) window.linkGlossaryTerms(body.querySelector('.story__body'), 3);
@@ -341,7 +342,7 @@
     groups.slice(0, limit || 999).forEach(function (g) {
       html += '<li class="index__item"><button type="button" class="index__toggle" aria-expanded="false"><span class="index__name">' + esc(labelOf ? labelOf(g.key) : g.key) + '</span><span class="index__count">' + g.items.length + '</span></button><ul class="index__sub">';
       g.items.slice().sort(function (a, b) { return (a.year || 9999) - (b.year || 9999) || a.displayName.localeCompare(b.displayName); }).forEach(function (d) {
-        html += '<li>' + link(d, esc(d.displayName)) + (d.year ? '<span class="mono">' + d.year + '</span>' : '') + '</li>';
+        html += '<li>' + link(d, sciNameHtml(d.displayName)) + (d.year ? '<span class="mono">' + d.year + '</span>' : '') + '</li>';
       });
       html += '</ul></li>';
     });
@@ -449,7 +450,7 @@
       var thumb = thumbMap[d.displayName] && baseUrl ? (window.galleryImg ? window.galleryImg(thumbMap[d.displayName], 120) : baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[d.displayName]) : '';
       html += '<tr role="link" tabindex="0" data-nav="cultivar" data-key="' + esc(d.fullName) + '">';
       html += '<td class="ledger-table__no">' + esc(no) + '</td>';
-      html += '<td class="ledger-table__cell-name"><div class="flex-center-sm">' + (thumb ? '<img class="ledger-table__thumb" src="' + esc(thumb) + '" alt="" loading="lazy" decoding="async">' : '') + '<span class="ledger-table__name">' + esc(d.displayName) + '</span></div></td>';
+      html += '<td class="ledger-table__cell-name"><div class="flex-center-sm">' + (thumb ? '<img class="ledger-table__thumb" src="' + esc(thumb) + '" alt="" loading="lazy" decoding="async">' : '') + '<span class="ledger-table__name">' + sciNameHtml(d.displayName) + '</span></div></td>';
       html += '<td class="ledger-table__cell-type"><span class="badge ' + esc(bi.cls) + '">' + esc(bi.txt) + '</span></td>';
       var cite = citeHtml(d);
       html += '<td class="ledger-table__cell-meta ledger-table__meta">' + (cite ? '<span class="mono">' + cite + '</span>' : '') + (d.parentA && d.parentB ? '<div class="text-xs">' + esc(d.parentA) + ' × ' + esc(d.parentB) + '</div>' : '') + '</td>';
@@ -510,7 +511,7 @@
     if (d.selectedFrom) {
       // an individual names its species; a Clone selected from another plant names that plant
       var parentSp = all.filter(function (x) { return x.id && x.id === d.selectedFrom; })[0];
-      if (parentSp) cells = cell(d.isIndividual ? 'spec_selected_from' : 'spec_selected_from_clone', link(parentSp, esc(parentSp.displayName))) + cells;
+      if (parentSp) cells = cell(d.isIndividual ? 'spec_selected_from' : 'spec_selected_from_clone', link(parentSp, sciNameHtml(parentSp.displayName))) + cells;
     }
     // on the label: at most three Latin-script names; katakana stays for search and JSON-LD
     var labelAliases = (d.aliases || []).filter(function (a, i, arr) { return /[A-Za-z]/.test(a) && !/[゠-ヿ]/.test(a) && arr.indexOf(a) === i; }).slice(0, 3);
@@ -636,7 +637,7 @@
     var html = '<div class="related__group"><h3>' + esc(T(titleKey)) + '</h3><ul>';
     list.slice(0, 6).forEach(function (d) {
       var meta = d.type === 'species' ? joinParts([d.pubYear, d.country]) : joinParts([TYPE_LABEL[d.type] ? (lang() === 'en' ? TYPE_LABEL[d.type][1] : TYPE_LABEL[d.type][0]) : '', d.year]);
-      html += '<li>' + link(d, esc(d.displayName)) + (meta ? '<span class="mono">' + esc(meta) + '</span>' : '') + '</li>';
+      html += '<li>' + link(d, sciNameHtml(d.displayName)) + (meta ? '<span class="mono">' + esc(meta) + '</span>' : '') + '</li>';
     });
     return html + '</ul></div>';
   }
@@ -682,8 +683,8 @@
       + '</div>';
     if (prev || next) {
       html += '<nav class="related__nav" aria-label="' + esc(T('related_title')) + '">';
-      if (prev) html += link(prev, '<span class="mono">← ' + esc(T('related_prev')) + '</span><span class="related__nav-name">' + esc(prev.displayName) + '</span>');
-      if (next) html += link(next, '<span class="mono">' + esc(T('related_next')) + ' →</span><span class="related__nav-name">' + esc(next.displayName) + '</span>', 'related__nav--next');
+      if (prev) html += link(prev, '<span class="mono">← ' + esc(T('related_prev')) + '</span><span class="related__nav-name">' + sciNameHtml(prev.displayName) + '</span>');
+      if (next) html += link(next, '<span class="mono">' + esc(T('related_next')) + ' →</span><span class="related__nav-name">' + sciNameHtml(next.displayName) + '</span>', 'related__nav--next');
       html += '</nav>';
     }
     // exit line: back into the archive (ledger, timeline, same locality)

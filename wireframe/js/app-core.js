@@ -95,6 +95,24 @@ function psExport(name, val) { window.PlantStory[name] = val; window[name] = val
 function t(key) { return key; }
 var currentLang = 'jp';
 function getTrustClass(pct) { return pct >= 70 ? 'trust--high' : pct >= 40 ? 'trust--mid' : 'trust--low'; }
+// Scientific names (ICN/ICNCP): genus and epithets in italics; sp./aff./cf./var., the cultivar epithet in
+// quotes, and × stay roman. Returns escaped HTML.
+function sciNameHtml(name) {
+  var e = function (x) { return String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+  var parts = String(name == null ? '' : name).match(/'[^']*'|"[^"]*"|‘[^’]*’|“[^”]*”|\s+|[^\s'"‘“]+/g) || [];
+  var html = '', run = '';
+  var flush = function () { if (run) { html += '<i>' + run + '</i>'; run = ''; } };
+  parts.forEach(function (p) {
+    if (/^\s+$/.test(p)) { if (run) run += ' '; else html += ' '; return; }
+    var latin = /^[A-Za-zÀ-ÿ.-]+$/.test(p) && !/^(sp|spp|aff|cf|var|subsp|ssp|f|nothosp)\.$/i.test(p) && !/^\[/.test(p) && p !== '×' && p !== 'x';
+    if (latin) { run += e(p); return; }
+    flush();
+    html += e(p);
+  });
+  flush();
+  return html.replace(/<\/i> <i>/g, ' ').replace(/ +<\/i>/g, '</i> ').trim();
+}
+window.sciNameHtml = sciNameHtml;
 function getBadgeInfo(type, name) { return { cls: 'badge--' + (type || 'species'), txt: type || 'species' }; }
 function paginateGenus(genusEl, page) {}
 // An "individual" is a numbered/named single plant of a species ('HR1'); it lives on the species page, not in lists
@@ -499,6 +517,8 @@ function showPage(pageId) {
   if (window._pageAbort) { window._pageAbort.abort(); window._pageAbort = null; }
   _currentPageId = pageId;
   document.documentElement.removeAttribute('data-boot');
+  var staticEntry = document.getElementById('static-entry');
+  if (staticEntry) staticEntry.remove();   // the plain first screen of a stub gives way to the real page
 
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   // profile-edit maps to page-profile-edit
@@ -2536,7 +2556,7 @@ if (false) {
       : '<span class="thumb-mono" aria-hidden="true">' + escHtml((displayName.split(' ').slice(1).join(' ').replace(/[^A-Za-z]/g, '').charAt(0) || displayName.charAt(0)).toLowerCase()) + '</span>';
     h += '<div class="cultivar-row__thumb' + (locked ? ' seedling-thumb--locked' : '') + '">' + thumbContent + '</div>';
     h += '<div class="cultivar-row__info">';
-    h += '<div class="cultivar-row__name" data-key="' + escHtml(fullName) + '">' + escHtml(displayName) + '</div>';
+    h += '<div class="cultivar-row__name" data-key="' + escHtml(fullName) + '">' + sciNameHtml(displayName) + '</div>';
     h += '<div class="cultivar-row__meta">';
     if (!isSeedling) h += '<span>' + t('origin_prefix') + originCount + t('origin_count_suffix') + '</span>';
     h += '<span class="badge ' + bi.cls + '">' + bi.txt + '</span>';

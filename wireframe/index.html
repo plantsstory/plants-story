@@ -14,8 +14,8 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.yahoo.co.jp https://i.moshimo.com; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJK72JH471"></script>
-  <script src="js/textsize.js?v=20261003i"></script>
-  <script src="js/gtag-init.js?v=20261003i"></script>
+  <script src="js/textsize.js?v=20261003j"></script>
+  <script src="js/gtag-init.js?v=20261003j"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -54,13 +54,13 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20261003i">
-  <link rel="stylesheet" href="css/reset.css?v=20261003i">
-  <link rel="stylesheet" href="css/layout.css?v=20261003i">
-  <link rel="stylesheet" href="css/components.css?v=20261003i">
-  <link rel="stylesheet" href="css/pages.css?v=20261003i">
-  <link rel="stylesheet" href="css/utilities.css?v=20261003i">
-  <link rel="stylesheet" href="css/archive.css?v=20261003i">
+  <link rel="stylesheet" href="css/variables.css?v=20261003j">
+  <link rel="stylesheet" href="css/reset.css?v=20261003j">
+  <link rel="stylesheet" href="css/layout.css?v=20261003j">
+  <link rel="stylesheet" href="css/components.css?v=20261003j">
+  <link rel="stylesheet" href="css/pages.css?v=20261003j">
+  <link rel="stylesheet" href="css/utilities.css?v=20261003j">
+  <link rel="stylesheet" href="css/archive.css?v=20261003j">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -144,7 +144,7 @@
         </figure>
         <dl class="ledger masthead__ledger">
           <div><dt data-i18n="ledger_entries">収録品種</dt><dd id="ledger-count">—</dd></div>
-          <div><dt data-i18n="ledger_years">記載年</dt><dd id="ledger-years">—</dd></div>
+          <div><dt data-i18n="ledger_years">発表年</dt><dd id="ledger-years">—</dd></div>
           <div><dt data-i18n="ledger_localities">産地（国）</dt><dd id="ledger-localities">—</dd></div>
           <div><dt data-i18n="ledger_updated">最終更新</dt><dd id="ledger-updated">—</dd></div>
         </dl>
@@ -529,17 +529,17 @@
           <div class="form-radio-group">
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="species" checked>
-              <span data-i18n="type_species">原種 (Original species)</span>
+              <span data-i18n="type_species">原種</span>
               <span class="type-hint" data-hint="学術的に記載された種と未記載種等も含む">?<span class="type-hint__popup">学術的に記載された種と未記載種等も含む</span></span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="hybrid">
-              <span data-i18n="type_hybrid">ハイブリッド (Hybrid)</span>
+              <span data-i18n="type_hybrid">Hybrid</span>
               <span class="type-hint" data-hint="交配式につく品種名（例: 特定の親で作られたF1の不特定多数の選抜個体につく名前）">?<span class="type-hint__popup">交配式につく品種名（例: 特定の親で作られたF1の不特定多数の選抜個体につく名前）</span></span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="clone">
-              <span data-i18n="type_clone">クローン (Clone)</span>
+              <span data-i18n="type_clone">Clone</span>
               <span class="type-hint" data-hint="特定の個体についた品種名（selfやF個体等の画像掲載可能）">?<span class="type-hint__popup">特定の個体についた品種名（selfやF個体等の画像掲載可能）</span></span>
             </label>
             <label class="form-radio">
@@ -1054,8 +1054,8 @@
       <h2>区分と名前の書き方</h2>
       <p>区分は4つ。判定の軸はひとつ、「その名前を名乗る株は、1個体の栄養繁殖由来だけか」です。</p>
       <dl class="glossary">
-        <dt>原種（Species）</dt><dd>自然界の種。学名データベース（IPNI / POWO）に照らして、記載者・記載年・タイプ産地・分布を記録します。未同定は sp.、近縁は aff.、要確認は cf. を付けます（例: <i>Anthurium</i> sp. "Peru"）。</dd>
-        <dt>Hybrid</dt><dd>特定の交配式から得た実生群の名前。交配式（母 × 父）が必須です。作出者と命名年を添えます。例: <i>Anthurium</i> 'Mystique A88'。</dd>
+        <dt>原種（Species）</dt><dd>自然界の種。学名データベース（IPNI / POWO）に照らして、記載者・発表年・タイプ産地・分布を記録します。未同定は sp.、近縁は aff.、要確認は cf. を付けます（例: <i>Anthurium</i> sp. "Peru"）。</dd>
+        <dt>Hybrid</dt><dd>特定の交配式から得た実生群の名前。交配式（母 × 父）を書きます。親が不明・複合のときはそう明記します。作出者と命名年を添えます。例: <i>Anthurium</i> 'Red Crystallinum'。</dd>
         <dt>Clone</dt><dd>1個体の名前。オリジナル個体を指し、その分け株・組織培養株も同じ名前です。実生（F 個体）は別の株なので、その名前は名乗りません。例: <i>Anthurium</i> 'King of Spades'。</dd>
         <dt>実生（Seedling）</dt><dd>自分で播いた記録。交配式・播種日・作出者で識別します。ログインした人は5件まで無料で、非公開にもできます。</dd>
         <dt>個体（原種の株）</dt><dd>原種の1株に付けた番号や名前（例: <i>carlablackiae</i> 'HR1'、'Dark Star'）。Clone の一種として、その原種のページの「個体」欄に載ります。一覧や件数には数えません。</dd>
@@ -1064,7 +1064,7 @@
 
       <h2>記録の読み方</h2>
       <dl class="glossary">
-        <dt>標本ラベル</dt><dd>品種名の下にある表。原種なら記載者・記載年・採集者・タイプ産地・分布、交配種なら作出者・年・交配式。ここが要約です。</dd>
+        <dt>標本ラベル</dt><dd>品種名の下にある表。原種なら記載者・発表年・採集者・タイプ産地・分布、交配種なら作出者・年・交配式。ここが要約です。</dd>
         <dt>記録 1、記録 2 …</dt><dd>写真の下に並ぶ、出典つきの記録です。見出しの「IPNI / POWO · Tier S · 95%」は、誰が書いた記録か、出典の階層（S〜D）、信頼度を示します。信頼度が高い順に並びます。</dd>
         <dt>投稿者の記録 · 出典なし</dt><dd>栽培者や作出者本人が書いた記録で、出典 URL が無いもの。信頼度の数字は付けません。内容が正しくないと思ったら「疑問」の投票か「報告」から知らせてください。</dd>
         <dt>AI 下書き</dt><dd>出典が無く信頼度の低い AI 生成文は、折り畳んで「下書き」と表示します。記録には数えません。</dd>
@@ -1083,7 +1083,7 @@
       </ol>
 
       <h2>標本ラベルの印刷</h2>
-      <p>品種ページから、名前・記載者・年・QR コードを入れた標本ラベルを印刷できるようにします（準備中。9 月末に公開予定）。</p>
+      <p>品種ページから、名前・記載者・年・QR コードを入れた標本ラベルを印刷できるようにします（準備中）。</p>
 
       <h2>会員</h2>
       <p>閲覧と投稿は無料です。実生ノートを6件目以降も残したい人、非公開の記録を増やしたい人のために会員があります。内容と料金は<a href="/pricing/" data-nav="pricing">料金ページ</a>をご覧ください。</p>
@@ -1220,7 +1220,7 @@
         <dt id="g-kisai">記載（原記載）</dt><dd>その種を新種として初めて学術的に発表すること。その出版物を原記載（protologue）と呼びます。このサイトの「発表年」は原記載が出版された年です。</dd>
         <dt id="g-kisaisha">記載者</dt><dd>学名を発表した人。学名の後ろに略記で添えます（例: T.Moore、Croat）。括弧付きの記載者（例: (Sims) G.Don）は、別の属や種として最初に発表した人で、括弧の外がいまの名前に組み替えた人です。</dd>
         <dt id="g-type-locality">タイプ標本・タイプ産地</dt><dd>学名の基準として指定された標本と、それが採集された場所。タイプ産地は「その種が最初に見つかった場所」であって、分布の全体ではありません。</dd>
-        <dt id="g-saishusha">採集者</dt><dd>タイプ標本を採集した人。採集番号とともに標本ラベルに記録されます。</dd>
+        <dt id="g-saishusha">採集者</dt><dd>タイプ標本を採集した人。採集番号とともに標本ラベルに記録されます。タイプが栽培株のときは、野外で最初に採集した人と標本の採集者が異なることがあります。</dd>
         <dt id="g-bunpu">分布（生息地）</dt><dd>現在知られている自生範囲。タイプ産地より広いのが普通です。</dd>
         <dt id="g-synonym">異名（シノニム）・旧綴り</dt><dd>同じ植物に対して過去に使われた別の学名や綴り（例: <i>debilis</i> → <i>debile</i>）。このサイトでは「別名・旧綴り」欄に残します。</dd>
       </dl>
@@ -1236,7 +1236,7 @@
 
       <h2>交配と品種</h2>
       <dl class="glossary">
-        <dt id="g-formula">交配式</dt><dd>母親 × 父親 の形で書きます。母（種子親）を先に、× は前後に半角スペースを入れて書きます（例: <i>Anthurium warocqueanum</i> × <i>A. papillilaminum</i>）。</dd>
+        <dt id="g-formula">交配式</dt><dd>母親 × 父親 の形で書きます。母（種子親）を先に、× は前後に半角スペースを入れて書きます（例: <i>Anthurium forgetii</i> × <i>Anthurium</i> 'Titanium'）。</dd>
         <dt id="g-f1">F1 / F2 / self</dt><dd>F1 は交配で得られた第1世代、F2 は F1 同士を交配した第2世代、self は同じ株の自家受粉から得られた実生です。</dd>
         <dt id="g-original">オリジナル（原個体）・選抜個体</dt><dd>実生群の中から選ばれ、名前を付けられた1株。その名前はオリジナル個体を指し、オリジナルの実生（F 個体）は同じ名前で流通していてもオリジナルではありません。</dd>
         <dt id="g-clone">クローン</dt><dd>1個体を株分け・挿し木・組織培養で増やしたもの。遺伝的に同一です。<a href="#" data-nav="guide">使い方ガイド</a>の区分の説明も参照してください。</dd>
@@ -1250,7 +1250,7 @@
       <h2>個体・系統・収録</h2>
       <dl class="glossary">
         <dt id="g-individual">個体</dt><dd>原種の1株に付けた番号や名前（'HR1' など）。株分けや組織培養で増えた株も同じ個体。実生で生まれた子は別の個体で、親の名前を引き継がない。その原種のページの「個体」欄に載り、一覧や件数には数えない。</dd>
-        <dt id="g-line">系統（line）</dt><dd>同じ名前で世代を重ねた実生が流通している集団。遺伝的に異なる株を含むため、その名前は1個体ではなく「系統」を指す。このサイトではタグ line で示す。</dd>
+        <dt id="g-line">系統（line）</dt><dd>同じ名前で実生（F 個体）も流通していることを示す印。名前そのものがオリジナル個体を指すか（Clone）、実生群を指すか（Hybrid）は区分で示し、この印はそれとは別に「同名の実生が出回っている」ことだけを表す。このサイトではタグ line で示す。</dd>
         <dt id="g-code">管理番号</dt><dd>生産者や愛好家が個体の識別に付ける番号（'HR1'・'A88'）。品種名と同じシングルクォートで書き、命名者と命名年を添える。番号だけでは種を示さない。</dd>
         <dt id="g-unrecorded">未収録</dt><dd>記録はあるが、区分ごとの必須項目（記載者・年・出典、交配式・作出者、播種日など）が揃わず品質ゲートを通っていない状態。検索エンジンと件数には出さない。「記録を追加」で埋められる。</dd>
         <dt id="g-draft">AI 下書き</dt><dd>出典 URL が無く信頼度 40 未満の AI 生成文。折り畳んで表示し、記録には数えない。人の記録か出典が付けば記録になる。</dd>
@@ -1527,14 +1527,14 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/record-gate.js?v=20261003i"></script>
-  <script src="js/app-core.js?v=20261003i"></script>
-  <script src="js/pages.js?v=20261003i"></script>
-  <script src="js/forms.js?v=20261003i"></script>
-  <script src="js/entry-meta.js?v=20261003i"></script>
-  <script src="js/archive.js?v=20261003i"></script>
-  <script src="js/tool-gate.js?v=20261003i"></script>
-  <script src="js/tools.js?v=20261003i"></script>
+  <script src="js/record-gate.js?v=20261003j"></script>
+  <script src="js/app-core.js?v=20261003j"></script>
+  <script src="js/pages.js?v=20261003j"></script>
+  <script src="js/forms.js?v=20261003j"></script>
+  <script src="js/entry-meta.js?v=20261003j"></script>
+  <script src="js/archive.js?v=20261003j"></script>
+  <script src="js/tool-gate.js?v=20261003j"></script>
+  <script src="js/tools.js?v=20261003j"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1544,7 +1544,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261003i"></script>
+  <script src="js/dialogs.js?v=20261003j"></script>
 
   <!-- AI re-research request dialog -->
   <dialog id="research-request-dialog" class="dialog-clean" aria-labelledby="research-request-title">
@@ -1583,6 +1583,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261003i"></script>
+<script src="js/sw-register.js?v=20261003j"></script>
 </body>
 </html>

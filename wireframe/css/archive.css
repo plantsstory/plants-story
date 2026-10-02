@@ -1123,3 +1123,34 @@ html[data-boot="deep"] #page-top { display: none !important; }
 .specimen__cell--wide { grid-column: 1 / -1; }
 .specimen__cell--verify .specimen__v { font-size: 0.74rem; letter-spacing: 0.02em; }
 .verified-mark { margin-left: 4px; color: var(--color-green); font-weight: 700; font-size: 0.8rem; }
+
+/* T56: names use lining numerals ('HR1' must not read 'HRı'); italics come from sciNameHtml */
+h1, h2, h3, .ledger-table__name, .cultivar-row__name, .story__title, .related__nav-name, .index__sub a, .shop-card__name { font-variant-numeric: lining-nums; }
+.cultivar-row__name i, .ledger-table__name i, h1 i, .story__title i { font-style: italic; }
+
+/* T57: plain first screen of a stub (before the scripts run). The real pages are hidden behind it on a deep link. */
+.static-entry { padding-top: var(--space-lg); padding-bottom: var(--space-xl); }
+.static-entry .detail-title { font-family: var(--font-display); font-weight: 600; font-size: 2rem; line-height: 1.15; margin: 0 0 6px; }
+.static-entry__cite { font-size: 0.72rem; letter-spacing: 0.06em; color: var(--color-mid); margin: 0 0 6px; }
+.static-entry__aliases { font-size: var(--font-size-sm); color: var(--color-mid); margin: 0 0 var(--space-md); }
+.static-entry__plate { margin: 0 0 var(--space-md); border: 1px solid var(--color-rule); background: var(--color-paper-2); aspect-ratio: 4 / 5; max-width: 460px; display: flex; align-items: center; justify-content: center; }
+.static-entry__plate img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.static-entry__text { font-size: var(--font-size-md); line-height: 1.9; max-width: 36em; }
+.static-entry__related { font-size: 0.7rem; color: var(--color-mid); }
+html[data-boot="deep"] #static-entry ~ .page { display: none !important; }
+
+/* ---------- T58: tools catalogue on phones — one item per row, image on the left; outlined 44px store links ---------- */
+.shop-card__shops a { min-height: 44px; font-size: 0.72rem; background: transparent !important; color: var(--color-ink) !important; border: 1px solid var(--color-ink); }
+.shop-card__shops a:hover { background: var(--color-ink) !important; color: var(--color-paper) !important; }
+.shop-btn--primary { background: transparent; color: var(--color-ink); border-width: 2px; }
+.shop-btn--primary:hover { background: var(--color-ink); color: var(--color-paper); }
+.tools-lead + .pr-line { margin-top: 0; margin-bottom: var(--space-md); }
+@media (max-width: 640px) {
+  .shop-grid { grid-template-columns: 1fr; gap: 0; border-top: 1px solid var(--color-ink); }
+  .shop-card { display: grid; grid-template-columns: 96px minmax(0, 1fr); border: 0; border-bottom: 1px solid var(--color-rule); border-radius: 0; padding: 10px 0; gap: 12px; }
+  .shop-card__img { aspect-ratio: 1 / 1; border: 1px solid var(--color-rule); align-self: start; }
+  .shop-card__body { padding: 0; }
+  .shop-card__name { font-size: 0.9rem; }
+  .shop-card__price { font-size: 1.05rem; margin: 2px 0 0; }
+  .shop-card__shops a { flex: 0 1 auto; padding: 0 12px; }
+}
