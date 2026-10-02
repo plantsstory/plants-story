@@ -2242,6 +2242,8 @@ updateCultivarDetail = function(cultivarName, rowEl) {
 
   // --- Supabase Storage helpers ---
   function getPublicUrl(storagePath) {
+    // the detail gallery shows photos at most ~600px wide; 1200 keeps them sharp on phones
+    if (BUCKET_NAME === 'gallery-images' && window.galleryImg) return window.galleryImg(storagePath, 1200);
     return getSupabaseUrl() + '/storage/v1/object/public/' + BUCKET_NAME + '/' + storagePath;
   }
 

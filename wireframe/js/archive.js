@@ -218,11 +218,11 @@
       setTimeout(tick, 150);
     })();
   }
-  function thumbUrl(displayName) {
+  function thumbUrl(displayName, w) {
     var map = (typeof _thumbMap !== 'undefined') ? _thumbMap : (window._thumbMap || {});
     var p = map[displayName];
     if (!p || !window._SUPABASE_URL) return '';
-    return window._SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + p;
+    return window.galleryImg ? window.galleryImg(p, w || 800) : window._SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + p;
   }
   function link(d, inner, extraClass) {
     return '<a href="' + esc(d.href) + '" data-nav="cultivar" data-key="' + esc(d.fullName) + '"' + (extraClass ? ' class="' + extraClass + '"' : '') + '>' + inner + '</a>';
@@ -439,7 +439,7 @@
         var stamp = item.created_at || item.updated_at || '';
         no = stamp ? fmtDate(stamp).slice(5) : '—';   // MM.DD
       }
-      var thumb = thumbMap[d.displayName] && baseUrl ? baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[d.displayName] : '';
+      var thumb = thumbMap[d.displayName] && baseUrl ? (window.galleryImg ? window.galleryImg(thumbMap[d.displayName], 120) : baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[d.displayName]) : '';
       html += '<tr role="link" tabindex="0" data-nav="cultivar" data-key="' + esc(d.fullName) + '">';
       html += '<td class="ledger-table__no">' + esc(no) + '</td>';
       html += '<td class="ledger-table__cell-name"><div class="flex-center-sm">' + (thumb ? '<img class="ledger-table__thumb" src="' + esc(thumb) + '" alt="" loading="lazy" decoding="async">' : '') + '<span class="ledger-table__name">' + esc(d.displayName) + '</span></div></td>';

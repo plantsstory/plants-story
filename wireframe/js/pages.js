@@ -801,7 +801,7 @@ function renderFavoritesPage() {
 
       // Thumbnail or plant icon
       if (thumbMap[displayName] && baseUrl) {
-        var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
+        var url = window.galleryImg ? window.galleryImg(thumbMap[displayName], 480) : baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
         html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '" width="260" height="160" decoding="async"></div>';
       } else {
         html += '<div class="recent-card__img">';

@@ -1310,6 +1310,22 @@ if (false) {
       });
       window._supabaseClient = supabase;
       window._SUPABASE_URL = SUPABASE_URL;
+      // Photos at the width they are shown: originals are 1.5–5 MB phone photos.
+      // galleryImg(path, w) → resized copy; if the resize service fails, the <img> falls back to the original once.
+      window.galleryImg = function (path, w) {
+        if (!path) return '';
+        var p = String(path).split('/').map(encodeURIComponent).join('/');
+        return SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + p + '?width=' + (w || 640) + '&height=' + ((w || 640) * 2) + '&resize=contain&quality=72';   // fit inside w × 2w, keeping the shape
+      };
+      window.galleryOriginal = function (path) { return path ? SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + path : ''; };
+      document.addEventListener('error', function (e) {
+        var img = e.target;
+        if (!img || img.tagName !== 'IMG' || img.dataset.resizeFallback) return;
+        var src = img.currentSrc || img.src || '';
+        if (src.indexOf('/storage/v1/render/image/public/') === -1) return;
+        img.dataset.resizeFallback = '1';
+        img.src = src.replace('/storage/v1/render/image/public/', '/storage/v1/object/public/').replace(/\?.*$/, '');
+      }, true);
     }
   } catch(e) { console.warn('Supabase init failed:', e); }
 
@@ -2510,7 +2526,7 @@ if (false) {
     var thumbKey = isSeedling ? displayName : displayName;
     var thumbPath = _thumbMap[thumbKey];
     var thumbContent = thumbPath
-      ? '<img data-src="' + (window._SUPABASE_URL || '') + '/storage/v1/object/public/gallery-images/' + thumbPath + '" class="thumb-img" alt="' + escHtml(displayName) + '" width="60" height="60" decoding="async">'
+      ? '<img data-src="' + (window.galleryImg ? window.galleryImg(thumbPath, 160) : (window._SUPABASE_URL || '') + '/storage/v1/object/public/gallery-images/' + thumbPath) + '" class="thumb-img" alt="' + escHtml(displayName) + '" width="60" height="60" decoding="async">'
       : '<span class="thumb-mono" aria-hidden="true">' + escHtml((displayName.split(' ').slice(1).join(' ').replace(/[^A-Za-z]/g, '').charAt(0) || displayName.charAt(0)).toLowerCase()) + '</span>';
     h += '<div class="cultivar-row__thumb' + (locked ? ' seedling-thumb--locked' : '') + '">' + thumbContent + '</div>';
     h += '<div class="cultivar-row__info">';
@@ -2697,7 +2713,7 @@ if (false) {
 
         // Thumbnail or fallback icon
         if (thumbMap[displayName] && baseUrl) {
-          var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
+          var url = window.galleryImg ? window.galleryImg(thumbMap[displayName], 480) : baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
           html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '" width="260" height="160" decoding="async"></div>';
         } else {
           html += '<div class="card-img-container recent-card__placeholder">';
@@ -2759,7 +2775,7 @@ if (false) {
 
             // Thumbnail (same card-img-container as recently updated for size consistency)
             if (thumbMap[displayName] && baseUrl) {
-              var url = baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
+              var url = window.galleryImg ? window.galleryImg(thumbMap[displayName], 480) : baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
               html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '" width="260" height="160" decoding="async"></div>';
             } else {
               html += '<div class="card-img-container recent-card__placeholder">';
