@@ -42,12 +42,14 @@ function items(data: any): any[] {
   return list.map((x: any) => x?.Item || x);
 }
 
+let REFERRER = Deno.env.get("RAKUTEN_REFERRER") || "https://plantsstory.com/";
 async function rakuten(params: Record<string, string>) {
   const appId = Deno.env.get("RAKUTEN_APP_ID"), accessKey = Deno.env.get("RAKUTEN_ACCESS_KEY");
   if (!appId || !accessKey) throw new Error("RAKUTEN_APP_ID / RAKUTEN_ACCESS_KEY が設定されていません");
   const q = new URLSearchParams({ applicationId: appId, accessKey, affiliateId: RAKUTEN_AFFILIATE_ID, formatVersion: "2", ...params });
   for (let attempt = 0; attempt < 3; attempt++) {
-    const r = await fetch(RAKUTEN_ENDPOINT + "?" + q.toString(), { headers: { accessKey } });
+    // the app is registered to the site, so Rakuten wants the site as the referrer
+    const r = await fetch(RAKUTEN_ENDPOINT + "?" + q.toString(), { headers: { accessKey, Referer: REFERRER, Origin: new URL(REFERRER).origin } });
     if (r.status === 429) { await sleep(2000 * (attempt + 1)); continue; }
     const data = await r.json();
     if (data?.errors || data?.error) throw new Error("楽天 API: " + (data.errors?.errorMessage || data.error_description || data.error || JSON.stringify(data.errors)));
@@ -91,10 +93,16 @@ serve(async (req) => {
     // admin only
     const auth = req.headers.get("Authorization") || "";
     const userClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } });
-    const { data: { user } } = await userClient.auth.getUser();
-    if (!user || user.app_metadata?.role !== "admin") return json(req, { error: "admin only" }, 403);
+    const { data: { user } } = await userClient.auth.getUser().catch(() => ({ data: { user: null } }));
+    // the service key (server-side checks only) counts as admin
+    // a key that can list auth users is a real service key (checked only when the caller is not an admin user)
+    const isService = (!user || user.app_metadata?.role !== "admin") && await (async () => {
+      try { const c = createClient(Deno.env.get("SUPABASE_URL")!, auth.replace(/^Bearer /, "")); const r = await c.auth.admin.listUsers({ page: 1, perPage: 1 }); return !r.error; } catch (_e) { return false; }
+    })();
+    if (!isService && (!user || user.app_metadata?.role !== "admin")) return json(req, { error: "admin only" }, 403);
     const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const body = await req.json().catch(() => ({}));
+    if (isService && body.referrer) REFERRER = String(body.referrer);   // checks from the server only
 
     if (body.mode === "refresh") {
       const { data: rows } = await db.from("affiliates").select("id, ext_id").eq("source", "rakuten").not("ext_id", "is", null);
@@ -160,6 +168,7 @@ serve(async (req) => {
         is_published: body.publish !== false, sort_order: order++, icon: "",
       });
     }
+    if (body.dryRun) return json(req, { dryRun: true, considered: pool.length, rows: rows.map((r) => ({ name: r.product_name, maker: r.maker, spec: r.spec, price: r.price, reviews: r.review_count, rating: r.review_average, image: r.image, summary: r.summary, description: r.description })) });
     if (rows.length) {
       const { error } = await db.from("affiliates").insert(rows);
       if (error) throw error;
