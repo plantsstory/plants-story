@@ -16,6 +16,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/record-gate.js?v=20260930a"></script>
   <script src="js/tool-gate.js?v=20260930a"></script>
+  <script src="js/admin-ledger.js?v=20261002a"></script>
 </head>
 <body>
 
@@ -66,6 +67,8 @@
       <a href="#" data-section="genus-requests">属の追加依頼</a>
       <a href="#" data-section="gate">未収録一覧</a>
       <a href="#" data-section="affiliates">道具（アフィリエイト）</a>
+      <a href="#" data-section="ledger">帳簿</a>
+      <a href="#" data-section="plants">株台帳</a>
       <a href="#" data-section="users">ユーザー管理</a>
       <a href="#" data-section="bulk">一括操作</a>
       <a href="#" data-section="error-logs">エラーログ</a>
@@ -301,6 +304,18 @@
         <p class="desc-text">記録はあるが区分別の必須項目を満たしていないもの（未収録）、記録が無いもの、AI 調査が 72 時間を超えて終わっていないもの（調査失敗）。告知ゲート M3 はこの一覧がゼロになることです。</p>
         <div id="gate-list" class="d-grid gap-md"></div>
         <p id="gate-empty" class="desc-text">すべて収録済みです</p>
+      </section>
+
+      <!-- ---- LEDGER (帳簿) ---- -->
+      <section id="sec-ledger" class="hidden">
+        <h2 class="section-title">帳簿</h2>
+        <div id="ledger-root"></div>
+      </section>
+
+      <!-- ---- PLANT STOCK (株台帳) ---- -->
+      <section id="sec-plants" class="hidden">
+        <h2 class="section-title">株台帳</h2>
+        <div id="plants-root"></div>
       </section>
 
       <!-- ---- AFFILIATES ---- -->
@@ -931,6 +946,8 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
     if (section === 'genera') loadAdminGenera();
     if (section === 'origins') loadOrigins();
     if (section === 'affiliates') loadAffiliates();
+    if (section === 'ledger' && window.loadLedger) window.loadLedger();
+    if (section === 'plants' && window.loadPlants) window.loadPlants();
     if (section === 'keyword-research') populateKRSelect();
     closeNav();
   });
