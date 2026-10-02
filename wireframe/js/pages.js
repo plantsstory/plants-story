@@ -1154,7 +1154,7 @@ function renderOriginsInner(cultivarName, container) {
     rh += '<span class="vote-group">' + renderVoteButtons(i, origin.votes) + '</span></footer>';
     rh += '</article>';
     // AI text without a citable source and low trust is a draft: folded, not a record
-    if (window.RecordGate && window.RecordGate.isDraft(origin)) {
+    if (window.RecordGate && window.RecordGate.isDraft(origin) && !(data && data._verifiedAt)) {
       html += '<details class="record record--draft"><summary class="mono">' + t('draft_label').replace('{n}', trustNum) + '</summary>' + rh.replace('class="record"', 'class="record record__inner"') + '</details>';
     } else {
       html += rh;

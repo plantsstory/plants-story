@@ -2199,5 +2199,29 @@
   "member_about_btn": {
     "jp": "会員について",
     "en": "About membership"
+  },
+  "spec_verification": {
+    "jp": "検証",
+    "en": "Verification"
+  },
+  "verified_label": {
+    "jp": "検証済",
+    "en": "Verified"
+  },
+  "verified_none": {
+    "jp": "未検証",
+    "en": "Not verified"
+  },
+  "verified_community": {
+    "jp": "コミュニティ評価 正確 {a} / 疑問 {d}",
+    "en": "Community: accurate {a} / doubtful {d}"
+  },
+  "verified_disputed": {
+    "jp": "異説あり",
+    "en": "Disputed"
+  },
+  "verified_title": {
+    "jp": "管理者が出典を確認した記録",
+    "en": "Sources checked by the editor"
   }
 }

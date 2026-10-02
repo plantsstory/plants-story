@@ -2545,7 +2545,7 @@ if (false) {
     if (!isSeedling) {
       // No separate "AI pending" badge: the state column carries it
       h += hasDesc
-        ? '<div class="trust"><div class="trust__bar"><div class="trust__fill ' + getTrustClass(trustPct) + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + trustPct + '%</span></div>'
+        ? '<div class="trust"><div class="trust__bar"><div class="trust__fill ' + getTrustClass(trustPct) + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + trustPct + '%</span>' + (entry._verifiedAt ? '<span class="verified-mark" title="' + escHtml(t('verified_title')) + '">✓</span>' : '') + '</div>'
         : (byUser ? '<span class="mono cultivar-row__state">' + t('record_by_user') + '</span>' : '<span class="mono cultivar-row__state cultivar-row__state--' + recState + '">' + t('state_' + recState) + '</span>');
     }
     h += '</div>';
@@ -2827,7 +2827,7 @@ if (false) {
     // Then load from Supabase (async, authoritative source)
     // Fetch only needed columns to reduce payload size
     if (supabase) {
-      supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, parent_a_text, parent_b_text, parent_a_id, parent_b_id, is_private, ai_status, selected_from_id, updated_at, formula_status').then(function(res) {
+      supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, verified_at, verification_note, parent_a_text, parent_b_text, parent_a_id, parent_b_id, is_private, ai_status, selected_from_id, updated_at, formula_status').then(function(res) {
         if (res.error || !res.data) return;
 
         // Collect unique user_ids to fetch profiles
@@ -2860,7 +2860,8 @@ if (false) {
             _nameStatus: row.name_status || null, _locality: row.locality || null,
             _parents: [row.parent_a_text || null, row.parent_b_text || null], _parentIds: [row.parent_a_id || null, row.parent_b_id || null],
             _isPrivate: !!row.is_private, _selectedFrom: row.selected_from_id || null,
-            _updatedAt: row.updated_at || null, _formulaStatus: row.formula_status || null };
+            _updatedAt: row.updated_at || null, _formulaStatus: row.formula_status || null,
+            _verifiedAt: row.verified_at || null, _verificationNote: row.verification_note || null };
           var genus = row.genus || 'Anthurium';
           var meta = { genus: genus, type: row.type || 'Hybrid', created_at: row.created_at || '', user_id: row.user_id || null, id: row.id, is_private: !!row.is_private, ai_status: row.ai_status || null };
           addCultivarRow(row.cultivar_name, entry, meta);

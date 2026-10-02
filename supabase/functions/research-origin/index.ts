@@ -1656,7 +1656,15 @@ serve(async (req: Request) => {
     const authClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user: authUser }, error: authError } = await authClient.auth.getUser();
+    let { data: { user: authUser }, error: authError } = await authClient.auth.getUser();
+    if (authError || !authUser) {
+      // server-side runs with the service key act as the admin account (checked by what the key can do)
+      try {
+        const keyClient = createClient(supabaseUrl, String(authHeader || "").replace(/^Bearer /, ""));
+        const r = await keyClient.auth.admin.listUsers({ page: 1, perPage: 50 });
+        if (!r.error) { authUser = (r.data.users || []).find((u: any) => u.app_metadata?.role === "admin") || null; authError = null; }
+      } catch (_e) { /* not a service key */ }
+    }
     if (authError || !authUser) {
       return new Response(
         JSON.stringify({ error: "Invalid or expired token" }),

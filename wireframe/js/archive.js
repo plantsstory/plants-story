@@ -134,6 +134,8 @@
     // an individual (numbered or named plant of a species) is marked by its tag only (BOARD 09-07);
     // a Clone selected from another clone keeps its own page in the index
     d.isIndividual = d.tags.indexOf('individual') !== -1;
+    d.verifiedAt = entry._verifiedAt || null;
+    d.verificationNote = clean(entry._verificationNote);
     d.nameStatus = entry._nameStatus || null;
     d.formLocality = clean(entry._locality);
     d.creator = clean(d.formula && d.formula.creatorName);
@@ -453,7 +455,7 @@
       html += '<td class="ledger-table__cell-meta ledger-table__meta">' + (cite ? '<span class="mono">' + cite + '</span>' : '') + (d.parentA && d.parentB ? '<div class="text-xs">' + esc(d.parentA) + ' × ' + esc(d.parentB) + '</div>' : '') + '</td>';
       if (rowState !== 'ok') html += '<td class="ledger-table__cell-trust right"><span class="mono ledger-table__state">' + esc(T('state_' + rowState)) + '</span></td>';
       else if (!d.hasSources && d.type !== 'seedling') html += '<td class="ledger-table__cell-trust right"><span class="mono ledger-table__state">' + esc(T('record_by_user')) + '</span></td>';
-      else html += '<td class="ledger-table__cell-trust right">' + (d.trust > 0 ? '<div class="trust"><div class="trust__bar"><div class="trust__fill ' + trustCls + '" style="width:' + d.trust + '%"></div></div><span class="trust__label">' + d.trust + '%</span></div>' : '<span class="mono">—</span>') + '</td>';
+      else html += '<td class="ledger-table__cell-trust right">' + (d.trust > 0 ? '<div class="trust"><div class="trust__bar"><div class="trust__fill ' + trustCls + '" style="width:' + d.trust + '%"></div></div><span class="trust__label">' + d.trust + '%</span>' + (d.verifiedAt ? '<span class="verified-mark">✓</span>' : '') + '</div>' : '<span class="mono">—</span>') + '</td>';
       html += '</tr>';
     });
     html += '</tbody></table></div>';
@@ -513,6 +515,17 @@
     // on the label: at most three Latin-script names; katakana stays for search and JSON-LD
     var labelAliases = (d.aliases || []).filter(function (a, i, arr) { return /[A-Za-z]/.test(a) && !/[゠-ヿ]/.test(a) && arr.indexOf(a) === i; }).slice(0, 3);
     if (labelAliases.length) cells += cell('spec_aliases', esc(labelAliases.join(' / ')));
+    // the last line of every label: 検証 (BOARD §3.4)
+    if (d.type !== 'seedling') {
+      var ver;
+      if (d.verifiedAt) ver = '✓ ' + esc(T('verified_label')) + ' ' + esc(fmtDate(d.verifiedAt)) + (d.verificationNote && d.verificationNote.indexOf('[要再確認]') !== 0 ? ' — ' + esc(d.verificationNote) : '');
+      else {
+        var vv = (d.origin && d.origin.votes) || {}, ag = parseInt(vv.agree, 10) || 0, dg = parseInt(vv.disagree, 10) || 0;
+        ver = (ag >= 3 && ag > dg) ? esc(T('verified_community').replace('{a}', ag).replace('{d}', dg)) : esc(T('verified_none'));
+      }
+      if (d.nameStatus === 'disputed') ver += ' ／ ' + esc(T('verified_disputed'));
+      cells += '<div class="specimen__cell specimen__cell--wide specimen__cell--verify"><span class="specimen__k">' + esc(T('spec_verification')) + '</span><span class="specimen__v mono">' + ver + '</span></div>';
+    }
     var note = d.nameStatus === 'disputed' ? T('name_status_disputed') : d.nameStatus === 'trade' ? T('name_status_trade') : d.nameStatus === 'informal' ? T('name_status_informal') : '';
     el.innerHTML = (cells ? '<div class="specimen">' + cells + '</div>' : '') + (note ? '<p class="specimen__note mono">' + esc(note) + '</p>' : '');
   }

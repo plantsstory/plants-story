@@ -14,10 +14,11 @@
   <link rel="stylesheet" href="css/utilities.css">
   <link rel="stylesheet" href="css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/record-gate.js?v=20261003h"></script>
-  <script src="js/tool-gate.js?v=20261003h"></script>
-  <script src="js/admin-ledger.js?v=20261003h"></script>
-  <script src="js/admin-tools-research.js?v=20261003h"></script>
+  <script src="js/record-gate.js?v=20261003i"></script>
+  <script src="js/tool-gate.js?v=20261003i"></script>
+  <script src="js/admin-ledger.js?v=20261003i"></script>
+  <script src="js/admin-tools-research.js?v=20261003i"></script>
+  <script src="js/admin-verify.js?v=20261003i"></script>
 </head>
 <body>
 
@@ -67,6 +68,7 @@
       <a href="#" data-section="research-requests">再調査リクエスト <span id="rr-badge" class="d-none" style="background:#A8712E;color:#fff;border-radius:10px;padding:0 6px;font-size:0.7rem;"></span></a>
       <a href="#" data-section="genus-requests">属の追加依頼</a>
       <a href="#" data-section="gate">未収録一覧</a>
+      <a href="#" data-section="verify">検証</a>
       <a href="#" data-section="affiliates">道具（アフィリエイト）</a>
       <a href="#" data-section="ledger">帳簿</a>
       <a href="#" data-section="plants">株台帳</a>
@@ -305,6 +307,12 @@
         <p class="desc-text">記録はあるが区分別の必須項目を満たしていないもの（未収録）、記録が無いもの、AI 調査が 72 時間を超えて終わっていないもの（調査失敗）。告知ゲート M3 はこの一覧がゼロになることです。</p>
         <div id="gate-list" class="d-grid gap-md"></div>
         <p id="gate-empty" class="desc-text">すべて収録済みです</p>
+      </section>
+
+      <!-- ---- VERIFY (検証) ---- -->
+      <section id="sec-verify" class="hidden">
+        <h2 class="section-title">検証</h2>
+        <div id="verify-root"></div>
       </section>
 
       <!-- ---- LEDGER (帳簿) ---- -->
@@ -949,6 +957,7 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
     if (section === 'origins') loadOrigins();
     if (section === 'affiliates') loadAffiliates();
     if (section === 'ledger' && window.loadLedger) window.loadLedger();
+    if (section === 'verify' && window.loadVerify) window.loadVerify();
     if (section === 'plants' && window.loadPlants) window.loadPlants();
     if (section === 'keyword-research') populateKRSelect();
     closeNav();

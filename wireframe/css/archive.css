@@ -1118,3 +1118,8 @@ html[data-boot="deep"] #page-top { display: none !important; }
 
 /* T55: pricing summary and the 特商法 notice */
 .pricing-summary, .legal-notice { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.04em; border-top: 1px solid var(--color-ink); border-bottom: 1px solid var(--color-rule); padding: 8px 0; margin: 0 0 var(--space-lg); }
+
+/* T26: verification */
+.specimen__cell--wide { grid-column: 1 / -1; }
+.specimen__cell--verify .specimen__v { font-size: 0.74rem; letter-spacing: 0.02em; }
+.verified-mark { margin-left: 4px; color: var(--color-green); font-weight: 700; font-size: 0.8rem; }
