@@ -14,9 +14,10 @@
   <link rel="stylesheet" href="css/utilities.css">
   <link rel="stylesheet" href="css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/record-gate.js?v=20261002b"></script>
-  <script src="js/tool-gate.js?v=20261002b"></script>
-  <script src="js/admin-ledger.js?v=20261002b"></script>
+  <script src="js/record-gate.js?v=20261002c"></script>
+  <script src="js/tool-gate.js?v=20261002c"></script>
+  <script src="js/admin-ledger.js?v=20261002c"></script>
+  <script src="js/admin-tools-research.js?v=20261002c"></script>
 </head>
 <body>
 
@@ -325,6 +326,7 @@
           <button class="btn btn-primary" id="btn-add-affiliate">＋ 新規追加</button>
           <button class="btn btn-outline" id="btn-refresh-affiliates">更新</button>
         </div>
+        <div id="tools-research-panel" class="mt-md"></div>
         <div id="affiliate-list" class="d-grid gap-md mt-md"></div>
       </section>
 
@@ -2706,6 +2708,11 @@ function renderAffiliateList() {
     html += '<div style="font-size:var(--font-size-xs);color:var(--color-gray);font-family:monospace;">' + escapeHtml(g ? g.code + ' · ' + g.label : 'ジャンル未設定') + (a.slug ? ' · /tools/' + escapeHtml(a.slug) + '/' : '') + '</div>';
     html += '<div style="font-weight:700;font-size:var(--font-size-md);word-break:break-word;">' + escapeHtml(a.product_name) + '</div>';
     html += '<div style="font-size:var(--font-size-sm);color:var(--color-gray);margin-top:2px;">' + escapeHtml([a.maker, a.model, a.price_band].filter(Boolean).join(' · ') || '—') + ' ｜ 順序: ' + (a.sort_order || 0) + '</div>';
+    html += '<div style="font-size:var(--font-size-xs);margin-top:2px;color:var(--color-gray);">'
+      + (a.owner_used ? '<span style="color:#2d5016;font-weight:700;">使用中</span> · ' : '')
+      + (a.source === 'rakuten' ? '楽天リサーチ' + (a.shop_name ? '（' + escapeHtml(a.shop_name) + '）' : '') : '手動登録')
+      + (a.price ? ' · ¥' + Number(a.price).toLocaleString('ja-JP') + (a.price_checked_at ? '（' + escapeHtml(a.price_checked_at.slice(0, 10)) + '）' : '') : '')
+      + (a.review_count ? ' · レビュー ' + a.review_count + '件 ★' + a.review_average : '') + '</div>';
     html += '<div style="font-size:var(--font-size-xs);margin-top:4px;color:' + (gate.pass ? '#2d5016' : '#a8712e') + ';">'
       + (gate.pass ? '検索に出します（index）' : '検索には出しません（noindex）: ' + escapeHtml(gate.missing.map(ToolGate.label).join('、'))) + '</div>';
     html += '</div></div>';
@@ -2727,6 +2734,7 @@ function renderAffiliateList() {
     html += '</div></div>';
   });
   container.innerHTML = html;
+  if (window.renderToolsResearch) window.renderToolsResearch();
 }
 
 async function markAffiliateChecked(id) {
@@ -2763,7 +2771,9 @@ function showAffiliateForm(data) {
     + PRICE_BANDS.map(function(b) { return '<option' + (data.price_band === b ? ' selected' : '') + '>' + b + '</option>'; }).join('') + '</select></div>';
   html += '<div><label class="adm-label">一言（一覧と検索結果の説明、60字まで）</label><input class="form-input" name="summary" maxlength="60" value="' + escapeHtml(data.summary || '') + '"></div>';
   html += '</div>';
-  html += '<div><label class="adm-label">使用記録 *（' + ToolGate.MIN_RECORD + '字以上で検索に出ます）</label><textarea class="form-input" name="body" rows="5">' + escapeHtml(data.body || '') + '</textarea>'
+  html += '<label style="font-size:var(--font-size-sm);"><input type="checkbox" name="owner_used"' + (data.owner_used ? ' checked' : '') + '> 実際に使っている（目録に「使用中」と出ます）</label>';
+  html += '<div><label class="adm-label">商品の説明（事実だけ。効能・用量・価格は書かない）</label><textarea class="form-input" name="description" rows="3">' + escapeHtml(data.description || '') + '</textarea></div>';
+  html += '<div><label class="adm-label">使用記録（使っている人だけ。' + ToolGate.MIN_RECORD + '字以上で検索に出ます）</label><textarea class="form-input" name="body" rows="5">' + escapeHtml(data.body || '') + '</textarea>'
     + '<div id="tool-gate-live" style="font-size:var(--font-size-xs);margin-top:4px;"></div></div>';
   html += '<div><label class="adm-label">対応する自生地の条件</label><div style="display:flex;gap:var(--space-md);flex-wrap:wrap;font-size:var(--font-size-sm);">'
     + ToolGate.HABITATS.map(function(h) { return '<label><input type="checkbox" name="habitat" value="' + h + '"' + ((data.habitat_tags || []).indexOf(h) !== -1 ? ' checked' : '') + '> ' + h + '</label>'; }).join('') + '</div></div>';
@@ -2818,6 +2828,8 @@ function showAffiliateForm(data) {
       spec: form.spec.value.trim() || null,
       price_band: form.price_band.value || null,
       summary: form.summary.value.trim() || null,
+      description: form.description.value.trim() || null,
+      owner_used: form.owner_used.checked,
       body: form.body.value.trim() || null,
       habitat_tags: Array.prototype.slice.call(form.querySelectorAll('input[name="habitat"]:checked')).map(function(c) { return c.value; }),
       species: form.species.value.split(/\n+/).map(function(x) { return x.trim(); }).filter(Boolean).slice(0, 3),

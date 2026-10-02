@@ -1,66 +1,55 @@
-/* Tools catalogue — /tools/ (目録) and /tools/<slug>/ (道具の1頁). BOARD 第5回 (2026-09-30).
-   Reads the `affiliates` rows and `tool_genres`; the index/noindex decision and the shop-link
-   checks live in tool-gate.js so the page, the CI stubs and the sitemap agree.
-   No card grid, no emoji, no photos in the list: a ruled ledger like the rest of the archive. */
+/* Tools catalogue — /tools/ (道具の目録) and /tools/<slug>/ (道具のページ).
+   Shop layout (owner, 2026-10-02): departments, an image next to every name, store links in place of a buy
+   button. Items come from the operator (「使用中」) and from research on the Rakuten Ichiba API.
+   The index/noindex decision and the shop-link checks live in tool-gate.js. */
 (function () {
   'use strict';
   var base = (typeof _basePath === 'string') ? _basePath : '/';
   var Gate = window.ToolGate;
-  var SEARCH_FROM = 20;       // the text box and sort chips appear from 20 items (C10)
-  var GENRE_MIN = 2;          // a genre is listed on its own from 2 items; single items go under ほか
+  var PRICE_FRESH_DAYS = 30;   // an exact price is shown only while it is this recent; otherwise the band
 
   var JP = {
     tools_title: '道具の目録',
-    tools_lead: '自生地の条件（雲霧林・着生・標高）に近づけるための道具を、使った記録とともに並べます。育て方は書きません。',
-    tools_pr: 'PR — このページには楽天市場・Yahoo!ショッピング・Amazon のアフィリエイトリンクを含みます。リンク経由の購入で当サイトに紹介料が入ります。価格・在庫は各ストアの表示が最新です。',
+    tools_lead: '自生地の条件（雲霧林・着生・標高）に近づけるための道具を、部門ごとに集めました。育て方は書きません。',
+    tools_pr: 'PR — このページには楽天市場・Yahoo!ショッピング・Amazon のアフィリエイトリンクを含みます。リンク経由の購入で当サイトに紹介料が入ります。「使用中」の印がある物は運営者が実際に使っている物で、そのほかは販売実績（レビュー数・評価）と仕様を確認して選んだ物です。価格・在庫は各ストアの表示が最新です。',
     tools_pr_amazon: 'Amazonのアソシエイトとして、Aroid Origins は適格販売により収入を得ています。',
-    tools_pr_buy: 'PR — 以下のリンクから購入があった場合、運営者に紹介料が入ります。掲載は運営者が実際に使っているものに限ります。',
-    tools_genres: 'ジャンル',
-    tools_all: 'すべて',
-    tools_other: 'ほか',
-    tools_search: '道具を検索…',
-    tools_sort_genre: 'ジャンル順',
-    tools_sort_price: '価格帯順',
+    tools_pr_buy: 'PR — 以下のリンクから購入があった場合、運営者に紹介料が入ります。価格・在庫は各ストアの表示が最新です。',
+    tools_departments: '部門',
+    tools_all: 'すべての部門',
+    tools_search: '道具を検索',
+    tools_sort_genre: '部門順',
+    tools_sort_low: '価格の安い順',
+    tools_sort_high: '価格の高い順',
     tools_sort_new: '新着順',
-    tools_col_no: 'NO.',
-    tools_col_name: '道具',
-    tools_col_genre: 'ジャンル',
-    tools_col_maker: 'メーカー · 型番',
-    tools_col_price: '価格帯',
-    tools_none: 'この条件に合う道具はまだありません。',
-    tools_none_other: 'ほかのジャンルを見る →',
     tools_count: '{n} 点',
-    tools_items: 'ITEMS',
-    tools_exit: 'Anthurium の台帳 →',
-    tools_exit_locality: '産地索引 →',
+    tools_none: 'この条件に合う道具はまだありません。',
+    tools_none_other: 'すべての部門を見る →',
+    tools_soon: '準備中',
+    tools_used: '使用中',
     tools_back: '道具の目録 →',
-    tools_same_genre: '{g}のほかの道具 →',
-    tools_record: 'この道具の記録',
+    tools_same_genre: '{g}のほかの道具',
+    tools_description: '商品の説明',
+    tools_record: '運営者の使用記録',
     tools_habitat: '対応する自生地の条件',
     tools_species: 'この道具を使っている種',
-    tools_buy: '購入先',
-    tools_plate_none: 'PLATE — 図版なし',
-    tools_plate_rakuten: '図版: 楽天市場の商品画像',
-    tools_k_genre: 'ジャンル',
-    tools_k_maker: 'メーカー',
-    tools_k_model: '型番',
-    tools_k_spec: '規格・容量',
-    tools_k_price: '価格帯',
-    tools_k_recorded: '収録',
-    tools_k_updated: '更新',
+    tools_spec: '仕様',
+    tools_price_at: '{shop}での価格（{d} 時点）',
+    tools_price_band: '価格帯',
+    tools_view: '{shop}で見る',
+    tools_plate_none: '図版なし',
+    tools_k_genre: '部門', tools_k_maker: 'メーカー', tools_k_model: '型番', tools_k_spec: '規格・容量', tools_k_price: '価格帯',
+    tools_k_recorded: '収録', tools_k_updated: '更新',
     tools_colophon_note: '価格と在庫は各ストアの表示が最新です',
     tools_not_found: 'この道具は見つかりませんでした。',
-    tools_loading: '…',
-    tools_rule: '当サイトは育て方を書きません。ここにあるのは自生地の環境に近づけるための道具の定義と入手先です。'
+    tools_exit: 'Anthurium の台帳 →'
   };
   function T(k) { var v = (typeof t === 'function') ? t(k) : k; return (v && v !== k) ? v : (JP[k] || k); }
   function en() { return typeof currentLang !== 'undefined' && currentLang === 'en'; }
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
   function fmtDate(iso) { return iso ? String(iso).slice(0, 10).replace(/-/g, '.') : ''; }
-  function no(t) { return 'NO. ' + String(t.id).padStart(3, '0'); }
   var SHOP_NAME = { rakuten: '楽天市場', yahoo: 'Yahoo!ショッピング', amazon: 'Amazon' };
+  var SHOP_SHORT = { rakuten: '楽天', yahoo: 'Yahoo!', amazon: 'Amazon' };
+  var RAKUTEN_CREDIT = '<a href="https://developers.rakuten.com/" target="_blank">Supported by Rakuten Developers</a>';
 
   /* ---------- data ---------- */
   var _tools = null, _genres = null, _loading = null;
@@ -81,17 +70,12 @@
   function genreLabel(g) { return en() ? (g.label_en || g.label) : g.label; }
   function toolName(x) { return en() ? (x.product_name_en || x.product_name) : x.product_name; }
   function open() { return Gate ? Gate.catalogueOpen(_tools || []) : false; }
-  function genreCounts() {
-    var c = {};
-    (_tools || []).forEach(function (x) { c[x.genre] = (c[x.genre] || 0) + 1; });
-    return c;
-  }
-  // genres shown on their own (≥2 items); the rest fall under 「ほか」
-  function listedGenres() {
-    var c = genreCounts();
-    return (_genres || []).filter(function (g) { return (c[g.slug] || 0) >= GENRE_MIN; });
-  }
-  function isOther(slug) { var c = genreCounts(); return (c[slug] || 0) > 0 && (c[slug] || 0) < GENRE_MIN; }
+  function count(slug) { return (_tools || []).filter(function (x) { return x.genre === slug; }).length; }
+  function imageOf(x) { return x.image_own || (/^https:\/\/[^/]*rakuten\.co\.jp\//.test(String(x.image || '')) ? x.image : ''); }
+  function priceFresh(x) { return x.price && x.price_checked_at && (Date.now() - new Date(x.price_checked_at).getTime()) < PRICE_FRESH_DAYS * 864e5; }
+  function priceText(x) { return priceFresh(x) ? '¥' + Number(x.price).toLocaleString('ja-JP') : (x.price_band || ''); }
+  function priceNum(x) { if (x.price) return x.price; var m = String(x.price_band || '').match(/[\d,]+/); return m ? +m[0].replace(/,/g, '') : 1e9; }
+  function hasRakutenData() { return (_tools || []).some(function (x) { return x.source === 'rakuten'; }); }
 
   /* ---------- page state ---------- */
   var _slug = '', _genre = '', _q = '', _sort = 'genre';
@@ -100,7 +84,7 @@
     _slug = slug ? decodeURIComponent(slug) : '';
     _genre = genre || '';
     var body = document.getElementById('tools-body');
-    if (body && !_tools) body.innerHTML = '<div class="loading-text p-xl">' + esc(T('tools_loading')) + '</div>';
+    if (body && !_tools) body.innerHTML = '<div class="loading-text p-xl">…</div>';
     load().then(function () {
       var page = document.getElementById('page-tools');
       if (!page || !page.classList.contains('active')) return;
@@ -112,15 +96,31 @@
     var page = document.getElementById('page-tools');
     if (page && page.classList.contains('active') && _tools) { if (_slug) renderDetail(); else renderIndex(); }
   };
-
   function crumbs(name) {
     var n = document.getElementById('tools-crumb-name'), s = document.getElementById('tools-crumb-sep');
     if (n) n.textContent = name || '';
     if (s) s.classList.toggle('d-none', !name);
   }
-  function meta(opts) {
-    // navigateTo writes generic meta after the render hook; write ours after it
-    setTimeout(function () { if (typeof updateMeta === 'function') updateMeta(opts); }, 0);
+  function meta(opts) { setTimeout(function () { if (typeof updateMeta === 'function') updateMeta(opts); }, 0); }
+
+  /* ---------- a product card ---------- */
+  function card(x) {
+    var href = base + 'tools/' + encodeURIComponent(x.slug) + '/';
+    var img = imageOf(x);
+    var shops = Gate ? Gate.shops(x) : [];
+    return '<article class="shop-card">'
+      + '<a class="shop-card__img" href="' + esc(href) + '" data-nav="tools" data-tool="' + esc(x.slug) + '">'
+      + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">' : '<span class="shop-card__noimg mono">' + esc(T('tools_plate_none')) + '</span>')
+      + (x.owner_used ? '<span class="shop-badge mono">' + esc(T('tools_used')) + '</span>' : '') + '</a>'
+      + '<div class="shop-card__body">'
+      + '<p class="shop-card__dept mono">' + esc(genreOf(x.genre).code) + '</p>'
+      + '<h3 class="shop-card__name"><a href="' + esc(href) + '" data-nav="tools" data-tool="' + esc(x.slug) + '">' + esc(toolName(x)) + '</a></h3>'
+      + ((x.maker || x.spec) ? '<p class="shop-card__maker">' + esc([x.maker, x.spec].filter(Boolean).join(' · ')) + '</p>' : '')
+      + '<p class="shop-card__price">' + esc(priceText(x) || '—') + '</p>'
+      + '<p class="shop-card__shops">' + shops.map(function (s) {
+        return '<a href="' + esc(s.url) + '" target="_blank" rel="nofollow sponsored noopener" data-tool-shop="' + s.shop + '" data-tool-slug="' + esc(x.slug) + '">' + esc(SHOP_SHORT[s.shop]) + '</a>';
+      }).join('') + '</p>'
+      + '</div></article>';
   }
 
   /* ---------- /tools/ ---------- */
@@ -128,120 +128,76 @@
     var body = document.getElementById('tools-body');
     var title = document.getElementById('tools-title');
     if (!body) return;
-    if (title) title.textContent = T('tools_title');
-    crumbs('');
+    if (title) title.textContent = _genre ? genreLabel(genreOf(_genre)) : T('tools_title');
+    crumbs(_genre ? genreLabel(genreOf(_genre)) : '');
     var tools = _tools || [];
-    var listed = listedGenres();
-    var counts = genreCounts();
-    var otherN = tools.filter(function (x) { return isOther(x.genre); }).length;
-    var genreN = Object.keys(counts).length;
-
-    var html = '<p class="detail-standard mono">TOOLS — ' + esc(T('tools_title')) + ' · ' + tools.length + ' ' + esc(T('tools_items')) + ' · ' + genreN + ' GENRES</p>';
+    var html = '<p class="detail-standard mono">TOOLS — ' + esc(T('tools_title')) + ' · ' + tools.length + ' ITEMS · ' + (_genres || []).length + ' DEPARTMENTS</p>';
     html += '<p class="tools-lead">' + esc(T('tools_lead')) + '</p>';
-    html += '<p class="pr-line mono">' + esc(T('tools_pr')) + '<br>' + esc(T('tools_pr_amazon')) + '</p>';
-
-    // genre index with counts: pressing one filters the ledger below
-    html += '<section class="index tools-index" aria-label="' + esc(T('tools_genres')) + '"><div class="index__group"><h3>' + esc(T('tools_genres')) + '</h3><ul class="index__list">';
-    html += genreItem('', T('tools_all'), 'ALL', tools.length);
-    listed.forEach(function (g) { html += genreItem(g.slug, genreLabel(g), g.code, counts[g.slug]); });
-    if (otherN) html += genreItem('other', T('tools_other'), 'OTHER', otherN);
-    html += '</ul></div></section>';
-
-    if (tools.length >= SEARCH_FROM) {
-      html += '<div class="sort-bar tools-sortbar">'
-        + '<div class="search-bar search-bar--inline"><input type="search" enterkeyhint="search" class="search-bar__input" id="tools-q" placeholder="' + esc(T('tools_search')) + '" value="' + esc(_q) + '">'
-        + '<button class="search-bar__btn" aria-label="検索"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></button></div>'
-        + '<div class="chips">' + ['genre', 'price', 'new'].map(function (k) {
-          return '<button type="button" class="chip' + (_sort === k ? ' active' : '') + '" aria-pressed="' + (_sort === k) + '" data-tools-sort="' + k + '">' + esc(T('tools_sort_' + k)) + '</button>';
-        }).join('') + '</div></div>';
-    }
-    html += '<div id="tools-ledger"></div>';
-    html += '<p class="related__exit mono"><a href="' + esc(base + 'anthurium') + '" data-nav="genus" data-genus="Anthurium">' + esc(T('tools_exit')) + '</a><span class="related__exit-sep">·</span><a href="' + esc(base + 'locality/') + '" data-nav="locality">' + esc(T('tools_exit_locality')) + '</a></p>';
+    html += '<div class="shop-search"><input type="search" enterkeyhint="search" class="search-bar__input" id="tools-q" placeholder="' + esc(T('tools_search')) + '" value="' + esc(_q) + '">'
+      + '<select id="tools-sort" class="shop-sort" aria-label="並び順">' + ['genre', 'low', 'high', 'new'].map(function (k) { return '<option value="' + k + '"' + (_sort === k ? ' selected' : '') + '>' + esc(T('tools_sort_' + k)) + '</option>'; }).join('') + '</select></div>';
+    html += '<div class="shop-layout"><nav class="shop-depts" aria-label="' + esc(T('tools_departments')) + '"><p class="shop-depts__title mono">' + esc(T('tools_departments')) + '</p><ul>';
+    html += deptItem('', T('tools_all'), 'ALL', tools.length);
+    (_genres || []).forEach(function (g) { html += deptItem(g.slug, genreLabel(g), g.code, count(g.slug)); });
+    html += '</ul></nav><div class="shop-main"><div id="tools-grid"></div>'
+      + '<p class="pr-line mono">' + esc(T('tools_pr')) + '<br>' + esc(T('tools_pr_amazon')) + '</p>'
+      + (hasRakutenData() ? '<p class="shop-credit mono">' + RAKUTEN_CREDIT + '</p>' : '')
+      + '<p class="related__exit mono"><a href="' + esc(base + 'anthurium') + '" data-nav="genus" data-genus="Anthurium">' + esc(T('tools_exit')) + '</a></p></div></div>';
     body.innerHTML = html;
-    renderLedger();
+    renderGrid();
 
     body.querySelectorAll('[data-tools-genre]').forEach(function (b) {
       b.addEventListener('click', function () {
+        if (b.disabled) return;
         _genre = b.getAttribute('data-tools-genre');
         syncGenreUrl();
-        body.querySelectorAll('[data-tools-genre]').forEach(function (x) {
-          var on = x.getAttribute('data-tools-genre') === _genre;
-          x.closest('.index__item').classList.toggle('is-current', on);
-          x.setAttribute('aria-pressed', on ? 'true' : 'false');
-        });
-        renderLedger();
+        renderIndex();
+        var grid = document.getElementById('tools-grid');
+        if (grid && window.innerWidth < 900) grid.scrollIntoView({ block: 'start', behavior: 'smooth' });
         if (typeof gtag === 'function') gtag('event', 'tools_filter', { genre: _genre || 'all' });
       });
     });
     var q = document.getElementById('tools-q');
-    if (q) q.addEventListener('input', function () { _q = q.value; renderLedger(); });
-    body.querySelectorAll('[data-tools-sort]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        _sort = b.getAttribute('data-tools-sort');
-        body.querySelectorAll('[data-tools-sort]').forEach(function (x) { var on = x === b; x.classList.toggle('active', on); x.setAttribute('aria-pressed', on); });
-        renderLedger();
-      });
-    });
+    q.addEventListener('input', function () { _q = q.value; renderGrid(); });
+    document.getElementById('tools-sort').addEventListener('change', function (e) { _sort = e.target.value; renderGrid(); });
 
-    var g = _genre && _genre !== 'other' ? genreOf(_genre) : null;
-    meta({
-      title: (g ? genreLabel(g) + ' — ' : '') + T('tools_title') + ' - Aroid Origins',
-      description: T('tools_lead'),
-      path: 'tools/',
-      noindex: !open() || !!_genre
-    });
+    var g = _genre ? genreOf(_genre) : null;
+    meta({ title: (g ? genreLabel(g) + ' — ' : '') + T('tools_title') + ' - Aroid Origins', description: T('tools_lead'), path: 'tools/', noindex: !open() || !!_genre });
   }
-  function genreItem(slug, label, code, n) {
-    var on = (_genre || '') === slug;
-    return '<li class="index__item' + (on ? ' is-current' : '') + '"><button type="button" class="index__toggle" data-tools-genre="' + esc(slug) + '" aria-pressed="' + on + '">'
-      + '<span class="index__name"><span class="tools-index__code mono">' + esc(code) + '</span>' + esc(label) + '</span><span class="index__count">' + n + '</span></button></li>';
+  function deptItem(slug, label, code, n) {
+    var on = (_genre || '') === slug, empty = slug && !n;
+    return '<li><button type="button" class="shop-dept' + (on ? ' is-current' : '') + (empty ? ' is-empty' : '') + '" data-tools-genre="' + esc(slug) + '" aria-pressed="' + on + '"' + (empty ? ' disabled' : '') + '>'
+      + '<span class="shop-dept__code mono">' + esc(code) + '</span><span class="shop-dept__name">' + esc(label) + '</span>'
+      + '<span class="shop-dept__count mono">' + (empty ? esc(T('tools_soon')) : n) + '</span></button></li>';
   }
   function syncGenreUrl() {
-    var url = base + 'tools/' + (_genre ? '?g=' + encodeURIComponent(_genre) : '');
     var st = history.state || {};
     st.genre = _genre;
-    history.replaceState(st, '', url);
+    history.replaceState(st, '', base + 'tools/' + (_genre ? '?g=' + encodeURIComponent(_genre) : ''));
   }
-  var BAND_ORDER = ['〜1,000円', '1,000〜2,000円', '2,000〜3,000円', '3,000〜5,000円', '5,000〜10,000円', '10,000〜20,000円', '20,000円〜'];
-  function renderLedger() {
-    var el = document.getElementById('tools-ledger');
+  function renderGrid() {
+    var el = document.getElementById('tools-grid');
     if (!el) return;
     var q = _q.trim().toLowerCase();
     var order = {};
     (_genres || []).forEach(function (g, i) { order[g.slug] = i; });
     var rows = (_tools || []).filter(function (x) {
-      if (_genre === 'other') { if (!isOther(x.genre)) return false; }
-      else if (_genre && x.genre !== _genre) return false;
+      if (_genre && x.genre !== _genre) return false;
       if (!q) return true;
       return [x.product_name, x.product_name_en, x.maker, x.model, x.spec, x.summary, genreOf(x.genre).label].join(' ').toLowerCase().indexOf(q) !== -1;
     });
     rows.sort(function (a, b) {
-      if (_sort === 'price') return BAND_ORDER.indexOf(a.price_band) - BAND_ORDER.indexOf(b.price_band) || a.sort_order - b.sort_order;
+      if (_sort === 'low') return priceNum(a) - priceNum(b);
+      if (_sort === 'high') return priceNum(b) - priceNum(a);
       if (_sort === 'new') return String(b.created_at).localeCompare(String(a.created_at));
-      return (order[a.genre] - order[b.genre]) || (a.sort_order - b.sort_order);
+      return (order[a.genre] - order[b.genre]) || ((b.owner_used ? 1 : 0) - (a.owner_used ? 1 : 0)) || (a.sort_order - b.sort_order);
     });
     if (!rows.length) {
       el.innerHTML = '<div class="sheet sheet--search"><p>' + esc(T('tools_none')) + '</p><p class="sheet__actions mono"><button type="button" class="sheet__cta" data-tools-reset>' + esc(T('tools_none_other')) + '</button></p></div>';
       var r = el.querySelector('[data-tools-reset]');
-      if (r) r.addEventListener('click', function () { var all = document.querySelector('[data-tools-genre=""]'); if (all) all.click(); });
+      if (r) r.addEventListener('click', function () { _genre = ''; _q = ''; syncGenreUrl(); renderIndex(); });
       return;
     }
-    var html = '<div class="overflow-auto"><table class="ledger-table tools-ledger"><thead><tr>'
-      + '<th>' + esc(T('tools_col_no')) + '</th><th>' + esc(T('tools_col_name')) + '</th><th class="ledger-table__cell-type">' + esc(T('tools_col_genre')) + '</th>'
-      + '<th>' + esc(T('tools_col_maker')) + '</th><th class="right">' + esc(T('tools_col_price')) + '</th></tr></thead><tbody>';
-    rows.forEach(function (x) {
-      var g = genreOf(x.genre);
-      var href = base + 'tools/' + encodeURIComponent(x.slug) + '/';
-      html += '<tr role="link" tabindex="0" data-nav="tools" data-tool="' + esc(x.slug) + '">';
-      html += '<td class="ledger-table__no">' + esc(String(x.id).padStart(3, '0')) + '</td>';
-      html += '<td class="ledger-table__cell-name"><a class="ledger-table__name tools-ledger__name" href="' + esc(href) + '" data-nav="tools" data-tool="' + esc(x.slug) + '">' + esc(toolName(x)) + '</a>'
-        + (x.summary ? '<div class="tools-ledger__summary">' + esc(x.summary) + '</div>' : '') + '</td>';
-      html += '<td class="ledger-table__cell-type"><span class="ledger-table__genre mono">' + esc(g.code) + '</span></td>';
-      html += '<td class="ledger-table__cell-meta ledger-table__meta"><span class="mono">' + esc([x.maker, x.model].filter(Boolean).join(' · ') || '—') + '</span></td>';
-      html += '<td class="ledger-table__cell-trust right"><span class="ledger-table__price">' + esc(x.price_band || '—') + '</span></td>';
-      html += '</tr>';
-    });
-    el.innerHTML = html + '</tbody></table></div>';
+    el.innerHTML = '<p class="shop-count mono">' + esc(T('tools_count').replace('{n}', rows.length)) + '</p><div class="shop-grid">' + rows.map(card).join('') + '</div>';
   }
 
   /* ---------- /tools/<slug>/ ---------- */
@@ -257,85 +213,71 @@
       meta({ title: T('tools_title') + ' - Aroid Origins', path: 'tools/', noindex: true });
       return;
     }
-    var g = genreOf(x.genre);
-    var name = toolName(x);
+    var g = genreOf(x.genre), name = toolName(x);
     if (title) title.textContent = name;
     crumbs(name);
     var gate = Gate ? Gate.gate(x) : { pass: false };
+    var shops = Gate ? Gate.shops(x) : [];
+    var img = imageOf(x);
+    var rk = Gate ? Gate.shopUrl(x, 'rakuten') : '';
 
-    var html = '<p class="detail-standard mono">TOOLS · ' + esc(genreLabel(g)) + ' · ' + esc(no(x)) + '</p>';
-    var cite = [x.maker, x.model, x.price_band].filter(Boolean);
-    if (cite.length) html += '<p class="tool-cite mono">' + esc(cite.join(' · ')) + '</p>';
+    var html = '<p class="detail-standard mono"><a href="' + esc(base + 'tools/?g=' + encodeURIComponent(g.slug)) + '" data-nav="tools" data-genre="' + esc(g.slug) + '">' + esc(g.code + ' · ' + genreLabel(g)) + '</a> · NO. ' + esc(String(x.id).padStart(3, '0')) + '</p>';
+    html += '<div class="shop-item">';
+    // image
+    var imgTag = img ? '<img src="' + esc(img) + '" alt="' + esc(name) + '" decoding="async" referrerpolicy="no-referrer">' : '<span class="shop-card__noimg mono">' + esc(T('tools_plate_none')) + '</span>';
+    html += '<figure class="shop-item__img">' + (img && !x.image_own && rk ? '<a href="' + esc(rk) + '" target="_blank" rel="nofollow sponsored noopener" data-tool-shop="rakuten" data-tool-slug="' + esc(x.slug) + '">' + imgTag + '</a>' : imgTag)
+      + (x.owner_used ? '<span class="shop-badge mono">' + esc(T('tools_used')) + '</span>' : '') + '</figure>';
+    // buy box
+    html += '<div class="shop-item__buy">';
+    if (x.maker || x.model) html += '<p class="tool-cite mono">' + esc([x.maker, x.model].filter(Boolean).join(' · ')) + '</p>';
+    if (x.summary) html += '<p class="shop-item__summary">' + esc(x.summary) + '</p>';
+    if (priceFresh(x)) html += '<p class="shop-item__price">¥' + Number(x.price).toLocaleString('ja-JP') + '<span class="mono">' + esc(T('tools_price_at').replace('{shop}', x.source === 'rakuten' ? '楽天市場' : 'ストア').replace('{d}', fmtDate(x.price_checked_at))) + '</span></p>';
+    else if (x.price_band) html += '<p class="shop-item__price">' + esc(x.price_band) + '<span class="mono">' + esc(T('tools_price_band')) + '</span></p>';
+    if (shops.length) {
+      html += '<p class="pr-line mono">' + esc(T('tools_pr_buy')) + (shops.some(function (s) { return s.shop === 'amazon'; }) ? '<br>' + esc(T('tools_pr_amazon')) : '') + '</p>';
+      html += '<div class="shop-buttons">' + shops.map(function (s, i) {
+        return '<a class="shop-btn' + (i === 0 ? ' shop-btn--primary' : '') + '" href="' + esc(s.url) + '" target="_blank" rel="nofollow sponsored noopener" data-tool-shop="' + s.shop + '" data-tool-slug="' + esc(x.slug) + '">' + esc(T('tools_view').replace('{shop}', SHOP_NAME[s.shop])) + '</a>';
+      }).join('') + '</div>';
+      var imp = Gate.impUrl(x);
+      if (imp) html += '<img class="tool-imp" src="' + esc(imp) + '" width="1" height="1" alt="" referrerpolicy="no-referrer-when-downgrade">';
+    }
+    html += '</div></div>';
 
-    html += '<div class="tool-head">' + plateHtml(x) + '<div class="tool-label">';
-    var cells = '';
-    function cell(k, v) { if (v) cells += '<div class="specimen__cell"><span class="specimen__k">' + esc(T(k)) + '</span><span class="specimen__v">' + v + '</span></div>'; }
-    cell('tools_k_genre', '<a href="' + esc(base + 'tools/?g=' + encodeURIComponent(g.slug)) + '" data-nav="tools" data-genre="' + esc(g.slug) + '">' + esc(g.code + ' · ' + genreLabel(g)) + '</a>');
-    cell('tools_k_maker', esc(x.maker));
-    cell('tools_k_model', esc(x.model));
-    cell('tools_k_spec', esc(x.spec));
-    cell('tools_k_price', esc(x.price_band));
-    if (x.habitat_tags && x.habitat_tags.length) cell('tools_habitat', esc(x.habitat_tags.join(' · ')));
-    cell('tools_k_recorded', esc(fmtDate(x.created_at)));
-    if (x.updated_at && fmtDate(x.updated_at) !== fmtDate(x.created_at)) cell('tools_k_updated', esc(fmtDate(x.updated_at)));
-    html += '<div class="specimen">' + cells + '</div></div></div>';
-
+    if (x.description) html += '<section class="tool-section"><h2 class="section-title"><span>' + esc(T('tools_description')) + '</span></h2><div class="tool-body"><p>' + esc(x.description) + '</p></div></section>';
     if (x.body) {
       html += '<section class="tool-section"><h2 class="section-title"><span>' + esc(T('tools_record')) + '</span></h2><div class="tool-body">'
         + String(x.body).split(/\n{2,}|\r\n\r\n/).map(function (p) { return '<p>' + esc(p).replace(/\n/g, '<br>') + '</p>'; }).join('') + '</div></section>';
     }
+    var cells = '';
+    function cell(k, v) { if (v) cells += '<div class="specimen__cell"><span class="specimen__k">' + esc(T(k)) + '</span><span class="specimen__v">' + v + '</span></div>'; }
+    cell('tools_k_genre', '<a href="' + esc(base + 'tools/?g=' + encodeURIComponent(g.slug)) + '" data-nav="tools" data-genre="' + esc(g.slug) + '">' + esc(genreLabel(g)) + '</a>');
+    cell('tools_k_maker', esc(x.maker)); cell('tools_k_model', esc(x.model)); cell('tools_k_spec', esc(x.spec)); cell('tools_k_price', esc(x.price_band));
+    if (x.habitat_tags && x.habitat_tags.length) cell('tools_habitat', esc(x.habitat_tags.join(' · ')));
+    html += '<section class="tool-section"><h2 class="section-title"><span>' + esc(T('tools_spec')) + '</span></h2><div class="specimen">' + cells + '</div></section>';
     var sp = (x.species || []).filter(Boolean);
     if (sp.length) {
       var store = window.cultivarData || {};
       html += '<p class="tool-species mono"><span>' + esc(T('tools_species')) + '</span> ' + sp.map(function (n) {
         var parts = n.split(' ');
-        var known = !!store[n];
-        return known ? '<a href="' + esc(base + parts[0].toLowerCase() + '/' + encodeURIComponent(parts.slice(1).join(' '))) + '" data-nav="cultivar" data-key="' + esc(n) + '"><i>' + esc(n) + '</i></a>' : '<i>' + esc(n) + '</i>';
+        return store[n] ? '<a href="' + esc(base + parts[0].toLowerCase() + '/' + encodeURIComponent(parts.slice(1).join(' '))) + '" data-nav="cultivar" data-key="' + esc(n) + '"><i>' + esc(n) + '</i></a>' : '<i>' + esc(n) + '</i>';
       }).join('<span class="related__exit-sep">·</span>') + '</p>';
     }
-
-    var shops = Gate ? Gate.shops(x) : [];
-    if (shops.length) {
-      html += '<p class="pr-line mono">' + esc(T('tools_pr_buy')) + (shops.some(function (s) { return s.shop === 'amazon'; }) ? '<br>' + esc(T('tools_pr_amazon')) : '') + '</p>';
-      html += '<p class="tool-buy" aria-label="' + esc(T('tools_buy')) + '">' + shops.map(function (s) {
-        return '<a href="' + esc(s.url) + '" target="_blank" rel="nofollow sponsored noopener" data-tool-shop="' + s.shop + '">' + esc(SHOP_NAME[s.shop]) + ' ↗</a>';
-      }).join('') + '</p>';
-      var imp = Gate.impUrl(x);
-      // Moshimo's impression pixel, kept as handed out (no lazy loading)
-      if (imp) html += '<img class="tool-imp" src="' + esc(imp) + '" width="1" height="1" alt="" referrerpolicy="no-referrer-when-downgrade">';
-    }
-
+    var related = (_tools || []).filter(function (r) { return r.genre === x.genre && r.id !== x.id; }).slice(0, 4);
+    if (related.length) html += '<section class="tool-section"><h2 class="section-title"><span>' + esc(T('tools_same_genre').replace('{g}', genreLabel(g))) + '</span></h2><div class="shop-grid shop-grid--row">' + related.map(card).join('') + '</div></section>';
     html += '<p class="detail-colophon mono">' + [T('tools_k_recorded') + ' ' + fmtDate(x.created_at), x.updated_at ? T('tools_k_updated') + ' ' + fmtDate(x.updated_at) : '', T('tools_colophon_note')].filter(Boolean).map(esc).join('<span class="detail-colophon__sep">·</span>') + '</p>';
-    html += '<p class="related__exit mono"><a href="' + esc(base + 'tools/') + '" data-nav="tools">' + esc(T('tools_back')) + '</a><span class="related__exit-sep">·</span><a href="' + esc(base + 'tools/?g=' + encodeURIComponent(g.slug)) + '" data-nav="tools" data-genre="' + esc(g.slug) + '">' + esc(T('tools_same_genre').replace('{g}', genreLabel(g))) + '</a></p>';
+    if (x.source === 'rakuten') html += '<p class="shop-credit mono">' + RAKUTEN_CREDIT + '</p>';
+    html += '<p class="related__exit mono"><a href="' + esc(base + 'tools/') + '" data-nav="tools">' + esc(T('tools_back')) + '</a></p>';
     body.innerHTML = html;
 
-    var plateImg = body.querySelector('.tool-plate img');
-    if (plateImg) {
-      var fail = function () { var p = plateImg.closest('.tool-plate'); if (p) p.outerHTML = plateNone(); };
-      plateImg.addEventListener('error', fail);
-      setTimeout(function () { if (plateImg.isConnected && !plateImg.naturalWidth) fail(); }, 5000);
-    }
-    var desc = x.summary || String(x.body || '').replace(/\s+/g, ' ').slice(0, 110);
+    var plateImg = body.querySelector('.shop-item__img img');
+    if (plateImg) plateImg.addEventListener('error', function () { var f = plateImg.closest('.shop-item__img'); if (f) f.innerHTML = '<span class="shop-card__noimg mono">' + esc(T('tools_plate_none')) + '</span>'; });
     meta({
       title: name + ' — ' + genreLabel(g) + ' · ' + T('tools_title') + ' - Aroid Origins',
-      description: desc || T('tools_lead'),
+      description: x.summary || String(x.description || x.body || '').replace(/\s+/g, ' ').slice(0, 110) || T('tools_lead'),
       path: 'tools/' + encodeURIComponent(x.slug) + '/',
       image: x.image_own || undefined,
       noindex: !open() || !gate.pass
     });
-  }
-  function plateNone() { return '<div class="tool-plate tool-plate--none"><p class="mono">' + esc(T('tools_plate_none')) + '</p></div>'; }
-  function plateHtml(x) {
-    if (x.image_own) return '<figure class="tool-plate"><img src="' + esc(x.image_own) + '" alt="' + esc(toolName(x)) + '" decoding="async"></figure>';
-    var img = String(x.image || '');
-    if (/^https:\/\/[^/]*rakuten\.co\.jp\//.test(img)) {
-      // the Rakuten image is used as handed out, wrapped in the Rakuten link
-      var link = Gate ? Gate.shopUrl(x, 'rakuten') : '';
-      var tag = '<img src="' + esc(img) + '" alt="' + esc(toolName(x)) + '" decoding="async" referrerpolicy="no-referrer">';
-      return '<figure class="tool-plate tool-plate--store">' + (link ? '<a href="' + esc(link) + '" target="_blank" rel="nofollow sponsored noopener" data-tool-shop="rakuten">' + tag + '</a>' : tag)
-        + '<figcaption class="mono">' + esc(T('tools_plate_rakuten')) + '</figcaption></figure>';
-    }
-    return plateNone();
   }
 
   /* ---------- footer / menu links appear only once the catalogue is open ---------- */
@@ -345,10 +287,18 @@
   }
   load().then(refreshNavLinks);
 
+  /* ---------- broken store images fall back to the plain label ---------- */
+  document.addEventListener('error', function (e) {
+    var img = e.target;
+    if (img && img.tagName === 'IMG' && img.closest && img.closest('.shop-card__img')) img.outerHTML = '<span class="shop-card__noimg mono">' + esc(T('tools_plate_none')) + '</span>';
+  }, true);
+
   /* ---------- GA ---------- */
   document.addEventListener('click', function (e) {
     var a = e.target.closest && e.target.closest('[data-tool-shop]');
     if (!a || typeof gtag !== 'function') return;
-    gtag('event', 'affiliate_click', { shop: a.getAttribute('data-tool-shop'), slug: _slug, genre: ((_tools || []).filter(function (r) { return r.slug === _slug; })[0] || {}).genre || '', page: 'tool' });
+    var slug = a.getAttribute('data-tool-slug') || _slug;
+    var x = (_tools || []).filter(function (r) { return r.slug === slug; })[0] || {};
+    gtag('event', 'affiliate_click', { shop: a.getAttribute('data-tool-shop'), slug: slug, genre: x.genre || '', source: x.source || '', page: _slug ? 'tool' : 'tools' });
   });
 })();

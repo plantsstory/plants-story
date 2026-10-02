@@ -1913,40 +1913,36 @@
     "en": "Tools catalogue"
   },
   "tools_lead": {
-    "jp": "自生地の条件（雲霧林・着生・標高）に近づけるための道具を、使った記録とともに並べます。育て方は書きません。",
-    "en": "Tools that bring a room closer to the habitat (cloud forest, epiphytic, elevation), each with a record of use. No growing advice."
+    "jp": "自生地の条件（雲霧林・着生・標高）に近づけるための道具を、部門ごとに集めました。育て方は書きません。",
+    "en": "Tools that bring a room closer to the habitat (cloud forest, epiphytic, elevation), by department. No growing advice."
   },
   "tools_pr": {
-    "jp": "PR — このページには楽天市場・Yahoo!ショッピング・Amazon のアフィリエイトリンクを含みます。リンク経由の購入で当サイトに紹介料が入ります。価格・在庫は各ストアの表示が最新です。",
-    "en": "PR — This page contains affiliate links to Rakuten, Yahoo! Shopping and Amazon. Purchases through them pay this site a referral fee. Prices and stock are as shown by each store."
+    "jp": "PR — このページには楽天市場・Yahoo!ショッピング・Amazon のアフィリエイトリンクを含みます。リンク経由の購入で当サイトに紹介料が入ります。「使用中」の印がある物は運営者が実際に使っている物で、そのほかは販売実績（レビュー数・評価）と仕様を確認して選んだ物です。価格・在庫は各ストアの表示が最新です。",
+    "en": "PR — This page contains affiliate links to Rakuten, Yahoo! Shopping and Amazon; purchases through them pay this site a referral fee. Items marked In use are used by the operator; the others were chosen from their sales record (reviews and rating) and specifications. Prices and stock are as shown by each store."
   },
   "tools_pr_amazon": {
     "jp": "Amazonのアソシエイトとして、Aroid Origins は適格販売により収入を得ています。",
     "en": "As an Amazon Associate, Aroid Origins earns from qualifying purchases."
   },
   "tools_pr_buy": {
-    "jp": "PR — 以下のリンクから購入があった場合、運営者に紹介料が入ります。掲載は運営者が実際に使っているものに限ります。",
-    "en": "PR — A purchase through these links pays the operator a referral fee. Only tools the operator actually uses are listed."
-  },
-  "tools_genres": {
-    "jp": "ジャンル",
-    "en": "Genres"
+    "jp": "PR — 以下のリンクから購入があった場合、運営者に紹介料が入ります。価格・在庫は各ストアの表示が最新です。",
+    "en": "PR — A purchase through these links pays the operator a referral fee. Prices and stock are as shown by each store."
   },
   "tools_all": {
-    "jp": "すべて",
-    "en": "All"
+    "jp": "すべての部門",
+    "en": "All departments"
   },
   "tools_other": {
     "jp": "ほか",
     "en": "Other"
   },
   "tools_search": {
-    "jp": "道具を検索…",
-    "en": "Search tools…"
+    "jp": "道具を検索",
+    "en": "Search tools"
   },
   "tools_sort_genre": {
-    "jp": "ジャンル順",
-    "en": "By genre"
+    "jp": "部門順",
+    "en": "By department"
   },
   "tools_sort_price": {
     "jp": "価格帯順",
@@ -1981,8 +1977,8 @@
     "en": "No tools match yet."
   },
   "tools_none_other": {
-    "jp": "ほかのジャンルを見る →",
-    "en": "See other genres →"
+    "jp": "すべての部門を見る →",
+    "en": "All departments →"
   },
   "tools_items": {
     "jp": "ITEMS",
@@ -2001,12 +1997,12 @@
     "en": "Tools catalogue →"
   },
   "tools_same_genre": {
-    "jp": "{g}のほかの道具 →",
-    "en": "More in {g} →"
+    "jp": "{g}のほかの道具",
+    "en": "More in {g}"
   },
   "tools_record": {
-    "jp": "この道具の記録",
-    "en": "Record of use"
+    "jp": "運営者の使用記録",
+    "en": "Operator's record of use"
   },
   "tools_habitat": {
     "jp": "対応する自生地の条件",
@@ -2063,5 +2059,49 @@
   "tools_not_found": {
     "jp": "この道具は見つかりませんでした。",
     "en": "This tool was not found."
+  },
+  "tools_sort_low": {
+    "jp": "価格の安い順",
+    "en": "Price: low to high"
+  },
+  "tools_sort_high": {
+    "jp": "価格の高い順",
+    "en": "Price: high to low"
+  },
+  "tools_departments": {
+    "jp": "部門",
+    "en": "Departments"
+  },
+  "tools_used": {
+    "jp": "使用中",
+    "en": "In use"
+  },
+  "tools_soon": {
+    "jp": "準備中",
+    "en": "Coming"
+  },
+  "tools_description": {
+    "jp": "商品の説明",
+    "en": "Description"
+  },
+  "tools_spec": {
+    "jp": "仕様",
+    "en": "Specifications"
+  },
+  "tools_view": {
+    "jp": "{shop}で見る",
+    "en": "View at {shop}"
+  },
+  "tools_count": {
+    "jp": "{n} 点",
+    "en": "{n} items"
+  },
+  "tools_price_band": {
+    "jp": "価格帯",
+    "en": "Price band"
+  },
+  "tools_price_at": {
+    "jp": "{shop}での価格（{d} 時点）",
+    "en": "Price at {shop} ({d})"
   }
 }
