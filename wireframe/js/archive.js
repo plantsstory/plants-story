@@ -669,7 +669,7 @@
     }
     // exit line: back into the archive (ledger, timeline, same locality)
     var exits = ['<a href="' + esc(base + d.genus.toLowerCase() + '/') + '" data-nav="genus" data-genus="' + esc(d.genus.toLowerCase()) + '">' + esc(T('related_exit_ledger').replace('{genus}', d.genus)) + '</a>',
-      '<a href="' + esc(base) + '" data-nav="top">' + esc(T('related_exit_timeline')) + '</a>'];
+      '<a href="' + esc(base) + '#archive-timeline" data-nav="top" data-scroll="archive-timeline">' + esc(T('related_exit_timeline')) + '</a>'];
     if (d.country) exits.push('<a href="' + esc(base + 'locality/' + encodeURIComponent(countrySlug(d.country))) + '" data-nav="locality" data-place="' + esc(countrySlug(d.country)) + '">' + esc(T('related_exit_locality').replace('{country}', d.country)) + '</a>');
     html += '<p class="related__exit mono">' + exits.join('<span class="related__exit-sep">·</span>') + '</p>';
     // the exit line alone is reason enough to show the section

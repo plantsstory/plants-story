@@ -898,8 +898,8 @@ function renderTierBadge(tier, name, labelJp) {
 function renderVoteButtons(i, votes) {
   var agreeCount = votes ? votes.agree : 0;
   var disagreeCount = votes ? votes.disagree : 0;
-  var h = '<button class="vote-btn" data-origin-idx="' + i + '" data-vote="agree" aria-label="' + t('vote_agree') + ' (' + agreeCount + ')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v12"/><path d="M15 5.88L14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88z"/></svg><span class="vote-btn__badge">' + agreeCount + '</span></button>';
-  h += '<button class="vote-btn vote-btn--down" data-origin-idx="' + i + '" data-vote="disagree" aria-label="' + t('vote_disagree') + ' (' + disagreeCount + ')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 14V2"/><path d="M9 18.12L10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88z"/></svg><span class="vote-btn__badge">' + disagreeCount + '</span></button>';
+  var h = '<button class="vote-btn" data-origin-idx="' + i + '" data-vote="agree" aria-label="' + t('vote_agree') + ' (' + agreeCount + ')">' + escHtml(t('vote_word_agree')) + ' <span class="vote-btn__badge">' + agreeCount + '</span></button>';
+  h += '<button class="vote-btn vote-btn--down" data-origin-idx="' + i + '" data-vote="disagree" aria-label="' + t('vote_disagree') + ' (' + disagreeCount + ')">' + escHtml(t('vote_word_disagree')) + ' <span class="vote-btn__badge">' + disagreeCount + '</span></button>';
   return h;
 }
 
@@ -1091,15 +1091,17 @@ function renderOriginsInner(cultivarName, container) {
     if (!isSeedling) {
       // header: 記録 N · who wrote it · tier · trust (the % only when there is something to base it on)
       var meta = [];
+      if (hasSources && origin.source_tier) meta.push((currentLang === 'en' ? 'Source ' : '出典 ') + origin.source_tier);
       if (isDb) meta.push('IPNI / POWO');
       else if (origin.author && origin.author.isAI) meta.push('AI');
-      else meta.push(t('record_by_user'));
-      if (hasSources && origin.source_tier) meta.push('Tier ' + origin.source_tier + (origin.source_tier_label_jp && currentLang !== 'en' ? ' · ' + origin.source_tier_label_jp : (origin.source_tier_label_en && currentLang === 'en' ? ' · ' + origin.source_tier_label_en : '')));
+      else meta.push(origin.author && origin.author.name && origin.author.name !== 'User' ? origin.author.name : t('record_by_user'));
       if (!hasSources) meta.push(t('record_no_sources'));
+      var recDate = origin.author && origin.author.date ? String(origin.author.date).slice(0, 10).replace(/-/g, '.') : '';
       rh += '<header class="record__head mono">';
       rh += '<span class="record__rank">' + (currentLang === 'en' ? 'Record ' : '記録 ') + (i + 1) + '</span>';
       rh += '<span class="record__meta">' + meta.map(escHtml).join(' · ') + '</span>';
       if (hasSources) rh += '<span class="record__trust ' + getTrustClass(trustNum) + '" data-trust-idx="' + i + '">' + trustNum + '%</span>';
+      if (recDate) rh += '<span class="record__date">' + escHtml(recDate) + '</span>';
       rh += '</header>';
     }
     // body: the prose is the record; the field table only stands in when there is no prose
@@ -1147,7 +1149,7 @@ function renderOriginsInner(cultivarName, container) {
     if (srcHtml) rh += '<div class="record__sources"><span class="record__label mono">' + t('source_label') + '</span>' + srcHtml + '</div>';
     // Footer: who recorded it and when · votes (正確 / 疑問)
     var who = isDb ? 'IPNI / Kew' : (origin.author && origin.author.isAI ? (origin.author.name || 'AI') : (origin.author && origin.author.name && origin.author.name !== 'User' ? origin.author.name : t('record_by_user')));
-    rh += '<footer class="record__foot mono"><span>' + escHtml(who) + (origin.author && origin.author.date ? ' · ' + escHtml(origin.author.date) : '') + '</span>';
+    rh += '<footer class="record__foot mono"><span>' + (isSeedling ? escHtml(who) + (origin.author && origin.author.date ? ' · ' + escHtml(String(origin.author.date).slice(0, 10).replace(/-/g, '.')) : '') : '') + '</span>';
     rh += '<span class="vote-group">' + renderVoteButtons(i, origin.votes) + '</span></footer>';
     rh += '</article>';
     // AI text without a citable source and low trust is a draft: folded, not a record
@@ -1816,6 +1818,8 @@ document.addEventListener('click', function(e) {
     if (isEditNav) navOptions._editFlow = true;
 
     navigateTo(page, navOptions);
+    var scrollTarget = navEl.getAttribute('data-scroll');
+    if (scrollTarget) setTimeout(function () { var el = document.getElementById(scrollTarget); if (el) el.scrollIntoView({ block: 'start' }); }, 350);
 
     // Pre-select genus if coming from genus page, otherwise reset to placeholder
     if (page === 'contribute') {

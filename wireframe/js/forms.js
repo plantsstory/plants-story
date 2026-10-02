@@ -2240,6 +2240,14 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     return getVotedImages()[imageId] || null;
   }
 
+  // a photo's delete request is offered to the person who uploaded it and to admins; everyone else uses 報告
+  function canRequestImageDelete(opts) {
+    var u = window._currentUser;
+    if (!u) return false;
+    if (u.app_metadata && u.app_metadata.role === 'admin') return true;
+    return !!(opts && opts.ownerId && opts.ownerId === u.id);
+  }
+
   // --- Supabase Storage helpers ---
   function getPublicUrl(storagePath) {
     // the detail gallery shows photos at most ~600px wide; 1200 keeps them sharp on phones
@@ -2352,7 +2360,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     item.innerHTML =
       '<div class="gallery__img"><img src="' + src + '" class="gallery__img-full" loading="lazy" decoding="async" sizes="(max-width: 768px) 100vw, 600px">' + overlayHtml + '</div>' +
       '<div class="gallery__actions">' +
-        '<a class="gallery__delete">' + t('request_delete') + '</a>' +
+        (canRequestImageDelete(opts) ? '<a class="gallery__delete">' + t('request_delete') + '</a>' : '') +
       '</div>';
     // Tap to toggle overlay
     if (hasOverlay) {
@@ -2396,7 +2404,8 @@ updateCultivarDetail = function(cultivarName, rowEl) {
             realVotes: img.real_votes,
             fakeVotes: img.fake_votes,
             caption: img.caption,
-            linkUrl: img.link_url
+            linkUrl: img.link_url,
+            ownerId: img.user_id
           });
           gallery.insertBefore(item, galleryUpload);
         });

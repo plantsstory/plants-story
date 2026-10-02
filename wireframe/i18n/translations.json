@@ -2135,5 +2135,17 @@
   "notfound_search": {
     "jp": "品種名で検索 →",
     "en": "Search by name →"
+  },
+  "detail_more": {
+    "jp": "その他",
+    "en": "More"
+  },
+  "vote_word_agree": {
+    "jp": "正確",
+    "en": "Accurate"
+  },
+  "vote_word_disagree": {
+    "jp": "疑問",
+    "en": "Doubtful"
   }
 }

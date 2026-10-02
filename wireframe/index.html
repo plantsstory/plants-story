@@ -14,8 +14,8 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.yahoo.co.jp https://i.moshimo.com; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJK72JH471"></script>
-  <script src="js/textsize.js?v=20261003d"></script>
-  <script src="js/gtag-init.js?v=20261003d"></script>
+  <script src="js/textsize.js?v=20261003e"></script>
+  <script src="js/gtag-init.js?v=20261003e"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -56,13 +56,13 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20261003d">
-  <link rel="stylesheet" href="css/reset.css?v=20261003d">
-  <link rel="stylesheet" href="css/layout.css?v=20261003d">
-  <link rel="stylesheet" href="css/components.css?v=20261003d">
-  <link rel="stylesheet" href="css/pages.css?v=20261003d">
-  <link rel="stylesheet" href="css/utilities.css?v=20261003d">
-  <link rel="stylesheet" href="css/archive.css?v=20261003d">
+  <link rel="stylesheet" href="css/variables.css?v=20261003e">
+  <link rel="stylesheet" href="css/reset.css?v=20261003e">
+  <link rel="stylesheet" href="css/layout.css?v=20261003e">
+  <link rel="stylesheet" href="css/components.css?v=20261003e">
+  <link rel="stylesheet" href="css/pages.css?v=20261003e">
+  <link rel="stylesheet" href="css/utilities.css?v=20261003e">
+  <link rel="stylesheet" href="css/archive.css?v=20261003e">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -252,14 +252,19 @@
         <div id="share-menu" class="hidden share-menu-popup"></div>
         <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn" id="detail-add-photo-btn" data-i18n="detail_add_photo">写真を追加</button>
         <button type="button" class="btn btn--sm btn--secondary cursor-pointer font-xs-btn" id="detail-add-record-btn" data-i18n="detail_add_record">記録を追加</button>
-        <a href="#" class="btn btn--sm btn--secondary font-xs-btn d-none" id="detail-add-individual" data-nav="contribute" data-contribute-type="individual" data-i18n="detail_add_individual">個体を追加</a>
-        <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn d-none" id="detail-rerun-btn" data-i18n="rerun_request_btn">再調査を依頼</button>
-        <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn d-none" id="detail-private-btn"></button>
-        <span class="mono d-none" id="detail-rerun-status"></span>
-        <div class="flex gap-sm flex-align-center" id="edit-key-section" style="display:none">
-          <button class="btn btn--secondary btn--sm font-xs-btn" id="detail-edit-btn" data-i18n="detail_edit">編集</button>
-        </div>
-        <button class="btn btn--sm cursor-pointer text-danger-border font-xs-btn" id="detail-delete-request-btn" data-i18n="detail_report">報告</button>
+        <details class="detail-more">
+          <summary class="mono" data-i18n="detail_more">その他</summary>
+          <div class="detail-more__items">
+            <a href="#" class="btn btn--sm btn--secondary font-xs-btn d-none" id="detail-add-individual" data-nav="contribute" data-contribute-type="individual" data-i18n="detail_add_individual">個体を追加</a>
+            <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn d-none" id="detail-rerun-btn" data-i18n="rerun_request_btn">再調査を依頼</button>
+            <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn d-none" id="detail-private-btn"></button>
+            <span class="mono d-none" id="detail-rerun-status"></span>
+            <div class="flex gap-sm flex-align-center" id="edit-key-section" style="display:none">
+              <button class="btn btn--secondary btn--sm font-xs-btn" id="detail-edit-btn" data-i18n="detail_edit">編集</button>
+            </div>
+            <button class="btn btn--sm cursor-pointer text-danger-border font-xs-btn" id="detail-delete-request-btn" data-i18n="detail_report">報告</button>
+          </div>
+        </details>
       </div>
 
       <!-- Image Gallery (Carousel) -->
@@ -1522,13 +1527,13 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/record-gate.js?v=20261003d"></script>
-  <script src="js/app-core.js?v=20261003d"></script>
-  <script src="js/pages.js?v=20261003d"></script>
-  <script src="js/forms.js?v=20261003d"></script>
-  <script src="js/archive.js?v=20261003d"></script>
-  <script src="js/tool-gate.js?v=20261003d"></script>
-  <script src="js/tools.js?v=20261003d"></script>
+  <script src="js/record-gate.js?v=20261003e"></script>
+  <script src="js/app-core.js?v=20261003e"></script>
+  <script src="js/pages.js?v=20261003e"></script>
+  <script src="js/forms.js?v=20261003e"></script>
+  <script src="js/archive.js?v=20261003e"></script>
+  <script src="js/tool-gate.js?v=20261003e"></script>
+  <script src="js/tools.js?v=20261003e"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1538,7 +1543,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261003d"></script>
+  <script src="js/dialogs.js?v=20261003e"></script>
 
   <!-- AI re-research request dialog -->
   <dialog id="research-request-dialog" class="dialog-clean" aria-labelledby="research-request-title">
@@ -1577,6 +1582,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261003d"></script>
+<script src="js/sw-register.js?v=20261003e"></script>
 </body>
 </html>
