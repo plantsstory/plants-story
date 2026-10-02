@@ -1507,6 +1507,8 @@ if (false) {
   window._currentUser = null;
 
   function updateLoginUI() {
+    var adminFooter = document.getElementById('admin-footer-link');
+    if (adminFooter) adminFooter.classList.toggle('d-none', !(window._currentUser && window._currentUser.app_metadata && window._currentUser.app_metadata.role === 'admin'));
     var benefitsContent = document.getElementById('login-benefits-content');
     var loggedInInfo = document.getElementById('logged-in-info');
     var headerAuthBtn = document.getElementById('header-auth-btn');

@@ -129,7 +129,9 @@
     // Record gate (shared module): 'ok' | 'unrecorded' | 'researching' | 'none'
     d.state = (window.RecordGate && typeof window.recForGate === 'function' && type !== 'seedling') ? window.RecordGate.state(window.recForGate(fullName, entry, { type: type })) : 'ok';
     d.missing = (d.state === 'unrecorded' && window.RecordGate) ? window.RecordGate.gate(window.recForGate(fullName, entry, { type: type })).missing : [];
-    d.isIndividual = d.tags.indexOf('individual') !== -1 || (!!d.selectedFrom && type === 'clone');
+    // an individual (numbered or named plant of a species) is marked by its tag only (BOARD 09-07);
+    // a Clone selected from another clone keeps its own page in the index
+    d.isIndividual = d.tags.indexOf('individual') !== -1;
     d.nameStatus = entry._nameStatus || null;
     d.formLocality = clean(entry._locality);
     d.creator = clean(d.formula && d.formula.creatorName);
@@ -497,11 +499,14 @@
       cells += cell(d.type === 'seedling' ? 'spec_sowing' : 'spec_year', d.type === 'seedling' ? esc(d.sowing) : yearSpan(d.year));
       if (d.parentA || d.parentB) cells += cell('spec_parents', parentHtml(all, d.parentA || T('lineage_unknown')) + ' × ' + parentHtml(all, d.parentB || T('lineage_unknown')) + (d.formulaStatus === 'disputed' ? '<span class="specimen__flag mono">' + esc(T('formula_disputed')) + '</span>' : ''));
     }
-    if (d.isIndividual) {
+    if (d.selectedFrom) {
+      // an individual names its species; a Clone selected from another plant names that plant
       var parentSp = all.filter(function (x) { return x.id && x.id === d.selectedFrom; })[0];
-      if (parentSp) cells = cell('spec_selected_from', link(parentSp, esc(parentSp.displayName))) + cells;
+      if (parentSp) cells = cell(d.isIndividual ? 'spec_selected_from' : 'spec_selected_from_clone', link(parentSp, esc(parentSp.displayName))) + cells;
     }
-    if (d.aliases && d.aliases.length) cells += cell('spec_aliases', esc(d.aliases.join(' / ')));
+    // on the label: at most three Latin-script names; katakana stays for search and JSON-LD
+    var labelAliases = (d.aliases || []).filter(function (a, i, arr) { return /[A-Za-z]/.test(a) && !/[゠-ヿ]/.test(a) && arr.indexOf(a) === i; }).slice(0, 3);
+    if (labelAliases.length) cells += cell('spec_aliases', esc(labelAliases.join(' / ')));
     var note = d.nameStatus === 'disputed' ? T('name_status_disputed') : d.nameStatus === 'trade' ? T('name_status_trade') : d.nameStatus === 'informal' ? T('name_status_informal') : '';
     el.innerHTML = (cells ? '<div class="specimen">' + cells + '</div>' : '') + (note ? '<p class="specimen__note mono">' + esc(note) + '</p>' : '');
   }

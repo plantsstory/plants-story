@@ -1042,3 +1042,6 @@ html[data-textsize="xlarge"] .masthead__title { font-size: clamp(3.4rem, 9vw, 6.
 .paywall-closed { text-align: left; border-top: 1px solid var(--color-ink); padding-top: var(--space-sm); margin: var(--space-sm) 0; }
 .paywall-closed__title { font-size: 0.72rem; letter-spacing: 0.1em; color: var(--color-accent-warm); margin: 0 0 6px; }
 .paywall-closed__text { font-size: var(--font-size-sm); line-height: 1.8; margin: 0 0 var(--space-sm); }
+
+/* T49: menu and footer links rule display:flex/inline, so the hidden state has to win there */
+.mobile-nav .d-none, .footer .d-none { display: none !important; }

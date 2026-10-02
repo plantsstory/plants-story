@@ -2103,5 +2103,9 @@
   "tools_price_at": {
     "jp": "{shop}での価格（{d} 時点）",
     "en": "Price at {shop} ({d})"
+  },
+  "spec_selected_from_clone": {
+    "jp": "元の株",
+    "en": "Selected from"
   }
 }

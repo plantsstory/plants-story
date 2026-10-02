@@ -1945,8 +1945,14 @@ serve(async (req: Request) => {
 
         // Build body text from structured data for backward compatibility
         const dist = botResult.nativeDistribution.join(", ");
+        // Japanese body: country names in Japanese, no source tag in the prose (the source line carries it)
+        const COUNTRY_JP: Record<string, string> = { Colombia: "コロンビア", Panama: "パナマ", "Panamá": "パナマ", Mexico: "メキシコ", "México": "メキシコ", "Costa Rica": "コスタリカ", Nicaragua: "ニカラグア", Peru: "ペルー", "Perú": "ペルー", Ecuador: "エクアドル", Brazil: "ブラジル", Venezuela: "ベネズエラ", Guyana: "ガイアナ", Suriname: "スリナム", "French Guiana": "フランス領ギアナ", Bolivia: "ボリビア", Honduras: "ホンジュラス", Guatemala: "グアテマラ", Belize: "ベリーズ", "El Salvador": "エルサルバドル" };
+        const jpCountry = (c: string) => COUNTRY_JP[c.trim()] || c.trim();
+        const distJp = botResult.nativeDistribution.map(jpCountry).join("、");
         // Protologue citation without a repeated "(year)" (GBIF publishedIn often carries one already)
-        const pubClean = `${botResult.publication || ""} ${botResult.referenceCollation || ""}`.replace(/\s*\(\d{4}\)\s*/g, " ").replace(/^in\s+/, "").replace(/\s+/g, " ").replace(/\s*\.\s*$/, "").trim();
+        const pubClean = `${botResult.publication || ""} ${botResult.referenceCollation || ""}`.replace(/\s*\(\d{4}\)\s*/g, " ").replace(/^in\s+/, "").replace(/\s+/g, " ").replace(/\s*\.\s*$/, "").trim()
+          // figure and plate references are not part of the short citation
+          .replace(/(?:^|,|\s)\s*(?:figs?|t|tab|pl)\.?(?:\s*[\d,\s-]+)?$/i, "").replace(/,\s*(\d)/, " $1").replace(/\s*\.\s*$/, "").trim();
         const ipniCollectorForBody = botResult.collectorTeam ? botResult.collectorTeam.replace(/\s+\d+$/, "") : "";
         const ipniLocalityForBody = botResult.typeLocality && botResult.typeLocality !== "sine loc." ? botResult.typeLocality : "";
         // The web-search model sometimes leaves markdown citations "([ipni.org](https://…))" in prose — the links live in sources
@@ -1954,14 +1960,20 @@ serve(async (req: Request) => {
         const aiNotesJp = stripMd(aiStructured?.notes);
         const aiNotesEn = stripMd(aiStructured?.notes_en);
         let bodyJp = `${botResult.name} は ${botResult.publicationYear ? botResult.publicationYear + " 年、" : ""}${botResult.authors} が${pubClean ? " " + pubClean + " で" : ""}記載した。`;
-        if (ipniLocalityForBody) bodyJp += `タイプ産地は ${ipniLocalityForBody}。`;
+        if (ipniLocalityForBody) {
+          // "Chiapas, Mexico" → "メキシコ、Chiapas"
+          const parts = ipniLocalityForBody.split(/,\s*/);
+          const last = parts[parts.length - 1];
+          const locJp = COUNTRY_JP[last] ? COUNTRY_JP[last] + (parts.length > 1 ? "、" + parts.slice(0, -1).join(", ") : "") : ipniLocalityForBody;
+          bodyJp += `タイプ産地は${locJp}。`;
+        }
         if (ipniCollectorForBody) bodyJp += `採集者は ${ipniCollectorForBody}${botResult.collectionDate ? "（" + botResult.collectionDate.replace(/^.*?(\d{4}).*$/, "$1") + " 年採集）" : ""}。`;
-        if (dist) bodyJp += `分布は ${dist}（POWO）。`;
+        if (dist) bodyJp += `分布は${distJp}。`;
         if (aiNotesJp) bodyJp += aiNotesJp;
         let bodyEn = `${botResult.name} was described by ${botResult.authors}${botResult.publicationYear ? " in " + botResult.publicationYear : ""}${pubClean ? " in " + pubClean : ""}.`;
         if (ipniLocalityForBody) bodyEn += ` Type locality: ${ipniLocalityForBody}.`;
         if (ipniCollectorForBody) bodyEn += ` Collected by ${ipniCollectorForBody}${botResult.collectionDate ? " (" + botResult.collectionDate.replace(/^.*?(\d{4}).*$/, "$1") + ")" : ""}.`;
-        if (dist) bodyEn += ` Distribution: ${dist} (POWO).`;
+        if (dist) bodyEn += ` Distribution: ${dist}.`;
         if (aiNotesEn) bodyEn += " " + aiNotesEn;
 
         const tierInfo = TIER_CONFIG.S;
