@@ -202,7 +202,7 @@
             html += '<span class="text-sm text-muted">実生の投稿は5件まで無料（閲覧は無料・無制限）</span>';
             html += '</div>';
             if (isOwnProfile) {
-              html += '<div class="mt-sm"><button class="btn btn--primary btn--sm" data-action="show-paywall">サブスクリプションを開始</button></div>';
+              html += '<div class="mt-sm"><button class="btn btn--primary btn--sm" data-action="show-paywall">会員について</button></div>';
             }
             subContent.innerHTML = html;
           }
@@ -221,7 +221,7 @@
           html += '<span class="text-sm text-muted">実生の投稿は5件まで無料（閲覧は無料・無制限）</span>';
           html += '</div>';
           if (isOwnProfile) {
-            html += '<div class="mt-sm"><button class="btn btn--primary btn--sm" data-action="show-paywall">サブスクリプションを開始</button></div>';
+            html += '<div class="mt-sm"><button class="btn btn--primary btn--sm" data-action="show-paywall">会員について</button></div>';
           }
           subContent.innerHTML = html;
         }
@@ -346,7 +346,7 @@
         } else {
           subStatusEl.innerHTML = '<div class="text-sm text-muted">現在のプラン: <strong>Free</strong></div>' +
             '<div class="text-xs text-muted mt-xs">実生の投稿は5件まで無料。6件目以降の投稿にはサブスクリプションが必要です。</div>';
-          subActionsEl.innerHTML = '<button class="btn btn--primary btn--sm mt-sm" id="start-subscription-btn">サブスクリプションを開始</button>';
+          subActionsEl.innerHTML = '<button class="btn btn--primary btn--sm mt-sm" id="start-subscription-btn">会員について</button>';
           document.getElementById('start-subscription-btn').addEventListener('click', showPaywallModal);
         }
       });

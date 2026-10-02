@@ -713,7 +713,7 @@ function navigateTo(page, options, pushHistory) {
       people: 'アロイド品種の記載者・採集者・作出者の索引。人物ごとに関連する品種をたどれます',
       locality: 'タイプ産地（国）ごとに原種をたどる索引。コロンビア、パナマ、ペルーなど',
       glossary: 'sp. / aff. / cf.、記載者、タイプ産地、交配式、F1、クローン、TC など由来を読むための用語集',
-      pricing: 'Aroid Origins の料金とサービス内容。閲覧は無料、実生（My Seedlings）投稿は5件まで無料、6件目以降は月額240円または年額2,500円のサブスクリプション'
+      pricing: 'Aroid Origins の料金とサービス内容。閲覧は無料、実生の投稿は5件まで無料。会員（月額500円・年額5,000円）は受付準備中'
     };
     if (page === 'genus' && options.genus) {
       var gName = options.genus.charAt(0).toUpperCase() + options.genus.slice(1);
@@ -1288,6 +1288,8 @@ if (false) {
   window._PAYMENT_PROVIDER = 'stripe';
   // Membership sign-up is closed until a provider is approved (Stripe paused, PAY.JP after the opening
   // notification). While false, every entry point shows the "準備中" notice and no checkout starts.
+  // Before setting this to true: the Stripe Price secrets (STRIPE_PRICE_MONTHLY/ANNUAL) are still the old
+  // 240/2,500 prices — create 500/5,000 Prices (or switch to PAY.JP plans) and update the secrets first.
   window._MEMBER_OPEN = false;
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
 
@@ -1811,8 +1813,8 @@ if (false) {
     if (!cardSection) return;
     if (planLabel) {
       planLabel.textContent = _selectedPlan === 'annual'
-        ? '年額プラン: 2,500円/年'
-        : '月額プラン: 240円/月';
+        ? '年額: 5,000円/年'
+        : '月額: 500円/月';
     }
     if (errEl) errEl.textContent = '';
     if (planSelect) planSelect.classList.add('d-none');
