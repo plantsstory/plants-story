@@ -1287,6 +1287,9 @@ if (false) {
   // Payment provider in use: 'stripe' (Checkout redirect) or 'payjp' (inline card form).
   // Stripe first (BOARD 09-05); PAY.JP stays deployed as the fallback.
   window._PAYMENT_PROVIDER = 'stripe';
+  // Membership sign-up is closed until a provider is approved (Stripe paused, PAY.JP after the opening
+  // notification). While false, every entry point shows the "準備中" notice and no checkout starts.
+  window._MEMBER_OPEN = false;
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
 
   // --- IP address helper (cached per session, global) ---
@@ -1695,6 +1698,7 @@ if (false) {
 
   psExport('startCheckout', startCheckout);
   function startCheckout(plan) {
+    if (!window._MEMBER_OPEN) { showPaywallModal('closed'); return; }
     var sb = window._supabaseClient;
     if (!sb || !window._currentUser) {
       // Not logged in: remember the selected plan, send to Google OAuth,
@@ -1835,6 +1839,7 @@ if (false) {
 
   // Tokenize the card and create the subscription server-side
   function submitPayment() {
+    if (!window._MEMBER_OPEN) return;
     if (window._PAYMENT_PROVIDER === 'stripe') { startStripeCheckout(); return; }
     if (_checkoutInProgress || !_payjpInstance || !_payjpCardElement) return;
     var errEl = document.getElementById('payjp-card-error');
@@ -1960,6 +1965,20 @@ if (false) {
     _paywallPreviousFocus = document.activeElement;
     // Always start from the plan selection step
     if (typeof window.resetPaywallSteps === 'function') window.resetPaywallSteps();
+    // Sign-up closed: one notice in place of the plans, the card form and the payment note
+    var closed = !window._MEMBER_OPEN;
+    ['paywall-plan-select', 'paywall-card-section'].forEach(function(id) { var el = document.getElementById(id); if (el && closed) el.classList.add('d-none'); });
+    var note = modal.querySelector('.paywall-modal__note');
+    if (note) note.classList.toggle('d-none', closed);
+    var notice = document.getElementById('paywall-closed');
+    if (notice) {
+      notice.classList.toggle('d-none', !closed);
+      var loginBtn = document.getElementById('paywall-closed-login');
+      if (loginBtn) loginBtn.classList.toggle('d-none', !!window._currentUser);
+      var done = document.getElementById('paywall-closed-done');
+      if (done) done.classList.toggle('d-none', !window._currentUser);
+    }
+    if (closed && typeof gtag === 'function') gtag('event', 'member_interest', { source: source || 'unknown' });
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
     if (typeof gtag === 'function') gtag('event', 'paywall_view', { source: source || 'unknown' });
@@ -1990,6 +2009,8 @@ if (false) {
     if (closeBtn) closeBtn.addEventListener('click', hidePaywallModal);
     if (planMonthly) planMonthly.addEventListener('click', function() { startCheckout('monthly'); });
     if (planAnnual) planAnnual.addEventListener('click', function() { startCheckout('annual'); });
+    var closedLogin = document.getElementById('paywall-closed-login');
+    if (closedLogin) closedLogin.addEventListener('click', function() { hidePaywallModal(); startGoogleLogin(window.location.pathname, 'member_interest'); });
   })();
 
   // Delegated click handler for dynamically rendered paywall CTA buttons
