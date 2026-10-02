@@ -99,7 +99,8 @@
         if (!authoritySource) missing.push('source');
       }
     } else if (type === 'hybrid') {
-      var fs = clean(rec.formula_status).toLowerCase();
+      // not clean(): its NULLISH table would turn 'unknown' into '' and fail every Hybrid with unknown parents
+      var fs = String((rec && rec.formula_status) || '').trim().toLowerCase();
       if (!(p.both || fs === 'unknown' || fs === 'complex')) missing.push('parents');
       if (!(clean(s.breeder) || clean(s.namer) || num(s.naming_year) || clean(o.discoverer_or_breeder) || p.creator)) missing.push('person');
       if (!(anySource || humanLongest >= 80)) missing.push('evidence');

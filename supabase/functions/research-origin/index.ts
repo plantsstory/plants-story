@@ -278,8 +278,15 @@ async function queryGBIF(genus: string, species: string): Promise<(BotanicalResu
       match = { usageKey: hit.nubKey || hit.key, acceptedUsageKey: hit.acceptedKey, scientificName: hit.scientificName, canonicalName: hit.canonicalName, status: hit.taxonomicStatus, rank: "SPECIES" };
       console.log(`[GBIF] /match missed; backbone search found ${hit.scientificName}`);
     }
-    // Follow synonyms to the accepted taxon
-    const key = match.acceptedUsageKey || match.usageKey;
+    // Only an accepted name that is the name asked for takes the S route. A DOUBTFUL backbone name proves nothing,
+    // and a synonym or a fuzzy match would write another species' facts under this name (10-03: queremalense,
+    // portillae were DOUBTFUL; villenaorum matched vallense; angamarcanum resolved to dolichostachyum).
+    const asked = `${genus} ${species}`.toLowerCase();
+    if (String(match.status || "").toUpperCase() !== "ACCEPTED" || String(match.canonicalName || "").toLowerCase() !== asked) {
+      console.log(`[GBIF] ${match.scientificName} is ${match.status}${String(match.canonicalName || "").toLowerCase() !== asked ? " / not the name asked" : ""}: not used as an authority`);
+      return null;
+    }
+    const key = match.usageKey;
     console.log(`[GBIF] Matched ${match.scientificName} (key: ${key}, ${match.status})`);
 
     const [detailRes, typeRes, facetRes] = await Promise.all([
