@@ -2231,5 +2231,21 @@
   "tools_price_note": {
     "jp": "価格は楽天市場の {d} 時点",
     "en": "Rakuten prices as of {d}"
+  },
+  "shops_title": {
+    "jp": "取扱店 — PR",
+    "en": "Shops — PR"
+  },
+  "shops_note": {
+    "jp": "掲載料を受けて掲載しています。品種の記録・信頼度には影響しません。",
+    "en": "Paid listings. They do not affect the records or their trust levels."
+  },
+  "terms_9d_title": {
+    "jp": "第9条の5 取扱店の掲載",
+    "en": "Article 9-5 Shop listings"
+  },
+  "terms_9d_body": {
+    "jp": "取扱店の掲載（事業者向け）は月額1,000円（税込）、初月無料です。月末締めで翌月末までに銀行振込でお支払いいただきます（振込手数料は掲載者の負担）。解約はお申し出の翌月末までです。掲載内容は運営者が審査し、掲載を断る・取りやめる場合があります。掲載欄には PR と表示し、掲載は品種の記録や信頼度に影響しません。当サイトは適格請求書発行事業者ではありません。",
+    "en": "Shop listings (for businesses) cost ¥1,000 a month (tax included), first month free, invoiced at month end and paid by bank transfer by the end of the following month (transfer fees borne by the shop). Cancellation takes effect at the end of the month after notice. The operator reviews listings and may decline or withdraw them. Listings are marked PR and never affect records or trust levels. This site is not a registered qualified-invoice issuer."
   }
 }

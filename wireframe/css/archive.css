@@ -1154,3 +1154,13 @@ html[data-boot="deep"] #static-entry ~ .page { display: none !important; }
   .shop-card__price { font-size: 1.05rem; margin: 2px 0 0; }
   .shop-card__shops a { flex: 0 1 auto; padding: 0 12px; }
 }
+
+/* T33: 取扱店 — PR (one line per shop, the whole line is the link) */
+.shops { margin-top: var(--space-xl); }
+.shops__note { font-size: 0.64rem; color: var(--color-mid); margin: 0 0 6px; }
+.shops__list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--color-ink); }
+.shops__list li { border-bottom: 1px solid var(--color-rule); }
+.shops__list a { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; min-height: 44px; padding: 10px 0; color: var(--color-ink); text-decoration: none; }
+.shops__list a:hover .shops__name { text-decoration: underline; }
+.shops__name { font-weight: 600; }
+.shops__blurb { font-size: var(--font-size-sm); color: var(--color-mid); }

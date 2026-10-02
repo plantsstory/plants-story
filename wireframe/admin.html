@@ -14,11 +14,12 @@
   <link rel="stylesheet" href="css/utilities.css">
   <link rel="stylesheet" href="css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/record-gate.js?v=20261003j"></script>
-  <script src="js/tool-gate.js?v=20261003j"></script>
-  <script src="js/admin-ledger.js?v=20261003j"></script>
-  <script src="js/admin-tools-research.js?v=20261003j"></script>
-  <script src="js/admin-verify.js?v=20261003j"></script>
+  <script src="js/record-gate.js?v=20261003k"></script>
+  <script src="js/tool-gate.js?v=20261003k"></script>
+  <script src="js/admin-ledger.js?v=20261003k"></script>
+  <script src="js/admin-tools-research.js?v=20261003k"></script>
+  <script src="js/admin-verify.js?v=20261003k"></script>
+  <script src="js/admin-shops.js?v=20261003k"></script>
 </head>
 <body>
 
@@ -70,6 +71,7 @@
       <a href="#" data-section="gate">未収録一覧</a>
       <a href="#" data-section="verify">検証</a>
       <a href="#" data-section="affiliates">道具（アフィリエイト）</a>
+      <a href="#" data-section="shops">取扱店</a>
       <a href="#" data-section="ledger">帳簿</a>
       <a href="#" data-section="plants">株台帳</a>
       <a href="#" data-section="users">ユーザー管理</a>
@@ -313,6 +315,12 @@
       <section id="sec-verify" class="hidden">
         <h2 class="section-title">検証</h2>
         <div id="verify-root"></div>
+      </section>
+
+      <!-- ---- SHOPS (取扱店) ---- -->
+      <section id="sec-shops" class="hidden">
+        <h2 class="section-title">取扱店</h2>
+        <div id="shops-root"></div>
       </section>
 
       <!-- ---- LEDGER (帳簿) ---- -->
@@ -958,6 +966,7 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
     if (section === 'affiliates') loadAffiliates();
     if (section === 'ledger' && window.loadLedger) window.loadLedger();
     if (section === 'verify' && window.loadVerify) window.loadVerify();
+    if (section === 'shops' && window.loadShops) window.loadShops();
     if (section === 'plants' && window.loadPlants) window.loadPlants();
     if (section === 'keyword-research') populateKRSelect();
     closeNav();

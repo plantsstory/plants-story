@@ -562,6 +562,29 @@
     document.getElementById('share-band-x').addEventListener('click', function () { track('x'); });
     document.getElementById('share-band-close').addEventListener('click', function () { el.classList.add('d-none'); });
   }
+  /* 取扱店 — PR: paid listings, per genus (never tied to one plant), at most three, rotated daily */
+  var _shopsByGenus = {};
+  function renderShops(d) {
+    var el = document.getElementById('shops-section');
+    if (!el) return;
+    var draw = function (list) {
+      if (!list || !list.length) { el.classList.add('d-none'); el.innerHTML = ''; return; }
+      var day = Math.floor(Date.now() / 864e5), n = list.length, shown = [];
+      for (var i = 0; i < Math.min(3, n); i++) shown.push(list[(day + i) % n]);
+      el.innerHTML = '<h2 class="section-title"><span>' + esc(T('shops_title')) + '</span></h2><p class="shops__note mono">' + esc(T('shops_note')) + '</p><ul class="shops__list">'
+        + shown.map(function (s) { return '<li><a href="' + esc(s.url) + '" target="_blank" rel="sponsored noopener" data-shop-id="' + s.id + '"><span class="shops__name">' + esc(s.name) + '</span>' + (s.blurb ? '<span class="shops__blurb">' + esc(s.blurb) + '</span>' : '') + '</a></li>'; }).join('') + '</ul>';
+      el.classList.remove('d-none');
+    };
+    if (_shopsByGenus[d.genus]) { draw(_shopsByGenus[d.genus]); return; }
+    var sb = window._supabaseClient;
+    if (!sb) return;
+    sb.rpc('list_public_shops', { p_genus: d.genus }).then(function (r) { _shopsByGenus[d.genus] = (r && r.data) || []; draw(_shopsByGenus[d.genus]); }, function () {});
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('[data-shop-id]');
+    if (a && typeof gtag === 'function') gtag('event', 'shop_click', { shop: a.getAttribute('data-shop-id'), page: 'cultivar' });
+  });
+
   /* colophon line at the foot of the sheet: 収録 · 記録 n 件 · 更新 · 投稿 */
   function renderColophonLine(d, entry) {
     var el = document.getElementById('detail-colophon');
@@ -905,6 +928,7 @@
     renderGateNote(d);
     renderShareBand(d, entry);
     renderColophonLine(d, entry);
+    renderShops(d);
     if (window.refreshRerunButton) window.refreshRerunButton(entry);
     if (window.refreshPrivateButton) window.refreshPrivateButton(entry);
     var pnote = document.getElementById("detail-private-note");
