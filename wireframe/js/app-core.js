@@ -2517,6 +2517,11 @@ if (false) {
     var recState = isSeedling ? 'ok' : recordStateOf(fullName, entry, meta);
     var originCount = window.RecordGate ? window.RecordGate.visibleCount({ origins: entry.origins }) : (hasDesc ? entry.origins.length : 0);
     if (recState !== 'ok') hasDesc = false;
+    // a % only for a record that cites something; a contributor's own record says so instead
+    var o0 = entry.origins && entry.origins[0];
+    var cited = !!o0 && (o0.source_type === 'ipni_powo' || (o0.sources || []).some(function(x) { return x && x.url; }) || !!o0.source_url);
+    var byUser = hasDesc && !cited;
+    if (byUser) hasDesc = false;
     var trustPct = hasDesc ? entry.origins[0].trust : 0;
     var displayName = isSeedling ? fullName.replace(' [Seedling]', '') : fullName;
 
@@ -2539,7 +2544,7 @@ if (false) {
       // No separate "AI pending" badge: the state column carries it
       h += hasDesc
         ? '<div class="trust"><div class="trust__bar"><div class="trust__fill ' + getTrustClass(trustPct) + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + trustPct + '%</span></div>'
-        : '<span class="mono cultivar-row__state cultivar-row__state--' + recState + '">' + t('state_' + recState) + '</span>';
+        : (byUser ? '<span class="mono cultivar-row__state">' + t('record_by_user') + '</span>' : '<span class="mono cultivar-row__state cultivar-row__state--' + recState + '">' + t('state_' + recState) + '</span>');
     }
     h += '</div>';
     if (!isSeedling && window.entryCiteLine) {
@@ -2589,7 +2594,8 @@ if (false) {
   function refreshGenusStats(slug) {
     var statsEl = document.getElementById('genus-stats-' + slug);
     if (!statsEl) return;
-    var items = (_genusItems[slug] || []).filter(function(it) { return it.meta.type !== 'seedling' && !isIndividualItem(it); });
+    // same count as the top page: 収録 = recorded entries, no seedlings, no individuals
+    var items = (_genusItems[slug] || []).filter(function(it) { return it.meta.type !== 'seedling' && !isIndividualItem(it) && recordStateOf(it.fullName, it.entry, it.meta) === 'ok'; });
     if (items.length === 0) { statsEl.style.display = 'none'; return; }
 
     var speciesCount = 0, hybridCount = 0, cloneCount = 0;
@@ -2602,10 +2608,11 @@ if (false) {
 
     var chipsEl = statsEl.querySelector('.genus-stats__chips');
     if (chipsEl) {
-      var html = '<span class="genus-stat-chip">' + items.length + (currentLang === 'en' ? ' cultivars' : ' 品種') + '</span>';
-      if (speciesCount > 0) html += '<span class="genus-stat-chip genus-stat-chip--species">' + speciesCount + ' species</span>';
-      if (hybridCount > 0) html += '<span class="genus-stat-chip genus-stat-chip--hybrid">' + hybridCount + ' hybrid</span>';
-      if (cloneCount > 0) html += '<span class="genus-stat-chip genus-stat-chip--clone">' + cloneCount + ' clone</span>';
+      var en = currentLang === 'en';
+      var html = '<span class="genus-stat-chip">' + (en ? 'Recorded ' : '収録 ') + items.length + '</span>';
+      if (speciesCount > 0) html += '<span class="genus-stat-chip genus-stat-chip--species">' + (en ? 'Species ' : '原種 ') + speciesCount + '</span>';
+      if (hybridCount > 0) html += '<span class="genus-stat-chip genus-stat-chip--hybrid">Hybrid ' + hybridCount + '</span>';
+      if (cloneCount > 0) html += '<span class="genus-stat-chip genus-stat-chip--clone">Clone ' + cloneCount + '</span>';
       chipsEl.innerHTML = html;
     }
     statsEl.style.display = '';

@@ -329,11 +329,11 @@
     "en": "Contact"
   },
   "search_placeholder": {
-    "jp": "品種名を検索... / Search cultivar...",
+    "jp": "品種名・カタカナで検索（例: ワロクアナム）",
     "en": "Search cultivar..."
   },
   "genus_search": {
-    "jp": "属内を検索...",
+    "jp": "品種名・カタカナで検索（例: ワロクアナム）",
     "en": "Search within genus..."
   },
   "source_label": {
@@ -1089,8 +1089,8 @@
     "en": "Type localities"
   },
   "ledger_updated": {
-    "jp": "最終収録",
-    "en": "Latest entry"
+    "jp": "最終更新",
+    "en": "Last updated"
   },
   "story_label": {
     "jp": "今日の一葉",

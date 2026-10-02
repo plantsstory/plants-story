@@ -1085,3 +1085,33 @@ html[data-boot="deep"] #page-top { display: none !important; }
 .vote-btn--active, .vote-btn--active-down { border-bottom-color: var(--color-ink) !important; color: var(--color-ink) !important; }
 /* specimen label, 2 columns on phones: the left column starts at the edge in every row */
 @media (max-width: 640px) { .specimen__cell:nth-child(odd) { padding-left: 0; } .specimen__cell:nth-child(even) { padding-left: var(--space-md); } }
+
+/* ---------- T54: top page first screen (phones first) and the genus list ---------- */
+/* the plate image has no confirmed source: not used; the story of the day carries the first photo */
+.masthead__plate { display: none !important; }
+@media (max-width: 640px) {
+  .masthead { gap: var(--space-sm); }
+  .masthead__title { font-size: 2.3rem !important; line-height: 1.05; margin: 4px 0; }
+  .masthead__title br { display: none; }
+  .masthead__tagline { font-size: 0.86rem; margin: 0 0 4px; }
+  .masthead__desc { font-size: 0.92rem; line-height: 1.6; margin: 0 0 var(--space-sm); }
+  .masthead__meta { display: none; }
+  /* the four numbers as one mono line */
+  .masthead__ledger { display: flex !important; flex-wrap: wrap; gap: 2px 14px; border: 0 !important; padding: 0; margin: 2px 0 0; }
+  .masthead__ledger > div { display: flex; align-items: baseline; gap: 4px; border: 0 !important; padding: 0 !important; }
+  .masthead__ledger dt { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.06em; color: var(--color-mid); }
+  .masthead__ledger dd { font-family: var(--font-mono); font-size: 0.78rem; margin: 0; }
+  .masthead__ledger dd small { font-size: 0.6rem; margin-left: 1px; }
+  .front { margin-top: var(--space-md); }
+}
+/* genus list: the same ruled rows as the ledger, not cards */
+.genus-content .card.card--no-pad { background: transparent; border: 0; border-top: 1px solid var(--color-ink); border-radius: 0; box-shadow: none; }
+.genus-content .cultivar-row { background: transparent; border: 0; border-bottom: 1px solid var(--color-rule); border-radius: 0; box-shadow: none; padding: 10px 0; }
+.genus-content .cultivar-row:hover { background: rgba(30, 38, 34, 0.035); }
+.genus-content .cultivar-row__thumb { width: 48px; height: 48px; border-radius: 0; border: 1px solid var(--color-rule); background: var(--color-paper-2); }
+.genus-content .cultivar-row__thumb img { object-fit: cover; }
+.genus-content .cultivar-row__name { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; }
+.genus-content .sort-bar .search-bar { flex: 1 1 100%; max-width: none; }
+.genus-stat-chip { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.06em; background: none !important; border: 0 !important; color: var(--color-mid) !important; padding: 0 10px 0 0 !important; }
+.genus-stat-chip + .genus-stat-chip::before { content: '·'; margin-right: 10px; color: var(--color-rule-strong); }
+.badge { text-transform: none !important; }

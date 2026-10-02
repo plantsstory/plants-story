@@ -874,7 +874,8 @@ function extractFormula(data) {
 // ---- Shared helpers (used by buildRowHtml, renderOrigins, detail page, etc.) ----
 function getBadgeInfo(type, name) {
   var cls = type === 'species' ? 'badge--species' : (type === 'hybrid' ? 'badge--hybrid' : (type === 'seedling' ? 'badge--seedling' : 'badge--clone'));
-  var txt = type === 'species' ? getSpeciesBadgeText(name) : (type === 'hybrid' ? 'Hybrid' : (type === 'seedling' ? 'Seedling' : 'Clone'));
+  // one set of words everywhere: 原種 · Hybrid · Clone · 実生 (sp./aff. are part of the name, not the badge)
+  var txt = type === 'species' ? (currentLang === 'en' ? 'Species' : '原種') : (type === 'hybrid' ? 'Hybrid' : (type === 'seedling' ? (currentLang === 'en' ? 'Seedling' : '実生') : 'Clone'));
   return { cls: cls, txt: txt };
 }
 psExport('getBadgeInfo', getBadgeInfo);
@@ -1417,7 +1418,7 @@ function filterGenusRows(genusEl, query) {
 }
 
 // ---- Data-driven pagination: renders only current page from memory ----
-var ITEMS_PER_PAGE = 10;
+var ITEMS_PER_PAGE = 50;   // 31 entries on one page; the list is short enough to read whole
 var _dataFullyLoaded = false; // true after full Supabase fetch completes
 psExport('_dataFullyLoaded', false);
 var _paginationCursors = {}; // genus-slug -> { page -> lastCultivarName }
@@ -1582,7 +1583,10 @@ function paginateGenusFromMemory(genusEl, page) {
     if (sortMode === 'newest') {
       return (b.entry._created_at || '').localeCompare(a.entry._created_at || '');
     }
-    return a.fullName.localeCompare(b.fullName);
+    // 名前順 = category first (原種 → Hybrid → Clone → 実生), then the name without quotes and sp./aff./cf.
+    var rank = { species: 0, hybrid: 1, clone: 2, seedling: 3 };
+    var key = function(n) { return String(n).replace(/^\S+\s+/, '').replace(/['"‘’“”]/g, '').replace(/^(sp|aff|cf)\.\s*/i, '').toLowerCase(); };
+    return ((rank[a.meta.type] || 0) - (rank[b.meta.type] || 0)) || key(a.fullName).localeCompare(key(b.fullName));
   });
 
   var totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
@@ -1634,6 +1638,8 @@ function renderPaginationUI(scope, page, totalPages, totalCount, searchQuery) {
   var pagDiv = scope.querySelector('.pagination');
   if (!pagDiv) return;
   pagDiv.innerHTML = '';
+  // one page: no page links at all
+  pagDiv.classList.toggle('d-none', totalPages <= 1);
 
   var prev = document.createElement('a');
   prev.className = 'page-link' + (page <= 1 ? ' disabled' : '');
@@ -1658,12 +1664,9 @@ function renderPaginationUI(scope, page, totalPages, totalCount, searchQuery) {
   // Update count text
   var countEl = scope.querySelector('.text-muted.mb-lg');
   if (countEl) {
-    if (searchQuery) {
-      // For server-side, total IS the filtered count; for memory, it's the view total
-      countEl.textContent = totalCount + ' 品種が登録されています';
-    } else {
-      countEl.textContent = totalCount + ' 品種が登録されています';
-    }
+    // the list count: 掲載 (rows shown, unrecorded ones included); 収録 is the chip above
+    var en = typeof currentLang !== 'undefined' && currentLang === 'en';
+    countEl.textContent = searchQuery ? (en ? totalCount + ' matches' : '該当 ' + totalCount + ' 件') : (en ? totalCount + ' listed' : '掲載 ' + totalCount + ' 件');
   }
 }
 

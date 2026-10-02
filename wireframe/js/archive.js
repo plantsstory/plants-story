@@ -94,7 +94,7 @@
     var d = {
       fullName: fullName, displayName: displayName, genus: genus, epithet: epithet, type: type,
       origin: o, trust: o ? (parseInt(o.trust, 10) || 0) : 0,
-      id: entry._id || null, createdAt: entry._created_at || '',
+      id: entry._id || null, createdAt: entry._created_at || '', updatedAt: entry._updatedAt || '',
       formula: entry.formula || null
     };
     d.author = clean(s.author_name);
@@ -110,6 +110,8 @@
     d.sowing = clean(s.sowing_date);
     d.year = d.pubYear || d.namingYear || yearOf(d.sowing);
     d.text = clean(s.notes) || clean(o && o.body) || '';
+    // a % is shown only for a record that cites something (same rule as the record head)
+    d.hasSources = !!o && (o.source_type === 'ipni_powo' || (o.sources || []).some(function (x) { return x && clean(x.url); }) || !!clean(o.source_url));
     d.textEn = clean(o && o.body_en) || d.text;
     var sf = (s.formula && typeof s.formula === 'object') ? s.formula : {};
     var dbp = entry._parents || [];
@@ -267,12 +269,12 @@
   }
 
   function renderLedgerStats(all) {
-    var entries = all.filter(function (d) { return d.type !== 'seedling' && d.state === 'ok'; });
+    var entries = all.filter(function (d) { return d.type !== 'seedling' && !d.isIndividual && d.state === 'ok'; });
     var years = entries.map(function (d) { return d.type === 'species' ? d.pubYear : null; }).filter(Boolean);
     var countries = {};
     entries.forEach(function (d) { if (d.country) countries[d.country] = 1; });
     var latest = '';
-    all.forEach(function (d) { if (d.createdAt && d.createdAt > latest) latest = d.createdAt; });
+    all.forEach(function (d) { var u = d.updatedAt || d.createdAt; if (u && u > latest) latest = u; });
     var set = function (id, html) { var el = document.getElementById(id); if (el) el.innerHTML = html; };
     set('ledger-count', entries.length + '<small>' + esc(T('entries_unit')) + '</small>');
     set('ledger-years', years.length ? Math.min.apply(null, years) + '–' + Math.max.apply(null, years) : '—');
@@ -330,12 +332,12 @@
     return Object.keys(map).map(function (k) { return { key: k, items: map[k] }; })
       .sort(function (a, b) { return b.items.length - a.items.length || a.key.localeCompare(b.key); });
   }
-  function indexGroupHtml(title, groups, limit, titleHref, navPage) {
+  function indexGroupHtml(title, groups, limit, titleHref, navPage, labelOf) {
     if (!groups.length) return '';
     var head = titleHref ? '<a href="' + esc(titleHref) + '" data-nav="' + esc(navPage || 'people') + '">' + esc(title) + ' →</a>' : esc(title);
     var html = '<div class="index__group"><h3>' + head + '</h3><ul class="index__list">';
     groups.slice(0, limit || 999).forEach(function (g) {
-      html += '<li class="index__item"><button type="button" class="index__toggle" aria-expanded="false"><span class="index__name">' + esc(g.key) + '</span><span class="index__count">' + g.items.length + '</span></button><ul class="index__sub">';
+      html += '<li class="index__item"><button type="button" class="index__toggle" aria-expanded="false"><span class="index__name">' + esc(labelOf ? labelOf(g.key) : g.key) + '</span><span class="index__count">' + g.items.length + '</span></button><ul class="index__sub">';
       g.items.slice().sort(function (a, b) { return (a.year || 9999) - (b.year || 9999) || a.displayName.localeCompare(b.displayName); }).forEach(function (d) {
         html += '<li>' + link(d, esc(d.displayName)) + (d.year ? '<span class="mono">' + d.year + '</span>' : '') + '</li>';
       });
@@ -343,14 +345,17 @@
     });
     return html + '</ul></div>';
   }
-  var TYPE_LABEL = { species: ['原種', 'Species'], hybrid: ['交配種', 'Hybrids'], clone: ['クローン', 'Clones'], seedling: ['実生', 'Seedlings'] };
+  var TYPE_LABEL = { species: ['原種', 'Species'], hybrid: ['Hybrid', 'Hybrids'], clone: ['Clone', 'Clones'], seedling: ['実生', 'Seedlings'] };
   function renderIndex(all) {
     var el = document.getElementById('archive-index-body');
     if (!el) return;
     var byCountry = groupBy(all.filter(function (d) { return d.type === 'species'; }), function (d) { return d.country; });
     var byPerson = groupBy(all, peopleOf);
     var byType = groupBy(all, function (d) { var l = TYPE_LABEL[d.type]; return l ? (lang() === 'en' ? l[1] : l[0]) : ''; });
-    el.innerHTML = indexGroupHtml(T('index_localities'), byCountry, 999, base + 'locality/', 'locality') + indexGroupHtml(T('index_people'), byPerson, 12, base + 'people/', 'people') + indexGroupHtml(T('index_types'), byType);
+    var fullName = function (key) { var a = authorityOf(key); return a && a.name ? a.name : key; };
+    el.innerHTML = indexGroupHtml(T('index_localities'), byCountry, 999, base + 'locality/', 'locality') + indexGroupHtml(T('index_people'), byPerson, 12, base + 'people/', 'people', fullName) + indexGroupHtml(T('index_types'), byType);
+    // people are shown by full name: draw again once the authority table is in
+    if (!_authority) loadAuthority(function () { renderIndex(all); });
   }
 
   function renderTimeline(all) {
@@ -447,6 +452,7 @@
       var cite = citeHtml(d);
       html += '<td class="ledger-table__cell-meta ledger-table__meta">' + (cite ? '<span class="mono">' + cite + '</span>' : '') + (d.parentA && d.parentB ? '<div class="text-xs">' + esc(d.parentA) + ' × ' + esc(d.parentB) + '</div>' : '') + '</td>';
       if (rowState !== 'ok') html += '<td class="ledger-table__cell-trust right"><span class="mono ledger-table__state">' + esc(T('state_' + rowState)) + '</span></td>';
+      else if (!d.hasSources && d.type !== 'seedling') html += '<td class="ledger-table__cell-trust right"><span class="mono ledger-table__state">' + esc(T('record_by_user')) + '</span></td>';
       else html += '<td class="ledger-table__cell-trust right">' + (d.trust > 0 ? '<div class="trust"><div class="trust__bar"><div class="trust__fill ' + trustCls + '" style="width:' + d.trust + '%"></div></div><span class="trust__label">' + d.trust + '%</span></div>' : '<span class="mono">—</span>') + '</td>';
       html += '</tr>';
     });
