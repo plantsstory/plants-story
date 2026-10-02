@@ -129,7 +129,7 @@ serve(async (req) => {
     // 1) Rakuten: the most-reviewed items per keyword, rated 4.0 and up, in stock, with an image
     const pool: any[] = [];
     for (const q of queries) {
-      const found = await rakuten({ keyword: q.keyword, hits: "15", sort: "-reviewCount", availability: "1", imageFlag: "1", minPrice: "200" });
+      const found = await rakuten({ keyword: q.keyword, hits: "15", sort: "-reviewCount", availability: "1", imageFlag: "1", minPrice: "500" });
       await sleep(1100);
       found.filter((it) => !known.has(it.itemCode) && (it.reviewCount || 0) >= q.min_reviews && Number(it.reviewAverage || 0) >= MIN_RATING)
         .slice(0, 6)
