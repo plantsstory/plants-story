@@ -318,6 +318,8 @@ function updateMeta(opts) {
   var title = opts.title || _defaultTitle;
   var desc = opts.description || _defaultDesc;
   var path = opts.path || '';
+  // one canonical form: the trailing-slash URL the static stubs and the sitemap use
+  if (path && path.indexOf('?') === -1 && !/\/$/.test(path)) path += '/';
   var url = _siteBase + (path ? path : '');
   var image = opts.image || (_siteBase + 'images/og-default.png');
   document.title = title;
@@ -338,7 +340,7 @@ function updateMeta(opts) {
   var canonical = document.getElementById('canonical-link');
   if (canonical) canonical.setAttribute('href', url);
   // Update hreflang tags
-  ['ja', 'en', 'default'].forEach(function(lang) {
+  ['ja'].forEach(function(lang) {
     var el = document.getElementById('hreflang-' + lang);
     if (el) el.setAttribute('href', url);
   });
@@ -361,7 +363,7 @@ function updateCultivarJsonLd(name, genus, type, description, extraData) {
     document.head.appendChild(el);
   }
   extraData = extraData || {};
-  var cultivarUrl = _siteBase + genus.toLowerCase() + '/' + encodeURIComponent(name.replace(genus + ' ', ''));
+  var cultivarUrl = _siteBase + genus.toLowerCase() + '/' + encodeURIComponent(name.replace(genus + ' ', '')) + '/';
   var data = {
     '@context': 'https://schema.org',
     '@type': 'Thing',
@@ -379,16 +381,6 @@ function updateCultivarJsonLd(name, genus, type, description, extraData) {
   // Add image if available
   if (extraData.image) {
     data['image'] = extraData.image;
-  }
-  // Add aggregate rating from trust score
-  if (extraData.trustPct && extraData.voteCount) {
-    data['aggregateRating'] = {
-      '@type': 'AggregateRating',
-      'ratingValue': extraData.trustPct,
-      'bestRating': 100,
-      'worstRating': 0,
-      'ratingCount': extraData.voteCount
-    };
   }
   // Add classification info
   if (type) {
@@ -408,6 +400,10 @@ function updateCultivarJsonLd(name, genus, type, description, extraData) {
 
 // Breadcrumb structured data (Google rich result)
 function updateBreadcrumbJsonLd(items) {
+  // the static stub carries its own breadcrumb; keep one
+  document.querySelectorAll('script[type="application/ld+json"]:not([id])').forEach(function(s) {
+    if (s.textContent.indexOf('BreadcrumbList') !== -1) s.remove();
+  });
   var el = document.getElementById('breadcrumb-jsonld');
   if (!el) {
     el = document.createElement('script');
@@ -724,7 +720,7 @@ function navigateTo(page, options, pushHistory) {
       var genusOgImage = _defaultOgImage;
       updateMeta({
         title: gName + ' - ' + _defaultTitle,
-        description: gName + 'の品種一覧 - 由来・歴史情報をコミュニティで共有',
+        description: gName + ' の収録一覧。誰が、いつ、どこで名付けたか — 由来を出典つきで記録する図鑑。',
         path: options.genus,
         image: genusOgImage
       });

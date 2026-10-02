@@ -1217,12 +1217,14 @@ function updateCultivarDetail(cultivarName, rowEl) {
   // Update SEO meta tags
   var typeLabel = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: 'Seedling' }[detectedType] || '';
   var _recState = (typeof window.recordStateOf === 'function' && cData) ? window.recordStateOf(cultivarName, cData, { type: detectedType }) : 'ok';
+  // same formula as the static stub (entry-meta.js), so the page never downgrades the stub's title
+  var _metaRec = cData ? { cultivar_name: cultivarName, type: detectedType, origins: cData.origins || [], aliases: cData._aliases || [] } : null;
   var metaDesc = (_recState === 'ok' || detectedType === 'seedling')
-    ? displayName + ' (' + genusName + ' ' + typeLabel + ') の由来・歴史情報 - Aroid Origins'
+    ? (_metaRec && window.EntryMeta ? window.EntryMeta.description(_metaRec) : displayName + 'の由来 · Aroid Origins')
     : displayName + ' — 記録なし · 出典募集中 | Aroid Origins';
   var ogImageUrl = (detectedType !== 'seedling' && window.ogCardUrl) ? window.ogCardUrl(genusName, displayName) : _defaultOgImage;
   updateMeta({
-    title: displayName + ' - ' + genusName + ' | ' + _defaultTitle,
+    title: (_metaRec && window.EntryMeta) ? window.EntryMeta.title(_metaRec) : displayName + 'の由来 · Aroid Origins',
     description: metaDesc,
     path: genusKey + '/' + encodeURIComponent(displayName.replace(genusName + ' ', '')),
     image: ogImageUrl,

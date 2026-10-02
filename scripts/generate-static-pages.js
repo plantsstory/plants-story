@@ -16,6 +16,8 @@ const people = require('./lib/people');
 const geo = require('./lib/geo');
 const RecordGate = require('../wireframe/js/record-gate');
 const ToolGate = require('../wireframe/js/tool-gate');
+const EntryMeta = require('../wireframe/js/entry-meta');
+const AUTHORITY = (() => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'wireframe', 'data', 'people-authority.json'), 'utf8')); } catch (e) { return {}; } })();
 const { ogSlug } = require('./lib/og-slug');
 
 const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
@@ -91,8 +93,6 @@ function buildStub(template, meta) {
   // canonical + hreflang all point at this page
   html = html.replace(/(<link rel="canonical" id="canonical-link" href=")[^"]*(">)/, '$1' + escAttr(meta.url) + '$2');
   html = html.replace(/(<link rel="alternate" hreflang="ja" id="hreflang-ja" href=")[^"]*(">)/, '$1' + escAttr(meta.url) + '$2');
-  html = html.replace(/(<link rel="alternate" hreflang="en" id="hreflang-en" href=")[^"]*(">)/, '$1' + escAttr(meta.url) + '$2');
-  html = html.replace(/(<link rel="alternate" hreflang="x-default" id="hreflang-default" href=")[^"]*(">)/, '$1' + escAttr(meta.url) + '$2');
   // Page-specific JSON-LD before </head>
   if (meta.jsonLd && meta.jsonLd.length) {
     const blocks = meta.jsonLd.map(o => '  <script type="application/ld+json">\n  ' + jsonLd(o) + '\n  </script>').join('\n');
@@ -116,7 +116,7 @@ async function main() {
     genera = await fetchJSON('/rest/v1/genera?select=slug,name&order=display_order');
   }
   const visibleGenusNames = new Set(genera.map(g => g.name));
-  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,origins,updated_at,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=genus,cultivar_name');
+  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,origins,aliases,updated_at,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=genus,cultivar_name');
   const cultivars = allCultivars.filter(c => visibleGenusNames.has(c.genus || 'Anthurium'));
   const images = await fetchJSON('/rest/v1/cultivar_images?select=cultivar_name,storage_path&order=display_order');
 
@@ -184,7 +184,7 @@ async function main() {
       }).join('');
     const html = buildStub(template, {
       title: g.name + 'の品種一覧（' + count + '品種）| Aroid Origins',
-      description: g.name + 'の品種' + count + '件の由来・歴史情報。原種・Hybrid・Cloneの来歴を学術データベースとコミュニティで検証しています。',
+      description: g.name + 'の収録 ' + count + ' 件。誰が、いつ、どこで名付けたか — 原種・Hybrid・Clone の由来を出典つきで記録する図鑑。',
       url: url,
       ogType: 'website',
       jsonLd: [{
@@ -219,13 +219,13 @@ async function main() {
     const url = SITE + '/' + slug + '/' + encodeURIComponent(rest) + '/';
     const desc = RecordGate.state(c) !== 'ok'
       ? c.cultivar_name + ' — 記録なし · 出典募集中 | Aroid Origins'
-      : (originDescription(c.origins) || (c.cultivar_name + ' の由来・来歴・交配情報。学術データベースとコミュニティ投票で信頼度を検証しています。'));
+      : EntryMeta.description(c);
     // Share card rendered by scripts/make-og-cards.js (every public cultivar has one); raw photos are never the og:image
     const img = SITE + '/images/og/' + ogSlug(genus, c.cultivar_name) + '.png';
 
     const html = buildStub(template, {
       noindex: RecordGate.state(c) !== 'ok',
-      title: c.cultivar_name + 'の由来・歴史 | Aroid Origins',
+      title: EntryMeta.title(c),
       description: desc,
       url: url,
       ogType: 'article',
@@ -241,13 +241,14 @@ async function main() {
       }, {
         '@context': 'https://schema.org',
         '@type': 'ItemPage',
-        'name': c.cultivar_name + 'の由来・歴史',
+        'name': EntryMeta.title(c).replace(/ · Aroid Origins$/, ''),
         'url': url,
         'inLanguage': 'ja',
         'dateModified': c.updated_at || undefined,
         'about': {
           '@type': 'Thing',
           'name': c.cultivar_name,
+          'alternateName': (c.aliases && c.aliases.length) ? c.aliases : undefined,
           'description': desc,
           'image': img || undefined
         }
@@ -295,9 +296,10 @@ async function main() {
       const rest = String(r.cultivar_name).startsWith(g + ' ') ? String(r.cultivar_name).slice(g.length + 1) : String(r.cultivar_name);
       return '<li><a href="' + SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(rest) + '/">' + escAttr(r.cultivar_name) + '</a></li>';
     }).join('');
+    const full = (AUTHORITY[p.key] && AUTHORITY[p.key].name) || p.key;
     let ph = buildStub(template, {
-      title: p.key + ' — 関連する品種 ' + p.rows.length + '件 | Aroid Origins',
-      description: p.key + '（' + roles + '）に関連するアロイド品種: ' + names.slice(0, 6).join('、') + (names.length > 6 ? ' ほか' : '') + '。記載者・採集者・作出者から品種の由来をたどる索引。',
+      title: full + ' — 関連する品種 ' + p.rows.length + '件 | Aroid Origins',
+      description: (full !== p.key ? full + '（' + p.key + '）' : p.key) + '・' + roles + '。関連するアロイド品種: ' + names.slice(0, 6).join('、') + (names.length > 6 ? ' ほか' : '') + '。記載者・採集者・作出者から品種の由来をたどる索引。',
       url: url,
       ogType: 'profile',
       jsonLd: [{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': [

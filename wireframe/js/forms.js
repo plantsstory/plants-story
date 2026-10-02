@@ -286,7 +286,9 @@ if (formulaUnknown && formulaInputs) {
 // ========================================
 var translations = {};
 // Default language: Japanese only for ja* browsers; every other locale starts in English
-var currentLang = localStorage.getItem('plants-story-lang') || (String(navigator.language || '').toLowerCase().indexOf('ja') === 0 ? 'jp' : 'en');
+// crawlers read the Japanese archive (the English version is frozen and has no URL of its own)
+var _isCrawler = /bot|crawl|spider|slurp|Google-InspectionTool|Lighthouse/i.test(navigator.userAgent || '');
+var currentLang = localStorage.getItem('plants-story-lang') || (_isCrawler || String(navigator.language || '').toLowerCase().indexOf('ja') === 0 ? 'jp' : 'en');
 
 // Load translations asynchronously (non-blocking)
 var _translationsReady = fetch('i18n/translations.json')
