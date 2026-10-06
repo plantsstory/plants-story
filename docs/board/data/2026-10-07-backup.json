@@ -1,0 +1,2120 @@
+[
+ {
+  "cultivar_name": "Anthurium carlablackiae",
+  "id": 1,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-04-02",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium carlablackiae は 2020 年、Croat & O.Ortiz が Phytotaxa 467(1): 10 で記載した。タイプ産地はパナマ、グナ・ヤラ自治区の Puerto Obaldía 付近。採集者は T. B. Croat（2009 年）。分布はコロンビア、パナマ。種小名は、2009 年 9 月にこの植物を最初に見つけたチリキ県の園芸家 Carla Black への献名。",
+    "body_en": "Described by Croat & O.Ortiz in Phytotaxa 467(1): 10 (2020). Type locality: near Puerto Obaldía, Guna Yala, Panama. Collected by T. B. Croat (2009). Distribution: Colombia, Panama. Named for Carla Black, a horticulturist in Chiriquí, Panama, who first found the plant in September 2009.",
+    "discoverer_or_breeder": "Croat & O.Ortiz",
+    "discovery_year": 2020,
+    "first_description": "Croat & O.Ortiz, Phytotaxa 467(1): 10 (2020)",
+    "native_region": "Colombia, Panama",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:77212524-1",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/77212524-1"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:77212524-1"
+     }
+    ],
+    "structured": {
+     "author_name": "Croat & O.Ortiz",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/77212524-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:77212524-1"
+      }
+     ],
+     "collection_year": 2009,
+     "collector": "T. B. Croat",
+     "known_habitats": "Colombia, Panama",
+     "notes": "",
+     "origin_type": "species",
+     "publication_year": 2020,
+     "type_locality": "Puerto Obaldía, Comarca Guna Yala, Panama"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium crystallinum",
+  "id": 3,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-16",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium crystallinum は 1873 年、Linden & André が Linden, Cat. n. 90 で記載した。分布はコロンビア、パナマ。IPNI の原綴は cristallinum。",
+    "body_en": "Anthurium crystallinum was described by Linden & André in 1873 in Linden, Cat. n. 90. t. 128. Distribution: Colombia, Panama (POWO). IPNI records the original spelling as cristallinum.",
+    "discoverer_or_breeder": "Linden & André",
+    "discovery_year": null,
+    "first_description": "Linden & André, Linden, Cat. n. 90. t. 128 (1873)",
+    "native_region": "Colombia, Panama",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:84713-1",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/84713-1"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:84713-1"
+     }
+    ],
+    "structured": {
+     "author_name": "Linden & André",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/84713-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:84713-1"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Colombia, Panama",
+     "notes": "",
+     "origin_type": "species",
+     "publication_year": 1873,
+     "type_locality": null
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium warocqueanum",
+  "id": 4,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-04-02",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium warocqueanum は 1878 年、T.Moore が Florist & Pomol. 101 で記載した。タイプ産地はコロンビア。分布はコロンビア。",
+    "body_en": "Anthurium warocqueanum was described by T.Moore in 1878 in Florist & Pomol. 101, figs. Type locality: Colombia. Distribution: Colombia (POWO).",
+    "discoverer_or_breeder": "T.Moore",
+    "discovery_year": 1878,
+    "first_description": "T.Moore, Florist & Pomol. 101, figs (1878)",
+    "native_region": "Colombia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85496-1",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/85496-1"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85496-1"
+     }
+    ],
+    "structured": {
+     "author_name": "T.Moore",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/85496-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85496-1"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Colombia",
+     "notes": "",
+     "origin_type": "species",
+     "publication_year": 1878,
+     "type_locality": "Colombia"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium veitchii",
+  "id": 6,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-16",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium veitchii は 1876 年、Mast. が Gard. Chron. n.s. 775 で記載した。分布はコロンビア。",
+    "body_en": "Anthurium veitchii was described by Mast. in 1876 in Gard. Chron. n.s., 775. Distribution: Colombia (POWO).",
+    "discoverer_or_breeder": "Mast.",
+    "discovery_year": 1876,
+    "first_description": "Mast., Gard. Chron. n.s., 775 (1876)",
+    "native_region": "Colombia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85473-1",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/85473-1"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85473-1"
+     }
+    ],
+    "structured": {
+     "author_name": "Mast.",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/85473-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85473-1"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Colombia",
+     "notes": "",
+     "origin_type": "species",
+     "publication_year": 1876,
+     "type_locality": null
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 1,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium clarinervium",
+  "id": 9,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-16",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium clarinervium は 1952 年、Matuda が Anales Inst. Biol. Univ. Nac. México 22: 375 で記載した。タイプ産地はメキシコ・チアパス州。分布はメキシコ。",
+    "body_en": "Anthurium clarinervium was described by Matuda in 1952 in Anales Inst. Biol. Univ. Nac. México 22: 375, fig. 4. Type locality: Chiapas, Mexico. Distribution: Mexico (POWO).",
+    "discoverer_or_breeder": "Matuda",
+    "discovery_year": 1952,
+    "first_description": "Matuda, Anales Inst. Biol. Univ. Nac. México 22: 375, fig. 4 (1952)",
+    "native_region": "Mexico",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15185-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/15185-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15185-2"
+     }
+    ],
+    "structured": {
+     "author_name": "Matuda",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/15185-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15185-2"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Mexico",
+     "notes": "",
+     "origin_type": "species",
+     "publication_year": 1952,
+     "type_locality": "Chiapas, Mexico"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium magnificum",
+  "id": 10,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-08-23",
+     "isAI": true,
+     "name": "GBIF / Kew"
+    },
+    "body": "Anthurium magnificum は 1865 年、Linden が Belgique Hort. 15: 98 で記載した。分布はコロンビア。",
+    "body_en": "Anthurium magnificum was described by Linden in 1865 in Belgique Hort. xv. 98. Distribution: Colombia (POWO).",
+    "discoverer_or_breeder": "Linden",
+    "discovery_year": 1865,
+    "first_description": "Linden, Belgique Hort. xv. 98 (1865)",
+    "native_region": "Colombia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "GBIF / Kew Backbone Taxonomy",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://www.gbif.org/species/2872520",
+    "sources": [
+     {
+      "label": "GBIF (Kew Backbone)",
+      "url": "https://www.gbif.org/species/2872520"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85054-1"
+     }
+    ],
+    "structured": {
+     "author_name": "Linden",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/85054-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85054-1"
+      },
+      {
+       "label": "GBIF (Kew Backbone)",
+       "url": "https://www.gbif.org/species/2872520"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Colombia",
+     "notes": "",
+     "origin_type": "species",
+     "publication_year": 1865,
+     "type_locality": null
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium forgetii",
+  "id": 11,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-08-23",
+     "isAI": true,
+     "name": "GBIF / Kew"
+    },
+    "body": "Anthurium forgetii は 1906 年、N.E.Br. が Gard. Chron. ser. 3, 39: 161 で記載した。タイプ産地はコロンビア。分布はコロンビア。種小名は採集者 Forget への献名。",
+    "body_en": "Anthurium forgetii was described by N.E.Br. in 1906 in Gard. Chron. ser. 3, 39: 161. Type locality: Colombia. Distribution: Colombia (POWO). The epithet honours the collector Forget (IPNI).",
+    "discoverer_or_breeder": "N.E.Br.",
+    "discovery_year": 1906,
+    "first_description": "N.E.Br., Gard. Chron. ser. 3, 39: 161 (1906)",
+    "native_region": "Colombia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "GBIF / Kew Backbone Taxonomy",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://www.gbif.org/species/2873656",
+    "sources": [
+     {
+      "label": "GBIF (Kew Backbone)",
+      "url": "https://www.gbif.org/species/2873656"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15285-2"
+     }
+    ],
+    "structured": {
+     "author_name": "N.E.Br.",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/15285-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15285-2"
+      },
+      {
+       "label": "GBIF (Kew Backbone)",
+       "url": "https://www.gbif.org/species/2873656"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Colombia",
+     "notes": "",
+     "origin_type": "species",
+     "publication_year": 1906,
+     "type_locality": "Colombia"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium dressleri",
+  "id": 31,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-16",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium dressleri は 1978 年、Croat が Aroideana 1: 54 で記載した。タイプ産地はパナマ。採集者は T. B. Croat。分布はコロンビア、パナマ。",
+    "body_en": "Anthurium dressleri was described by Croat in 1978 in Aroideana 1: 54 (-56), figs. Type locality: Panama. Collected by T. B. Croat. Distribution: Colombia, Panama (POWO).",
+    "discoverer_or_breeder": "Croat",
+    "discovery_year": 1978,
+    "first_description": "Croat, Aroideana 1: 54 (-56), figs (1978)",
+    "native_region": "Colombia, Panama",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15249-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/15249-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15249-2"
+     }
+    ],
+    "structured": {
+     "author_name": "Croat",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/15249-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15249-2"
+      }
+     ],
+     "collection_year": null,
+     "collector": "T. B. Croat",
+     "known_habitats": "Colombia, Panama",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 1978,
+     "type_locality": "Panama"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium papillilaminum",
+  "id": 32,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-16",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium papillilaminum は 1986 年、Croat が Monogr. Syst. Bot. Missouri Bot. Gard. 14: 152 で記載した。タイプ産地はパナマ。採集者は R. L. Dressler。分布はパナマ。",
+    "body_en": "Anthurium papillilaminum was described by Croat in 1986 in Monogr. Syst. Bot. Missouri Bot. Gard. 14: 152. 1986 Revis. Gen Anthurium. Part 2. Panama. Type locality: Panama. Collected by R. L. Dressler. Distribution: Panama (POWO).",
+    "discoverer_or_breeder": "Croat",
+    "discovery_year": 1986,
+    "first_description": "Croat, Monogr. Syst. Bot. Missouri Bot. Gard. 14: 152 (1986)",
+    "native_region": "Panama",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:272342-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/272342-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:272342-2"
+     }
+    ],
+    "structured": {
+     "author_name": "Croat",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/272342-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:272342-2"
+      }
+     ],
+     "collection_year": null,
+     "collector": "R. L. Dressler",
+     "known_habitats": "Panama",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 1986,
+     "type_locality": "Panama"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium nutibarense",
+  "id": 33,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-16",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium nutibarense は 2008 年、Croat が Novon 18: 145 で記載した。タイプ産地はコロンビア・アンティオキア県 Frontino。採集者は J. M. MacDougal, D. Restrepo & D. S. Sylva（1989 年）。分布はコロンビア。2005 年に Aroideana 28: 61 で先行発表されている。",
+    "body_en": "Anthurium nutibarense was described by Croat in 2008 in Novon 18(2): 145. Type locality: Frontino, Antioquia, Colombia. Collected by J. M. MacDougal, D. Restrepo & D. S. Sylva (1989). Distribution: Colombia (POWO). Announced earlier in Aroideana 28: 61 (2005; IPNI 60439863-2).",
+    "discoverer_or_breeder": "Croat",
+    "discovery_year": 2008,
+    "first_description": "Croat, Novon 18(2): 145 (2008)",
+    "native_region": "Colombia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:77094489-1",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/77094489-1"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:77094489-1"
+     }
+    ],
+    "structured": {
+     "author_name": "Croat",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/77094489-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:77094489-1"
+      }
+     ],
+     "collection_year": 1989,
+     "collector": "J. M. MacDougal, D. Restrepo & D. S. Sylva",
+     "known_habitats": "Colombia",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 2008,
+     "type_locality": "Frontino, Antioquia, Colombia"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium debile",
+  "id": 34,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-16",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium debile は 2004 年、Croat & D.C.Bay が Aroideana 27: 97 で記載した（原綴は debilis）。タイプ産地はコロンビア・バジェ・デル・カウカ県 Bajo Calima。採集者は T. B. Croat & Watt（1990 年）。分布はコロンビア。",
+    "body_en": "Anthurium debile was described by Croat & D.C.Bay in 2004 in Aroideana 27: 97 (-99; figs. 9-11). Type locality: Bajo Calima, Valle del Cauca, Colombia. Collected by T. B. Croat & Watt (1990). Distribution: Colombia (POWO). Spelled 'debilis' in the protologue.",
+    "discoverer_or_breeder": "Croat & D.C.Bay",
+    "discovery_year": 2004,
+    "first_description": "Croat & D.C.Bay, Aroideana 27: 97 (-99; figs. 9-11) (2004)",
+    "native_region": "Colombia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:60436403-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/60436403-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:60436403-2"
+     }
+    ],
+    "structured": {
+     "author_name": "Croat & D.C.Bay",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/60436403-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:60436403-2"
+      }
+     ],
+     "collection_year": 1990,
+     "collector": "T. B. Croat & Watt",
+     "known_habitats": "Colombia",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 2004,
+     "type_locality": "Bajo Calima, Valle del Cauca, Colombia"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium splendidum",
+  "id": 35,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-16",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium splendidum は 1884 年、W.Bull ex Rodigas が Ill. Hort. 31: 13 で記載した。タイプ産地はコロンビア。分布はコロンビア。前年の Gard. Chron. 19: 381（1883）に W.Bull の名で先に掲載されている。",
+    "body_en": "Anthurium splendidum was described by W.Bull ex Rodigas in 1884 in Ill. Hort. 31: 13, t. 510. Type locality: Colombia. Distribution: Colombia (POWO). First announced in English as W.Bull in Gard. Chron. n.s. 19: 381 (1883).",
+    "discoverer_or_breeder": "W.Bull",
+    "discovery_year": 1884,
+    "first_description": "W.Bull ex Rodigas, Ill. Hort. 31: 13, t. 510 (1884)",
+    "native_region": "Colombia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85368-1",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/85368-1"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85368-1"
+     }
+    ],
+    "structured": {
+     "author_name": "W.Bull ex Rodigas",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/85368-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85368-1"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Colombia",
+     "notes": "",
+     "origin_type": "species",
+     "publication_year": 1884,
+     "type_locality": "Colombia"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium kunayalense",
+  "id": 38,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-16",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium kunayalense は 2010 年、Croat & Vannini が Aroideana 33: 162 で記載した。タイプ産地はパナマ県の El Llano–Cartí 道路沿い。採集者は T. B. Croat & J. Vannini（2009 年）。タイプは J. Vannini が 2007 年に採集した株の栽培個体。分布はパナマ。",
+    "body_en": "Described by Croat & Vannini in Aroideana 33: 162 (2010). Type locality: along the El Llano–Cartí road, Panamá Province, Panama. Collected by T. B. Croat & J. Vannini (2009); the type is a cultivated plant originally collected by J. Vannini in 2007. Distribution: Panama.",
+    "discoverer_or_breeder": "Croat & Vannini",
+    "discovery_year": 2010,
+    "first_description": "Croat & Vannini, Aroideana 33: 162 (-164, 166; figs. 1A-D, 2A-C) (2010)",
+    "native_region": "Panama",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:77107445-1",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/77107445-1"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:77107445-1"
+     }
+    ],
+    "structured": {
+     "author_name": "Croat & Vannini",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/77107445-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:77107445-1"
+      }
+     ],
+     "collection_year": 2009,
+     "collector": "T. B. Croat & J. Vannini",
+     "known_habitats": "Panama",
+     "notes": "",
+     "origin_type": "species",
+     "publication_year": 2010,
+     "type_locality": "El Llano–Cartí road, Panamá Province, Panama"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium luxurians",
+  "id": 57,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-16",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium luxurians は 2005 年、Croat & R.N.Cirino が Aroideana 28: 56 で記載した。タイプは栽培株で、George Wagner（マイアミ）が採集した株をフロリダ州 Homestead で Denis Rotolante が開花させたもの。原記載に産地の記録はない。標本の採集者は T. B. Croat。分布はコロンビア。",
+    "body_en": "Described by Croat & R.N.Cirino in Aroideana 28: 56 (2005). The type is a cultivated plant, originally collected by George Wagner (Miami) and flowered by Denis Rotolante in Homestead, Florida; no locality is given (sine loc.). Specimen collected by T. B. Croat. Distribution: Colombia.",
+    "discoverer_or_breeder": "Croat & R.N.Cirino",
+    "discovery_year": 2005,
+    "first_description": "Croat & R.N.Cirino, Aroideana 28: 56 (-58; fig. 2) (2005)",
+    "native_region": "Colombia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:60439860-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/60439860-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:60439860-2"
+     }
+    ],
+    "structured": {
+     "author_name": "Croat & R.N.Cirino",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/60439860-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:60439860-2"
+      }
+     ],
+     "collection_year": null,
+     "collector": "T. B. Croat",
+     "known_habitats": "Colombia",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 2005,
+     "type_locality": null
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium antolakii",
+  "id": 59,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-09-04",
+     "isAI": true,
+     "name": "AI (gpt-5-mini + Web検索)"
+    },
+    "body": "正式な記載はない未記載種。Jay Vannini は Exotica Esoterica の記事で、パナマの非公開の産地から見つかった Anthurium sp. nov. \"Darkest Panamá\"（別名 \"Black Velvet Panama\"、A. \"antolakii\" Vannini & Croat ined.）として紹介し、A. papillilaminum に最も近いとしている。IPNI・WCVP に登録はない（2026-10-03 確認）。",
+    "body_en": "Not formally described. In Exotica Esoterica, Jay Vannini presents it as Anthurium sp. nov. \"Darkest Panamá\" (also A. \"Black Velvet Panama\" and A. \"antolakii\" Vannini & Croat, ined.) from an undisclosed locality in Panama, most closely related to A. papillilaminum. Not listed in IPNI or WCVP (checked 2026-10-03).",
+    "discoverer_or_breeder": null,
+    "discovery_year": null,
+    "first_description": null,
+    "native_region": "Panama",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "Exotica Esoterica — \"The Ultimate Guide to Velvet Leaf Anthuriums\" (Jay Vannini)",
+    "source_tier": "B",
+    "source_tier_label_en": "Horticultural Books / Society Publications",
+    "source_tier_label_jp": "園芸書籍・学会資料",
+    "source_type": "ai_research",
+    "source_url": "https://www.exoticaesoterica.com/magazine/the-ultimate-guide-to-velvet-leaf-anthuriums",
+    "sources": [
+     {
+      "label": "Exotica Esoterica — \"The Ultimate Guide to Velvet Leaf Anthuriums\" (Jay Vannini)",
+      "url": "https://www.exoticaesoterica.com/magazine/the-ultimate-guide-to-velvet-leaf-anthuriums"
+     }
+    ],
+    "structured": {
+     "citation_links": [
+      {
+       "label": "Exotica Esoterica — \"The Ultimate Guide to Velvet Leaf Anthuriums\" (Jay Vannini)",
+       "url": "https://www.exoticaesoterica.com/magazine/the-ultimate-guide-to-velvet-leaf-anthuriums"
+      }
+     ],
+     "closest_species": "Anthurium papillilaminum",
+     "known_habitats": "Panama",
+     "notes": null,
+     "origin_type": "species",
+     "species_status": "undescribed",
+     "trade_names": [
+      "Darkest Panamá",
+      "Black Velvet Panama"
+     ],
+     "working_name_origin": "Vannini & Croat の未発表名（ined.）"
+    },
+    "trust": 67,
+    "trustClass": "trust--mid",
+    "verified": false,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": null
+ },
+ {
+  "cultivar_name": "Anthurium wendlingeri",
+  "id": 77,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-16",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium wendlingeri は 1965 年、G.M.Barroso が Bol. Soc. Venez. Ci. Nat. 26: 151 で記載した。タイプ産地はコスタリカ。分布はコロンビア、コスタリカ、ニカラグア、パナマ。",
+    "body_en": "Anthurium wendlingeri was described by G.M.Barroso in 1965 in Bol. Soc. Venez. Ci. Nat. 26: 151, fig. Type locality: Costa Rica. Distribution: Panama, Colombia, Costa Rica, Nicaragua (POWO).",
+    "discoverer_or_breeder": "G.M.Barroso",
+    "discovery_year": 1965,
+    "first_description": "G.M.Barroso, Bol. Soc. Venez. Ci. Nat. 26: 151, fig (1965)",
+    "native_region": "Panama, Colombia, Costa Rica, Nicaragua",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15824-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/15824-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15824-2"
+     }
+    ],
+    "structured": {
+     "author_name": "G.M.Barroso",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/15824-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15824-2"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Panama, Colombia, Costa Rica, Nicaragua",
+     "notes": "",
+     "origin_type": "species",
+     "publication_year": 1965,
+     "type_locality": "Costa Rica"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium sagittatum",
+  "id": 82,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-17",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium sagittatum は 1839 年、G.Don が Pothos sagittatus Sims を Anthurium に組み替えた名前（Sweet's Hort. Brit., ed. 3: 633）。分布はブラジル、コロンビア、フランス領ギアナ、ガイアナ、ペルー、スリナム、ベネズエラ。",
+    "body_en": "Anthurium sagittatum is G.Don's 1839 transfer of Pothos sagittatus Sims to Anthurium in Sweet's Hort. Brit., ed. 3. 633. Distribution: French Guiana, Guyana, Colombia, Brazil, Peru, Suriname, Venezuela (POWO).",
+    "discoverer_or_breeder": "(Sims) G.Don",
+    "discovery_year": 1839,
+    "first_description": "(Sims) G.Don, Sweet's Hort. Brit., ed. 3. 633 (1839)",
+    "native_region": "French Guiana, Guyana, Colombia, Brazil, Peru, Suriname, Venezuela",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85321-1",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/85321-1"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85321-1"
+     }
+    ],
+    "structured": {
+     "author_name": "(Sims) G.Don",
+     "basionym": "Pothos sagittatus Sims",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/85321-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85321-1"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "French Guiana, Guyana, Colombia, Brazil, Peru, Suriname, Venezuela",
+     "notes": "",
+     "origin_type": "species",
+     "publication_year": 1839,
+     "type_locality": null
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium regale",
+  "id": 83,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-08-23",
+     "isAI": true,
+     "name": "GBIF / Kew"
+    },
+    "body": "Anthurium regale は 1866 年、Linden が Belgique Hort. 16: 200 で記載した。分布はペルー。",
+    "body_en": "Anthurium regale was described by Linden in 1866 in Belgique Hort. xvi. 200. Distribution: Peru (POWO).",
+    "discoverer_or_breeder": "Linden",
+    "discovery_year": 1866,
+    "first_description": "Linden, Belgique Hort. xvi. 200 (1866)",
+    "native_region": "Peru",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "GBIF / Kew Backbone Taxonomy",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://www.gbif.org/species/2873074",
+    "sources": [
+     {
+      "label": "GBIF (Kew Backbone)",
+      "url": "https://www.gbif.org/species/2873074"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85270-1"
+     }
+    ],
+    "structured": {
+     "author_name": "Linden",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/85270-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85270-1"
+      },
+      {
+       "label": "GBIF (Kew Backbone)",
+       "url": "https://www.gbif.org/species/2873074"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Peru",
+     "notes": "導入株は Gustav Wallis の採集とされる（原記載未確認）。",
+     "origin_type": "species",
+     "publication_year": 1866,
+     "type_locality": null
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium aff. besseae",
+  "id": 108,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-27",
+     "isAI": false,
+     "name": "User"
+    },
+    "body": "Anthurium besseae（ボリビア産）とは別物として扱う。パナマ Darién 産として流通。",
+    "body_en": "Treated as distinct from Anthurium besseae (Bolivia). Traded as material from Darién, Panama.",
+    "native_region": "Darién, Panama",
+    "source_type": "manual",
+    "sources": [],
+    "structured": {
+     "author_name": null,
+     "closest_species": "Anthurium besseae",
+     "collector": null,
+     "known_habitats": "Darién, Panama",
+     "notes": "Anthurium besseaeとは別物",
+     "origin_type": "species",
+     "species_subcategory": "aff",
+     "type_locality": null
+    },
+    "trust": 30,
+    "trustClass": "trust--low",
+    "votes": {
+     "agree": 1,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": null
+ },
+ {
+  "cultivar_name": "Anthurium moronense",
+  "id": 120,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-04-02",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium moronense は 2004 年、Croat & Carlsen が Novon 14: 405 で記載した。タイプ産地はエクアドル・モロナ・サンティアゴ県 Gualaquiza。採集者は C. S. B. U. Sparre（1967 年）。分布はエクアドル、ペルー。",
+    "body_en": "Anthurium moronense was described by Croat & Carlsen in 2004 in Novon 14(4): 405 (-407; fig. 2A-B). Type locality: Gualaquiza, Morona-Santiago, Ecuador. Collected by C. S. B. U. Sparre (1967). Distribution: Ecuador, Peru (POWO).",
+    "discoverer_or_breeder": "Croat & Carlsen",
+    "discovery_year": 2004,
+    "first_description": "Croat & Carlsen, Novon 14(4): 405 (-407; fig. 2A-B) (2004)",
+    "native_region": "Ecuador, Peru",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:60437873-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/60437873-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:60437873-2"
+     }
+    ],
+    "structured": {
+     "author_name": "Croat & Carlsen",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/60437873-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:60437873-2"
+      }
+     ],
+     "collection_year": 1967,
+     "collector": "C. S. B. U. Sparre",
+     "known_habitats": "Ecuador, Peru",
+     "notes": "",
+     "origin_type": "species",
+     "publication_year": 2004,
+     "type_locality": "Gualaquiza, Morona-Santiago, Ecuador"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00",
+  "verification_note": "IPNI・WCVP（GBIF）の記載者・発表年・出版物・分布と照合（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium sp. \"Peru\"",
+  "id": 121,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-04-03",
+     "isAI": false,
+     "name": "User"
+    },
+    "body": "ペルー産として流通する未同定の原種。葉は青みがかった明るい色で luxurians に似た質感だが凹凸は少なく、葉柄も luxurians に類似する。",
+    "body_en": null,
+    "source_type": "manual",
+    "sources": [],
+    "structured": {
+     "author_name": null,
+     "collector": null,
+     "known_habitats": "Peru",
+     "notes": "ペルー産として流通する未同定の原種。葉は青みがかった明るい色で luxurians に似た質感だが凹凸は少なく、葉柄も luxurians に類似する。",
+     "origin_type": "species",
+     "species_subcategory": "sp",
+     "type_locality": null
+    },
+    "trust": 30,
+    "trustClass": "trust--low",
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-09-04 12:22:21.380587+00",
+  "verification_note": null
+ },
+ {
+  "cultivar_name": "Anthurium sp. \"queremalense\"",
+  "id": 127,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-10-03",
+     "isAI": true,
+     "name": "AI（出典を編集部が照合）"
+    },
+    "body": "正式な記載はない未記載種（IPNI・WCVP に登録なし、2026-10-03 確認）。Jay Vannini は Exotica Esoterica の記事で A. queremalense（ined.）として紹介し、コロンビア・バジェ・デル・カウカ県の旧カリ–ブエナベントゥラ道路周辺などの中標高の雲霧林に限られるようだ、としている。同記事は A. marmoratum の種群に含め、marmoratum と混同されやすいとも書いている。",
+    "body_en": "Not formally described (not in IPNI or WCVP, checked 2026-10-03). In Exotica Esoterica, Jay Vannini presents it as A. queremalense (ined.), apparently restricted to mid-elevation cloud forest around the old Cali–Buenaventura road and elsewhere in Valle del Cauca, western Colombia. He places it in the A. marmoratum species complex and notes it is easily confused with A. marmoratum.",
+    "discoverer_or_breeder": null,
+    "discovery_year": null,
+    "first_description": null,
+    "native_region": "Colombia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "Exotica Esoterica — \"The Ultimate Guide to Velvet Leaf Anthuriums\" (Jay Vannini)",
+    "source_tier": "B",
+    "source_tier_label_en": "Horticultural Books / Society Publications",
+    "source_tier_label_jp": "園芸書籍・学会資料",
+    "source_type": "ai_research",
+    "source_url": "https://www.exoticaesoterica.com/magazine/the-ultimate-guide-to-velvet-leaf-anthuriums",
+    "sources": [
+     {
+      "label": "Exotica Esoterica — \"The Ultimate Guide to Velvet Leaf Anthuriums\" (Jay Vannini)",
+      "url": "https://www.exoticaesoterica.com/magazine/the-ultimate-guide-to-velvet-leaf-anthuriums"
+     }
+    ],
+    "structured": {
+     "author_name": null,
+     "citation_links": [
+      {
+       "label": "Exotica Esoterica — \"The Ultimate Guide to Velvet Leaf Anthuriums\" (Jay Vannini)",
+       "url": "https://www.exoticaesoterica.com/magazine/the-ultimate-guide-to-velvet-leaf-anthuriums"
+      }
+     ],
+     "closest_species": "Anthurium marmoratum",
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Colombia (Valle del Cauca)",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": null,
+     "species_status": "undescribed",
+     "type_locality": null,
+     "working_name_origin": "Vannini の記事での未発表名（ined.）"
+    },
+    "trust": 65,
+    "trustClass": "trust--mid",
+    "verified": false,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 19:57:05.098931+00",
+  "verification_note": null
+ },
+ {
+  "cultivar_name": "Anthurium besseae",
+  "id": 128,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-10-02",
+     "isAI": true,
+     "name": "GBIF / Kew"
+    },
+    "body": "Anthurium besseae は 2005 年、Croat が Novon 15: 84 で記載した。タイプ産地はボリビア・コチャバンバ県 Chapare の Villa Tunari 付近。タイプは Libby Besse が 1986 年に採集し、アメリカの Selby 植物園で開花した栽培株で、標本の採集者は T. B. Croat（1996 年）。分布はボリビア。",
+    "body_en": "Described by Croat in Novon 15: 84 (2005). Type locality: near Villa Tunari, Chapare, Cochabamba, Bolivia. The type is a cultivated plant originally collected by Libby Besse in 1986 and flowered at Selby Botanical Gardens (USA); specimen collected by T. B. Croat (1996). Distribution: Bolivia.",
+    "discoverer_or_breeder": "Croat",
+    "discovery_year": 2005,
+    "first_description": "Croat, Novon 15: 84 (2005)",
+    "native_region": "Bolivia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "GBIF / Kew Backbone Taxonomy",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:60438309-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/60438309-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:60438309-2"
+     },
+     {
+      "label": "GBIF (Kew Backbone)",
+      "url": "https://www.gbif.org/species/2873162"
+     }
+    ],
+    "structured": {
+     "author_name": "Croat",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/60438309-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:60438309-2"
+      },
+      {
+       "label": "GBIF (Kew Backbone)",
+       "url": "https://www.gbif.org/species/2873162"
+      }
+     ],
+     "collection_year": 1996,
+     "collector": "T. B. Croat",
+     "known_habitats": "Bolivia",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 2005,
+     "type_locality": "Chapare, vic. Villa Tunari, Cochabamba, Bolivia"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 19:57:05.098931+00",
+  "verification_note": "IPNI・WCVP（GBIF）と照合し、照合元に無い記述を削除（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium pallidiflorum",
+  "id": 129,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-10-02",
+     "isAI": true,
+     "name": "GBIF / Kew"
+    },
+    "body": "Anthurium pallidiflorum は 1898 年、Engl. が Bot. Jahrb. Syst. 25: 395 で記載した。タイプ産地はエクアドル。分布はエクアドル。",
+    "body_en": "Described by Engl. in Bot. Jahrb. Syst. 25: 395 (1898). Type locality: Ecuador. Distribution: Ecuador.",
+    "discoverer_or_breeder": "Engl.",
+    "discovery_year": 1898,
+    "first_description": "Engl., Bot. Jahrb. Syst. 25: 395 (1898)",
+    "native_region": "Ecuador",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "GBIF / Kew Backbone Taxonomy",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15544-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/15544-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15544-2"
+     },
+     {
+      "label": "GBIF (Kew Backbone)",
+      "url": "https://www.gbif.org/species/2873206"
+     }
+    ],
+    "structured": {
+     "author_name": "Engl.",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/15544-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15544-2"
+      },
+      {
+       "label": "GBIF (Kew Backbone)",
+       "url": "https://www.gbif.org/species/2873206"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Ecuador",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 1898,
+     "type_locality": "Ecuador"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 19:57:05.098931+00",
+  "verification_note": "IPNI・WCVP（GBIF）と照合し、照合元に無い記述を削除（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium metallicum",
+  "id": 130,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-10-02",
+     "isAI": true,
+     "name": "GBIF / Kew"
+    },
+    "body": "Anthurium metallicum は 1860 年、Linden ex Schott が Prodr. Syst. Aroid. 506 で記載した。原記載に産地の記載はない（「Hab.?」）。分布はコロンビア。",
+    "body_en": "Described by Linden ex Schott in Prodr. Syst. Aroid. 506 (1860). The protologue gives no locality (\"Hab.?\"). Distribution: Colombia.",
+    "discoverer_or_breeder": "Linden ex Schott",
+    "discovery_year": 1860,
+    "first_description": "Linden ex Schott, Prodr. Syst. Aroid. 506 (1860)",
+    "native_region": "Colombia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "GBIF / Kew Backbone Taxonomy",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85079-1",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/85079-1"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85079-1"
+     },
+     {
+      "label": "GBIF (Kew Backbone)",
+      "url": "https://www.gbif.org/species/2872936"
+     }
+    ],
+    "structured": {
+     "author_name": "Linden ex Schott",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/85079-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85079-1"
+      },
+      {
+       "label": "GBIF (Kew Backbone)",
+       "url": "https://www.gbif.org/species/2872936"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Colombia",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 1860,
+     "type_locality": null
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 19:57:05.098931+00",
+  "verification_note": "IPNI・WCVP（GBIF）と照合し、照合元に無い記述を削除（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium vittariifolium",
+  "id": 132,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-10-02",
+     "isAI": true,
+     "name": "GBIF / Kew"
+    },
+    "body": "Anthurium vittariifolium は 1905 年、Engl. が Pflanzenr. 4, Fam. 23b: 88 で記載した。タイプ産地はブラジル。分布はブラジル北部、コロンビア、エクアドル、ペルー。",
+    "body_en": "Described by Engl. in Pflanzenr. 4, Fam. 23b: 88 (1905). Type locality: Brazil. Distribution: northern Brazil, Colombia, Ecuador, Peru.",
+    "discoverer_or_breeder": "Engl.",
+    "discovery_year": 1905,
+    "first_description": "Engl., Pflanzenr. 4, Fam. 23b: 88 (1905)",
+    "native_region": "Brazil North, Colombia, Ecuador, Peru",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "GBIF / Kew Backbone Taxonomy",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15820-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/15820-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15820-2"
+     },
+     {
+      "label": "GBIF (Kew Backbone)",
+      "url": "https://www.gbif.org/species/2873406"
+     }
+    ],
+    "structured": {
+     "author_name": "Engl.",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/15820-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15820-2"
+      },
+      {
+       "label": "GBIF (Kew Backbone)",
+       "url": "https://www.gbif.org/species/2873406"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Brazil North, Colombia, Ecuador, Peru",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 1905,
+     "type_locality": "Brazil"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 19:57:05.098931+00",
+  "verification_note": "IPNI・WCVP（GBIF）と照合し、照合元に無い記述を削除（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium marmoratum",
+  "id": 133,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-10-02",
+     "isAI": true,
+     "name": "GBIF / Kew"
+    },
+    "body": "Anthurium marmoratum は 1903 年、Sodiro が Anales Univ. Centr. Ecuador 17: 261 で記載した。タイプ産地はエクアドル。分布はコロンビア、エクアドル。",
+    "body_en": "Described by Sodiro in Anales Univ. Centr. Ecuador 17: 261 (1903). Type locality: Ecuador. Distribution: Colombia, Ecuador.",
+    "discoverer_or_breeder": "Sodiro",
+    "discovery_year": 1903,
+    "first_description": "Sodiro, Anales Univ. Centr. Ecuador 17: 261 (1903)",
+    "native_region": "Colombia, Ecuador",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "GBIF / Kew Backbone Taxonomy",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15456-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/15456-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15456-2"
+     },
+     {
+      "label": "GBIF (Kew Backbone)",
+      "url": "https://www.gbif.org/species/2872424"
+     }
+    ],
+    "structured": {
+     "author_name": "Sodiro",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/15456-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15456-2"
+      },
+      {
+       "label": "GBIF (Kew Backbone)",
+       "url": "https://www.gbif.org/species/2872424"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Colombia, Ecuador",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 1903,
+     "type_locality": "Ecuador"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 19:57:05.098931+00",
+  "verification_note": "IPNI・WCVP（GBIF）と照合し、照合元に無い記述を削除（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium angamarcanum",
+  "id": 134,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-10-02",
+     "isAI": true,
+     "name": "GBIF / Kew"
+    },
+    "body": "Anthurium angamarcanum は 1902 年、Sodiro が Anales Univ. Centr. Ecuador 16: 200 で記載した。タイプ産地はエクアドル。WCVP は A. dolichostachyum Sodiro の異名として扱っており、分布（コロンビア、エクアドル）はその種のもの。",
+    "body_en": "Described by Sodiro in Anales Univ. Centr. Ecuador 16: 200 (1902). Type locality: Ecuador. WCVP treats it as a synonym of A. dolichostachyum Sodiro; the distribution (Colombia, Ecuador) is that of the accepted species.",
+    "discoverer_or_breeder": "Sodiro",
+    "discovery_year": 1902,
+    "first_description": "Sodiro, Anales Univ. Centr. Ecuador 16: 200 (1902)",
+    "native_region": "Colombia, Ecuador",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "GBIF / Kew Backbone Taxonomy",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15082-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/15082-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15082-2"
+     },
+     {
+      "label": "GBIF（受理名 A. dolichostachyum）",
+      "url": "https://www.gbif.org/species/2872992"
+     }
+    ],
+    "structured": {
+     "author_name": "Sodiro",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/15082-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15082-2"
+      },
+      {
+       "label": "GBIF（受理名 A. dolichostachyum）",
+       "url": "https://www.gbif.org/species/2872992"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Colombia, Ecuador",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 1902,
+     "type_locality": "Ecuador"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 19:57:05.098931+00",
+  "verification_note": "IPNI・WCVP（GBIF）と照合し、照合元に無い記述を削除（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium radicans",
+  "id": 136,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-10-02",
+     "isAI": true,
+     "name": "GBIF / Kew"
+    },
+    "body": "Anthurium radicans は 1854 年、K.Koch & A.Haage が Index Seminum [Berlin] 10 で記載した。分布はブラジル北東部。",
+    "body_en": "Described by K.Koch & A.Haage in Index Seminum [Berlin] 10 (1854). Distribution: northeastern Brazil.",
+    "discoverer_or_breeder": "K.Koch & A.Haage",
+    "discovery_year": 1854,
+    "first_description": "K.Koch & A.Haage, Index Seminum [Berlin] 10 (1854)",
+    "native_region": "Brazil Northeast",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "GBIF / Kew Backbone Taxonomy",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85262-1",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/85262-1"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85262-1"
+     },
+     {
+      "label": "GBIF (Kew Backbone)",
+      "url": "https://www.gbif.org/species/2872788"
+     }
+    ],
+    "structured": {
+     "author_name": "K.Koch & A.Haage",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/85262-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85262-1"
+      },
+      {
+       "label": "GBIF (Kew Backbone)",
+       "url": "https://www.gbif.org/species/2872788"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Brazil Northeast",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 1854,
+     "type_locality": null
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 19:57:05.098931+00",
+  "verification_note": "IPNI・WCVP（GBIF）と照合し、照合元に無い記述を削除（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium faustomirandae",
+  "id": 137,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-10-02",
+     "isAI": true,
+     "name": "GBIF / Kew"
+    },
+    "body": "Anthurium faustomirandae は 2001 年、Pérez-Farr. & Croat が Novon 11: 88 で記載した。タイプ産地はメキシコ・チアパス州 San Fernando 郡の Montañas del Norte。採集者は M. A. Pérez-Farrera（1995 年）。分布はメキシコ南東部。",
+    "body_en": "Described by Pérez-Farr. & Croat in Novon 11: 88 (2001). Type locality: Montañas del Norte, Mpio. San Fernando, Chiapas, Mexico. Collected by M. A. Pérez-Farrera (1995). Distribution: southeastern Mexico.",
+    "discoverer_or_breeder": "Pérez-Farr. & Croat",
+    "discovery_year": 2001,
+    "first_description": "Pérez-Farr. & Croat, Novon 11: 88 (2001)",
+    "native_region": "Mexico Southeast",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "GBIF / Kew Backbone Taxonomy",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:321082-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/321082-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:321082-2"
+     },
+     {
+      "label": "GBIF (Kew Backbone)",
+      "url": "https://www.gbif.org/species/2872706"
+     }
+    ],
+    "structured": {
+     "author_name": "Pérez-Farr. & Croat",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/321082-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:321082-2"
+      },
+      {
+       "label": "GBIF (Kew Backbone)",
+       "url": "https://www.gbif.org/species/2872706"
+      }
+     ],
+     "collection_year": 1995,
+     "collector": "M. A. Pérez-Farrera",
+     "known_habitats": "Mexico Southeast",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 2001,
+     "type_locality": "Montañas del Norte, 2 km N of Colonia Cuactemoc, Mpio. de San Fernando, Chiapas, Mexico"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 19:57:05.098931+00",
+  "verification_note": "IPNI・WCVP（GBIF）と照合し、照合元に無い記述を削除（2026-10-03 点検）"
+ },
+ {
+  "cultivar_name": "Anthurium sp. \"villenaorum\"",
+  "id": 138,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-10-03",
+     "isAI": true,
+     "name": "AI（出典を編集部が照合）"
+    },
+    "body": "正式な記載はない未記載種（IPNI・WCVP・GBIF に登録なし、2026-10-03 確認）。Jay Vannini は Exotica Esoterica の記事で A. villenaorum（sp. ined.）として紹介し、ペルー中部サン・マルティン州の低地に局在する固有種で、着生とみられるとしている。同記事に載る野生採集株は Karol Villena から購入したもの。",
+    "body_en": "Not formally described (not in IPNI, WCVP or GBIF, checked 2026-10-03). In Exotica Esoterica, Jay Vannini presents it as A. villenaorum (sp. ined.), a localized, apparently epiphytic lowland endemic of the San Martín Region in central Peru. The wild-collected plant shown in the article was purchased from Karol Villena.",
+    "discoverer_or_breeder": null,
+    "discovery_year": null,
+    "first_description": null,
+    "native_region": "Peru",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "Exotica Esoterica — \"The Ultimate Guide to Velvet Leaf Anthuriums\" (Jay Vannini)",
+    "source_tier": "B",
+    "source_tier_label_en": "Horticultural Books / Society Publications",
+    "source_tier_label_jp": "園芸書籍・学会資料",
+    "source_type": "ai_research",
+    "source_url": "https://www.exoticaesoterica.com/magazine/the-ultimate-guide-to-velvet-leaf-anthuriums",
+    "sources": [
+     {
+      "label": "Exotica Esoterica — \"The Ultimate Guide to Velvet Leaf Anthuriums\" (Jay Vannini)",
+      "url": "https://www.exoticaesoterica.com/magazine/the-ultimate-guide-to-velvet-leaf-anthuriums"
+     }
+    ],
+    "structured": {
+     "author_name": null,
+     "citation_links": [
+      {
+       "label": "Exotica Esoterica — \"The Ultimate Guide to Velvet Leaf Anthuriums\" (Jay Vannini)",
+       "url": "https://www.exoticaesoterica.com/magazine/the-ultimate-guide-to-velvet-leaf-anthuriums"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Peru (San Martín)",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": null,
+     "species_status": "undescribed",
+     "type_locality": null,
+     "working_name_origin": "Vannini の記事での未発表名（sp. ined.）"
+    },
+    "trust": 65,
+    "trustClass": "trust--mid",
+    "verified": false,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 19:57:05.098931+00",
+  "verification_note": null
+ },
+ {
+  "cultivar_name": "Anthurium hookeri",
+  "id": 139,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-10-02",
+     "isAI": true,
+     "name": "GBIF / Kew"
+    },
+    "body": "Anthurium hookeri は 1841 年、Kunth が Enum. Pl. 3: 74 で記載した。分布はフランス領ギアナ、ガイアナ、オランダ領アンティル、スリナム、トリニダード・トバゴ、ベネズエラ、ベネズエラ領アンティル諸島、ウィンドワード諸島。",
+    "body_en": "Described by Kunth in Enum. Pl. 3: 74 (1841). Distribution: French Guiana, Guyana, Netherlands Antilles, Suriname, Trinidad and Tobago, Venezuela, Venezuelan Antilles, Windward Islands.",
+    "discoverer_or_breeder": "Kunth",
+    "discovery_year": 1841,
+    "first_description": "Kunth, Enum. Pl. 3: 74 (1841)",
+    "native_region": "French Guiana, Guyana, Netherlands Antilles, Suriname, Trinidad-Tobago, Venezuela, Venezuelan Antilles, Windward Is.",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "GBIF / Kew Backbone Taxonomy",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:84893-1",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/84893-1"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:84893-1"
+     },
+     {
+      "label": "GBIF (Kew Backbone)",
+      "url": "https://www.gbif.org/species/2872293"
+     }
+    ],
+    "structured": {
+     "author_name": "Kunth",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/84893-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:84893-1"
+      },
+      {
+       "label": "GBIF (Kew Backbone)",
+       "url": "https://www.gbif.org/species/2872293"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "French Guiana, Guyana, Netherlands Antilles, Suriname, Trinidad-Tobago, Venezuela, Venezuelan Antilles, Windward Is.",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 1841,
+     "type_locality": null
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 19:57:05.098931+00",
+  "verification_note": "IPNI・WCVP（GBIF）と照合し、照合元に無い記述を削除（2026-10-03 点検）"
+ }
+]

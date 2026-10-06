@@ -1,8 +1,8 @@
 // Service Worker for Aroid Origins PWA
-var CACHE_VERSION = 'aroid-origins-v65';
+var CACHE_VERSION = 'aroid-origins-v66';
 // Must match the ?v= cache buster in index.html — otherwise the precache
 // URLs never match real requests and every asset downloads twice.
-var ASSET_VERSION = '20261007e';
+var ASSET_VERSION = '20261007f';
 var OFFLINE_PAGE = './offline.html';
 var STATIC_ASSETS = [
   './',

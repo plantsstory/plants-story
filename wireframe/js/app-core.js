@@ -2995,3 +2995,6 @@ document.addEventListener('change', function(e) {
   var chip = sel.classList.contains('sort-select') ? bar.querySelector('.chip[data-sort="' + sel.value + '"]') : bar.querySelector('.chip[data-filter-type="' + sel.value + '"]');
   if (chip) chip.click();
 });
+
+// T67: the membership terms stay folded until membership opens
+(function() { var f = document.getElementById('member-terms'); if (f && window._MEMBER_OPEN) f.open = true; })();

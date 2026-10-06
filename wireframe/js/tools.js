@@ -118,11 +118,10 @@
     return '<article class="shop-card">'
       + '<a class="shop-card__img" href="' + esc(href) + '" data-nav="tools" data-tool="' + esc(x.slug) + '">'
       + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">' : '<span class="shop-card__noimg mono">' + esc(T('tools_plate_none')) + '</span>')
-      + (x.owner_used ? '<span class="shop-badge mono">' + esc(T('tools_used')) + '</span>' : '') + '</a>'
+      + '</a>'
       + '<div class="shop-card__body">'
-      + '<p class="shop-card__dept mono">' + esc(genreOf(x.genre).code) + '</p>'
       + '<h3 class="shop-card__name"><a href="' + esc(href) + '" data-nav="tools" data-tool="' + esc(x.slug) + '">' + esc(toolName(x)) + '</a></h3>'
-      + ((x.maker || x.spec) ? '<p class="shop-card__maker">' + esc([x.maker, x.spec].filter(Boolean).join(' · ')) + '</p>' : '')
+      + ((x.maker || x.spec || x.owner_used) ? '<p class="shop-card__maker">' + (x.owner_used ? '<span class="badge">' + esc(T('tools_used')) + '</span> ' : '') + esc([x.maker, x.spec].filter(Boolean).join(' · ')) + '</p>' : '')
       + (priceText(x) ? '<p class="shop-card__price">' + esc(priceText(x)) + '</p>' : '')
       + '<p class="shop-card__shops">' + shops.map(function (s) {
         return '<a href="' + esc(s.url) + '" target="_blank" rel="nofollow sponsored noopener" data-tool-shop="' + s.shop + '" data-tool-slug="' + esc(x.slug) + '">' + esc(SHOP_SHORT[s.shop]) + '</a>';
@@ -138,17 +137,16 @@
     if (title) title.textContent = _genre ? genreLabel(genreOf(_genre)) : T('tools_title');
     crumbs(_genre ? genreLabel(genreOf(_genre)) : '');
     var tools = _tools || [];
-    var html = '<p class="detail-standard mono">TOOLS — ' + esc(T('tools_title')) + ' · ' + tools.length + ' ITEMS · ' + (_genres || []).length + ' DEPARTMENTS</p>';
-    html += '<p class="tools-lead">' + esc(T('tools_lead')) + '</p>';
+    var html = '<p class="tools-lead">' + esc(T('tools_lead')) + '</p>';
     // PR right under the lead, so it is in the first screen on a phone; only true sentences
     var anyAmazon = tools.some(function (x) { return Gate && Gate.shopUrl(x, 'amazon'); });
     var anyUsed = tools.some(function (x) { return x.owner_used; });
     html += '<p class="pr-line mono">' + esc(T('tools_pr')) + (anyUsed ? ' ' + esc(T('tools_pr_used')) : '') + (anyAmazon ? '<br>' + esc(T('tools_pr_amazon')) : '') + '</p>';
     html += '<div class="shop-search"><input type="search" enterkeyhint="search" class="search-bar__input" id="tools-q" placeholder="' + esc(T('tools_search')) + '" value="' + esc(_q) + '">'
       + '<select id="tools-sort" class="shop-sort" aria-label="並び順">' + ['genre', 'low', 'high', 'new'].map(function (k) { return '<option value="' + k + '"' + (_sort === k ? ' selected' : '') + '>' + esc(T('tools_sort_' + k)) + '</option>'; }).join('') + '</select></div>';
-    html += '<div class="shop-layout"><nav class="shop-depts" aria-label="' + esc(T('tools_departments')) + '"><p class="shop-depts__title mono">' + esc(T('tools_departments')) + '</p><ul>';
-    html += deptItem('', T('tools_all'), 'ALL', tools.length);
-    (_genres || []).forEach(function (g) { html += deptItem(g.slug, genreLabel(g), g.code, count(g.slug)); });
+    html += '<div class="shop-layout"><nav class="shop-depts" aria-label="' + esc(T('tools_departments')) + '"><ul>';
+    html += deptItem('', T('tools_all'), '', null);
+    (_genres || []).forEach(function (g) { var n = count(g.slug); if (n) html += deptItem(g.slug, genreLabel(g), '', n); });
     html += '</ul></nav><div class="shop-main"><div id="tools-grid"></div>'
       + (hasRakutenData() ? '<p class="shop-credit mono">' + RAKUTEN_CREDIT + '</p>' : '')
       + '<p class="related__exit mono"><a href="' + esc(base + 'anthurium') + '" data-nav="genus" data-genus="Anthurium">' + esc(T('tools_exit')) + '</a></p></div></div>';
@@ -176,8 +174,8 @@
   function deptItem(slug, label, code, n) {
     var on = (_genre || '') === slug, empty = slug && !n;
     return '<li><button type="button" class="shop-dept' + (on ? ' is-current' : '') + (empty ? ' is-empty' : '') + '" data-tools-genre="' + esc(slug) + '" aria-pressed="' + on + '"' + (empty ? ' disabled' : '') + '>'
-      + '<span class="shop-dept__code mono">' + esc(code) + '</span><span class="shop-dept__name">' + esc(label) + '</span>'
-      + '<span class="shop-dept__count mono">' + (empty ? esc(T('tools_soon')) : n) + '</span></button></li>';
+      + '<span class="shop-dept__name">' + esc(label) + '</span>'
+      + (n == null ? '' : '<span class="shop-dept__count">' + (empty ? esc(T('tools_soon')) : n) + '</span>') + '</button></li>';
   }
   function syncGenreUrl() {
     var st = history.state || {};
@@ -208,7 +206,7 @@
       return;
     }
     var latest = rows.map(function (x) { return x.price_checked_at || ''; }).sort().pop();
-    el.innerHTML = '<p class="shop-count mono">' + esc(T('tools_count').replace('{n}', rows.length)) + (latest ? ' · ' + esc(T('tools_price_note').replace('{d}', fmtDate(latest))) : '') + '</p><div class="shop-grid">' + rows.map(card).join('') + '</div>';
+    el.innerHTML = '<p class="shop-count">' + esc(T('tools_count').replace('{n}', rows.length)) + (latest ? ' · ' + esc(T('tools_price_note').replace('{d}', fmtDate(latest))) : '') + '</p><div class="shop-grid">' + rows.map(card).join('') + '</div>';
   }
 
   /* ---------- /tools/<slug>/ ---------- */
@@ -232,16 +230,14 @@
     var img = imageOf(x, true);
     var rk = Gate ? Gate.shopUrl(x, 'rakuten') : '';
 
-    var html = '<p class="detail-standard mono"><a href="' + esc(base + 'tools/?g=' + encodeURIComponent(g.slug)) + '" data-nav="tools" data-genre="' + esc(g.slug) + '">' + esc(g.code + ' · ' + genreLabel(g)) + '</a> · NO. ' + esc(String(x.id).padStart(3, '0')) + '</p>';
+    var html = '<p class="detail-standard"><a href="' + esc(base + 'tools/?g=' + encodeURIComponent(g.slug)) + '" data-nav="tools" data-genre="' + esc(g.slug) + '">' + esc(genreLabel(g)) + '</a></p>';
     html += '<div class="shop-item">';
     // image
     var imgTag = img ? '<img src="' + esc(img) + '" alt="' + esc(name) + '" decoding="async" referrerpolicy="no-referrer">' : '<span class="shop-card__noimg mono">' + esc(T('tools_plate_none')) + '</span>';
     html += '<figure class="shop-item__img">' + (img && !x.image_own && rk ? '<a href="' + esc(rk) + '" target="_blank" rel="nofollow sponsored noopener" data-tool-shop="rakuten" data-tool-slug="' + esc(x.slug) + '">' + imgTag + '</a>' : imgTag)
-      + (x.owner_used ? '<span class="shop-badge mono">' + esc(T('tools_used')) + '</span>' : '') + '</figure>';
+      + '</figure>';
     // buy box
     html += '<div class="shop-item__buy">';
-    if (x.maker || x.model) html += '<p class="tool-cite mono">' + esc([x.maker, x.model].filter(Boolean).join(' · ')) + '</p>';
-    if (x.summary) html += '<p class="shop-item__summary">' + esc(x.summary) + '</p>';
     if (priceFresh(x)) html += '<p class="shop-item__price">¥' + Number(x.price).toLocaleString('ja-JP') + '<span class="mono">' + esc(T('tools_price_at').replace('{shop}', x.source === 'rakuten' ? '楽天市場' : 'ストア').replace('{d}', fmtDate(x.price_checked_at))) + '</span></p>';
     else if (x.price_band) html += '<p class="shop-item__price">' + esc(x.price_band) + '<span class="mono">' + esc(T('tools_price_band')) + '</span></p>';
     if (shops.length) {
@@ -252,6 +248,8 @@
       var imp = Gate.impUrl(x);
       if (imp) html += '<img class="tool-imp" src="' + esc(imp) + '" width="1" height="1" alt="" referrerpolicy="no-referrer-when-downgrade">';
     }
+    if (x.maker || x.model || x.owner_used) html += '<p class="tool-cite">' + (x.owner_used ? '<span class="badge">' + esc(T('tools_used')) + '</span> ' : '') + esc([x.maker, x.model].filter(Boolean).join(' · ')) + '</p>';
+    if (x.summary) html += '<p class="shop-item__summary">' + esc(x.summary) + '</p>';
     html += '</div></div>';
 
     if (x.description) html += '<section class="tool-section"><h2 class="section-title"><span>' + esc(T('tools_description')) + '</span></h2><div class="tool-body"><p>' + esc(x.description) + '</p></div></section>';

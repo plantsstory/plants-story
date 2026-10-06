@@ -9,7 +9,14 @@ function clean(v) {
   return NULLISH.has(v.toLowerCase()) ? '' : v;
 }
 // "T. B. Croat" / "O.Ortiz" / "Croat" -> "Croat"; abbreviations ("N.E.Br.") and full names stay
+const AUTHORITY = (() => { try { return JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '..', '..', 'wireframe', 'data', 'people-authority.json'), 'utf8')); } catch (e) { return {}; } })();
+// a key the people authority marks alias_of folds into that person
 function personKey(p) {
+  const k = personKeyRaw(p);
+  const a = AUTHORITY[k];
+  return a && a.alias_of ? a.alias_of : k;
+}
+function personKeyRaw(p) {
   p = p.replace(/\s+/g, ' ').trim();
   const tokens = p.split(' ');
   if (tokens.length === 1) {

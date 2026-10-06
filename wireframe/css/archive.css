@@ -1350,3 +1350,32 @@ h2.section-title, .legal-page h2, .section-heading, h2.text-lg.font-bold {
 .genus-stat-chip b { margin: 0 0.25em; }
 .genus-content .sort-bar { justify-content: flex-start; }
 @media (max-width: 640px) { .specimen__cell, .specimen__cell:nth-child(n), .specimen__cell:first-child { grid-template-columns: 6.5em 1fr; } }
+
+/* -- T67: tools catalogue, pricing and legal pages on the same rules -- */
+.tools-lead { font-family: var(--font-primary); font-weight: 400; }
+.pr-line { font-family: var(--font-primary); font-size: var(--fs-label); line-height: 1.6; }
+.shop-depts ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--s4); border-top: 1px solid var(--color-rule); }
+.shop-dept, .shop-dept:hover { display: flex !important; align-items: center; justify-content: space-between; gap: var(--s2); min-height: var(--tap); padding: 0 !important; border: 0 !important; border-bottom: 1px solid var(--color-rule) !important; border-radius: 0 !important; background: none !important; color: var(--color-ink); font-family: var(--font-primary); font-size: 0.9375rem; text-align: left; }
+.shop-dept.is-current { font-weight: 700; }
+.shop-dept__count { font-size: var(--fs-label); color: var(--color-mid); font-variant-numeric: lining-nums tabular-nums; font-family: var(--font-primary); }
+.shop-count { font-family: var(--font-primary); font-size: var(--fs-small); color: var(--color-mid); }
+.shop-card__price, .shop-item__price { font-family: var(--font-primary) !important; font-variant-numeric: lining-nums tabular-nums; font-weight: 600; color: var(--color-ink); }
+.shop-card__price { font-size: var(--fs-body) !important; }
+.shop-item__price { font-size: var(--fs-h2) !important; }
+.shop-item__price .mono { font-family: var(--font-primary); font-size: var(--fs-label); font-weight: 400; color: var(--color-mid); margin-left: var(--s2); }
+.shop-card__maker .badge, .tool-cite .badge { margin-right: var(--s1); }
+.shop-card__shops a { min-height: var(--tap); display: inline-flex; align-items: center; }
+.shop-btn { min-height: var(--tap); display: flex; align-items: center; justify-content: center; font-family: var(--font-primary); font-size: 0.9375rem; font-weight: 500; border: 1px solid var(--color-ink); border-radius: var(--radius-sm); background: transparent; color: var(--color-ink); text-decoration: none; }
+.shop-btn--primary { background: var(--color-ink); color: var(--color-paper); }
+.tool-cite { font-family: var(--font-primary); font-size: var(--fs-small); color: var(--color-mid); margin-top: var(--s3); }
+.shop-credit { font-family: var(--font-primary); font-size: var(--fs-label); }
+@media (max-width: 640px) {
+  .shop-item__img { max-height: 240px; display: flex; justify-content: center; }
+  .shop-item__img img { max-height: 240px; width: auto; max-width: 100%; object-fit: contain; }
+}
+.pricing-summary { font-family: var(--font-primary); font-size: var(--fs-body); line-height: 1.7; color: var(--color-ink); border-top: 1px solid var(--color-ink); border-bottom: 1px solid var(--color-rule); padding: var(--s2) 0; }
+.tokushoho-table th { font-family: var(--font-primary); font-size: var(--fs-label); font-weight: 500; color: var(--color-mid); vertical-align: top; }
+.tokushoho-table td { font-size: var(--fs-small); color: var(--color-ink); }
+.terms-fold { margin: var(--s3) 0; }
+.terms-fold > summary { cursor: pointer; display: inline-flex; align-items: center; min-height: var(--tap); font-size: 0.9375rem; font-weight: 500; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
+.legal-page .breadcrumb { margin-bottom: var(--s3); }

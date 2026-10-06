@@ -144,7 +144,13 @@
   }
   // "T. B. Croat" / "O.Ortiz" / "Croat" all index under the surname "Croat";
   // standard abbreviations ("N.E.Br.", "Mast.") and full names ("Tim Anderson") stay as written.
+  // a key the people authority marks alias_of folds into that person ("M. A. Pérez-Farrera" -> "Pérez-Farr.")
   function personKey(p) {
+    var k = personKeyRaw(p);
+    var a = (typeof _authority !== "undefined" && _authority && _authority[k]) || null;
+    return a && a.alias_of ? a.alias_of : k;
+  }
+  function personKeyRaw(p) {
     p = p.replace(/\s+/g, ' ').trim();
     var tokens = p.split(' ');
     if (tokens.length === 1) {
