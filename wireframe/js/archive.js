@@ -722,7 +722,8 @@
     el.innerHTML = html;
     section.classList.remove('d-none');
   }
-  function normParent(p) { return clean(p).replace(/^['"‘’“”]+|['"‘’“”]+$/g, '').toLowerCase().replace(/^(anthurium|monstera|philodendron)\s+/, ''); }
+  // a parent name compared whole: genus (or "A.") and outer quotes dropped, nothing else
+  function normParent(p) { return clean(p).replace(/^['"‘’“”]+|['"‘’“”]+$/g, '').toLowerCase().replace(/^(?:(?:anthurium|monstera|philodendron)\s+|a\.\s*)/, '').replace(/^['"‘’“”]+|['"‘’“”]+$/g, '').replace(/\s+/g, ' ').trim(); }
   function relatedGroupHtml(titleKey, list, headHtml) {
     if (!list.length) return '';
     var html = '<div class="related__group"><h3>' + (headHtml || esc(T(titleKey))) + '</h3><ul>';
@@ -749,7 +750,8 @@
       if (x.type === 'species' || x.isIndividual) return false;
       if (d.id && x.selectedFrom === d.id) return true;
       var ps = [normParent(x.parentA), normParent(x.parentB)];
-      return ps.indexOf(self) !== -1 || ps.some(function (p) { return p && p.indexOf(self) !== -1; });
+      // the whole name must match: 'Red Crystallinum' is a different plant from crystallinum
+      return ps.indexOf(self) !== -1;
     }) : [];
     var siblings = myParents.length ? others.filter(function (x) {
       var ps = [normParent(x.parentA), normParent(x.parentB)].filter(Boolean);
