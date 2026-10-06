@@ -2,162 +2,45 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 /**
- * OGP Prerendering Edge Function
+ * Old share links (https://<project>.supabase.co/functions/v1/share?name=…)
  *
- * SNS crawlers don't execute JavaScript, so SPA dynamic meta tags are invisible.
- * This function serves a lightweight HTML page with proper OG meta tags,
- * then redirects human visitors to the actual SPA page.
- *
- * Usage: https://<project>.supabase.co/functions/v1/share?name=Anthurium%20crystallinum
+ * This function used to serve an OGP page, but Supabase's default domain delivers HTML as text/plain
+ * (with nosniff and a sandbox CSP), so people saw raw markup and crawlers saw no card. The share button
+ * now gives the page URL on plantsstory.com, whose static stub carries the OG tags (BOARD 10-07 board 8).
+ * Links already sent keep working: this function only redirects to that page.
  */
 
 const SITE_URL = "https://plantsstory.com/";
 
+// same form as getShareUrl() in wireframe/js/pages.js: quotes percent-encoded, trailing slash
+export function pageUrl(genus: string, name: string): string {
+  const display = name.replace(" [Seedling]", "");
+  const g = (genus || display.split(" ")[0]).toLowerCase();
+  const rest = display.replace(/^\S+\s*/, "");
+  const enc = (s: string) => encodeURIComponent(s).replace(/'/g, "%27");
+  return SITE_URL + enc(g) + "/" + enc(rest) + "/";
+}
+
 serve(async (req: Request) => {
   const url = new URL(req.url);
   const name = url.searchParams.get("name") || "";
+  const home = new Response(null, { status: 302, headers: { Location: SITE_URL, "Cache-Control": "no-store" } });
+  if (!name || name.length > 200) return home;
 
-  if (!name || name.length > 200) {
-    return new Response("Invalid name parameter", { status: 400 });
-  }
-
-  // Build Supabase client (service role for public read)
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_ANON_KEY") || "";
-  const supabase = createClient(supabaseUrl, supabaseKey);
-
-  // Fetch cultivar data from DB
-  let genus = "";
-  let type = "species";
-  let description = "";
-  let imageUrl = "";
-
+  const supabase = createClient(Deno.env.get("SUPABASE_URL") || "", Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "");
   try {
-    // Seedling share links use the display name; the DB stores the [Seedling] suffix
-    const nameVariants = [name];
-    if (!name.includes("[Seedling]")) nameVariants.push(name + " [Seedling]");
-    const { data: rows } = await supabase
-      .from("cultivars")
-      .select("genus, type, origins, is_private")
-      .in("cultivar_name", nameVariants)
-      .limit(1);
+    // Seedling links use the display name; the DB stores the [Seedling] suffix
+    const variants = [name];
+    if (!name.includes("[Seedling]")) variants.push(name + " [Seedling]");
+    const { data: rows } = await supabase.from("cultivars").select("genus, cultivar_name, is_private").in("cultivar_name", variants).limit(1);
     const found = (rows || [])[0];
-
-    // Unknown or owner-only records get no share page at all: without this, any
-    // guessed name renders an OGP card and confirms that a private record exists.
-    if (!found || found.is_private) {
-      return new Response(null, {
-        status: 302,
-        headers: { Location: "https://plantsstory.com/", "Cache-Control": "no-store" },
-      });
-    }
-    const data = found;
-
-    if (data) {
-      genus = data.genus || "";
-      type = data.type || "species";
-
-      // Extract first origin description
-      const origins = data.origins || [];
-      if (Array.isArray(origins) && origins.length > 0) {
-        // Sort by trust desc, take best one
-        const sorted = [...origins].sort((a: any, b: any) => (b.trust || 0) - (a.trust || 0));
-        const best = sorted.find((o: any) => o && !o._type) || sorted[0];
-        // Origins store prose in `body` (legacy) or `structured.notes` (current schema)
-        const text = best.body || (best.structured && best.structured.notes) || best.body_en ||
-          best.description_jp || best.description || "";
-        if (typeof text === "string" && text.trim()) {
-          description = text.replace(/\s+/g, " ").trim().substring(0, 200);
-        }
-      }
-    }
+    // unknown or owner-only records: the top page (a guessed name must not confirm a private record)
+    if (!found || found.is_private) return home;
+    return new Response(null, {
+      status: 301,
+      headers: { Location: pageUrl(found.genus || "", found.cultivar_name || name), "Cache-Control": "public, max-age=3600" },
+    });
   } catch (_e) {
-    // DB error — proceed with defaults
+    return home;
   }
-
-  // Try to get a thumbnail image
-  try {
-    const { data: imgData } = await supabase
-      .from("cultivar_images")
-      .select("storage_path")
-      .eq("cultivar_name", name.replace(" [Seedling]", ""))
-      .order("display_order", { ascending: true })
-      .limit(1)
-      .maybeSingle();
-
-    if (imgData?.storage_path) {
-      imageUrl = supabaseUrl + "/storage/v1/object/public/gallery-images/" + imgData.storage_path;
-    }
-  } catch (_e) {
-    // No image — use OG image function as fallback
-  }
-
-  const displayName = name.replace(" [Seedling]", "");
-  const typeLabels: Record<string, string> = {
-    species: "原種",
-    hybrid: "Hybrid",
-    clone: "Clone",
-    seedling: "Seedling",
-  };
-  const typeLabel = typeLabels[type] || "";
-
-  const title = displayName + " - " + genus + " | Aroid Origins";
-  const desc = description || displayName + " (" + genus + " " + typeLabel + ") の由来・歴史情報";
-  // encodeURIComponent on BOTH segments: genusSlug can derive from the
-  // query string, so it must never reach the HTML/JS below unencoded (XSS)
-  const genusSlug = encodeURIComponent((genus || displayName.split(" ")[0]).toLowerCase());
-  const rest = displayName.replace(/^\S+\s*/, "");
-  const spaUrl = SITE_URL + genusSlug + "/" + encodeURIComponent(rest);
-
-  // og:image is the cultivar's share card (rendered in CI); the photo is only a fallback signal that one exists
-  const ogSlug = (g: string, n: string) => {
-    let rest = n.replace(" [Seedling]", "");
-    if (g && rest.toLowerCase().startsWith(g.toLowerCase() + " ")) rest = rest.slice(g.length + 1);
-    const s = (g + " " + rest).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-    return s || "entry";
-  };
-  const ogImage = type === "seedling" ? (imageUrl || (SITE_URL + "images/og-default-2026-09.png")) : (SITE_URL + "images/og/" + ogSlug(genus, displayName) + ".png");
-
-  // Return HTML with OG meta tags + auto-redirect for human visitors
-  const html = `<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<title>${esc(title)}</title>
-<meta name="description" content="${esc(desc)}">
-<meta property="og:title" content="${esc(title)}">
-<meta property="og:description" content="${esc(desc)}">
-<meta property="og:type" content="article">
-<meta property="og:url" content="${esc(spaUrl)}">
-<meta property="og:image" content="${esc(ogImage)}">
-<meta property="og:site_name" content="Aroid Origins">
-<meta property="og:locale" content="ja_JP">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="${esc(title)}">
-<meta name="twitter:description" content="${esc(desc)}">
-<meta name="twitter:image" content="${esc(ogImage)}">
-<link rel="canonical" href="${esc(spaUrl)}">
-<meta http-equiv="refresh" content="0;url=${esc(spaUrl)}">
-</head>
-<body>
-<p>Redirecting to <a href="${esc(spaUrl)}">${esc(displayName)} - Aroid Origins</a>...</p>
-<script>window.location.replace(${JSON.stringify(spaUrl).replace(/</g, "\\u003c")});</script>
-</body>
-</html>`;
-
-  return new Response(html, {
-    headers: {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=3600, s-maxage=3600",
-    },
-  });
 });
-
-function esc(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}

@@ -543,6 +543,7 @@ function loadCultivarThumbnails() {
         }
       });
       if (typeof window.renderStoryOfDay === 'function') window.renderStoryOfDay();
+      if (typeof window.refreshEntriesLedger === 'function') window.refreshEntriesLedger(); // new entries / people / places
       // Re-render all genus pages to apply thumbnails
       (window._generaData || []).forEach(function(gObj) {
         var section = document.getElementById('genus-' + gObj.slug);
@@ -665,19 +666,23 @@ document.addEventListener('click', function(e) {
   }
   var h1 = document.querySelector('#page-cultivar h1');
   if (!h1) return;
-  var name = h1.textContent;
+  var name = h1Key(h1);
   var added = toggleFavorite(name);
   showToast(t(added ? 'favorites_added' : 'favorites_removed'));
 });
 
 // ---- Share button ----
-// Share the OGP prerendering Edge Function URL: SNS crawlers don't execute JS,
-// so the SPA URL shows no card. The function serves OG tags and redirects
-// human visitors to the real page.
+// Share the page itself on plantsstory.com: its static stub carries the OG tags and the share card.
+// (The old Supabase share function returned HTML as text/plain; it now only redirects old links here.)
+// Quotes are percent-encoded so X's auto-link keeps the closing ' of 'Ace of Spades'.
 function getShareUrl(cultivarName) {
-  var base = window._SUPABASE_URL || 'https://jpgbehsrglsiwijglhjo.supabase.co';
-  return base + '/functions/v1/share?name=' + encodeURIComponent(cultivarName);
+  var display = String(cultivarName || '').replace(' [Seedling]', '');
+  var genus = display.split(' ')[0].toLowerCase();
+  var rest = display.replace(/^\S+\s*/, '');
+  var enc = function(s) { return encodeURIComponent(s).replace(/'/g, '%27'); };
+  return 'https://plantsstory.com/' + enc(genus) + '/' + enc(rest) + '/';
 }
+window.getShareUrl = getShareUrl;
 
 document.addEventListener('click', function(e) {
   var btn = e.target.closest('#share-btn');
@@ -693,7 +698,7 @@ document.addEventListener('click', function(e) {
   }
   var h1 = document.querySelector('#page-cultivar h1');
   if (!h1) return;
-  var name = h1.textContent;
+  var name = h1Key(h1);
   // Use the DB name (includes " [Seedling]" suffix) so the OGP function finds the record
   var detailPageEl = document.getElementById('page-cultivar');
   var dbName = (detailPageEl && detailPageEl.getAttribute('data-cultivar-dbname')) || name;
@@ -1216,7 +1221,8 @@ function updateCultivarDetail(cultivarName, rowEl) {
   var displayName = cultivarName.replace(' [Seedling]', '');
   var shownName = (window.EntryMeta && cData) ? window.EntryMeta.name({ cultivar_name: displayName, type: detectedType, origins: cData.origins || [], species_qualifier: cData._qualifier }) : displayName;
   var h1 = detailPage.querySelector('h1');
-  if (h1) h1.innerHTML = sciNameHtml(shownName);
+  // the heading shows the reader-facing name; data-name keeps the stored name every handler looks up
+  if (h1) { h1.innerHTML = sciNameHtml(shownName); h1.setAttribute('data-name', displayName); }
 
   // Update SEO meta tags
   var typeLabel = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: 'Seedling' }[detectedType] || '';
@@ -1855,7 +1861,7 @@ document.addEventListener('click', function(e) {
       if (isEditNav) {
         // Get current cultivar name from the detail page h1
         var detailH1 = document.querySelector('#page-cultivar h1');
-        var editCultivarName = detailH1 ? detailH1.textContent : '';
+        var editCultivarName = detailH1 ? h1Key(detailH1) : '';
         if (editCultivarName && typeof window.enterEditMode === 'function') {
           window.enterEditMode(editCultivarName);
         }
@@ -1914,7 +1920,7 @@ document.addEventListener('keydown', function(e) {
     if (!editBtn) return;
     e.preventDefault();
     var detailH1 = document.querySelector('#page-cultivar h1');
-    var cultivarName = detailH1 ? detailH1.textContent : '';
+    var cultivarName = detailH1 ? h1Key(detailH1) : '';
     if (!cultivarName) { showToast('品種が見つかりません', true); return; }
     // Check if this is a seedling (badge says Seedling) - DB stores with [Seedling] suffix
     var detailBadge = document.querySelector('#page-cultivar .badge');

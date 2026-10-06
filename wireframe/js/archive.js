@@ -336,7 +336,8 @@
     if (species) { if (d.pubYear) parts.push(yearSpan(d.pubYear)); }
     else if (d.namingYear) parts.push('<span class="num">' + d.namingYear + '</span>');
     if (!opts.noCountry && species && d.country) parts.push(esc(countryLabel(d.country)));
-    return parts.join(' · ');
+    // each part kept whole on a line (no 'パ／ナマ'); the separators are where the line may break
+    return parts.map(function (x) { return '<span class="entry__seg">' + x + '</span>'; }).join(' · ');
   }
   function entryStateHtml(d) {
     if (d.type === 'seedling') return '';
@@ -541,6 +542,7 @@
      ENTRIES LEDGER (replaces "recently updated" cards)
      ============================================================ */
   var _ledgerArgs = null;
+  window.refreshEntriesLedger = function () { if (_ledgerArgs) window.renderEntriesLedger.apply(null, _ledgerArgs); };
   window.renderEntriesLedger = function (grid, items, thumbMap, opts) {
     _ledgerArgs = [grid, items, thumbMap, opts];
     // drawn from bare rows first; drawn again once the full entries (tags, verification) are in
@@ -565,6 +567,8 @@
       var cached = (typeof cultivarData !== 'undefined' && cultivarData[item.cultivar_name]) || null;
       var d = describe(item.cultivar_name, cached || { origins: origins, formula: formula, _type: item.type, _id: item.id }, item.type);
       var stamp = withDate ? (item.created_at || item.updated_at || '') : '';
+      // the map passed in may predate the thumbnails query; fall back to the live one
+      if (!thumbMap[d.displayName] && window._thumbMap && window._thumbMap[d.displayName]) thumbMap[d.displayName] = window._thumbMap[d.displayName];
       var thumb = thumbMap[d.displayName] && baseUrl ? (window.galleryImg ? window.galleryImg(thumbMap[d.displayName], 120) : baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[d.displayName]) : '';
       html += window.entryLine(d, { thumb: thumb, date: stamp ? fmtDate(stamp) : '', noPerson: opts.noPerson, noCountry: opts.noCountry });
     });
@@ -599,7 +603,7 @@
     if (undescribed) {
       var stKey = { undescribed: 'status_undescribed', provisional_name: 'status_provisional', unresolved: 'status_unresolved' }[d.speciesStatus] || 'status_unresolved';
       cells += cell('spec_status', esc(T(stKey)));
-      cells += cell('spec_region', esc(d.originRegion || d.habitat));
+      cells += cell('spec_region', distributionHtml(d.originRegion || d.habitat));
       cells += cell('spec_closest', esc(d.closestSpecies));
       cells += cell('spec_introduced_by', esc(d.introducedBy));
       cells += cell('spec_trade_names', esc(d.tradeNames.join(' / ')));
@@ -660,7 +664,7 @@
     var head = [who, d.year].filter(Boolean).join(' ');
     var mid = [head, where].filter(Boolean).join('、');
     // canonical page URL: the static stubs carry the OGP tags, so no proxy is needed in the text
-    var url = 'https://plantsstory.com/' + d.genus.toLowerCase() + '/' + encodeURIComponent(d.epithet);
+    var url = window.getShareUrl ? window.getShareUrl(d.fullName) : 'https://plantsstory.com/' + d.genus.toLowerCase() + '/' + encodeURIComponent(d.epithet).replace(/'/g, '%27') + '/';
     return d.shownName + (mid ? ' — ' + mid : '') + '｜Aroid Origins ' + url;
   };
   /* one-time band after a registration: 収録しました · この台紙を共有 */
@@ -960,6 +964,7 @@
     var sorted = p.entries.slice().sort(function (a, b) { return (a.year || 9999) - (b.year || 9999) || a.displayName.localeCompare(b.displayName); });
     var thumbs = {};
     sorted.forEach(function (d) { var u = (typeof _thumbMap !== 'undefined') ? _thumbMap[d.displayName] : null; if (u) thumbs[d.displayName] = u; });
+    if (typeof window.loadCultivarThumbnails === 'function') window.loadCultivarThumbnails();
     window.renderEntriesLedger(document.getElementById('people-ledger'), toLedgerItems(sorted), thumbs, { noPerson: true });
     if (typeof updateMeta === 'function') {
       setTimeout(function () {
@@ -1011,6 +1016,7 @@
     var sorted = g.items.slice().sort(function (a, b) { return (a.pubYear || 9999) - (b.pubYear || 9999) || a.displayName.localeCompare(b.displayName); });
     var thumbs = {};
     sorted.forEach(function (d) { var u = (typeof _thumbMap !== 'undefined') ? _thumbMap[d.displayName] : null; if (u) thumbs[d.displayName] = u; });
+    if (typeof window.loadCultivarThumbnails === 'function') window.loadCultivarThumbnails();
     window.renderEntriesLedger(document.getElementById('locality-ledger'), toLedgerItems(sorted), thumbs, { noCountry: true });
     if (typeof updateMeta === 'function') {
       setTimeout(function () {
@@ -1036,7 +1042,7 @@
     if (!_detailArgs) return;
     var displayName = _detailArgs[0];
     var h1 = document.querySelector('#page-cultivar h1');
-    if (!h1 || h1.textContent.trim() !== displayName) return; // page moved on
+    if (!h1 || h1Key(h1).trim() !== displayName) return; // page moved on
     var all = collectAll();
     var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
     var key = _detailArgs[4] || displayName;
@@ -1302,7 +1308,7 @@
     btn.addEventListener('click', function () {
       if (!window._currentUser) { showToast(T('rerun_login'), true); return; }
       var h1 = document.querySelector('#page-cultivar h1');
-      $id('research-request-target').textContent = h1 ? h1.textContent : '';
+      $id('research-request-target').textContent = h1 ? h1Key(h1) : '';
       reason.value = '';
       dlg.showModal();
     });
@@ -1311,7 +1317,7 @@
       var id = cultivarId(), h1 = document.querySelector('#page-cultivar h1');
       if (!id || !sb() || !window._currentUser) return;
       submit.disabled = true;
-      sb().from('research_requests').insert({ cultivar_id: id, cultivar_name: h1 ? h1.textContent.trim() : '', user_id: window._currentUser.id, reason: reason.value.trim() || null })
+      sb().from('research_requests').insert({ cultivar_id: id, cultivar_name: h1 ? h1Key(h1).trim() : '', user_id: window._currentUser.id, reason: reason.value.trim() || null })
         .then(function (res) {
           submit.disabled = false;
           if (res.error) {

@@ -160,7 +160,7 @@ document.addEventListener('click', function(e) {
   if (isNaN(originIdx)) return;
   var h1 = document.querySelector('#page-cultivar h1');
   if (!h1) return;
-  var cultivarName = h1.textContent;
+  var cultivarName = h1Key(h1);
   var voteType = btn.getAttribute('data-vote') === 'agree' ? 'agree' : 'disagree';
 
   btn.disabled = true;
@@ -230,7 +230,7 @@ if (btnAddOrigin) {
     addOriginForm.style.display = 'block';
     // Show type-specific fields based on current cultivar type
     var h1 = document.querySelector('#page-cultivar h1');
-    var cName = h1 ? h1.textContent : '';
+    var cName = h1 ? h1Key(h1) : '';
     var cData = cultivarData[cName] || cultivarData[cName + ' [Seedling]'];
     var cType = cData ? (cData._type || 'species') : 'species';
     ['ao-species-fields','ao-clone-fields','ao-hybrid-fields','ao-seedling-fields'].forEach(function(id) {
@@ -387,8 +387,8 @@ function refreshDynamicText() {
   var cultivarPage = document.getElementById('page-cultivar');
   if (cultivarPage && cultivarPage.classList.contains('active')) {
     var h1 = cultivarPage.querySelector('h1');
-    if (h1 && cultivarData[h1.textContent]) {
-      renderOrigins(h1.textContent);
+    if (h1 && cultivarData[h1Key(h1)]) {
+      renderOrigins(h1Key(h1));
     }
   }
 
@@ -1951,7 +1951,7 @@ document.addEventListener('click', function(e) {
       // Get current cultivar
       var cultivarPage = document.getElementById('page-cultivar');
       var h1 = cultivarPage ? cultivarPage.querySelector('h1') : null;
-      var cultivarName = h1 ? h1.textContent : '';
+      var cultivarName = h1 ? h1Key(h1) : '';
       var cData = cultivarData[cultivarName] || cultivarData[cultivarName + ' [Seedling]'];
       if (!cultivarName || !cData) return;
       var cType = cData._type || 'species';
@@ -2397,7 +2397,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
         // Check cultivar hasn't changed while loading
         var detailPage = document.getElementById('page-cultivar');
         var h1 = detailPage ? detailPage.querySelector('h1') : null;
-        if (!h1 || h1.textContent !== cultivarName) return;
+        if (!h1 || h1Key(h1) !== cultivarName) return;
 
         images.forEach(function(img) {
           var url = getPublicUrl(img.storage_path);
@@ -2554,7 +2554,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
 
       var detailPage = document.getElementById('page-cultivar');
       var h1 = detailPage ? detailPage.querySelector('h1') : null;
-      var cultivarName = h1 ? h1.textContent : '';
+      var cultivarName = h1 ? h1Key(h1) : '';
       if (!cultivarName) return;
 
       // Prompt for caption and link
@@ -2601,7 +2601,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
         voteImage(imageId, voteType).then(function() {
           var detailPage = document.getElementById('page-cultivar');
           var h1 = detailPage ? detailPage.querySelector('h1') : null;
-          if (h1) renderGalleryForCultivar(h1.textContent);
+          if (h1) renderGalleryForCultivar(h1Key(h1));
         }).catch(function(err) {
           console.warn('Vote failed:', err);
           showToast(t('toast_vote_failed'), true);

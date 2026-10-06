@@ -158,7 +158,7 @@
       if (!btn) return;
       e.preventDefault();
       var h1 = document.querySelector('#page-cultivar h1');
-      var cultivarName = h1 ? h1.textContent : '';
+      var cultivarName = h1 ? h1Key(h1) : '';
       if (!cultivarName) return;
 
       // Get cultivar ID - use stored ID first, fallback to name search
@@ -194,7 +194,7 @@
       if (!imageId) return; // no image ID, can't submit request
 
       var h1 = document.querySelector('#page-cultivar h1');
-      var cultivarName = h1 ? h1.textContent : '';
+      var cultivarName = h1 ? h1Key(h1) : '';
       openDialog('image', imageId, cultivarName);
     });
   })();

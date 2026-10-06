@@ -113,6 +113,9 @@ function sciNameHtml(name) {
   return html.replace(/<\/i> <i>/g, ' ').replace(/ +<\/i>/g, '</i> ').trim();
 }
 window.sciNameHtml = sciNameHtml;
+// the stored name of the entry on the detail page (the heading may show sp. "…" instead, T69)
+function h1Key(el) { return el ? (el.getAttribute('data-name') || el.textContent) : ''; }
+window.h1Key = h1Key;
 // Scientific names inside escaped prose: "Anthurium warocqueanum" and "A. warocqueanum" in italics,
 // the genus alone before sp./aff./cf. (which stay roman). Input is already HTML-escaped text without tags.
 var SCI_GENERA = 'Anthurium|Monstera|Philodendron|Platycerium|Alocasia|Syngonium|Rhaphidophora|Amydrium|Epipremnum';
@@ -2430,7 +2433,7 @@ if (false) {
     // Also update detail page if it's open
     if (_currentPageId === 'cultivar') {
       var detailH1 = document.querySelector('#page-cultivar h1');
-      if (detailH1 && detailH1.textContent.trim() === cultivarName.replace(' [Seedling]', '')) {
+      if (detailH1 && h1Key(detailH1).trim() === cultivarName.replace(' [Seedling]', '')) {
         updateCultivarDetail(cultivarName, null);
       }
     }
@@ -2927,7 +2930,7 @@ if (false) {
         if (_currentPageId === 'cultivar' && typeof updateCultivarDetail === 'function') {
           var _detailPage = document.getElementById('page-cultivar');
           var _detailH1 = _detailPage ? _detailPage.querySelector('h1') : null;
-          var _detailName = _detailH1 ? _detailH1.textContent.trim() : '';
+          var _detailName = _detailH1 ? h1Key(_detailH1).trim() : '';
           if (_detailName) updateCultivarDetail(_detailName, null);
         }
         // Re-render all genus pages from data store
