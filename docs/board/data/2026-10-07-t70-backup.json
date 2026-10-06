@@ -1,0 +1,274 @@
+[
+ {
+  "cultivar_name": "Anthurium warocqueanum",
+  "id": 4,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-04-02",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium warocqueanum は 1878 年、T.Moore が Florist & Pomol. 101 で記載した。タイプ産地はコロンビア。分布はコロンビア。",
+    "body_en": "Anthurium warocqueanum was described by T.Moore in 1878 in Florist & Pomol. 101, figs. Type locality: Colombia. Distribution: Colombia (POWO).",
+    "discoverer_or_breeder": "T.Moore",
+    "discovery_year": 1878,
+    "first_description": "T.Moore, Florist & Pomol. 101, figs (1878)",
+    "native_region": "Colombia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85496-1",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/85496-1"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85496-1"
+     }
+    ],
+    "structured": {
+     "author_name": "T.Moore",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/85496-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85496-1"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Colombia",
+     "notes": "",
+     "origin_type": "species",
+     "publication_year": 1878,
+     "type_locality": "Colombia"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00"
+ },
+ {
+  "cultivar_name": "Anthurium pallidiflorum",
+  "id": 129,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-10-02",
+     "isAI": true,
+     "name": "GBIF / Kew"
+    },
+    "body": "Anthurium pallidiflorum は 1898 年、Engl. が Bot. Jahrb. Syst. 25: 395 で記載した。タイプ産地はエクアドル。分布はエクアドル。",
+    "body_en": "Described by Engl. in Bot. Jahrb. Syst. 25: 395 (1898). Type locality: Ecuador. Distribution: Ecuador.",
+    "discoverer_or_breeder": "Engl.",
+    "discovery_year": 1898,
+    "first_description": "Engl., Bot. Jahrb. Syst. 25: 395 (1898)",
+    "native_region": "Ecuador",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "GBIF / Kew Backbone Taxonomy",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15544-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/15544-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15544-2"
+     },
+     {
+      "label": "GBIF (Kew Backbone)",
+      "url": "https://www.gbif.org/species/2873206"
+     }
+    ],
+    "structured": {
+     "author_name": "Engl.",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/15544-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15544-2"
+      },
+      {
+       "label": "GBIF (Kew Backbone)",
+       "url": "https://www.gbif.org/species/2873206"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Ecuador",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 1898,
+     "type_locality": "Ecuador"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 19:57:05.098931+00"
+ },
+ {
+  "cultivar_name": "Anthurium forgetii",
+  "id": 11,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-08-23",
+     "isAI": true,
+     "name": "GBIF / Kew"
+    },
+    "body": "Anthurium forgetii は 1906 年、N.E.Br. が Gard. Chron. ser. 3, 39: 161 で記載した。タイプ産地はコロンビア。分布はコロンビア。種小名は採集者 Forget への献名。",
+    "body_en": "Anthurium forgetii was described by N.E.Br. in 1906 in Gard. Chron. ser. 3, 39: 161. Type locality: Colombia. Distribution: Colombia (POWO). The epithet honours the collector Forget (IPNI).",
+    "discoverer_or_breeder": "N.E.Br.",
+    "discovery_year": 1906,
+    "first_description": "N.E.Br., Gard. Chron. ser. 3, 39: 161 (1906)",
+    "native_region": "Colombia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "GBIF / Kew Backbone Taxonomy",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://www.gbif.org/species/2873656",
+    "sources": [
+     {
+      "label": "GBIF (Kew Backbone)",
+      "url": "https://www.gbif.org/species/2873656"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15285-2"
+     }
+    ],
+    "structured": {
+     "author_name": "N.E.Br.",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/15285-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:15285-2"
+      },
+      {
+       "label": "GBIF (Kew Backbone)",
+       "url": "https://www.gbif.org/species/2873656"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Colombia",
+     "notes": "",
+     "origin_type": "species",
+     "publication_year": 1906,
+     "type_locality": "Colombia"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00"
+ },
+ {
+  "cultivar_name": "Anthurium splendidum",
+  "id": 35,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-16",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium splendidum は 1884 年、W.Bull ex Rodigas が Ill. Hort. 31: 13 で記載した。タイプ産地はコロンビア。分布はコロンビア。前年の Gard. Chron. 19: 381（1883）に W.Bull の名で先に掲載されている。",
+    "body_en": "Anthurium splendidum was described by W.Bull ex Rodigas in 1884 in Ill. Hort. 31: 13, t. 510. Type locality: Colombia. Distribution: Colombia (POWO). First announced in English as W.Bull in Gard. Chron. n.s. 19: 381 (1883).",
+    "discoverer_or_breeder": "W.Bull",
+    "discovery_year": 1884,
+    "first_description": "W.Bull ex Rodigas, Ill. Hort. 31: 13, t. 510 (1884)",
+    "native_region": "Colombia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85368-1",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/85368-1"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85368-1"
+     }
+    ],
+    "structured": {
+     "author_name": "W.Bull ex Rodigas",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/85368-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85368-1"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Colombia",
+     "notes": "",
+     "origin_type": "species",
+     "publication_year": 1884,
+     "type_locality": "Colombia"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "updated_at": "2026-10-02 18:53:40.846688+00"
+ }
+]

@@ -113,6 +113,16 @@ function sciNameHtml(name) {
   return html.replace(/<\/i> <i>/g, ' ').replace(/ +<\/i>/g, '</i> ').trim();
 }
 window.sciNameHtml = sciNameHtml;
+// Scientific names inside escaped prose: "Anthurium warocqueanum" and "A. warocqueanum" in italics,
+// the genus alone before sp./aff./cf. (which stay roman). Input is already HTML-escaped text without tags.
+var SCI_GENERA = 'Anthurium|Monstera|Philodendron|Platycerium|Alocasia|Syngonium|Rhaphidophora|Amydrium|Epipremnum';
+function italicizeSciNames(html) {
+  return String(html || '')
+    .replace(new RegExp('\\b(' + SCI_GENERA + ')\\s+(?!(?:sp|aff|cf|var|subsp|ssp|x)\\b)([a-z][a-z-]{2,})\\b', 'g'), '<i>$1 $2</i>')
+    .replace(new RegExp('\\b(' + SCI_GENERA + ')(?=\\s+(?:sp|aff|cf)\\.)', 'g'), '<i>$1</i>')
+    .replace(/(^|[^A-Za-z])([AMP])\.\s?(?!(?:sp|aff|cf)\b)([a-z][a-z-]{3,})\b/g, '$1<i>$2. $3</i>');
+}
+window.italicizeSciNames = italicizeSciNames;
 function getBadgeInfo(type, name) { return { cls: 'badge--' + (type || 'species'), txt: type || 'species' }; }
 function paginateGenus(genusEl, page) {}
 // An "individual" is a numbered/named single plant of a species ('HR1'); it lives on the species page, not in lists
@@ -2566,7 +2576,8 @@ if (false) {
       var nInd0 = 0;
       if (meta.type === 'species' && entry._id) Object.keys(cultivarData).forEach(function(k) { if (cultivarData[k]._selectedFrom === entry._id) nInd0++; });
       h += '<div class="cultivar-row__thumb' + (thumbPath ? '' : ' entry__thumb--empty') + '">' + (thumbPath ? thumbContent : '') + '</div>';
-      h += '<div class="cultivar-row__info"><div class="cultivar-row__name entry__name" data-key="' + escHtml(fullName) + '">' + sciNameHtml(displayName)
+      var shown = window.EntryMeta ? window.EntryMeta.name({ cultivar_name: displayName, type: meta.type, origins: entry.origins || [], species_qualifier: entry._qualifier }) : displayName;
+      h += '<div class="cultivar-row__info"><div class="cultivar-row__name entry__name" data-key="' + escHtml(fullName) + '">' + sciNameHtml(shown)
         + ((entry._isPrivate || meta.is_private) ? ' <span class="badge badge--private">' + t('private_badge') + '</span>' : '') + '</div>'
         + '<div class="entry__sub">' + parts.sub + (nInd0 ? ' · ' + escHtml(t('individuals_count').replace('{n}', nInd0)) : '') + '</div></div>'
         + parts.state + '</div>';

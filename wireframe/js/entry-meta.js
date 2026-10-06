@@ -23,7 +23,20 @@
     var os = ((rec && rec.origins) || []).filter(function (o) { return o && typeof o === 'object' && !o._type; });
     return os.sort(function (a, b) { return (parseInt(b.trust, 10) || 0) - (parseInt(a.trust, 10) || 0); });
   }
-  function displayName(rec) { return String((rec && rec.cultivar_name) || '').replace(' [Seedling]', ''); }
+  // The name shown to readers. A species whose record says it is not yet described (species_status undescribed /
+  // provisional_name) but whose stored name has no sp. reads as  Genus sp. "epithet"  (BOARD 10-07 T69).
+  // The stored name, and so the URL, stay as they are.
+  function displayName(rec) {
+    var name = String((rec && rec.cultivar_name) || '').replace(' [Seedling]', '');
+    var type = (rec && rec.type) || '';
+    var q = String((rec && rec.species_qualifier) || '').toLowerCase();
+    if (type && type !== 'species') return name;
+    if (q) return name;
+    var st = clean(((records(rec)[0] || {}).structured || {}).species_status);
+    if (st !== 'undescribed' && st !== 'provisional_name') return name;
+    var m = name.match(/^([A-Z][a-z]+) ([a-z][a-z-]+)$/);
+    return m ? m[1] + ' sp. "' + m[2] + '"' : name;
+  }
   function kana(rec) { return ((rec && rec.aliases) || []).filter(function (a) { return KATAKANA.test(a); })[0] || ''; }
   function whoAndYear(rec) {
     var o = records(rec)[0] || {}, s = o.structured || {};
@@ -50,5 +63,5 @@
     return text + (aliases.length ? ' 別名: ' + aliases.join('、') : '');
   }
 
-  return { title: title, description: description, kana: kana };
+  return { title: title, description: description, kana: kana, name: displayName };
 });

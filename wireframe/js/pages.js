@@ -1079,7 +1079,7 @@ function renderOriginsInner(cultivarName, container) {
 
   function recordParagraphs(text) {
     return String(text || '').split(/\n\s*\n/).map(function(p) { return p.trim(); }).filter(Boolean)
-      .map(function(p) { return '<p>' + escHtml(p).replace(/\n/g, '<br>') + '</p>'; }).join('');
+      .map(function(p) { return '<p>' + italicizeSciNames(escHtml(p)).replace(/\n/g, '<br>') + '</p>'; }).join('');
   }
   origins.forEach(function(origin, i) {
     var rh = '';
@@ -1214,14 +1214,15 @@ function updateCultivarDetail(cultivarName, rowEl) {
 
   // Update title
   var displayName = cultivarName.replace(' [Seedling]', '');
+  var shownName = (window.EntryMeta && cData) ? window.EntryMeta.name({ cultivar_name: displayName, type: detectedType, origins: cData.origins || [], species_qualifier: cData._qualifier }) : displayName;
   var h1 = detailPage.querySelector('h1');
-  if (h1) h1.innerHTML = sciNameHtml(displayName);
+  if (h1) h1.innerHTML = sciNameHtml(shownName);
 
   // Update SEO meta tags
   var typeLabel = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: 'Seedling' }[detectedType] || '';
   var _recState = (typeof window.recordStateOf === 'function' && cData) ? window.recordStateOf(cultivarName, cData, { type: detectedType }) : 'ok';
   // same formula as the static stub (entry-meta.js), so the page never downgrades the stub's title
-  var _metaRec = cData ? { cultivar_name: cultivarName, type: detectedType, origins: cData.origins || [], aliases: cData._aliases || [] } : null;
+  var _metaRec = cData ? { cultivar_name: cultivarName, type: detectedType, origins: cData.origins || [], aliases: cData._aliases || [], species_qualifier: cData._qualifier || null } : null;
   var metaDesc = (_recState === 'ok' || detectedType === 'seedling')
     ? (_metaRec && window.EntryMeta ? window.EntryMeta.description(_metaRec) : displayName + 'の由来 · Aroid Origins')
     : displayName + ' — 記録なし · 出典募集中 | Aroid Origins';
@@ -1596,11 +1597,22 @@ function paginateGenusFromMemory(genusEl, page) {
     return ((rank[a.meta.type] || 0) - (rank[b.meta.type] || 0)) || key(a.fullName).localeCompare(key(b.fullName));
   });
 
+  // Names short of a record go to the end, folded under 「記録が足りない名前（n）」 (BOARD 10-07 T72)
+  var isSeedlingView = scope.getAttribute('data-genus-view') === 'seedlings';
+  var firstShort = -1, shortTotal = 0;
+  if (!isSeedlingView && typeof window.recordStateOf === 'function') {
+    var okRows = [], shortRows = [];
+    filtered.forEach(function(it) { (window.recordStateOf(it.fullName, it.entry, it.meta) === 'ok' ? okRows : shortRows).push(it); });
+    filtered = okRows.concat(shortRows);
+    shortTotal = shortRows.length;
+    if (shortTotal) firstShort = okRows.length;
+  }
+  var searching = !!((scope.querySelector('.search-bar__input') || {}).value || '').trim();
+
   var totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   if (page > totalPages) page = totalPages;
 
   // Render only current page's rows into the container
-  var isSeedlingView = scope.getAttribute('data-genus-view') === 'seedlings';
   var container;
   if (isSeedlingView) {
     container = scope.querySelector('.seedling-list');
@@ -1610,10 +1622,15 @@ function paginateGenusFromMemory(genusEl, page) {
   if (container) {
     var start = (page - 1) * ITEMS_PER_PAGE;
     var end = Math.min(start + ITEMS_PER_PAGE, filtered.length);
-    var html = '';
+    var html = '', folded = false;
     for (var i = start; i < end; i++) {
+      if (firstShort !== -1 && i >= firstShort && !folded) {
+        folded = true;
+        html += '<details class="genus-short"' + (searching || firstShort === 0 ? ' open' : '') + '><summary>' + escHtml(t('genus_short').replace('{n}', shortTotal)) + '</summary>';
+      }
       html += buildRowHtml(filtered[i].fullName, filtered[i].entry, filtered[i].meta);
     }
+    if (folded) html += '</details>';
     if (filtered.length === 0) {
       html = '<div class="text-muted empty-state">' + t('no_results') + '</div>';
     }

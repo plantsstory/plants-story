@@ -1385,3 +1385,23 @@ h2.section-title, .legal-page h2, .section-heading, h2.text-lg.font-bold {
 .dist-more { display: inline; padding: 12px 2px; font-size: var(--fs-small); color: var(--color-ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; cursor: pointer; white-space: nowrap; }
 .dist-more:hover { color: var(--color-primary); }
 .specimen__v a.dist-more { border-bottom: 0; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
+
+/* -- T72: names short of a record, folded at the end of the genus list -- */
+.genus-short { border-top: 1px solid var(--color-ink); margin-top: var(--s4); }
+.genus-short > summary { list-style: none; cursor: pointer; display: flex; align-items: center; min-height: var(--tap); font-size: 0.9375rem; font-weight: 500; color: var(--color-ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
+.genus-short > summary::-webkit-details-marker { display: none; }
+.genus-short[open] > summary { text-decoration: none; color: var(--color-mid); }
+
+/* -- T73: aliases under the name -- */
+.detail-aliases { margin: var(--s1) 0 var(--s3); font-size: var(--fs-small); color: var(--color-mid); }
+.record__body i, .story__body i { font-family: inherit; font-style: italic; }
+
+/* -- T74: contribute form on the same rules; 44px tap areas for small links -- */
+#page-contribute h2.text-lg.font-bold { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-h2); border-top: 1px solid var(--color-ink); padding-top: var(--s2); margin: var(--s5) 0 var(--s3); }
+.contribute-login__title { margin: 0 0 var(--s1); font-size: var(--fs-body); font-weight: 600; }
+.btn--danger-outline { margin-top: var(--s3); background: transparent; color: var(--color-danger); border: 1px solid var(--color-danger); min-height: var(--tap); }
+.btn--danger-outline:hover { background: var(--color-danger-bg); color: var(--color-danger); }
+#page-contribute .btn { min-height: var(--tap); font-family: var(--font-primary); }
+/* inline links: the padding widens the tap area to 44px without moving the text */
+.breadcrumb a { display: inline-block; padding: 12px 4px; margin: -12px -4px; }
+.footer__links a { display: inline-flex; align-items: center; min-height: var(--tap); }

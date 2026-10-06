@@ -14,8 +14,8 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.yahoo.co.jp https://i.moshimo.com; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJK72JH471"></script>
-  <script src="js/textsize.js?v=20261007m"></script>
-  <script src="js/gtag-init.js?v=20261007m"></script>
+  <script src="js/textsize.js?v=20261007n"></script>
+  <script src="js/gtag-init.js?v=20261007n"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -54,13 +54,13 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20261007m">
-  <link rel="stylesheet" href="css/reset.css?v=20261007m">
-  <link rel="stylesheet" href="css/layout.css?v=20261007m">
-  <link rel="stylesheet" href="css/components.css?v=20261007m">
-  <link rel="stylesheet" href="css/pages.css?v=20261007m">
-  <link rel="stylesheet" href="css/utilities.css?v=20261007m">
-  <link rel="stylesheet" href="css/archive.css?v=20261007m">
+  <link rel="stylesheet" href="css/variables.css?v=20261007n">
+  <link rel="stylesheet" href="css/reset.css?v=20261007n">
+  <link rel="stylesheet" href="css/layout.css?v=20261007n">
+  <link rel="stylesheet" href="css/components.css?v=20261007n">
+  <link rel="stylesheet" href="css/pages.css?v=20261007n">
+  <link rel="stylesheet" href="css/utilities.css?v=20261007n">
+  <link rel="stylesheet" href="css/archive.css?v=20261007n">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -227,6 +227,7 @@
         <div>
           <p class="mono detail-standard" id="detail-standard"></p>
           <h1 class="detail-title"></h1>
+          <p class="detail-aliases d-none" id="detail-aliases"></p>
           <div class="flex gap-sm mt-sm flex-align-center flex-wrap detail-badges">
             <span class="badge badge--species">原種 / Original Species</span>
             <span class="text-sm text-muted">Anthurium</span>
@@ -449,7 +450,7 @@
       <div id="login-benefits-card" class="card mb-lg login-benefits-bg">
         <div id="login-benefits-content" class="flex-center-md flex-wrap">
           <div class="flex-1" style="min-width:200px;">
-            <h3 class="text-base" style="margin:0 0 var(--space-xs);">Googleでログインすると</h3>
+            <h3 class="contribute-login__title">Googleでログインすると</h3>
             <ul class="desc-text" style="margin:0;padding-left:1.2em;">
               <li>品種の投稿・編集・削除</li>
               <li>自分の投稿履歴を確認できます</li>
@@ -520,7 +521,7 @@
           <div class="duplicate-alert d-none mt-sm p-md" id="duplicate-alert">
             <p class="text-sm font-bold mb-sm" data-i18n="duplicate_found">この品種は既に登録されています</p>
             <p class="text-sm text-muted mb-sm" id="duplicate-cultivar-msg"></p>
-            <a href="#" class="btn btn--primary btn--sm" data-nav="cultivar" data-i18n="go_to_page">品種ページへ移動</a>
+            <a href="#" class="btn btn--secondary btn--sm" data-nav="cultivar" data-i18n="go_to_page">品種ページへ移動 →</a>
           </div>
         </div>
 
@@ -556,7 +557,7 @@
         <h2 class="text-lg font-bold mb-md" data-i18n="image_upload">画像アップロード</h2>
         <div class="upload-area" id="contribute-upload-area">
           <input type="file" id="contribute-file-input" accept="image/jpeg,image/png" multiple class="d-none" aria-label="品種画像をアップロード">
-          <div class="upload-area__icon">&#x1F4F7;</div>
+          <div class="upload-area__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
           <div class="upload-area__text" data-i18n="drag_drop">ドラッグ&ドロップ または クリック</div>
           <div class="upload-area__hint">最大3枚, JPG/PNG, 各20MB以下（自動圧縮）</div>
         </div>
@@ -664,7 +665,7 @@
                 <div class="text-sm font-bold mb-sm">Mother (母)</div>
                 <div class="upload-area upload-area--small" id="mother-upload">
                   <input type="file" id="mother-photo-input" accept="image/jpeg,image/png,image/webp" class="d-none" aria-label="母株の写真をアップロード">
-                  <div class="upload-area__icon">&#x1F4F7;</div>
+                  <div class="upload-area__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
                   <div class="upload-area__text text-xs">写真をアップロード</div>
                 </div>
                 <div id="mother-preview" class="mt-sm"></div>
@@ -676,7 +677,7 @@
                 <div class="text-sm font-bold mb-sm">Father (父)</div>
                 <div class="upload-area upload-area--small" id="father-upload">
                   <input type="file" id="father-photo-input" accept="image/jpeg,image/png,image/webp" class="d-none" aria-label="父株の写真をアップロード">
-                  <div class="upload-area__icon">&#x1F4F7;</div>
+                  <div class="upload-area__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
                   <div class="upload-area__text text-xs">写真をアップロード</div>
                 </div>
                 <div id="father-preview" class="mt-sm"></div>
@@ -703,9 +704,9 @@
       </div>
 
       <!-- Submit -->
-      <button class="btn btn--primary btn--block" id="contribute-submit-btn" data-i18n="btn_submit">&#x1F4E4; 投稿する</button>
+      <button class="btn btn--primary btn--block" id="contribute-submit-btn" data-i18n="btn_submit">投稿する</button>
 
-      <button class="btn btn--block d-none cursor-pointer" id="edit-delete-btn" style="margin-top:12px;background:transparent;color:#dc3545;border:1px solid #dc3545;">&#x1F5D1; この品種を削除</button>
+      <button class="btn btn--block btn--danger-outline d-none cursor-pointer" id="edit-delete-btn">この品種を削除</button>
 
     </div>
   </section>
@@ -1380,7 +1381,7 @@
         <h2 class="section-title">My Seedlings</h2>
         <div class="search-bar mt-md mb-md max-w-400">
           <input type="search" enterkeyhint="search" class="search-bar__input" id="profile-post-search" placeholder="品種名で検索...">
-          <button class="search-bar__btn" aria-label="検索">&#x1F50D;</button>
+          <button class="search-bar__btn" aria-label="検索"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></button>
         </div>
         <div id="profile-posts-grid" class="card-grid"></div>
         <div id="profile-posts-empty" class="d-none text-center p-xl text-muted">
@@ -1545,14 +1546,14 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/record-gate.js?v=20261007m"></script>
-  <script src="js/app-core.js?v=20261007m"></script>
-  <script src="js/pages.js?v=20261007m"></script>
-  <script src="js/forms.js?v=20261007m"></script>
-  <script src="js/entry-meta.js?v=20261007m"></script>
-  <script src="js/archive.js?v=20261007m"></script>
-  <script src="js/tool-gate.js?v=20261007m"></script>
-  <script src="js/tools.js?v=20261007m"></script>
+  <script src="js/record-gate.js?v=20261007n"></script>
+  <script src="js/app-core.js?v=20261007n"></script>
+  <script src="js/pages.js?v=20261007n"></script>
+  <script src="js/forms.js?v=20261007n"></script>
+  <script src="js/entry-meta.js?v=20261007n"></script>
+  <script src="js/archive.js?v=20261007n"></script>
+  <script src="js/tool-gate.js?v=20261007n"></script>
+  <script src="js/tools.js?v=20261007n"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1562,7 +1563,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261007m"></script>
+  <script src="js/dialogs.js?v=20261007n"></script>
 
   <!-- AI re-research request dialog -->
   <dialog id="research-request-dialog" class="dialog-clean" aria-labelledby="research-request-title">
@@ -1601,6 +1602,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261007m"></script>
+<script src="js/sw-register.js?v=20261007n"></script>
 </body>
 </html>

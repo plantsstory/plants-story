@@ -260,8 +260,8 @@
     "en": "This cultivar is already registered"
   },
   "go_to_page": {
-    "jp": "品種ページへ移動",
-    "en": "Go to cultivar page"
+    "jp": "品種ページへ移動 →",
+    "en": "Go to the entry page →"
   },
   "origin_story": {
     "jp": "由来",
@@ -2299,5 +2299,9 @@
   "dist_more": {
     "jp": "ほか{n}地域",
     "en": "+{n} more"
+  },
+  "genus_short": {
+    "jp": "記録が足りない名前（{n}）",
+    "en": "Names short of a record ({n})"
   }
 }

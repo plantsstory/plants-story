@@ -69,7 +69,7 @@ function staticEntryHtml(c, ctx) {
   const undescribed = type === 'species' && (q === 'sp' || q === 'aff' || q === 'cf' || (s.species_status && s.species_status !== 'described'));
   const kind = (c.tags || []).indexOf('individual') !== -1 ? '個体' : undescribed ? '未記載' : (TYPE_JP[type] || '');
   h += '<p class="detail-standard">' + escAttr(kind) + '</p>';
-  h += '<h1 class="detail-title">' + sciHtml(c.cultivar_name) + '</h1>';
+  h += '<h1 class="detail-title">' + sciHtml(EntryMeta.name(c)) + '</h1>';
   if (cite) h += '<p class="mono static-entry__cite">' + escAttr(cite) + '</p>';
   if (aliases.length) h += '<p class="static-entry__aliases">別名: ' + escAttr(aliases.join(' / ')) + '</p>';
   if (ctx.photo) h += '<figure class="static-entry__plate"><img src="' + escAttr(ctx.photo) + '" alt="' + escAttr(c.cultivar_name) + '" width="720" decoding="async"></figure>';
@@ -270,7 +270,7 @@ async function main() {
         'itemListElement': [
           { '@type': 'ListItem', 'position': 1, 'name': 'Aroid Origins', 'item': SITE + '/' },
           { '@type': 'ListItem', 'position': 2, 'name': genus, 'item': SITE + '/' + slug + '/' },
-          { '@type': 'ListItem', 'position': 3, 'name': c.cultivar_name, 'item': url }
+          { '@type': 'ListItem', 'position': 3, 'name': EntryMeta.name(c), 'item': url }
         ]
       }, {
         '@context': 'https://schema.org',

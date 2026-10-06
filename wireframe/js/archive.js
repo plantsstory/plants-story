@@ -140,6 +140,8 @@
     d.formLocality = clean(entry._locality);
     d.creator = clean(d.formula && d.formula.creatorName);
     d.href = base + genus.toLowerCase() + '/' + encodeURIComponent(epithet);
+    // the name readers see (T69: undescribed species stored without sp.); displayName stays the stored key
+    d.shownName = window.EntryMeta ? window.EntryMeta.name({ cultivar_name: displayName, type: type, origins: entry.origins || [], species_qualifier: entry._qualifier }) : displayName;
     return d;
   }
   // "T. B. Croat" / "O.Ortiz" / "Croat" all index under the surname "Croat";
@@ -356,7 +358,7 @@
     var thumb = opts.thumb ? '<img src="' + esc(opts.thumb) + '" alt="" width="48" height="48" loading="lazy" decoding="async">' : '';
     return '<li class="entry"><a class="entry__link" href="' + esc(d.href) + '" data-nav="cultivar" data-key="' + esc(d.fullName) + '">'
       + '<span class="entry__thumb' + (thumb ? '' : ' entry__thumb--empty') + '" aria-hidden="true">' + thumb + '</span>'
-      + '<span class="entry__main"><span class="entry__name">' + sciNameHtml(d.displayName) + '</span>'
+      + '<span class="entry__main"><span class="entry__name">' + sciNameHtml(d.shownName) + '</span>'
       + '<span class="entry__sub">' + entrySubHtml(d, opts) + '</span></span>'
       + entryStateHtml(d) + '</a></li>';
   };
@@ -433,12 +435,12 @@
     var text = lang() === 'en' ? d.textEn : d.text;
     var html = '';
     if (thumb) html += '<figure class="story__figure">' + link(d, '<img src="' + esc(thumb) + '" alt="' + esc(d.displayName) + '" loading="lazy" decoding="async">') + '</figure>';
-    html += '<h2 class="story__title">' + link(d, sciNameHtml(d.displayName)) + '</h2>';
+    html += '<h2 class="story__title">' + link(d, sciNameHtml(d.shownName)) + '</h2>';
     var cite = citeHtml(d);
     if (cite) html += '<p class="story__cite mono">' + cite + '</p>';
     var ex = excerpt(text, lang() === 'en' ? 320 : 170);
     // no drop cap: the text opens with a scientific name, and a raised first letter splits it ('A nthurium')
-    html += '<p class="story__body">' + esc(ex) + '</p>';
+    html += '<p class="story__body">' + (window.italicizeSciNames ? window.italicizeSciNames(esc(ex)) : esc(ex)) + '</p>';
     html += link(d, esc(T('story_more')), 'story__more');
     body.innerHTML = html;
     if (window.linkGlossaryTerms) window.linkGlossaryTerms(body.querySelector('.story__body'), 3);
@@ -461,7 +463,7 @@
     groups.slice(0, limit || 999).forEach(function (g) {
       html += '<li class="index__item"><button type="button" class="index__toggle" aria-expanded="false"><span class="index__name">' + esc(labelOf ? labelOf(g.key) : g.key) + '</span><span class="index__count">' + g.items.length + '</span></button><ul class="index__sub">';
       g.items.slice().sort(function (a, b) { return (a.year || 9999) - (b.year || 9999) || a.displayName.localeCompare(b.displayName); }).forEach(function (d) {
-        html += '<li>' + link(d, sciNameHtml(d.displayName)) + (d.year ? '<span class="mono">' + d.year + '</span>' : '') + '</li>';
+        html += '<li>' + link(d, sciNameHtml(d.shownName)) + (d.year ? '<span class="mono">' + d.year + '</span>' : '') + '</li>';
       });
       html += '</ul></li>';
     });
@@ -623,13 +625,18 @@
     if (d.selectedFrom) {
       // an individual names its species; a Clone selected from another plant names that plant
       var parentSp = all.filter(function (x) { return x.id && x.id === d.selectedFrom; })[0];
-      if (parentSp) cells = cell(d.isIndividual ? 'spec_selected_from' : 'spec_selected_from_clone', link(parentSp, sciNameHtml(parentSp.displayName))) + cells;
+      if (parentSp) cells = cell(d.isIndividual ? 'spec_selected_from' : 'spec_selected_from_clone', link(parentSp, sciNameHtml(parentSp.shownName))) + cells;
     }
     // an individual: who brought it in and where it came from
     if (d.isIndividual) cells += cell('spec_introduced_by', linkPeople(d.introducedBy)) + cell('spec_region', esc(d.originRegion || d.formLocality || d.locality || d.habitat));
     // on the label: at most three Latin-script names; katakana stays for search and JSON-LD
     var labelAliases = (d.aliases || []).filter(function (a, i, arr) { return /[A-Za-z]/.test(a) && !/[゠-ヿ]/.test(a) && arr.indexOf(a) === i; }).slice(0, 3);
-    if (labelAliases.length) cells += cell('spec_aliases', esc(labelAliases.join(' / ')));
+    // under the name, not in the label (BOARD 10-07 T73)
+    var aliasEl = document.getElementById('detail-aliases');
+    if (aliasEl) {
+      aliasEl.textContent = labelAliases.length ? T('spec_aliases') + ': ' + labelAliases.join(' / ') : '';
+      aliasEl.classList.toggle('d-none', !labelAliases.length);
+    }
     // the last line of every label: 検証 (BOARD §3.4)
     if (d.type !== 'seedling') {
       var ver;
@@ -654,7 +661,7 @@
     var mid = [head, where].filter(Boolean).join('、');
     // canonical page URL: the static stubs carry the OGP tags, so no proxy is needed in the text
     var url = 'https://plantsstory.com/' + d.genus.toLowerCase() + '/' + encodeURIComponent(d.epithet);
-    return d.displayName + (mid ? ' — ' + mid : '') + '｜Aroid Origins ' + url;
+    return d.shownName + (mid ? ' — ' + mid : '') + '｜Aroid Origins ' + url;
   };
   /* one-time band after a registration: 収録しました · この台紙を共有 */
   function renderShareBand(d, entry) {
@@ -775,7 +782,7 @@
     var html = '<div class="related__group"><h3>' + (headHtml || esc(T(titleKey))) + '</h3><ul>';
     list.slice(0, 6).forEach(function (d) {
       var meta = d.type === 'species' && !d.isIndividual ? (d.pubYear || '') : joinParts([kindWord(d), d.namingYear || d.year]);
-      html += '<li>' + link(d, sciNameHtml(d.displayName)) + (meta ? '<span class="num">' + esc(meta) + '</span>' : '') + '</li>';
+      html += '<li>' + link(d, sciNameHtml(d.shownName)) + (meta ? '<span class="num">' + esc(meta) + '</span>' : '') + '</li>';
     });
     return html + '</ul></div>';
   }
@@ -826,8 +833,8 @@
       + '</div>';
     if (prev || next) {
       html += '<nav class="related__nav" aria-label="' + esc(T('related_title')) + '">';
-      if (prev) html += link(prev, '<span class="mono">← ' + esc(T('related_prev')) + '</span><span class="related__nav-name">' + sciNameHtml(prev.displayName) + '</span>');
-      if (next) html += link(next, '<span class="mono">' + esc(T('related_next')) + ' →</span><span class="related__nav-name">' + sciNameHtml(next.displayName) + '</span>', 'related__nav--next');
+      if (prev) html += link(prev, '<span class="mono">← ' + esc(T('related_prev')) + '</span><span class="related__nav-name">' + sciNameHtml(prev.shownName) + '</span>');
+      if (next) html += link(next, '<span class="mono">' + esc(T('related_next')) + ' →</span><span class="related__nav-name">' + sciNameHtml(next.shownName) + '</span>', 'related__nav--next');
       html += '</nav>';
     }
     // exit: back to the genus list (same locality is the heading above)
