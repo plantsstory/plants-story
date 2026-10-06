@@ -1090,19 +1090,21 @@ function renderOriginsInner(cultivarName, container) {
     var hasSources = isDb || srcList.some(function(s) { return !!safeUrl(s.url); }) || !!safeUrl(origin.source_url || '');
     rh += '<article class="record" data-record-idx="' + i + '">';
     if (!isSeedling) {
-      // header: 記録 N · who wrote it · tier · trust (the % only when there is something to base it on)
+      // header: 出典 S · 95% · 2026.04.02 — the source names are in the 情報元 line below;
+      // 記録 N only when there is more than one record
       var meta = [];
       if (hasSources && origin.source_tier) meta.push((currentLang === 'en' ? 'Source ' : '出典 ') + origin.source_tier);
-      if (isDb) meta.push('IPNI / POWO');
-      else if (origin.author && origin.author.isAI) meta.push('AI');
-      else meta.push(origin.author && origin.author.name && origin.author.name !== 'User' ? origin.author.name : t('record_by_user'));
+      if (!isDb) {
+        if (origin.author && origin.author.isAI) meta.push('AI');
+        else meta.push(origin.author && origin.author.name && origin.author.name !== 'User' ? origin.author.name : t('record_by_user'));
+      }
       if (!hasSources) meta.push(t('record_no_sources'));
       var recDate = origin.author && origin.author.date ? String(origin.author.date).slice(0, 10).replace(/-/g, '.') : '';
-      rh += '<header class="record__head mono">';
-      rh += '<span class="record__rank">' + (currentLang === 'en' ? 'Record ' : '記録 ') + (i + 1) + '</span>';
+      rh += '<header class="record__head">';
+      if (origins.length > 1) rh += '<span class="record__rank">' + (currentLang === 'en' ? 'Record ' : '記録 ') + (i + 1) + '</span>';
       rh += '<span class="record__meta">' + meta.map(escHtml).join(' · ') + '</span>';
       if (hasSources) rh += '<span class="record__trust ' + getTrustClass(trustNum) + '" data-trust-idx="' + i + '">' + trustNum + '%</span>';
-      if (recDate) rh += '<span class="record__date">' + escHtml(recDate) + '</span>';
+      if (recDate) rh += '<span class="record__date num">' + escHtml(recDate) + '</span>';
       rh += '</header>';
     }
     // body: the prose is the record; the field table only stands in when there is no prose
@@ -1183,7 +1185,7 @@ function updateCultivarDetail(cultivarName, rowEl) {
   if (!genusName) { genusName = 'Unknown'; genusKey = ''; }
 
   // Short name for breadcrumb
-  var shortName = cultivarName.replace(' [Seedling]', '').replace(genusName + ' ', '').replace(/'/g, '');
+  var shortName = cultivarName.replace(' [Seedling]', '').replace(genusName + ' ', '');
 
   // Resolve the cultivar record up front — type detection, meta, JSON-LD and
   // the sections further down all read from it.
@@ -1269,11 +1271,13 @@ function updateCultivarDetail(cultivarName, rowEl) {
   }
   detailPage.setAttribute('data-cultivar-id', _cId);
   detailPage.setAttribute('data-cultivar-dbname', _cDbName || cultivarName);
-  // mono standard line: GENUS · 区分 · NO. 013 (the badge row under the title is retired)
+  // the line above the title carries the kind only (BOARD 10-07: the genus is in the breadcrumb and the title;
+  // NO. stays on the share card and the printed label)
   var stdEl = document.getElementById('detail-standard');
   if (stdEl) {
     var _isInd = cData && cData._tags && cData._tags.indexOf('individual') !== -1;
-    stdEl.textContent = _typeUnknown ? genusName.toUpperCase() : genusName.toUpperCase() + ' · ' + (_isInd ? t('type_individual') : (bi ? bi.txt : '')) + (_cId ? ' · NO. ' + String(_cId).padStart(3, '0') : '');
+    var _kind = window.entryKind ? window.entryKind(cultivarName, cData, cData && cData._type) : '';
+    stdEl.textContent = _typeUnknown ? '' : (_kind || (_isInd ? t('type_individual') : (bi ? bi.txt : '')));
   }
   if (createdAtEl && cData && cData._created_at) {
     var d = new Date(cData._created_at);
@@ -1510,7 +1514,8 @@ function paginateGenusFromServer(genusEl, page) {
 
     var total = res.data.total || 0;
     var countEl = genusEl.querySelector('.text-muted.mb-lg');
-    if (countEl && !searchQuery) countEl.textContent = total + ' ' + t('cultivars_registered');
+    // no number until the full list is in: a partial count would disagree with the stats line
+    if (countEl && !searchQuery) countEl.textContent = '';
     var items = (res.data.items || []).map(rpcRowToItem);
     var totalPages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
     if (page > totalPages) page = totalPages;

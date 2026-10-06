@@ -2105,7 +2105,7 @@ paginateGenus = function(genusEl, page) {
     if (input && input.value.trim()) {
       countEl.textContent = t('search_hit').replace('{n}', filtered.length).replace('{total}', totalCount);
     } else {
-      countEl.textContent = totalCount + ' ' + t('cultivars_registered');
+      countEl.textContent = ''; // the count lives in the stats line (収録 n 品種)
     }
   }
 };

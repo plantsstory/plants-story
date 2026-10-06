@@ -64,17 +64,17 @@
   function countryOf(text) {
     text = clean(text);
     if (!text) return '';
-    var i;
+    var i, best = '', bestAt = Infinity;
     for (i = 0; i < COUNTRIES.length; i++) {
       var c = COUNTRIES[i];
-      if (new RegExp('(^|[^A-Za-z])' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^A-Za-z]|$)', 'i').test(text)) {
-        return CANON[c] || c;
-      }
+      var m = new RegExp('(^|[^A-Za-z])' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^A-Za-z]|$)', 'i').exec(text);
+      if (m && m.index < bestAt) { bestAt = m.index; best = CANON[c] || c; }
     }
     for (i = 0; i < REGION_HINTS.length; i++) {
-      if (REGION_HINTS[i][0].test(text)) return REGION_HINTS[i][1];
+      var r = REGION_HINTS[i][0].exec(text);
+      if (r && r.index < bestAt) { bestAt = r.index; best = REGION_HINTS[i][1]; }
     }
-    return '';
+    return best;
   }
 
   /* ---------- entry description ---------- */
@@ -237,13 +237,78 @@
   /* citation line for list rows and ledger ("T.Moore · 1878 · Colombia") */
   function citeHtml(d) {
     if (d.type === 'species') {
-      return joinParts([esc(d.author), yearSpan(d.pubYear), esc(d.country || d.locality)]);
+      return joinParts([esc(d.author), yearSpan(d.pubYear), esc(d.country ? countryLabel(d.country) : d.locality)]);
     }
     var who = d.breeder || d.namer || d.creator;
     if (!who && !d.year) return '';
     var label = d.type === 'clone' && !d.breeder && d.namer ? T('cite_namer') : T('cite_breeder');
     return joinParts([who ? (lang() === 'en' ? label + ' ' + esc(who) : label + ' ' + esc(who)) : '', yearSpan(d.year)]);
   }
+  /* ---------- one list line for every list (BOARD 10-07 T62) ----------
+     line 1: name, and one state at the right end; line 2: [date ·] kind · person · year · country */
+  var COUNTRY_JA = { 'Colombia': 'コロンビア', 'Ecuador': 'エクアドル', 'Panama': 'パナマ', 'Peru': 'ペルー', 'Mexico': 'メキシコ',
+    'Costa Rica': 'コスタリカ', 'Brazil': 'ブラジル', 'Bolivia': 'ボリビア', 'Venezuela': 'ベネズエラ', 'Guatemala': 'グアテマラ',
+    'Honduras': 'ホンジュラス', 'Nicaragua': 'ニカラグア', 'Belize': 'ベリーズ', 'El Salvador': 'エルサルバドル', 'Guyana': 'ガイアナ',
+    'French Guiana': '仏領ギアナ', 'Suriname': 'スリナム', 'Argentina': 'アルゼンチン', 'Paraguay': 'パラグアイ', 'Cuba': 'キューバ',
+    'Jamaica': 'ジャマイカ', 'Trinidad and Tobago': 'トリニダード・トバゴ', 'Dominican Republic': 'ドミニカ共和国', 'Puerto Rico': 'プエルトリコ',
+    'Indonesia': 'インドネシア', 'Malaysia': 'マレーシア', 'Thailand': 'タイ', 'Vietnam': 'ベトナム', 'Philippines': 'フィリピン',
+    'Papua New Guinea': 'パプアニューギニア', 'Australia': 'オーストラリア', 'Japan': '日本', 'Taiwan': '台湾', 'China': '中国' };
+  function countryLabel(c) { c = clean(c); if (!c) return ''; return lang() === 'en' ? c : (COUNTRY_JA[c] || c); }
+  window.countryLabel = countryLabel;
+  function isUndescribed(d) {
+    var q = String(d.qualifier || '').toLowerCase().replace(/\./g, '');
+    return q === 'sp' || q === 'aff' || q === 'cf' || (!!d.speciesStatus && d.speciesStatus !== 'described');
+  }
+  function kindWord(d) {
+    if (d.isIndividual) return T('kind_individual');
+    if (d.type === 'species') return isUndescribed(d) ? T('kind_undescribed') : T('kind_species');
+    if (d.type === 'seedling') return T('kind_seedling');
+    return d.type === 'hybrid' ? 'Hybrid' : d.type === 'clone' ? 'Clone' : String(d.type || '');
+  }
+  function entrySubHtml(d, opts) {
+    opts = opts || {};
+    var parts = [];
+    if (opts.date) parts.push('<span class="num">' + esc(opts.date) + '</span>');
+    parts.push(esc(kindWord(d)));
+    var species = d.type === 'species' && !d.isIndividual;
+    if (!opts.noPerson) {
+      if (species) { if (d.author) parts.push(esc(d.author)); }
+      else {
+        var who = d.breeder || d.creator;
+        if (who) parts.push(esc(T('cite_breeder')) + ' ' + esc(who));
+        else if (d.namer) parts.push(esc(T('cite_namer')) + ' ' + esc(d.namer));
+      }
+    }
+    if (species) { if (d.pubYear) parts.push(yearSpan(d.pubYear)); }
+    else if (d.namingYear) parts.push('<span class="num">' + d.namingYear + '</span>');
+    if (!opts.noCountry && species && d.country) parts.push(esc(countryLabel(d.country)));
+    return parts.join(' · ');
+  }
+  function entryStateHtml(d) {
+    if (d.type === 'seedling') return '';
+    if (d.state !== 'ok') return '<span class="entry__state entry__state--' + esc(d.state) + '">' + esc(T('state_' + d.state)) + '</span>';
+    if (!d.hasSources) return '<span class="entry__state">' + esc(T('record_by_user')) + '</span>';
+    if (d.trust > 0) return '<span class="entry__state entry__state--pct">' + (d.verifiedAt ? '<span class="verified-mark" title="' + esc(T('verified_title')) + '">✓</span> ' : '') + '<span class="num">' + d.trust + '%</span></span>';
+    return '';
+  }
+  // pieces for list rows drawn elsewhere (the genus list in app-core.js)
+  window.entryKind = function (fullName, entry, type) {
+    try { return kindWord(describe(fullName, entry || {}, type)); } catch (e) { return ''; }
+  };
+  window.entryParts = function (fullName, entry, type, opts) {
+    try { var d = describe(fullName, entry, type); return { sub: entrySubHtml(d, opts), state: entryStateHtml(d) }; } catch (e) { return null; }
+  };
+  // one entry as an <li>: thumbnail (48px, dashed empty frame without a photo), two lines, state
+  window.entryLine = function (d, opts) {
+    opts = opts || {};
+    var thumb = opts.thumb ? '<img src="' + esc(opts.thumb) + '" alt="" width="48" height="48" loading="lazy" decoding="async">' : '';
+    return '<li class="entry"><a class="entry__link" href="' + esc(d.href) + '" data-nav="cultivar" data-key="' + esc(d.fullName) + '">'
+      + '<span class="entry__thumb' + (thumb ? '' : ' entry__thumb--empty') + '" aria-hidden="true">' + thumb + '</span>'
+      + '<span class="entry__main"><span class="entry__name">' + sciNameHtml(d.displayName) + '</span>'
+      + '<span class="entry__sub">' + entrySubHtml(d, opts) + '</span></span>'
+      + entryStateHtml(d) + '</a></li>';
+  };
+
   window.entryCiteLine = function (fullName, entry, type) {
     try { return citeHtml(describe(fullName, entry, type)); } catch (e) { return ''; }
   };
@@ -275,13 +340,15 @@
     var years = entries.map(function (d) { return d.type === 'species' ? d.pubYear : null; }).filter(Boolean);
     var countries = {};
     entries.forEach(function (d) { if (d.country) countries[d.country] = 1; });
-    var latest = '';
-    all.forEach(function (d) { var u = d.updatedAt || d.createdAt; if (u && u > latest) latest = u; });
-    var set = function (id, html) { var el = document.getElementById(id); if (el) el.innerHTML = html; };
-    set('ledger-count', entries.length + '<small>' + esc(T('entries_unit')) + '</small>');
-    set('ledger-years', years.length ? Math.min.apply(null, years) + '–' + Math.max.apply(null, years) : '—');
-    set('ledger-localities', Object.keys(countries).length ? Object.keys(countries).length + '<small>' + esc(T('countries_unit')) + '</small>' : '—');
-    set('ledger-updated', latest ? fmtDate(latest) : '—');
+    // one line under the search: 収録 40 品種 · 発表年 1829–2020 · 9 か国
+    var el = document.getElementById('masthead-stats');
+    if (!el) return;
+    var n = Object.keys(countries).length;
+    el.innerHTML = joinParts([
+      esc(T('stats_recorded')) + ' <span class="num">' + entries.length + '</span> ' + esc(T('entries_unit')),
+      years.length ? esc(T('ledger_years')) + ' <span class="num">' + Math.min.apply(null, years) + '–' + Math.max.apply(null, years) + '</span>' : '',
+      n ? '<span class="num">' + n + '</span> ' + esc(T('countries_unit')) : ''
+    ]);
   }
 
   function excerpt(text, max) {
@@ -348,15 +415,15 @@
     });
     return html + '</ul></div>';
   }
-  var TYPE_LABEL = { species: ['原種', 'Species'], hybrid: ['Hybrid', 'Hybrids'], clone: ['Clone', 'Clones'], seedling: ['実生', 'Seedlings'] };
   function renderIndex(all) {
     var el = document.getElementById('archive-index-body');
     if (!el) return;
-    var byCountry = groupBy(all.filter(function (d) { return d.type === 'species'; }), function (d) { return d.country; });
-    var byPerson = groupBy(all, peopleOf);
-    var byType = groupBy(all, function (d) { var l = TYPE_LABEL[d.type]; return l ? (lang() === 'en' ? l[1] : l[0]) : ''; });
+    var counted = all.filter(function (d) { return d.type !== 'seedling' && d.state === 'ok'; }); // same rule as 収録
+    var byCountry = groupBy(counted.filter(function (d) { return d.type === 'species'; }), function (d) { return d.country; });
+    var byPerson = groupBy(counted, peopleOf);
     var fullName = function (key) { var a = authorityOf(key); return a && a.name ? a.name : key; };
-    el.innerHTML = indexGroupHtml(T('index_localities'), byCountry, 999, base + 'locality/', 'locality') + indexGroupHtml(T('index_people'), byPerson, 12, base + 'people/', 'people', fullName) + indexGroupHtml(T('index_types'), byType);
+    // the kind group is gone (the genus list filters by kind); five people, then the people index
+    el.innerHTML = indexGroupHtml(T('index_localities'), byCountry, 999, base + 'locality/', 'locality', countryLabel) + indexGroupHtml(T('index_people'), byPerson, 5, base + 'people/', 'people', fullName);
     // people are shown by full name: draw again once the authority table is in
     if (!_authority) loadAuthority(function () { renderIndex(all); });
   }
@@ -364,6 +431,9 @@
   function renderTimeline(all) {
     var el = document.getElementById('archive-timeline-body');
     if (!el) return;
+    // folded on phones; open on wide screens and when someone came for it (#archive-timeline)
+    var fold = document.getElementById('timeline-fold');
+    if (fold && !fold._init) { fold._init = true; if (window.innerWidth >= 900 || /timeline/.test(location.hash)) fold.open = true; }
     var items = all.filter(function (d) { return d.type === 'species' && d.pubYear; })
       .sort(function (a, b) { return a.pubYear - b.pubYear || a.displayName.localeCompare(b.displayName); });
     if (!items.length) { el.innerHTML = '<p class="empty-state">' + esc(T('timeline_empty')) + '</p>'; return; }
@@ -419,6 +489,8 @@
   var _ledgerArgs = null;
   window.renderEntriesLedger = function (grid, items, thumbMap, opts) {
     _ledgerArgs = [grid, items, thumbMap, opts];
+    // drawn from bare rows first; drawn again once the full entries (tags, verification) are in
+    if (!window._dataFullyLoaded) waitForData(function () { if (_ledgerArgs && _ledgerArgs[0] === grid) window.renderEntriesLedger.apply(null, _ledgerArgs); });
     thumbMap = thumbMap || {};
     opts = opts || {};
     var baseUrl = window._SUPABASE_URL || '';
@@ -430,38 +502,19 @@
       var countEl = document.getElementById('new-entries-count');
       if (countEl) countEl.textContent = week > 0 ? T('new_entries_week').replace('{n}', week) : '';
     }
-    var html = '<div class="overflow-auto"><table class="ledger-table"><thead><tr>'
-      + '<th>' + esc(T(withDate ? 'ledger_date' : 'ledger_no')) + '</th><th>' + esc(T('ledger_name')) + '</th><th class="ledger-table__cell-type">' + esc(T('ledger_type')) + '</th>'
-      + '<th>' + esc(T('ledger_meta')) + '</th><th class="right">' + esc(T('ledger_trust')) + '</th></tr></thead><tbody>';
-    items.forEach(function (item, i) {
+    var html = '<ol class="entries">';
+    items.forEach(function (item) {
       var origins = (item.origins || []);
       var formula = null;
       origins = origins.filter(function (o) { if (o && o._type === 'formula') { formula = o.formula; return false; } return true; });
       // the full entry (tags, verification, parents) when the archive is loaded, else the bare row
       var cached = (typeof cultivarData !== 'undefined' && cultivarData[item.cultivar_name]) || null;
       var d = describe(item.cultivar_name, cached || { origins: origins, formula: formula, _type: item.type, _id: item.id }, item.type);
-      var bi = (typeof getBadgeInfo === 'function') ? getBadgeInfo(d.type, d.fullName) : { cls: 'badge--' + d.type, txt: d.type };
-      if (d.isIndividual) bi = { cls: 'badge--clone', txt: T('type_individual') };
-      var trustCls = (typeof getTrustClass === 'function') ? getTrustClass(d.trust) : '';
-      var rowState = d.type === 'seedling' ? 'ok' : d.state;
-      var no = d.id ? String(d.id).padStart(3, '0') : String(i + 1).padStart(2, '0');
-      if (withDate) {
-        var stamp = item.created_at || item.updated_at || '';
-        no = stamp ? fmtDate(stamp).slice(5) : '—';   // MM.DD
-      }
+      var stamp = withDate ? (item.created_at || item.updated_at || '') : '';
       var thumb = thumbMap[d.displayName] && baseUrl ? (window.galleryImg ? window.galleryImg(thumbMap[d.displayName], 120) : baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[d.displayName]) : '';
-      html += '<tr role="link" tabindex="0" data-nav="cultivar" data-key="' + esc(d.fullName) + '">';
-      html += '<td class="ledger-table__no">' + esc(no) + '</td>';
-      html += '<td class="ledger-table__cell-name"><div class="flex-center-sm">' + (thumb ? '<img class="ledger-table__thumb" src="' + esc(thumb) + '" alt="" loading="lazy" decoding="async">' : '') + '<span class="ledger-table__name">' + sciNameHtml(d.displayName) + '</span></div></td>';
-      html += '<td class="ledger-table__cell-type"><span class="badge ' + esc(bi.cls) + '">' + esc(bi.txt) + '</span></td>';
-      var cite = citeHtml(d);
-      html += '<td class="ledger-table__cell-meta ledger-table__meta">' + (cite ? '<span class="mono">' + cite + '</span>' : '') + (d.parentA && d.parentB ? '<div class="text-xs">' + esc(d.parentA) + ' × ' + esc(d.parentB) + '</div>' : '') + '</td>';
-      if (rowState !== 'ok') html += '<td class="ledger-table__cell-trust right"><span class="mono ledger-table__state">' + esc(T('state_' + rowState)) + '</span></td>';
-      else if (!d.hasSources && d.type !== 'seedling') html += '<td class="ledger-table__cell-trust right"><span class="mono ledger-table__state">' + esc(T('record_by_user')) + '</span></td>';
-      else html += '<td class="ledger-table__cell-trust right">' + (d.trust > 0 ? '<div class="trust"><div class="trust__bar"><div class="trust__fill ' + trustCls + '" style="width:' + d.trust + '%"></div></div><span class="trust__label">' + d.trust + '%</span>' + (d.verifiedAt ? '<span class="verified-mark">✓</span>' : '') + '</div>' : '<span class="mono">—</span>') + '</td>';
-      html += '</tr>';
+      html += window.entryLine(d, { thumb: thumb, date: stamp ? fmtDate(stamp) : '', noPerson: opts.noPerson, noCountry: opts.noCountry });
     });
-    html += '</tbody></table></div>';
+    html += '</ol>';
     grid.innerHTML = html;
   };
 
@@ -481,13 +534,14 @@
   }
   function parentHtml(all, name) {
     var d = findByEpithet(all, name);
-    return d ? link(d, esc(name)) : esc(name);
+    return d ? link(d, sciNameHtml(name)) : sciNameHtml(name);
   }
   function renderSpecimen(d, all) {
     var el = document.getElementById('specimen-label');
     if (!el) return;
     var cells = '';
-    var undescribed = d.type === 'species' && d.speciesStatus && d.speciesStatus !== 'described';
+    // sp. / aff. / cf. names take the undescribed form too (BOARD 10-07)
+    var undescribed = d.type === 'species' && !d.isIndividual && isUndescribed(d);
     if (undescribed) {
       var stKey = { undescribed: 'status_undescribed', provisional_name: 'status_provisional', unresolved: 'status_unresolved' }[d.speciesStatus] || 'status_unresolved';
       cells += cell('spec_status', esc(T(stKey)));
@@ -501,36 +555,44 @@
       cells += cell('spec_pub_year', yearSpan(d.pubYear));
       cells += cell('spec_collector', linkPeople(d.collector));
       cells += cell('spec_col_year', yearSpan(d.colYear));
-      cells += cell('spec_locality', esc(d.locality));
-      if (!d.locality && d.formLocality) cells += cell('spec_form_locality', esc(d.formLocality));
-      cells += cell('spec_habitat', esc(d.habitat));
+      // type locality and distribution with the same value take one cell
+      if (d.locality && d.habitat && d.locality === d.habitat) cells += cell('spec_locality_habitat', esc(countryLabel(d.locality)));
+      else {
+        cells += cell('spec_locality', esc(countryLabel(d.locality)));
+        if (!d.locality && d.formLocality) cells += cell('spec_form_locality', esc(d.formLocality));
+        cells += cell('spec_habitat', esc(countryLabel(d.habitat)));
+      }
     } else {
       if (d.type === 'clone' && !d.breeder && d.namer) cells += cell('spec_namer', linkPeople(d.namer));
       else cells += cell('spec_breeder', linkPeople(d.breeder || d.namer || d.creator));
-      cells += cell(d.type === 'seedling' ? 'spec_sowing' : 'spec_year', d.type === 'seedling' ? esc(d.sowing) : yearSpan(d.year));
-      if (d.parentA || d.parentB) cells += cell('spec_parents', parentHtml(all, d.parentA || T('lineage_unknown')) + ' × ' + parentHtml(all, d.parentB || T('lineage_unknown')) + (d.formulaStatus === 'disputed' ? '<span class="specimen__flag mono">' + esc(T('formula_disputed')) + '</span>' : ''));
+      cells += cell(d.type === 'seedling' ? 'spec_sowing' : 'spec_year', d.type === 'seedling' ? esc(/^\d{4}-\d{2}-\d{2}/.test(d.sowing) ? fmtDate(d.sowing) : d.sowing) : ((d.namingYear || d.year) ? '<span class="num">' + (d.namingYear || d.year) + '</span>' : ''));
+      if (d.parentA || d.parentB) cells += cell('spec_parents', parentHtml(all, d.parentA || T('lineage_unknown')) + ' × ' + parentHtml(all, d.parentB || T('lineage_unknown')));
     }
     if (d.selectedFrom) {
       // an individual names its species; a Clone selected from another plant names that plant
       var parentSp = all.filter(function (x) { return x.id && x.id === d.selectedFrom; })[0];
       if (parentSp) cells = cell(d.isIndividual ? 'spec_selected_from' : 'spec_selected_from_clone', link(parentSp, sciNameHtml(parentSp.displayName))) + cells;
     }
+    // an individual: who brought it in and where it came from
+    if (d.isIndividual) cells += cell('spec_introduced_by', linkPeople(d.introducedBy)) + cell('spec_region', esc(d.originRegion || d.formLocality || d.locality || d.habitat));
     // on the label: at most three Latin-script names; katakana stays for search and JSON-LD
     var labelAliases = (d.aliases || []).filter(function (a, i, arr) { return /[A-Za-z]/.test(a) && !/[゠-ヿ]/.test(a) && arr.indexOf(a) === i; }).slice(0, 3);
     if (labelAliases.length) cells += cell('spec_aliases', esc(labelAliases.join(' / ')));
     // the last line of every label: 検証 (BOARD §3.4)
     if (d.type !== 'seedling') {
       var ver;
-      if (d.verifiedAt) ver = '✓ ' + esc(T('verified_label')) + ' ' + esc(fmtDate(d.verifiedAt)) + (d.verificationNote && d.verificationNote.indexOf('[要再確認]') !== 0 ? ' — ' + esc(d.verificationNote) : '');
+      // the date once: the note loses any date of its own
+      var vnote = d.verificationNote && d.verificationNote.indexOf('[要再確認]') !== 0 ? d.verificationNote.replace(/[（(]\s*\d{4}-\d{2}-\d{2}\s*点検\s*[)）]/g, '').trim() : '';
+      if (d.verifiedAt) ver = '<span class="verified-mark">✓</span> ' + esc(T('verified_label')) + ' <span class="num">' + esc(fmtDate(d.verifiedAt)) + '</span>' + (vnote ? ' · ' + esc(vnote) : '');
       else {
         var vv = (d.origin && d.origin.votes) || {}, ag = parseInt(vv.agree, 10) || 0, dg = parseInt(vv.disagree, 10) || 0;
         ver = (ag >= 3 && ag > dg) ? esc(T('verified_community').replace('{a}', ag).replace('{d}', dg)) : esc(T('verified_none'));
       }
-      if (d.nameStatus === 'disputed') ver += ' ／ ' + esc(T('verified_disputed'));
-      cells += '<div class="specimen__cell specimen__cell--wide specimen__cell--verify"><span class="specimen__k">' + esc(T('spec_verification')) + '</span><span class="specimen__v mono">' + ver + '</span></div>';
+      cells += '<div class="specimen__cell specimen__cell--wide specimen__cell--verify"><span class="specimen__k">' + esc(T('spec_verification')) + '</span><span class="specimen__v">' + ver + '</span></div>';
     }
-    var note = d.nameStatus === 'disputed' ? T('name_status_disputed') : d.nameStatus === 'trade' ? T('name_status_trade') : d.nameStatus === 'informal' ? T('name_status_informal') : '';
-    el.innerHTML = (cells ? '<div class="specimen">' + cells + '</div>' : '') + (note ? '<p class="specimen__note mono">' + esc(note) + '</p>' : '');
+    // a dispute is said once, in the note under the label
+    var note = d.nameStatus === 'disputed' ? T('name_status_disputed') : d.formulaStatus === 'disputed' ? T('formula_disputed') : d.nameStatus === 'trade' ? T('name_status_trade') : d.nameStatus === 'informal' ? T('name_status_informal') : '';
+    el.innerHTML = (cells ? '<div class="specimen">' + cells + '</div>' : '') + (note ? '<p class="specimen__note">' + esc(note) + '</p>' : '');
   }
   /* share text: {name} — {describer or breeder} {year}、{type locality or parentage}｜Aroid Origins {URL} */
   window.shareTextFor = function (d) {
@@ -587,14 +649,12 @@
     if (a && typeof gtag === 'function') gtag('event', 'shop_click', { shop: a.getAttribute('data-shop-id'), page: 'cultivar' });
   });
 
-  /* colophon line at the foot of the sheet: 収録 · 記録 n 件 · 更新 · 投稿 */
+  /* colophon line at the foot of the sheet: 登録 · 更新 · 投稿 */
   function renderColophonLine(d, entry) {
     var el = document.getElementById('detail-colophon');
     if (!el) return;
     var parts = [];
     if (d.createdAt) parts.push(esc(T('colophon_recorded')) + ' ' + esc(fmtDate(d.createdAt)));
-    var n = window.RecordGate ? window.RecordGate.visibleCount({ origins: entry.origins || [] }) : (entry.origins || []).length;
-    parts.push(esc(T('colophon_records').replace('{n}', n)));
     if (entry._updatedAt && fmtDate(entry._updatedAt) !== fmtDate(d.createdAt || '')) parts.push(esc(T('colophon_updated')) + ' ' + esc(fmtDate(entry._updatedAt)));
     if (entry._posterName && entry._userId) parts.push(esc(T('colophon_poster')) + ' <a href="' + esc(base + 'profile/' + entry._userId) + '" data-nav="profile" data-userid="' + esc(entry._userId) + '">' + esc(entry._posterName) + '</a>');
     el.innerHTML = parts.join('<span class="detail-colophon__sep">·</span>');
@@ -612,7 +672,7 @@
         + '<a href="#add-origin-section" class="sheet__cta" id="gate-cta">' + esc(T('gate_cta')) + '</a></div>';
       el.classList.remove('d-none');
       var cta = document.getElementById('gate-cta');
-      if (cta) cta.addEventListener('click', function (e) { e.preventDefault(); var b = document.getElementById('btn-add-origin'); if (b) { b.scrollIntoView({ behavior: 'smooth', block: 'center' }); } });
+      if (cta) cta.addEventListener('click', function (e) { e.preventDefault(); var b = document.getElementById('detail-add-record-btn'); if (b) b.click(); });
     }
     // Unrecorded pages stay out of the index until they carry a real record
     var robots = document.querySelector('meta[name="robots"]');
@@ -657,12 +717,12 @@
     section.classList.remove('d-none');
   }
   function normParent(p) { return clean(p).replace(/^['"‘’“”]+|['"‘’“”]+$/g, '').toLowerCase().replace(/^(anthurium|monstera|philodendron)\s+/, ''); }
-  function relatedGroupHtml(titleKey, list) {
+  function relatedGroupHtml(titleKey, list, headHtml) {
     if (!list.length) return '';
-    var html = '<div class="related__group"><h3>' + esc(T(titleKey)) + '</h3><ul>';
+    var html = '<div class="related__group"><h3>' + (headHtml || esc(T(titleKey))) + '</h3><ul>';
     list.slice(0, 6).forEach(function (d) {
-      var meta = d.type === 'species' ? joinParts([d.pubYear, d.country]) : joinParts([TYPE_LABEL[d.type] ? (lang() === 'en' ? TYPE_LABEL[d.type][1] : TYPE_LABEL[d.type][0]) : '', d.year]);
-      html += '<li>' + link(d, sciNameHtml(d.displayName)) + (meta ? '<span class="mono">' + esc(meta) + '</span>' : '') + '</li>';
+      var meta = d.type === 'species' && !d.isIndividual ? (d.pubYear || '') : joinParts([kindWord(d), d.namingYear || d.year]);
+      html += '<li>' + link(d, sciNameHtml(d.displayName)) + (meta ? '<span class="num">' + esc(meta) + '</span>' : '') + '</li>';
     });
     return html + '</ul></div>';
   }
@@ -695,8 +755,10 @@
     }
 
     // previous / next within the same genus and the same broad group
+    // quotes and sp./aff./cf. do not decide the order (aff. besseae sits next to besseae)
+    var sortKey = function (x) { return x.displayName.replace(/['"‘’“”]/g, '').replace(/\b(?:sp|aff|cf)\.\s*/g, ''); };
     var group = others.concat([d]).filter(function (x) { return x.genus === d.genus && (x.type === 'seedling') === (d.type === 'seedling'); })
-      .sort(function (a, b) { return a.displayName.localeCompare(b.displayName, undefined, { sensitivity: 'base' }); });
+      .sort(function (a, b) { return sortKey(a).localeCompare(sortKey(b), undefined, { sensitivity: 'base' }); });
     var idx = -1;
     group.forEach(function (x, i) { if (x.fullName === d.fullName) idx = i; });
     var prev = idx > 0 ? group[idx - 1] : null;
@@ -705,7 +767,7 @@
     var html = lineageHtml(d, all, children)
       + '<div class="related__grid">'
       + relatedGroupHtml('related_siblings', siblings)
-      + relatedGroupHtml('related_same_locality', sameCountry)
+      + relatedGroupHtml('related_same_locality', sameCountry, d.country ? '<a href="' + esc(base + 'locality/' + encodeURIComponent(countrySlug(d.country)) + '/') + '" data-nav="locality" data-place="' + esc(countrySlug(d.country)) + '">' + esc(T('related_same_locality_n').replace('{country}', countryLabel(d.country)).replace('{n}', sameCountry.length)) + ' →</a>' : '')
       + relatedGroupHtml('related_same_person', samePerson)
       + '</div>';
     if (prev || next) {
@@ -714,11 +776,8 @@
       if (next) html += link(next, '<span class="mono">' + esc(T('related_next')) + ' →</span><span class="related__nav-name">' + sciNameHtml(next.displayName) + '</span>', 'related__nav--next');
       html += '</nav>';
     }
-    // exit line: back into the archive (ledger, timeline, same locality)
-    var exits = ['<a href="' + esc(base + d.genus.toLowerCase() + '/') + '" data-nav="genus" data-genus="' + esc(d.genus.toLowerCase()) + '">' + esc(T('related_exit_ledger').replace('{genus}', d.genus)) + '</a>',
-      '<a href="' + esc(base) + '#archive-timeline" data-nav="top" data-scroll="archive-timeline">' + esc(T('related_exit_timeline')) + '</a>'];
-    if (d.country) exits.push('<a href="' + esc(base + 'locality/' + encodeURIComponent(countrySlug(d.country))) + '" data-nav="locality" data-place="' + esc(countrySlug(d.country)) + '">' + esc(T('related_exit_locality').replace('{country}', d.country)) + '</a>');
-    html += '<p class="related__exit mono">' + exits.join('<span class="related__exit-sep">·</span>') + '</p>';
+    // exit: back to the genus list (same locality is the heading above)
+    html += '<p class="related__exit"><a href="' + esc(base + d.genus.toLowerCase() + '/') + '" data-nav="genus" data-genus="' + esc(d.genus.toLowerCase()) + '">' + esc(T('related_exit_ledger').replace('{genus}', d.genus)) + '</a></p>';
     // the exit line alone is reason enough to show the section
     el.innerHTML = html;
     section.classList.remove('d-none');
@@ -728,16 +787,14 @@
     var d = typeof name === 'object' ? name : findByEpithet(all, name);
     var label = d ? d.displayName : clean(name);
     if (!label) label = T('lineage_unknown');
-    var inner = '<span class="lineage__name">' + esc(label) + '</span>';
+    var inner = '<span class="lineage__name">' + sciNameHtml(label) + '</span>';
     // A parent that is only a name: invite the reader to record it
     if (!d && label !== T('lineage_unknown')) {
-      inner += '<span class="lineage__meta mono">' + esc(T('lineage_missing')) + '</span>'
+      inner += '<span class="lineage__meta">' + esc(T('lineage_missing')) + '</span>'
         + '<a class="lineage__add" href="' + esc(base + 'contribute') + '" data-nav="contribute" data-prefill="' + esc(label) + '">' + esc(T('lineage_add_parent')) + '</a>';
     }
     if (d) {
-      var meta = d.type === 'species' ? joinParts([d.pubYear, d.country]) : joinParts([TYPE_LABEL[d.type] ? (lang() === 'en' ? TYPE_LABEL[d.type][1] : TYPE_LABEL[d.type][0]) : '', d.year]);
-      if (meta) inner += '<span class="lineage__meta mono">' + esc(meta) + '</span>';
-      if (d.type !== 'species' && (d.parentA || d.parentB)) inner += '<span class="lineage__sub">' + esc(clean(d.parentA) || T('lineage_unknown')) + ' × ' + esc(clean(d.parentB) || T('lineage_unknown')) + '</span>';
+      inner += '<span class="lineage__meta">' + esc(kindWord(d)) + '</span>';
     }
     var cls = 'lineage__node' + (extraClass ? ' ' + extraClass : '') + (d ? '' : ' lineage__node--text');
     return d && !extraClass ? link(d, inner, cls) : '<div class="' + cls + '">' + inner + '</div>';
@@ -745,7 +802,7 @@
   function lineageHtml(d, all, children) {
     var hasParents = d.type !== 'species' && (d.parentA || d.parentB);
     if (!hasParents && !children.length) return '';
-    var html = '<div class="lineage"><h3 class="lineage__title mono">' + esc(T('lineage_title')) + '</h3>';
+    var html = '<div class="lineage"><h3 class="lineage__title">' + esc(T('lineage_title')) + '</h3>';
     if (hasParents) {
       html += '<div class="lineage__row lineage__row--parents">' + lineageNode(all, d.parentA) + '<span class="lineage__x">×</span>' + lineageNode(all, d.parentB) + '</div>';
       html += '<div class="lineage__joint lineage__joint--down"></div>';
@@ -842,7 +899,7 @@
     var sorted = p.entries.slice().sort(function (a, b) { return (a.year || 9999) - (b.year || 9999) || a.displayName.localeCompare(b.displayName); });
     var thumbs = {};
     sorted.forEach(function (d) { var u = (typeof _thumbMap !== 'undefined') ? _thumbMap[d.displayName] : null; if (u) thumbs[d.displayName] = u; });
-    window.renderEntriesLedger(document.getElementById('people-ledger'), toLedgerItems(sorted), thumbs);
+    window.renderEntriesLedger(document.getElementById('people-ledger'), toLedgerItems(sorted), thumbs, { noPerson: true });
     if (typeof updateMeta === 'function') {
       setTimeout(function () {
         updateMeta({ title: personLabel(p) + ' — ' + T('people_entries') + ' ' + p.entries.length + ' | Aroid Origins', description: p.key + ': ' + rolesLine(p).replace(/<[^>]+>/g, '') + (years.length ? ' (' + Math.min.apply(null, years) + '–' + Math.max.apply(null, years) + ')' : ''), path: 'people/' + encodeURIComponent(p.slug) });
@@ -893,7 +950,7 @@
     var sorted = g.items.slice().sort(function (a, b) { return (a.pubYear || 9999) - (b.pubYear || 9999) || a.displayName.localeCompare(b.displayName); });
     var thumbs = {};
     sorted.forEach(function (d) { var u = (typeof _thumbMap !== 'undefined') ? _thumbMap[d.displayName] : null; if (u) thumbs[d.displayName] = u; });
-    window.renderEntriesLedger(document.getElementById('locality-ledger'), toLedgerItems(sorted), thumbs);
+    window.renderEntriesLedger(document.getElementById('locality-ledger'), toLedgerItems(sorted), thumbs, { noCountry: true });
     if (typeof updateMeta === 'function') {
       setTimeout(function () {
         updateMeta({ title: g.key + ' — ' + T('locality_species') + ' ' + g.items.length + ' | Aroid Origins', description: g.key + ' をタイプ産地とするアロイド原種 ' + g.items.length + '種: ' + sorted.slice(0, 6).map(function (d) { return d.displayName; }).join('、'), path: 'locality/' + encodeURIComponent(countrySlug(g.key)) });
@@ -1098,7 +1155,7 @@
      GLOSSARY: link the first mention of each term inside origin text
      ============================================================ */
   var GLOSSARY_TERMS = [
-    ['管理番号', 'g-code'], ['未収録', 'g-unrecorded'], ['AI 下書き', 'g-draft'], ['系統', 'g-line'],
+    ['管理番号', 'g-code'], ['記録不足', 'g-unrecorded'], ['AI 下書き', 'g-draft'], ['系統', 'g-line'],
     ['ソマクローナル変異', 'g-tc'], ['組織培養', 'g-tc'], ['タイプ標本', 'g-type-locality'], ['タイプ産地', 'g-type-locality'],
     ['産地フォーム', 'g-ecotype'], ['エコタイプ', 'g-ecotype'], ['原記載', 'g-kisai'], ['記載者', 'g-kisaisha'], ['採集者', 'g-saishusha'],
     ['シノニム', 'g-synonym'], ['異名', 'g-synonym'], ['旧綴り', 'g-synonym'], ['交配式', 'g-formula'], ['選抜個体', 'g-original'],

@@ -1457,15 +1457,16 @@ if (false) {
       html += '<div class="genus-content" id="genus-' + g.slug + '"' + display + '>';
       html += '<nav class="breadcrumb mb-sm" aria-label="パンくずリスト"><a href="' + _basePath + '" data-nav="top">Home</a><span class="breadcrumb__sep">/</span><span>' + escHtml(g.name) + '</span></nav>';
       html += '<h1 class="section-title">' + g.name + '</h1>';
+      html += '<p class="genus-lead">' + escHtml(t('genus_lead').replace('{genus}', g.name)) + '</p>';
       html += '<div class="genus-stats" id="genus-stats-' + g.slug + '" style="display:none;">';
       html += '<div class="genus-stats__chips"></div>';
       html += '</div>';
-      html += '<p class="text-muted mb-lg">' + t('loading') + '</p>';
+      html += '<p class="text-muted mb-lg genus-hits"></p>'; // search hits only; the count is the stats line
 
       if (g.has_seedlings) {
         // Pattern 1: with seedlings tab
         html += '<div class="genus-tabs" id="genus-tabs-' + g.slug + '">';
-        html += '<button class="genus-tab active" data-tab="species-clones" data-i18n="tab_species_clones">収録品種</button>';
+        html += '<button class="genus-tab active" data-tab="species-clones" data-i18n="tab_species_clones">品種</button>';
         html += '<button class="genus-tab" data-tab="seedlings" data-i18n="tab_seedlings">実生ノート</button>';
         html += '</div>';
       }
@@ -1482,13 +1483,18 @@ if (false) {
       html += '<button type="button" class="chip" aria-pressed="false" data-sort="trust" data-i18n="sort_trust">信頼度順</button>';
       html += '<button type="button" class="chip" aria-pressed="false" data-sort="newest" data-i18n="sort_newest">新着順</button>';
       html += '</div>';
+      // phones: the two rows of chips become two selects on one line (the chips stay as the state the list reads)
+      html += '<div class="sort-selects">';
+      html += '<select class="sort-select" aria-label="' + escHtml(t('sort_label')) + '"><option value="name" data-i18n="sort_name">名前順</option><option value="trust" data-i18n="sort_trust">信頼度順</option><option value="newest" data-i18n="sort_newest">新着順</option></select>';
+      html += '<select class="filter-select" aria-label="' + escHtml(t('filter_label')) + '"><option value="all" data-i18n="filter_all_type">すべて</option><option value="species" data-i18n="filter_species">原種</option><option value="hybrid" data-i18n="filter_hybrid">Hybrid</option><option value="clone" data-i18n="filter_clone">Clone</option></select>';
+      html += '</div>';
       html += '<div class="chips filter-chips">';
       html += '<button type="button" class="chip filter-chip active" aria-pressed="true" data-filter-type="all" data-i18n="filter_all_type">すべて</button>';
       html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="species" data-i18n="filter_species">原種</button>';
       html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="hybrid" data-i18n="filter_hybrid">Hybrid</button>';
       html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="clone" data-i18n="filter_clone">Clone</button>';
       html += '</div>';
-      html += '<a href="#" class="btn btn--primary btn--sm" data-nav="contribute" data-genus="' + g.name + '" data-i18n="add_cultivar" class="btn--ml-auto">+ 品種を追加</a>';
+      html += '<a href="#" class="genus-add-link" data-nav="contribute" data-genus="' + g.name + '" data-i18n="add_cultivar">品種を追加</a>';
       html += '</div>';
 
       html += '<div class="card card--no-pad"></div>';
@@ -2554,6 +2560,18 @@ if (false) {
     var thumbContent = thumbPath
       ? '<img data-src="' + (window.galleryImg ? window.galleryImg(thumbPath, 160) : (window._SUPABASE_URL || '') + '/storage/v1/object/public/gallery-images/' + thumbPath) + '" class="thumb-img" alt="' + escHtml(displayName) + '" width="60" height="60" decoding="async">'
       : '<span class="thumb-mono" aria-hidden="true">' + escHtml((displayName.split(' ').slice(1).join(' ').replace(/[^A-Za-z]/g, '').charAt(0) || displayName.charAt(0)).toLowerCase()) + '</span>';
+    // Named entries use the shared list line (archive.js entryParts): name / kind · person · year · country, one state
+    var parts = (!isSeedling && window.entryParts) ? window.entryParts(fullName, entry, meta.type) : null;
+    if (parts) {
+      var nInd0 = 0;
+      if (meta.type === 'species' && entry._id) Object.keys(cultivarData).forEach(function(k) { if (cultivarData[k]._selectedFrom === entry._id) nInd0++; });
+      h += '<div class="cultivar-row__thumb' + (thumbPath ? '' : ' entry__thumb--empty') + '">' + (thumbPath ? thumbContent : '') + '</div>';
+      h += '<div class="cultivar-row__info"><div class="cultivar-row__name entry__name" data-key="' + escHtml(fullName) + '">' + sciNameHtml(displayName)
+        + ((entry._isPrivate || meta.is_private) ? ' <span class="badge badge--private">' + t('private_badge') + '</span>' : '') + '</div>'
+        + '<div class="entry__sub">' + parts.sub + (nInd0 ? ' · ' + escHtml(t('individuals_count').replace('{n}', nInd0)) : '') + '</div></div>'
+        + parts.state + '</div>';
+      return h;
+    }
     h += '<div class="cultivar-row__thumb' + (locked ? ' seedling-thumb--locked' : '') + '">' + thumbContent + '</div>';
     h += '<div class="cultivar-row__info">';
     h += '<div class="cultivar-row__name" data-key="' + escHtml(fullName) + '">' + sciNameHtml(displayName) + '</div>';
@@ -2619,6 +2637,7 @@ if (false) {
     // same count as the top page: 収録 = recorded entries, no seedlings, no individuals
     var items = (_genusItems[slug] || []).filter(function(it) { return it.meta.type !== 'seedling' && !isIndividualItem(it) && recordStateOf(it.fullName, it.entry, it.meta) === 'ok'; });
     if (items.length === 0) { statsEl.style.display = 'none'; return; }
+    var short = (_genusItems[slug] || []).filter(function(it) { return it.meta.type !== 'seedling' && !isIndividualItem(it) && recordStateOf(it.fullName, it.entry, it.meta) === 'unrecorded'; }).length;
 
     var speciesCount = 0, hybridCount = 0, cloneCount = 0;
     items.forEach(function(it) {
@@ -2631,10 +2650,12 @@ if (false) {
     var chipsEl = statsEl.querySelector('.genus-stats__chips');
     if (chipsEl) {
       var en = currentLang === 'en';
-      var html = '<span class="genus-stat-chip">' + (en ? 'Recorded ' : '収録 ') + items.length + '</span>';
-      if (speciesCount > 0) html += '<span class="genus-stat-chip genus-stat-chip--species">' + (en ? 'Species ' : '原種 ') + speciesCount + '</span>';
-      if (hybridCount > 0) html += '<span class="genus-stat-chip genus-stat-chip--hybrid">Hybrid ' + hybridCount + '</span>';
-      if (cloneCount > 0) html += '<span class="genus-stat-chip genus-stat-chip--clone">Clone ' + cloneCount + '</span>';
+      // one line: 収録 40 品種 · 原種 32 · Hybrid 3 · Clone 5 · 記録不足 1
+      var html = '<span class="genus-stat-chip">' + (en ? 'Recorded ' : '収録 ') + '<b>' + items.length + '</b>' + (en ? '' : ' 品種') + '</span>';
+      if (speciesCount > 0) html += '<span class="genus-stat-chip">' + (en ? 'Species ' : '原種 ') + speciesCount + '</span>';
+      if (hybridCount > 0) html += '<span class="genus-stat-chip">Hybrid ' + hybridCount + '</span>';
+      if (cloneCount > 0) html += '<span class="genus-stat-chip">Clone ' + cloneCount + '</span>';
+      if (short > 0) html += '<span class="genus-stat-chip">' + (en ? 'Short of a record ' : '記録不足 ') + short + '</span>';
       chipsEl.innerHTML = html;
     }
     statsEl.style.display = '';
@@ -2964,3 +2985,13 @@ if (false) {
     startApp();
   }
 })();
+
+// T65: the genus list's two selects press the matching (hidden) chip, so sorting and filtering keep one code path
+document.addEventListener('change', function(e) {
+  var sel = e.target;
+  if (!sel || !sel.matches || !sel.matches('.sort-select, .filter-select')) return;
+  var bar = sel.closest('.sort-bar');
+  if (!bar) return;
+  var chip = sel.classList.contains('sort-select') ? bar.querySelector('.chip[data-sort="' + sel.value + '"]') : bar.querySelector('.chip[data-filter-type="' + sel.value + '"]');
+  if (chip) chip.click();
+});

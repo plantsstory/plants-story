@@ -20,8 +20,8 @@
     "en": "Philodendron"
   },
   "nav_home": {
-    "jp": "Home",
-    "en": "Home"
+    "jp": "トップ",
+    "en": "Top"
   },
   "nav_search": {
     "jp": "Search",
@@ -136,8 +136,8 @@
     "en": "Clone"
   },
   "add_cultivar": {
-    "jp": "+ 品種を追加",
-    "en": "+ Add Cultivar"
+    "jp": "品種を追加",
+    "en": "Add an entry"
   },
   "edit": {
     "jp": "✏️ 編集",
@@ -156,8 +156,8 @@
     "en": "Upload Image"
   },
   "image_policy": {
-    "jp": "栽培者本人の写真のみ · 権利や内容の問題は「報告」から",
-    "en": "Growers' own photos only · rights or content issues: use Report"
+    "jp": "権利や内容の問題は「報告」から",
+    "en": "Rights or content issues: use Report"
   },
   "origins": {
     "jp": "由来の記録",
@@ -301,7 +301,7 @@
     "en": "All"
   },
   "footer_about": {
-    "jp": "About",
+    "jp": "この図鑑について",
     "en": "About"
   },
   "footer_guide": {
@@ -509,8 +509,8 @@
     "en": "Terms of Service"
   },
   "terms_updated": {
-    "jp": "最終更新日: 2026年10月3日",
-    "en": "Last updated: October 3, 2026"
+    "jp": "最終更新 2026.10.03",
+    "en": "Last updated 2026.10.03"
   },
   "terms_1_title": {
     "jp": "第1条 適用範囲",
@@ -645,8 +645,8 @@
     "en": "Privacy Policy"
   },
   "privacy_updated": {
-    "jp": "最終更新日: 2026年10月3日",
-    "en": "Last updated: October 3, 2026"
+    "jp": "最終更新 2026.10.03",
+    "en": "Last updated 2026.10.03"
   },
   "privacy_1_title": {
     "jp": "1. はじめに",
@@ -761,8 +761,8 @@
     "en": "Specified Commercial Transactions Act"
   },
   "tokushoho_updated": {
-    "jp": "最終更新日: 2026年10月3日",
-    "en": "Last updated: October 3, 2026"
+    "jp": "最終更新 2026.10.03",
+    "en": "Last updated 2026.10.03"
   },
   "tokushoho_seller_label": {
     "jp": "販売業者",
@@ -1133,8 +1133,8 @@
     "en": "No publication years recorded yet"
   },
   "ledger_all": {
-    "jp": "台帳をすべて見る →",
-    "en": "See the full ledger →"
+    "jp": "一覧をすべて見る →",
+    "en": "See the full list →"
   },
   "ledger_no": {
     "jp": "No.",
@@ -1253,8 +1253,8 @@
     "en": "Named by"
   },
   "spec_year": {
-    "jp": "年",
-    "en": "Year"
+    "jp": "命名年",
+    "en": "Year named"
   },
   "spec_parents": {
     "jp": "交配式",
@@ -1273,7 +1273,7 @@
     "en": "named by"
   },
   "entries_unit": {
-    "jp": "種",
+    "jp": "品種",
     "en": "entries"
   },
   "countries_unit": {
@@ -1285,8 +1285,8 @@
     "en": "Parents"
   },
   "tab_species_clones": {
-    "jp": "収録品種",
-    "en": "Species & Cultivars"
+    "jp": "品種",
+    "en": "Entries"
   },
   "tab_seedlings": {
     "jp": "実生ノート",
@@ -1513,19 +1513,19 @@
     "en": "Search by scientific name, cultivar name or katakana. If it is not here yet, ask for it or record it yourself."
   },
   "state_unrecorded": {
-    "jp": "未収録",
-    "en": "Unrecorded"
+    "jp": "記録不足",
+    "en": "Short of a record"
   },
   "state_researching": {
     "jp": "調査中",
     "en": "Researching"
   },
   "new_entries_title": {
-    "jp": "新着記録",
+    "jp": "新着の品種",
     "en": "New entries"
   },
   "new_entries_week": {
-    "jp": "今週 +{n} 件",
+    "jp": "今週 +{n}",
     "en": "+{n} this week"
   },
   "colophon_cta": {
@@ -1533,12 +1533,12 @@
     "en": "Put your cross on the lineage tree →"
   },
   "lineage_add_parent": {
-    "jp": "登録する →",
-    "en": "Add this entry →"
+    "jp": "品種を追加 →",
+    "en": "Add it →"
   },
   "lineage_missing": {
-    "jp": "未収録",
-    "en": "Not recorded"
+    "jp": "未登録",
+    "en": "Not in the list"
   },
   "ledger_date": {
     "jp": "日付",
@@ -1625,7 +1625,7 @@
     "en": "Individual"
   },
   "spec_selected_from": {
-    "jp": "原種",
+    "jp": "種",
     "en": "Species"
   },
   "individual_form_title": {
@@ -1685,7 +1685,7 @@
     "en": "No record"
   },
   "state_ok": {
-    "jp": "収録済み",
+    "jp": "記録あり",
     "en": "Recorded"
   },
   "draft_label": {
@@ -1693,8 +1693,8 @@
     "en": "AI draft (unverified, trust {n}%) — open"
   },
   "gate_title_unrecorded": {
-    "jp": "記録未収録",
-    "en": "Not yet recorded"
+    "jp": "記録不足",
+    "en": "Short of a record"
   },
   "gate_title_researching": {
     "jp": "AI 調査中",
@@ -1713,8 +1713,8 @@
     "en": "The name is registered, but no origin record can be shown yet."
   },
   "gate_cta": {
-    "jp": "記録を追加する →",
-    "en": "Add a record →"
+    "jp": "記録を追加",
+    "en": "Add a record"
   },
   "gate_missing_record": {
     "jp": "出典のある記録",
@@ -1725,8 +1725,8 @@
     "en": "author"
   },
   "gate_missing_year": {
-    "jp": "記載年",
-    "en": "year"
+    "jp": "発表年",
+    "en": "Year published"
   },
   "gate_missing_place": {
     "jp": "タイプ産地または分布",
@@ -1797,8 +1797,8 @@
     "en": "Enter at least 3 characters"
   },
   "share_band_title": {
-    "jp": "収録しました · この台紙を共有",
-    "en": "Recorded · share this sheet"
+    "jp": "登録しました · このページを共有",
+    "en": "Saved · share this page"
   },
   "share_band_copy": {
     "jp": "共有文をコピー",
@@ -1853,8 +1853,8 @@
     "en": "Report"
   },
   "record_add_link": {
-    "jp": "この台紙に書き足す →",
-    "en": "Write on this sheet →"
+    "jp": "記録を追加",
+    "en": "Add a record"
   },
   "record_add_details": {
     "jp": "項目を分けて書く（記載者 · 年 · 産地 · 交配式）",
@@ -1865,20 +1865,20 @@
     "en": "The record"
   },
   "plate_empty": {
-    "jp": "図版未収録",
-    "en": "No plate yet"
+    "jp": "写真なし",
+    "en": "No photo"
   },
   "plate_empty_note": {
     "jp": "栽培者本人の写真を1枚。撮影者名を添えて。",
     "en": "One photo by the grower, with the photographer named."
   },
   "plate_empty_cta": {
-    "jp": "写真を追加する →",
-    "en": "Add a photo →"
+    "jp": "写真を追加",
+    "en": "Add a photo"
   },
   "related_exit_ledger": {
-    "jp": "{genus} の台帳 →",
-    "en": "{genus} ledger →"
+    "jp": "{genus} の一覧 →",
+    "en": "All {genus} entries →"
   },
   "related_exit_timeline": {
     "jp": "記載史年表 →",
@@ -1889,8 +1889,8 @@
     "en": "Same locality: {country} →"
   },
   "colophon_recorded": {
-    "jp": "収録",
-    "en": "Recorded"
+    "jp": "登録",
+    "en": "Added"
   },
   "colophon_records": {
     "jp": "記録 {n} 件",
@@ -1961,8 +1961,8 @@
     "en": "Tool"
   },
   "tools_col_genre": {
-    "jp": "ジャンル",
-    "en": "Genre"
+    "jp": "部門",
+    "en": "Department"
   },
   "tools_col_maker": {
     "jp": "メーカー · 型番",
@@ -1985,8 +1985,8 @@
     "en": "ITEMS"
   },
   "tools_exit": {
-    "jp": "Anthurium の台帳 →",
-    "en": "Anthurium ledger →"
+    "jp": "Anthurium の一覧 →",
+    "en": "All Anthurium entries →"
   },
   "tools_exit_locality": {
     "jp": "産地索引 →",
@@ -2025,8 +2025,8 @@
     "en": "Image: Rakuten product image"
   },
   "tools_k_genre": {
-    "jp": "ジャンル",
-    "en": "Genre"
+    "jp": "部門",
+    "en": "Department"
   },
   "tools_k_maker": {
     "jp": "メーカー",
@@ -2045,8 +2045,8 @@
     "en": "Price band"
   },
   "tools_k_recorded": {
-    "jp": "収録",
-    "en": "Recorded"
+    "jp": "掲載",
+    "en": "Listed"
   },
   "tools_k_updated": {
     "jp": "更新",
@@ -2109,8 +2109,8 @@
     "en": "Selected from"
   },
   "unrecorded_title": {
-    "jp": "この名前は未収録です",
-    "en": "This name is not recorded"
+    "jp": "この名前はまだ登録されていません",
+    "en": "This name is not in the list yet"
   },
   "unrecorded_note": {
     "jp": "この名前の記録はまだありません。綴りを変えて探すか、検索結果から収録を依頼できます。",
@@ -2121,16 +2121,16 @@
     "en": "Search this name →"
   },
   "unrecorded_ledger": {
-    "jp": "Anthurium の台帳 →",
-    "en": "Anthurium ledger →"
+    "jp": "Anthurium の一覧 →",
+    "en": "All Anthurium entries →"
   },
   "notfound_title": {
     "jp": "ページが見つかりません",
     "en": "Page not found"
   },
   "notfound_note": {
-    "jp": "この URL のページはありません。品種名で探すか、台帳から選んでください。",
-    "en": "There is no page at this address. Search by name or pick from the ledger."
+    "jp": "この URL のページはありません。品種名で探すか、一覧から選んでください。",
+    "en": "There is no page at this URL. Search by name or pick one from the list."
   },
   "notfound_search": {
     "jp": "品種名で検索 →",
@@ -2251,5 +2251,49 @@
   "tokushoho_price_link": {
     "jp": "料金とサービス内容",
     "en": "Pricing"
+  },
+  "kind_species": {
+    "jp": "原種",
+    "en": "Species"
+  },
+  "kind_undescribed": {
+    "jp": "未記載",
+    "en": "Undescribed"
+  },
+  "kind_individual": {
+    "jp": "個体",
+    "en": "Individual"
+  },
+  "kind_seedling": {
+    "jp": "実生",
+    "en": "Seedling"
+  },
+  "stats_recorded": {
+    "jp": "収録",
+    "en": "Recorded"
+  },
+  "timeline_open": {
+    "jp": "年表を開く",
+    "en": "Open the timeline"
+  },
+  "genus_lead": {
+    "jp": "{genus} の原種・Hybrid・Clone。名前を開くと、誰が・いつ・どこで名付けたかを出典つきで読めます。",
+    "en": "{genus} species, hybrids and clones. Open a name to read who named it, when and where, with sources."
+  },
+  "sort_label": {
+    "jp": "並び順",
+    "en": "Sort"
+  },
+  "filter_label": {
+    "jp": "区分",
+    "en": "Kind"
+  },
+  "spec_locality_habitat": {
+    "jp": "タイプ産地・分布",
+    "en": "Type locality and range"
+  },
+  "related_same_locality_n": {
+    "jp": "同じ産地（{country}）の原種 {n}",
+    "en": "Species from {country} ({n})"
   }
 }

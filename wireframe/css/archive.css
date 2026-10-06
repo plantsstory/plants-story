@@ -1273,3 +1273,80 @@ h2.section-title, .legal-page h2, .section-heading, h2.text-lg.font-bold {
   .specimen__k { margin: 0; }
   .mobile-nav a { padding-left: var(--s3) !important; padding-right: var(--s3) !important; }
 }
+
+/* -- T62: one list line for every list (new entries, people, places, genus list) -- */
+.entries { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--color-rule); }
+.entry { border-bottom: 1px solid var(--color-rule); }
+.entry__link { display: flex; align-items: center; gap: var(--s3); min-height: 64px; padding: var(--s2) 0; color: var(--color-ink); text-decoration: none; }
+.entry__link:hover .entry__name, .cultivar-row:hover .entry__name { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+.entry__thumb { flex: 0 0 48px; width: 48px; height: 48px; overflow: hidden; background: var(--color-paper-2); }
+.entry__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.entry__thumb--empty, .genus-content .cultivar-row__thumb.entry__thumb--empty { border: 1px dashed var(--color-rule-strong); background: transparent; }
+.entry__main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.entry__name, .genus-content .entry__name { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-h3); line-height: 1.3; margin: 0; overflow-wrap: anywhere; }
+.entry__sub { font-family: var(--font-primary); font-size: var(--fs-small); color: var(--color-mid); line-height: 1.5; font-variant-numeric: lining-nums tabular-nums; }
+.entry__sub .year { color: var(--color-accent-warm); font-family: inherit; }
+.entry__state { flex: 0 0 auto; margin-left: auto; align-self: flex-start; padding-top: 3px; font-family: var(--font-primary); font-size: var(--fs-small); color: var(--color-mid); text-align: right; white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
+.entry__state--pct { color: var(--color-ink); font-weight: 500; }
+.entry__state .verified-mark { color: var(--color-primary); margin: 0; }
+.cultivar-row:has(.entry__sub) { display: flex; align-items: center; gap: var(--s3); padding: var(--s2) 0; min-height: 64px; }
+.cultivar-row:has(.entry__sub) .cultivar-row__info { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.cultivar-row:has(.entry__sub) .cultivar-row__thumb { flex: 0 0 48px; width: 48px; height: 48px; }
+
+/* -- T63: top page — one stats line, then today's leaf, new entries, index, timeline (folded on phones) -- */
+.masthead { grid-template-areas: none !important; grid-template-columns: 1fr !important; border-bottom: 0; padding-bottom: 0; }
+.masthead__stats { margin: var(--s3) 0 0; font-family: var(--font-primary); font-size: var(--fs-small); color: var(--color-mid); font-variant-numeric: lining-nums tabular-nums; }
+.masthead__stats .num { color: var(--color-ink); font-weight: 500; }
+.front-new { margin-top: var(--s5); }
+.front-new .section-title { margin-top: 0; }
+.front-new__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--s3); margin: var(--s2) 0 0; font-size: var(--fs-small); color: var(--color-mid); }
+.front-new__foot #ledger-all-link { margin-left: auto; }
+.timeline__fold > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; min-height: var(--tap); font-size: 0.9375rem; font-weight: 500; color: var(--color-ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
+.timeline__fold > summary::-webkit-details-marker { display: none; }
+.timeline__fold[open] > summary { display: none; }
+.timeline__decade .mono, .timeline__decade .num { color: var(--color-mid); }
+.timeline__decade > .mono { color: var(--color-accent-warm); }
+@media (max-width: 899px) {
+  /* phones: today's leaf → new entries → index → timeline → about */
+  #page-top > .container { display: flex; flex-direction: column; }
+  #page-top .front { display: contents; }
+  #page-top .masthead { order: 0; }
+  #page-top .story { order: 1; margin-top: var(--s4); }
+  #page-top .front-new { order: 2; }
+  #page-top .index { order: 3; margin-top: var(--s5); }
+  #page-top .timeline { order: 4; }
+  #page-top .colophon { order: 5; }
+}
+.front-new__foot #new-entries-count { color: var(--color-mid); }
+.masthead { padding-top: var(--s4); }
+
+/* -- T64: plant page — one entrance to add a record (the action row), record head in the sans -- */
+#add-origin-toggle { display: none !important; }
+.record__head { font-family: var(--font-primary); font-size: var(--fs-small); color: var(--color-mid); letter-spacing: 0.02em; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px var(--s2); }
+.record__head .record__trust { color: var(--color-ink); font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
+.record__head .record__rank { color: var(--color-ink); font-weight: 600; }
+.detail-standard { font-family: var(--font-primary); font-size: var(--fs-small); color: var(--color-mid); letter-spacing: 0.02em; margin-bottom: var(--s1); }
+.specimen__cell--verify .verified-mark { color: var(--color-primary); }
+.specimen__note { font-size: var(--fs-small); margin-top: var(--s2); }
+.lineage__title { font-family: var(--font-primary); font-size: var(--fs-small); color: var(--color-mid); font-weight: 500; }
+.lineage__meta { font-family: var(--font-primary); font-size: var(--fs-label); color: var(--color-mid); }
+.related__group li .num { margin-left: var(--s2); color: var(--color-mid); font-size: var(--fs-label); }
+.plate-policy { font-family: var(--font-primary); font-size: var(--fs-label); }
+
+/* -- T65: genus list header — lead, one count line, one tab row, two selects, add as a text link -- */
+.genus-lead { font-size: var(--fs-small); color: var(--color-mid); margin: 0 0 var(--s2); max-width: 36em; }
+.genus-stats { margin: 0 0 var(--s3); }
+.genus-stats__chips { display: flex; flex-wrap: wrap; gap: 0 var(--s2); }
+.genus-stat-chip, .genus-stat-chip--species, .genus-stat-chip--hybrid, .genus-stat-chip--clone { font-family: var(--font-primary) !important; font-size: var(--fs-small) !important; color: var(--color-mid) !important; border: 0 !important; padding: 0 !important; background: none !important; letter-spacing: 0.02em; }
+.genus-stat-chip b { color: var(--color-ink); font-weight: 600; }
+.genus-stat-chip + .genus-stat-chip::before { content: '·'; margin-right: var(--s2); color: var(--color-mid); }
+.genus-hits:empty { display: none; }
+.genus-content .sort-bar .chips { display: none; }
+.sort-selects { display: flex; gap: var(--s2); flex-wrap: wrap; }
+.sort-select, .filter-select { min-height: var(--tap); padding: 0 32px 0 12px; border: 1px solid var(--color-rule-strong); border-radius: var(--radius-sm); background: var(--color-paper-2); color: var(--color-ink); font-family: var(--font-primary); font-size: 0.9375rem; }
+.genus-add-link { display: inline-flex; align-items: center; min-height: var(--tap); font-size: 0.9375rem; font-weight: 500; color: var(--color-ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; margin-left: auto; }
+.genus-content .sort-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s3); margin-bottom: var(--s3); }
+.genus-content .sort-bar .search-bar { flex: 1 1 100%; max-width: none; }
+.genus-stat-chip b { margin: 0 0.25em; }
+.genus-content .sort-bar { justify-content: flex-start; }
+@media (max-width: 640px) { .specimen__cell, .specimen__cell:nth-child(n), .specimen__cell:first-child { grid-template-columns: 6.5em 1fr; } }

@@ -40,10 +40,10 @@
     tools_view: '{shop}で見る',
     tools_plate_none: '図版なし',
     tools_k_genre: '部門', tools_k_maker: 'メーカー', tools_k_model: '型番', tools_k_spec: '規格・容量', tools_k_price: '価格帯',
-    tools_k_recorded: '収録', tools_k_updated: '更新',
+    tools_k_recorded: '掲載', tools_k_updated: '更新',
     tools_colophon_note: '価格と在庫は各ストアの表示が最新です',
     tools_not_found: 'この道具は見つかりませんでした。',
-    tools_exit: 'Anthurium の台帳 →'
+    tools_exit: 'Anthurium の一覧 →'
   };
   function T(k) { var v = (typeof t === 'function') ? t(k) : k; return (v && v !== k) ? v : (JP[k] || k); }
   function en() { return typeof currentLang !== 'undefined' && currentLang === 'en'; }

@@ -64,7 +64,11 @@ function staticEntryHtml(c, ctx) {
   if (text.length > 220) text = text.slice(0, 219) + '…';
   const aliases = (c.aliases || []).filter(a => /[A-Za-z]/.test(a)).slice(0, 3);
   let h = '<article id="static-entry" class="container static-entry">';
-  h += '<p class="mono detail-standard">' + escAttr((c.genus || 'Anthurium').toUpperCase() + ' · ' + (TYPE_JP[type] || '')) + '</p>';
+  // the line above the title: the kind only (BOARD 10-07), same words as the page
+  const q = String(c.species_qualifier || '').toLowerCase().replace(/\./g, '');
+  const undescribed = type === 'species' && (q === 'sp' || q === 'aff' || q === 'cf' || (s.species_status && s.species_status !== 'described'));
+  const kind = (c.tags || []).indexOf('individual') !== -1 ? '個体' : undescribed ? '未記載' : (TYPE_JP[type] || '');
+  h += '<p class="detail-standard">' + escAttr(kind) + '</p>';
   h += '<h1 class="detail-title">' + sciHtml(c.cultivar_name) + '</h1>';
   if (cite) h += '<p class="mono static-entry__cite">' + escAttr(cite) + '</p>';
   if (aliases.length) h += '<p class="static-entry__aliases">別名: ' + escAttr(aliases.join(' / ')) + '</p>';

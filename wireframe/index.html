@@ -14,8 +14,8 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.yahoo.co.jp https://i.moshimo.com; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJK72JH471"></script>
-  <script src="js/textsize.js?v=20261007a"></script>
-  <script src="js/gtag-init.js?v=20261007a"></script>
+  <script src="js/textsize.js?v=20261007e"></script>
+  <script src="js/gtag-init.js?v=20261007e"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -54,13 +54,13 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20261007a">
-  <link rel="stylesheet" href="css/reset.css?v=20261007a">
-  <link rel="stylesheet" href="css/layout.css?v=20261007a">
-  <link rel="stylesheet" href="css/components.css?v=20261007a">
-  <link rel="stylesheet" href="css/pages.css?v=20261007a">
-  <link rel="stylesheet" href="css/utilities.css?v=20261007a">
-  <link rel="stylesheet" href="css/archive.css?v=20261007a">
+  <link rel="stylesheet" href="css/variables.css?v=20261007e">
+  <link rel="stylesheet" href="css/reset.css?v=20261007e">
+  <link rel="stylesheet" href="css/layout.css?v=20261007e">
+  <link rel="stylesheet" href="css/components.css?v=20261007e">
+  <link rel="stylesheet" href="css/pages.css?v=20261007e">
+  <link rel="stylesheet" href="css/utilities.css?v=20261007e">
+  <link rel="stylesheet" href="css/archive.css?v=20261007e">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -97,7 +97,7 @@
 
   <!-- Mobile Nav -->
   <nav class="mobile-nav" id="mobileNav" aria-label="モバイルナビゲーション">
-    <a href="#" data-nav="top" data-i18n="nav_home">Home</a>
+    <a href="#" data-nav="top" data-i18n="nav_home">トップ</a>
     <span id="mobile-nav-genera"></span>
     <a href="/people/" data-nav="people" data-i18n="nav_people">人物索引</a>
     <a href="/locality/" data-nav="locality" data-i18n="locality_title">産地索引</a>
@@ -128,7 +128,6 @@
       <!-- Masthead -->
       <header class="masthead">
         <div class="masthead__main">
-          <p class="mono masthead__kicker"><span data-i18n="mast_kicker">Anthurium — 品種の由来・記載史アーカイブ</span><a href="#" class="masthead__lang" id="masthead-lang" data-i18n="mast_lang" lang="en">ENGLISH</a></p>
           <h1 class="masthead__title">Aroid <br>Origins</h1>
           <p class="masthead__tagline">一葉に、千の物語。</p>
           <p class="masthead__desc" data-i18n="hero_desc">誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。</p>
@@ -136,18 +135,13 @@
             <input type="search" enterkeyhint="search" class="search-bar__input" placeholder="品種名・カタカナで検索（例: ワロクアナム）" data-i18n-placeholder="search_placeholder" aria-label="品種名を検索">
             <button class="search-bar__btn" data-nav="search" aria-label="検索"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></button>
           </div>
+          <p class="masthead__stats" id="masthead-stats"></p>
           <div class="masthead__meta" id="masthead-genera"></div>
         </div>
         <figure class="masthead__plate">
           <div class="plate"><img src="images/anthurium.png" alt="Anthurium の葉脈図" width="472" height="756" decoding="async"></div>
           <figcaption class="mono"><span data-i18n="plate_caption">図版 I — 葉脈</span><i>Anthurium</i></figcaption>
         </figure>
-        <dl class="ledger masthead__ledger">
-          <div><dt data-i18n="ledger_entries">収録品種</dt><dd id="ledger-count">—</dd></div>
-          <div><dt data-i18n="ledger_years">発表年</dt><dd id="ledger-years">—</dd></div>
-          <div><dt data-i18n="ledger_localities">産地（国）</dt><dd id="ledger-localities">—</dd></div>
-          <div><dt data-i18n="ledger_updated">最終更新</dt><dd id="ledger-updated">—</dd></div>
-        </dl>
       </header>
 
       <!-- Front page: story of the day + index -->
@@ -157,21 +151,25 @@
           <div id="story-body"><div class="loading-text p-xl">…</div></div>
         </article>
         <aside class="index" id="archive-index">
-          <div class="index__head"><h2 data-i18n="index_title">索引</h2><span class="mono" data-i18n="index_hint">項目を開くと品種が並びます</span></div>
+          <div class="index__head"><h2 data-i18n="index_title">索引</h2><span class="text-sm" data-i18n="index_hint">項目を開くと品種が並びます</span></div>
           <div id="archive-index-body"><div class="loading-text p-xl">…</div></div>
         </aside>
       </div>
 
-      <!-- Timeline of first descriptions -->
-      <section class="timeline" id="archive-timeline">
-        <div class="timeline__head"><h2 data-i18n="timeline_title">記載史年表</h2><span class="mono" data-i18n="timeline_hint">原種が学名として発表された年</span></div>
-        <div id="archive-timeline-body"><div class="loading-text p-xl">…</div></div>
+      <!-- New entries (one list line each) -->
+      <section class="front-new" id="front-new">
+        <h2 class="section-title" data-i18n="new_entries_title">新着の品種</h2>
+        <div id="recently-updated-grid"><div class="loading-text p-xl">…</div></div>
+        <p class="front-new__foot"><span id="new-entries-count"></span><a href="#" id="ledger-all-link" data-nav="genus" data-genus="anthurium" data-i18n="ledger_all">一覧をすべて見る →</a></p>
       </section>
 
-      <!-- Entries ledger -->
-      <section class="mt-2xl">
-        <h2 class="section-title"><span data-i18n="new_entries_title">新着記録</span><span class="mono" id="new-entries-count"></span><a href="#" class="mono" id="ledger-all-link" data-nav="genus" data-genus="anthurium" data-i18n="ledger_all">台帳をすべて見る →</a></h2>
-        <div id="recently-updated-grid"><div class="loading-text p-xl">…</div></div>
+      <!-- Timeline of first descriptions (folded on phones) -->
+      <section class="timeline" id="archive-timeline">
+        <div class="timeline__head"><h2 data-i18n="timeline_title">記載史年表</h2><span class="text-sm" data-i18n="timeline_hint">原種が学名として発表された年</span></div>
+        <details class="timeline__fold" id="timeline-fold">
+          <summary data-i18n="timeline_open">年表を開く</summary>
+          <div id="archive-timeline-body"><div class="loading-text p-xl">…</div></div>
+        </details>
       </section>
 
       <!-- Colophon: what this archive is -->
@@ -272,7 +270,7 @@
           <div class="gallery-carousel__viewport">
             <div class="gallery">
               <div class="gallery__empty">
-                <div class="sheet sheet--plate"><p class="sheet__title" data-i18n="plate_empty">図版未収録</p><p class="sheet__note mono" data-i18n="plate_empty_note">栽培者本人の写真を1枚。撮影者名を添えて。</p><a href="#" class="sheet__cta" id="plate-empty-cta" data-i18n="plate_empty_cta">写真を追加する →</a></div>
+                <div class="sheet sheet--plate"><p class="sheet__title" data-i18n="plate_empty">写真なし</p><p class="sheet__note mono" data-i18n="plate_empty_note">栽培者本人の写真を1枚。撮影者名を添えて。</p><a href="#" class="sheet__cta" id="plate-empty-cta" data-i18n="plate_empty_cta">写真を追加</a></div>
               </div>
               <div class="gallery__upload" id="gallery-upload">
                 <input type="file" id="gallery-file-input" accept="image/jpeg,image/png" class="d-none" aria-label="ギャラリー画像をアップロード">
@@ -285,7 +283,7 @@
           <button class="gallery-carousel__arrow gallery-carousel__arrow--right d-none" id="gallery-next" aria-label="次の画像">&#x203A;</button>
         </div>
         <div class="gallery-carousel__counter d-none" id="gallery-counter"></div>
-        <p class="mono plate-policy" data-i18n="image_policy">栽培者本人の写真のみ · 権利や内容の問題は「報告」から</p>
+        <p class="mono plate-policy" data-i18n="image_policy">権利や内容の問題は「報告」から</p>
       </div>
 
       <!-- Origins (dynamically populated by JS) -->
@@ -298,7 +296,7 @@
         <div class="mt-lg" id="add-origin-section">
 
           <div id="add-origin-toggle">
-            <button type="button" id="btn-add-origin" class="record-add mono" data-i18n="record_add_link">この台紙に書き足す →</button>
+            <button type="button" id="btn-add-origin" class="record-add mono" data-i18n="record_add_link">記録を追加</button>
           </div>
 
           <!-- Inline origin form (hidden by default) -->
@@ -751,7 +749,7 @@
   <section id="page-terms" class="page">
     <div class="container container--narrow legal-page">
       <h1 data-i18n="terms_title">利用規約</h1>
-      <p class="legal-date" data-i18n="terms_updated">最終更新日: 2026年10月3日</p>
+      <p class="legal-date" data-i18n="terms_updated">最終更新 2026.10.03</p>
 
       <h2 data-i18n="terms_1_title">第1条 適用範囲</h2>
       <p data-i18n="terms_1_body">本規約は、Aroid Origins（以下「本サービス」）を利用するすべてのユーザーに適用されます。本サービスを利用した時点で、本規約に同意したものとみなします。閲覧はアカウント登録なしで利用でき、投稿などの一部機能にはGoogleアカウントによるログインが必要です。</p>
@@ -859,7 +857,7 @@
   <section id="page-privacy" class="page">
     <div class="container container--narrow legal-page">
       <h1 data-i18n="privacy_title">プライバシーポリシー</h1>
-      <p class="legal-date" data-i18n="privacy_updated">最終更新日: 2026年10月3日</p>
+      <p class="legal-date" data-i18n="privacy_updated">最終更新 2026.10.03</p>
 
       <h2 data-i18n="privacy_1_title">1. はじめに</h2>
       <p data-i18n="privacy_1_body">Aroid Origins（運営者）（運営責任者: 久恒 佑太）は、ユーザーのプライバシーを尊重します。本ポリシーでは、本サービスで収集する情報とその取り扱いについて説明します。閲覧はアカウント登録なしで利用できます。投稿にはGoogleアカウントによるログインが必要で、公開されるのはニックネーム等のプロフィール情報のみです。</p>
@@ -937,7 +935,7 @@
   <section id="page-tokushoho" class="page">
     <div class="container container--narrow legal-page">
       <h1 data-i18n="tokushoho_title">特定商取引法に基づく表記</h1>
-      <p class="legal-date" data-i18n="tokushoho_updated">最終更新日: 2026年10月3日</p>
+      <p class="legal-date" data-i18n="tokushoho_updated">最終更新 2026.10.03</p>
       <p class="legal-notice" data-i18n="tokushoho_notice">会員の受付は準備中です。現在、有料サービスの販売はありません。以下は受付開始後の条件です。</p>
 
       <table class="tokushoho-table">
@@ -1072,7 +1070,7 @@
         <dt>記録 1、記録 2 …</dt><dd>写真の下に並ぶ、出典つきの記録です。見出しの「IPNI / POWO · Tier S · 95%」は、誰が書いた記録か、出典の階層（S〜D）、信頼度を示します。信頼度が高い順に並びます。</dd>
         <dt>投稿者の記録 · 出典なし</dt><dd>栽培者や作出者本人が書いた記録で、出典 URL が無いもの。信頼度の数字は付けません。内容が正しくないと思ったら「疑問」の投票か「報告」から知らせてください。</dd>
         <dt>AI 下書き</dt><dd>出典が無く信頼度の低い AI 生成文は、折り畳んで「下書き」と表示します。記録には数えません。</dd>
-        <dt>未収録</dt><dd>名前は登録されているが、区分ごとの必須項目（記載者・年・出典、交配式・作出者、播種日など）が揃っていない状態。点線のシートに不足している項目が出ます。「記録を追加」で埋められます。</dd>
+        <dt>記録不足</dt><dd>名前は登録されているが、区分ごとの必須項目（記載者・年・出典、交配式・作出者、播種日など）が揃っていない状態。点線のシートに不足している項目が出ます。「記録を追加」で埋められます。</dd>
         <dt>検証済</dt><dd>管理者が出典と照合した記録に付く印です（準備中）。</dd>
       </dl>
 
@@ -1266,7 +1264,7 @@
         <dt id="g-individual">個体</dt><dd>原種の1株に付けた番号や名前（'HR1' など）。株分けや組織培養で増えた株も同じ個体。実生で生まれた子は別の個体で、親の名前を引き継がない。その原種のページの「個体」欄に載り、一覧や件数には数えない。</dd>
         <dt id="g-line">系統（line）</dt><dd>同じ名前で実生（F 個体）も流通していることを示す印。名前そのものがオリジナル個体を指すか（Clone）、実生群を指すか（Hybrid）は区分で示し、この印はそれとは別に「同名の実生が出回っている」ことだけを表す。このサイトではタグ line で示す。</dd>
         <dt id="g-code">管理番号</dt><dd>生産者や愛好家が個体の識別に付ける番号（'HR1'・'A88'）。品種名と同じシングルクォートで書き、命名者と命名年を添える。番号だけでは種を示さない。</dd>
-        <dt id="g-unrecorded">未収録</dt><dd>記録はあるが、区分ごとの必須項目（記載者・年・出典、交配式・作出者、播種日など）が揃わず品質ゲートを通っていない状態。検索エンジンと件数には出さない。「記録を追加」で埋められる。</dd>
+        <dt id="g-unrecorded">記録不足</dt><dd>記録はあるが、区分ごとの必須項目（記載者・年・出典、交配式・作出者、播種日など）が揃わず品質ゲートを通っていない状態。検索エンジンと件数には出さない。「記録を追加」で埋められる。</dd>
         <dt id="g-draft">AI 下書き</dt><dd>出典 URL が無く信頼度 40 未満の AI 生成文。折り畳んで表示し、記録には数えない。人の記録か出典が付けば記録になる。</dd>
       </dl>
 
@@ -1318,8 +1316,8 @@
     <div class="container">
       <h1 class="section-title" data-i18n="notfound_title">ページが見つかりません</h1>
       <div class="sheet sheet--search">
-        <p class="sheet__note" data-i18n="notfound_note">この URL のページはありません。品種名で探すか、台帳から選んでください。</p>
-        <p class="sheet__actions mono"><a class="sheet__cta" href="/search" data-nav="search" data-i18n="notfound_search">品種名で検索 →</a><a class="sheet__cta" href="/anthurium" data-nav="genus" data-genus="Anthurium" data-i18n="unrecorded_ledger">Anthurium の台帳 →</a><a class="sheet__cta" href="/" data-nav="top">Home →</a></p>
+        <p class="sheet__note" data-i18n="notfound_note">この URL のページはありません。品種名で探すか、一覧から選んでください。</p>
+        <p class="sheet__actions mono"><a class="sheet__cta" href="/search" data-nav="search" data-i18n="notfound_search">品種名で検索 →</a><a class="sheet__cta" href="/anthurium" data-nav="genus" data-genus="Anthurium" data-i18n="unrecorded_ledger">Anthurium の一覧 →</a><a class="sheet__cta" href="/" data-nav="top">Home →</a></p>
       </div>
     </div>
   </section>
@@ -1515,7 +1513,7 @@
   <footer class="footer">
     <div class="container footer__inner">
       <div class="footer__links">
-        <a href="#" data-nav="about" data-i18n="footer_about">About</a>
+        <a href="#" data-nav="about" data-i18n="footer_about">この図鑑について</a>
         <a href="#" data-nav="guide" data-i18n="footer_guide">使い方</a>
         <a href="/pricing/" data-nav="pricing" data-i18n="pricing_title">料金</a>
         <a href="/glossary/" data-nav="glossary" data-i18n="glossary_title">用語集</a>
@@ -1541,14 +1539,14 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/record-gate.js?v=20261007a"></script>
-  <script src="js/app-core.js?v=20261007a"></script>
-  <script src="js/pages.js?v=20261007a"></script>
-  <script src="js/forms.js?v=20261007a"></script>
-  <script src="js/entry-meta.js?v=20261007a"></script>
-  <script src="js/archive.js?v=20261007a"></script>
-  <script src="js/tool-gate.js?v=20261007a"></script>
-  <script src="js/tools.js?v=20261007a"></script>
+  <script src="js/record-gate.js?v=20261007e"></script>
+  <script src="js/app-core.js?v=20261007e"></script>
+  <script src="js/pages.js?v=20261007e"></script>
+  <script src="js/forms.js?v=20261007e"></script>
+  <script src="js/entry-meta.js?v=20261007e"></script>
+  <script src="js/archive.js?v=20261007e"></script>
+  <script src="js/tool-gate.js?v=20261007e"></script>
+  <script src="js/tools.js?v=20261007e"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1558,7 +1556,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261007a"></script>
+  <script src="js/dialogs.js?v=20261007e"></script>
 
   <!-- AI re-research request dialog -->
   <dialog id="research-request-dialog" class="dialog-clean" aria-labelledby="research-request-title">
@@ -1597,6 +1595,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261007a"></script>
+<script src="js/sw-register.js?v=20261007e"></script>
 </body>
 </html>
