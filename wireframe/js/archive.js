@@ -224,7 +224,7 @@
       if (i % 2 === 1) return esc(part);
       var key = personKey(part.replace(/\([^)]*\)/g, ' ').trim());
       if (key.length < 2) return esc(part);
-      return '<a href="' + esc(base + 'people/' + encodeURIComponent(personSlug(key))) + '" data-nav="people" data-person="' + esc(personSlug(key)) + '">' + esc(part) + '</a>';
+      return '<a href="' + esc(base + 'people/' + encodeURIComponent(personSlug(key)) + '/') + '" data-nav="people" data-person="' + esc(personSlug(key)) + '">' + esc(part) + '</a>';
     }).join('');
   }
   function collectAll() {
@@ -850,8 +850,9 @@
     // previous / next within the same genus and the same broad group
     // quotes and sp./aff./cf. do not decide the order (aff. besseae sits next to besseae)
     var sortKey = function (x) { return x.displayName.replace(/['"‘’“”]/g, '').replace(/\b(?:sp|aff|cf)\.\s*/g, ''); };
-    var group = others.concat([d]).filter(function (x) { return x.genus === d.genus && (x.type === 'seedling') === (d.type === 'seedling'); })
-      .sort(function (a, b) { return sortKey(a).localeCompare(sortKey(b), undefined, { sensitivity: 'base' }); });
+    var KIND_RANK = { species: 0, hybrid: 1, clone: 2, seedling: 3 };
+    var group = others.concat([d]).filter(function (x) { return x.genus === d.genus && (x.type === 'seedling') === (d.type === 'seedling') && !x.isIndividual && (x.type === 'seedling' || x.state === 'ok' || x.fullName === d.fullName); })
+      .sort(function (a, b) { return ((KIND_RANK[a.type] || 0) - (KIND_RANK[b.type] || 0)) || sortKey(a).localeCompare(sortKey(b), undefined, { sensitivity: 'base' }); });
     var idx = -1;
     group.forEach(function (x, i) { if (x.fullName === d.fullName) idx = i; });
     var prev = idx > 0 ? group[idx - 1] : null;
@@ -870,7 +871,8 @@
       html += '</nav>';
     }
     // exit: back to the genus list (same locality is the heading above)
-    html += '<p class="related__exit"><a href="' + esc(base + d.genus.toLowerCase() + '/') + '" data-nav="genus" data-genus="' + esc(d.genus.toLowerCase()) + '">' + esc(T('related_exit_ledger').replace('{genus}', d.genus)) + '</a></p>';
+    html += '<p class="related__exit"><a href="' + esc(base + d.genus.toLowerCase() + '/') + '" data-nav="genus" data-genus="' + esc(d.genus.toLowerCase()) + '">' + esc(T('related_exit_ledger').replace('{genus}', d.genus)) + '</a>'
+      + (idx >= 0 ? '<span class="related__pos num">' + (idx + 1) + ' / ' + group.length + '</span>' : '') + '</p>';
     // the exit line alone is reason enough to show the section
     el.innerHTML = html;
     section.classList.remove('d-none');
@@ -965,7 +967,7 @@
         html += '<div class="people__group"><h2 class="mono">' + esc(T(ROLE_KEYS[r])) + '</h2><ul class="people__list">';
         groups[r].forEach(function (p) {
           var a = authorityOf(p.key);
-          html += '<li><a href="' + esc(base + 'people/' + encodeURIComponent(p.slug)) + '" data-nav="people" data-person="' + esc(p.slug) + '">' + esc(personLabel(p)) + (a && a.name && a.name !== p.key ? ' <span class="people__abbr mono">' + esc(p.key) + '</span>' : '') + '</a><span class="mono">' + rolesLine(p) + '</span></li>';
+          html += '<li><a href="' + esc(base + 'people/' + encodeURIComponent(p.slug) + '/') + '" data-nav="people" data-person="' + esc(p.slug) + '">' + esc(personLabel(p)) + (a && a.name && a.name !== p.key ? ' <span class="people__abbr mono">' + esc(p.key) + '</span>' : '') + '</a><span class="mono">' + rolesLine(p) + '</span></li>';
         });
         html += '</ul></div>';
       });
@@ -1158,6 +1160,8 @@
     setUnrecorded(true);
     var std = document.getElementById('detail-standard');
     if (std) std.textContent = '';
+    var uh = document.querySelector('#page-cultivar h1');
+    if (uh) uh.textContent = displayName; // roman: not a recorded name
     sheet.innerHTML = '<div class="sheet sheet--search"><p class="sheet__title">' + esc(T('unrecorded_title')) + '</p>'
       + '<p class="sheet__note">' + esc(T('unrecorded_note')) + '</p>'
       + '<p class="sheet__actions mono"><a class="sheet__cta" href="' + esc(base + 'search?q=' + encodeURIComponent(displayName)) + '">' + esc(T('unrecorded_search')) + '</a>'

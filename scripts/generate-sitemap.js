@@ -4,6 +4,8 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const people = require('./lib/people');
+// newest updated_at among a set of rows, for lastmod
+const newest = (rows, today) => { const d = rows.map(r => r.updated_at || '').sort().pop(); return d ? new Date(d).toISOString().split('T')[0] : today; };
 const geo = require('./lib/geo');
 const RecordGate = require('../wireframe/js/record-gate');
 
@@ -68,14 +70,14 @@ async function main() {
 
   // Cultivar pages
   for (const c of cultivars) {
-    // Skip seedlings (they're behind paywall), individuals (listed on their species page) and unrecorded entries (noindex)
-    if (c.cultivar_name.includes('[Seedling]')) continue;
+    // Individuals are listed on their species page; unrecorded entries (seedlings included) are noindex.
+    // Public seedlings are free to read and get their own page (BOARD 10-07b T85).
     if ((c.tags || []).includes('individual')) continue;
     if (RecordGate.state(c) !== 'ok') continue;
 
     const genus = c.genus || 'Anthurium';
     const genusSlug = genus.toLowerCase();
-    const rest = c.cultivar_name.replace(genus + ' ', '');
+    const rest = c.cultivar_name.replace(' [Seedling]', '').replace(genus + ' ', '');
     const encodedRest = encodeURIComponent(rest);
     const lastmod = c.updated_at ? new Date(c.updated_at).toISOString().split('T')[0] : today;
 
@@ -85,13 +87,13 @@ async function main() {
   // People pages
   xml += `  <url>\n    <loc>${SITE}/people/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
   for (const p of people.peopleIndex(cultivars.filter(c => !c.cultivar_name.includes('[Seedling]')))) {
-    xml += `  <url>\n    <loc>${SITE}/people/${encodeURIComponent(p.slug)}/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
+    xml += `  <url>\n    <loc>${SITE}/people/${encodeURIComponent(p.slug)}/</loc>\n    <lastmod>${newest(p.rows || [], today)}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
   }
 
   // Locality pages
   xml += `  <url>\n    <loc>${SITE}/locality/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
-  for (const l of geo.localityIndex(cultivars.filter(c => !c.cultivar_name.includes('[Seedling]')))) {
-    xml += `  <url>\n    <loc>${SITE}/locality/${encodeURIComponent(l.slug)}/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
+  for (const l of geo.localityIndex(cultivars.filter(c => !c.cultivar_name.includes('[Seedling]')), c => RecordGate.state(c) === 'ok')) {
+    xml += `  <url>\n    <loc>${SITE}/locality/${encodeURIComponent(l.slug)}/</loc>\n    <lastmod>${newest(l.rows, today)}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
   }
 
   // Tools catalogue: only once it is open, and only the pages that pass the tool gate

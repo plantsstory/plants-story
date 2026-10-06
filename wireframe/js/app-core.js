@@ -752,7 +752,7 @@ function navigateTo(page, options, pushHistory) {
       var gName = options.genus.charAt(0).toUpperCase() + options.genus.slice(1);
       var genusOgImage = _defaultOgImage;
       updateMeta({
-        title: gName + ' - ' + _defaultTitle,
+        title: (gName === 'Anthurium' ? 'アンスリウム' : gName) + 'の原種・品種一覧 — 記載者・発表年・原産国 | Aroid Origins',
         description: gName + ' の収録一覧。誰が、いつ、どこで名付けたか — 由来を出典つきで記録する図鑑。',
         path: options.genus,
         image: genusOgImage
@@ -766,7 +766,7 @@ function navigateTo(page, options, pushHistory) {
         updateGenusJsonLd(gName, names);
       }
     } else {
-      var noindexPages = { search: true, mypost: true, favorites: true, profile: true, 'profile-edit': true, notfound: true };
+      var noindexPages = { search: true, contribute: true, mypost: true, favorites: true, profile: true, 'profile-edit': true, notfound: true };
       updateMeta({ title: pageTitles[page] || _defaultTitle, description: pageDescriptions[page] || _defaultDesc, path: page === 'top' ? '' : page, noindex: !!noindexPages[page] });
       // Remove genus JSON-LD on non-genus pages
       var gjld = document.getElementById('genus-jsonld');
@@ -1468,7 +1468,7 @@ if (false) {
     window._generaData.forEach(function(g, idx) {
       var display = idx === 0 ? '' : ' style="display:none;"';
       html += '<div class="genus-content" id="genus-' + g.slug + '"' + display + '>';
-      html += '<nav class="breadcrumb mb-sm" aria-label="パンくずリスト"><a href="' + _basePath + '" data-nav="top">Home</a><span class="breadcrumb__sep">/</span><span>' + escHtml(g.name) + '</span></nav>';
+      html += '<nav class="breadcrumb mb-sm" aria-label="パンくずリスト"><a href="' + _basePath + '" data-nav="top">トップ</a><span class="breadcrumb__sep">/</span><span>' + escHtml(g.name) + '</span></nav>';
       html += '<h1 class="section-title">' + g.name + '</h1>';
       html += '<p class="genus-lead">' + escHtml(t('genus_lead').replace('{genus}', g.name)) + '</p>';
       html += '<div class="genus-stats" id="genus-stats-' + g.slug + '" style="display:none;">';
@@ -1623,6 +1623,12 @@ if (false) {
   if (supabase) {
     supabase.auth.onAuthStateChange(function(event, session) {
       window._currentUser = session ? session.user : null;
+      // a wish made before logging in (「ログインして受付開始のお知らせを受け取る」)
+      if (session) {
+        var _intent = null;
+        try { _intent = sessionStorage.getItem('member_notify_intent'); if (_intent) sessionStorage.removeItem('member_notify_intent'); } catch (e) {}
+        if (_intent) setTimeout(function() { joinMemberNotify(_intent); }, 0);
+      }
       updateLoginUI();
       checkSubscription();
       if (session && typeof syncFavoritesFromServer === 'function') syncFavoritesFromServer();
@@ -2017,9 +2023,32 @@ if (false) {
   // Show paywall modal with focus trap and keyboard support
   var _paywallPreviousFocus = null;
   psExport('showPaywallModal', showPaywallModal);
+  // the list of people who asked to hear when membership opens (BOARD 10-07b T86)
+  var _paywallSource = '';
+  var _memberNotifyOn = null;
+  function refreshMemberNotifyUI() {
+    var btn = document.getElementById('paywall-notify-btn'), on = document.getElementById('paywall-notify-on');
+    if (!btn || !on) return;
+    var logged = !!window._currentUser;
+    var show = function(isOn) { _memberNotifyOn = isOn; btn.classList.toggle('d-none', !logged || isOn); on.classList.toggle('d-none', !logged || !isOn); };
+    if (!logged || !supabase) { show(false); return; }
+    supabase.from('member_interest').select('user_id').eq('user_id', window._currentUser.id).maybeSingle().then(function(r) { show(!!(r && r.data)); }, function() { show(false); });
+  }
+  function joinMemberNotify(source) {
+    if (!supabase || !window._currentUser) return;
+    supabase.rpc('set_member_interest', { p_source: source }).then(function(r) {
+      if (r.error || !r.data || !r.data.ok) { showToast('登録できませんでした。時間をおいてお試しください', true); return; }
+      if (typeof gtag === 'function') gtag('event', 'member_notify', { source: source });
+      showToast('受付開始のお知らせを登録しました');
+      refreshMemberNotifyUI();
+    });
+  }
+  window.joinMemberNotify = joinMemberNotify;
   function showPaywallModal(source) {
     var modal = document.getElementById('paywall-modal');
     if (!modal) return;
+    _paywallSource = source || 'unknown';
+    refreshMemberNotifyUI();
     _paywallPreviousFocus = document.activeElement;
     // Always start from the plan selection step
     if (typeof window.resetPaywallSteps === 'function') window.resetPaywallSteps();
@@ -2068,7 +2097,23 @@ if (false) {
     if (planMonthly) planMonthly.addEventListener('click', function() { startCheckout('monthly'); });
     if (planAnnual) planAnnual.addEventListener('click', function() { startCheckout('annual'); });
     var closedLogin = document.getElementById('paywall-closed-login');
-    if (closedLogin) closedLogin.addEventListener('click', function() { hidePaywallModal(); startGoogleLogin(window.location.pathname, 'member_interest'); });
+    // logged out: remember the wish, log in, and put the name on the list once the session is back (T86)
+    if (closedLogin) closedLogin.addEventListener('click', function() {
+      try { sessionStorage.setItem('member_notify_intent', _paywallSource || 'unknown'); } catch (e) {}
+      hidePaywallModal(); startGoogleLogin(window.location.pathname, 'member_interest');
+    });
+    var notifyBtn = document.getElementById('paywall-notify-btn');
+    if (notifyBtn) notifyBtn.addEventListener('click', function() { joinMemberNotify(_paywallSource || 'unknown'); });
+    var notifyCancel = document.getElementById('paywall-notify-cancel');
+    if (notifyCancel) notifyCancel.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (!supabase || !window._currentUser) return;
+      supabase.from('member_interest').delete().eq('user_id', window._currentUser.id).then(function(r) {
+        if (r.error) { showToast('取り消せませんでした。時間をおいてお試しください', true); return; }
+        showToast('お知らせの登録を取り消しました');
+        refreshMemberNotifyUI();
+      });
+    });
   })();
 
   // Delegated click handler for dynamically rendered paywall CTA buttons

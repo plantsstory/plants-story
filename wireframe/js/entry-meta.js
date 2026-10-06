@@ -46,9 +46,17 @@
     return [who, year].filter(Boolean).join(' ');
   }
 
+  // In the form Japanese searches take: 「アンスリウム・クリスタリナム（Anthurium crystallinum）の学名と由来」 for a species,
+  // 「…の由来・作出者」 for a hybrid or clone (BOARD 10-07b T83). Without a katakana alias, the name alone leads.
+  var GENUS_KANA = { Anthurium: 'アンスリウム', Monstera: 'モンステラ', Philodendron: 'フィロデンドロン' };
   function title(rec) {
-    var k = kana(rec), tail = whoAndYear(rec);
-    return displayName(rec) + (k ? '（' + k + '）' : '') + 'の由来' + (tail ? ' — ' + tail : '') + ' · Aroid Origins';
+    var k = kana(rec), tail = whoAndYear(rec), name = displayName(rec);
+    var o = records(rec)[0] || {}, s = o.structured || {};
+    var type = (rec && rec.type) || s.origin_type || 'species';
+    var what = type === 'species' ? 'の学名と由来' : type === 'seedling' ? 'の由来' : 'の由来・作出者';
+    var gk = GENUS_KANA[name.split(' ')[0]];
+    var head = k ? (gk ? gk + '・' : '') + k + '（' + name + '）' : name;
+    return head + what + (tail ? ' — ' + tail : '') + ' · Aroid Origins';
   }
   function description(rec) {
     var name = displayName(rec);

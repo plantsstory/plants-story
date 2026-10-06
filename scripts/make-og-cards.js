@@ -79,8 +79,11 @@ function cardSvg(c, photoDataUri) {
     const pa = clean(c.parent_a_text) || clean(fm.parentA), pb = clean(c.parent_b_text) || clean(fm.parentB);
     row1k = isIndividual ? 'SPECIES' : 'PARENTAGE';
     row1v = isIndividual ? rest.replace(/\s*'[^']*'\s*$/, '') : (pa && pb ? pa.replace(genus + ' ', '') + ' × ' + pb.replace(genus + ' ', '') : (String(c.formula_status || '').toLowerCase() === 'disputed' ? '係争中' : '—'));
-    row2k = type === 'clone' && !clean(s.breeder) ? 'NAMED BY' : 'BREEDER';
-    row2v = [clean(s.breeder) || clean(s.namer) || clean(o && o.discoverer_or_breeder) || clean(fm.creatorName), clean(s.naming_year) || clean(o && o.discovery_year)].filter(Boolean).join(', ') || '—';
+    row2k = type === 'seedling' ? 'SOWN · BREEDER' : type === 'clone' && !clean(s.breeder) ? 'NAMED BY' : 'BREEDER';
+    const sown = clean(s.sowing_date) ? clean(s.sowing_date).replace(/^(\d{4})-(\d{2})-(\d{2}).*$/, '$1.$2.$3') : '';
+    row2v = type === 'seedling'
+      ? [sown, clean(s.breeder) || clean(fm.creatorName) || clean(o && o.discoverer_or_breeder)].filter(Boolean).join(' · ') || '—'
+      : [clean(s.breeder) || clean(s.namer) || clean(o && o.discoverer_or_breeder) || clean(fm.creatorName), clean(s.naming_year) || clean(o && o.discovery_year)].filter(Boolean).join(', ') || '—';
   }
   // undescribed / unresolved names: the status row replaces the description row
   const q = String(c.species_qualifier || '').toLowerCase() || ((rest.match(/^(sp|aff|cf)\./) || [])[1] || '');
@@ -96,8 +99,8 @@ function cardSvg(c, photoDataUri) {
     sent = sent.replace(new RegExp('^' + displayName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*は\\s*'), '');
     summary = truncateJp(sent, 21);
   }
-  if (!summary) summary = state === 'ok' ? '' : '由来 未収録 · 記録を募集中';
-  const status = state === 'ok' ? ('記録 ' + n + ' · ' + (o && o.source_type === 'ipni_powo' ? 'IPNI / POWO' : '投稿者の記録')) : '記録 未収録';
+  if (!summary) summary = state === 'ok' ? '' : '記録不足 · 記録を募集中';
+  const status = state === 'ok' ? ('記録 ' + n + ' · ' + (o && o.source_type === 'ipni_powo' ? 'IPNI / POWO' : '投稿者の記録')) : '記録不足';
   const url = 'plantsstory.com/' + genus.toLowerCase() + '/' + rest;
 
   const size = titleSize(rest);
@@ -157,7 +160,6 @@ async function main() {
   let written = 0;
   for (const c of rows) {
     if (!visible.has(c.genus || 'Anthurium')) continue;
-    if (c.type === 'seedling' || String(c.cultivar_name).includes('[Seedling]')) continue;
     if (only && (c.genus || '').toLowerCase() !== only.toLowerCase()) continue;
     const displayName = String(c.cultivar_name).replace(' [Seedling]', '');
     const photo = await photoDataUri(firstImage[displayName]);

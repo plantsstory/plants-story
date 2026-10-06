@@ -329,8 +329,8 @@
     "en": "Contact"
   },
   "search_placeholder": {
-    "jp": "品種名・カタカナで検索（例: ワロクアナム）",
-    "en": "Search cultivar..."
+    "jp": "品種名・カタカナで検索",
+    "en": "Search by name"
   },
   "genus_search": {
     "jp": "品種名・カタカナで検索（例: ワロクアナム）",
@@ -349,8 +349,8 @@
     "en": "Disagree"
   },
   "species_badge": {
-    "jp": "原種 / Original Species",
-    "en": "Original Species"
+    "jp": "原種",
+    "en": "Species"
   },
   "hybrid_badge": {
     "jp": "Hybrid",
@@ -697,8 +697,8 @@
     "en": "Collected information is used for the following purposes:"
   },
   "privacy_5_list": {
-    "jp": "品種由来情報の表示と維持管理\n記録の正確性の評価（「正確／疑問」の投票）\n不正投稿・荒らし行為の防止および対応（IPアドレスの一時的な記録）\nサービスおよびコンテンツの改善\nアフィリエイトリンクを通じた収益化",
-    "en": "Displaying and maintaining cultivar origin information\nCommunity voting for content reliability evaluation\nPrevention of spam and abuse (temporary recording of IP addresses)\nImproving the Service and its content\nServing relevant advertisements\nMonetization through affiliate links"
+    "jp": "品種由来情報の表示と維持管理\n記録の正確性の評価（「正確／疑問」の投票）\n不正投稿・荒らし行為の防止および対応（IPアドレスの一時的な記録）\nサービスおよびコンテンツの改善\nアフィリエイトリンクを通じた収益化\nサブスクリプションの契約管理および決済処理\nご希望いただいたお知らせ（会員受付の開始など）のメール送信（1 回のみ。宣伝には使いません）",
+    "en": "Displaying and maintaining cultivar origin records\nJudging the accuracy of records (the accurate / doubtful votes)\nPreventing spam and abuse (IP addresses kept for a limited time)\nImproving the service and its content\nRevenue through affiliate links\nManaging subscriptions and processing payments\nEmail notices you asked for (such as the opening of membership), sent once and never used for promotion"
   },
   "privacy_6_title": {
     "jp": "6. 情報の共有",
@@ -1293,7 +1293,7 @@
     "en": "Seedling notes"
   },
   "nav_people": {
-    "jp": "人物",
+    "jp": "人物索引",
     "en": "People"
   },
   "people_title": {
@@ -2363,5 +2363,9 @@
   "about_funding": {
     "jp": "この図鑑は会員の会費・取扱店の掲載料（PR）・アフィリエイト（PR）で運営しています。いずれも記録の内容や検証には影響しません。",
     "en": "The archive is funded by membership fees, shop listings (PR) and affiliate links (PR). None of them affects the records or their verification."
+  },
+  "contribute_note": {
+    "jp": "投稿者名は人物索引と系統図に載ります。あなたの実生ページは、共有するとカードつきで表示されます。",
+    "en": "Your name appears in the people index and the lineage. Your seedling page shows a card when shared."
   }
 }

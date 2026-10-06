@@ -74,7 +74,14 @@ function staticEntryHtml(c, ctx) {
   if (aliases.length) h += '<p class="static-entry__aliases">別名: ' + escAttr(aliases.join(' / ')) + '</p>';
   if (ctx.photo) h += '<figure class="static-entry__plate"><img src="' + escAttr(ctx.photo) + '" alt="' + escAttr(c.cultivar_name) + '" width="720" decoding="async"></figure>';
   if (text) h += '<p class="static-entry__text">' + escAttr(text) + '</p>';
-  if (ctx.related && ctx.related.length) h += '<p class="mono static-entry__related">同じ産地: ' + ctx.related.map(r => '<a href="' + escAttr(r.url) + '">' + sciHtml(r.name) + '</a>').join(' · ') + '</p>';
+  // links a crawler can follow from every entry (BOARD 10-07b T84): people, place, neighbours, the genus list
+  const lk = (x, sci) => '<a href="' + escAttr(x.url) + '">' + (sci ? sciHtml(x.name) : escAttr(x.name)) + '</a>';
+  const lines = [];
+  if (ctx.people && ctx.people.length) lines.push((type === 'species' ? '記載者・採集者: ' : '人物: ') + ctx.people.map(x => lk(x)).join('、'));
+  if (ctx.place) lines.push('産地: ' + lk(ctx.place));
+  if (ctx.prev || ctx.next) lines.push([ctx.prev ? '← ' + lk(ctx.prev, true) : '', ctx.next ? lk(ctx.next, true) + ' →' : ''].filter(Boolean).join(' · '));
+  if (ctx.genusList) lines.push(lk(ctx.genusList) + ' →');
+  if (lines.length) h += '<nav class="static-entry__links" aria-label="関連">' + lines.map(x => '<p>' + x + '</p>').join('') + '</nav>';
   return h + '</article>';
 }
 
@@ -200,6 +207,16 @@ async function main() {
     written++;
   }
 
+  // recorded entries per genus in the genus-list order (kind, then the name without quotes and sp./aff./cf.)
+  const KIND_RANK = { species: 0, hybrid: 1, clone: 2 };
+  const listKey = n => String(n).replace(/^\S+\s+/, '').replace(/['"‘’“”]/g, '').replace(/^(sp|aff|cf)\.\s*/i, '').toLowerCase();
+  const entryOrder = {};
+  for (const c of publicCultivars) {
+    if ((c.tags || []).includes('individual') || RecordGate.state(c) !== 'ok') continue;
+    (entryOrder[c.genus || 'Anthurium'] = entryOrder[c.genus || 'Anthurium'] || []).push(c);
+  }
+  for (const k of Object.keys(entryOrder)) entryOrder[k].sort((a, b) => ((KIND_RANK[a.type] || 0) - (KIND_RANK[b.type] || 0)) || listKey(a.cultivar_name).localeCompare(listKey(b.cultivar_name)));
+
   // ---- Genus pages ----
   for (const g of genera) {
     const slug = safeDirName(g.slug);
@@ -217,7 +234,7 @@ async function main() {
         return '<li><a href="' + SITE + '/' + slug + '/' + encodeURIComponent(rest) + '/">' + escAttr(c.cultivar_name) + '</a></li>';
       }).join('');
     const html = buildStub(template, {
-      title: g.name + 'の品種一覧（' + count + '品種）| Aroid Origins',
+      title: (g.name === 'Anthurium' ? 'アンスリウム' : g.name) + 'の原種・品種一覧（' + count + '品種）— 記載者・発表年・原産国 | Aroid Origins',
       description: g.name + 'の収録 ' + count + ' 件。誰が、いつ、どこで名付けたか — 原種・Hybrid・Clone の由来を出典つきで記録する図鑑。',
       url: url,
       ogType: 'website',
@@ -241,12 +258,13 @@ async function main() {
   }
 
   // ---- Cultivar pages ----
-  for (const c of publicCultivars) {
+  // entry stubs: named entries and the public seedlings (a shared seedling page shows a card, BOARD 10-07b T85)
+  const seedlingRows = cultivars.filter(c => c.type === 'seedling' || String(c.cultivar_name).includes('[Seedling]'));
+  for (const c of publicCultivars.concat(seedlingRows)) {
     const genus = c.genus || 'Anthurium';
     const slug = genus.toLowerCase();
-    const rest = String(c.cultivar_name).startsWith(genus + ' ')
-      ? String(c.cultivar_name).slice(genus.length + 1)
-      : String(c.cultivar_name);
+    const shown = String(c.cultivar_name).replace(' [Seedling]', '');
+    const rest = shown.startsWith(genus + ' ') ? shown.slice(genus.length + 1) : shown;
     const restDir = safeDirName(rest);
     if (!restDir || !safeDirName(slug)) { skipped++; continue; }
 
@@ -292,13 +310,24 @@ async function main() {
     // first screen in plain HTML
     const photoPath = imageMap[c.cultivar_name];
     const photo = photoPath ? SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + photoPath.split('/').map(encodeURIComponent).join('/') + '?width=720&height=1440&resize=contain&quality=72' : '';
-    const country = (c.origins || []).map(o => (o && o.structured && o.structured.type_locality) || '').join(' ').match(/Colombia|Panama|Ecuador|Peru|Mexico|Costa Rica|Brazil|Bolivia|Venezuela|Guyana/);
-    const related = country ? publicCultivars.filter(x => x !== c && x.type === 'species' && JSON.stringify(x.origins || []).indexOf(country[0]) !== -1).slice(0, 3).map(x => {
+    // people, place (same country rule as the site), neighbours in the genus-list order, the list
+    const ctx = { photo, people: [], place: null, prev: null, next: null, genusList: { name: (c.genus || 'Anthurium') + ' の一覧', url: SITE + '/' + (c.genus || 'Anthurium').toLowerCase() + '/' } };
+    ctx.people = people.peopleOfRow(c).slice(0, 3).map(pp => ({ name: (AUTHORITY[pp.key] && AUTHORITY[pp.key].name) || pp.key, url: SITE + '/people/' + encodeURIComponent(people.personSlug(pp.key)) + '/' }));
+    {
+      const st = (((c.origins || []).filter(o => o && !o._type)[0]) || {}).structured || {};
+      const cc = c.type === 'species' ? (geo.countryOf(st.type_locality) || geo.countriesOf(st.known_habitats)[0] || '') : '';
+      if (cc) ctx.place = { name: geo.countryJa(cc) + 'の原種', url: SITE + '/locality/' + encodeURIComponent(geo.countrySlug(cc)) + '/' };
+    }
+    const order = entryOrder[c.genus || 'Anthurium'] || [];
+    const at = order.indexOf(c);
+    const entryUrl = x => {
       const g2 = x.genus || 'Anthurium';
       const r2 = String(x.cultivar_name).startsWith(g2 + ' ') ? String(x.cultivar_name).slice(g2.length + 1) : String(x.cultivar_name);
-      return { name: x.cultivar_name, url: SITE + '/' + g2.toLowerCase() + '/' + encodeURIComponent(r2) + '/' };
-    }) : [];
-    const htmlWithEntry = RecordGate.state(c) === 'ok' ? html.replace(/(<main[^>]*>)/, '$1\n' + staticEntryHtml(c, { photo, related })) : html;
+      return SITE + '/' + g2.toLowerCase() + '/' + encodeURIComponent(r2).replace(/'/g, '%27') + '/';
+    };
+    if (at > 0) ctx.prev = { name: EntryMeta.name(order[at - 1]), url: entryUrl(order[at - 1]) };
+    if (at >= 0 && at < order.length - 1) ctx.next = { name: EntryMeta.name(order[at + 1]), url: entryUrl(order[at + 1]) };
+    const htmlWithEntry = RecordGate.state(c) === 'ok' ? html.replace(/(<main[^>]*>)/, '$1\n' + staticEntryHtml(c, ctx)) : html;
 
     const dir = path.join(WIREFRAME, slug, restDir);
     try {
@@ -351,7 +380,7 @@ async function main() {
         { '@type': 'ListItem', 'position': 1, 'name': 'Aroid Origins', 'item': SITE + '/' },
         { '@type': 'ListItem', 'position': 2, 'name': '人物索引', 'item': peopleUrl },
         { '@type': 'ListItem', 'position': 3, 'name': p.key, 'item': url } ] },
-        { '@context': 'https://schema.org', '@type': 'Person', 'name': p.key, 'url': url, 'description': roles }]
+        { '@context': 'https://schema.org', '@type': 'Person', 'name': (AUTHORITY[p.key] && AUTHORITY[p.key].name) || p.key, 'alternateName': (AUTHORITY[p.key] && AUTHORITY[p.key].name && AUTHORITY[p.key].name !== p.key) ? p.key : undefined, 'url': url, 'description': roles }]
     });
     ph = ph.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="' + escAttr(p.key) + '"><ul>' + links + '</ul></nav>');
     fs.mkdirSync(path.join(WIREFRAME, 'people', dir), { recursive: true });

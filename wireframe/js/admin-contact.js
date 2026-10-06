@@ -43,3 +43,26 @@
   // the unread count shows on the menu as soon as the admin page opens
   document.addEventListener('DOMContentLoaded', function () { setTimeout(function () { if (window.sb) window.loadContactMessages(); }, 1500); });
 })();
+
+/* Member-interest list (BOARD 10-07b T86): the count on the dashboard. Sending is member-launch-notify, which refuses
+   until the owner approves (Secrets MEMBER_NOTIFY_ENABLED). */
+window.loadMemberInterestCount = async function () {
+  var host = document.getElementById('member-interest-count');
+  if (!host) {
+    var dash = document.getElementById('sec-dashboard');
+    if (!dash) return;
+    host = document.createElement('div');
+    host.id = 'member-interest-count';
+    host.className = 'stat-card';
+    host.style.marginTop = 'var(--space-sm)';
+    dash.appendChild(host);
+  }
+  var r = await sb.from('member_interest').select('source, created_at, notified_at');
+  if (r.error) { host.textContent = '受付開始のお知らせ名簿: 読み込みエラー'; return; }
+  var rows = r.data || [], by = {};
+  rows.forEach(function (x) { by[x.source || 'unknown'] = (by[x.source || 'unknown'] || 0) + 1; });
+  host.innerHTML = '<strong>受付開始のお知らせ名簿 ' + rows.length + ' 人</strong>（未送信 ' + rows.filter(function (x) { return !x.notified_at; }).length + '）<br><span style="font-size:var(--font-size-xs);color:var(--color-gray);">'
+    + Object.keys(by).map(function (k) { return k + ' ' + by[k]; }).join(' · ')
+    + ' — 一斉送信はオーナーの承認後（Secrets MEMBER_NOTIFY_ENABLED）にだけ動きます。</span>';
+};
+document.addEventListener('DOMContentLoaded', function () { setTimeout(function () { if (window.sb && window.loadMemberInterestCount) window.loadMemberInterestCount(); }, 1800); });

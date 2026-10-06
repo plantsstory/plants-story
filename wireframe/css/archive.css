@@ -1430,3 +1430,25 @@ h2.section-title, .legal-page h2, .section-heading, h2.text-lg.font-bold {
 .people__facts dt { font-family: var(--font-primary); font-size: var(--fs-label); color: var(--color-mid); letter-spacing: 0.02em; }
 .people__facts dd { margin: 0; font-family: var(--font-primary) !important; font-size: var(--fs-body) !important; font-weight: 400; color: var(--color-ink); font-variant-numeric: lining-nums tabular-nums; }
 .people__list .num { margin-left: var(--s2); font-size: var(--fs-small); color: var(--color-mid); }
+
+/* -- T85: what a contributor gets, said first -- */
+.contribute-note { font-size: var(--fs-small); color: var(--color-ink); border-left: 2px solid var(--color-rule-strong); padding: var(--s1) 0 var(--s1) var(--s3); margin: 0 0 var(--s4); }
+
+/* -- T87: board 8 design leftovers -- */
+:root { color-scheme: only light; }                                       /* I8: no forced dark */
+#page-genus .genus-content .card--no-pad, #page-genus .genus-content .card { background: transparent !important; border: 0 !important; box-shadow: none !important; } /* D5 */
+@media (max-width: 640px) { .masthead { display: block !important; } .masthead__main { min-width: 0; } }  /* D6 */
+#page-cultivar .detail-more > summary { font-family: var(--font-primary); font-size: 0.9375rem; color: var(--color-ink); }  /* D11 */
+.record .vote-btn, .vote-btn { min-height: var(--tap) !important; font-family: var(--font-primary) !important; font-size: var(--fs-small) !important; letter-spacing: 0.02em; } /* D12 */
+.record__head { justify-content: flex-start !important; }               /* D13 */
+.record__head .record__trust { font-weight: 500; }
+div:has(> .gallery-carousel .gallery__empty) > .plate-policy { display: none; }  /* D14 */
+.specimen__v a, .record__source a, .record__sources a { padding: 12px 0; margin: -12px 0; }   /* D15: tap area without moving text */
+.mobile-nav { padding-left: 0 !important; padding-right: 0 !important; } /* D17 */
+.mobile-nav a { padding-left: var(--s3) !important; padding-right: var(--s3) !important; }
+.textsize__btn--1 { font-size: 14px !important; } .textsize__btn--2 { font-size: 17px !important; } .textsize__btn--3 { font-size: 20px !important; } /* D18 */
+.legal-page h1 { letter-spacing: 0.02em !important; }                   /* D19 */
+.legal-page p a, .legal-page td a, .legal-page li a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+.header__logo { min-height: var(--tap); display: inline-flex; align-items: center; }   /* D22 */
+#page-contribute label:has(> input[type="radio"]), #page-contribute .form-radio { min-height: var(--tap); display: inline-flex; align-items: center; gap: var(--s2); } /* D23 */
+.related__pos { margin-left: var(--s3); font-size: var(--fs-small); color: var(--color-mid); }  /* I5 */
