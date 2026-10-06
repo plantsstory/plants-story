@@ -36,6 +36,8 @@ jobs:
         run: node scripts/generate-sitemap.js
       - name: Render share cards
         run: node scripts/make-og-cards.js
+      - name: Render Instagram images
+        run: node scripts/make-ig-images.js
       - name: Generate static SEO stub pages
         run: node scripts/generate-static-pages.js
       - uses: actions/configure-pages@v5

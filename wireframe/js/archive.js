@@ -430,6 +430,13 @@
     if (m > max * 0.5) return cut.slice(0, m + 1);
     return cut + '…';
   }
+  var _storyPost = '';
+  document.addEventListener('click', function (e) {
+    var c = e.target.closest && e.target.closest('[data-story-copy]');
+    if (!c || !_storyPost) return;
+    navigator.clipboard.writeText(_storyPost).then(function () { showToast(T('story_copied')); }, function () { showToast(T('story_copy_failed'), true); });
+    if (typeof gtag === 'function') gtag('event', 'share_click', { channel: 'instagram_copy', source: 'story' });
+  });
   function renderStory(all) {
     var body = document.getElementById('story-body');
     var dateEl = document.getElementById('story-date');
@@ -459,6 +466,12 @@
     // no drop cap: the text opens with a scientific name, and a raised first letter splits it ('A nthurium')
     html += '<p class="story__body">' + (window.italicizeSciNames ? window.italicizeSciNames(esc(ex)) : esc(ex)) + '</p>';
     html += link(d, esc(T('story_more')), 'story__more');
+    // for the owner's Instagram post: the text to paste and the 1080×1350 image made in CI (T94)
+    if (d.state === 'ok' && window.ogSlug) {
+      html += '<p class="story__share"><button type="button" class="story__copy" data-story-copy>' + esc(T('story_copy')) + '</button>'
+        + '<a class="story__img" href="' + esc(base + 'images/ig/' + window.ogSlug(d.genus, d.fullName) + '.png') + '" download target="_blank" rel="noopener">' + esc(T('story_save_image')) + '</a></p>';
+      _storyPost = [d.shownName + (citeHtml(d) ? ' — ' + citeHtml(d).replace(/<[^>]+>/g, '') : ''), excerpt(text, 120), (window.getShareUrl ? window.getShareUrl(d.fullName) : ''), '#アンスリウム #Anthurium #AroidOrigins'].filter(Boolean).join('\n\n');
+    }
     body.innerHTML = html;
     if (window.linkGlossaryTerms) window.linkGlossaryTerms(body.querySelector('.story__body'), 3);
   }
@@ -577,7 +590,7 @@
       var countEl = document.getElementById('new-entries-count');
       if (countEl) countEl.textContent = week > 0 ? T('new_entries_week').replace('{n}', week) : '';
     }
-    var html = '<ol class="entries">';
+    var html = '<ol class="entries">', lastDay = '';
     items.forEach(function (item) {
       var origins = (item.origins || []);
       var formula = null;
@@ -589,7 +602,14 @@
       // the map passed in may predate the thumbnails query; fall back to the live one
       if (!thumbMap[d.displayName] && window._thumbMap && window._thumbMap[d.displayName]) thumbMap[d.displayName] = window._thumbMap[d.displayName];
       var thumb = thumbMap[d.displayName] && baseUrl ? (window.galleryImg ? window.galleryImg(thumbMap[d.displayName], 120) : baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[d.displayName]) : '';
-      html += window.entryLine(d, { thumb: thumb, date: stamp ? fmtDate(stamp) : '', noPerson: opts.noPerson, noCountry: opts.noCountry });
+      // new entries: one date heading per day (「2026.10.03 — 8 品種」) instead of the date on every line (T91)
+      var day = stamp ? fmtDate(stamp) : '';
+      if (withDate && day && day !== lastDay) {
+        lastDay = day;
+        var n = items.filter(function (it) { var st = it.created_at || it.updated_at || ''; return st && fmtDate(st) === day; }).length;
+        html += '<li class="entries__day"><span class="num">' + esc(day) + '</span> — ' + esc(T('entries_day_count').replace('{n}', n)) + '</li>';
+      }
+      html += window.entryLine(d, { thumb: thumb, date: '', noPerson: opts.noPerson, noCountry: opts.noCountry });
     });
     html += '</ol>';
     grid.innerHTML = html;
@@ -685,6 +705,60 @@
     var note = d.nameStatus === 'disputed' ? T('name_status_disputed') : d.formulaStatus === 'disputed' ? T('formula_disputed') : d.nameStatus === 'trade' ? T('name_status_trade') : d.nameStatus === 'informal' ? T('name_status_informal') : '';
     el.innerHTML = (cells ? '<div class="specimen">' + cells + '</div>' : '') + (note ? '<p class="specimen__note">' + esc(note) + '</p>' : '');
   }
+  /* ---------- specimen labels to print (BOARD 10-07b T89) ---------- */
+  var _labelEntry = null;
+  function loadQr(cb) {
+    if (window.qrcode) { cb(); return; }
+    var sc = document.createElement('script');
+    sc.src = base + 'js/vendor/qrcode.js';
+    sc.onload = function () { cb(); };
+    sc.onerror = function () { showToast(T('label_qr_error'), true); };
+    document.head.appendChild(sc);
+  }
+  function labelHtml(d) {
+    var url = window.getShareUrl ? window.getShareUrl(d.fullName) : 'https://plantsstory.com/';
+    var q = window.qrcode(0, 'M'); q.addData(url); q.make();
+    var qr = q.createSvgTag({ cellSize: 2, margin: 0, scalable: true });
+    var species = d.type === 'species' && !d.isIndividual;
+    var who = species ? d.author : (d.breeder || d.namer || d.creator);
+    var year = species ? d.pubYear : (d.namingYear || d.year);
+    var place = species ? countryLabel(d.country || d.locality) : (d.parentA || d.parentB ? (d.parentA || '?') + ' × ' + (d.parentB || '?') : '');
+    var ver = d.verifiedAt ? '✓ ' + T('verified_label') + ' ' + fmtDate(d.verifiedAt) : '';
+    return '<div class="lb"><div class="lb__t"><p class="lb__k">' + esc(kindWord(d)) + '</p><p class="lb__n">' + sciNameHtml(d.shownName) + '</p>'
+      + (who ? '<p class="lb__l">' + esc(who) + (year ? ' · ' + year : '') + '</p>' : (year ? '<p class="lb__l">' + year + '</p>' : ''))
+      + (place ? '<p class="lb__l">' + sciNameHtml(place) + '</p>' : '')
+      + (ver ? '<p class="lb__v">' + esc(ver) + '</p>' : '') + '<p class="lb__s">Aroid Origins</p></div><div class="lb__q">' + qr + '</div></div>';
+  }
+  function printLabels(d) {
+    var w = window.open('', '_blank');
+    if (!w) { showToast(T('label_popup'), true); return; }
+    var one = labelHtml(d);
+    var page = '<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>' + esc(d.shownName) + ' — label</title>'
+      + '<style>@page{size:A4;margin:10mm}body{margin:0;font-family:"BIZ UDPGothic","Noto Sans JP",sans-serif;color:#1E2622}'
+      + '.bar{padding:12px;font-size:14px;display:flex;gap:12px;align-items:center}.bar select,.bar button{font-size:16px;min-height:44px;padding:0 12px}'
+      + '.sheet{display:grid;grid-template-columns:91mm 91mm;grid-auto-rows:55mm;gap:4mm;justify-content:center}'
+      + '.lb{box-sizing:border-box;border:0.3mm solid #1E2622;padding:4mm;display:flex;gap:3mm;overflow:hidden}.lb__t{flex:1;min-width:0}'
+      + '.lb__k{margin:0;font-size:8pt;color:#5B655F}.lb__n{margin:1mm 0 2mm;font-family:"Cormorant Garamond","Shippori Mincho",serif;font-weight:600;font-size:13pt;line-height:1.15}'
+      + '.lb__l{margin:0 0 1mm;font-size:8.5pt}.lb__v{margin:1mm 0 0;font-size:7.5pt;color:#2F5D4A}.lb__s{margin:2mm 0 0;font-size:7pt;letter-spacing:.12em;color:#5B655F}'
+      + '.lb__q{width:20mm;flex:0 0 20mm;align-self:flex-end}.lb__q svg{width:20mm;height:20mm;display:block}'
+      + '@media print{.bar{display:none}}</style></head><body>'
+      + '<div class="bar"><label>' + esc(T('label_count')) + ' <select id="n"><option>1</option><option>2</option><option>4</option><option selected>8</option></select></label>'
+      + '<button onclick="window.print()">' + esc(T('label_do_print')) + '</button></div><div class="sheet" id="s"></div>'
+      + '<script>var one=' + JSON.stringify(one).replace(/</g, '\\u003c') + ';function draw(){var n=+document.getElementById("n").value,h="";for(var i=0;i<n;i++)h+=one;document.getElementById("s").innerHTML=h;}document.getElementById("n").onchange=draw;draw();<\/script>'
+      + '</body></html>';
+    w.document.write(page); w.document.close();
+    if (typeof gtag === 'function') gtag('event', 'label_print', { cultivar: d.displayName, member: !!window._isSubscribed });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('#detail-print-label');
+    if (!b) return;
+    e.preventDefault();
+    if (!_labelEntry) return;
+    if (!window._currentUser) { showToast(T('label_login'), false); if (window.startGoogleLogin) window.startGoogleLogin(location.pathname, 'label_print'); return; }
+    var d = _labelEntry;
+    loadQr(function () { printLabels(d); });
+  });
+
   /* share text: {name} — {describer or breeder} {year}、{type locality or parentage}｜Aroid Origins {URL} */
   window.shareTextFor = function (d) {
     var who = d.type === 'species' ? d.author : (d.breeder || d.namer || d.creator);
@@ -1136,6 +1210,9 @@
     setUnrecorded(false);
     var d = describe(key in store ? key : (store[displayName] ? displayName : (store[displayName + ' [Seedling]'] ? displayName + ' [Seedling]' : key)), entry, entry._type || _detailArgs[2]);
     renderSpecimen(d, all);
+    _labelEntry = d.type === 'seedling' ? null : d;
+    var plb = document.getElementById('detail-print-label');
+    if (plb) plb.classList.toggle('d-none', d.type === 'seedling');
     renderRelated(d, all);
     renderIndividuals(d, all);
     renderGateNote(d);

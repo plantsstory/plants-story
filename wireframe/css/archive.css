@@ -1449,6 +1449,52 @@ div:has(> .gallery-carousel .gallery__empty) > .plate-policy { display: none; } 
 .textsize__btn--1 { font-size: 14px !important; } .textsize__btn--2 { font-size: 17px !important; } .textsize__btn--3 { font-size: 20px !important; } /* D18 */
 .legal-page h1 { letter-spacing: 0.02em !important; }                   /* D19 */
 .legal-page p a, .legal-page td a, .legal-page li a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
-.header__logo { min-height: var(--tap); display: inline-flex; align-items: center; }   /* D22 */
 #page-contribute label:has(> input[type="radio"]), #page-contribute .form-radio { min-height: var(--tap); display: inline-flex; align-items: center; gap: var(--s2); } /* D23 */
 .related__pos { margin-left: var(--s3); font-size: var(--fs-small); color: var(--color-mid); }  /* I5 */
+
+/* -- T91: new entries under one date heading per day -- */
+.entries__day { list-style: none; padding: var(--s3) 0 var(--s1); font-family: var(--font-primary); font-size: var(--fs-label); color: var(--color-mid); border-bottom: 1px solid var(--color-rule); }
+.entries__day:first-child { padding-top: var(--s2); }
+.entries__day .num { color: var(--color-ink); font-weight: 600; }
+/* -- T90: no photo on a phone = one dashed band, so the record starts on the first screen; photos capped at 70svh -- */
+@media (max-width: 640px) {
+  .gallery:has(> .gallery__empty) { aspect-ratio: auto !important; min-height: 0 !important; height: auto !important; }
+  .gallery-carousel:has(.gallery__empty) .gallery-carousel__viewport { aspect-ratio: auto !important; height: auto !important; min-height: 0 !important; }
+  .gallery__empty .sheet--plate { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); min-height: 56px; padding: var(--s2) var(--s3) !important; margin: 0; }
+  .gallery__empty .sheet--plate .sheet__note { display: none; }
+  .gallery__empty .sheet--plate .sheet__title { margin: 0; font-size: var(--fs-small); color: var(--color-mid); }
+  .gallery__empty .sheet--plate .sheet__cta { margin: 0; min-height: var(--tap); }
+  .gallery__img, .gallery__img-full { max-height: 70svh; }
+  .gallery__img { aspect-ratio: auto; }
+  .gallery__img-full { object-fit: contain; }
+}
+
+/* -- T92: the contribute form as one column of ruled sections -- */
+#page-contribute .card { background: transparent !important; border: 0 !important; border-top: 1px solid var(--color-ink) !important; border-radius: 0 !important; box-shadow: none !important; padding: var(--s3) 0 0 !important; }
+#page-contribute .structured-fieldset { border: 0 !important; padding: 0 !important; margin: 0 0 var(--s3) !important; background: transparent !important; }
+#page-contribute .structured-fieldset__legend { font-family: var(--font-primary); font-size: var(--fs-label); color: var(--color-mid) !important; padding: 0 !important; margin: 0 0 var(--s2); }
+#page-contribute .form-input, #page-contribute .form-select, #page-contribute .form-textarea { width: 100%; max-width: none; font-size: var(--fs-body); min-height: var(--tap); }
+#page-contribute .form-label { font-size: var(--fs-small); color: var(--color-ink); font-weight: 500; }
+#page-contribute .upload-area__text, #page-contribute .upload-area__hint { color: var(--color-mid) !important; font-size: var(--fs-small) !important; }
+#page-contribute .form-radio-group { display: flex; flex-direction: column; gap: 0; }
+#page-contribute .form-radio { display: grid !important; grid-template-columns: auto 1fr; column-gap: var(--s2); align-items: baseline; padding: var(--s2) 0; border-bottom: 1px solid var(--color-rule); min-height: var(--tap); }
+#page-contribute .type-def { grid-column: 2; font-size: var(--fs-small); color: var(--color-mid); line-height: 1.5; }
+.contribute-fold { margin: var(--s2) 0 var(--s3); }
+.contribute-fold > summary { cursor: pointer; min-height: var(--tap); display: inline-flex; align-items: center; font-size: 0.9375rem; font-weight: 500; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
+@media (max-width: 640px) { #page-contribute .container, #page-contribute .container--narrow { padding-left: var(--s3); padding-right: var(--s3); } #page-contribute .structured-form-grid { grid-template-columns: 1fr !important; } }
+
+/* -- T93: keep the page still while data arrives (reserve the space the lists and the label will take) -- */
+.genus-content .card--no-pad:empty, #people-body:has(> .loading-text), #locality-body:has(> .loading-text) { min-height: 70vh; }
+#recently-updated-grid:has(> .loading-text) { min-height: 560px; }
+#story-body:has(> .loading-text) { min-height: 520px; }
+#archive-index-body:has(> .loading-text) { min-height: 360px; }
+#detail-actions { min-height: var(--tap); }
+.loading-text { color: transparent; }
+
+/* -- T94: today's leaf → Instagram -- */
+.story__share { display: flex; flex-wrap: wrap; gap: 0 var(--s3); margin: var(--s2) 0 0; }
+.story__copy, .story__img { background: none; border: 0; padding: 0; min-height: var(--tap); display: inline-flex; align-items: center; font: inherit; font-size: var(--fs-small); color: var(--color-mid); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; cursor: pointer; }
+/* D13: the record head reads as one line — 出典 S · 95% · 2026.04.02 */
+.record__head .record__trust, .record__head .record__date { margin-left: 0 !important; }
+.record__head > span + span::before { content: '·'; margin-right: var(--s2); color: var(--color-mid); font-weight: 400; }
+.record__trust.trust--low { color: var(--color-ink); }

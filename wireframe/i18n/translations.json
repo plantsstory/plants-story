@@ -2367,5 +2367,49 @@
   "contribute_note": {
     "jp": "投稿者名は人物索引と系統図に載ります。あなたの実生ページは、共有するとカードつきで表示されます。",
     "en": "Your name appears in the people index and the lineage. Your seedling page shows a card when shared."
+  },
+  "entries_day_count": {
+    "jp": "{n} 品種",
+    "en": "{n} entries"
+  },
+  "label_print": {
+    "jp": "ラベルを印刷",
+    "en": "Print a label"
+  },
+  "label_count": {
+    "jp": "枚数",
+    "en": "Copies"
+  },
+  "label_do_print": {
+    "jp": "印刷 / PDF に保存",
+    "en": "Print / save as PDF"
+  },
+  "label_login": {
+    "jp": "ラベルの印刷にはログインが必要です（無料）",
+    "en": "Log in to print labels (free)"
+  },
+  "label_popup": {
+    "jp": "ポップアップを許可してください",
+    "en": "Please allow pop-ups"
+  },
+  "label_qr_error": {
+    "jp": "QR コードを作れませんでした。時間をおいてお試しください",
+    "en": "Could not make the QR code. Please try again later"
+  },
+  "story_copy": {
+    "jp": "投稿文をコピー",
+    "en": "Copy post text"
+  },
+  "story_save_image": {
+    "jp": "画像を保存",
+    "en": "Save image"
+  },
+  "story_copied": {
+    "jp": "投稿文をコピーしました",
+    "en": "Copied"
+  },
+  "story_copy_failed": {
+    "jp": "コピーできませんでした",
+    "en": "Could not copy"
   }
 }

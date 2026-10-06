@@ -15,8 +15,8 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.yahoo.co.jp https://i.moshimo.com; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJK72JH471"></script>
-  <script src="js/textsize.js?v=20261007s"></script>
-  <script src="js/gtag-init.js?v=20261007s"></script>
+  <script src="js/textsize.js?v=20261007v"></script>
+  <script src="js/gtag-init.js?v=20261007v"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -55,13 +55,13 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20261007s">
-  <link rel="stylesheet" href="css/reset.css?v=20261007s">
-  <link rel="stylesheet" href="css/layout.css?v=20261007s">
-  <link rel="stylesheet" href="css/components.css?v=20261007s">
-  <link rel="stylesheet" href="css/pages.css?v=20261007s">
-  <link rel="stylesheet" href="css/utilities.css?v=20261007s">
-  <link rel="stylesheet" href="css/archive.css?v=20261007s">
+  <link rel="stylesheet" href="css/variables.css?v=20261007v">
+  <link rel="stylesheet" href="css/reset.css?v=20261007v">
+  <link rel="stylesheet" href="css/layout.css?v=20261007v">
+  <link rel="stylesheet" href="css/components.css?v=20261007v">
+  <link rel="stylesheet" href="css/pages.css?v=20261007v">
+  <link rel="stylesheet" href="css/utilities.css?v=20261007v">
+  <link rel="stylesheet" href="css/archive.css?v=20261007v">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -102,7 +102,7 @@
     <span id="mobile-nav-genera"></span>
     <a href="/people/" data-nav="people" data-i18n="nav_people">人物索引</a>
     <a href="/locality/" data-nav="locality" data-i18n="locality_title">産地索引</a>
-    <a href="/glossary/" data-nav="glossary" data-i18n="glossary_title">用語集</a>
+    <a href="/glossary/" data-nav="glossary" data-i18n="glossary_title">由来の用語集</a>
     <a href="/tools/" data-nav="tools" data-tools-link class="d-none" data-i18n="tools_nav">道具</a>
     <a href="#" data-nav="contribute" data-i18n="nav_contribute_mobile">品種を投稿</a>
     <a href="#" data-nav="mypost" id="nav-mypost" class="d-none">投稿履歴</a>
@@ -254,6 +254,7 @@
           <summary class="mono" data-i18n="detail_more">その他</summary>
           <div class="detail-more__items">
             <a href="#" class="btn btn--sm btn--secondary font-xs-btn d-none" id="detail-add-individual" data-nav="contribute" data-contribute-type="individual" data-i18n="detail_add_individual">個体を追加</a>
+            <button type="button" class="btn btn--sm btn--secondary cursor-pointer font-xs-btn" id="detail-print-label" data-i18n="label_print">ラベルを印刷</button>
             <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn d-none" id="detail-rerun-btn" data-i18n="rerun_request_btn">再調査を依頼</button>
             <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn d-none" id="detail-private-btn"></button>
             <span class="mono d-none" id="detail-rerun-status"></span>
@@ -385,7 +386,7 @@
 
             <!-- Shared: 引用リンク -->
             <div class="form-group">
-              <label class="form-label" data-i18n="label_sources">引用リンク</label>
+              <label class="form-label" data-i18n="label_sources">情報元リンク</label>
               <div class="flex gap-sm mb-sm">
                 <input type="url" class="form-input flex-1" placeholder="https://...">
                 <button class="btn btn--secondary">+ 追加</button>
@@ -533,22 +534,22 @@
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="species" checked>
               <span data-i18n="type_species">原種</span>
-              <span class="type-hint" data-hint="学術的に記載された種と未記載種等も含む">?<span class="type-hint__popup">学術的に記載された種と未記載種等も含む</span></span>
+              <span class="type-def">学名が発表されている種。sp. / aff. / cf. の未記載もここ</span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="hybrid">
               <span data-i18n="type_hybrid">Hybrid</span>
-              <span class="type-hint" data-hint="交配式につく品種名（例: 特定の親で作られたF1の不特定多数の選抜個体につく名前）">?<span class="type-hint__popup">交配式につく品種名（例: 特定の親で作られたF1の不特定多数の選抜個体につく名前）</span></span>
+              <span class="type-def">ひとつの交配式から生まれた実生群の名前</span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="clone">
               <span data-i18n="type_clone">Clone</span>
-              <span class="type-hint" data-hint="特定の個体についた品種名（selfやF個体等の画像掲載可能）">?<span class="type-hint__popup">特定の個体についた品種名（selfやF個体等の画像掲載可能）</span></span>
+              <span class="type-def">1 株（オリジナル個体）とその株分け・組織培養株の名前</span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="seedling">
               <span data-i18n="type_seedling">実生 (Seedling)</span>
-              <span class="type-hint" data-hint="趣味家の播種記録公開用">?<span class="type-hint__popup">趣味家の播種記録公開用</span></span>
+              <span class="type-def">自分で播いた記録（交配式・播種日・作出者）</span>
             </label>
           </div>
         </div>
@@ -583,19 +584,20 @@
           <div class="structured-fieldset">
             <div class="structured-fieldset__legend">記載情報</div>
             <div class="structured-form-grid">
-              <div class="form-group"><label class="form-label">発表者 (Author)</label><input type="text" id="sf-author-name" class="form-input" placeholder="例: Engl."></div>
+              <div class="form-group"><label class="form-label">記載者</label><input type="text" id="sf-author-name" class="form-input" placeholder="例: Engl."></div>
               <div class="form-group"><label class="form-label">発表年 (Year)</label><input type="number" id="sf-publication-year" class="form-input" placeholder="例: 1898" min="1700" max="2100"></div>
             </div>
           </div>
           <div class="structured-fieldset">
-            <div class="structured-fieldset__legend">採取情報</div>
+            <details class="contribute-fold"><summary>採集の情報（わかれば）</summary>
             <div class="structured-form-grid">
-              <div class="form-group"><label class="form-label">発見者 (Collector)</label><input type="text" id="sf-collector" class="form-input" placeholder="例: Thomas B. Croat"></div>
-              <div class="form-group"><label class="form-label">採取年 (Collection year)</label><input type="number" id="sf-collection-year" class="form-input" placeholder="例: 1975" min="1700" max="2100"></div>
+              <div class="form-group"><label class="form-label">採集者</label><input type="text" id="sf-collector" class="form-input" placeholder="例: Thomas B. Croat"></div>
+              <div class="form-group"><label class="form-label">採集年</label><input type="number" id="sf-collection-year" class="form-input" placeholder="例: 1975" min="1700" max="2100"></div>
             </div>
-            <div class="form-group"><label class="form-label">採取地 (Type locality)</label><input type="text" id="sf-type-locality" class="form-input" placeholder="例: Colombia, Antioquia"></div>
+            <div class="form-group"><label class="form-label">タイプ産地</label><input type="text" id="sf-type-locality" class="form-input" placeholder="例: Colombia, Antioquia"></div>
+          </details>
           </div>
-          <div class="form-group"><label class="form-label">現在わかっている生息地</label><textarea id="sf-known-habitats" class="form-textarea" rows="2" placeholder="例: コロンビア、エクアドル、ペルーの熱帯雨林"></textarea></div>
+          <div class="form-group"><label class="form-label">分布</label><textarea id="sf-known-habitats" class="form-textarea" rows="2" placeholder="例: コロンビア、エクアドル、ペルーの熱帯雨林"></textarea></div>
         </div>
 
         <!-- ② Clone fields -->
@@ -696,7 +698,7 @@
 
         <!-- Shared: 引用リンク (all types) -->
         <div class="form-group">
-          <label class="form-label" data-i18n="label_sources">引用リンク</label>
+          <label class="form-label" data-i18n="label_sources">情報元リンク</label>
           <div class="flex gap-sm mb-sm">
             <input type="url" class="form-input flex-1" placeholder="https://...">
             <button class="btn btn--secondary">+ 追加</button>
@@ -759,7 +761,7 @@
       <p data-i18n="terms_1_body">本規約は、Aroid Origins（以下「本サービス」）を利用するすべてのユーザーに適用されます。本サービスを利用した時点で、本規約に同意したものとみなします。閲覧はアカウント登録なしで利用でき、投稿などの一部機能にはGoogleアカウントによるログインが必要です。</p>
 
       <h2 data-i18n="terms_2_title">第2条 サービスの内容</h2>
-      <p data-i18n="terms_2_body">本サービスは、植物の品種（原種・ハイブリッド・クローン）の由来情報を収集・共有するプラットフォームです。主な機能は以下の通りです：</p>
+      <p data-i18n="terms_2_body">本サービスは、植物の品種（原種・Hybrid・Clone・実生）の由来情報を収集・共有するプラットフォームです。主な機能は以下の通りです：</p>
       <ul class="terms-list" data-i18n-list="terms_2_list">
         <li>品種由来情報の閲覧</li>
         <li>由来情報の投稿（要ログイン・ニックネーム表示）</li>
@@ -1002,7 +1004,7 @@
         <tr><th data-i18n="tokushoho_howcancel_label">解約方法</th><td data-i18n="tokushoho_howcancel_value">ログイン後、プロフィール編集ページからいつでも解約できます。解約後も現在の契約期間の満了日まで利用でき、以降の請求は発生しません</td></tr>
         <tr>
           <th data-i18n="tokushoho_cancel_label">返品・キャンセル</th>
-          <td data-i18n="tokushoho_cancel_value">デジタルサービスの性質上、決済後の返金・日割り返金は行いません。解約はログイン後のプロフィール編集ページから随時可能で、解約後も現在の契約期間の満了日までご利用いただけます。当サイトの不具合によりサービスを提供できなかった場合は個別に対応します</td>
+          <td data-i18n="tokushoho_cancel_value">デジタルサービスのため返品はお受けできません。解約はプロフィール編集ページから随時可能です。解約後も現在の契約期間終了まではサービスをご利用いただけます</td>
         </tr>
         <tr>
           <th data-i18n="tokushoho_env_label">動作環境</th>
@@ -1096,7 +1098,7 @@
       </ol>
 
       <h2>標本ラベルの印刷</h2>
-      <p>品種ページから、名前・記載者・年・QR コードを入れた標本ラベルを印刷できるようにします（準備中）。</p>
+      <p>品種ページの「その他」→「ラベルを印刷」で、名前・記載者または作出者・年・産地・検証の行と、そのページへの QR コードを入れたラベルを A4 に 8 枚まで印刷できます（ログインが必要。いまは無料）。QR はこのサイトの品種ページだけを指します。</p>
 
       <h2>会員</h2>
       <p>閲覧と投稿は無料です。実生ノートを6件目以降も残したい人、非公開の記録を増やしたい人のために会員があります。内容と料金は<a href="/pricing/" data-nav="pricing">料金ページ</a>をご覧ください。</p>
@@ -1237,7 +1239,7 @@
        ======================================== -->
   <section id="page-glossary" class="page">
     <div class="container container--narrow legal-page">
-      <nav class="breadcrumb" aria-label="パンくずリスト"><a href="/" data-nav="top">トップ</a><span class="breadcrumb__sep">/</span><span data-i18n="glossary_title">用語集</span></nav>
+      <nav class="breadcrumb" aria-label="パンくずリスト"><a href="/" data-nav="top">トップ</a><span class="breadcrumb__sep">/</span><span data-i18n="glossary_title">由来の用語集</span></nav>
       <h1 data-i18n="glossary_title">由来の用語集</h1>
       <p class="legal-date" data-i18n="glossary_intro">品種の由来ページに出てくる言葉を、このサイトでの使い方に沿って説明します。</p>
 
@@ -1532,8 +1534,8 @@
       <div class="footer__links">
         <a href="#" data-nav="about" data-i18n="footer_about">この図鑑について</a>
         <a href="#" data-nav="guide" data-i18n="footer_guide">使い方</a>
-        <a href="/pricing/" data-nav="pricing" data-i18n="pricing_title">料金</a>
-        <a href="/glossary/" data-nav="glossary" data-i18n="glossary_title">用語集</a>
+        <a href="/pricing/" data-nav="pricing" data-i18n="pricing_title">料金とサービス内容</a>
+        <a href="/glossary/" data-nav="glossary" data-i18n="glossary_title">由来の用語集</a>
         <a href="/people/" data-nav="people" data-i18n="people_title">人物索引</a>
         <a href="/locality/" data-nav="locality" data-i18n="locality_title">産地索引</a>
         <a href="/tools/" data-nav="tools" data-tools-link class="d-none" data-i18n="tools_nav">道具</a>
@@ -1556,14 +1558,14 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/record-gate.js?v=20261007s"></script>
-  <script src="js/app-core.js?v=20261007s"></script>
-  <script src="js/pages.js?v=20261007s"></script>
-  <script src="js/forms.js?v=20261007s"></script>
-  <script src="js/entry-meta.js?v=20261007s"></script>
-  <script src="js/archive.js?v=20261007s"></script>
-  <script src="js/tool-gate.js?v=20261007s"></script>
-  <script src="js/tools.js?v=20261007s"></script>
+  <script src="js/record-gate.js?v=20261007v"></script>
+  <script src="js/app-core.js?v=20261007v"></script>
+  <script src="js/pages.js?v=20261007v"></script>
+  <script src="js/forms.js?v=20261007v"></script>
+  <script src="js/entry-meta.js?v=20261007v"></script>
+  <script src="js/archive.js?v=20261007v"></script>
+  <script src="js/tool-gate.js?v=20261007v"></script>
+  <script src="js/tools.js?v=20261007v"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1573,7 +1575,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261007s"></script>
+  <script src="js/dialogs.js?v=20261007v"></script>
 
   <!-- AI re-research request dialog -->
   <dialog id="research-request-dialog" class="dialog-clean" aria-labelledby="research-request-title">
@@ -1612,6 +1614,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261007s"></script>
+<script src="js/sw-register.js?v=20261007v"></script>
 </body>
 </html>
