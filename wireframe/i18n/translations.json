@@ -665,8 +665,8 @@
     "en": "The Service may collect the following information:"
   },
   "privacy_2_list": {
-    "jp": "ユーザーが任意で提供する情報: 品種名、由来説明、交配式、情報元URL、アップロード画像\n自動的に収集される情報: ブラウザの種類、言語設定、アクセスしたページ、IPアドレス（サーバーログおよび投稿時のデータベース記録。不正投稿防止のため最大180日間保存後、自動削除されます）\nブラウザに保存されるデータ: 言語設定、ユーザーが追加した品種データ（localStorageを使用、端末内のみ）",
-    "en": "Information you voluntarily provide: cultivar names, origin descriptions, breeding formulas, source URLs, uploaded images\nAutomatically collected information: browser type, language preference, pages visited, IP address (server logs and database records at time of submission, stored for up to 180 days for spam prevention, then automatically deleted)\nData stored in your browser: language preference, user-added cultivar data (via localStorage, stored locally only)"
+    "jp": "ユーザーが任意で提供する情報: 品種名、由来説明、交配式、情報元URL、アップロード画像\nGoogleアカウント情報（OAuth認証利用時）: メールアドレス、表示名、プロフィール画像URL\n自動的に収集される情報: ブラウザの種類、言語設定、アクセスしたページ、IPアドレス（サーバーログおよび投稿時のデータベース記録。不正投稿防止のため最大180日間保存後、自動削除されます）\nブラウザに保存されるデータ: 言語設定、ユーザーが追加した品種データ（localStorageを使用、端末内のみ）",
+    "en": "Information you voluntarily provide: cultivar names, origin descriptions, breeding formulas, source URLs, uploaded images\nGoogle account information (when signing in with OAuth): email address, display name, profile image URL\nAutomatically collected information: browser type, language preference, pages visited, IP address (server logs and database records at time of submission, stored for up to 180 days for spam prevention, then automatically deleted)\nData stored in your browser: language preference, user-added cultivar data (via localStorage, stored locally only)"
   },
   "privacy_3_title": {
     "jp": "3. ブラウザへの保存（localStorage）",
@@ -809,8 +809,8 @@
     "en": "Price"
   },
   "tokushoho_price_value": {
-    "jp": "会員: 月額 500円（税込）／ 年額 5,000円（税込）。詳細は<a href=\"#\" data-nav=\"pricing\">料金とサービス内容</a>",
-    "en": "Membership: ¥500/month or ¥5,000/year (tax included). See <a href=\"#\" data-nav=\"pricing\">Pricing</a>"
+    "jp": "会員: 月額 500円（税込）／ 年額 5,000円（税込）。",
+    "en": "Membership: ¥500/month or ¥5,000/year (tax included). "
   },
   "tokushoho_payment_label": {
     "jp": "支払方法",
@@ -2247,5 +2247,9 @@
   "terms_9d_body": {
     "jp": "取扱店の掲載（事業者向け）は月額1,000円（税込）、初月無料です。月末締めで翌月末までに銀行振込でお支払いいただきます（振込手数料は掲載者の負担）。解約はお申し出の翌月末までです。掲載内容は運営者が審査し、掲載を断る・取りやめる場合があります。掲載欄には PR と表示し、掲載は品種の記録や信頼度に影響しません。当サイトは適格請求書発行事業者ではありません。",
     "en": "Shop listings (for businesses) cost ¥1,000 a month (tax included), first month free, invoiced at month end and paid by bank transfer by the end of the following month (transfer fees borne by the shop). Cancellation takes effect at the end of the month after notice. The operator reviews listings and may decline or withdraw them. Listings are marked PR and never affect records or trust levels. This site is not a registered qualified-invoice issuer."
+  },
+  "tokushoho_price_link": {
+    "jp": "料金とサービス内容",
+    "en": "Pricing"
   }
 }

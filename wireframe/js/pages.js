@@ -1509,6 +1509,8 @@ function paginateGenusFromServer(genusEl, page) {
     }
 
     var total = res.data.total || 0;
+    var countEl = genusEl.querySelector('.text-muted.mb-lg');
+    if (countEl && !searchQuery) countEl.textContent = total + ' ' + t('cultivars_registered');
     var items = (res.data.items || []).map(rpcRowToItem);
     var totalPages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
     if (page > totalPages) page = totalPages;

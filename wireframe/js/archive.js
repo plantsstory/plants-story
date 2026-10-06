@@ -390,7 +390,7 @@
     Object.keys(decades).sort(function (a, b) { return a - b; }).forEach(function (k) {
       html += '<li class="timeline__decade"><span class="mono">' + k + 's</span><div>';
       decades[k].forEach(function (d) {
-        html += link(d, esc(d.epithet) + '<span class="num">' + d.pubYear + '</span>');
+        html += link(d, '<i>' + esc(d.epithet) + '</i><span class="num">' + d.pubYear + '</span>');
       });
       html += '</div></li>';
     });
@@ -437,7 +437,9 @@
       var origins = (item.origins || []);
       var formula = null;
       origins = origins.filter(function (o) { if (o && o._type === 'formula') { formula = o.formula; return false; } return true; });
-      var d = describe(item.cultivar_name, { origins: origins, formula: formula, _type: item.type, _id: item.id }, item.type);
+      // the full entry (tags, verification, parents) when the archive is loaded, else the bare row
+      var cached = (typeof cultivarData !== 'undefined' && cultivarData[item.cultivar_name]) || null;
+      var d = describe(item.cultivar_name, cached || { origins: origins, formula: formula, _type: item.type, _id: item.id }, item.type);
       var bi = (typeof getBadgeInfo === 'function') ? getBadgeInfo(d.type, d.fullName) : { cls: 'badge--' + d.type, txt: d.type };
       if (d.isIndividual) bi = { cls: 'badge--clone', txt: T('type_individual') };
       var trustCls = (typeof getTrustClass === 'function') ? getTrustClass(d.trust) : '';
@@ -675,11 +677,13 @@
 
     var sameCountry = d.country ? others.filter(function (x) { return x.type === 'species' && x.country === d.country; }) : [];
     var samePerson = myPeople.length ? others.filter(function (x) { return peopleOf(x).some(function (p) { return myPeople.indexOf(p) !== -1; }); }) : [];
+    // children come from recorded parents or "selected from" only — a name mentioned in the text is not parentage.
+    // Individuals have their own block, so they are left out here.
     var children = self.length >= 4 ? others.filter(function (x) {
-      if (x.type === 'species') return false;
+      if (x.type === 'species' || x.isIndividual) return false;
+      if (d.id && x.selectedFrom === d.id) return true;
       var ps = [normParent(x.parentA), normParent(x.parentB)];
-      if (ps.indexOf(self) !== -1 || ps.some(function (p) { return p && p.indexOf(self) !== -1; })) return true;
-      return new RegExp('(^|[^a-z])' + self.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^a-z]|$)', 'i').test(x.text);
+      return ps.indexOf(self) !== -1 || ps.some(function (p) { return p && p.indexOf(self) !== -1; });
     }) : [];
     var siblings = myParents.length ? others.filter(function (x) {
       var ps = [normParent(x.parentA), normParent(x.parentB)].filter(Boolean);

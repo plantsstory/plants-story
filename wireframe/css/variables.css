@@ -31,20 +31,20 @@
   --color-danger-bg: #F4E4E1;
   --color-warning: #A8712E;
   --color-trust-high: #2F5D4A;
-  --color-trust-mid: #A8712E;
+  --color-trust-mid: var(--color-ink);
   --color-trust-low: #B9B1A0;
 
   /* Badge / chip palette — typographic labels, one ink each */
   --badge-species-bg: transparent;
-  --badge-species-fg: #2F5D4A;
+  --badge-species-fg: var(--color-ink);
   --badge-hybrid-bg: transparent;
-  --badge-hybrid-fg: #8A5A1E;
+  --badge-hybrid-fg: var(--color-ink);
   --badge-clone-bg: transparent;
-  --badge-clone-fg: #2C5F63;
+  --badge-clone-fg: var(--color-ink);
   --badge-seedling-bg: transparent;
-  --badge-seedling-fg: #5B6B21;
+  --badge-seedling-fg: var(--color-ink);
   --badge-ai-bg: transparent;
-  --badge-ai-fg: #5A5670;
+  --badge-ai-fg: var(--color-ink);
 
   /* Typography */
   /* Display serif: Cormorant for Latin, Shippori for JP */
@@ -52,7 +52,7 @@
   --font-heading: "Noto Sans JP", "BIZ UDPGothic", "Helvetica Neue", Arial, sans-serif;
   --font-heading-en: "Cormorant Garamond", Georgia, serif;
   --font-primary: "Noto Sans JP", "BIZ UDPGothic", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "IBM Plex Mono", "Fira Code", "Courier New", monospace;
+  --font-mono: "IBM Plex Mono", "Noto Sans JP", "BIZ UDPGothic", monospace; /* JP falls to the sans, never to a random face */
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
@@ -84,4 +84,21 @@
 
   /* Transitions */
   --transition: 0.15s ease;
+  /* ===== Board 7 (2026-10-07): one type scale, one spacing scale ===== */
+  --fs-h1: 1.875rem;    /* page name, one per page */
+  --fs-h2: 1.375rem;    /* section heading */
+  --fs-h3: 1.0625rem;   /* list names, terms, sub-heads */
+  --fs-body: 1rem;
+  --fs-small: 0.875rem; /* notes, second lines */
+  --fs-label: 0.75rem;  /* dates, numbers, field names; nothing smaller */
+  --lh-body: 1.85;
+  --lh-head: 1.25;
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 16px;
+  --s4: 24px;
+  --s5: 40px;
+  --tap: 44px;
+  --color-green: var(--color-primary); /* was referenced but never defined */
+  --font-size-md: var(--fs-body);
 }

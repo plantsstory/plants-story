@@ -2096,6 +2096,7 @@ paginateGenus = function(genusEl, page) {
   if (countEl) {
     var slug = genusEl.id.replace('genus-', '');
     var allItems = _genusItems[slug] || [];
+    if (allItems.length === 0 && !_dataFullyLoaded) return; // server path writes its own count
     var scope = getActiveView(genusEl);
     var isSeedling = scope.getAttribute('data-genus-view') === 'seedlings';
     var totalCount = allItems.filter(function(it) { return isSeedling ? it.meta.type === 'seedling' : it.meta.type !== 'seedling'; }).length;
