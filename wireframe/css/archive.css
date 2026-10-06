@@ -1417,3 +1417,16 @@ h2.section-title, .legal-page h2, .section-heading, h2.text-lg.font-bold {
 .entry__seg, .genus-stat-chip { white-space: nowrap; }
 .genus-stat-chip + .genus-stat-chip::before { content: none; }
 .genus-stat-chip:not(:last-child)::after { content: ' ·'; margin-left: var(--s2); color: var(--color-mid); }
+
+/* -- T78: why a field is empty; unsourced parentage -- */
+.absent { color: var(--color-mid); }
+.absent--none { font-size: var(--fs-small); }
+.lineage__row--unconfirmed .lineage__node { border-style: dashed; }
+.lineage__note { text-align: center; font-size: var(--fs-label); color: var(--color-mid); margin: var(--s1) 0 0; }
+
+/* -- T80 / D7: people and place facts as rows (label 12px, value in the body size, lining figures) -- */
+.people__facts { display: block !important; margin: 0 0 var(--s4); border-top: 1px solid var(--color-rule); }
+.people__facts > div { display: grid; grid-template-columns: 7em 1fr; column-gap: var(--s2); align-items: baseline; padding: var(--s2) 0; border-bottom: 1px solid var(--color-rule); }
+.people__facts dt { font-family: var(--font-primary); font-size: var(--fs-label); color: var(--color-mid); letter-spacing: 0.02em; }
+.people__facts dd { margin: 0; font-family: var(--font-primary) !important; font-size: var(--fs-body) !important; font-weight: 400; color: var(--color-ink); font-variant-numeric: lining-nums tabular-nums; }
+.people__list .num { margin-left: var(--s2); font-size: var(--fs-small); color: var(--color-mid); }

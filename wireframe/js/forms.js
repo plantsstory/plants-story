@@ -2908,6 +2908,21 @@ if (window._pageCleanups) {
 // ========================================
 // CONTACT FORM - real submission (contact_messages table via RPC)
 // ========================================
+// /contact/?c=shop (or a link with data-contact-category) opens with the category chosen and, for shops, an outline
+window.prefillContact = function(cat) {
+  var sel = document.getElementById('contact-category');
+  var msg = document.getElementById('contact-message');
+  if (!sel || !cat || !sel.querySelector('option[value="' + cat + '"]')) return;
+  sel.value = cat;
+  if (cat === 'shop' && msg && !msg.value.trim()) msg.value = t('contact_shop_template');
+};
+document.addEventListener('click', function(e) {
+  var a = e.target.closest && e.target.closest('[data-contact-category]');
+  if (a) setTimeout(function() { window.prefillContact(a.getAttribute('data-contact-category')); }, 0);
+});
+(function() {
+  try { var c = new URLSearchParams(location.search).get('c'); if (c) setTimeout(function() { window.prefillContact(c); }, 0); } catch (e) { /* ignore */ }
+})();
 (function() {
   var submitBtn = document.getElementById('contact-submit');
   if (!submitBtn) return;
@@ -2957,6 +2972,11 @@ if (window._pageCleanups) {
         return;
       }
       showToast(t('contact_success'));
+      // one notice to the operator (contact-notify sends to a fixed address only; failures are silent)
+      if (r.id && window._SUPABASE_URL) {
+        fetch(window._SUPABASE_URL + '/functions/v1/contact-notify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: r.id }) }).catch(function() {});
+      }
+      if (typeof gtag === 'function') gtag('event', 'contact_submit', { category: category });
       nameEl.value = '';
       emailEl.value = '';
       messageEl.value = '';

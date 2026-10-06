@@ -41,7 +41,7 @@ function topOrigin(origins) {
   os.sort((a, b) => (parseInt(b.trust, 10) || 0) - (parseInt(a.trust, 10) || 0));
   return os[0] || null;
 }
-const ROLE_FIELDS = [['author_name', 'author'], ['collector', 'collector'], ['breeder', 'breeder'], ['namer', 'namer']];
+const ROLE_FIELDS = [['author_name', 'author'], ['collector', 'collector'], ['breeder', 'breeder'], ['namer', 'namer'], ['introduced_by', 'introducer']];
 // -> [{ key, role }] for one cultivar row
 function peopleOfRow(row) {
   const o = topOrigin(row.origins);

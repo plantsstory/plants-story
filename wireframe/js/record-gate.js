@@ -83,6 +83,9 @@
     var longest = Math.max.apply(null, os.map(textLen));
     var q = qualifierOf(rec);
     var p = parentsOf(rec, s);
+    // 'not known' written down as a fact (BOARD 10-07b T78): sine loc. in the protologue, no breeder for a trade label
+    var absent = (s.absent && typeof s.absent === 'object') ? s.absent : {};
+    var unconfirmed = (rec.tags || []).indexOf('parentage_unconfirmed') !== -1;
 
     if (type === 'species') {
       var undescribed = (q === 'sp' || q === 'aff' || q === 'cf') || (clean(s.species_status) && clean(s.species_status) !== 'described');
@@ -94,15 +97,15 @@
       } else {
         if (!clean(s.author_name)) missing.push('author');
         if (!(num(s.publication_year) || num(o.discovery_year))) missing.push('year');
-        if (!(clean(s.type_locality) || clean(s.known_habitats) || clean(o.native_region) || clean(rec.locality))) missing.push('place');
+        if (!(clean(s.type_locality) || clean(s.known_habitats) || clean(o.native_region) || clean(rec.locality) || absent.type_locality === 'sine_loc')) missing.push('place');
         if (!(clean(o.first_description) || clean(s.first_description))) missing.push('publication');
         if (!authoritySource) missing.push('source');
       }
     } else if (type === 'hybrid') {
       // not clean(): its NULLISH table would turn 'unknown' into '' and fail every Hybrid with unknown parents
       var fs = String((rec && rec.formula_status) || '').trim().toLowerCase();
-      if (!(p.both || fs === 'unknown' || fs === 'complex')) missing.push('parents');
-      if (!(clean(s.breeder) || clean(s.namer) || num(s.naming_year) || clean(o.discoverer_or_breeder) || p.creator)) missing.push('person');
+      if (!((p.both && !unconfirmed) || fs === 'unknown' || fs === 'complex')) missing.push('parents');
+      if (!(clean(s.breeder) || clean(s.namer) || num(s.naming_year) || clean(o.discoverer_or_breeder) || p.creator || absent.breeder === 'not_applicable')) missing.push('person');
       if (!(anySource || humanLongest >= 80)) missing.push('evidence');
     } else if (type === 'clone') {
       if (isIndividual(rec)) {
@@ -111,8 +114,9 @@
         var facts = 0;
         if (clean(s.namer) || clean(s.breeder) || clean(o.discoverer_or_breeder)) facts++;
         if (num(s.naming_year) || num(o.discovery_year)) facts++;
-        var disputed = ((rec.tags || []).indexOf('disputed_parentage') !== -1) || clean(rec.formula_status).toLowerCase() === 'disputed';
-        if ((p.any && !disputed) || rec.selected_from_id) facts++;
+        // a disputed or unsourced parent / selected-from is not counted as a fact
+        var disputed = ((rec.tags || []).indexOf('disputed_parentage') !== -1) || clean(rec.formula_status).toLowerCase() === 'disputed' || unconfirmed;
+        if (!disputed && (p.any || rec.selected_from_id)) facts++;
         if (humanLongest >= 80) facts++;
         if (anySource) facts++;
         if (facts < 2) missing.push('clone_facts');

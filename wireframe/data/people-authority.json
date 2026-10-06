@@ -241,5 +241,32 @@
   },
   "M. A. Pérez-Farrera": {
     "alias_of": "Pérez-Farr."
+  },
+  "Jay Vannini": {
+    "alias_of": "Vannini"
+  },
+  "Sodiro": {
+    "name": "Luis Sodiro",
+    "years": "1836–1909",
+    "ipni": "Sodiro",
+    "note": ""
+  },
+  "Koch": {
+    "name": "Karl Heinrich Emil Koch",
+    "years": "1809–1879",
+    "ipni": "K.Koch",
+    "note": ""
+  },
+  "Haage": {
+    "name": "A. Haage",
+    "years": "",
+    "ipni": "A.Haage",
+    "note": "IPNI に本名の記載なし"
+  },
+  "John Banta": {
+    "name": "John Banta",
+    "years": "",
+    "ipni": "",
+    "note": "'Dark Mama' の最初の作出者とされる（Vannini の記事）"
   }
 }

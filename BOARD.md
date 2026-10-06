@@ -1,6 +1,6 @@
 # BOARD.md — Aroid Origins 常設ボード 決定台帳
 
-最終更新: 2026-10-07（第7回会議「見た目のまとまり（375px）」）。これが「現行の決定事項」の唯一の台帳。会議録は `docs/board/YYYY-MM-DD.md`（第3回は `2026-09-05b.md`、第4回は `2026-09-07.md`、第5回は `2026-09-30.md`、第6回は `2026-10-03.md`、第7回は `2026-10-07-decisions.md`）、各担当の詳細は `docs/board/2026-09-05-{monetization,taxonomy,content,design}.md`、`2026-09-05b-*.md`、`2026-09-07-*.md`、`2026-10-07-*.md`。
+最終更新: 2026-10-07（第8回会議「告知前の総点検」）。これが「現行の決定事項」の唯一の台帳。会議録は `docs/board/YYYY-MM-DD.md`（第3回は `2026-09-05b.md`、第4回は `2026-09-07.md`、第5回は `2026-09-30.md`、第6回は `2026-10-03.md`、第7回は `2026-10-07-decisions.md`、第8回は `2026-10-07b-decisions.md`）、各担当の詳細は `docs/board/2026-09-05-{monetization,taxonomy,content,design}.md`、`2026-09-05b-*.md`、`2026-09-07-*.md`、`2026-10-07-*.md`、`2026-10-07b-*.md`。
 運営: オーナー（個人のアロイド栽培家、開発しない）／ 開発: Claude Code。判断基準は `.claude/agents/product-owner.md`（①売上直結 ②由来の正確性＝信頼 ③1セッションで終わる ④可逆）。
 **オーナー委任（09-05）**: 「何を削り、何を増やすか、料金や何を有料にするか」はボードが決める。オーナーに聞くのは本人にしかできない作業だけ。**オーナー指示（上書き）**: 由来調査の有料化はしない／住所・電話は非公開／AI 生成の植物図版は不採用／品質を決済より先に／**Stripe は放置し PAY.JP を開業届の直後に申請（09-30）**／**園芸道具のページ（楽天・Yahoo!・Amazon、ジャンル別検索、一覧 → 商品説明）を作る（09-30 オーナー指示 → 「道具の目録」§2・§2-3・T44〜T47）**／Amazon はもしもアフィリエイト経由（09-30）。
 
@@ -21,6 +21,7 @@
 - 現状（2026-09-05）: 売上 ¥0、登録 6人（3月以降新規ゼロ）、有料 0人、公開 Anthurium 31件（原種21・Hybrid 3・Clone 5・実生2）、非公開 Monstera 11・Philodendron 9・Platycerium 18、写真 40枚/28品種、Stripe 審査中。**サイトは植物界隈に未告知**（第2回の削除根拠「利用0件」は無効 — 09-05b）。
 - **現状（2026-09-30）**: 9/8〜9/29 の実装ゼロ（T27a・T29a・T30 の 3 ブランチが 48h 規則を過ぎて滞留）。公開 Anthurium 31件のまま（T24 未着手）、検証列なし（T26 未着手）、登録 6人、売上 ¥0、決済未稼働（Stripe 25日不動）、告知未実施。9月末 KPI は全項目未達。`affiliates` 7件の Amazon 欄は旧・直接契約リンクのまま（もしも未反映）、Yahoo! の `yahoo.jp` は Yahoo!ショッピングのアフィリエイトリンク（`affiliate.shopping.yahoo.co.jp/shp-entry`、実測）。属ページに道具棚 7商品が出ている（§2 違反、T44 で削除）。
 - **現状（2026-10-03、第6回）**: 売上 ¥0、決済未稼働（開業届は本日、PAY.JP 申請 10/5 予定）。公開 Anthurium 31 件（合格 29）。**T30 は未 merge だった**（§2・§6 の「10/2 merge」は誤記）→ 申込の全入口は本日「会員受付は準備中です」に切替（commit 154e0d9）、本番の料金・特商法・規約・About は 240/2,500・Stripe 表記のまま（T55 で改訂）。道具の目録は 10/02 オーナー指示でショップ型 + 楽天 API 自動リサーチ、40 点（使用中 0。範囲外 4 点を本日非公開 → 36 点）、URL 直打ちのみ・10/24 自動公開。スマホ実測（375px・回線を絞る）で直着地 10.6 秒白紙・写真 45.9 秒・Clone を一時「原種」と表示・画像は原寸 39 枚 52MB → 第6回の T48〜T59。
+- **現状（2026-10-07、第8回）**: 売上 0 円。登録 6 人（最新は 2026-03-26）。課金 0 件。`shops` 0。道具 36 点（楽天 36・Yahoo! 6・もしも 0・書籍 0・使用中 0・品種との結び付け 0）。収録 40（原種 32・Hybrid 3・Clone 5）・検証済 27/27。写真は 40 件中 20 件。**M2 未達**（'Michelle'・'Zara'・'Dorayaki'・'Red Vein Dark Phoenix' が未登録 → T95 で 10/16 まで）。お問い合わせは通知も一覧もなく、取扱店の申込が誰にも読まれない状態（→ T81）。会員受付のお知らせの記録先なし（→ T86）。共有リンクの不具合（supabase.co の text/plain）と antolakii の描画停止は、会議前に修正済み（09015ff）。
 
 | KPI | 10月末（09-30 に 9月末から繰り延べ） | 12月末 | 見る場所 |
 |---|---|---|---|
@@ -58,6 +59,9 @@
 | AdSense | やらない。プレースホルダ DOM・i18n キー・プライバシーポリシーの「導入予定」を削除 | 決定 09-05 |
 | やらない | 無料トライアル、値上げのみで1万円、自社EC、PDF/API、980円サブスク、人物ページの有料掲載、会員への検証権限付与 | 決定 09-05 |
 | 価格据え置き | **2027-02 まで改訂しない** | 決定 09-05 |
+| **会員受付のお知らせ名簿**（10-07b） | `member_interest` に、本人がボタンで入る（未ログインはログインの後）。文言「登録したメールアドレスに、受付開始を 1 回だけお知らせします」。プライバシー 5 条に利用目的を追記。一斉送信は Secrets の承認フラグ（オーナー承認後に設定）・管理者ボタン・`notified_at` の 3 つが揃わないと動かない。宣伝メールにはしない | 決定 10-07b。T86 |
+| **振込の年額会員**（10-07b） | 年 5,000 円・前払い・自動更新なし。最終確認画面（12 条の 6）→ `member_orders` → オーナーが請求書 → 入金確認で `subscriptions`（plan `annual_transfer`）。**開く条件: 10/31 に PAY.JP 未承認 かつ お知らせ名簿 ≥3 人 → 11/1 に開く**。PAY.JP が稼働したら閉じる（申込済みの人は期間満了まで有効）。特商法・規約 9 条の 2 の追記は、開くときだけ表示 | 決定 10-07b。T97（10/30 にスイッチを切った状態で作る） |
+| **道具の文脈行**（10-07b 改訂） | 09-30 の「自生地環境が一致する原種だけ」を上書き。種ごとのデータがないため、**属レベルの 1 行**にする: 見出し「道具の目録 — PR」・「湿度・送風 · 温度 · 用土・植込み材」→ `/tools/?g=`。収録済みの原種と産地ページだけ、`catalogueOpen` のときだけ。GA は `tools_context_click`。種ごとの行は、WCVP の生活形を出典つきで取り込めたときに限って足す。同時に、取扱店が 0 店のときの「取扱店の掲載について（事業者向け）」1 行（10/24 から） | 決定 10-07b。T96 |
 
 ### 2-1. AI 調査コスト方針（09-05 改訂）
 
@@ -122,7 +126,7 @@
 
 スキーマ: **Phase A 残**（順に）P1 バッジを `species_qualifier` 参照 → P2 投稿フォームから新列へ保存（RPC に `p_meta jsonb` 1個追加、Hybrid に「複合交配」チェック `#formula-complex`）→ P3 `structured.origin_type` 廃止 → P4 別名の検索・URL 解決・JSON-LD `alternateName`・台帳表示 → P5 異説 `structured.alt_claims` 両論併記（disputed は表示上限60）。**Phase B（10月）**: `species_epithet` `cultivar_epithet` `display_name` `propagation` `japanese_name`。
 
-既定回答（オーナー未確認・異論なければ確定）: Glorious / Splendid / Majestic → Hybrid ／ 'Dark Mama' → disputed 両説 ／ 'Albo Variegata' 'Aurea' → Clone + tag `variegata`+`line` ／ 未収録ページは noindex ／ 'Michelle' 'Zara' は Hybrid。オーナー回答済: 'King of Spades' Clone、'Angels dream' 綴り維持。**09-05b 既定**（無回答なら確定）: 'Mystique A88'(109)・'Galaxy'(110) は現状維持（Hybrid）+ 本文に「オリジナル個体は存在する／流通は F1」／ splendidum(35) は W.Bull ex Rodigas, Ill. Hort. 31: 13, t. 510 (1884) + 注記「1883 年 Gard. Chron. で W.Bull 名義の先行発表」／ Mr Chandra → Chandra、Space Hijau は breeder 表示 + 注記「ナーセリー」／ 個体区分は上記6択。
+既定回答（オーナー未確認・異論なければ確定）: Glorious / Splendid / Majestic → Hybrid ／ 'Dark Mama' → disputed 両説 ／ 'Albo Variegata' 'Aurea' → Clone + tag `variegata`+`line` ／ 未収録ページは noindex ／ 'Michelle' 'Zara' は Hybrid。オーナー回答済: 'King of Spades' Clone、'Angels dream' 綴り維持。**09-05b 既定**（無回答なら確定）: 'Mystique A88'(109)・'Galaxy'(110) は現状維持（Hybrid）+ 本文に「オリジナル個体は存在する／流通は F1」／ splendidum(35) は W.Bull ex Rodigas, Ill. Hort. 31: 13, t. 510 (1884) + 注記「1883 年 Gard. Chron. で W.Bull 名義の先行発表」／ Mr Chandra → Chandra、Space Hijau は breeder 表示 + 注記「ナーセリー」／ 個体区分は上記6択。 **10-07b 上書き**: 'Galaxy' は Clone（IAS 登録。作出の表示は Space Hijau のまま・種小名なし。O-1 は閉じる）／'Mystique A88' は Clone + tag `line`（09-04 のオーナー規則。Chandra 本人が兄弟株を同じ名前で売っている出典が出たら Hybrid に戻す）／'Dark Mama' は Hybrid（親 warocqueanum × papillilaminum は Vannini・NSE で一致、`formula_status=known`、tag `disputed_parentage` を外し、`name_status=disputed` は作出者の異説 Banta / Havilcek として残す）。09-05b の「Mystique A88・Galaxy は現状維持（Hybrid）」と、09-05 の「Dark Mama → disputed 両説」は廃止。
 
 データ追加修正（09-05、[即]）: 'Red Crystallinum'(52) `formula_status='complex'`／ 'Ace of Spades'(7) 'King of Spades'(2) 先頭 origin を `manual`／ antolakii(59) `aliases=['BVEP','Black Velvet Eastern Panama']`／ debile(34) 本文に「原記載では debilis」／ forgetii × 'Titanium'(55) はオーナーの播種日・作出者待ち／ `cultivar_images` の旧名3件を現名へ、`Anthurium テスト` 削除。**09-05b 追加（T23-①）**: collector NULL 化 crystallinum(3)・veitchii(6)・warocqueanum(4)・wendlingeri(77)・regale(83、本文「発見者: Linden」も削除）、collector「不明」→ NULL（10, 11, 35, 82）、分布 magnificum(10)・forgetii(11) → Colombia、regale(83) → Peru、carlablackiae(1) TDWG 残骸整理、サイズ文削除 forgetii(11)・sagittatum(82)・debile(34) `body_en`、曲引用符 7・52、aff. besseae(108) 本文と habitats「Darién, Panama」、first_description 年重複 10・11・83、POWO 検索 URL → LSID、55 `parent_b_text` → Anthurium 'Titanium'、109 `parent_b_id=52` + notes「NSE 系統」、110 'X-One' 'Dark Phoenix'、2 `name_status` NULL、6 habitats Colombia、38 片仮名削除、画像名寄せ 4枚。**09-07 第4回（T39-2、IPNI 型データ照合済みで前回の [要確認] を上書き）**: collector 記入 dressleri(31) T. B. Croat／papillilaminum(32) R. L. Dressler／luxurians(57) T. B. Croat／debile(34) T. B. Croat & Watt／nutibarense(33) J. M. MacDougal, D. Restrepo & D. S. Sylva + 年 2008（Novon 18(2): 145、2005 Aroideana 28: 61 先行発表を注記）；collector・年 NULL carlablackiae(1)（IPNI 型は T. B. Croat、Carla Black は献名の一文のみ）・clarinervium(9)・regale(83)（notes「導入株は Wallis 採集とされる（原記載未確認）」）・moronense(120) 年；kunayalense(38) → T. B. Croat & J. Vannini；wendlingeri(77) type_locality Costa Rica；crystallinum(3)・veitchii(6) type_locality NULL（Chocó は notes）；sagittatum(82) basionym *Pothos sagittatus* Sims・type_locality NULL；crystallinum(3) aliases 'cristallinum'；forgetii(11)・regale(83) の第 2 記録（manual・trust 95・形態文 30cm）削除；antolakii(59) habitats「Panama」・closest_species「Anthurium dressleri」；'Dark Mama'(5) AI 記録（Llama 3.3・出典 0）削除 + `formula_status='disputed'`；'Queen of Hearts'(8) name_status NULL + tag `tc_origin`；'Ace of Spades'(7)・'Mystique A88'(109) namer「Denis Rotolante」・formula.parentB を列と同期；89 creatorName「hare_anthurium」・本文「'HR1' × 'HR2'」；静的 `people/george-wagner` `people/mr-chandra` と `anthurium/aff.besseae` `anthurium/debile(debilis)` は生成時に掃除 + alias 名寄せ。
 
@@ -133,6 +137,16 @@
 **10-07 第7回**: 未記載の書式の条件に `species_qualifier` が sp/aff/cf の場合を加える（aff. besseae・sp. "Peru"）。国はタイプ産地 → 分布の先頭（テキスト中で最も早く出る国）の順で選び、日本語画面では 13 か国を和名にする（小地名は原綴）。ラベルの項目名「年」→「命名年」、個体の「原種」→「種」。タイプ産地と分布が同じ値なら 1 マス。照合日は検証の行だけに書く（verification_note と本文から日付を削除）。Q1: antolakii は URL を変えずに表示を sp. "antolakii" に（T69、10/14。10-03 の「告知後」を上書き）。Q2: 分布は 4 地域まで＋「ほか n 地域」（T71）。Q3: 原種の本文は記載者・年・産地を残す。
 
 **10-07 オーナー指摘（系統・関連の名前合わせ）**: 名前の一部が同じでも別の植物（crystallinum と 'Red Crystallinum'）。系統図の子・関連は、属名・引用符・空白の違いを除いた**名前の完全一致**だけで結ぶ。部分一致・本文中の言及では結ばない（archive.js normParent / renderRelated）。
+
+**10-07b 第8回（T77〜T80）**:
+- **出典のない推測は消す**: 'Queen of Hearts' の選抜元・tag・記録を外し「記録なし」に。'Red Crystallinum' の「'Wonderboy' の関与」を削除。出典のない親・選抜元の受け皿として tag `parentage_unconfirmed` を作る（収録判定では数えず、系統図では点線と「とされる」）。
+- **「わからない」は 3 つの値**（`structured.absent`）: 「記録なし」（未確認）／「原記載に記載なし（sine loc.）」（luxurians・metallicum）／「該当なし（流通ラベル）」（'BVIT' の作出者）。後の 2 つは収録判定で事実に数える。
+- **引用符（D4）は確定**: 品種名・個体名・流通名は ' '、種レベルの非公式名は " "、流通名には「流通名」と注記。用語集 g-trade-name に「国際栽培植物命名規約は流通名を引用符で囲まないが、このサイトは流通の書き方に合わせて ' ' で囲み、『流通名』と注記する」。
+- **Platycerium（D12）**: 退避（`docs/data/platycerium-2026-10-07.json`）と、戻すための INSERT を保存したうえで削除する（T36 を閉じる）。
+- **産地ページ**: 題名は「{和名の国}の原種 n 種（タイプ産地 a · 分布 b）」。一覧は「タイプ産地がこの国」「分布に含む」の 2 群。流通情報だけの産地は載せない。国の決め方は geo.js と archive.js で同じにし、CI で一致を確かめる。
+- **人物**: 導入者も人物索引の対象にする。名前の照合は `normParent` 1 つにする。
+- **表記**: 敬称を付けない（氏・さん・様・Mr・Dr）。本文の日付も YYYY.MM.DD。推量の語と具体的な品種名を同じ文に並べない。説は「〈出典〉は…としている」の形でだけ書く。
+- **区分の迷い方の順番**（ガイドに掲載）: 学名が発表されている → 原種／野生由来で種レベル → 未記載／原種の 1 株 → 個体／1 株を指す出典 → Clone／実生群を指す出典 → Hybrid／どちらもない → Clone（オーナー規則）／名前のない播種 → 実生。
 
 ## 4. コンテンツ方針
 
@@ -145,6 +159,14 @@
 - 10月: **Monstera 公開**（obliqua "Peru" / 'Burle Marx's Flame' / Albo / Aurea の修正と deliciosa 1849 ほか発表年補完、ゲート合格後）。Philodendron は3件の Hybrid 化と gloriosum/melanochrysum 発表年補完後に11月判断。
 - 投稿者の報酬: 人物ページ自動生成 + 系統図掲載（フォーム冒頭に明記）、実生 OGP に交配式・播種日・作出者、投稿完了画面に X/Instagram 用テキスト。存命ブリーダーは本人公開名義のみ。
 - SNS: Instagram 主戦場。オーナー週3回「今日の一葉」（OGP + シェア文をサイトが用意し、コピペにする）。
+- **10-07b 第8回**:
+  - タイトルは実際の検索語の形にする。原種は「アンスリウム・{カタカナ}（学名）の学名と由来 — 記載者 年」、Hybrid・Clone は「…の由来・作出者」。カタカナは学名の読みか国内で使われている表記だけ（略号には作らない）（T83）。
+  - 未登録の 4 名は、オーナーの投稿を待たずに Claude Code が出典つきで登録する（10/11 Dorayaki・10/13 Michelle・10/15 Zara・10/16 RVDP。推測は書かない）（T95）。
+  - 告知の 1 投稿目をドラヤキにするのは、B 階層以上の出典が 1 件あるときだけ。なければ crystallinum。
+  - 公開の実生にスタブと共有カードを作る（T85）。
+  - Instagram 用の縦長画像と「投稿文をコピー」を作る（T94）。
+  - `/names/` 4 本は告知後（T99）。
+  - Monstera は 10/31 に第二波として判断する。
 - 空ページは「未収録」シート + 投稿 CTA。系統図の「未収録の親」（'X-One' 'Dark Phoenix' 'Titanium' 'Dorayaki'）は登録 CTA にする。検索0件も「この名前で登録する →」。
 - **09-07 追加（第4回）**: カタカナ別名（トップ15 + 収録済み全件）を `aliases` に投入し検索・JSON-LD・description に出す（T40）／ 検索 0 件シートに「この名前の収録を依頼」（ログイン不要、`genus_requests.kind='name'`、GA `search_zero{term}`、T41）／ 記載史年表を `/timeline/` 独立 URL + 年表画像 1 枚（T43）／ 未収録・記録なしの description は定型「記録なし · 作出者と交配式の出典を募集」（AI 本文を出さない）／ 使い方ガイドは 5 見出し（区分 4 つと名前の書き方／記録の読み方 8 行／投稿: 原種・Hybrid・Clone・個体・実生 5 件無料・非公開・再調査リクエスト／ラベル印刷／会員は価格を書かず料金ページへ）。手順リスト 5 本と「コミュニティで収集・共有するプラットフォーム」「ユーザー名」は削除（T42）／ 用語集に 個体・系統（line）・F1・オリジナル個体・管理番号・未収録・記載者・タイプ産地 の 8 語（T42、未収録シート・個体欄からリンク。basionym 著者は索引に出さない）／ 訂正の可視化（新着記録「訂正」種別・収録メモ「訂正 n 件」・訂正者 by-line）は本告知 +1 週に実例を見て形を決める。収録メモの「収録 · 記録 n 件 · 更新」は T27a／ **無料付与 `granted`（告知戦術）**: ソフトローンチ協力 2 名・本告知後の他者投稿 最初の 5 人・写真提供者に 3 か月（管理画面「無料付与」、規約 9 条に「運営者が無償で会員資格を付与することがある」を T30 で追記、会員一覧では区別しない）。付与者の 12 月継続 0 なら 1 月に終了／ 告知文 1 投稿目は 'Michelle' が 9/19 までに収録・検証済でなければ crystallinum（1873 Linden & André、原産コロンビア。「チョコ」は書かない）。
 
@@ -203,6 +225,13 @@
   - **道具の目録**: 部門は罫線の 2 列リストで、0 件の部門は出さない。英字の標題行と部門コードは使わない。「使用中」は枠つきのバッジ（緑にしない、画像に重ねない）。ストアのボタンは、商品ページの先頭だけ主ボタンで、ほかは副ボタン 44px。PR は 12px。ショップ型は維持。
   - **料金ページの並び**: 要約 2 行 → 無料 → 会員（有料）の表 → お知らせボタンと特商法・規約へのリンク → 取扱店の掲載 →「Aroid Origins について →」。契約条項は受付開始まで `<details>`。
   - **変えないもの**: 5 色・書体 3 種・角 2px・影・グラデーション・絵文字の禁止、未収録シート、写真の扱い、文字サイズ 3 段階、admin.css・print.css。収益の不変条件（PR の位置と文言、href・rel・target、もしもの imp、楽天の表示、GA の属性、禁止語、JSON-LD は ItemList のみ）。
+- **10-07b 第8回（第7回の決まりの補足・上書き）**:
+  - 四辺の枠を使ってよい部品に「系統図の箱」を足して 6 つにする。
+  - 新着は日付の見出し「YYYY.MM.DD — n 品種」でまとめ、各行の日付を外す（第7回の「2 行目の先頭に日付」を上書き）。
+  - ≤640px で写真がないときは、`.sheet--plate` を 1 行の帯「写真なし — 写真を追加」（`.sheet--inline`、56px）にする。写真の台紙は `max-height:70svh`。
+  - ダークモードは作らない。`color-scheme: only light` で強制ダークを止める。
+  - 前後の品種は、属一覧と同じ順番（区分 → 名前）にし、「Anthurium の一覧 · n / N →」を出す。
+  - T59 はタッチ再現（`TOUCH=1`）と CLS の計測を標準にする。目標は主要 5 画面で CLS 0.1 未満（T93 で 0.25 以下、T98 で 0.1 未満）。
 
 ## 6. 未完了タスク（担当・期限）— 実装順
 
@@ -218,7 +247,7 @@
 | T26 | **10-03: 期限を 10/11 に変更（T24 の 14 件と同時に検証済にするため）。投票の文字化は T52 に移す。** **09-30: 未着手（`verified_at` 列なし）。10/5 まで（M4）** **検証ワークフロー**: 列3本・RPC・`cast_origin_vote` の固定・標本ラベル「検証状況」行・台帳 ✓・admin「検証 / 再確認キュー」 + 投票の文字化「正確 / 疑問」。完了後、IPNI/GBIF 一致の記載種を admin で検証済にし **M4（記載種 100%）** を満たす。Clone/Hybrid は Tier C 出典が取れた分のみ | Claude Code | 9/19 | M4 |
 | T27a | **09-30: 48h 期限超過のため 10/1 に merge（T44）** **branch t27a-reading-order で実装済 09-07** **読み順 + 削除（09-07、第 1 週）**: §5 の読み順（mono 標題行・バッジ行削除・操作行をラベル下へ・h2「画像」撤去 + `.sheet--plate`・個体 0 件非表示・出口 1 行・収録メモ）／ 詳細ページ道具棚 CSS 非表示／ D5 文言（`index.html:1052`、`add_origin_title.en`）／ ⑧ `#edit-key-section` 既定非表示 + 「報告」／ ⑥ 黒ボタン → mono 1 行「この台紙に書き足す」+ 3 要素フォーム + `<details>` → プレビュー 4 パターン（写真あり / 写真なし原種 / AI のみ trust 23 / 調査中）→ 48h 無反応で本番 | Claude Code → オーナー実機 | 9/12（本番 9/14） | 着地 1 画面の純度（≈7h） |
 | T27b | **画像**: 撮影者 by-line（`credit`, `user_id`）・個体区分 `specimen_status`（original / tc / f1 / f2 / line / unknown）・「報告」の理由選択 → `image_reports`（Real/Fake 投票の置換）+ フォーム冒頭の報酬明記 | Claude Code | 9/26 | E8（≈4h） |
-| T28a | **標本ラベル印刷（告知前）**: `print.css`（A4 2×4 = 91×55mm・二重罫・ink 1 色・`.label--stake` 60×25mm）・`buildLabelHtml` 区分別セル + 検証状況 1 行・dialog 1/2/4/8・GA `label_print{count,member}`・i18n。決済稼働までログイン全員に無料 → iPhone Safari 印刷確認 | Claude Code → オーナー実機 | 9/26 | 会員特典②の実体・第 2 のペイウォール・E9（≈4h） |
+| T28a | **10-07b: T89 に置き換え（QR つき）。** **標本ラベル印刷（告知前）**: `print.css`（A4 2×4 = 91×55mm・二重罫・ink 1 色・`.label--stake` 60×25mm）・`buildLabelHtml` 区分別セル + 検証状況 1 行・dialog 1/2/4/8・GA `label_print{count,member}`・i18n。決済稼働までログイン全員に無料 → iPhone Safari 印刷確認 | Claude Code → オーナー実機 | 9/26 | 会員特典②の実体・第 2 のペイウォール・E9（≈4h） |
 | T28b | **棚（告知後）**: §5 09-05b の仕様（`/shelf`・操作行 1 語・フッター/mobile-nav 入口・dialog 複数品種・`favorites` 同期・GA `shelf_add`、`add_favorite` は廃止）。本告知 +2 週に `share_click`・`label_print` の実測を見て着手判断 | Claude Code | 告知 +2 週以降 | ログイン率 +2pt 仮説（≈3h）。撤退: 12 月レビューで保存者 <10 かつ会員転換 0 |
 | T29 | **09-30: (a) は 10/1 に merge（T44）、(c) 今日の一葉 OGP は 10/15。** **(a) 生成器は branch t29a-og-cards で実装済・見本3枚送付。(b) 完了帯は本番反映済 09-07** **標本カード + 完了帯 — 9/19 に前倒し**: (a) 生成器 `scripts/make-og-cards.js`（§5 統合仕様、`@resvg/resvg-js` + `fonts/og/` 3 書体、`images/og/<slug>.png`、deploy.yml、スタブと `share` fallback を同 URL、トップ15 先行、Validator 3 枚をオーナーへ）(b) ⑤ 投稿完了帯 + 共有文の共通式 (c) 9/28: 今日の一葉 OGP + シェア文コピー（content §3-F）+ 実生 OGP に交配式 + 人物索引「日本のブリーダー」 | Claude Code | (a)(b) 9/19、(c) 9/28 | M5・M7。Instagram 素材（≈9.5h） |
 | T30 | **10-03 訂正: 未 merge のまま（branch のみ・master と競合）。申込入口の準備中化は 10-03 本番（154e0d9）、価格 500/5,000・特典 2 つ・法務は T55 で master 上に作り直し、branch は merge せず閉じる。開始通知フラグとメールは告知後。** **09-30: Stripe 判定を待たず 10/2 に merge（事業者名「クレジットカード決済（決済代行会社）」・準備中表示 + 開始通知を既定）。PAY.JP 承認日に `_PAYMENT_PROVIDER=payjp` + `#payjp-card-element`（1h）** **準備ブランチ t30-member-plan 作成済 09-07** **料金 v2（Stripe 判定翌日。10/3 に判定なしなら判定を待たず実施し PAY.JP 申請へ）**: 1プラン化 会員 500/5,000、translations・料金・特商法・規約9条の2・モーダル・OGP・静的スタブ再生成、敗者側の決済関数・分岐削除、特典「先行閲覧」「広告非表示」「支援者」文言削除、ラベル印刷の門を `window._member` に。**09-07: ブランチ `t30-member-plan` を第 1 週に作成（本番に出さない、≈3h）**: 年額既定ラジオ + 1 ボタン、`showPaywallModal(source)`（実生起点「実生ノートを続ける」／ラベル起点「このラベルを印刷する」／料金ページ「会員になる」）、規約 9 条「無償付与」1 行、About「会員（n 人）」区画、Trial 分岐削除、料金ページは「会員でなくてもできること」→ 特典 4 つの順、静的スタブ再生成。`create-checkout`・`stripe-webhook` はコード変更なし（内部キー `seedling_*` は改名しない）。判定日は merge + キャッシュバスター 30 分 → オーナー実決済 500 円 → 解約確認 → 返金。不承認・判定なしは同ブランチで事業者名を「クレジットカード決済（決済代行会社）」にし PAY.JP へ（サイト側 1h: `_PAYMENT_PROVIDER`、`#payjp-card-element` 表示、CSP `js.pay.jp`）。10/24 決済なし告知のときだけ「開始したら知らせる」（価格は出す、押せないボタンは置かない、`profiles.notify_member_launch` + RPC + GA `member_interest{source}`、バナー + Resend メール、1h） | Claude Code | 判定 +1日 | 売上化 |
@@ -227,7 +256,7 @@
 | T33 | **09-30 改訂** 取扱店掲載（銀行振込）: `shops` テーブル（管理画面で手入力）・品種ページ「取扱店 — PR」欄・掲載条件（1,000円/月・初月無料・月末請求・解約は翌月末）を規約に 1 条・請求書テンプレ（適格請求書発行事業者でない旨）・DM 文面。自己申込 Checkout は作らない | Claude Code / オーナー DM・請求 | 実装 10/16（10-03 改訂: 告知前必須 T48〜T57 の後。規約 9 条の 5・事業者向け料金も同時）、DM 本告知 +1 週 | +3,000円/月（決済に依存しない） |
 | T34 | **09-30: T46・T47 に統合**（文脈行は T47、GA `page` は T46、Admin ファネルは 11 月） | — | — | — |
 | T35 | 写真到着後: 版画変換 CSS 試作 → 可否 → 図版シリーズ | Claude Code | 写真到着 +3日 | 図版 |
-| T36 | Platycerium CSV 退避 → `cultivars` 18行 + `genera.id=4` 削除、テストデータ削除 SQL | Claude Code 用意 → オーナー実行 | 9/10 | 看板との整合 |
+| T36 | **10-07b: T77-k で実行（退避と、戻すための INSERT つき）。** Platycerium CSV 退避 → `cultivars` 18行 + `genera.id=4` 削除、テストデータ削除 SQL | Claude Code 用意 → オーナー実行 | 9/10 | 看板との整合 |
 | T37 | **ローンチ実行（§4b）**: ソフト 9/21〜10/2 → 本告知 目標 10/3・上限 10/24 → +1週 海外 DM・ブログ → +2週 専門店・出品者 → Monstera 第二波。Claude Code は当日の最終チェック（19:00、M1〜M10 チェックスクリプト）と翌日以降の指摘修正（24h 以内）。**09-07 追加**: 第 4 週に 告知文の数値差し替え（'Michelle' 未収録なら 1 投稿目 crystallinum）、④「この株から実生を記録 →」（原種・Clone・個体の操作行、`data-prefill` 流用、GA `contribute_start{source:'from_parent'}`、1h）、写真到着時の版画 CSS 試作（T35、2h 予備）。本告知 +1 週に 訂正の可視化（新着記録「訂正」種別・収録メモ「訂正 n 件」・訂正者 by-line）、他者投稿 最初の 5 人へ `granted`。初週の判断線は monetization §4-3（来訪→登録 ≥4%、登録→会員 ≥8%、share ≥30、paywall 到達 ≥3%、投稿導線 ≥30%） | オーナー（投稿・返信）+ Claude Code | 9/21〜10/31 | 来訪 1,000 → 会員 5・初月現金 ≈9,250円 |
 | T38 | 出典書籍の書誌欄（リンク無し、著者・年・書名・ISBN。Bown *Aroids* 2000、Croat 1986 ほか出典に現れる分だけ）。**09-30: 書誌は道具の目録「書籍・資料」と相互リンク、Amazon はもしも経由で可** | Claude Code | T25 と同時 | 資料館の価値。Amazon 条件付きの下地 |
 | T39 | **①〜④ 完了 09-07（ゲート改訂・IPNI 型データ準拠のデータ修正・由来文再生成・典拠表組み込み）** **taxonomy 一括（第4回、第 1 週）**: ①ゲート G1〜G9（`wireframe/js/record-gate.js` ← `docs/board/data/2026-09-07-record-gate.proposed.js`）+ i18n 2 キー + sitemap・admin 再判定（2h） ②データ修正 SQL D1〜D15 + 削除 3 件（§3 09-07 項、バックアップ `docs/board/data/`、4h） ③由来文再生成 12 件（1, 3, 9, 31, 32, 33, 34, 38, 57, 77, 82, 83）+ 生成器 basionym・原綴分岐（2h） ④人物典拠表 `wireframe/data/people-authority.json` の組み込み（`archive.js` `peopleIndex` + `scripts/lib/people.js`、alias_of 畳み込み、kind nursery/handle ラベル、見出し本名 + mono「IPNI 略称 · 生没年」）+ 静的 people/anthurium の掃除と名寄せ（2.5h）。目標: 合格 29/31 | Claude Code | 9/12 | M1・M3（C2・C4・C5・C11・C13） |
@@ -238,7 +267,7 @@
 | T44 | **完了 09-30（本番）**: 属ページ・詳細ページの道具棚と絵文字 fallback を削除（`forms.js` の旧ブロック一式、詳細は `#tool-context` の空枠に置換）、`t29a`・`t27a` を merge（競合は双方残し）、キャッシュバスター `20260930a` / `v46`。 **滞留解消 + §2 違反の是正**: 属ページ道具棚（`forms.js:2208-2217`、`:378-380`・`:2145-2147` の `top-affiliate-grid`/`genus-affiliate-grid`）と絵文字 fallback（`:2179/2182/2200`）削除 → `t27a-reading-order`・`t29a-og-cards` merge → キャッシュバスター 12 箇所 + `sw.js` → 本番 | Claude Code | 10/1 | 決定違反の解消・M5（1.5h） |
 | T45 | **完了 09-30（本番）**: migration 適用済み（`tool_genres` 9 行、既存 7 件に slug・genre 割当、`species text[]` も追加 = 詳細の「この道具を使っている種」。原種側に自生地タグの列が無いため、T47 の照合は当面この欄で行う）。共有判定 `wireframe/js/tool-gate.js`（C9 の合格条件・禁止語・価格数字・もしもホスト判定・`catalogueOpen`）。管理画面「道具（アフィリエイト）」: ジャンル select・URL名・メーカー・型番・規格・価格帯・一言・使用記録（字数と index 可否をその場で表示）・自生地条件・使っている種・自前写真・楽天/もしも HTML の分解・点検済みボタン。旧 amzn.to は管理画面で「表示されません: もしものリンクに貼り替え」と出る。 **道具の器（P0）**: migration `20260930100000_tools_catalogue.sql` に `amazon_imp text`・`last_checked_at timestamptz` を追加、`tool_genres` 9 行 seed（§2-3）、既存 7 件に slug・genre → 管理画面「道具」（ジャンル select・メーカー・型番・規格・価格帯・一言・使用記録 80 字未満は「noindex になります」・habitat_tags・自前写真・**もしもの HTML を貼ると href と imp を分解して保存**・`icon` 欄削除・点検モード） | Claude Code | 10/2 | オーナーがデータを溜め始められる（2h） |
 | T46 | **10-03: 40 点 → 36 点（T48 D 節で範囲外 4 点を非公開・名前訂正 12・説明 2）。スマホ表示・PR 位置・文言は T58（10/14）。** **本番 merge 10-02（48h 経過）。URL 直打ちでのみ表示、10/24・12点・6ジャンルで自動公開** **10-02 オーナー指示で上書き**: 一覧は写真つきのショップ型（部門ナビ・画像カード・価格・ストアリンク、商品ページは大きな画像＋ストアボタン＋同じ部門の道具）。「実際に使っている物だけ」をやめ、楽天市場 API の自動リサーチ（レビュー数・評価4.0以上から AI が部門に合う物を選び、名前と中立の説明を整える）で全部門を埋める。運営者の物は「使用中」印で区別し PR 文もそれに合わせた。C10 の「2件以上の部門だけ表示」は廃止（全9部門を表示、0件は準備中）。Yahoo! の既存リンクは Yahoo!ショッピング自社アフィリで API から作れないため、Amazon（もしも）と同じく手動貼り付け。自動追加分は使用記録が無いので noindex のまま（toolGate 不変）。 旧: プレビュー branch `t46-tools`（09-30）: 目録・道具の1頁・GA `affiliate_click{shop,slug,genre,page}` と `tools_filter`・静的スタブ + sitemap（ToolGate 経由）まで実装。公開判定 `catalogueOpen` = 10/24 以降 かつ 12 点・6 ジャンル以上。それまでは noindex・フッター/メニューのリンク非表示で、URL を直接開いた人にだけ見える。 **道具の目録（P1〜P3）**: `/tools/` + `/tools/<slug>/`（§5）・`tools.js`・`toolGate`・PR 2 か所・もしも imp（lazy なし）+ CSP `img-src https://i.moshimo.com`・Amazon は `af.moshimo.com` のみ描画・GA `affiliate_click{page,genre,shop,slug}`・ジャンル解説 9 本・書籍 2 冊の書誌・静的スタブと sitemap（合格分）・`app-core.js` の `buildPath`/`parseRoute`/`navigateTo`・i18n `tools_*`。公開までフッターに出さず noindex → 10/14 プレビュー → 本告知の翌週土曜に公開 | Claude Code → オーナー実機 | プレビュー 10/14 | アフィリの受け皿・ロングテール（8h） |
-| T47 | **文脈行（P4、旧 T34）**: 自生地環境（着生・雲霧林・標高）が `habitat_tags` と一致する原種ページと産地ページに、文字行 最大 2 行 +「道具の目録 →」（見出し「この種の自生環境に近い道具 — PR」）+ フッター・モバイルナビ「道具」。T46 公開と同時 | Claude Code | 本告知の翌週土曜 | +クリック（1h） |
+| T47 | **10-07b: T96（属レベルの 1 行）に改訂。** **文脈行（P4、旧 T34）**: 自生地環境（着生・雲霧林・標高）が `habitat_tags` と一致する原種ページと産地ページに、文字行 最大 2 行 +「道具の目録 →」（見出し「この種の自生環境に近い道具 — PR」）+ フッター・モバイルナビ「道具」。T46 公開と同時 | Claude Code | 本告知の翌週土曜 | +クリック（1h） |
 | T48 | **第6回 データ正確性**: 修正 SQL 46 文（'Galaxy' は差し替え文、E 節は実行しない）→ recordGate 29/31 維持を確認 → `archive.js:132` 個体判定 tag のみ・`archive.js:504` 別名 最大 3 語・`research-origin` 原種テンプレ（短縮出典・国名和訳・「（POWO）」なし） | Claude Code | 10/3 | M3（1.5h） |
 | T49 | 漏れの止血: `.d-none{display:none !important}`（モバイルメニューの未公開「道具」、ログアウト時の投稿履歴・プロフィール）、フッター Admin は admin のみ | Claude Code | 10/3 | 0.3h |
 | T50 | 画像の変換配信 `imgUrl(path,w)`（`/storage/v1/render/image/public/...?width=&quality=70`。一覧 120/240・今日の一葉 720・詳細 srcset 800/1600・ライトボックス 1600、`onerror` で原寸）+ 主画像枠 aspect-ratio + `sw.js` | Claude Code | 10/4 | スマホの表示と通信量 1/10（2h） |
@@ -263,10 +292,40 @@
 | T69 | ~~antolakii の表示名~~ **10-07 済**: entry-meta.js の name() 1 か所に規則（species で qualifier なし・species_status が undescribed/provisional_name → Genus sp. "epithet"）。画面・タイトル・スタブ・パンくず JSON-LD・共有文が同じ名前。URL は不変 | Claude Code | 10/07 | — |
 | T70 | ~~原種本文の型~~ **10-07 済**: research-origin のテンプレートで同じ値は「タイプ産地・分布とも X。」（英語も）。既存 4 件（4・11・35・129）は AI 再調査なしで置き換え（docs/board/data/2026-10-07-t70.sql、バックアップあり）。research-origin の旧い型エラー（496 行）も修正してデプロイ | Claude Code | 10/07 | — |
 | T71 | ~~分布 4 地域まで＋WCVP 地域名の和訳表~~ **10-07 済**（オーナー要望で前倒し）: 4 地域を出し「ほか n 地域」を押すと残りが開く。和訳は archive.js REGION_JA（データにある地域名 75 件、本文の表記に合わせる）。説明文が入った値は分けずにそのまま表示 | Claude Code | 10/07 | — |
-| T72 | ~~属一覧の折りたたみ~~ **10-07 済**（メモリ内の一覧）: 記録不足の名前は末尾の「記録が足りない名前（n）」に畳む（検索中は開く）。**残り**: 必須項目が空のときの「記録なし」表示は sine loc. と区別する値の定義待ち | Claude Code | 10/07 | — |
+| T72 | ~~属一覧の折りたたみ~~ **10-07 済**（メモリ内の一覧）: 記録不足の名前は末尾の「記録が足りない名前（n）」に畳む（検索中は開く）。**残り**: 必須項目が空のときの「記録なし」表示は sine loc. と区別する値の定義待ち → T78 で解決 | Claude Code | 10/07 | — |
 | T73 | ~~別名と本文の学名~~ **10-07 済**: 別名は名前の下の 1 行（ラベルから外す）。由来の本文と今日の一葉で学名をイタリック（italicizeSciNames、sp./aff./cf. と人名略記は立体のまま） | Claude Code | 10/07 | — |
 | T74 | ~~投稿フォーム~~ **10-07 済**: 送信だけ主ボタン、絵文字を全廃（📤🗑📷🔍 → 文字か線のアイコン）、削除ボタンの直書きの赤を .btn--danger-outline に、見出しを h2 共通に。パンくず・フッターのリンクに 44px の押せる範囲 | Claude Code | 10/07 | — |
-| T75 | components.css の旧層と使われていないセレクタの削除 | Claude Code | 本番1 +1 週 | 負債の削減 |
+| T75 | components.css の旧層と使われていないセレクタの削除。あわせて `supabase/functions/og-image`・`trial-reminder` のデプロイ状態を確かめ、使われていなければ削除 | Claude Code | 10/21 | 負債の削減 |
+| T76 | **URL の表記ゆれを救う**（正規化後の完全一致が 1 件 → replaceState。部分一致では飛ばさない）＋ `research_requests` の antolakii 名の確認（本番A） | Claude Code | 10/8 | 共有リンクの取りこぼしを防ぐ |
+| T77 | **分類データの修正** `docs/board/data/2026-10-07b-fixes.sql`（Galaxy → Clone〔IAS を描画で確認後〕・Dark Mama → Hybrid・Queen of Hearts を記録なしに・Red Crystallinum の推測削除・Angels dream の出典と別名・absent 3 行・Mystique A88 → Clone + line・文面 5 件・`updated_at` の補正 9 行）＋ Platycerium の退避と削除（別ファイル、T36 を閉じる）。収録 40・検証済 27/27 を維持（本番A） | Claude Code | 10/8 | M3・正確性 |
+| T78 | **「わからない」の 3 つの値**（record-gate・ラベル・系統図の点線、tag `parentage_unconfirmed`）。T72 の残りを閉じる（本番A） | Claude Code | 10/8 | 正確性 |
+| T79 | **人物の名寄せ**（Vannini・Sodiro・Koch・Haage・Banta、導入者を人物索引へ）と、親の名前の照合を `normParent` 1 つに（本番A） | Claude Code | 10/8 | 404 の解消・重複登録の防止 |
+| T80 | **産地ページ**（geo.js と archive.js を一致させ CI で確認・題名「{国}の原種 n 種（タイプ産地 a · 分布 b）」・2 群・流通だけの産地を除く・和名・統計を dl 行に）（本番A） | Claude Code | 10/8 | 正確性（いちばん大きい誤表示） |
+| T81 | **お問い合わせの通知と一覧**（区分 shop・`/contact/?c=shop`・`contact-notify` の宛先は運営アドレスに固定・自動返信なし・管理画面一覧・料金 `#shops`）（本番A） | Claude Code | 10/8 | 取扱店 3,000 円/月の前提 |
+| T82 | **About を直す**（`<br>`・特徴の一覧・「この図鑑について」・運営資金の 1 文・「投票」の削除）（本番A） | Claude Code | 10/8 | PAY.JP の審査・信頼 |
+| T83 | **タイトル・別名をカタカナの検索語の形に** ＋ 別名の SQL（13 件 ＋ ワロクアーナム）（本番B） | Claude Code | 10/11 | 検索流入 +150〜250/月 |
+| T84 | **スタブにリンクを書く**（記載者・国・前後・属）・内部リンクの末尾スラッシュ・Person.name を本名に・sitemap の lastmod（本番B） | Claude Code | 10/11 | 人物・産地の index |
+| T85 | **実生のスタブ・共有カード・sitemap**（公開分だけ）＋ フォーム冒頭の 1 文（本番B） | Claude Code | 10/11 | 投稿者が自分の記録を見せられる |
+| T86 | **会員受付のお知らせ名簿**（`member_interest`・RPC・ボタン・プライバシー 5 条・管理画面・一斉送信は承認フラグつき）（本番B） | Claude Code（送信はオーナー承認後） | 10/11 | 開始日 +1,000〜1,500 円/月 |
+| T87 | **見た目の取りこぼし一括**（D5・D6・D11〜D23、D8 + I5、I8 強制ダークの停止、`/contribute`・`/search` を noindex）（本番B） | Claude Code | 10/11 | 着地の品質 |
+| T88 | **使い方ガイドの定義集**（taxonomy 報告 §3）・「Original Species」の削除・g-trade-name の 1 文（本番B） | Claude Code | 10/11 | 初見の信頼 |
+| T89 | **標本ラベルの印刷（QR つき）**。T28a を置き換え。ログインした全員に無料・A4 2×4・QR は自サイトの URL だけ・GA `label_print`（本番C） | Claude Code（iPhone での印刷確認はオーナーの任意） | 10/14 | E9・M6・ログイン率 |
+| T90 | **写真なしを 1 行の帯にし、写真の高さに上限**（I2・I3 の一部）（本番C） | Claude Code | 10/14 | 記録を 1 画面目に |
+| T91 | **新着を日付の見出しでまとめる**（I4）（本番C） | Claude Code | 10/14 | mono ≤35% |
+| T92 | **投稿フォームを罫線の 1 列に**（D10。送る中身は変えない）（本番C） | Claude Code | 10/14 | M7・他者投稿 |
+| T93 | **読み込み中のずれを軽く抑える**（初期の文言・骨組み・高さの確保。CLS ≤0.25）（本番C） | Claude Code | 10/14 | 着地の品質 |
+| T94 | **Instagram 用の縦長画像と投稿文コピー**（`images/ig/`・告知用 launch-1〜5）（本番C） | Claude Code | 10/14（画像は 10/15 まで） | オーナーの投稿 1 回 3 分 |
+| T95 | **未登録 4 名の登録**（10/11 Dorayaki・10/13 Michelle・10/15 Zara・10/16 RVDP。出典つき・推測なし） | Claude Code | 10/16 | **M2**・M8 |
+| T96 | **道具の文脈行（属レベル）と取扱店の募集の 1 行**＋ 営業キット `docs/board/2026-10-24-shops-kit.md` | Claude Code | 10/24 | +100〜300 円 ＋ 申込 0〜1 店 |
+| T97 | **振込の年額会員**（スイッチを切った状態で作る。開く条件は §2） | Claude Code / 入金確認はオーナー | 10/30（開くのは 11/1） | 最悪の場合 +400〜1,250 円/月 |
+| T98 | 静的スタブを SPA と同じ骨組みに（I1 の残り、CLS <0.1） | Claude Code | 10/28 | 着地・SEO |
+| T99 | `/names/` 4 本（black-velvet・red-crystallinum・spades・dorayaki） | Claude Code | 10/25 | 「違い」「とは」の検索 +50〜150/月 |
+| T100 | 属名の由来の 2 文（IPNI で照合）・用語の個別ページ `/glossary/<id>/` | Claude Code | 10/31 | +30〜100/月 |
+| T101 | プロフィールの作り直し・「この原種から実生を記録」・投稿フォームの最初の 3 択 | Claude Code | 10/31 | 他者投稿 |
+| T102 | 掲載店のクリックの記録と請求書の回数 | Claude Code | 11/25 | 取扱店の継続 |
+| T103 | `scripts/check-names.js`（名前・文・国・再照合・記載待ちの監視・収録の差分） | Claude Code | 11/7 | 再発防止 |
+| T104 | 収録の候補 +11 原種と系統図の空き枠 → 12 月に 60 件 | Claude Code | 11/30 | KPI 60 件 |
+| T105 | 図版キャプション・用語集の目次・フッターを詰める（I3・I6・I7） | Claude Code | 11/7 | 読みやすさ |
 | 条件到達時 | `/seedlings/` 索引（公開実生 ≥20・投稿者 ≥5）／ ヘッダー EN（非 ja ≥15%）／ 楽天・Yahoo! のもしも移行（アフィリ確定額 2ヶ月連続 ≥3,000円）／ 道具一覧のサムネイル（オーナーが 10/14 プレビューで求めた場合、自前写真のみ） | Claude Code | — | — |
 
 **第6回（10-03）の実装順**: T48 → T49 → T50 → T51 → T52 → T53 → T54 → T55 → T24 → T26 → T56 → T57（告知前必須、全体 10/13）→ T58 → T33（10/24 前）。T59 は各本番後。詳細は `docs/board/2026-10-03.md` §2。
@@ -275,6 +334,15 @@
 
 **第7回の実装結果（10-07、3 回とも同日に本番）**: 本番1 = T60・T61＋会議前の修正 4 件＋年表のイタリック・系統図の子の判定（3d6c430）。本番2 = T62〜T66（b480c08）。本番3 = T67・T68（下記）。375px 実測（ローカル、変更後）: 文字サイズ 1 画面 5〜8 種（変更前は全体で 36 種）、12px 未満 0、mono 3〜55%（人物ページだけ 35% 超。年・件数の数字が多いため）、横はみ出しなし。トップは今日の一葉 → 新着の品種 → 索引 → 年表（閉じる）。T68: 108・121 を unresolved（121 は origin_region「ペルー（流通情報）」）、検証メモ 27 件と本文 3 件（59・127・138、日英）から日付を削除、検証済 27/27 を維持。radicans は IPNI（85262-1: K.Koch & A.Haage, 1854）と一致し変更なし。Pérez-Farr. は IPNI 38770-1（Miguel Ángel Pérez-Farrera）で人物典拠に登録し、「M. A. Pérez-Farrera」を alias_of でまとめた（archive.js と scripts/lib/people.js の personKey が alias_of を読む）。バックアップ 、SQL 。残り: 44px 未満のタップ（パンくず・フッターのリンク、5〜8 個/画面）は T74 と一緒に、交配式の属名略記（A. ×）は T73 に回す。
 
+**第8回（10-07b）の実装順**:
+- 本番A 10/8 = T76 → T77 → T78 → T79 → T80 → T81 → T82
+- 本番B 10/11 = T83 → T84 → T85 → T86 → T87 → T88
+- 本番C 10/14 = T89 → T90 → T91 → T92 → T93 → T94
+- データ T95 = 10/11・10/13・10/15・10/16
+- 10/24 = T96。10/30 = T97。告知後 = T75・T98〜T105
+- 各本番のあとに T59（タッチ再現・CLS）。10/17 の 19:00 の最終チェックに「共有リンクで品種ページが開く」「M2 の 15 名が学名とカタカナで 0 件にならない」を加える。
+- 詳細は `docs/board/2026-10-07b-decisions.md` §4。
+
 **第6回の実装結果（10-03、すべて本番）**: T48 データ修正 46 文 + 個体判定 tag のみ・別名 3 語・原種テンプレ／T49 メニュー・Admin リンク／T50 写真を表示サイズで配信（5.1MB→8KB 等）／T51 共有リンクでトップを出さない・未収録シート・notfound／T52 操作 3 つ + その他・投票は文字・記録見出し 1 行・44px／T53 タイトル式（カタカナ別名）・canonical・aggregateRating 削除・クローラー日本語／T54 トップ 1 画面目・件数「収録」統一・区分語統一・属一覧を罫線 1 ページ／T55 料金・法務（会員 500/5,000・受付準備中・GA4・外部送信・運営者）／会員申込は全入口「準備中」（。**開く前に Stripe Price 秘密値（旧 240/2,500）を差し替え**）／T24 原種 14 件 → 点検後 12 件公開、portillae（nom. nud.）削除、Fort Sherman は papillilaminum の個体、Dark Mama に Vannini 出典の記録 → **M1 収録 40/41 達成**／T26 検証済の仕組み・管理画面「検証」・記載種 27/27 検証済 → **M4 達成**（antolakii は未記載のため対象外、sp. 化は URL 転送の後）／T56 学名イタリック・用語の統一（D1〜D3・D5〜D10）／T57 スタブに本文の 1 画面目／T58 道具の目録のスマホ 1 列・PR を上に・44px／T33 取扱店掲載（月 1,000 円・振込・請求書・帳簿連携）。research-origin は DOUBTFUL・異名・別名一致に S を付けない。record-gate の formula_status=unknown バグ修正。**残り**: D4（流通名の引用符の決定）、D12（Platycerium 行の削除）、Galaxy の区分（O-1）、Dark Mama の区分（出典は「単純交配はすべて Dark Mama」= Hybrid を示唆。2 本目の出典で確定）、BVIT の作出者、antolakii の sp. 化（旧 URL 転送）、Cloudflare 解析ビーコンが CSP で止まる（GA4 で足りるので放置可）。
 
 完了（09-04〜09-07）: T20 AI 再調査リクエスト（09-07）、T1 Field Archive 本番、T2 データ修正22件、T3 Phase A 列追加・分割入力、T5 人物ページ、T6 系統図、T8 産地・用語集・自動リンク、AI 調査の歯止め、未記載種経路、Stripe 申請パック。**廃止**: 旧 T4（支援者2プラン）→ T30、旧 T11（有料由来調査）→ T20、旧 T9 の英語補完 → 凍結。
@@ -282,6 +350,23 @@
 ---
 
 ## 7. オーナー待ちタスク（各に既定回答つき、無回答なら既定で進む）
+
+### 7-000. 10-07b 第8回の依頼（最新。全文は `docs/board/2026-10-07b-decisions.md` §6）
+
+| # | 依頼 | 手順・所要 | 期限 | 無回答時の既定 |
+|---|---|---|---|---|
+| 1 | PAY.JP の状況を 1 行で | 申請したか・審査からの連絡の内容。2 分 | 10/10 | 10/31 に振込の年額の条件を判定。電話番号はそのとき相談（それまで非公開） |
+| 2 | 写真 5 枚 | clarinervium・luxurians・regale・'Dark Mama'・antolakii。正面・無地・長辺 2,000px 以上。40 分 | 10/12 | 写真なしで告知 |
+| 3 | 実機の確認 1 回 | 本番B の後に iPhone で、共有 → LINE と X でカードと着地、トップの年表、warocqueanum の一番下。10 分 | 10/12 | パソコンの確認だけ |
+| 4 | 楽天の成果確認と GA4 のキーイベント | 楽天リンク 2 種を押して翌日のレポートを見る。4 イベントに印を付ける。15 分 | 10/12 | 「未確認」と記録 |
+| 5 | ソフトローンチの DM 2 通 | 15 分 | 10/13 | ストーリーズだけ |
+| 6 | 本告知 | 10/17 20:00 X → 20:30 Instagram（T94 の画像）→ 23:00 まで返信。2 時間 | 10/17 | 10/24 に確定 |
+| 7 | 取扱店の候補 3〜5 店 → DM | 候補 10 分、DM 30 分（文面は T96） | 10/20・10/24 | 募集の 1 行だけで待つ |
+| 8 | もしもの Amazon と書籍（7-0 #4 の継続） | 1 件 1 分 | 10/20 | 楽天・Yahoo! のみ |
+| 9 | 受付開始のお知らせメールの承認 | 決済の稼働日に「送ってよい」と一言 | 稼働日 | 送らない |
+| 10〜12 | （任意）登録した 4 名の確認・自分の実生 2〜3 件・Android の強制ダークの確認 | 各 5〜20 分 | 10/14〜10/16 | 未検証のまま／89・55 だけ／確認なし |
+
+報告だけ（返事不要）: 'Galaxy' は Clone（O-1 は閉じる）、'Dark Mama' は Hybrid、'Mystique A88' は Clone + line、'Queen of Hearts' は記録なし、'BVIT' の作出者は「該当なし」、Platycerium は退避して削除。O-2 と 55 の播種日は継続。
 
 **10-07 第7回の依頼: なし。** 任意で、本番1〜3（10/8・10/9・10/10）のあとに届く 375px のスクリーンショット（トップ・属一覧・warocqueanum・'Ace of Spades'・存在しない URL＋/tools/・料金）を見て、気になる点だけ箇条書きで返す（各 10〜15 分、48h 反応なしで確定）。
 
@@ -333,6 +418,14 @@
 
 ## 8. 次回の議題（本告知 +1 週、10月下旬）
 
+- **10-07b 追加（第9回 = 本告知 +1 週）**:
+  - 本告知の 7 日 KPI と、共有リンクの実際の着地。
+  - M2・M8 の達成。
+  - お知らせ名簿の人数（10/31 の振込判定）と PAY.JP の結果。
+  - お問い合わせの件数と取扱店の DM の反応。
+  - `label_print` と `tools_context_click`。
+  - CLS の実測（T93・T98）。
+  - 次回に送ったもの: 訂正の履歴 `cultivar_changes`・ラベルの各行の出典の印・`cultivar_images.cultivar_id`・`alt_claims`・Monstera の第二波（10/31）。
 - **09-30 追加**: 本告知の実施日と 7 日 KPI／ 開業届・PAY.JP の審査結果と初売上／ 取扱店 DM の反応（合意店数）／ 道具の目録の公開可否（12 商品・6 ジャンル）と 10/14 プレビューの指摘（サムネイル要否）／ もしも Amazon の提携状況と `affiliate_click` の shop 別・genre 別／ M1 40 件と M4 の達成状況／ 48h merge 規則の運用
 - Stripe/PAY.JP の稼働と初売上、9月末 KPI 実測（PV・登録・収録数・Search Console）
 - 再調査リクエストの件数・処理日数・AI コスト実績（15回/日で足りているか）
@@ -355,6 +448,15 @@
 
 ## 9. 決定履歴
 
+- **2026-10-07b（第8回「告知前の総点検」）**: オーナー「T75 以外をやった後に、新しいアイデアや修正、改善を会議を開いた後に実行してほしい」→ 確認質問なしで裁定。会議前に、共有リンク（supabase.co の text/plain → plantsstory.com の正規 URL、旧リンクは 301）と antolakii の描画停止（h1Key）、タッチ端末の崩れ・語中改行・サムネイルを修正済み（09015ff）。統括の事実確認: **M2 未達**（4 名が未登録）、お問い合わせは通知も一覧もない、お知らせの記録先がない、新着は `created_at` で数える。
+  - 裁定（分類）: 'Galaxy' は Clone（IAS 登録）。'Dark Mama' は Hybrid（親は 2 出典で一致、作出者に異説）。'Mystique A88' は Clone + line。'Queen of Hearts' の推測の選抜元を外す。'BVIT' の作出者は「該当なし」。「わからない」は 3 つの値。引用符 D4 は確定。Platycerium は退避して削除。taxonomy Q1〜Q3 は質問せず既定で進める（報告のみ）。
+  - 裁定（デザイン）: 新着は日付の見出しでまとめる。系統図の箱を枠の例外に追加。写真なしは ≤640 で 1 行の帯。ダークモードは作らず強制ダークを止める。T59 はタッチ再現。
+  - 裁定（収益）: お問い合わせの通知（宛先は運営アドレスに固定）。お知らせ名簿（一斉送信はオーナー承認後）。About の修正。ラベル印刷を QR つきで告知前に。道具の文脈行は属レベルの 1 行に改訂（09-30 を上書き）。取扱店の募集の 1 行は 10/24 から。振込の年額は 10/31 に「PAY.JP 未承認 かつ 名簿 ≥3」で 11/1 に開く。運営者の植物販売の開示は、販売へリンクする日まで書かない。
+  - 裁定（集客）: タイトルをカタカナの検索語の形に。4 名を出典つきで日を分けて登録。告知の 1 投稿目のドラヤキは B 階層の出典があるときだけ。`/names/` は告知後。
+  - 実装: T76〜T95 を本番 3 回（10/8・10/11・10/14）とデータ登録 4 回で行う。T96 は 10/24、T97 は 10/30、T98〜T105 は告知後。
+  - 却下: ダークモード・生きた植物のアフィリエイトリンク・投げ銭・会員権の物販・特許と 'Michelle' の結び付け。
+  - 月 1 万円の数式は不変（決済が 11 月上旬に稼働すれば 9,300〜10,500 円、12 月まで止まれば 3,500〜4,750 円）。
+  - オーナーへの依頼は 9 件（うち必須は写真・実機・DM・告知・PAY.JP の 1 行）と任意 3 件。各に既定あり。
 - **2026-10-07（第7回「見た目のまとまり（375px）」）**: オーナー「デザインにまとまりがない。もう少し見やすく」「基本スマホ」→ 確認質問なしで裁定。実測（375px・9 画面）では、文字サイズ 36 種・mono 50〜75%・12px 未満 30〜50%・灰色が黒より多い・文字色 11 色・ボタンとリンク 9〜22 種。4 報告は「同じ事実が何度も出る」「同じ語が別の意味」「件数が画面ごとに違う」で一致。裁定: 見た目の決まり（文字 6 段・書体の役割・色の役割・余白 5 刻み・ボタン 3＋切替 1・枠 5 つ）を archive.css 末尾の統一レイヤー 1 ブロックで入れる／大文字化はどこにも使わない／一覧は `entryLine(d)` の 2 行 1 種類／件数は「収録」= 合格だけ、数字は正しく出せるときだけ出す／日付は例外なく YYYY.MM.DD／→ はページ移動だけ／台帳・台紙・アーカイブは使わず、「未収録」→「記録不足」、「図版未収録」→「写真なし」／トップは一葉 → 新着 → 索引 → 年表（英字の見出し行と ENGLISH を廃止、09-05b を上書き）／品種ページの標題行は区分の印だけ（09-07 を上書き、NO. は共有カードと印刷ラベルに残す）／道具の部門は 2 列の罫線リストで 0 件は出さない、使用中はバッジ、ストアは主 1 つ／料金はお知らせボタンを会員の表の直後に置き、条項は details。却下: 検証の行を由来の記録の下へ・新着の MM.DD・部門の横スクロール・使用中の緑・108 の habitats 削除・料金の取扱店を閉じる。保留: 道具ページのクリック率の前後比較（非公開で元の数字がない）、必須項目の「記録なし」表示。taxonomy Q1 は URL を変えずに 10/14（T69）、Q2 は T71、Q3 は残す。実装 T60〜T68 は本番 3 回（10/8・10/9・10/10）、次回 T69〜T75。売上への直接効果は ±0〜+100円/月で、本告知 10/17 の着地品質を守るために行う。月 1 万円の数式は不変。オーナーへの新しい依頼はなし。
 - **2026-10-03（第6回「サイト全体の質を高める」）**: オーナー「会議をしてその後実行して」「基本スマホで見るユーザーが多い」→ 375px 基準で評価し、決定は確認を待たずに本番へ（本番後にスクリーンショットで報告）。統括の事実確認: **T30 は未 merge だった**（BOARD の「10/2 merge」は誤記）。同日、申込の全入口を「会員受付は準備中です」に切替（154e0d9）。4 報告の一致点は「スマホで直着地した人が最初の 10 秒で壊れている・間違っていると判断する」原因（原寸画像 52MB・白紙 10.6 秒・Clone を一時「原種」と表示・存在しない名前が架空の原種ページ・未公開リンクの漏れ）。裁定: 実装順 T48（データ正確性。修正 SQL 47 文中 46 文を適用、'Galaxy' 本文は差し替え、antolakii 改名は告知後）→ T49 漏れ → T50 画像変換 → T51 直着地 → T52 品種詳細 → T53 メタデータ → T54 トップと一覧 → T55 料金・法務（T30 を master 上で作り直し）→ T24 → T26 → T56 表記 → T57 プレレンダー（告知前必須、10/13）→ T58 /tools/ → T33 取扱店（10/16）。会員の特典は実在する 2 つ（実生投稿 無制限・再調査リクエストの優先審査）に絞る。/tools/ はショップ型を維持しスマホだけ 1 列の行に（オーナー 10/02 指示と両立）。一覧は区分順 → 名前順、区分の表示語は「原種 · Hybrid · Clone · 実生」、日付は YYYY.MM.DD、`anthurium.png` は使わない。道具の範囲外 4 点は非公開（36 点）。取扱店は告知必須の後。分類 Q3〜Q6 はボードで確定し、オーナー確認は 3 件（'Galaxy' の流通・Tim Anderson の役割・スクリーンショット確認）に圧縮。月 1 万円の数式は不変。
 - **2026-09-30（第5回）**: オーナー「Stripe をあきらめて違う収益を」「園芸商品をきれいにまとめたページ（楽天・Yahoo!・Amazon、一覧 → 商品説明、ジャンル別検索）」「Amazon はもしもに切替」。統括の事実確認: 9/8〜9/29 の実装ゼロ（3 ブランチ滞留）、Anthurium 31 件のまま、検証列なし、Amazon 欄は旧・直接契約リンク、Yahoo! 短縮はアフィリエイトリンク（実測）、属ページに道具棚が出ている（§2 違反）。裁定: **道具の目録** `/tools/` + `/tools/<slug>/` を作る（ジャンル 9 本 soil/mount/pots/humidity/heat/light/measure/nutrient/books、肥料・活力剤は効能・用量・頻度を書かない条件で作り、病害虫・水やり・棚は作らない）。一覧は写真なしの台帳・詳細に図版 1 枚（自前 → 楽天画像 → 図版なし）、`toolGate`（使用記録 80 字・禁止語・価格数字なし）で index を分け、掲載はオーナーが使っている物だけ、公開は 12 商品・6 ジャンル以上で本告知の翌週土曜。**Amazon の条件付き削除を廃止し、もしも経由のみ全ジャンルで描画**（href 無改変・imp 1px・CSP `i.moshimo.com`・アソシエイト表示文）。**本告知の必須条件から決済稼働を外し（M10 → E10）、M1 を 40 に、目標 10/17・上限 10/24 を確定日に**。Stripe は放置、PAY.JP は開業届（10/3）直後に申請、T30 は 10/2 に merge（準備中表示）。**取扱店掲載は Checkout を作らず銀行振込で前倒し**（最悪ケースでも月 3,500 円）。月 1 万円の構成は不変、アフィリは 500 円のまま（上限 1,000 円）。48h 無反応 merge を厳守。新規 T44〜T47、T33 改訂、T34 は T46/T47 に統合。オーナー依頼 9 件（開業届・PAY.JP・Stripe 放置・もしもリンク・道具データ・告知・プレビュー・取扱店 DM・シード投稿）、各に既定回答。

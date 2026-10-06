@@ -14,8 +14,8 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.yahoo.co.jp https://i.moshimo.com; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJK72JH471"></script>
-  <script src="js/textsize.js?v=20261007p"></script>
-  <script src="js/gtag-init.js?v=20261007p"></script>
+  <script src="js/textsize.js?v=20261007r"></script>
+  <script src="js/gtag-init.js?v=20261007r"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -54,13 +54,13 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20261007p">
-  <link rel="stylesheet" href="css/reset.css?v=20261007p">
-  <link rel="stylesheet" href="css/layout.css?v=20261007p">
-  <link rel="stylesheet" href="css/components.css?v=20261007p">
-  <link rel="stylesheet" href="css/pages.css?v=20261007p">
-  <link rel="stylesheet" href="css/utilities.css?v=20261007p">
-  <link rel="stylesheet" href="css/archive.css?v=20261007p">
+  <link rel="stylesheet" href="css/variables.css?v=20261007r">
+  <link rel="stylesheet" href="css/reset.css?v=20261007r">
+  <link rel="stylesheet" href="css/layout.css?v=20261007r">
+  <link rel="stylesheet" href="css/components.css?v=20261007r">
+  <link rel="stylesheet" href="css/pages.css?v=20261007r">
+  <link rel="stylesheet" href="css/utilities.css?v=20261007r">
+  <link rel="stylesheet" href="css/archive.css?v=20261007r">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -180,7 +180,7 @@
           <dl>
             <dt data-i18n="colophon_k1">収録範囲</dt><dd data-i18n="colophon_v1">Anthurium（Monstera・Philodendron は準備中）</dd>
             <dt data-i18n="colophon_k2">一次資料</dt><dd data-i18n="colophon_v2">IPNI・POWO・GBIF、原記載論文、育種家の公開情報</dd>
-            <dt data-i18n="colophon_k3">信頼度</dt><dd data-i18n="colophon_v3">出典の階層（S〜D）と投票から算出</dd>
+            <dt data-i18n="colophon_k3">信頼度</dt><dd data-i18n="colophon_v3">出典の階層（S〜D）から算出。管理者が照合した記録には ✓ 検証済</dd>
             <dt data-i18n="colophon_k4">読み方</dt><dd><a href="/glossary/" data-nav="glossary" data-i18n="glossary_title">由来の用語集</a></dd>
           </dl>
           <div class="colophon__actions">
@@ -1014,7 +1014,7 @@
        ======================================== -->
   <section id="page-about" class="page">
     <div class="container container--narrow legal-page">
-      <h1 data-i18n="about_title">About Aroid Origins</h1>
+      <h1 data-i18n="about_title">この図鑑について</h1>
 
       <div class="about-mission">
         <p data-i18n="about_mission_text">誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。</p>
@@ -1022,11 +1022,11 @@
 
       <h2 data-i18n="about_features_title">主な特徴</h2>
       <ul class="terms-list" data-i18n-list="about_features_list">
-        <li>コミュニティによる品種由来情報の収集と検証</li>
-        <li>信頼度スコアによる情報の可視化</li>
-        <li>AIによる由来情報の自動生成支援</li>
-        <li>削除依頼への即時対応による画像の品質管理</li>
-        <li>日本語・英語バイリンガル対応</li>
+        <li>原種の記載者・発表年・タイプ産地を、IPNI・POWO と原記載で照合して出典つきで記録</li>
+        <li>管理者が出典と照合した記録に「✓ 検証済」を付け、照合した日を載せる</li>
+        <li>AI の下書きは未検証として分け、出典のない記録には % を付けない</li>
+        <li>交配種・クローンは作出者・交配式・系統を、出典か投稿者の記録として分けて表示</li>
+        <li>写真は栽培者本人のものだけ。権利や内容の問題は「報告」からすぐに対応</li>
       </ul>
 
       <h2 data-i18n="about_plan_title">料金プラン</h2>
@@ -1035,7 +1035,8 @@
         <li>実生の投稿 無制限（非公開の記録も含む）</li>
         <li>AI 再調査リクエストの優先審査（48時間以内に可否）</li>
       </ul>
-      <p class="text-sm text-muted mt-sm" data-i18n="about_plan_pricing">月額 500円（税込）／ 年額 5,000円（税込）<br>受付開始後、クレジットカード・デビットカードで支払えます（決済代行会社: PAY.JP または Stripe）。</p>
+      <p class="text-sm text-muted mt-sm"><span data-i18n="about_plan_pricing">月額 500円（税込）／ 年額 5,000円（税込）</span><br><span data-i18n="about_plan_payment">受付開始後、クレジットカード・デビットカードで支払えます（決済代行会社: PAY.JP または Stripe）。</span></p>
+      <p data-i18n="about_funding">この図鑑は会員の会費・取扱店の掲載料（PR）・アフィリエイト（PR）で運営しています。いずれも記録の内容や検証には影響しません。</p>
 
       <h2 data-i18n="about_operator_title">運営情報</h2>
       <div class="legal-operator" data-i18n-html="about_operator_body">
@@ -1141,6 +1142,7 @@
             <option value="copyright" data-i18n="contact_category_copyright">著作権に関するお問い合わせ</option>
             <option value="deletion" data-i18n="contact_category_deletion">コンテンツ削除要請</option>
             <option value="bug" data-i18n="contact_category_bug">不具合報告</option>
+            <option value="shop" data-i18n="contact_category_shop">取扱店の掲載（事業者）</option>
           </select>
         </div>
         <div class="form-group">
@@ -1169,7 +1171,7 @@
       <h2>無料でご利用いただけるもの</h2>
       <ul class="terms-list">
         <li>すべての品種ページ・由来記録・写真・人物索引・産地索引・年表の閲覧</li>
-        <li>原種・ハイブリッド・クローンの投稿、由来の追加、写真の投稿、投票</li>
+        <li>原種・Hybrid・Clone の投稿、由来の追加、写真の投稿、投票</li>
         <li>実生の閲覧と、1ユーザーにつき5件までの実生投稿</li>
       </ul>
 
@@ -1194,14 +1196,14 @@
       <div class="mt-lg"><button class="btn btn--primary" type="button" data-action="open-paywall">受付開始のお知らせを受け取る</button></div>
       <p class="text-sm text-muted mt-md">お申込み前に <a href="#" data-nav="tokushoho">特定商取引法に基づく表記</a> と <a href="#" data-nav="terms">利用規約</a> をご確認ください。</p>
 
-      <h2>取扱店の掲載（事業者向け）</h2>
+      <h2 id="shops">取扱店の掲載（事業者向け）</h2>
       <p>品種ページの「取扱店 — PR」欄に、店名・リンク・一言（40字まで）を載せます。掲載は属ごと（いまは Anthurium）で、特定の品種を「この店が売っている」とは表示しません。記録や信頼度には影響しません。</p>
       <table class="tokushoho-table">
         <tr><th>掲載料</th><td>月額 1,000円（税込）。初月無料</td></tr>
         <tr><th>お支払い</th><td>月末締め。翌月5日までに請求書をメールでお送りし、その月末までに銀行振込でお支払いください（振込手数料はご負担ください）</td></tr>
         <tr><th>解約</th><td>お申し出の翌月末で掲載を終えます</td></tr>
         <tr><th>掲載の条件</th><td>国内で植物を販売する事業者に限ります。内容は運営者が確認し、掲載をお断りまたは取りやめる場合があります。当サイトは適格請求書発行事業者ではありません</td></tr>
-        <tr><th>お申込み</th><td><a href="#" data-nav="contact">お問い合わせフォーム</a>から「取扱店の掲載」とお書きください</td></tr>
+        <tr><th>お申込み</th><td><a href="/contact/?c=shop" data-nav="contact" data-contact-category="shop">お問い合わせフォーム</a>で区分「取扱店の掲載」を選んでお送りください</td></tr>
       </table>
       <p class="related__exit"><a href="/about/" data-nav="about">Aroid Origins について →</a></p>
     </div>
@@ -1546,14 +1548,14 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/record-gate.js?v=20261007p"></script>
-  <script src="js/app-core.js?v=20261007p"></script>
-  <script src="js/pages.js?v=20261007p"></script>
-  <script src="js/forms.js?v=20261007p"></script>
-  <script src="js/entry-meta.js?v=20261007p"></script>
-  <script src="js/archive.js?v=20261007p"></script>
-  <script src="js/tool-gate.js?v=20261007p"></script>
-  <script src="js/tools.js?v=20261007p"></script>
+  <script src="js/record-gate.js?v=20261007r"></script>
+  <script src="js/app-core.js?v=20261007r"></script>
+  <script src="js/pages.js?v=20261007r"></script>
+  <script src="js/forms.js?v=20261007r"></script>
+  <script src="js/entry-meta.js?v=20261007r"></script>
+  <script src="js/archive.js?v=20261007r"></script>
+  <script src="js/tool-gate.js?v=20261007r"></script>
+  <script src="js/tools.js?v=20261007r"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1563,7 +1565,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261007p"></script>
+  <script src="js/dialogs.js?v=20261007r"></script>
 
   <!-- AI re-research request dialog -->
   <dialog id="research-request-dialog" class="dialog-clean" aria-labelledby="research-request-title">
@@ -1602,6 +1604,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261007p"></script>
+<script src="js/sw-register.js?v=20261007r"></script>
 </body>
 </html>

@@ -14,12 +14,13 @@
   <link rel="stylesheet" href="css/utilities.css">
   <link rel="stylesheet" href="css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/record-gate.js?v=20261007p"></script>
-  <script src="js/tool-gate.js?v=20261007p"></script>
-  <script src="js/admin-ledger.js?v=20261007p"></script>
-  <script src="js/admin-tools-research.js?v=20261007p"></script>
-  <script src="js/admin-verify.js?v=20261007p"></script>
-  <script src="js/admin-shops.js?v=20261007p"></script>
+  <script src="js/record-gate.js?v=20261007r"></script>
+  <script src="js/tool-gate.js?v=20261007r"></script>
+  <script src="js/admin-ledger.js?v=20261007r"></script>
+  <script src="js/admin-tools-research.js?v=20261007r"></script>
+  <script src="js/admin-verify.js?v=20261007r"></script>
+  <script src="js/admin-contact.js?v=20261007r"></script>
+  <script src="js/admin-shops.js?v=20261007r"></script>
 </head>
 <body>
 
@@ -71,6 +72,7 @@
       <a href="#" data-section="gate">未収録一覧</a>
       <a href="#" data-section="verify">検証</a>
       <a href="#" data-section="affiliates">道具（アフィリエイト）</a>
+      <a href="#" data-section="contact">お問い合わせ <span id="contact-badge" class="d-none" style="background:#A8712E;color:#fff;border-radius:10px;padding:0 6px;font-size:0.7rem;"></span></a>
       <a href="#" data-section="shops">取扱店</a>
       <a href="#" data-section="ledger">帳簿</a>
       <a href="#" data-section="plants">株台帳</a>
@@ -315,6 +317,12 @@
       <section id="sec-verify" class="hidden">
         <h2 class="section-title">検証</h2>
         <div id="verify-root"></div>
+      </section>
+
+      <!-- ---- CONTACT (お問い合わせ) ---- -->
+      <section id="sec-contact" class="hidden">
+        <h2 class="section-title">お問い合わせ</h2>
+        <div id="contact-root"></div>
       </section>
 
       <!-- ---- SHOPS (取扱店) ---- -->
@@ -967,6 +975,7 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
     if (section === 'ledger' && window.loadLedger) window.loadLedger();
     if (section === 'verify' && window.loadVerify) window.loadVerify();
     if (section === 'shops' && window.loadShops) window.loadShops();
+    if (section === 'contact' && window.loadContactMessages) window.loadContactMessages();
     if (section === 'plants' && window.loadPlants) window.loadPlants();
     if (section === 'keyword-research') populateKRSelect();
     closeNav();

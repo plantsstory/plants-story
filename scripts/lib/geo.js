@@ -23,25 +23,53 @@ const REGION_HINTS = [
 function countryOf(text) {
   text = text == null ? '' : String(text).trim();
   if (!text || text === 'null') return '';
+  // the country mentioned first in the text (same rule as archive.js since 10-07), not the first in our list
+  let best = '', bestAt = Infinity;
   for (const c of COUNTRIES) {
-    if (new RegExp('(^|[^A-Za-z])' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^A-Za-z]|$)', 'i').test(text)) return CANON[c] || c;
+    const m = new RegExp('(^|[^A-Za-z])' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^A-Za-z]|$)', 'i').exec(text);
+    if (m && m.index < bestAt) { bestAt = m.index; best = CANON[c] || c; }
   }
-  for (const [re, c] of REGION_HINTS) if (re.test(text)) return c;
-  return '';
+  for (const [re, c] of REGION_HINTS) { const m = re.exec(text); if (m && m.index < bestAt) { bestAt = m.index; best = c; } }
+  return best;
 }
+// every country a text mentions, in order of mention
+function countriesOf(text) {
+  text = text == null ? '' : String(text).trim();
+  if (!text || text === 'null') return [];
+  const hits = [];
+  for (const c of COUNTRIES) {
+    const m = new RegExp('(^|[^A-Za-z])' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^A-Za-z]|$)', 'i').exec(text);
+    if (m) hits.push({ at: m.index, c: CANON[c] || c });
+  }
+  for (const [re, c] of REGION_HINTS) { const m = re.exec(text); if (m) hits.push({ at: m.index, c }); }
+  hits.sort((a, b) => a.at - b.at);
+  return [...new Set(hits.map(h => h.c))];
+}
+// Japanese country names (same table as COUNTRY_JA in wireframe/js/archive.js)
+const COUNTRY_JA = { 'Colombia': 'コロンビア', 'Ecuador': 'エクアドル', 'Panama': 'パナマ', 'Peru': 'ペルー', 'Mexico': 'メキシコ',
+  'Costa Rica': 'コスタリカ', 'Brazil': 'ブラジル', 'Bolivia': 'ボリビア', 'Venezuela': 'ベネズエラ', 'Guatemala': 'グアテマラ',
+  'Honduras': 'ホンジュラス', 'Nicaragua': 'ニカラグア', 'Belize': 'ベリーズ', 'El Salvador': 'エルサルバドル', 'Guyana': 'ガイアナ',
+  'French Guiana': 'フランス領ギアナ', 'Suriname': 'スリナム', 'Argentina': 'アルゼンチン', 'Paraguay': 'パラグアイ', 'Cuba': 'キューバ',
+  'Jamaica': 'ジャマイカ', 'Trinidad': 'トリニダード', 'Dominican Republic': 'ドミニカ共和国', 'Puerto Rico': 'プエルトリコ' };
+function countryJa(c) { return COUNTRY_JA[c] || c; }
 function countrySlug(c) { return String(c).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, ''); }
-// species rows grouped by country -> [{ key, slug, rows }]
-function localityIndex(rows) {
+// recorded species grouped by country (same rule as placeGroups() in archive.js):
+// typeRows = type locality in the country, rangeRows = the range includes it; trade-only places are left out.
+// isRecorded(row) is the caller's record gate. -> [{ key, slug, ja, typeRows, rangeRows, rows }]
+function localityIndex(rows, isRecorded) {
   const map = new Map();
+  const get = c => { if (!map.has(c)) map.set(c, { key: c, slug: countrySlug(c), ja: countryJa(c), typeRows: [], rangeRows: [] }); return map.get(c); };
   for (const row of rows) {
-    if (row.type !== 'species') continue;
+    if (row.type !== 'species' || (row.tags || []).includes('individual')) continue;
+    if (isRecorded && !isRecorded(row)) continue;
     const os = (row.origins || []).filter(o => o && !o._type).sort((a, b) => (parseInt(b.trust, 10) || 0) - (parseInt(a.trust, 10) || 0));
     const s = (os[0] && os[0].structured) || {};
-    const c = countryOf(s.type_locality) || countryOf(s.known_habitats) || countryOf(os[0] && os[0].native_region);
-    if (!c) continue;
-    if (!map.has(c)) map.set(c, { key: c, slug: countrySlug(c), rows: [] });
-    map.get(c).rows.push(row);
+    if (String(s.species_status || '') === 'unresolved' || /流通/.test(String(s.origin_region || ''))) continue;
+    const typeC = countryOf(s.type_locality);
+    if (typeC) get(typeC).typeRows.push(row);
+    for (const c of countriesOf(s.known_habitats || (os[0] && os[0].native_region) || s.origin_region)) if (c !== typeC) get(c).rangeRows.push(row);
   }
-  return [...map.values()].sort((a, b) => b.rows.length - a.rows.length || a.key.localeCompare(b.key));
+  return [...map.values()].map(g => Object.assign(g, { rows: g.typeRows.concat(g.rangeRows) }))
+    .sort((a, b) => b.rows.length - a.rows.length || a.key.localeCompare(b.key));
 }
-module.exports = { countryOf, countrySlug, localityIndex };
+module.exports = { countryOf, countriesOf, countryJa, countrySlug, localityIndex };

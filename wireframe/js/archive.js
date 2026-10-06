@@ -77,6 +77,21 @@
     return best;
   }
 
+  function countriesOf(text) {
+    text = clean(text);
+    if (!text) return [];
+    var hits = [];
+    COUNTRIES.forEach(function (c) {
+      var m = new RegExp('(^|[^A-Za-z])' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^A-Za-z]|$)', 'i').exec(text);
+      if (m) hits.push({ at: m.index, c: CANON[c] || c });
+    });
+    REGION_HINTS.forEach(function (h) { var m = h[0].exec(text); if (m) hits.push({ at: m.index, c: h[1] }); });
+    hits.sort(function (a, b) { return a.at - b.at; });
+    var out = [];
+    hits.forEach(function (h) { if (out.indexOf(h.c) === -1) out.push(h.c); });
+    return out;
+  }
+
   /* ---------- entry description ---------- */
   function topOrigin(entry) {
     var os = ((entry && entry.origins) || []).filter(function (o) { return o && !o._type; });
@@ -128,6 +143,7 @@
     d.tags = entry._tags || [];
     d.selectedFrom = entry._selectedFrom || null;
     d.formulaStatus = entry._formulaStatus || null;
+    d.absent = (s.absent && typeof s.absent === 'object') ? s.absent : {};
     // Record gate (shared module): 'ok' | 'unrecorded' | 'researching' | 'none'
     d.state = (window.RecordGate && typeof window.recForGate === 'function' && type !== 'seedling') ? window.RecordGate.state(window.recForGate(fullName, entry, { type: type })) : 'ok';
     d.missing = (d.state === 'unrecorded' && window.RecordGate) ? window.RecordGate.gate(window.recForGate(fullName, entry, { type: type })).missing : [];
@@ -182,7 +198,7 @@
     function push(v, role) { splitPeople(v).forEach(function (p) { if (!out.some(function (x) { return x.key === p; })) out.push({ key: p, role: role }); }); }
     // Seedling notes are personal records: their growers are listed apart from breeders of named plants
     var breederRole = d.type === 'seedling' ? 'grower' : 'breeder';
-    push(d.author, 'author'); push(d.collector, 'collector'); push(d.breeder, breederRole); push(d.namer, 'namer'); push(d.creator, breederRole);
+    push(d.author, 'author'); push(d.collector, 'collector'); push(d.breeder, breederRole); push(d.namer, 'namer'); push(d.creator, breederRole); push(d.introducedBy, 'introducer');
     return out;
   }
   function personSlug(name) {
@@ -541,12 +557,15 @@
   /* ============================================================
      ENTRIES LEDGER (replaces "recently updated" cards)
      ============================================================ */
-  var _ledgerArgs = null;
-  window.refreshEntriesLedger = function () { if (_ledgerArgs) window.renderEntriesLedger.apply(null, _ledgerArgs); };
+  var _ledgerArgs = null, _ledgers = {};
+  window.refreshEntriesLedger = function () {
+    Object.keys(_ledgers).forEach(function (id) { var a = _ledgers[id]; if (document.body.contains(a[0])) window.renderEntriesLedger.apply(null, a); else delete _ledgers[id]; });
+  };
   window.renderEntriesLedger = function (grid, items, thumbMap, opts) {
     _ledgerArgs = [grid, items, thumbMap, opts];
+    _ledgers[grid.id || 'grid'] = _ledgerArgs;
     // drawn from bare rows first; drawn again once the full entries (tags, verification) are in
-    if (!window._dataFullyLoaded) waitForData(function () { if (_ledgerArgs && _ledgerArgs[0] === grid) window.renderEntriesLedger.apply(null, _ledgerArgs); });
+    if (!window._dataFullyLoaded) waitForData(function () { var a = _ledgers[grid.id || 'grid']; if (a && a[0] === grid) window.renderEntriesLedger.apply(null, a); });
     thumbMap = thumbMap || {};
     opts = opts || {};
     var baseUrl = window._SUPABASE_URL || '';
@@ -581,18 +600,25 @@
      ============================================================ */
   var _detailArgs = null;
   function cell(k, v) { return v ? '<div class="specimen__cell"><span class="specimen__k">' + esc(T(k)) + '</span><span class="specimen__v">' + v + '</span></div>' : ''; }
+  // a parent name found by the same whole-name rule as the children (normParent): genus, A., quotes and extra
+  // spaces aside, the names must be equal — 'Red Crystallinum' never finds crystallinum
   function findByEpithet(all, name) {
-    name = clean(name).replace(/^['"‘’“”]+|['"‘’“”]+$/g, '').toLowerCase();
-    if (!name) return null;
+    var key = normParent(name);
+    if (!key) return null;
     for (var i = 0; i < all.length; i++) {
-      var e = all[i].epithet.replace(/^['"‘’“”]+|['"‘’“”]+$/g, '').toLowerCase();
-      if (e === name || all[i].displayName.toLowerCase() === name) return all[i];
+      if (normParent(all[i].epithet) === key || normParent(all[i].displayName) === key) return all[i];
     }
     return null;
   }
   function parentHtml(all, name) {
     var d = findByEpithet(all, name);
     return d ? link(d, sciNameHtml(name)) : sciNameHtml(name);
+  }
+  // why a required field is empty: sine loc. / not applicable are facts; anything else is 記録なし (not yet checked)
+  function absentHtml(d, field) {
+    var v = d.absent[field];
+    var key = v === 'sine_loc' ? 'absent_sine_loc' : v === 'not_applicable' ? 'absent_na' : 'absent_none';
+    return '<span class="absent' + (key === 'absent_none' ? ' absent--none' : '') + '">' + esc(T(key)) + '</span>';
   }
   function renderSpecimen(d, all) {
     var el = document.getElementById('specimen-label');
@@ -609,22 +635,24 @@
       cells += cell('spec_trade_names', esc(d.tradeNames.join(' / ')));
       cells += cell('spec_working_name', esc(d.workingNameOrigin));
     } else if (d.type === 'species') {
-      cells += cell('spec_author', linkPeople(d.author));
-      cells += cell('spec_pub_year', yearSpan(d.pubYear));
+      cells += cell('spec_author', linkPeople(d.author) || absentHtml(d, 'author_name'));
+      cells += cell('spec_pub_year', yearSpan(d.pubYear) || absentHtml(d, 'publication_year'));
       cells += cell('spec_collector', linkPeople(d.collector));
       cells += cell('spec_col_year', yearSpan(d.colYear));
       // type locality and distribution with the same value take one cell
       if (d.locality && d.habitat && d.locality === d.habitat) cells += cell('spec_locality_habitat', distributionHtml(d.locality));
       else {
-        cells += cell('spec_locality', esc(countryLabel(d.locality)));
+        cells += cell('spec_locality', d.locality ? esc(countryLabel(d.locality)) : absentHtml(d, 'type_locality'));
         if (!d.locality && d.formLocality) cells += cell('spec_form_locality', esc(d.formLocality));
-        cells += cell('spec_habitat', distributionHtml(d.habitat));
+        cells += cell('spec_habitat', distributionHtml(d.habitat) || absentHtml(d, 'known_habitats'));
       }
     } else {
       if (d.type === 'clone' && !d.breeder && d.namer) cells += cell('spec_namer', linkPeople(d.namer));
-      else cells += cell('spec_breeder', linkPeople(d.breeder || d.namer || d.creator));
+      else cells += cell('spec_breeder', linkPeople(d.breeder || d.namer || d.creator) || (d.type === 'seedling' || d.isIndividual ? '' : absentHtml(d, 'breeder')));
       cells += cell(d.type === 'seedling' ? 'spec_sowing' : 'spec_year', d.type === 'seedling' ? esc(/^\d{4}-\d{2}-\d{2}/.test(d.sowing) ? fmtDate(d.sowing) : d.sowing) : ((d.namingYear || d.year) ? '<span class="num">' + (d.namingYear || d.year) + '</span>' : ''));
-      if (d.parentA || d.parentB) cells += cell('spec_parents', parentHtml(all, d.parentA || T('lineage_unknown')) + ' × ' + parentHtml(all, d.parentB || T('lineage_unknown')));
+      var unconfirmed = d.tags.indexOf('parentage_unconfirmed') !== -1;
+      if (d.parentA || d.parentB) cells += cell('spec_parents', parentHtml(all, d.parentA || T('lineage_unknown')) + ' × ' + parentHtml(all, d.parentB || T('lineage_unknown')) + (unconfirmed ? ' <span class="absent">' + esc(T('parentage_unconfirmed')) + '</span>' : ''));
+      else if (d.type === 'hybrid') cells += cell('spec_parents', d.formulaStatus === 'unknown' ? esc(T('lineage_unknown')) : absentHtml(d, 'formula'));
     }
     if (d.selectedFrom) {
       // an individual names its species; a Clone selected from another plant names that plant
@@ -632,7 +660,7 @@
       if (parentSp) cells = cell(d.isIndividual ? 'spec_selected_from' : 'spec_selected_from_clone', link(parentSp, sciNameHtml(parentSp.shownName))) + cells;
     }
     // an individual: who brought it in and where it came from
-    if (d.isIndividual) cells += cell('spec_introduced_by', linkPeople(d.introducedBy)) + cell('spec_region', esc(d.originRegion || d.formLocality || d.locality || d.habitat));
+    if (d.isIndividual) cells += cell('spec_introduced_by', linkPeople(d.introducedBy)) + cell('spec_region', distributionHtml(d.originRegion || d.formLocality || d.locality || d.habitat));
     // on the label: at most three Latin-script names; katakana stays for search and JSON-LD
     var labelAliases = (d.aliases || []).filter(function (a, i, arr) { return /[A-Za-z]/.test(a) && !/[゠-ヿ]/.test(a) && arr.indexOf(a) === i; }).slice(0, 3);
     // under the name, not in the label (BOARD 10-07 T73)
@@ -869,7 +897,9 @@
     if (!hasParents && !children.length) return '';
     var html = '<div class="lineage"><h3 class="lineage__title">' + esc(T('lineage_title')) + '</h3>';
     if (hasParents) {
-      html += '<div class="lineage__row lineage__row--parents">' + lineageNode(all, d.parentA) + '<span class="lineage__x">×</span>' + lineageNode(all, d.parentB) + '</div>';
+      var unsure = d.tags.indexOf('parentage_unconfirmed') !== -1;
+      html += '<div class="lineage__row lineage__row--parents' + (unsure ? ' lineage__row--unconfirmed' : '') + '">' + lineageNode(all, d.parentA) + '<span class="lineage__x">×</span>' + lineageNode(all, d.parentB) + '</div>';
+      if (unsure) html += '<p class="lineage__note">' + esc(T('parentage_unconfirmed')) + '</p>';
       html += '<div class="lineage__joint lineage__joint--down"></div>';
     }
     html += '<div class="lineage__row">' + lineageNode(all, d, 'lineage__node--self') + '</div>';
@@ -883,12 +913,14 @@
   /* ============================================================
      PEOPLE: /people/ index and /people/<slug>/ pages
      ============================================================ */
-  var ROLE_KEYS = { author: 'role_author', collector: 'role_collector', breeder: 'role_breeder', namer: 'role_namer', grower: 'role_grower' };
+  var ROLE_KEYS = { author: 'role_author', collector: 'role_collector', breeder: 'role_breeder', namer: 'role_namer', introducer: 'role_introducer', grower: 'role_grower' };
   /* people authority (wireframe/data/people-authority.json): IPNI abbreviation → full name, years, note */
   var _authority = null;
   function loadAuthority(cb) {
     if (_authority) { cb(_authority); return; }
-    fetch(base + 'data/people-authority.json?v=' + (window._assetVersion || '1')).then(function (r) { return r.ok ? r.json() : {}; })
+    // same version as the scripts (the ?v= of archive.js), so an updated table is never hidden by a cache
+    var av = ((document.querySelector('script[src*="archive.js"]') || {}).src || '').split('v=')[1] || '1';
+    fetch(base + 'data/people-authority.json?v=' + av).then(function (r) { return r.ok ? r.json() : {}; })
       .then(function (j) { _authority = j || {}; cb(_authority); })
       .catch(function () { _authority = {}; cb(_authority); });
   }
@@ -975,6 +1007,21 @@
   /* ---------- locality pages: /locality/ and /locality/<country>/ ---------- */
   function countrySlug(c) { return String(c).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, ''); }
   var _placeSlug = null;
+  // places: recorded species only; a country page lists species whose type locality is there and species whose range
+  // includes it. Places known only from the trade (unresolved names, 「流通」 regions) are not places (BOARD 10-07b T80).
+  function placeGroups(all) {
+    var map = {};
+    var get = function (c) { return map[c] || (map[c] = { key: c, typeItems: [], rangeItems: [] }); };
+    all.forEach(function (d) {
+      if (d.type !== 'species' || d.isIndividual || d.state !== 'ok') return;
+      if (d.speciesStatus === 'unresolved' || /流通/.test(d.originRegion)) return;
+      var typeC = countryOf(d.locality);
+      if (typeC) get(typeC).typeItems.push(d);
+      countriesOf(d.habitat || d.originRegion).forEach(function (c) { if (c !== typeC) get(c).rangeItems.push(d); });
+    });
+    return Object.keys(map).map(function (k) { var g = map[k]; g.count = g.typeItems.length + g.rangeItems.length; return g; })
+      .sort(function (a, b) { return b.count - a.count || a.key.localeCompare(b.key); });
+  }
   function renderLocalityPageInner() {
     var body = document.getElementById('locality-body');
     var title = document.getElementById('locality-title');
@@ -982,7 +1029,7 @@
     var crumbSep = document.getElementById('locality-crumb-sep');
     if (!body) return;
     var all = collectAll();
-    var groups = groupBy(all.filter(function (d) { return d.type === 'species'; }), function (d) { return d.country; });
+    var groups = placeGroups(all);
     var slug = _placeSlug ? decodeURIComponent(_placeSlug) : '';
     if (!slug) {
       if (title) title.textContent = T('locality_title');
@@ -990,37 +1037,39 @@
       if (crumbSep) crumbSep.classList.add('d-none');
       var html = '<p class="people__intro">' + esc(T('locality_intro')) + '</p><div class="people__grid"><div class="people__group"><ul class="people__list">';
       groups.forEach(function (g) {
-        var years = g.items.map(function (d) { return d.pubYear; }).filter(Boolean);
-        var y0 = years.length ? Math.min.apply(null, years) : 0, y1 = years.length ? Math.max.apply(null, years) : 0;
-        var meta = g.items.length + ' ' + T('locality_species') + (years.length ? ' · ' + (y0 === y1 ? y0 : y0 + '–' + y1) : '');
-        html += '<li><a href="' + esc(base + 'locality/' + encodeURIComponent(countrySlug(g.key))) + '" data-nav="locality" data-place="' + esc(countrySlug(g.key)) + '">' + esc(g.key) + '</a><span class="mono">' + esc(meta) + '</span></li>';
+        var meta = T('locality_count').replace('{n}', g.count).replace('{a}', g.typeItems.length).replace('{b}', g.rangeItems.length);
+        html += '<li><a href="' + esc(base + 'locality/' + encodeURIComponent(countrySlug(g.key)) + '/') + '" data-nav="locality" data-place="' + esc(countrySlug(g.key)) + '">' + esc(countryLabel(g.key)) + '</a><span class="num">' + esc(meta) + '</span></li>';
       });
       body.innerHTML = html + '</ul></div></div>';
       return;
     }
     var g = groups.filter(function (x) { return countrySlug(x.key) === slug; })[0];
     if (!g) { if (title) title.textContent = slug; body.innerHTML = '<p class="empty-state">' + esc(T('locality_none')) + '</p>'; return; }
-    if (title) title.textContent = g.key;
-    if (crumbName) crumbName.textContent = g.key;
+    var name = countryLabel(g.key);
+    if (title) title.textContent = T('locality_page_title').replace('{country}', name);
+    if (crumbName) crumbName.textContent = name;
     if (crumbSep) crumbSep.classList.remove('d-none');
-    var years = g.items.map(function (d) { return d.pubYear; }).filter(Boolean);
+    var items = g.typeItems.concat(g.rangeItems);
+    var years = items.map(function (d) { return d.pubYear; }).filter(Boolean);
     var authors = {};
-    g.items.forEach(function (d) { splitPeople(d.author).forEach(function (p) { authors[p] = (authors[p] || 0) + 1; }); });
+    items.forEach(function (d) { splitPeople(d.author).forEach(function (p) { authors[p] = (authors[p] || 0) + 1; }); });
     var topAuthors = Object.keys(authors).sort(function (a, b) { return authors[b] - authors[a]; }).slice(0, 4);
-    var facts = '<dl class="ledger people__facts">';
-    facts += '<div><dt>' + esc(T('locality_species')) + '</dt><dd>' + g.items.length + '</dd></div>';
-    if (years.length) facts += '<div><dt>' + esc(T('ledger_years')) + '</dt><dd>' + Math.min.apply(null, years) + (years.length > 1 ? '–' + Math.max.apply(null, years) : '') + '</dd></div>';
-    if (topAuthors.length) facts += '<div><dt>' + esc(T('role_author')) + '</dt><dd class="people__facts-small">' + topAuthors.map(function (p) { return linkPeople(p); }).join(', ') + '</dd></div>';
+    var facts = '<dl class="people__facts">';
+    facts += '<div><dt>' + esc(T('locality_species')) + '</dt><dd>' + esc(T('locality_count').replace('{n}', g.count).replace('{a}', g.typeItems.length).replace('{b}', g.rangeItems.length)) + '</dd></div>';
+    if (years.length) facts += '<div><dt>' + esc(T('ledger_years')) + '</dt><dd class="num">' + Math.min.apply(null, years) + (years.length > 1 ? '–' + Math.max.apply(null, years) : '') + '</dd></div>';
+    if (topAuthors.length) facts += '<div><dt>' + esc(T('role_author')) + '</dt><dd>' + topAuthors.map(function (p) { return linkPeople(p); }).join(', ') + '</dd></div>';
     facts += '</dl>';
-    body.innerHTML = facts + '<h2 class="section-title"><span>' + esc(T('locality_species')) + '</span></h2><div id="locality-ledger"></div>';
-    var sorted = g.items.slice().sort(function (a, b) { return (a.pubYear || 9999) - (b.pubYear || 9999) || a.displayName.localeCompare(b.displayName); });
-    var thumbs = {};
-    sorted.forEach(function (d) { var u = (typeof _thumbMap !== 'undefined') ? _thumbMap[d.displayName] : null; if (u) thumbs[d.displayName] = u; });
+    var byYear = function (list) { return list.slice().sort(function (a, b) { return (a.pubYear || 9999) - (b.pubYear || 9999) || a.displayName.localeCompare(b.displayName); }); };
+    body.innerHTML = facts
+      + (g.typeItems.length ? '<h2 class="section-title"><span>' + esc(T('locality_group_type')) + '</span></h2><div id="locality-ledger"></div>' : '')
+      + (g.rangeItems.length ? '<h2 class="section-title"><span>' + esc(T('locality_group_range')) + '</span></h2><div id="locality-ledger-range"></div>' : '');
     if (typeof window.loadCultivarThumbnails === 'function') window.loadCultivarThumbnails();
-    window.renderEntriesLedger(document.getElementById('locality-ledger'), toLedgerItems(sorted), thumbs, { noCountry: true });
+    if (g.typeItems.length) window.renderEntriesLedger(document.getElementById('locality-ledger'), toLedgerItems(byYear(g.typeItems)), {}, { noCountry: true });
+    if (g.rangeItems.length) window.renderEntriesLedger(document.getElementById('locality-ledger-range'), toLedgerItems(byYear(g.rangeItems)), {});
     if (typeof updateMeta === 'function') {
       setTimeout(function () {
-        updateMeta({ title: g.key + ' — ' + T('locality_species') + ' ' + g.items.length + ' | Aroid Origins', description: g.key + ' をタイプ産地とするアロイド原種 ' + g.items.length + '種: ' + sorted.slice(0, 6).map(function (d) { return d.displayName; }).join('、'), path: 'locality/' + encodeURIComponent(countrySlug(g.key)) });
+        updateMeta({ title: T('locality_page_title').replace('{country}', name) + ' ' + g.count + '種（' + T('locality_count_short').replace('{a}', g.typeItems.length).replace('{b}', g.rangeItems.length) + '） | Aroid Origins',
+          description: T('locality_meta_desc').replace('{country}', name) + byYear(items).slice(0, 6).map(function (d) { return d.shownName; }).join('、'), path: 'locality/' + encodeURIComponent(countrySlug(g.key)) + '/' });
       }, 0);
     }
   }
@@ -1038,6 +1087,27 @@
     waitForData(function () { if (document.getElementById('page-people').classList.contains('active')) renderPeoplePageInner(); });
   };
 
+  // whole-name match after setting aside quotes, case, hyphens/underscores/extra spaces and width; also the aliases
+  function looseKey(s) {
+    s = String(s || '');
+    if (s.normalize) s = s.normalize('NFKC');
+    return s.toLowerCase().replace(/['"‘’“”]/g, '').replace(/[-_\s]+/g, ' ').trim();
+  }
+  function resolveLooseName(displayName, store) {
+    var want = looseKey(displayName);
+    var genus = displayName.split(' ')[0];
+    var wantRest = looseKey(displayName.slice(genus.length + 1));
+    if (!want) return null;
+    var hits = [];
+    Object.keys(store).forEach(function (k) {
+      if (k.indexOf(' [Seedling]') !== -1 || store[k]._isPrivate) return;
+      if (looseKey(k.split(' ')[0]) !== looseKey(genus)) return;
+      var names = [k].concat((store[k]._aliases || []).map(function (a) { return a; }));
+      var ok = names.some(function (n) { return looseKey(n) === want || looseKey(n) === wantRest; });
+      if (ok && hits.indexOf(k) === -1) hits.push(k);
+    });
+    return hits.length === 1 ? hits[0] : null;
+  }
   function renderDetail() {
     if (!_detailArgs) return;
     var displayName = _detailArgs[0];
@@ -1047,7 +1117,20 @@
     var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
     var key = _detailArgs[4] || displayName;
     var entry = store[key] || store[displayName] || store[displayName + ' [Seedling]'] || _detailArgs[1];
+    if (!entry && window._dataFullyLoaded) {
+      // a link that lost its quotes, changed case, used hyphens or a katakana alias: if exactly one entry matches
+      // once those are set aside, show it under its own URL; never a partial match (BOARD 10-07b T76)
+      var hit = resolveLooseName(displayName, store);
+      if (hit && typeof window.updateCultivarDetail === 'function') {
+        var hd = describe(hit, store[hit], store[hit]._type);
+        try { history.replaceState(history.state, '', hd.href + '/'); } catch (e) { /* ignore */ }
+        window.updateCultivarDetail(hit);
+        return;
+      }
+    }
     if (!entry) { if (window._dataFullyLoaded) renderUnrecorded(displayName); return; }
+    // people links fold aliases ("Jay Vannini" -> Vannini) once the authority table is in: draw again then
+    if (!_authority) loadAuthority(function () { renderDetail(); });
     setUnrecorded(false);
     var d = describe(key in store ? key : (store[displayName] ? displayName : (store[displayName + ' [Seedling]'] ? displayName + ' [Seedling]' : key)), entry, entry._type || _detailArgs[2]);
     renderSpecimen(d, all);
@@ -1441,7 +1524,7 @@
       var r = _applyLanguage.apply(this, arguments);
       try {
         if (window._dataFullyLoaded) { renderFront(); renderDetail(); }
-        if (_ledgerArgs) window.renderEntriesLedger.apply(null, _ledgerArgs);
+        window.refreshEntriesLedger();
       } catch (err) { /* ignore */ }
       return r;
     };

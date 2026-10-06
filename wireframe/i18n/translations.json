@@ -853,7 +853,7 @@
     "en": "Modern browsers (latest versions of Chrome, Safari, Firefox, Edge)"
   },
   "about_title": {
-    "jp": "About Aroid Origins",
+    "jp": "この図鑑について",
     "en": "About Aroid Origins"
   },
   "about_mission_text": {
@@ -865,8 +865,8 @@
     "en": "Key Features"
   },
   "about_features_list": {
-    "jp": "コミュニティによる品種由来情報の収集と検証\n信頼度スコアによる情報の可視化\nAIによる由来情報の自動生成支援\n記録ごとの出典の明示と「正確／疑問」の投票\n日本語・英語バイリンガル対応",
-    "en": "Community-driven cultivar origin collection and verification\nTrust score visualization for information reliability\nAI-assisted origin information generation\nImage quality control through Real/Fake voting\nBilingual support (Japanese/English)"
+    "jp": "原種の記載者・発表年・タイプ産地を、IPNI・POWO と原記載で照合して出典つきで記録\n管理者が出典と照合した記録に「✓ 検証済」を付け、照合した日を載せる\nAI の下書きは未検証として分け、出典のない記録には % を付けない\n交配種・クローンは作出者・交配式・系統を、出典か投稿者の記録として分けて表示\n写真は栽培者本人のものだけ。権利や内容の問題は「報告」からすぐに対応",
+    "en": "Species: author, year and type locality checked against IPNI, POWO and the protologue, with sources\nRecords checked by the editor carry ✓ Verified and the date of the check\nAI drafts are kept apart as unverified; records without sources get no %\nHybrids and clones: breeder, parentage and line, shown as sourced or as a contributor record\nPhotos by the growers only; rights or content issues are handled from Report"
   },
   "about_operator_title": {
     "jp": "運営情報",
@@ -1189,8 +1189,8 @@
     "en": "Trust score"
   },
   "colophon_v3": {
-    "jp": "出典の階層（S〜D）と投票から算出",
-    "en": "Derived from source tier (S–D) and votes"
+    "jp": "出典の階層（S〜D）から算出。管理者が照合した記録には ✓ 検証済",
+    "en": "From the source tier (S–D); records checked by the editor carry ✓ Verified"
   },
   "related_title": {
     "jp": "関連する品種",
@@ -1361,8 +1361,8 @@
     "en": "Locality"
   },
   "name_status_disputed": {
-    "jp": "親・作出者に異説あり",
-    "en": "Parentage or origin disputed"
+    "jp": "作出者・命名の経緯に異説あり（本文を参照）",
+    "en": "Breeder or naming history disputed (see text)"
   },
   "name_status_trade": {
     "jp": "流通名",
@@ -1377,8 +1377,8 @@
     "en": "Type localities"
   },
   "locality_intro": {
-    "jp": "原種のタイプ産地（学名の基準となった標本が採集された国）ごとの索引です。国を開くと記載年順に原種が並びます。",
-    "en": "Species grouped by the country of their type locality — where the specimen that anchors the name was collected. Open a country to see its species in order of description."
+    "jp": "原種を国ごとにまとめた索引です。タイプ産地（学名の基準になった標本が採集された国）と、分布に含まれる国の両方から引けます。流通上の産地だけが伝わる名前は載せていません。",
+    "en": "Species by country: where the type specimen was collected, and where the species is known to occur. Names known only from the trade are not listed."
   },
   "locality_species": {
     "jp": "原種",
@@ -2193,8 +2193,8 @@
     "en": "Cancel any time from the profile edit page after logging in; the membership stays active until the end of the current period and nothing further is charged"
   },
   "about_plan_pricing": {
-    "jp": "月額 500円（税込）／ 年額 5,000円（税込）<br>受付開始後、クレジットカード・デビットカードで支払えます（決済代行会社: PAY.JP または Stripe）。",
-    "en": "¥500/month or ¥5,000/year (tax included)<br>Payable by credit or debit card once sign-up opens (PAY.JP or Stripe)."
+    "jp": "月額 500円（税込）／ 年額 5,000円（税込）",
+    "en": "¥500 a month / ¥5,000 a year (tax included)"
   },
   "member_about_btn": {
     "jp": "会員について",
@@ -2303,5 +2303,65 @@
   "genus_short": {
     "jp": "記録が足りない名前（{n}）",
     "en": "Names short of a record ({n})"
+  },
+  "absent_none": {
+    "jp": "記録なし",
+    "en": "Not recorded"
+  },
+  "absent_sine_loc": {
+    "jp": "原記載に記載なし（sine loc.）",
+    "en": "Not given in the protologue (sine loc.)"
+  },
+  "absent_na": {
+    "jp": "該当なし（流通ラベル）",
+    "en": "None (a trade label)"
+  },
+  "parentage_unconfirmed": {
+    "jp": "とされる（出典未確認）",
+    "en": "reported, not sourced"
+  },
+  "role_introducer": {
+    "jp": "導入者",
+    "en": "Introducer"
+  },
+  "locality_count": {
+    "jp": "{n} 種（タイプ産地 {a} · 分布 {b}）",
+    "en": "{n} species (type locality {a} · range {b})"
+  },
+  "locality_count_short": {
+    "jp": "タイプ産地 {a} · 分布 {b}",
+    "en": "type locality {a} · range {b}"
+  },
+  "locality_page_title": {
+    "jp": "{country}の原種",
+    "en": "Species of {country}"
+  },
+  "locality_group_type": {
+    "jp": "タイプ産地がこの国",
+    "en": "Type locality in this country"
+  },
+  "locality_group_range": {
+    "jp": "分布にこの国を含む",
+    "en": "Range includes this country"
+  },
+  "locality_meta_desc": {
+    "jp": "{country}をタイプ産地または分布にもつアンスリウムの原種: ",
+    "en": "Anthurium species with a type locality or range in {country}: "
+  },
+  "contact_category_shop": {
+    "jp": "取扱店の掲載（事業者）",
+    "en": "Shop listing (businesses)"
+  },
+  "contact_shop_template": {
+    "jp": "店名:\nURL（https）:\n一言（40字まで）:\n連絡先メール（請求書の送り先）:\n",
+    "en": "Shop name:\nURL (https):\nOne line (up to 40 characters):\nEmail for invoices:\n"
+  },
+  "about_plan_payment": {
+    "jp": "受付開始後、クレジットカード・デビットカードで支払えます（決済代行会社: PAY.JP または Stripe）。",
+    "en": "Once membership opens, payment is by credit or debit card (processor: PAY.JP or Stripe)."
+  },
+  "about_funding": {
+    "jp": "この図鑑は会員の会費・取扱店の掲載料（PR）・アフィリエイト（PR）で運営しています。いずれも記録の内容や検証には影響しません。",
+    "en": "The archive is funded by membership fees, shop listings (PR) and affiliate links (PR). None of them affects the records or their verification."
   }
 }

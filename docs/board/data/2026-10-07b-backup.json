@@ -1,0 +1,726 @@
+[
+ {
+  "aliases": [
+   "キング・オブ・スペード",
+   "キングオブスペード"
+  ],
+  "cultivar_name": "Anthurium 'King of Spades'",
+  "formula_status": "unknown",
+  "id": 2,
+  "name_status": null,
+  "origins": [
+   {
+    "author": {
+     "isAI": false,
+     "name": "User"
+    },
+    "body": "インドネシア・ボゴールの Haji Ulih（ハジ・ウリ）氏が作出し、命名したオリジナル個体（クローン）の名前。オリジナルから代々実生をして改良が続けられており、流通している株はオリジナルの実生（F個体）であって本クローンそのものではない。",
+    "body_en": "'King of Spades' is the name of the original individual (a clone) bred and named by Haji Ulih in Bogor, Indonesia. Seedlings of the original have been raised for generations; plants in circulation are those seedlings (F generations), not the clone itself.",
+    "discoverer_or_breeder": "Haji Ulih",
+    "discovery_year": null,
+    "first_description": null,
+    "native_region": null,
+    "parentage": null,
+    "source_language": "ja",
+    "source_name": "",
+    "source_tier": "D",
+    "source_tier_label_en": "Unknown / Unverified",
+    "source_tier_label_jp": "不明・未検証",
+    "source_type": "manual",
+    "source_url": "",
+    "sources": [],
+    "structured": {
+     "citation_links": [],
+     "collector": null,
+     "namer": "Haji Ulih",
+     "naming_year": null,
+     "notes": "'King of Spades' はオリジナル個体（クローン）の名前。流通株はオリジナルの実生（F個体）であり、本クローンそのものではない。",
+     "origin_type": "clone"
+    },
+    "trust": 23,
+    "trustClass": "trust--low",
+    "verified": false,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "selected_from_id": null,
+  "tags": [
+   "line"
+  ],
+  "type": "clone",
+  "updated_at": "2026-10-02 18:53:40.846688+00"
+ },
+ {
+  "aliases": [
+   "Dark Moma",
+   "Dark Momma",
+   "ダークママ"
+  ],
+  "cultivar_name": "Anthurium 'Dark Mama'",
+  "formula_status": "disputed",
+  "id": 5,
+  "name_status": "disputed",
+  "origins": [
+   {
+    "author": {
+     "date": "2026-10-03",
+     "isAI": true,
+     "name": "AI 要約（2026-10-03、引用元の本文と照合）"
+    },
+    "body": "John Banta が作出し \"Dark Moma\" と名付けた Anthurium warocqueanum の交配種に始まる名前。Jay Vannini は 2003 年に同じ交配（A. warocqueanum × A. papillilaminum 'Fort Sherman'、正逆とも）を作り直し、2006 年に NSE Tropicals へ実生を送った。綴りは Dark Momma なども使われたが、流通で定着したのは NSE Tropicals が広めた 'Dark Mama'。Vannini はこの 2 種の単純交配はすべて Dark Mama になると書いている（ただし流通する papillilaminum には交配株が多い）。",
+    "body_en": "The name goes back to John Banta's Anthurium warocqueanum hybrid, which he christened \"Dark Moma\". Jay Vannini remade the cross in 2003 (A. warocqueanum × A. papillilaminum 'Fort Sherman', both ways) and sent seedlings to NSE Tropicals in 2006. Spellings such as Dark Momma circulated, but 'Dark Mama', popularised by NSE Tropicals, prevailed in the trade. Vannini writes that all simple crosses of these two species produce Dark Mama (many papillilaminum in cultivation are bench hybrids).",
+    "source_name": "Exotica Esoterica (Jay Vannini)",
+    "source_tier": "B",
+    "source_type": "ai_research",
+    "source_url": "https://www.exoticaesoterica.com/magazine/the-ultimate-guide-to-velvet-leaf-anthuriums",
+    "sources": [
+     {
+      "label": "Exotica Esoterica — The ultimate guide to velvet-leaf anthuriums (Jay Vannini)",
+      "url": "https://www.exoticaesoterica.com/magazine/the-ultimate-guide-to-velvet-leaf-anthuriums"
+     }
+    ],
+    "structured": {
+     "breeder": "John Banta",
+     "introduced_by": "NSE Tropicals",
+     "namer": "John Banta",
+     "notes": null,
+     "origin_type": "clone"
+    },
+    "trust": 65,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "selected_from_id": null,
+  "tags": [
+   "disputed_parentage"
+  ],
+  "type": "clone",
+  "updated_at": "2026-10-02 19:59:31.879911+00"
+ },
+ {
+  "aliases": [
+   "クイーン・オブ・ハーツ",
+   "クイーンオブハーツ"
+  ],
+  "cultivar_name": "Anthurium 'Queen of Hearts'",
+  "formula_status": null,
+  "id": 8,
+  "name_status": null,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-04-07",
+     "isAI": false,
+     "name": "User"
+    },
+    "body": "Anthurium 'Queen of Hearts' は、'Ace of Spades' の組織培養（TC）株に生じたソマクローナル変異から生まれた品種である可能性が高い（出典未確認）。",
+    "source_type": "manual",
+    "sources": [],
+    "structured": {
+     "collector": null,
+     "notes": null,
+     "origin_type": "clone"
+    },
+    "trust": 25,
+    "trustClass": "trust--low",
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "selected_from_id": 7,
+  "tags": [
+   "tc_origin"
+  ],
+  "type": "clone",
+  "updated_at": "2026-10-02 18:53:40.846688+00"
+ },
+ {
+  "aliases": [
+   "パピリラミナム",
+   "パピリラミヌム"
+  ],
+  "cultivar_name": "Anthurium papillilaminum",
+  "formula_status": null,
+  "id": 32,
+  "name_status": null,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-16",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium papillilaminum は 1986 年、Croat が Monogr. Syst. Bot. Missouri Bot. Gard. 14: 152 で記載した。タイプ産地はパナマ。採集者は R. L. Dressler。分布はパナマ。",
+    "body_en": "Anthurium papillilaminum was described by Croat in 1986 in Monogr. Syst. Bot. Missouri Bot. Gard. 14: 152. 1986 Revis. Gen Anthurium. Part 2. Panama. Type locality: Panama. Collected by R. L. Dressler. Distribution: Panama (POWO).",
+    "discoverer_or_breeder": "Croat",
+    "discovery_year": 1986,
+    "first_description": "Croat, Monogr. Syst. Bot. Missouri Bot. Gard. 14: 152 (1986)",
+    "native_region": "Panama",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:272342-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/272342-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:272342-2"
+     }
+    ],
+    "structured": {
+     "author_name": "Croat",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/272342-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:272342-2"
+      }
+     ],
+     "collection_year": null,
+     "collector": "R. L. Dressler",
+     "known_habitats": "Panama",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 1986,
+     "type_locality": "Panama"
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "selected_from_id": null,
+  "tags": null,
+  "type": "species",
+  "updated_at": "2026-10-02 18:53:40.846688+00"
+ },
+ {
+  "aliases": [
+   "Red crystallinum",
+   "レッドクリスタリナム"
+  ],
+  "cultivar_name": "Anthurium 'Red Crystallinum'",
+  "formula_status": "complex",
+  "id": 52,
+  "name_status": "trade",
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-16",
+     "isAI": false,
+     "name": "User"
+    },
+    "body": "一般的な A. crystallinum とは別の園芸系統で、Tim Anderson が持っていた個体群に由来するとされる。交配由来と考えられているが親は不明（'Wonderboy' の関与が指摘されるが確証はない）。個体群は NSE Tropicals・Tezula Plants・Docblock に分けられ、各所で実生が作られたため、この名前はいまは単一のクローンではなく、複数の系統（クローンとその実生）の総称として使われている。",
+    "body_en": null,
+    "discoverer_or_breeder": null,
+    "discovery_year": null,
+    "first_description": null,
+    "native_region": null,
+    "parentage": null,
+    "source_language": "en",
+    "source_name": null,
+    "source_tier": null,
+    "source_tier_label_en": null,
+    "source_tier_label_jp": null,
+    "source_type": "manual",
+    "source_url": null,
+    "sources": [],
+    "structured": {
+     "breeder": "Tim Anderson",
+     "citation_links": [],
+     "collector": null,
+     "naming_year": null,
+     "notes": null,
+     "origin_type": "hybrid"
+    },
+    "trust": 30,
+    "trustClass": "trust--low",
+    "verified": false,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "selected_from_id": null,
+  "tags": [
+   "line"
+  ],
+  "type": "hybrid",
+  "updated_at": "2026-10-02 18:53:40.846688+00"
+ },
+ {
+  "aliases": null,
+  "cultivar_name": "Anthurium 'Angels dream'",
+  "formula_status": "partial",
+  "id": 53,
+  "name_status": null,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-14",
+     "isAI": false,
+     "name": "User"
+    },
+    "body": "kunzo が 2000 年、フィリピンの園芸家から入手した個体に命名した。アメリカで作られた A. magnificum の交配種に由来するとされる（もう一方の親は不明）。",
+    "source_type": "manual",
+    "sources": [],
+    "structured": {
+     "collector": null,
+     "formula": {
+      "parentA": "Anthurium magnificum",
+      "parentB": null
+     },
+     "namer": "kunzo",
+     "naming_year": 2000
+    },
+    "trust": 30,
+    "trustClass": "trust--low",
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "selected_from_id": null,
+  "tags": null,
+  "type": "clone",
+  "updated_at": "2026-10-02 18:53:40.846688+00"
+ },
+ {
+  "aliases": [
+   "ルクスリアンス",
+   "ルクスリアンズ"
+  ],
+  "cultivar_name": "Anthurium luxurians",
+  "formula_status": null,
+  "id": 57,
+  "name_status": null,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-16",
+     "isAI": true,
+     "name": "IPNI / POWO"
+    },
+    "body": "Anthurium luxurians は 2005 年、Croat & R.N.Cirino が Aroideana 28: 56 で記載した。タイプは栽培株で、George Wagner（マイアミ）が採集した株をフロリダ州 Homestead で Denis Rotolante が開花させたもの。原記載に産地の記録はない。標本の採集者は T. B. Croat。分布はコロンビア。",
+    "body_en": "Described by Croat & R.N.Cirino in Aroideana 28: 56 (2005). The type is a cultivated plant, originally collected by George Wagner (Miami) and flowered by Denis Rotolante in Homestead, Florida; no locality is given (sine loc.). Specimen collected by T. B. Croat. Distribution: Colombia.",
+    "discoverer_or_breeder": "Croat & R.N.Cirino",
+    "discovery_year": 2005,
+    "first_description": "Croat & R.N.Cirino, Aroideana 28: 56 (-58; fig. 2) (2005)",
+    "native_region": "Colombia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "IPNI / POWO (Kew Gardens)",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:60439860-2",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/60439860-2"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:60439860-2"
+     }
+    ],
+    "structured": {
+     "author_name": "Croat & R.N.Cirino",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/60439860-2"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:60439860-2"
+      }
+     ],
+     "collection_year": null,
+     "collector": "T. B. Croat",
+     "known_habitats": "Colombia",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 2005,
+     "type_locality": null
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "selected_from_id": null,
+  "tags": null,
+  "type": "species",
+  "updated_at": "2026-10-02 18:53:40.846688+00"
+ },
+ {
+  "aliases": null,
+  "cultivar_name": "Anthurium carlablackiae 'HR1' × carlablackiae 'HR2' [Seedling]",
+  "formula_status": "known",
+  "id": 89,
+  "name_status": null,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-31",
+     "isAI": false,
+     "name": "User"
+    },
+    "body": "hare_anthurium による A. carlablackiae の個体 'HR1' × 'HR2' の実生。2025-11-10 播種。",
+    "discoverer_or_breeder": "hare_anthurium",
+    "source_type": "manual",
+    "sources": [
+     {
+      "label": "Instagram",
+      "url": "https://www.instagram.com/hare_anthurium/"
+     }
+    ],
+    "structured": {
+     "breeder": "hare_anthurium",
+     "citation_links": [
+      {
+       "label": "Instagram",
+       "url": "https://www.instagram.com/hare_anthurium/"
+      }
+     ],
+     "collector": null,
+     "formula": {
+      "parentA": "Anthurium carlablackiae 'HR1'",
+      "parentB": "Anthurium carlablackiae 'HR2'"
+     },
+     "notes": null,
+     "origin_type": "seedling",
+     "sowing_date": "2025-11-10"
+    },
+    "trust": 50,
+    "trustClass": "trust--mid",
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   },
+   {
+    "_type": "formula",
+    "formula": {
+     "creatorName": "hare_anthurium",
+     "fatherPhoto": "seedling-parents/Anthurium__carlablackiae__HR1___HR2___Seedling_/father_1774119494200.jpg",
+     "motherPhoto": "seedling-parents/Anthurium__carlablackiae__HR1___HR2___Seedling_/mother_1774119494199.jpg",
+     "parentA": "Anthurium carlablackiae 'HR1'",
+     "parentB": "Anthurium carlablackiae 'HR2'"
+    }
+   }
+  ],
+  "selected_from_id": null,
+  "tags": null,
+  "type": "seedling",
+  "updated_at": "2026-10-02 18:53:40.846688+00"
+ },
+ {
+  "aliases": [
+   "アフィニス ベッセアエ",
+   "ベッセアエ"
+  ],
+  "cultivar_name": "Anthurium aff. besseae",
+  "formula_status": null,
+  "id": 108,
+  "name_status": "informal",
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-27",
+     "isAI": false,
+     "name": "User"
+    },
+    "body": "Anthurium besseae（ボリビア産）とは別物として扱う。パナマ Darién 産として流通。",
+    "body_en": "Treated as distinct from Anthurium besseae (Bolivia). Traded as material from Darién, Panama.",
+    "native_region": "Darién, Panama",
+    "source_type": "manual",
+    "sources": [],
+    "structured": {
+     "author_name": null,
+     "closest_species": "Anthurium besseae",
+     "collector": null,
+     "known_habitats": "Darién, Panama",
+     "notes": "Anthurium besseaeとは別物",
+     "origin_type": "species",
+     "species_status": "unresolved",
+     "species_subcategory": "aff",
+     "type_locality": null
+    },
+    "trust": 30,
+    "trustClass": "trust--low",
+    "votes": {
+     "agree": 1,
+     "disagree": 0
+    }
+   }
+  ],
+  "selected_from_id": null,
+  "tags": null,
+  "type": "species",
+  "updated_at": "2026-10-02 18:53:40.846688+00"
+ },
+ {
+  "aliases": [
+   "Mystique a88",
+   "ミスティーク",
+   "ミスティークA88"
+  ],
+  "cultivar_name": "Anthurium 'Mystique A88'",
+  "formula_status": "known",
+  "id": 109,
+  "name_status": null,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-03-30",
+     "isAI": false,
+     "name": "User"
+    },
+    "body": "Chandra が 'Dorayaki'（オリジナル個体）× 'Red Crystallinum'（NSE 系統）で作出した。'Mystique A88' と名付けたオリジナル個体はあるが、流通している株はその実生ではなく、同じ交配式の F1 個体。",
+    "discoverer_or_breeder": "Chandra",
+    "source_type": "manual",
+    "sources": [],
+    "structured": {
+     "breeder": "Chandra",
+     "collector": null,
+     "formula": {
+      "parentA": "Anthurium 'Dorayaki'",
+      "parentB": "Anthurium 'Red Crystallinum'"
+     },
+     "notes": null,
+     "origin_type": "hybrid"
+    },
+    "trust": 30,
+    "trustClass": "trust--low",
+    "votes": {
+     "agree": 1,
+     "disagree": 0
+    }
+   }
+  ],
+  "selected_from_id": null,
+  "tags": null,
+  "type": "hybrid",
+  "updated_at": "2026-10-02 18:53:40.846688+00"
+ },
+ {
+  "aliases": null,
+  "cultivar_name": "Anthurium sp. \"Peru\"",
+  "formula_status": null,
+  "id": 121,
+  "name_status": "informal",
+  "origins": [
+   {
+    "author": {
+     "date": "2026-04-03",
+     "isAI": false,
+     "name": "User"
+    },
+    "body": "ペルー産として流通する未同定の原種。葉は青みがかった明るい色で luxurians に似た質感だが凹凸は少なく、葉柄も luxurians に類似する。",
+    "body_en": null,
+    "source_type": "manual",
+    "sources": [],
+    "structured": {
+     "author_name": null,
+     "collector": null,
+     "known_habitats": "Peru",
+     "notes": "ペルー産として流通する未同定の原種。葉は青みがかった明るい色で luxurians に似た質感だが凹凸は少なく、葉柄も luxurians に類似する。",
+     "origin_region": "ペルー（流通情報）",
+     "origin_type": "species",
+     "species_status": "unresolved",
+     "species_subcategory": "sp",
+     "type_locality": null
+    },
+    "trust": 30,
+    "trustClass": "trust--low",
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "selected_from_id": null,
+  "tags": null,
+  "type": "species",
+  "updated_at": "2026-09-04 12:22:21.380587+00"
+ },
+ {
+  "aliases": null,
+  "cultivar_name": "Anthurium metallicum",
+  "formula_status": null,
+  "id": 130,
+  "name_status": null,
+  "origins": [
+   {
+    "author": {
+     "date": "2026-10-02",
+     "isAI": true,
+     "name": "GBIF / Kew"
+    },
+    "body": "Anthurium metallicum は 1860 年、Linden ex Schott が Prodr. Syst. Aroid. 506 で記載した。原記載に産地の記載はない（「Hab.?」）。分布はコロンビア。",
+    "body_en": "Described by Linden ex Schott in Prodr. Syst. Aroid. 506 (1860). The protologue gives no locality (\"Hab.?\"). Distribution: Colombia.",
+    "discoverer_or_breeder": "Linden ex Schott",
+    "discovery_year": 1860,
+    "first_description": "Linden ex Schott, Prodr. Syst. Aroid. 506 (1860)",
+    "native_region": "Colombia",
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "GBIF / Kew Backbone Taxonomy",
+    "source_tier": "S",
+    "source_tier_label_en": "IPNI / POWO (Kew)",
+    "source_tier_label_jp": "IPNI / POWO（キュー王立植物園）",
+    "source_type": "ipni_powo",
+    "source_url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85079-1",
+    "sources": [
+     {
+      "label": "IPNI",
+      "url": "https://www.ipni.org/n/85079-1"
+     },
+     {
+      "label": "POWO (Kew)",
+      "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85079-1"
+     },
+     {
+      "label": "GBIF (Kew Backbone)",
+      "url": "https://www.gbif.org/species/2872936"
+     }
+    ],
+    "structured": {
+     "author_name": "Linden ex Schott",
+     "citation_links": [
+      {
+       "label": "IPNI",
+       "url": "https://www.ipni.org/n/85079-1"
+      },
+      {
+       "label": "POWO (Kew)",
+       "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:85079-1"
+      },
+      {
+       "label": "GBIF (Kew Backbone)",
+       "url": "https://www.gbif.org/species/2872936"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "known_habitats": "Colombia",
+     "notes": null,
+     "origin_type": "species",
+     "publication_year": 1860,
+     "type_locality": null
+    },
+    "trust": 95,
+    "trustClass": "trust--high",
+    "verified": true,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "selected_from_id": null,
+  "tags": null,
+  "type": "species",
+  "updated_at": "2026-10-02 19:57:05.098931+00"
+ },
+ {
+  "aliases": [
+   "Anthurium sp. \"BVIT\"",
+   "Black Velvet Indo Type"
+  ],
+  "cultivar_name": "Anthurium 'BVIT'",
+  "formula_status": "unknown",
+  "id": 131,
+  "name_status": "trade",
+  "origins": [
+   {
+    "author": {
+     "date": "2026-10-03",
+     "isAI": true,
+     "name": "AI（出典を編集部が照合）"
+    },
+    "body": "Black Velvet Indo Type の略。Anthurium Collector’s Guide は、インドネシアで作られた暗色のベルベット葉の株に付く非公式の流通ラベルで、単一のクローンでも登録品種でもなく、同じ名前で親の異なる株が売られていると説明している。作出者と交配式の記録はない。",
+    "body_en": "Short for \"Black Velvet Indo Type\". Anthurium Collector’s Guide describes it as an informal trade label for dark velvet-leaved plants bred in Indonesia, not a single clone or a registered cultivar; plants of different parentage are sold under the same name. No breeder or parentage is recorded.",
+    "discoverer_or_breeder": null,
+    "discovery_year": null,
+    "first_description": null,
+    "native_region": null,
+    "parentage": null,
+    "source_language": "en",
+    "source_name": "Anthurium Collector’s Guide — IT / BVIT",
+    "source_tier": "C",
+    "source_tier_label_en": "Community / Collector Information",
+    "source_tier_label_jp": "コミュニティ・コレクター情報",
+    "source_type": "ai_research",
+    "source_url": "https://anthuriumcollectorsguide.com/",
+    "sources": [
+     {
+      "label": "Anthurium Collector’s Guide — IT / BVIT",
+      "url": "https://anthuriumcollectorsguide.com/"
+     }
+    ],
+    "structured": {
+     "author_name": null,
+     "citation_links": [
+      {
+       "label": "Anthurium Collector’s Guide — IT / BVIT",
+       "url": "https://anthuriumcollectorsguide.com/"
+      }
+     ],
+     "collection_year": null,
+     "collector": null,
+     "notes": null,
+     "origin_region": "Indonesia（園芸育種）",
+     "origin_type": "hybrid",
+     "publication_year": null,
+     "trade_names": [
+      "Black Velvet Indo Type"
+     ],
+     "type_locality": null
+    },
+    "trust": 40,
+    "trustClass": "trust--mid",
+    "verified": false,
+    "votes": {
+     "agree": 0,
+     "disagree": 0
+    }
+   }
+  ],
+  "selected_from_id": null,
+  "tags": null,
+  "type": "hybrid",
+  "updated_at": "2026-10-02 19:57:05.098931+00"
+ }
+]

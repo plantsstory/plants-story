@@ -177,7 +177,7 @@ async function main() {
 
   // ---- Static SPA routes (previously HTTP 404 despite being in the sitemap) ----
   const staticRoutes = [
-    { dir: 'about', title: 'Aroid Originsについて | Aroid Origins', description: 'アロイド品種の由来・交配情報を学術データベースとコミュニティで検証するサイト「Aroid Origins」の概要・料金・運営情報。' },
+    { dir: 'about', title: 'この図鑑について | Aroid Origins', description: '誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑「Aroid Origins」の記録の方針・料金・運営情報。' },
     { dir: 'guide', title: '使い方ガイド | Aroid Origins', description: '品種の検索・由来の閲覧・投稿・画像アップロードなど、Aroid Originsの使い方を解説します。' },
     { dir: 'terms', title: '利用規約 | Aroid Origins', description: 'Aroid Originsの利用規約。投稿コンテンツの取り扱い、会員（受付準備中）、道具の目録とアフィリエイト、禁止行為について定めています。' },
     { dir: 'privacy', title: 'プライバシーポリシー | Aroid Origins', description: 'Aroid Originsの個人情報・Cookie・アクセス解析（GA4）・外部送信（アフィリエイト、楽天ウェブサービス）・決済情報の取り扱いについて説明します。' },
@@ -313,7 +313,7 @@ async function main() {
   }
 
   // ---- People pages (/people/ and /people/<slug>/) ----
-  const ROLE_JP = { author: '記載者', collector: '採集者', breeder: '作出者', namer: '命名者' };
+  const ROLE_JP = { author: '記載者', collector: '採集者', breeder: '作出者', namer: '命名者', introducer: '導入者' };
   const personList = people.peopleIndex(cultivars);
   const peopleUrl = SITE + '/people/';
   const peopleLinks = personList.map(p => '<li><a href="' + peopleUrl + encodeURIComponent(p.slug) + '/">' + escAttr(p.key) + '</a></li>').join('');
@@ -361,17 +361,17 @@ async function main() {
 
   // ---- Locality pages (/locality/ and /locality/<slug>/) ----
   const localityUrl = SITE + '/locality/';
-  const localities = geo.localityIndex(publicCultivars);
+  const localities = geo.localityIndex(publicCultivars, c => RecordGate.state(c) === 'ok');
   let lh = buildStub(template, {
-    title: '産地索引 — タイプ産地でたどる原種 | Aroid Origins',
-    description: '原種のタイプ産地（国）ごとの索引。' + localities.map(l => l.key + ' ' + l.rows.length + '種').join('、') + '。',
+    title: '産地索引 — 国ごとのアンスリウム原種 | Aroid Origins',
+    description: '原種をタイプ産地と分布の国ごとにまとめた索引。' + localities.map(l => l.ja + ' ' + l.rows.length + '種').join('、') + '。',
     url: localityUrl,
     ogType: 'website',
     jsonLd: [{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': [
       { '@type': 'ListItem', 'position': 1, 'name': 'Aroid Origins', 'item': SITE + '/' },
       { '@type': 'ListItem', 'position': 2, 'name': '産地索引', 'item': localityUrl } ] }]
   });
-  lh = lh.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="localities"><ul>' + localities.map(l => '<li><a href="' + localityUrl + encodeURIComponent(l.slug) + '/">' + escAttr(l.key) + '</a></li>').join('') + '</ul></nav>');
+  lh = lh.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="localities"><ul>' + localities.map(l => '<li><a href="' + localityUrl + encodeURIComponent(l.slug) + '/">' + escAttr(l.ja) + '</a></li>').join('') + '</ul></nav>');
   fs.mkdirSync(path.join(WIREFRAME, 'locality'), { recursive: true });
   fs.writeFileSync(path.join(WIREFRAME, 'locality', 'index.html'), lh, 'utf8');
   written++;
@@ -379,23 +379,25 @@ async function main() {
     const dir = safeDirName(l.slug);
     if (!dir) { skipped++; continue; }
     const url = localityUrl + encodeURIComponent(l.slug) + '/';
-    const names = l.rows.map(r => r.cultivar_name);
-    const links = l.rows.map(r => {
+    const names = l.rows.map(r => EntryMeta.name(r));
+    const linkOf = r => {
       const g = r.genus || 'Anthurium';
       const rest = String(r.cultivar_name).startsWith(g + ' ') ? String(r.cultivar_name).slice(g.length + 1) : String(r.cultivar_name);
-      return '<li><a href="' + SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(rest) + '/">' + escAttr(r.cultivar_name) + '</a></li>';
-    }).join('');
+      return '<li><a href="' + SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(rest).replace(/'/g, '%27') + '/">' + escAttr(EntryMeta.name(r)) + '</a></li>';
+    };
+    const links = (l.typeRows.length ? '<li>タイプ産地が' + escAttr(l.ja) + '</li>' + l.typeRows.map(linkOf).join('') : '')
+      + (l.rangeRows.length ? '<li>分布に' + escAttr(l.ja) + 'を含む</li>' + l.rangeRows.map(linkOf).join('') : '');
     let ph = buildStub(template, {
-      title: l.key + ' をタイプ産地とする原種 ' + l.rows.length + '種 | Aroid Origins',
-      description: l.key + ' で採集されたタイプ標本に基づいて記載されたアロイド原種: ' + names.slice(0, 6).join('、') + (names.length > 6 ? ' ほか' : '') + '。記載者・発表年・産地から由来をたどる索引。',
+      title: l.ja + 'のアンスリウム原種 ' + l.rows.length + '種（タイプ産地 ' + l.typeRows.length + ' · 分布 ' + l.rangeRows.length + '） | Aroid Origins',
+      description: l.ja + 'をタイプ産地または分布にもつアンスリウムの原種: ' + names.slice(0, 6).join('、') + (names.length > 6 ? ' ほか' : '') + '。記載者・発表年・産地から由来をたどる索引。',
       url: url,
       ogType: 'website',
       jsonLd: [{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': [
         { '@type': 'ListItem', 'position': 1, 'name': 'Aroid Origins', 'item': SITE + '/' },
         { '@type': 'ListItem', 'position': 2, 'name': '産地索引', 'item': localityUrl },
-        { '@type': 'ListItem', 'position': 3, 'name': l.key, 'item': url } ] }]
+        { '@type': 'ListItem', 'position': 3, 'name': l.ja, 'item': url } ] }]
     });
-    ph = ph.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="' + escAttr(l.key) + '"><ul>' + links + '</ul></nav>');
+    ph = ph.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="' + escAttr(l.ja) + '"><ul>' + links + '</ul></nav>');
     fs.mkdirSync(path.join(WIREFRAME, 'locality', dir), { recursive: true });
     fs.writeFileSync(path.join(WIREFRAME, 'locality', dir, 'index.html'), ph, 'utf8');
     written++;
