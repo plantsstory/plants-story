@@ -2295,5 +2295,9 @@
   "related_same_locality_n": {
     "jp": "同じ産地（{country}）の原種 {n}",
     "en": "Species from {country} ({n})"
+  },
+  "dist_more": {
+    "jp": "ほか{n}地域",
+    "en": "+{n} more"
   }
 }

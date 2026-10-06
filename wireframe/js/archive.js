@@ -255,11 +255,57 @@
   var COUNTRY_JA = { 'Colombia': 'コロンビア', 'Ecuador': 'エクアドル', 'Panama': 'パナマ', 'Peru': 'ペルー', 'Mexico': 'メキシコ',
     'Costa Rica': 'コスタリカ', 'Brazil': 'ブラジル', 'Bolivia': 'ボリビア', 'Venezuela': 'ベネズエラ', 'Guatemala': 'グアテマラ',
     'Honduras': 'ホンジュラス', 'Nicaragua': 'ニカラグア', 'Belize': 'ベリーズ', 'El Salvador': 'エルサルバドル', 'Guyana': 'ガイアナ',
-    'French Guiana': '仏領ギアナ', 'Suriname': 'スリナム', 'Argentina': 'アルゼンチン', 'Paraguay': 'パラグアイ', 'Cuba': 'キューバ',
+    'French Guiana': 'フランス領ギアナ', 'Suriname': 'スリナム', 'Argentina': 'アルゼンチン', 'Paraguay': 'パラグアイ', 'Cuba': 'キューバ',
     'Jamaica': 'ジャマイカ', 'Trinidad and Tobago': 'トリニダード・トバゴ', 'Dominican Republic': 'ドミニカ共和国', 'Puerto Rico': 'プエルトリコ',
     'Indonesia': 'インドネシア', 'Malaysia': 'マレーシア', 'Thailand': 'タイ', 'Vietnam': 'ベトナム', 'Philippines': 'フィリピン',
     'Papua New Guinea': 'パプアニューギニア', 'Australia': 'オーストラリア', 'Japan': '日本', 'Taiwan': '台湾', 'China': '中国' };
-  function countryLabel(c) { c = clean(c); if (!c) return ''; return lang() === 'en' ? c : (COUNTRY_JA[c] || c); }
+  // WCVP level-3 region names as they appear in the distribution field (BOARD 10-07 T71)
+  var REGION_JA = { 'Angola': 'アンゴラ', 'Assam': 'アッサム', 'Bangladesh': 'バングラデシュ', 'Benin': 'ベナン',
+    'Bismarck Archipelago': 'ビスマルク諸島', 'Borneo': 'ボルネオ', 'Brazil North': 'ブラジル北部', 'Brazil Northeast': 'ブラジル北東部',
+    'Burundi': 'ブルンジ', 'Cambodia': 'カンボジア', 'Cameroon': 'カメルーン', 'Central African Republic': '中央アフリカ共和国',
+    'China South-Central': '中国中南部', 'Comoros': 'コモロ', 'Darién': 'ダリエン', 'Equatorial Guinea': '赤道ギニア', 'Ethiopia': 'エチオピア',
+    'Gabon': 'ガボン', 'Ghana': 'ガーナ', 'Guinea': 'ギニア', 'Gulf of Guinea Is.': 'ギニア湾諸島', 'Ivory Coast': 'コートジボワール',
+    'Jawa': 'ジャワ', 'Kenya': 'ケニア', 'Laos': 'ラオス', 'Lesser Sunda Is.': '小スンダ列島', 'Liberia': 'リベリア', 'Madagascar': 'マダガスカル',
+    'Malawi': 'マラウイ', 'Malaya': 'マレー半島', 'Maluku': 'マルク諸島', 'Mauritius': 'モーリシャス', 'Mexico Southeast': 'メキシコ南東部',
+    'Mozambique': 'モザンビーク', 'Myanmar': 'ミャンマー', 'Netherlands Antilles': 'オランダ領アンティル', 'New Caledonia': 'ニューカレドニア',
+    'New Guinea': 'ニューギニア', 'New South Wales': 'ニューサウスウェールズ', 'Queensland': 'クイーンズランド', 'Nigeria': 'ナイジェリア', 'Norfolk Is.': 'ノーフォーク島',
+    'Réunion': 'レユニオン', 'Rwanda': 'ルワンダ', 'Senegal': 'セネガル', 'Seychelles': 'セーシェル', 'Sierra Leone': 'シエラレオネ',
+    'Sudan': 'スーダン', 'Sulawesi': 'スラウェシ', 'Sumatera': 'スマトラ', 'Tanzania': 'タンザニア', 'Trinidad-Tobago': 'トリニダード・トバゴ',
+    'Uganda': 'ウガンダ', 'Venezuelan Antilles': 'ベネズエラ領アンティル諸島', 'Windward Is.': 'ウィンドワード諸島', 'Zaire': 'コンゴ民主共和国',
+    'Zambia': 'ザンビア', 'Zimbabwe': 'ジンバブエ' };
+  function regionJa(r) { return COUNTRY_JA[r] || REGION_JA[r] || ''; }
+  function countryLabel(c) { c = clean(c); if (!c) return ''; return lang() === 'en' ? c : (regionJa(c) || c); }
+  // "Colombia (Valle del Cauca)" -> コロンビア（Valle del Cauca）; '' when the name is not in the tables
+  function regionLabel(r) {
+    var m = r.match(/^(.+?)\s*\((.+)\)$/);
+    var head = m ? m[1] : r, ja = regionJa(head);
+    if (!ja) return '';
+    if (lang() === 'en') return r;
+    return m ? ja + '（' + m[2] + '）' : ja;
+  }
+  // the distribution cell: a list of known regions shows four, the rest behind a button; free text stays as written
+  var DIST_SHOWN = 4;
+  function distributionHtml(v) {
+    v = clean(v);
+    if (!v) return '';
+    var parts = v.split(/\s*,\s*/).filter(Boolean);
+    var labels = parts.map(regionLabel);
+    if (parts.length < 2 || labels.some(function (x) { return !x; })) return esc(countryLabel(v));
+    var sep = lang() === 'en' ? ', ' : '、';
+    if (labels.length <= DIST_SHOWN + 1) return esc(labels.join(sep));
+    var rest = labels.slice(DIST_SHOWN);
+    return esc(labels.slice(0, DIST_SHOWN).join(sep))
+      + '<span class="dist-rest" hidden>' + esc(sep + rest.join(sep)) + '</span>'
+      + ' <a href="#" role="button" class="dist-more" aria-expanded="false">' + esc(T('dist_more').replace('{n}', rest.length)) + '</a>';
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.dist-more');
+    if (!b) return;
+    e.preventDefault();
+    var rest = b.previousElementSibling;
+    if (rest && rest.classList.contains('dist-rest')) rest.hidden = false;
+    b.remove();
+  });
   window.countryLabel = countryLabel;
   function isUndescribed(d) {
     var q = String(d.qualifier || '').toLowerCase().replace(/\./g, '');
@@ -562,11 +608,11 @@
       cells += cell('spec_collector', linkPeople(d.collector));
       cells += cell('spec_col_year', yearSpan(d.colYear));
       // type locality and distribution with the same value take one cell
-      if (d.locality && d.habitat && d.locality === d.habitat) cells += cell('spec_locality_habitat', esc(countryLabel(d.locality)));
+      if (d.locality && d.habitat && d.locality === d.habitat) cells += cell('spec_locality_habitat', distributionHtml(d.locality));
       else {
         cells += cell('spec_locality', esc(countryLabel(d.locality)));
         if (!d.locality && d.formLocality) cells += cell('spec_form_locality', esc(d.formLocality));
-        cells += cell('spec_habitat', esc(countryLabel(d.habitat)));
+        cells += cell('spec_habitat', distributionHtml(d.habitat));
       }
     } else {
       if (d.type === 'clone' && !d.breeder && d.namer) cells += cell('spec_namer', linkPeople(d.namer));

@@ -262,7 +262,7 @@
 | T68 | **データ修正**（`docs/board/data/2026-10-07-fixes.sql`）: 108・121 を unresolved、121 の origin_region、verification_note 27 件と本文 3 件の日付を削除、people-authority の Pérez-Farrera を名寄せ、radicans は IPNI で照合だけ。合格 40・検証済 27/27 を維持 → **本番3** | Claude Code | 10/10 | M1・M4 の維持・正確性（0.5h） |
 | T69 | antolakii の表示名 sp. "antolakii"（画面・スタブ・JSON-LD・共有カードを同時に、URL は変えない） | Claude Code | 10/14 | 正確性（1.5h） |
 | T70 | 原種本文の型（タイプ産地・分布ともに 1 文）＋記載種 27 件の再生成 | Claude Code | 10/14 | 重複の削減（1.5h） |
-| T71 | 分布 4 地域まで＋WCVP 地域名の和訳表 | Claude Code | 10/14 | 長い値の解消（1h） |
+| T71 | ~~分布 4 地域まで＋WCVP 地域名の和訳表~~ **10-07 済**（オーナー要望で前倒し）: 4 地域を出し「ほか n 地域」を押すと残りが開く。和訳は archive.js REGION_JA（データにある地域名 75 件、本文の表記に合わせる）。説明文が入った値は分けずにそのまま表示 | Claude Code | 10/07 | — |
 | T72 | 属一覧「記録が足りない名前（n）」の折りたたみ／必須項目の空欄表示（sine loc. の値を決めてから） | Claude Code | 本告知後 | — |
 | T73 | 別名の行を名前の下へ移す・本文中の学名のイタリック化 | Claude Code | 本告知後 | — |
 | T74 | 投稿フォームのボタン 3 種・見出しを h2 共通に | Claude Code | 10/14 | 0.5h |
