@@ -34,6 +34,9 @@ jobs:
         run: node scripts/check-geo-parity.js
       - name: Check names and texts (report only)
         run: node scripts/check-names.js
+      - name: Check that every PNG decodes (report only)
+        run: node scripts/check-png.js
+        continue-on-error: true
       - name: Generate sitemap from Supabase
         run: node scripts/generate-sitemap.js
       - name: Render share cards

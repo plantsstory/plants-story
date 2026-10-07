@@ -1542,3 +1542,20 @@ html[data-boot="entry"] #page-cultivar { display: none !important; }
 .static-entry__plate img { width: auto; max-width: 100%; max-height: 70svh; }
 .static-entry__links { font-size: var(--fs-small); color: var(--color-mid); margin-top: var(--s4); }
 #genus-sections-container:has(> .text-center), #page-genus .genus-content:not(:has(.cultivar-row)) { min-height: 100vh; }
+
+/* -- 2026-10-08 app-ux deploy 1: notices, login sheet, draft line -- */
+#toast-container { position: fixed; left: 16px; right: 16px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 9999; display: flex; flex-direction: column; align-items: center; gap: var(--s2); pointer-events: none; }
+#toast-container .toast-notification { position: static; left: auto; transform: translateY(8px); width: 100%; max-width: 480px; box-sizing: border-box; display: flex; align-items: center; gap: var(--s3); padding: 12px 16px; border-radius: 2px; box-shadow: none; background: var(--color-ink); color: var(--color-paper); font-family: var(--font-primary); font-size: var(--fs-small); font-weight: 400; line-height: 1.5; }
+#toast-container .toast-notification.show { transform: none; }
+#toast-container .toast-notification.toast-error { background: var(--color-danger); }
+#toast-container .toast--actionable { pointer-events: auto; }
+.toast__msg { flex: 1; }
+.toast__action, .toast__close { background: none; border: 0; color: inherit; font: inherit; min-height: var(--tap); padding: 0 var(--s1); cursor: pointer; }
+.toast__action { text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.toast__close { font-size: var(--fs-body); }
+.login-sheet { max-width: 420px; }
+.login-sheet .dialog-actions { flex-wrap: wrap; }
+.draft-note { font-size: var(--fs-small); color: var(--color-mid); margin: 0 0 var(--s3); }
+.draft-note__clear { background: none; border: 0; padding: 0 var(--s1); min-height: var(--tap); font: inherit; color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+#add-origin-section { scroll-margin-top: 72px; }
+.pwa-install-banner { box-shadow: none; border-top: 1px solid var(--color-rule-strong, var(--color-ink)); border-radius: 0; }

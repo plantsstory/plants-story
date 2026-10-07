@@ -1352,6 +1352,9 @@ function updateCultivarDetail(cultivarName, rowEl) {
   }
   var addPhotoBtn = document.getElementById('detail-add-photo-btn');
   if (addPhotoBtn) addPhotoBtn.style.display = isSeedlingDetail ? 'none' : '';
+  // a seedling has no record form, so its 「記録を追加」 would do nothing
+  var addRecordBtn = document.getElementById('detail-add-record-btn');
+  if (addRecordBtn) addRecordBtn.style.display = isSeedlingDetail ? 'none' : '';
 
   // Disable empty state glass card click for seedlings
   var emptyGlassEl = document.querySelector('.gallery__empty-glass');
@@ -1814,6 +1817,17 @@ document.addEventListener('click', function(e) {
   if (navEl) {
     e.preventDefault();
     var page = navEl.getAttribute('data-nav');
+    // posting needs a login: ask first, before anything is typed, and come back to the same form
+    if (page === 'contribute' && navEl.getAttribute('data-edit') !== 'true' && !window._currentUser && window._supabaseClient && typeof window.requireLogin === 'function') {
+      var _ct = navEl.getAttribute('data-contribute-type');
+      window.requireLogin({
+        a: _ct === 'individual' ? 'individual' : 'contribute',
+        path: (typeof _basePath !== 'undefined' ? _basePath : '/') + 'contribute',
+        type: _ct || '', parent: navEl.getAttribute('data-prefill-parent') || '',
+        target: _ct === 'individual' ? { id: navEl.getAttribute('data-species-id'), name: navEl.getAttribute('data-species-name'), genus: navEl.getAttribute('data-genus') } : null
+      });
+      return;
+    }
     var genus = navEl.getAttribute('data-genus');
     var navOptions = {};
 

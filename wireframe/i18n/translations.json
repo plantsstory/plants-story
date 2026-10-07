@@ -401,8 +401,8 @@
     "en": "Species"
   },
   "submit_success": {
-    "jp": "品種が登録されました！",
-    "en": "Cultivar registered successfully!"
+    "jp": "品種を登録しました",
+    "en": "Entry registered"
   },
   "error_genus_required": {
     "jp": "属を選択してください",
@@ -425,8 +425,8 @@
     "en": "This cultivar is already registered"
   },
   "origin_added": {
-    "jp": "由来が追加されました！",
-    "en": "Origin added successfully!"
+    "jp": "記録を追加しました",
+    "en": "Record added"
   },
   "origin_desc_required": {
     "jp": "由来の説明を入力してください",
@@ -2439,5 +2439,29 @@
   "profile_entries_title": {
     "jp": "記録した品種",
     "en": "Entries"
+  },
+  "login_sheet_title": {
+    "jp": "ログインしてから始めます",
+    "en": "Log in to start"
+  },
+  "login_sheet_text": {
+    "jp": "投稿・写真・記録の追加には Google のログインが要ります。ログインのあと、この続きから始められます。",
+    "en": "Posting, photos and records need a Google login. After logging in you continue from here."
+  },
+  "login_sheet_inapp": {
+    "jp": "このアプリの中のブラウザでは Google のログインが使えません。右上の「…」から「ブラウザで開く」を選んでください。",
+    "en": "Google login does not work inside this app’s browser. Choose “Open in browser” from the … menu."
+  },
+  "login_sheet_cancel": {
+    "jp": "やめる",
+    "en": "Cancel"
+  },
+  "login_sheet_copy": {
+    "jp": "リンクをコピー",
+    "en": "Copy link"
+  },
+  "login_sheet_go": {
+    "jp": "Google でログイン",
+    "en": "Log in with Google"
   }
 }

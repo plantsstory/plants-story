@@ -36,12 +36,13 @@ if ('serviceWorker' in navigator) {
     e.preventDefault();
     deferredPrompt = e;
 
-    // Don't show if user previously dismissed
-    if (localStorage.getItem(DISMISSED_KEY)) return;
-
-    // Show after 30s of engagement
-    setTimeout(showInstallBanner, 30000);
   });
+  // offered once something has been posted (a record, a photo, an entry) — not on a timer
+  window.offerInstall = function() {
+    try { if (localStorage.getItem(DISMISSED_KEY)) return; } catch (e) { return; }
+    if (document.querySelector('.pwa-install-banner')) return;
+    showInstallBanner();
+  };
 
   function showInstallBanner() {
     if (!deferredPrompt) return;
@@ -49,8 +50,8 @@ if ('serviceWorker' in navigator) {
     var banner = document.createElement('div');
     banner.className = 'pwa-install-banner';
     banner.innerHTML =
-      '<span class="pwa-install-banner__text">ホーム画面に追加してオフラインでも利用可能</span>' +
-      '<button class="btn btn--sm btn--primary pwa-install-banner__btn" type="button">インストール</button>' +
+      '<span class="pwa-install-banner__text">ホーム画面に追加すると、アプリのように開けます</span>' +
+      '<button class="btn btn--sm btn--primary pwa-install-banner__btn" type="button">追加する</button>' +
       '<button class="pwa-install-banner__close" type="button" aria-label="閉じる">&times;</button>';
 
     document.body.appendChild(banner);

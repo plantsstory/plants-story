@@ -280,7 +280,9 @@ psExport('trackEvent', trackEvent);
 })();
 
 // Toast notification helper (non-blocking replacement for alert)
-function showToast(msg, isError) {
+// opts.action = { label, fn } adds a button (e.g. 「もう一度」); opts.sticky keeps it until closed.
+function showToast(msg, isError, opts) {
+  opts = opts || {};
   var container = document.getElementById('toast-container');
   if (!container) {
     container = document.createElement('div');
@@ -290,12 +292,30 @@ function showToast(msg, isError) {
     document.body.appendChild(container);
   }
   var toast = document.createElement('div');
-  toast.className = 'toast-notification' + (isError ? ' toast-error' : '');
+  var actionable = !!(opts.action || opts.sticky);
+  toast.className = 'toast-notification' + (isError ? ' toast-error' : '') + (actionable ? ' toast--actionable' : '');
   toast.setAttribute('role', isError ? 'alert' : 'status');
-  toast.textContent = msg;
+  var text = document.createElement('span');
+  text.className = 'toast__msg';
+  text.textContent = String(msg).replace(/[！!]$/, '');
+  toast.appendChild(text);
+  function close() { toast.classList.remove('show'); setTimeout(function() { toast.remove(); }, 300); }
+  if (opts.action) {
+    var act = document.createElement('button');
+    act.type = 'button'; act.className = 'toast__action'; act.textContent = opts.action.label;
+    act.addEventListener('click', function() { close(); opts.action.fn(); });
+    toast.appendChild(act);
+  }
+  if (actionable) {
+    var x = document.createElement('button');
+    x.type = 'button'; x.className = 'toast__close'; x.setAttribute('aria-label', '閉じる'); x.textContent = '×';
+    x.addEventListener('click', close);
+    toast.appendChild(x);
+  }
   container.appendChild(toast);
   setTimeout(function() { toast.classList.add('show'); }, 10);
-  setTimeout(function() { toast.classList.remove('show'); setTimeout(function() { toast.remove(); }, 300); }, 3000);
+  if (!opts.sticky) setTimeout(close, opts.action ? 8000 : (isError ? 5000 : 3500));
+  return toast;
 }
 
 // Submit guard: prevents double submission on buttons
@@ -693,6 +713,7 @@ function navigateTo(page, options, pushHistory) {
   }
   // The compact 'add an individual' form only stays when a species page linked here; any other entry resets it
   if (page === 'contribute' && !options.individual && typeof window.setIndividualMode === 'function') window.setIndividualMode(null);
+  if (page === 'contribute' && !options._editFlow && !options.individual && typeof window.restoreContributeDraft === 'function') setTimeout(window.restoreContributeDraft, 0);
   if (page === 'people' && typeof window.renderPeoplePage === 'function') window.renderPeoplePage(options.person || '');
   if (page === 'locality' && typeof window.renderLocalityPage === 'function') window.renderLocalityPage(options.place || '');
   if (page === 'names' && typeof window.renderNamesPage === 'function') window.renderNamesPage(options.nameSlug || '');
@@ -1693,6 +1714,10 @@ if (false) {
           window.history.replaceState({}, '', _basePath);
           if (typeof navigateTo === 'function') navigateTo('top');
         }
+        // Resume the action that asked for the login (photo / record / individual / contribute)
+        var _ri = null;
+        try { _ri = JSON.parse(localStorage.getItem('login_return_intent') || 'null'); localStorage.removeItem('login_return_intent'); } catch (e) {}
+        if (_ri && Date.now() - (_ri.t || 0) < 15 * 60 * 1000) setTimeout(function() { resumeLoginIntent(_ri); }, 300);
         // Resume checkout selected before login (paywall -> OAuth -> card form)
         var pendingPlan = localStorage.getItem('pending_checkout_plan');
         if (pendingPlan) {
@@ -2228,6 +2253,81 @@ if (false) {
         queryParams: { prompt: 'select_account' }
       }
     });
+  }
+
+  // Ask for the login before anything is typed; remember what the person was about to do (2026-10-08 app-ux).
+  // intent = { a: 'photo'|'record'|'individual'|'contribute', k: entry name, path, type, parent, target }
+  var IN_APP_UA = /Instagram|FBAN|FBAV|FB_IAB|Line\/|MicroMessenger|; wv\)/i;
+  function startLoginWithIntent(intent) {
+    intent = intent || {};
+    try { localStorage.setItem('login_return_intent', JSON.stringify(Object.assign({ t: Date.now() }, intent))); } catch (e) {}
+    if (typeof window.saveContributeDraft === 'function') window.saveContributeDraft(true);
+    startGoogleLogin(intent.path || window.location.pathname, intent.a || 'gate');
+  }
+  window.requireLogin = function(intent) {
+    if (window._currentUser) return true;
+    var dlg = document.getElementById('login-sheet');
+    if (!dlg || typeof dlg.showModal !== 'function') { startLoginWithIntent(intent); return false; }
+    if (!dlg._wired) {
+      dlg._wired = true;
+      document.getElementById('login-sheet-cancel').addEventListener('click', function() { dlg.close(); });
+      document.getElementById('login-sheet-go').addEventListener('click', function() { dlg.close(); startLoginWithIntent(dlg._intent); });
+      document.getElementById('login-sheet-copy').addEventListener('click', function() {
+        var url = window.location.href;
+        (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function() { showToast('リンクをコピーしました'); }, function() { window.prompt('このリンクをコピーしてください', url); });
+      });
+      dlg.addEventListener('click', function(e) { if (e.target === dlg) dlg.close(); });
+    }
+    var inApp = IN_APP_UA.test(navigator.userAgent || '');
+    document.getElementById('login-sheet-inapp').classList.toggle('d-none', !inApp);
+    document.getElementById('login-sheet-copy').classList.toggle('d-none', !inApp);
+    document.getElementById('login-sheet-go').classList.toggle('d-none', inApp);
+    dlg._intent = intent || {};
+    dlg.showModal();
+    if (typeof gtag === 'function') gtag('event', 'login_gate', { action: (intent && intent.a) || 'other', in_app: inApp ? 1 : 0 });
+    return false;
+  };
+  // after the login: wait for the page to draw, then reopen the action
+  function resumeLoginIntent(ri) {
+    var tries = 0;
+    function entryReady() {
+      var h1 = document.querySelector('#page-cultivar h1');
+      return h1 && (!ri.k || h1Key(h1) === ri.k);
+    }
+    (function step() {
+      tries++;
+      if (ri.a === 'record' || ri.a === 'photo') {
+        if (!entryReady()) { if (tries < 40) setTimeout(step, 250); return; }
+        if (ri.a === 'record') {
+          var rb = document.getElementById('detail-add-record-btn');
+          if (rb) rb.click();
+          showToast('ログインしました。続きを書けます');
+        } else {
+          // the file picker only opens from a tap, so the notice carries the button
+          showToast('ログインしました', false, { sticky: true, action: { label: '写真を選ぶ', fn: function() { var pb = document.getElementById('detail-add-photo-btn'); if (pb) pb.click(); } } });
+        }
+      } else if (ri.a === 'individual' && ri.target) {
+        if (typeof navigateTo === 'function') navigateTo('contribute', { individual: true }, true);
+        if (typeof window.setIndividualMode === 'function') window.setIndividualMode(ri.target);
+        showToast('ログインしました。個体の番号を入れてください');
+      } else if (ri.a === 'contribute') {
+        if (!document.getElementById('page-contribute') || document.getElementById('page-contribute').style.display === 'none') {
+          if (tries < 2 && typeof navigateTo === 'function') navigateTo('contribute', {}, true);
+        }
+        var restored = typeof window.restoreContributeDraft === 'function' && window.restoreContributeDraft();
+        if (!restored) {
+          if (ri.type === 'seedling') {
+            var sr = document.querySelector('#page-contribute input[name="cultivar-type"][value="seedling"]');
+            if (sr) { sr.checked = true; sr.dispatchEvent(new Event('change')); }
+          }
+          if (ri.parent) {
+            var mi = document.querySelector('#seedling-formula-inputs input');
+            if (mi) { mi.value = ri.parent; mi.dispatchEvent(new Event('input', { bubbles: true })); }
+          }
+        }
+        showToast(restored ? 'ログインしました。入力は残っています' : 'ログインしました');
+      }
+    })();
   }
 
   // Header auth button (login/logout)

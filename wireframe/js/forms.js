@@ -226,6 +226,8 @@ const addOriginToggle = document.getElementById('add-origin-toggle');
 const addOriginForm = document.getElementById('add-origin-form');
 if (btnAddOrigin) {
   btnAddOrigin.addEventListener('click', function() {
+    var _h = document.querySelector('#page-cultivar h1');
+    if (window.requireLogin && !window.requireLogin({ a: 'record', k: _h ? h1Key(_h) : '' })) return;
     addOriginToggle.style.display = 'none';
     addOriginForm.style.display = 'block';
     // Show type-specific fields based on current cultivar type
@@ -235,17 +237,19 @@ if (btnAddOrigin) {
     var cType = cData ? (cData._type || 'species') : 'species';
     ['ao-species-fields','ao-clone-fields','ao-hybrid-fields','ao-seedling-fields'].forEach(function(id) {
       var el = document.getElementById(id);
-      if (el) el.style.display = 'none';
+      if (el) { el.style.display = 'none'; el.classList.add('d-none'); }
     });
     var showId = 'ao-' + cType + '-fields';
     var showEl = document.getElementById(showId);
-    if (showEl) showEl.style.display = '';
+    if (showEl) { showEl.style.display = ''; showEl.classList.remove('d-none'); }
   });
 }
 // "記録を追加" in the action row and the empty plate CTA delegate to the existing buttons
 var btnAddRecord = document.getElementById('detail-add-record-btn');
 if (btnAddRecord && btnAddOrigin) {
   btnAddRecord.addEventListener('click', function() {
+    var _h = document.querySelector('#page-cultivar h1');
+    if (window.requireLogin && !window.requireLogin({ a: 'record', k: _h ? h1Key(_h) : '' })) return;
     var sec = document.getElementById('add-origin-section');
     if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
     if (addOriginForm && addOriginForm.style.display !== 'block') btnAddOrigin.click();
@@ -824,6 +828,7 @@ document.addEventListener('click', function(e) {
     if (editDeleteBtn) editDeleteBtn.style.display = '';
   };
 
+  window.isContributeEditMode = function() { return editMode; };
   window.exitEditMode = function() {
     editMode = false;
     editCultivarKey = null;
@@ -1079,7 +1084,7 @@ document.addEventListener('click', function(e) {
     $('ind-submit').addEventListener('click', function(e) {
       e.preventDefault();
       if (!target) return;
-      if (!window._currentUser) { showToast(t('individual_login'), true); return; }
+      if (!window._currentUser) { if (window.requireLogin) window.requireLogin({ a: 'individual', target: target, path: (typeof _basePath !== 'undefined' ? _basePath : '/') + 'contribute' }); else showToast(t('individual_login'), true); return; }
       var code = $('ind-code').value.replace(/^['‘’"“”]+|['‘’"“”]+$/g, '').trim();
       if (!code) { showToast(t('individual_code_required'), true); $('ind-code').focus(); return; }
       var fullName = target.name + " '" + code + "'";
@@ -1122,7 +1127,8 @@ document.addEventListener('click', function(e) {
       if (this.value === 'seedling') {
         if (!window._currentUser) {
           revertToSpecies(this);
-          showToast('実生の投稿にはログインが必要です', true);
+          if (window.requireLogin) window.requireLogin({ a: 'contribute', type: 'seedling', path: (typeof _basePath !== 'undefined' ? _basePath : '/') + 'contribute' });
+          else showToast('実生の投稿にはログインが必要です', true);
           return;
         }
         if (!window._isSubscribed && window._supabaseClient) {
@@ -1359,9 +1365,10 @@ document.addEventListener('click', function(e) {
       }
       if (hasError) return;
 
-      // Login required
+      // Login required — the sheet saves the draft first, so nothing typed is lost
       if (!window._currentUser) {
-        showToast('投稿するにはログインが必要です', true);
+        if (window.requireLogin) window.requireLogin({ a: 'contribute', path: (typeof _basePath !== 'undefined' ? _basePath : '/') + 'contribute' });
+        else showToast('投稿するにはログインが必要です', true);
         return;
       }
 
@@ -1729,6 +1736,9 @@ document.addEventListener('click', function(e) {
 
       // --- Helper: finish submit (add to UI, navigate, reset form) ---
       function finishSubmit() {
+        if (typeof window.clearContributeDraft === 'function') window.clearContributeDraft();
+        try { localStorage.setItem('ao-posted', '1'); } catch (e) {}
+        if (typeof window.offerInstall === 'function') setTimeout(window.offerInstall, 4000);
         // Store user info for poster name display
         if (window._currentUser) {
           newEntry._userId = window._currentUser.id;
@@ -2005,83 +2015,72 @@ document.addEventListener('click', function(e) {
       var pA = aoStructured.formula ? aoStructured.formula.parentA : '';
       var pB = aoStructured.formula ? aoStructured.formula.parentB : '';
 
+      if (!window._currentUser) { if (window.requireLogin) window.requireLogin({ a: 'record', k: cultivarName }); return; }
+      var _sb = window._supabaseClient;
+      if (!_sb) { showToast(t('toast_db_save_failed'), true); return; }
+      var _me = window._currentUser;
       var newOrigin = {
         trust: 25, trustClass: 'trust--low',
         body: autoBody,
         structured: aoStructured,
         source_type: 'manual',
         sources: originSources.map(function(url) { return { icon: '\u{1F310}', text: url }; }),
-        author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
+        author: { isAI: false, name: (window._profileCache && window._profileCache[_me.id]) || 'User', user_id: _me.id, date: new Date().toISOString().slice(0, 10) },
         votes: { agree: 0, disagree: 0 }
       };
 
-      cData.origins.push(newOrigin);
-      if (pA && pB && !cData.formula) {
-        cData.formula = { parentA: pA, parentB: pB };
+      // Disable submit to prevent double submission
+      var _btnText = submitOriginBtn.textContent;
+      submitOriginBtn.disabled = true; submitOriginBtn.style.opacity = '0.5'; submitOriginBtn.textContent = '送信中…';
+      function done() { submitOriginBtn.disabled = false; submitOriginBtn.style.opacity = ''; submitOriginBtn.textContent = _btnText; }
+      function failed(err) {
+        done();
+        console.error('Failed to save origin to DB:', err);
+        _rateLimits.add_origin = 0;   // let 「もう一度」 through at once
+        showToast('保存できませんでした。入力は残っています', true, { sticky: true, action: { label: 'もう一度', fn: function() { submitOriginBtn.click(); } } });
       }
 
-      renderOrigins(cultivarName);
-
-      // Disable submit to prevent double submission
-      if (submitOriginBtn) { submitOriginBtn.disabled = true; submitOriginBtn.style.opacity = '0.5'; }
-
-      // Persist to Supabase via RPC (bypasses RLS UPDATE restriction)
-      var _sb = window._supabaseClient;
-      if (_sb) {
-        var originToSave = JSON.parse(JSON.stringify(newOrigin));
-        // Also include formula as a separate origin entry if provided
-        var originsToAppend = [originToSave];
-        if (pA && pB) {
-          originsToAppend.push({ _type: 'formula', formula: { parentA: pA, parentB: pB } });
-        }
-        // Append each origin via RPC (with IP tracking)
-        var savePromises = getUserIp().then(function(userIp) {
-          return Promise.all(originsToAppend.map(function(o) {
-            return _sb.rpc('append_origin', {
-              p_cultivar_name: cultivarName,
-              p_origin: o,
-              p_ip: userIp
+      // Persist via RPC first; the page shows the record only once the database has it
+      var originToSave = JSON.parse(JSON.stringify(newOrigin));
+      getUserIp().then(function(userIp) {
+        return _sb.rpc('append_origin', { p_cultivar_name: cultivarName, p_origin: originToSave, p_ip: userIp }).then(function(r) {
+          if (r.error || (r.data && r.data.success === false)) throw (r.error || new Error(r.data.error || 'append_origin failed'));
+          // the formula is a second, optional row; a failure there does not undo the record
+          if (pA && pB) {
+            return _sb.rpc('append_origin', { p_cultivar_name: cultivarName, p_origin: { _type: 'formula', formula: { parentA: pA, parentB: pB } }, p_ip: userIp }).then(function(r2) {
+              if (r2.error || (r2.data && r2.data.success === false)) console.warn('formula append failed', r2.error || r2.data);
             });
-          }));
-        });
-        savePromises.then(function(results) {
-          if (submitOriginBtn) { submitOriginBtn.disabled = false; submitOriginBtn.style.opacity = ''; }
-          var failed = results.filter(function(r) { return r.error; });
-          if (failed.length > 0) {
-            console.error('Failed to save origin to DB:', failed[0].error);
-            showToast(t('toast_db_save_failed'), true);
-          } else {
-            // Trigger AI verification for CLONE/hybrid after origin is saved
-            var cData = cultivarData[cultivarName];
-            var cType = cData && cData._type;
-            if ((cType === 'clone' || cType === 'hybrid') && descText && cData && cData._id) {
-              var srcUrls = originSources.slice();
-              triggerAIResearch(cData._id, cData._genus || '', cultivarName, cType, [], descText, srcUrls);
-              showToast('AI検証を開始しました');
-            }
           }
         });
-      }
+      }).then(function() {
+        done();
+        cData.origins.push(newOrigin);
+        if (pA && pB && !cData.formula) cData.formula = { parentA: pA, parentB: pB };
+        renderOrigins(cultivarName);
 
-      // Reset form
-      if (desc) desc.value = '';
-      originSources = [];
-      var list = originForm.querySelector('.origin-source-list');
-      if (list) list.innerHTML = '';
-      // Clear all inline structured fields
-      ['ao-description','ao-author-name','ao-publication-year','ao-collector','ao-collection-year','ao-type-locality','ao-known-habitats',
-       'ao-clone-namer','ao-clone-naming-year','ao-clone-parentA','ao-clone-parentB',
-       'ao-hybrid-breeder','ao-hybrid-naming-year','ao-hybrid-parentA','ao-hybrid-parentB',
-       'ao-seedling-breeder','ao-sowing-date','ao-seedling-parentA','ao-seedling-parentB'].forEach(function(id) {
-        var el = document.getElementById(id); if (el) el.value = '';
-      });
+        // Trigger AI verification for CLONE/hybrid after origin is saved
+        if ((cType === 'clone' || cType === 'hybrid') && descText && cData._id) {
+          triggerAIResearch(cData._id, cData._genus || '', cultivarName, cType, [], descText, originSources.slice());
+        }
 
-      // Hide form, show button
-      originForm.style.display = 'none';
-      var toggle = document.getElementById('add-origin-toggle');
-      if (toggle) toggle.style.display = 'block';
-
-      showToast(t('origin_added'));
+        // Reset form
+        if (desc) desc.value = '';
+        originSources = [];
+        var list = originForm.querySelector('.origin-source-list');
+        if (list) list.innerHTML = '';
+        ['ao-description','ao-author-name','ao-publication-year','ao-collector','ao-collection-year','ao-type-locality','ao-known-habitats',
+         'ao-clone-namer','ao-clone-naming-year','ao-clone-parentA','ao-clone-parentB',
+         'ao-hybrid-breeder','ao-hybrid-naming-year','ao-hybrid-parentA','ao-hybrid-parentB',
+         'ao-seedling-breeder','ao-sowing-date','ao-seedling-parentA','ao-seedling-parentB'].forEach(function(id) {
+          var el = document.getElementById(id); if (el) el.value = '';
+        });
+        originForm.style.display = 'none';
+        var toggle = document.getElementById('add-origin-toggle');
+        if (toggle) toggle.style.display = 'block';
+        var recs = document.getElementById('origins-container') || document.getElementById('add-origin-section');
+        if (recs && recs.scrollIntoView) recs.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showToast((cType === 'clone' || cType === 'hybrid') && descText ? t('origin_added') + '。AI が出典を確かめています' : t('origin_added'));
+      }).catch(failed);
     });
   }
 })();
@@ -2528,18 +2527,19 @@ updateCultivarDetail = function(cultivarName, rowEl) {
 
   // External "画像追加" button triggers the same file input
   var detailAddPhotoBtn = document.getElementById('detail-add-photo-btn');
+  function currentEntryName() { var h = document.querySelector('#page-cultivar h1'); return h ? h1Key(h) : ''; }
+  function openPhotoPicker() {
+    if (window.requireLogin && !window.requireLogin({ a: 'photo', k: currentEntryName() })) return;
+    galleryInput.click();
+  }
   if (detailAddPhotoBtn && galleryInput) {
-    detailAddPhotoBtn.addEventListener('click', function() {
-      galleryInput.click();
-    });
+    detailAddPhotoBtn.addEventListener('click', openPhotoPicker);
   }
 
   // Empty state glass card click → trigger file upload (non-seedling only)
   var emptyGlass = document.querySelector('.gallery__empty-glass');
   if (emptyGlass && galleryInput) {
-    emptyGlass.addEventListener('click', function() {
-      galleryInput.click();
-    });
+    emptyGlass.addEventListener('click', openPhotoPicker);
   }
 
   if (galleryUpload && galleryInput) {
@@ -2561,29 +2561,25 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       var caption = prompt('画像の補足（日付等）を入力してください（任意）：') || '';
       var linkUrl = prompt('リンクURL（Instagram等）を入力してください（任意）：') || '';
 
-      var sb = getSupabase();
-      if (sb) {
+      // Sent to the server or reported as not sent — never kept only on this phone (2026-10-08 app-ux)
+      function send() {
+        if (!getSupabase() || !window._currentUser) { showToast('写真を送るにはログインが必要です', true); return; }
+        var sending = showToast('写真を送っています…', false, { sticky: true });
         uploadToSupabase(file, cultivarName, caption.trim(), linkUrl.trim()).then(function() {
+          if (sending) sending.remove();
           renderGalleryForCultivar(cultivarName);
           trackEvent('gallery_upload', { cultivar_name: cultivarName });
           if (typeof loadCultivarThumbnails === 'function') loadCultivarThumbnails();
+          showToast('写真を載せました');
+          try { localStorage.setItem('ao-posted', '1'); } catch (e) {}
+          if (typeof window.offerInstall === 'function') setTimeout(window.offerInstall, 4000);
         }).catch(function(err) {
-          console.warn('Supabase upload failed, saving locally:', err);
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            saveGalleryImageLocal(cultivarName, e.target.result);
-            renderGalleryForCultivar(cultivarName);
-          };
-          reader.readAsDataURL(file);
+          if (sending) sending.remove();
+          console.warn('Photo upload failed:', err);
+          showToast('写真を送れませんでした', true, { sticky: true, action: { label: 'もう一度', fn: send } });
         });
-      } else {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          saveGalleryImageLocal(cultivarName, e.target.result);
-          renderGalleryForCultivar(cultivarName);
-        };
-        reader.readAsDataURL(file);
       }
+      send();
       this.value = '';
     });
 
@@ -2982,4 +2978,88 @@ document.addEventListener('click', function(e) {
       messageEl.value = '';
     });
   });
+})();
+
+
+// ========================================
+// Contribute draft: what was typed survives a login round trip, a reload or a mistap (2026-10-08 app-ux)
+// ========================================
+(function() {
+  var KEY = 'ao-draft:contribute';
+  var page = document.getElementById('page-contribute');
+  if (!page) return;
+  function editing() {
+    return page.classList.contains('contribute--individual') || page.classList.contains('contribute--edit') ||
+      !!document.querySelector('#page-contribute [data-edit-mode="true"]') || (typeof window.isContributeEditMode === 'function' && window.isContributeEditMode());
+  }
+  // inputs without an id (the two parents of a cross) are keyed by their container and position
+  function keyOf(el) {
+    if (el.id) return el.id;
+    var box = el.parentElement && el.parentElement.closest('[id]');
+    if (!box || !page.contains(box)) return '';
+    var all = Array.prototype.filter.call(box.querySelectorAll('input, textarea'), function(x) { return !x.id; });
+    return '@' + box.id + ':' + all.indexOf(el);
+  }
+  function byKey(k) {
+    if (k.charAt(0) !== '@') return document.getElementById(k);
+    var m = k.match(/^@(.+):(\d+)$/); if (!m) return null;
+    var box = document.getElementById(m[1]); if (!box) return null;
+    return Array.prototype.filter.call(box.querySelectorAll('input, textarea'), function(x) { return !x.id; })[+m[2]] || null;
+  }
+  function fields() {
+    return Array.prototype.filter.call(page.querySelectorAll('input, textarea, select'), function(el) {
+      return (el.id || keyOf(el)) && el.type !== 'file' && el.type !== 'hidden' && el.type !== 'password' && el.type !== 'radio' && el.type !== 'checkbox' && el.closest('.contribute-individual') === null && !/^ind-/.test(el.id);
+    });
+  }
+  window.saveContributeDraft = function(force) {
+    if (editing()) return;
+    var data = { v: 1, savedAt: Date.now(), fields: {}, radios: {} };
+    var any = false;
+    fields().forEach(function(el) { if (el.value && el.tagName !== 'SELECT') any = true; data.fields[keyOf(el)] = el.value; });
+    page.querySelectorAll('input[type="radio"]:checked').forEach(function(r) { if (r.name) data.radios[r.name] = r.value; });
+    page.querySelectorAll('input[type="checkbox"][id]').forEach(function(c) { data.fields[c.id] = c.checked ? '1' : ''; });
+    try { if (any) localStorage.setItem(KEY, JSON.stringify(data)); else if (force !== true) localStorage.removeItem(KEY); } catch (e) {}
+  };
+  window.clearContributeDraft = function() { try { localStorage.removeItem(KEY); } catch (e) {} var n = document.getElementById('draft-note'); if (n) n.remove(); };
+  window.restoreContributeDraft = function() {
+    if (editing()) return false;
+    var data = null;
+    try { data = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+    if (!data || !data.fields || Date.now() - (data.savedAt || 0) > 30 * 24 * 3600 * 1000) return false;
+    // only into an empty form, so a draft never overwrites what is on screen
+    if (fields().some(function(el) { return el.tagName !== 'SELECT' && el.value; })) return false;
+    Object.keys(data.radios || {}).forEach(function(name) {
+      var r = page.querySelector('input[type="radio"][name="' + name + '"][value="' + String(data.radios[name]).replace(/"/g, '') + '"]');
+      if (r && !r.checked) { r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); }
+    });
+    Object.keys(data.fields).forEach(function(id) {
+      var el = byKey(id);
+      if (!el || !page.contains(el)) return;
+      if (el.type === 'checkbox') el.checked = data.fields[id] === '1';
+      else if (data.fields[id] !== undefined && data.fields[id] !== '') el.value = data.fields[id];
+      el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true }));
+    });
+    var d = new Date(data.savedAt), pad = function(n) { return (n < 10 ? '0' : '') + n; };
+    var note = document.getElementById('draft-note');
+    if (!note) {
+      note = document.createElement('p');
+      note.id = 'draft-note'; note.className = 'draft-note';
+      var form = page.querySelector('form') || page.querySelector('.container') || page;
+      form.insertBefore(note, form.firstChild);
+    }
+    note.innerHTML = '';
+    note.appendChild(document.createTextNode('下書きを戻しました · ' + d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' · '));
+    var clr = document.createElement('button');
+    clr.type = 'button'; clr.className = 'draft-note__clear'; clr.textContent = '消す';
+    clr.addEventListener('click', function() {
+      window.clearContributeDraft();
+      fields().forEach(function(el) { if (el.tagName !== 'SELECT') { el.value = ''; el.dispatchEvent(new Event('input', { bubbles: true })); } });
+    });
+    note.appendChild(clr);
+    return true;
+  };
+  var timer = null;
+  page.addEventListener('input', function() { clearTimeout(timer); timer = setTimeout(window.saveContributeDraft, 400); });
+  page.addEventListener('change', function() { clearTimeout(timer); timer = setTimeout(window.saveContributeDraft, 400); });
+  window.addEventListener('pagehide', function() { if (page.style.display !== 'none') window.saveContributeDraft(); });
 })();
