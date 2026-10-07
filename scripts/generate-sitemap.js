@@ -91,6 +91,12 @@ async function main() {
   }
 
   // Locality pages
+  // name-confusion pages (T99)
+  {
+    const NAMES = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'wireframe', 'data', 'names.json'), 'utf8')).pages || [];
+    xml += `  <url>\n    <loc>${SITE}/names/</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
+    for (const pg of NAMES) xml += `  <url>\n    <loc>${SITE}/names/${pg.slug}/</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+  }
   // glossary terms (T100), read from the page itself
   {
     const html = fs.readFileSync(path.join(__dirname, '..', 'wireframe', 'index.html'), 'utf8');

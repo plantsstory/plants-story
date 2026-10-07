@@ -705,6 +705,57 @@
     var note = d.nameStatus === 'disputed' ? T('name_status_disputed') : d.formulaStatus === 'disputed' ? T('formula_disputed') : d.nameStatus === 'trade' ? T('name_status_trade') : d.nameStatus === 'informal' ? T('name_status_informal') : '';
     el.innerHTML = (cells ? '<div class="specimen">' + cells + '</div>' : '') + (note ? '<p class="specimen__note">' + esc(note) + '</p>' : '');
   }
+  /* ---------- name-confusion pages (BOARD 10-07b T99): /names/<slug>/ from data/names.json ---------- */
+  var _names = null;
+  function loadNames(cb) {
+    if (_names) { cb(_names); return; }
+    var av = ((document.querySelector('script[src*="archive.js"]') || {}).src || '').split('v=')[1] || '1';
+    fetch(base + 'data/names.json?v=' + av).then(function (r) { return r.ok ? r.json() : { pages: [] }; })
+      .then(function (j) { _names = j || { pages: [] }; cb(_names); }, function () { _names = { pages: [] }; cb(_names); });
+  }
+  function nameItemHtml(it, store) {
+    var e = it.entry && store[it.entry] ? describe(it.entry, store[it.entry], store[it.entry]._type) : null;
+    var title = e ? link(e, sciNameHtml(e.shownName)) : sciNameHtml(it.name || it.entry || '');
+    var src = (it.sources || []).map(function (s) { return '<a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.label) + '</a>'; }).join(' · ');
+    return '<li class="names__item"><p class="names__name">' + title + '<span class="names__kind">' + esc(it.kind || (e ? kindWord(e) : '')) + '</span></p>'
+      + '<p class="names__text">' + window.italicizeSciNames(esc(it.text || '')) + '</p>' + (src ? '<p class="names__src">' + esc(T('source_label')) + ' ' + src + '</p>' : '') + '</li>';
+  }
+  window.renderNamesPage = function (slug) {
+    var body = document.getElementById('names-body'), title = document.getElementById('names-title'), crumb = document.getElementById('names-crumb');
+    if (!body) return;
+    loadNames(function (j) {
+      waitForData(function () {
+        var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
+        var pages = j.pages || [];
+        var pg = slug ? pages.filter(function (x) { return x.slug === slug; })[0] : null;
+        if (!pg) {
+          if (title) title.textContent = '名前の違い';
+          if (crumb) crumb.textContent = '名前の違い';
+          body.innerHTML = '<p class="people__intro">名前が似ていても別の植物、という例をまとめています。</p><ul class="names__index">'
+            + pages.map(function (x) { return '<li><a href="' + esc(base + 'names/' + x.slug + '/') + '" data-nav="names" data-name-slug="' + esc(x.slug) + '">' + esc(x.title) + '</a></li>'; }).join('') + '</ul>';
+          if (typeof updateMeta === 'function') setTimeout(function () { updateMeta({ title: '名前の違い — 似た名前の別の植物 | Aroid Origins', description: pages.map(function (x) { return x.title; }).join('、'), path: 'names/' }); }, 0);
+          return;
+        }
+        if (title) title.textContent = pg.title;
+        if (crumb) crumb.textContent = pg.title;
+        body.innerHTML = '<p class="names__lead">' + window.italicizeSciNames(esc(pg.lead)) + '</p><ol class="names__list">' + pg.items.map(function (it) { return nameItemHtml(it, store); }).join('') + '</ol>'
+          + '<p class="names__summary">' + window.italicizeSciNames(esc(pg.summary)) + '</p><p class="related__exit"><a href="' + esc(base + 'names/') + '" data-nav="names">名前の違いの一覧 →</a></p>';
+        if (typeof updateMeta === 'function') setTimeout(function () { updateMeta({ title: pg.title + ' | Aroid Origins', description: (pg.lead + ' ' + pg.summary).slice(0, 120), path: 'names/' + pg.slug + '/' }); }, 0);
+      });
+    });
+  };
+  // on an entry a names page covers: one line pointing to it
+  function renderNameNote(d) {
+    var el = document.getElementById('names-note');
+    if (!el) return;
+    el.innerHTML = '';
+    loadNames(function (j) {
+      var hit = (j.pages || []).filter(function (pg) { return pg.items.some(function (it) { return it.entry === d.fullName; }); })[0];
+      if (!hit) return;
+      el.innerHTML = '<p class="names-note">' + esc(T('names_note')) + ' <a href="' + esc(base + 'names/' + hit.slug + '/') + '" data-nav="names" data-name-slug="' + esc(hit.slug) + '">' + esc(hit.title) + ' →</a></p>';
+    });
+  }
+
   /* ---------- specimen labels to print (BOARD 10-07b T89) ---------- */
   var _labelEntry = null;
   function loadQr(cb) {
@@ -1214,6 +1265,7 @@
     var plb = document.getElementById('detail-print-label');
     if (plb) plb.classList.toggle('d-none', d.type === 'seedling');
     renderRelated(d, all);
+    renderNameNote(d);
     renderIndividuals(d, all);
     renderGateNote(d);
     renderShareBand(d, entry);

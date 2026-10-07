@@ -2419,5 +2419,13 @@
   "genus_ipni_anthurium": {
     "jp": "329747-2",
     "en": "329747-2"
+  },
+  "names_note": {
+    "jp": "名前の似た別の植物:",
+    "en": "Similar names, different plants:"
+  },
+  "names_title": {
+    "jp": "名前の違い",
+    "en": "Similar names"
   }
 }

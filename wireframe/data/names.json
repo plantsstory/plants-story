@@ -1,0 +1,37 @@
+{
+  "_note": "名前の混同ページ（BOARD 10-07b T99）。書くのは各品種の記録と出典にある事実だけ。形・育て方・推測は書かない。entry は品種の保存名（あればその品種ページへリンク）。",
+  "pages": [
+    {
+      "slug": "black-velvet",
+      "title": "「ブラックベルベット」と呼ばれる植物",
+      "lead": "名前に Black Velvet が付く植物は、少なくとも3つあります。どれも別の植物で、属が違うものも含まれます。",
+      "items": [
+        { "name": "Alocasia reginula", "kind": "原種（アロカシア属）", "text": "アロカシア属の原種。1998 年に A.Hay が Gard. Bull. Singapore 50(2): 258 で記載した。'Black Velvet' の名前で流通することが多い。アンスリウムではない。", "sources": [{ "label": "IPNI", "url": "https://www.ipni.org/n/1006568-1" }, { "label": "Wikipedia（英語）", "url": "https://en.wikipedia.org/wiki/Alocasia_reginula" }] },
+        { "entry": "Anthurium antolakii", "kind": "未記載", "text": "正式な記載がない未記載種。流通名は Black Velvet Panama、Black Velvet Eastern Panama（BVEP）、Darkest Panamá。Jay Vannini は A. papillilaminum に最も近いとしている。" },
+        { "entry": "Anthurium 'BVIT'", "kind": "Hybrid（流通ラベル）", "text": "Black Velvet Indo Type の略。インドネシアで作られた暗色のベルベット葉の株に付く非公式の流通ラベルで、単一のクローンでも登録品種でもない。作出者と交配式の記録はない。" }
+      ],
+      "summary": "同じ「ブラックベルベット」でも、アロカシアの原種、アンスリウムの未記載種、インドネシアの交配株の流通ラベル、と中身が違います。買う前に、学名か正式な品種名で確かめてください。"
+    },
+    {
+      "slug": "red-crystallinum",
+      "title": "crystallinum と 'Red Crystallinum' の違い",
+      "lead": "名前に crystallinum が入っていますが、原種の crystallinum と 'Red Crystallinum' は別の植物です。",
+      "items": [
+        { "entry": "Anthurium crystallinum", "kind": "原種", "text": "1873 年に Linden & André が記載した原種。分布はコロンビア、パナマ。" },
+        { "entry": "Anthurium 'Red Crystallinum'", "kind": "Hybrid", "text": "原種の crystallinum とは別の園芸系統。Tim Anderson が持っていた個体群に由来するとされ、親は記録されていない。いまは単一のクローンではなく、複数の系統の総称として使われている。" }
+      ],
+      "summary": "この図鑑では、名前の一部が同じでも親子として結びません。'Red Crystallinum' を親にもつ品種は、crystallinum の系統図には出てきません。"
+    },
+    {
+      "slug": "spades",
+      "title": "'Ace of Spades'・'King of Spades'・'Queen of Hearts'",
+      "lead": "トランプにちなむ名前の 3 つの品種です。名前は似ていますが、作出者も由来も別です。",
+      "items": [
+        { "entry": "Anthurium 'Ace of Spades'", "kind": "Clone", "text": "フロリダのナーセリーで管理されていた南米採集の未同定株（当初 A. hoffmannii のラベル）の種子を Denis Rotolante が播き、実生群から選んだ 1 株の名前。" },
+        { "entry": "Anthurium 'King of Spades'", "kind": "Clone", "text": "インドネシア・ボゴールの Haji Ulih が作出し命名したオリジナル個体の名前。流通している株の多くはオリジナルの実生（F 個体）。" },
+        { "entry": "Anthurium 'Queen of Hearts'", "kind": "Clone", "text": "由来の記録はまだありません。'Ace of Spades' から生まれたという話は、出典が確認できないため載せていません。" }
+      ],
+      "summary": "3 つの名前のあいだに親子関係があることを示す出典は、見つかっていません。"
+    }
+  ]
+}

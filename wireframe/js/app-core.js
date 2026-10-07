@@ -593,6 +593,7 @@ function buildPath(page, options) {
   if (page === 'search' && options.q) return _basePath + 'search?q=' + encodeURIComponent(options.q);
   if (page === 'people') return _basePath + 'people' + (options.person ? '/' + encodeURIComponent(options.person) : '');
   if (page === 'locality') return _basePath + 'locality' + (options.place ? '/' + encodeURIComponent(options.place) : '');
+  if (page === 'names') return _basePath + 'names/' + (options.nameSlug ? encodeURIComponent(options.nameSlug) + '/' : '');
   if (page === 'tools') return _basePath + 'tools/' + (options.tool ? encodeURIComponent(options.tool) + '/' : (options.genre ? '?g=' + encodeURIComponent(options.genre) : ''));
   if (page === 'glossary' && options.term) return _basePath + 'glossary/' + options.term + '/';
   if (simplePages.indexOf(page) !== -1) return _basePath + page;
@@ -644,6 +645,9 @@ function parseRoute() {
   if (first === 'people') {
     return segments[1] ? { page: 'people', person: segments[1] } : { page: 'people' };
   }
+  if (first === 'names') {
+    return { page: 'names', nameSlug: segments[1] || '' };
+  }
   if (first === 'locality') {
     return segments[1] ? { page: 'locality', place: segments[1] } : { page: 'locality' };
   }
@@ -678,6 +682,7 @@ function navigateTo(page, options, pushHistory) {
   if (page === 'contribute' && !options.individual && typeof window.setIndividualMode === 'function') window.setIndividualMode(null);
   if (page === 'people' && typeof window.renderPeoplePage === 'function') window.renderPeoplePage(options.person || '');
   if (page === 'locality' && typeof window.renderLocalityPage === 'function') window.renderLocalityPage(options.place || '');
+  if (page === 'names' && typeof window.renderNamesPage === 'function') window.renderNamesPage(options.nameSlug || '');
   if (page === 'tools' && typeof window.renderToolsPage === 'function') window.renderToolsPage(options.tool || '', options.genre || '');
   if (page === 'genus' && options.genus) showGenus(options.genus);
   if (page === 'cultivar' && options.cultivar && !options._skipUpdate) {

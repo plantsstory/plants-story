@@ -388,6 +388,31 @@ async function main() {
     written++;
   }
 
+  // ---- Name-confusion pages (/names/ and /names/<slug>/) from wireframe/data/names.json (T99) ----
+  {
+    const NAMES = JSON.parse(fs.readFileSync(path.join(WIREFRAME, 'data', 'names.json'), 'utf8')).pages || [];
+    fs.rmSync(path.join(WIREFRAME, 'names'), { recursive: true, force: true });
+    const entryUrl = n => { const g = n.split(' ')[0]; const r = n.slice(g.length + 1); return SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(r).replace(/'/g, '%27') + '/'; };
+    let ih = buildStub(template, { title: '名前の違い — 似た名前の別の植物 | Aroid Origins', description: NAMES.map(x => x.title).join('、'), url: SITE + '/names/', ogType: 'website' });
+    ih = ih.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="名前の違い"><ul>' + NAMES.map(x => '<li><a href="' + SITE + '/names/' + x.slug + '/">' + escAttr(x.title) + '</a></li>').join('') + '</ul></nav>');
+    fs.mkdirSync(path.join(WIREFRAME, 'names'), { recursive: true });
+    fs.writeFileSync(path.join(WIREFRAME, 'names', 'index.html'), ih, 'utf8');
+    written++;
+    for (const pg of NAMES) {
+      const url = SITE + '/names/' + pg.slug + '/';
+      let ph = buildStub(template, { title: pg.title + ' | Aroid Origins', description: (pg.lead + ' ' + pg.summary).slice(0, 120), url, ogType: 'article',
+        jsonLd: [{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': [
+          { '@type': 'ListItem', 'position': 1, 'name': 'Aroid Origins', 'item': SITE + '/' },
+          { '@type': 'ListItem', 'position': 2, 'name': '名前の違い', 'item': SITE + '/names/' },
+          { '@type': 'ListItem', 'position': 3, 'name': pg.title, 'item': url } ] }] });
+      const items = pg.items.map(it => '<li><p class="names__name">' + (it.entry ? '<a href="' + entryUrl(it.entry) + '">' + sciHtml(it.entry) + '</a>' : sciHtml(it.name)) + ' — ' + escAttr(it.kind || '') + '</p><p>' + escAttr(it.text) + '</p></li>').join('');
+      ph = ph.replace(/(<main[^>]*>)/, '$1\n<article id="static-entry" class="container static-entry"><p class="detail-standard">名前の違い</p><h1 class="detail-title">' + escAttr(pg.title) + '</h1><p class="static-entry__text">' + escAttr(pg.lead) + '</p><ol>' + items + '</ol><p class="static-entry__text">' + escAttr(pg.summary) + '</p></article>');
+      fs.mkdirSync(path.join(WIREFRAME, 'names', pg.slug), { recursive: true });
+      fs.writeFileSync(path.join(WIREFRAME, 'names', pg.slug, 'index.html'), ph, 'utf8');
+      written++;
+    }
+  }
+
   // ---- Glossary terms (/glossary/<id>/): one page per term for 「〜とは」 searches (T100) ----
   {
     const gStart = template.indexOf('<dl class="glossary">', template.indexOf('id="page-glossary"'));

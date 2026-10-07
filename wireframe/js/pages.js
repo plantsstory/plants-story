@@ -1836,6 +1836,7 @@ document.addEventListener('click', function(e) {
       var placeSlug = navEl.getAttribute('data-place');
       if (placeSlug) navOptions.place = placeSlug;
     }
+    if (page === 'names') navOptions.nameSlug = navEl.getAttribute('data-name-slug') || '';
     if (page === 'tools') {
       var toolSlug = navEl.getAttribute('data-tool');
       var toolGenre = navEl.getAttribute('data-genre');
