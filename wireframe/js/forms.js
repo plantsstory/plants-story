@@ -2473,7 +2473,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     // Show arrows and counter
     if (prevBtn) prevBtn.classList.remove('d-none');
     if (nextBtn) nextBtn.classList.remove('d-none');
-    if (counter) { counter.classList.remove('d-none'); counter.textContent = (galleryCarouselIdx + 1) + ' / ' + total; }
+    if (counter) { counter.classList.remove('d-none'); counter.textContent = (currentLang === 'en' ? 'Plate ' : '図 ') + (galleryCarouselIdx + 1) + ' / ' + total; }
   }
 
   document.getElementById('gallery-prev').addEventListener('click', function() {

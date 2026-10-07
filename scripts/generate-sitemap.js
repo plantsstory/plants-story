@@ -91,6 +91,13 @@ async function main() {
   }
 
   // Locality pages
+  // glossary terms (T100), read from the page itself
+  {
+    const html = fs.readFileSync(path.join(__dirname, '..', 'wireframe', 'index.html'), 'utf8');
+    const gStart = html.indexOf('<dl class="glossary">', html.indexOf('id="page-glossary"'));
+    const part = gStart >= 0 ? html.slice(gStart, html.indexOf('</section>', gStart)) : '';
+    for (const m of part.matchAll(/<dt id="(g-[a-z0-9-]+)">/g)) xml += `  <url>\n    <loc>${SITE}/glossary/${m[1]}/</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.4</priority>\n  </url>\n`;
+  }
   xml += `  <url>\n    <loc>${SITE}/locality/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
   for (const l of geo.localityIndex(cultivars.filter(c => !c.cultivar_name.includes('[Seedling]')), c => RecordGate.state(c) === 'ok')) {
     xml += `  <url>\n    <loc>${SITE}/locality/${encodeURIComponent(l.slug)}/</loc>\n    <lastmod>${newest(l.rows, today)}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;

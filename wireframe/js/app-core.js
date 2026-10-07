@@ -594,6 +594,7 @@ function buildPath(page, options) {
   if (page === 'people') return _basePath + 'people' + (options.person ? '/' + encodeURIComponent(options.person) : '');
   if (page === 'locality') return _basePath + 'locality' + (options.place ? '/' + encodeURIComponent(options.place) : '');
   if (page === 'tools') return _basePath + 'tools/' + (options.tool ? encodeURIComponent(options.tool) + '/' : (options.genre ? '?g=' + encodeURIComponent(options.genre) : ''));
+  if (page === 'glossary' && options.term) return _basePath + 'glossary/' + options.term + '/';
   if (simplePages.indexOf(page) !== -1) return _basePath + page;
   return _basePath;
 }
@@ -656,6 +657,8 @@ function parseRoute() {
     var sq = searchParams.get('q');
     return { page: 'search', q: sq || '', _fromRoute: true };
   }
+  // a glossary term has its own URL; it opens the glossary at that term (T100)
+  if (first === 'glossary' && segments[1] && /^g-[a-z0-9-]+$/.test(segments[1])) return { page: 'glossary', term: segments[1] };
   if (simplePages.indexOf(first) !== -1) return { page: first };
 
   // anything else is not a page of this site (decided only once the genera are known)
@@ -766,6 +769,15 @@ function navigateTo(page, options, pushHistory) {
         updateGenusJsonLd(gName, names);
       }
     } else {
+      if (page === 'glossary' && options.term) {
+        var _dt = document.getElementById(options.term);
+        if (_dt) {
+          var _dd = _dt.nextElementSibling;
+          updateMeta({ title: _dt.textContent.trim() + 'とは — 由来の用語集 | Aroid Origins', description: _dd ? _dd.textContent.trim().slice(0, 120) : '', path: 'glossary/' + options.term + '/' });
+          setTimeout(function() { _dt.scrollIntoView({ block: 'start' }); _dt.classList.add('is-target'); }, 200);
+          return;
+        }
+      }
       var noindexPages = { search: true, contribute: true, mypost: true, favorites: true, profile: true, 'profile-edit': true, notfound: true };
       updateMeta({ title: pageTitles[page] || _defaultTitle, description: pageDescriptions[page] || _defaultDesc, path: page === 'top' ? '' : page, noindex: !!noindexPages[page] });
       // Remove genus JSON-LD on non-genus pages
@@ -1471,6 +1483,8 @@ if (false) {
       html += '<nav class="breadcrumb mb-sm" aria-label="パンくずリスト"><a href="' + _basePath + '" data-nav="top">トップ</a><span class="breadcrumb__sep">/</span><span>' + escHtml(g.name) + '</span></nav>';
       html += '<h1 class="section-title">' + g.name + '</h1>';
       html += '<p class="genus-lead">' + escHtml(t('genus_lead').replace('{genus}', g.name)) + '</p>';
+      // where the genus name comes from (sourced; only genera with a checked line)
+      if (t('genus_origin_' + g.slug) !== 'genus_origin_' + g.slug) html += '<p class="genus-origin">' + escHtml(t('genus_origin_' + g.slug)) + ' <a href="https://www.ipni.org/n/' + escHtml(t('genus_ipni_' + g.slug)) + '" target="_blank" rel="noopener">IPNI</a></p>';
       html += '<div class="genus-stats" id="genus-stats-' + g.slug + '" style="display:none;">';
       html += '<div class="genus-stats__chips"></div>';
       html += '</div>';

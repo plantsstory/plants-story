@@ -1426,7 +1426,7 @@
         frag = frag || document.createDocumentFragment();
         frag.appendChild(document.createTextNode(rest.slice(0, idx)));
         var a = document.createElement('a');
-        a.className = 'term'; a.href = base + 'glossary/#' + id; a.setAttribute('data-nav', 'glossary'); a.setAttribute('data-anchor', id);
+        a.className = 'term'; a.href = base + 'glossary/' + id + '/'; a.setAttribute('data-nav', 'glossary'); a.setAttribute('data-anchor', id);
         a.title = T('glossary_title'); a.textContent = m[2];
         frag.appendChild(a);
         rest = rest.slice(idx + m[2].length);
@@ -1624,4 +1624,38 @@
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+
+/* Glossary table of contents (BOARD 10-07b I6): the sections as a ruled two-column list at the top, built from the
+   page's own h2s, with a way back from each section. */
+(function () {
+  function build() {
+    var page = document.getElementById('page-glossary');
+    if (!page || page.querySelector('.glossary-toc')) return;
+    var heads = page.querySelectorAll('.legal-page > h2');
+    if (heads.length < 3) return;
+    var items = '';
+    heads.forEach(function (h, i) {
+      if (!h.id) h.id = 'gs-' + (i + 1);
+      items += '<li><a href="#' + h.id + '" data-toc="' + h.id + '">' + h.textContent.replace(/[<>&]/g, '') + '</a></li>';
+      var back = document.createElement('p');
+      back.className = 'glossary-toc__back';
+      back.innerHTML = '<a href="#glossary-toc" data-toc="glossary-toc">目次へ ↑</a>';
+      if (i > 0) h.parentNode.insertBefore(back, h);
+    });
+    var nav = document.createElement('nav');
+    nav.className = 'glossary-toc';
+    nav.id = 'glossary-toc';
+    nav.setAttribute('aria-label', '目次');
+    nav.innerHTML = '<ul>' + items + '</ul>';
+    heads[0].parentNode.insertBefore(nav, heads[0]);
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('[data-toc]');
+    if (!a) return;
+    e.preventDefault();
+    var el = document.getElementById(a.getAttribute('data-toc'));
+    if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();
 })();

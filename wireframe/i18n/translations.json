@@ -2411,5 +2411,13 @@
   "story_copy_failed": {
     "jp": "コピーできませんでした",
     "en": "Could not copy"
+  },
+  "genus_origin_anthurium": {
+    "jp": "Anthurium は 1829 年、Schott が Wiener Z. Kunst 1829(3): 828 で発表した属名。ギリシャ語の anthos（花）と oura（尾）から（尾のように伸びる花序にちなむ）。",
+    "en": "Anthurium was published by Schott in Wiener Z. Kunst 1829(3): 828. From the Greek anthos (flower) and oura (tail), after the tail-like spadix."
+  },
+  "genus_ipni_anthurium": {
+    "jp": "329747-2",
+    "en": "329747-2"
   }
 }

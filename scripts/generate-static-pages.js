@@ -388,6 +388,31 @@ async function main() {
     written++;
   }
 
+  // ---- Glossary terms (/glossary/<id>/): one page per term for 「〜とは」 searches (T100) ----
+  {
+    const gStart = template.indexOf('<dl class="glossary">', template.indexOf('id="page-glossary"'));
+    const gEnd = template.indexOf('</section>', gStart);
+    const part = gStart >= 0 ? template.slice(gStart, gEnd) : '';
+    const re = /<dt id="(g-[a-z0-9-]+)">([\s\S]*?)<\/dt>\s*<dd>([\s\S]*?)<\/dd>/g;
+    let m;
+    while ((m = re.exec(part))) {
+      const id = m[1], term = m[2].replace(/<[^>]+>/g, '').trim(), def = m[3].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+      const url = SITE + '/glossary/' + id + '/';
+      let gh = buildStub(template, {
+        title: term + 'とは — 由来の用語集 | Aroid Origins',
+        description: def.slice(0, 120),
+        url: url,
+        ogType: 'article',
+        jsonLd: [{ '@context': 'https://schema.org', '@type': 'DefinedTerm', 'name': term, 'description': def, 'url': url,
+          'inDefinedTermSet': { '@type': 'DefinedTermSet', 'name': '由来の用語集', 'url': SITE + '/glossary/' } }]
+      });
+      gh = gh.replace(/(<main[^>]*>)/, '$1\n<article id="static-entry" class="container static-entry"><p class="detail-standard">由来の用語集</p><h1 class="detail-title">' + escAttr(term) + '</h1><p class="static-entry__text">' + escAttr(def) + '</p><nav class="static-entry__links"><p><a href="' + SITE + '/glossary/">用語集をすべて見る →</a></p></nav></article>');
+      fs.mkdirSync(path.join(WIREFRAME, 'glossary', id), { recursive: true });
+      fs.writeFileSync(path.join(WIREFRAME, 'glossary', id, 'index.html'), gh, 'utf8');
+      written++;
+    }
+  }
+
   // ---- Locality pages (/locality/ and /locality/<slug>/) ----
   const localityUrl = SITE + '/locality/';
   const localities = geo.localityIndex(publicCultivars, c => RecordGate.state(c) === 'ok');
