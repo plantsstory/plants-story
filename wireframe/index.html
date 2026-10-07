@@ -15,8 +15,8 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.yahoo.co.jp https://i.moshimo.com; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJK72JH471"></script>
-  <script src="js/textsize.js?v=20261008e"></script>
-  <script src="js/gtag-init.js?v=20261008e"></script>
+  <script src="js/textsize.js?v=20261008f"></script>
+  <script src="js/gtag-init.js?v=20261008f"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -57,13 +57,13 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20261008e">
-  <link rel="stylesheet" href="css/reset.css?v=20261008e">
-  <link rel="stylesheet" href="css/layout.css?v=20261008e">
-  <link rel="stylesheet" href="css/components.css?v=20261008e">
-  <link rel="stylesheet" href="css/pages.css?v=20261008e">
-  <link rel="stylesheet" href="css/utilities.css?v=20261008e">
-  <link rel="stylesheet" href="css/archive.css?v=20261008e">
+  <link rel="stylesheet" href="css/variables.css?v=20261008f">
+  <link rel="stylesheet" href="css/reset.css?v=20261008f">
+  <link rel="stylesheet" href="css/layout.css?v=20261008f">
+  <link rel="stylesheet" href="css/components.css?v=20261008f">
+  <link rel="stylesheet" href="css/pages.css?v=20261008f">
+  <link rel="stylesheet" href="css/utilities.css?v=20261008f">
+  <link rel="stylesheet" href="css/archive.css?v=20261008f">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -107,7 +107,7 @@
     <a href="/glossary/" data-nav="glossary" data-i18n="glossary_title">由来の用語集</a>
     <a href="/tools/" data-nav="tools" data-tools-link class="d-none" data-i18n="tools_nav">道具</a>
     <a href="#" data-nav="contribute" data-i18n="nav_contribute_mobile">品種を投稿</a>
-    <a href="#" data-nav="mypost" id="nav-mypost" class="d-none">投稿履歴</a>
+    <a href="#" data-nav="mypost" id="nav-mypost" class="d-none">自分の記録</a>
     <a href="#" id="nav-profile" class="d-none" data-nav="profile">プロフィール</a>
     <div class="mt-sm mobile-nav__divider">
       <a href="#" id="nav-auth">ログイン</a>
@@ -279,7 +279,7 @@
                 <div class="sheet sheet--plate"><p class="sheet__title" data-i18n="plate_empty">写真なし</p><p class="sheet__note mono" data-i18n="plate_empty_note">栽培者本人の写真を1枚。撮影者名を添えて。</p><a href="#" class="sheet__cta" id="plate-empty-cta" data-i18n="plate_empty_cta">写真を追加</a></div>
               </div>
               <div class="gallery__upload" id="gallery-upload">
-                <input type="file" id="gallery-file-input" accept="image/jpeg,image/png" class="d-none" aria-label="ギャラリー画像をアップロード">
+                <input type="file" id="gallery-file-input" accept="image/jpeg,image/png,image/webp" class="d-none" aria-label="ギャラリー画像をアップロード">
                 <div class="upload-area__icon">&#x2B06;</div>
                 <div class="upload-area__text" data-i18n="upload_image">画像をアップロード</div>
                 <div class="upload-area__hint">JPG/PNG, 20MB以下（自動圧縮）</div>
@@ -1353,10 +1353,10 @@
 
   <section id="page-mypost" class="page">
     <div class="container">
-      <h1 class="section-title">投稿履歴</h1>
-      <p class="text-muted mb-lg">あなたが投稿した品種の一覧です。</p>
+      <h1 class="section-title">自分の記録</h1>
+      <p class="text-muted mb-lg" id="mypost-desc">あなたが記録した品種です。写真や記録はここから足せます。</p>
       <div id="mypost-login-msg" class="d-none text-center p-xl" style="color:var(--color-gray);">
-        <p>ログインすると投稿履歴を確認できます。</p>
+        <p>ログインすると自分の記録を見られます。</p>
       </div>
       <div id="mypost-grid" class="card-grid"></div>
       <div id="mypost-empty" class="d-none text-center p-xl" style="color:var(--color-gray);">
@@ -1541,6 +1541,57 @@
   </div>
   </main>
 
+  <!-- App-like bottom bar (≤640px, preview html.app-ui only; BOARD 10-08 §4-1) -->
+  <nav class="appbar" id="appbar" aria-label="下部ナビ">
+    <a href="/" data-nav="top" class="appbar__item" data-appbar="top">図鑑</a>
+    <a href="/anthurium/" data-nav="genus" data-genus="anthurium" class="appbar__item" data-appbar="genus">一覧</a>
+    <button type="button" class="appbar__item appbar__post" id="appbar-post">＋投稿</button>
+    <a href="/mypost" data-nav="mypost" class="appbar__item" data-appbar="mypost">自分の記録</a>
+    <button type="button" class="appbar__item" id="appbar-more" aria-controls="mobileNav">その他</button>
+  </nav>
+
+  <!-- 「＋投稿」 on a plant page: what to add to this entry -->
+  <dialog id="post-sheet" class="dialog-clean sheet-dialog" aria-labelledby="post-sheet-name">
+    <p class="sheet-dialog__kind" id="post-sheet-kind"></p>
+    <h3 class="dialog-title" id="post-sheet-name"></h3>
+    <ul class="sheet-rows">
+      <li><button type="button" data-post-act="photo">写真を追加 <span aria-hidden="true">→</span></button></li>
+      <li><button type="button" data-post-act="record">記録を追加 <span aria-hidden="true">→</span></button></li>
+      <li id="post-sheet-ind"><button type="button" data-post-act="individual">個体を追加 <span aria-hidden="true">→</span></button></li>
+    </ul>
+    <ul class="sheet-rows sheet-rows--more">
+      <li><button type="button" data-post-act="new">新しい品種を登録 <span aria-hidden="true">→</span></button></li>
+      <li id="post-sheet-seedling"><button type="button" data-post-act="seedling">この品種を親に実生を記録 <span aria-hidden="true">→</span></button></li>
+    </ul>
+    <div class="dialog-actions"><button type="button" class="btn btn--secondary btn--sm" data-post-act="close">閉じる</button></div>
+  </dialog>
+
+  <!-- Photo sheet: replaces the two prompt() questions (BOARD 10-08 §4-3) -->
+  <dialog id="photo-sheet" class="dialog-clean sheet-dialog" aria-labelledby="photo-sheet-title">
+    <h3 class="dialog-title" id="photo-sheet-title">写真を載せる</h3>
+    <p class="sheet-dialog__kind" id="photo-sheet-name"></p>
+    <div class="photo-sheet__plates" id="photo-sheet-plates"></div>
+    <div class="form-group">
+      <label class="form-label" for="photo-sheet-date">撮影日</label>
+      <input type="date" id="photo-sheet-date" class="form-input">
+      <p class="form-hint" id="photo-sheet-date-hint"></p>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="photo-sheet-caption">補足（任意）</label>
+      <input type="text" id="photo-sheet-caption" class="form-input" maxlength="120" placeholder="例: 栽培株 · 温室で 2 年目">
+    </div>
+    <details class="contribute-fold"><summary>リンクを付ける（Instagram など）</summary>
+      <div class="form-group"><input type="url" id="photo-sheet-link" class="form-input" placeholder="https://" aria-label="リンク"></div>
+    </details>
+    <p class="photo-sheet__note">自分で撮った写真だけを載せてください。載せた写真はあとから自分で消せます。</p>
+    <div class="dialog-actions">
+      <button type="button" class="btn btn--secondary btn--sm" id="photo-sheet-cancel">やめる</button>
+      <button type="button" class="btn btn--primary btn--sm" id="photo-sheet-send">載せる</button>
+    </div>
+  </dialog>
+  <input type="file" id="sheet-pick-input" accept="image/jpeg,image/png,image/webp" multiple class="d-none" aria-label="写真を選ぶ">
+  <input type="file" id="sheet-shoot-input" accept="image/*" capture="environment" class="d-none" aria-label="写真を撮る">
+
   <footer class="footer">
     <div class="container footer__inner">
       <div class="footer__links">
@@ -1571,14 +1622,14 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/record-gate.js?v=20261008e"></script>
-  <script src="js/app-core.js?v=20261008e"></script>
-  <script src="js/pages.js?v=20261008e"></script>
-  <script src="js/forms.js?v=20261008e"></script>
-  <script src="js/entry-meta.js?v=20261008e"></script>
-  <script src="js/archive.js?v=20261008e"></script>
-  <script src="js/tool-gate.js?v=20261008e"></script>
-  <script src="js/tools.js?v=20261008e"></script>
+  <script src="js/record-gate.js?v=20261008f"></script>
+  <script src="js/app-core.js?v=20261008f"></script>
+  <script src="js/pages.js?v=20261008f"></script>
+  <script src="js/forms.js?v=20261008f"></script>
+  <script src="js/entry-meta.js?v=20261008f"></script>
+  <script src="js/archive.js?v=20261008f"></script>
+  <script src="js/tool-gate.js?v=20261008f"></script>
+  <script src="js/tools.js?v=20261008f"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1588,7 +1639,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261008e"></script>
+  <script src="js/dialogs.js?v=20261008f"></script>
 
   <!-- AI re-research request dialog -->
   <!-- Asked before anything is typed: posting, photos and records need a login (2026-10-08 app-ux) -->
@@ -1639,6 +1690,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261008e"></script>
+<script src="js/sw-register.js?v=20261008f"></script>
 </body>
 </html>

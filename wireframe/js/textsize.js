@@ -2,6 +2,15 @@
    Loaded in <head> so the choice is applied before the first paint: every size in the
    stylesheets is rem-based, so moving the root size scales body text, headings and labels
    together. The choice is per browser (localStorage). */
+// Preview switch for the app-like screens (BOARD 10-08): ?preview=app on, ?preview=off off; this browser only.
+(function () {
+  try {
+    var q = location.search;
+    if (/[?&]preview=app\b/.test(q)) localStorage.setItem('ao-preview-app', '1');
+    if (/[?&]preview=off\b/.test(q)) localStorage.removeItem('ao-preview-app');
+    if (localStorage.getItem('ao-preview-app') === '1') document.documentElement.classList.add('app-ui');
+  } catch (e) {}
+})();
 (function () {
   'use strict';
   var KEY = 'plants-story-textsize';

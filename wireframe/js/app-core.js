@@ -578,6 +578,7 @@ function showPage(pageId) {
   if (pageId === 'mypost' && typeof window.loadMyPosts === 'function') {
     window.loadMyPosts();
   }
+  try { document.dispatchEvent(new CustomEvent('ao:page', { detail: pageId })); } catch (e) {}
 }
 
 // Genus content switching
@@ -764,7 +765,7 @@ function navigateTo(page, options, pushHistory) {
       tokushoho: '特定商取引法に基づく表記 - ' + _defaultTitle,
       contact: 'お問い合わせ - ' + _defaultTitle,
       search: '検索結果 - ' + _defaultTitle,
-      mypost: '投稿履歴 - ' + _defaultTitle,
+      mypost: '自分の記録 - ' + _defaultTitle,
       people: '人物索引 - ' + _defaultTitle,
       locality: '産地索引 - ' + _defaultTitle,
       tools: '道具の目録 - ' + _defaultTitle,
@@ -784,7 +785,7 @@ function navigateTo(page, options, pushHistory) {
       tokushoho: 'Aroid Originsの特定商取引法に基づく表記',
       contact: 'Aroid Originsへのお問い合わせ',
       search: 'アロイド植物の品種名で検索 - Anthurium, Monstera, Philodendronなど',
-      mypost: 'あなたが投稿した品種の履歴',
+      mypost: 'あなたが記録した品種',
       people: 'アロイド品種の記載者・採集者・作出者の索引。人物ごとに関連する品種をたどれます',
       locality: 'タイプ産地（国）ごとに原種をたどる索引。コロンビア、パナマ、ペルーなど',
       glossary: 'sp. / aff. / cf.、記載者、タイプ産地、交配式、F1、クローン、TC など由来を読むための用語集',

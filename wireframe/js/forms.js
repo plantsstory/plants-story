@@ -2138,7 +2138,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
 // ========================================
 (function() {
   var MAX_SIZE = 20 * 1024 * 1024; // 20MB
-  var ALLOWED_TYPES = ['image/jpeg', 'image/png'];
+  var ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
   var GALLERY_STORAGE_KEY = 'plants-story-gallery-images';
   var VOTE_STORAGE_KEY = 'plants-story-image-votes';
   var BUCKET_NAME = 'gallery-images';
@@ -2289,6 +2289,121 @@ updateCultivarDetail = function(cultivarName, rowEl) {
   }
 
   psExport('uploadGalleryImage', uploadToSupabase);
+
+  // ---- Photo sheet (BOARD 10-08 §4-3): preview, 撮影日 from the photo, a note, a link; sent one by one ----
+  // The 撮影日 comes from the photo's EXIF only; when the photo has none the field stays empty (no guessed date).
+  function exifDate(file) {
+    return new Promise(function(resolve) {
+      if (!/jpe?g/i.test(file.type || '')) { resolve(''); return; }
+      var r = new FileReader();
+      r.onload = function() {
+        try {
+          var v = new DataView(r.result);
+          if (v.getUint16(0) !== 0xFFD8) { resolve(''); return; }
+          var off = 2;
+          while (off + 4 < v.byteLength) {
+            var marker = v.getUint16(off), len = v.getUint16(off + 2);
+            if (marker === 0xFFE1 && v.getUint32(off + 4) === 0x45786966) {
+              var tiff = off + 10, le = v.getUint16(tiff) === 0x4949;
+              var g16 = function(o) { return v.getUint16(o, le); }, g32 = function(o) { return v.getUint32(o, le); };
+              var orig = '', plain = '';
+              var str = function(p) { var s = ''; for (var k = 0; k < 19; k++) s += String.fromCharCode(v.getUint8(p + k)); return s; };
+              var scan = function(ifd, depth) {
+                if (depth > 2 || ifd + 2 > v.byteLength) return;
+                var n = g16(ifd);
+                for (var i = 0; i < n; i++) {
+                  var e = ifd + 2 + i * 12, tag = g16(e);
+                  if (tag === 0x8769) scan(tiff + g32(e + 8), depth + 1);
+                  else if (tag === 0x9003) orig = str(tiff + g32(e + 8));
+                  else if (tag === 0x0132) plain = str(tiff + g32(e + 8));
+                }
+              };
+              scan(tiff + g32(tiff + 4), 0);
+              var m = (orig || plain).match(/^(\d{4}):(\d{2}):(\d{2})/);
+              resolve(m && m[1] !== '0000' ? m[1] + '-' + m[2] + '-' + m[3] : '');
+              return;
+            }
+            if ((marker & 0xFF00) !== 0xFF00) break;
+            off += 2 + len;
+          }
+        } catch (e) {}
+        resolve('');
+      };
+      r.onerror = function() { resolve(''); };
+      r.readAsArrayBuffer(file.slice(0, 256 * 1024));
+    });
+  }
+  var _sheetFiles = [], _sheetName = '';
+  window.openPhotoSheet = function(cultivarName, files) {
+    if (window.requireLogin && !window.requireLogin({ a: 'photo', k: cultivarName })) return;
+    var dlg = document.getElementById('photo-sheet');
+    if (!dlg || typeof dlg.showModal !== 'function') return;
+    files = (files || []).filter(function(f) { return validateFile(f); });
+    if (!files.length) return;
+    if (files.length > 3) { showToast('一度に載せられるのは 3 枚までです。最初の 3 枚にしました'); files = files.slice(0, 3); }
+    _sheetFiles = files; _sheetName = cultivarName;
+    var shown = cultivarName.replace(/ \[Seedling\]$/, '');
+    document.getElementById('photo-sheet-name').innerHTML = typeof italicizeSciNames === 'function' ? italicizeSciNames(escHtml(shown)) : escHtml(shown);
+    var plates = document.getElementById('photo-sheet-plates');
+    plates.innerHTML = '';
+    files.forEach(function(f) {
+      var fig = document.createElement('figure');
+      var img = document.createElement('img');
+      img.alt = ''; img.src = URL.createObjectURL(f);
+      img.onload = function() { URL.revokeObjectURL(img.src); };
+      fig.appendChild(img); plates.appendChild(fig);
+    });
+    var dateEl = document.getElementById('photo-sheet-date'), hint = document.getElementById('photo-sheet-date-hint');
+    dateEl.value = ''; hint.textContent = '';
+    document.getElementById('photo-sheet-caption').value = '';
+    document.getElementById('photo-sheet-link').value = '';
+    exifDate(files[0]).then(function(d) {
+      dateEl.value = d;
+      hint.textContent = d ? '写真に記録された日付です' : '写真に日付がありません。わかれば入れてください';
+    });
+    if (!dlg._wired) {
+      dlg._wired = true;
+      document.getElementById('photo-sheet-cancel').addEventListener('click', function() { dlg.close(); });
+      dlg.addEventListener('click', function(e) { if (e.target === dlg) dlg.close(); });
+      document.getElementById('photo-sheet-send').addEventListener('click', function() {
+        var d = dateEl.value, note = document.getElementById('photo-sheet-caption').value.trim();
+        var link = document.getElementById('photo-sheet-link').value.trim();
+        if (link && !/^https?:\/\//i.test(link)) { showToast('リンクは https:// から始めてください', true); return; }
+        var caption = [d ? '撮影 ' + d.replace(/-/g, '.') : '', note].filter(Boolean).join(' · ');
+        dlg.close();
+        sendPhotos(_sheetName, _sheetFiles.slice(), caption, link);
+      });
+    }
+    dlg.showModal();
+  };
+  function sendPhotos(cultivarName, files, caption, link) {
+    var total = files.length, done = 0;
+    var sending = showToast('写真を送っています… 0 / ' + total, false, { sticky: true });
+    var msg = sending && sending.querySelector('.toast__msg');
+    (function next() {
+      if (!files.length) {
+        if (sending) sending.remove();
+        if (typeof renderGalleryForCultivar === 'function') renderGalleryForCultivar(cultivarName);
+        if (typeof loadCultivarThumbnails === 'function') loadCultivarThumbnails();
+        showToast(total > 1 ? '写真を ' + total + ' 枚載せました' : '写真を載せました');
+        try { localStorage.setItem('ao-posted', '1'); } catch (e) {}
+        if (typeof window.offerInstall === 'function') setTimeout(window.offerInstall, 4000);
+        document.dispatchEvent(new CustomEvent('ao:photo-sent', { detail: cultivarName }));
+        return;
+      }
+      if (msg) msg.textContent = '写真を送っています… ' + (done + 1) + ' / ' + total;
+      uploadToSupabase(files[0], cultivarName, caption, link).then(function() {
+        files.shift(); done++;
+        trackEvent('gallery_upload', { cultivar_name: cultivarName, via: 'sheet' });
+        next();
+      }).catch(function(err) {
+        if (sending) sending.remove();
+        console.warn('Photo upload failed:', err);
+        if (done && typeof renderGalleryForCultivar === 'function') renderGalleryForCultivar(cultivarName);
+        showToast((done ? done + ' 枚は載りました。残りの ' + files.length + ' 枚を' : '写真を') + '送れませんでした', true, { sticky: true, action: { label: 'もう一度', fn: function() { sendPhotos(cultivarName, files, caption, link); } } });
+      });
+    })();
+  }
 
   function fetchImagesFromSupabase(cultivarName) {
     var sb = getSupabase();
@@ -2549,6 +2664,14 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     });
 
     galleryInput.addEventListener('change', function() {
+      // preview (html.app-ui): the photo sheet instead of two prompt() questions
+      if (document.documentElement.classList.contains('app-ui') && window.openPhotoSheet) {
+        var _h = document.querySelector('#page-cultivar h1');
+        var _files = Array.prototype.slice.call(this.files || []);
+        this.value = '';
+        if (_h && _files.length) window.openPhotoSheet(h1Key(_h), _files);
+        return;
+      }
       var file = this.files[0];
       if (!file || !validateFile(file)) { this.value = ''; return; }
 
