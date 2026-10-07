@@ -53,27 +53,55 @@ function sciHtml(name) {
   }).join('').replace(/<\/i>(\s+)<i>/g, '$1');
 }
 function staticEntryHtml(c, ctx) {
+  // laid out like the plant page (same classes), so the page does not move when the app takes over (BOARD 10-07b T98)
   const os = (c.origins || []).filter(o => o && !o._type).sort((a, b) => (parseInt(b.trust, 10) || 0) - (parseInt(a.trust, 10) || 0));
   const o = os[0] || {}, s = o.structured || {};
   const type = c.type || s.origin_type || 'species';
-  const year = String(s.publication_year || o.discovery_year || s.naming_year || '').match(/\d{4}/);
-  const who = type === 'species' ? (s.author_name || '') : (s.breeder || o.discoverer_or_breeder || '');
-  const place = type === 'species' ? (s.type_locality || '') : ((c.parent_a_text || c.parent_b_text) ? (c.parent_a_text || '?') + ' × ' + (c.parent_b_text || '?') : '');
-  const cite = [who, year ? year[0] : '', place].filter(Boolean).join(' · ');
-  let text = String(o.body || s.notes || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
-  if (text.length > 220) text = text.slice(0, 219) + '…';
-  const aliases = (c.aliases || []).filter(a => /[A-Za-z]/.test(a)).slice(0, 3);
-  let h = '<article id="static-entry" class="container static-entry">';
-  // the line above the title: the kind only (BOARD 10-07), same words as the page
+  const genus = c.genus || 'Anthurium';
   const q = String(c.species_qualifier || '').toLowerCase().replace(/\./g, '');
   const undescribed = type === 'species' && (q === 'sp' || q === 'aff' || q === 'cf' || (s.species_status && s.species_status !== 'described'));
-  const kind = (c.tags || []).indexOf('individual') !== -1 ? '個体' : undescribed ? '未記載' : (TYPE_JP[type] || '');
+  const individual = (c.tags || []).indexOf('individual') !== -1;
+  const kind = individual ? '個体' : undescribed ? '未記載' : (TYPE_JP[type] || '');
+  const name = EntryMeta.name(c);
+  const yearOf = v => (String(v || '').match(/\b(1[6-9]\d{2}|20\d{2})\b/) || [''])[0];
+  const absent = s.absent || {};
+  const none = '<span class="absent absent--none">記録なし</span>';
+  const cell = (k, v) => v ? '<div class="specimen__cell"><span class="specimen__k">' + escAttr(k) + '</span><span class="specimen__v">' + v + '</span></div>' : '';
+  const places = v => { const cs = geo.countriesOf(v); return cs.length && cs.length === String(v).split(/\s*,\s*/).length ? cs.map(geo.countryJa).join('、') : escAttr(v || ''); };
+  let cells = '';
+  if (type === 'species' && !undescribed && !individual) {
+    cells += cell('記載者', escAttr(s.author_name || '') || none);
+    cells += cell('発表年', yearOf(s.publication_year || o.discovery_year) ? '<span class="year">' + yearOf(s.publication_year || o.discovery_year) + '</span>' : none);
+    const tl = s.type_locality, kh = s.known_habitats || o.native_region;
+    if (tl && kh && tl === kh) cells += cell('タイプ産地・分布', places(tl));
+    else {
+      cells += cell('タイプ産地', tl ? escAttr(geo.countryJa(tl)) : (absent.type_locality === 'sine_loc' ? '<span class="absent">原記載に記載なし（sine loc.）</span>' : none));
+      cells += cell('分布', kh ? places(kh) : none);
+    }
+  } else if (undescribed) {
+    cells += cell('名前の状態', '未記載種');
+    cells += cell('報告されている産地', places(s.origin_region || s.known_habitats || ''));
+    cells += cell('近縁とされる種', escAttr(s.closest_species || ''));
+  } else {
+    const who = s.breeder || s.namer || o.discoverer_or_breeder || '';
+    cells += cell(type === 'clone' && !s.breeder && s.namer ? '命名者' : '作出者', escAttr(who) || (type === 'seedling' || individual ? '' : (absent.breeder === 'not_applicable' ? '<span class="absent">該当なし（流通ラベル）</span>' : none)));
+    cells += cell(type === 'seedling' ? '播種日' : '命名年', escAttr(type === 'seedling' ? String(s.sowing_date || '').replace(/^(\d{4})-(\d{2})-(\d{2}).*$/, '$1.$2.$3') : yearOf(s.naming_year || o.discovery_year)));
+    if (c.parent_a_text || c.parent_b_text) cells += cell('交配式', sciHtml((c.parent_a_text || '不明') + ' × ' + (c.parent_b_text || '不明')));
+  }
+  if (type !== 'seedling') cells += '<div class="specimen__cell specimen__cell--wide specimen__cell--verify"><span class="specimen__k">検証</span><span class="specimen__v">' + (c.verified_at ? '<span class="verified-mark">✓</span> 検証済 <span class="num">' + String(c.verified_at).slice(0, 10).replace(/-/g, '.') + '</span>' : '未検証') + '</span></div>';
+  const aliases = (c.aliases || []).filter(a => /[A-Za-z]/.test(a) && !/[゠-ヿ]/.test(a)).slice(0, 3);
+  const rest = name.startsWith(genus + ' ') ? name.slice(genus.length + 1) : name;
+  let text = String(o.body || s.notes || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  if (text.length > 260) text = text.slice(0, 259) + '…';
+  let h = '<article id="static-entry" class="container static-entry">';
+  h += '<nav class="breadcrumb" aria-label="パンくずリスト"><a href="' + SITE + '/">トップ</a><span class="breadcrumb__sep">/</span><a href="' + SITE + '/' + genus.toLowerCase() + '/">' + escAttr(genus) + '</a><span class="breadcrumb__sep">/</span><span>' + escAttr(rest) + '</span></nav>';
   h += '<p class="detail-standard">' + escAttr(kind) + '</p>';
-  h += '<h1 class="detail-title">' + sciHtml(EntryMeta.name(c)) + '</h1>';
-  if (cite) h += '<p class="mono static-entry__cite">' + escAttr(cite) + '</p>';
-  if (aliases.length) h += '<p class="static-entry__aliases">別名: ' + escAttr(aliases.join(' / ')) + '</p>';
+  h += '<h1 class="detail-title">' + sciHtml(name) + '</h1>';
+  if (aliases.length) h += '<p class="detail-aliases">別名・旧綴り: ' + escAttr(aliases.join(' / ')) + '</p>';
+  if (cells) h += '<div class="specimen">' + cells + '</div>';
+  h += '<div class="static-entry__actions" aria-hidden="true"></div>';
   if (ctx.photo) h += '<figure class="static-entry__plate"><img src="' + escAttr(ctx.photo) + '" alt="' + escAttr(c.cultivar_name) + '" width="720" decoding="async"></figure>';
-  if (text) h += '<p class="static-entry__text">' + escAttr(text) + '</p>';
+  if (text) h += '<h2 class="section-title">由来の記録</h2><div class="record__body"><p>' + escAttr(text) + '</p></div>';
   // links a crawler can follow from every entry (BOARD 10-07b T84): people, place, neighbours, the genus list
   const lk = (x, sci) => '<a href="' + escAttr(x.url) + '">' + (sci ? sciHtml(x.name) : escAttr(x.name)) + '</a>';
   const lines = [];
@@ -157,7 +185,7 @@ async function main() {
     genera = await fetchJSON('/rest/v1/genera?select=slug,name&order=display_order');
   }
   const visibleGenusNames = new Set(genera.map(g => g.name));
-  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,origins,aliases,updated_at,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=genus,cultivar_name');
+  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,origins,aliases,updated_at,verified_at,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=genus,cultivar_name');
   const cultivars = allCultivars.filter(c => visibleGenusNames.has(c.genus || 'Anthurium'));
   const images = await fetchJSON('/rest/v1/cultivar_images?select=cultivar_name,storage_path&order=display_order');
 
@@ -327,7 +355,7 @@ async function main() {
     };
     if (at > 0) ctx.prev = { name: EntryMeta.name(order[at - 1]), url: entryUrl(order[at - 1]) };
     if (at >= 0 && at < order.length - 1) ctx.next = { name: EntryMeta.name(order[at + 1]), url: entryUrl(order[at + 1]) };
-    const htmlWithEntry = RecordGate.state(c) === 'ok' ? html.replace(/(<main[^>]*>)/, '$1\n' + staticEntryHtml(c, ctx)) : html;
+    const htmlWithEntry = RecordGate.state(c) === 'ok' ? html.replace(/(<main[^>]*>)/, '$1\n' + staticEntryHtml(c, ctx)).replace(/<body([^>]*)>/, (m, at) => /class="/.test(at) ? m.replace('class="', 'class="stub-entry-page ') : '<body' + at + ' class="stub-entry-page">') : html;
 
     const dir = path.join(WIREFRAME, slug, restDir);
     try {

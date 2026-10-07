@@ -644,15 +644,6 @@ a.genus-card:focus-visible {
   margin-top: 4px;
 }
 
-.found-source {
-  font-size: 0.85rem;
-  margin-top: 2px;
-}
-
-.found-source a {
-  color: var(--color-primary, #2D6A4F);
-}
-
 /* Genus page tabs */
 .genus-tabs {
   display: flex;
@@ -887,24 +878,6 @@ a.genus-card:focus-visible {
   margin-bottom: var(--space-md);
 }
 
-.origin-card__rank {
-  font-family: var(--font-heading);
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: var(--color-dark);
-}
-
-.origin-card__body {
-  margin-bottom: var(--space-md);
-  line-height: 1.8;
-}
-
-.origin-card__sources {
-  margin-top: var(--space-md);
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--color-lighter);
-}
-
 .origin-card__source-item {
   display: flex;
   align-items: center;
@@ -920,25 +893,6 @@ a.genus-card:focus-visible {
 
 .origin-card__source-item a:hover {
   color: var(--color-dark);
-}
-
-.origin-card__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-md);
-  margin-top: var(--space-md);
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--color-lighter);
-}
-
-.origin-card__author {
-  font-size: var(--font-size-sm);
-  color: var(--color-gray);
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
 }
 
 /* ========================================
@@ -1272,14 +1226,6 @@ a.genus-card:focus-visible {
   border-bottom-color: var(--color-primary);
 }
 
-.tab-panel {
-  display: none;
-}
-
-.tab-panel.active {
-  display: block;
-}
-
 /* ========================================
    FORM ELEMENTS
    ======================================== */
@@ -1479,54 +1425,8 @@ a.genus-card:focus-visible {
   border-color: var(--color-primary);
   color: var(--color-dark);
 }
-.type-hint__popup {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: #333;
-  color: #fff;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 0.78rem;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-  z-index: 100;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-  line-height: 1.4;
-}
 /* Small arrow below popup */
-.type-hint__popup::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-  border-top-color: #333;
-}
-.type-hint:hover .type-hint__popup,
-.type-hint.active .type-hint__popup {
-  opacity: 1;
-}
 /* Prevent popup from being clipped on small screens */
-@media (max-width: 480px) {
-  .type-hint__popup {
-    white-space: normal;
-    min-width: 0;
-    width: calc(100vw - 64px);
-    max-width: 300px;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: left;
-  }
-  .type-hint__popup::after {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-}
 
 /* ========================================
    SORT BAR
@@ -1539,51 +1439,13 @@ a.genus-card:focus-visible {
   margin-bottom: var(--space-lg);
 }
 
-.sort-bar__label {
-  font-size: var(--font-size-sm);
-  color: var(--color-gray);
-}
-
 /* ========================================
    SOURCE LINK
    ======================================== */
-.source-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  font-size: var(--font-size-sm);
-  color: var(--color-mid);
-}
-
-.source-link__icon {
-  font-size: var(--font-size-xs);
-}
 
 /* ========================================
    AFFILIATE SECTION
    ======================================== */
-.affiliate-section {
-  padding: var(--space-lg);
-  background: var(--color-bg);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-lighter);
-}
-
-.affiliate-grid {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-  margin-top: var(--space-md);
-  margin-bottom: var(--space-md);
-}
-
-.affiliate-product {
-  background: var(--color-white);
-  border: 1.5px solid var(--color-lighter);
-  border-radius: var(--radius-md);
-  padding: var(--space-md) var(--space-lg);
-  position: relative;
-}
 
 .affiliate-product__header {
   display: flex;
@@ -1592,96 +1454,9 @@ a.genus-card:focus-visible {
   margin-bottom: var(--space-sm);
 }
 
-.affiliate-product__icon {
-  font-size: var(--font-size-lg);
-}
-
-.affiliate-product__name {
-  font-size: var(--font-size-sm);
-  font-weight: 700;
-  color: var(--color-black);
-}
-
-.affiliate-card__badge {
-  background: var(--color-accent-warm);
-  color: #fff;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  margin-left: var(--space-xs);
-}
-
-.affiliate-product__links {
-  display: flex;
-  gap: var(--space-sm);
-  flex-wrap: wrap;
-}
-
-.affiliate-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  text-decoration: none;
-  transition: all var(--transition);
-  border: 1.5px solid var(--color-lighter);
-  color: var(--color-black);
-  background: var(--color-bg);
-}
-
-.affiliate-link:hover {
-  border-color: var(--color-primary);
-  background: var(--color-white);
-  text-decoration: none;
-  box-shadow: var(--shadow-sm);
-}
-
-.affiliate-link--rakuten:hover {
-  border-color: #BF0000;
-  color: #BF0000;
-}
-
-.affiliate-link--amazon:hover {
-  border-color: #FF9900;
-  color: #CC7A00;
-}
-
-.affiliate-link--yahoo:hover {
-  border-color: #FF0033;
-  color: #FF0033;
-}
-
 /* ========================================
    AD PLACEHOLDER
    ======================================== */
-.ad-placeholder {
-  text-align: center;
-  padding: var(--space-lg);
-  background: var(--color-bg);
-  border: 1px dashed var(--color-light);
-  border-radius: var(--radius-md);
-}
-
-.ad-placeholder__label {
-  display: block;
-  font-size: var(--font-size-xs);
-  color: var(--color-gray);
-  margin-bottom: var(--space-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.ad-placeholder__slot {
-  padding: var(--space-xl) var(--space-md);
-  background: var(--color-lighter);
-  border-radius: var(--radius-sm);
-  color: var(--color-gray);
-  font-size: var(--font-size-sm);
-}
 
 /* ========================================
    UPLOAD PREVIEW
@@ -1787,30 +1562,6 @@ a.genus-card:focus-visible {
   align-items: flex-start;
 }
 
-.step__number {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-full);
-  background: var(--color-primary);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.step__content h3 {
-  font-size: var(--font-size-base);
-  margin-bottom: var(--space-xs);
-  color: var(--color-dark);
-}
-
-.step__content p {
-  font-size: var(--font-size-sm);
-  color: var(--color-mid);
-}
-
 @media (min-width: 768px) {
   .steps {
     flex-direction: row;
@@ -1895,222 +1646,12 @@ a.genus-card:focus-visible {
 /* ========================================
    AFFILIATE SECTION
    ======================================== */
-.affiliate-section {
-  margin-top: var(--space-2xl);
-}
-
-.affiliate-section .section-title {
-  text-align: center;
-}
-
-.affiliate-banner {
-  background: linear-gradient(135deg, #2D6A4F 0%, #40916C 50%, #52B788 100%);
-  border-radius: 16px;
-  padding: 28px 24px 20px;
-  margin-top: var(--space-lg);
-  position: relative;
-  overflow: hidden;
-}
-
-.affiliate-banner::before {
-  content: '';
-  position: absolute;
-  top: -30px;
-  right: -30px;
-  width: 120px;
-  height: 120px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 50%;
-}
-
-.affiliate-banner::after {
-  content: '';
-  position: absolute;
-  bottom: -20px;
-  left: -20px;
-  width: 80px;
-  height: 80px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 50%;
-}
-
-.affiliate-banner__title {
-  color: #fff;
-  font-family: var(--font-heading);
-  font-size: 1.15rem;
-  margin-bottom: 16px;
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
-
-.affiliate-banner__grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 12px;
-  position: relative;
-  z-index: 1;
-}
-
-@media (max-width: 768px) {
-  .affiliate-banner__grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-}
-
-@media (max-width: 400px) {
-  .affiliate-banner__grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-}
-
-.affiliate-card {
-  position: relative;
-  background: rgba(255,255,255,0.95);
-  border-radius: 12px;
-  padding: 16px;
-  text-align: center;
-  transition: transform 0.2s, box-shadow 0.2s;
-  cursor: pointer;
-  text-decoration: none;
-  color: inherit;
-  display: block;
-}
-
-.affiliate-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-}
-
-.affiliate-card__image {
-  width: 100%;
-  max-width: 120px;
-  height: 120px;
-  object-fit: contain;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  background: #f8f8f8;
-}
-
-.affiliate-card__icon {
-  font-size: 2rem;
-  display: block;
-  margin-bottom: 6px;
-}
-
-.affiliate-card__category {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 2px;
-}
-
-.affiliate-card__name {
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--color-primary-dark);
-  margin-bottom: 4px;
-  line-height: 1.3;
-}
-
-.affiliate-card__badge {
-  display: inline-block;
-  background: #ff6b6b;
-  color: #fff;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 1px 8px;
-  border-radius: 10px;
-  margin-bottom: 8px;
-}
-
-.affiliate-card__shops {
-  display: flex;
-  gap: 6px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.affiliate-card__shop {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: opacity 0.2s;
-}
-
-.affiliate-card__shop:hover {
-  opacity: 0.85;
-}
-
-.affiliate-card__shop--rakuten {
-  background: #BF0000;
-  color: #fff;
-}
-
-.affiliate-card__shop--amazon {
-  background: #FF9900;
-  color: #111;
-}
-
-.affiliate-card__shop--yahoo {
-  background: #FF0033;
-  color: #fff;
-}
-
-.affiliate-notice {
-  text-align: center;
-  color: rgba(255,255,255,0.7);
-  font-size: 0.7rem;
-  margin-top: 12px;
-  position: relative;
-  z-index: 1;
-}
 
 /* Affiliate banner context line */
-.affiliate-banner__context {
-  text-align: center;
-  color: rgba(255,255,255,0.85);
-  font-size: 0.8rem;
-  margin-bottom: 4px;
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.affiliate-banner__context-icon {
-  font-size: 1rem;
-}
 
 /* Recommend badge */
-.affiliate-card__recommend {
-  position: absolute;
-  top: -4px;
-  left: -4px;
-  background: #ff6b6b;
-  color: #fff;
-  font-size: 0.6rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 8px 0 8px 0;
-  z-index: 2;
-  letter-spacing: 0.03em;
-}
 
 /* Detail page banner modifier */
-.affiliate-banner--detail {
-  margin-top: 0;
-}
 
 /* ========================================
    AI RESEARCH ANIMATION
@@ -2458,19 +1999,6 @@ dialog.parent-photo-dialog .dialog-label {
 .pricing-card--recommended:hover {
   background: rgba(82, 183, 136, 0.1);
 }
-.pricing-card__badge {
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 2px 10px;
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-}
 .pricing-card__name {
   font-size: var(--font-size-sm);
   font-weight: 600;
@@ -2740,8 +2268,7 @@ dialog.parent-photo-dialog .dialog-label {
    BOTANICAL ATLAS TYPOGRAPHY (Phase 2)
    Serif display for headings only — body text stays sans
    ======================================== */
-.hero__title,
-.hero__subtitle,
+
 .section-title,
 .genus-card__title,
 .paywall-modal__title,
@@ -2752,14 +2279,9 @@ dialog.parent-photo-dialog .dialog-label {
   font-weight: 600;
   letter-spacing: 0.02em;
 }
-.hero__title { font-weight: 700; letter-spacing: 0.06em; }
 .genus-card__title { font-size: 1.35rem; }
 
 /* Framed hero: the mist painting sits in a rounded "mount" */
-.hero {
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-}
 
 /* Respect users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
@@ -2771,13 +2293,6 @@ dialog.parent-photo-dialog .dialog-label {
 }
 
 /* Hero one-line value proposition */
-.hero__desc {
-  color: rgba(255, 255, 255, 0.82);
-  font-size: var(--font-size-sm);
-  max-width: 560px;
-  margin: var(--space-md) auto 0;
-  line-height: 1.7;
-}
 
 /* Desktop header nav (hidden on mobile; hamburger covers it there) */
 .header__nav { display: none; }

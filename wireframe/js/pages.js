@@ -43,10 +43,10 @@
 
     grid.innerHTML = skeletonCards(3);
 
+    // everything this person recorded (private rows are visible to their owner only, by RLS)
     var query = sb.from('cultivars')
-      .select('id, genus, cultivar_name, type, created_at')
+      .select('id, genus, cultivar_name, type, created_at, origins, tags, is_private')
       .eq('user_id', userId)
-      .eq('type', 'seedling')
       .order('created_at', { ascending: false });
 
     if (searchQuery) {
@@ -67,6 +67,11 @@
         return;
       }
       if (emptyMsg) emptyMsg.style.display = 'none';
+      if (window.renderEntriesLedger) {
+        // the same two-line rows as every other list (BOARD 10-07 T62)
+        window.renderEntriesLedger(grid, rows.map(function(r) { return { cultivar_name: r.cultivar_name, origins: r.origins || [], type: r.type, id: r.id, created_at: r.created_at }; }), (typeof _thumbMap !== 'undefined' ? _thumbMap : {}), { noPerson: true });
+        return;
+      }
 
       rows.forEach(function(row) {
         var card = document.createElement('div');
@@ -1885,6 +1890,10 @@ document.addEventListener('click', function(e) {
         // Quota (5 free posts) is checked by the radio change handler / server
         var seedlingRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="seedling"]');
         if (seedlingRadio) { seedlingRadio.checked = true; seedlingRadio.dispatchEvent(new Event('change')); }
+        // from a plant page: that plant is the mother (T101)
+        var _mother = navEl.getAttribute('data-prefill-parent');
+        var _motherInput = document.querySelector('#seedling-formula-inputs input');
+        if (_mother && _motherInput) { _motherInput.value = _mother; _motherInput.dispatchEvent(new Event('input', { bubbles: true })); }
       }
     }
 

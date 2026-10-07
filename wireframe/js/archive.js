@@ -1261,7 +1261,11 @@
     setUnrecorded(false);
     var d = describe(key in store ? key : (store[displayName] ? displayName : (store[displayName + ' [Seedling]'] ? displayName + ' [Seedling]' : key)), entry, entry._type || _detailArgs[2]);
     renderSpecimen(d, all);
+    if (window.releaseStaticEntry) setTimeout(window.releaseStaticEntry, 0);
     _labelEntry = d.type === 'seedling' ? null : d;
+    // 「この品種を親に実生を記録」: the seedling form opens with this name as the mother
+    var sdl = document.getElementById('detail-add-seedling');
+    if (sdl) { sdl.setAttribute('data-prefill-parent', d.displayName); sdl.classList.toggle('d-none', d.type === 'seedling' || d.isIndividual); }
     var plb = document.getElementById('detail-print-label');
     if (plb) plb.classList.toggle('d-none', d.type === 'seedling');
     renderRelated(d, all);
@@ -1287,6 +1291,7 @@
     var sheet = document.getElementById('detail-unrecorded');
     if (!sheet) return;
     setUnrecorded(true);
+    if (window.releaseStaticEntry) window.releaseStaticEntry();
     var std = document.getElementById('detail-standard');
     if (std) std.textContent = '';
     var uh = document.querySelector('#page-cultivar h1');

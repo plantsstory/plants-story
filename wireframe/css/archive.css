@@ -1531,3 +1531,14 @@ div:has(> .gallery-carousel .gallery__empty) > .plate-policy { display: none; } 
 .names__index { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--color-rule); }
 .names__index a { display: flex; align-items: center; min-height: var(--tap); border-bottom: 1px solid var(--color-rule); color: var(--color-ink); text-decoration: none; font-size: var(--fs-h3); font-family: var(--font-display); font-weight: 600; }
 .names-note { margin: var(--s4) 0 0; font-size: var(--fs-small); color: var(--color-mid); }
+
+/* -- T98: the stub's first screen is the plant page's layout; it stays until the page has drawn -- */
+html[data-boot="entry"] #page-cultivar { display: none !important; }
+.static-entry { padding-top: var(--s4); padding-bottom: var(--s4); }
+.static-entry .breadcrumb { margin-bottom: var(--s3); }
+.static-entry .specimen { margin-top: var(--s3); }
+.static-entry__actions { min-height: 60px; margin: var(--space-md) 0 var(--space-lg); border-top: 1px solid var(--color-rule); border-bottom: 1px solid var(--color-rule); }
+.static-entry__plate { max-width: none; width: 100%; max-height: 70svh; aspect-ratio: auto; border: 1px solid var(--color-rule); }
+.static-entry__plate img { width: auto; max-width: 100%; max-height: 70svh; }
+.static-entry__links { font-size: var(--fs-small); color: var(--color-mid); margin-top: var(--s4); }
+#genus-sections-container:has(> .text-center), #page-genus .genus-content:not(:has(.cultivar-row)) { min-height: 100vh; }

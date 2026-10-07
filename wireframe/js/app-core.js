@@ -114,6 +114,13 @@ function sciNameHtml(name) {
 }
 window.sciNameHtml = sciNameHtml;
 // the stored name of the entry on the detail page (the heading may show sp. "…" instead, T69)
+// the plant page has drawn: the stub's first screen gives way without moving the screen
+window.releaseStaticEntry = function() {
+  var se = document.getElementById('static-entry');
+  if (se) se.remove();
+  if (document.documentElement.getAttribute('data-boot') === 'entry') document.documentElement.removeAttribute('data-boot');
+  clearTimeout(window._staticEntryTimer);
+};
 function h1Key(el) { return el ? (el.getAttribute('data-name') || el.textContent) : ''; }
 window.h1Key = h1Key;
 // Scientific names inside escaped prose: "Anthurium warocqueanum" and "A. warocqueanum" in italics,
@@ -531,7 +538,13 @@ function showPage(pageId) {
   _currentPageId = pageId;
   document.documentElement.removeAttribute('data-boot');
   var staticEntry = document.getElementById('static-entry');
-  if (staticEntry) staticEntry.remove();   // the plain first screen of a stub gives way to the real page
+  // A plant page keeps the stub's first screen until it has drawn its own (archive.js calls releaseStaticEntry);
+  // any other page replaces it at once. 8 s at most, so a failed load never leaves the stub up.
+  if (staticEntry && pageId === 'cultivar' && document.body.classList.contains('stub-entry-page')) {
+    document.documentElement.setAttribute('data-boot', 'entry');
+    clearTimeout(window._staticEntryTimer);
+    window._staticEntryTimer = setTimeout(window.releaseStaticEntry, 8000);
+  } else if (staticEntry) staticEntry.remove();
 
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   // profile-edit maps to page-profile-edit

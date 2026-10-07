@@ -2427,5 +2427,17 @@
   "names_title": {
     "jp": "名前の違い",
     "en": "Similar names"
+  },
+  "detail_add_seedling": {
+    "jp": "この品種を親に実生を記録",
+    "en": "Record a seedling from this plant"
+  },
+  "profile_post_count": {
+    "jp": "記録した品種",
+    "en": "Entries"
+  },
+  "profile_entries_title": {
+    "jp": "記録した品種",
+    "en": "Entries"
   }
 }
