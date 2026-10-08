@@ -8,6 +8,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { budgetGate, budgetRefusal } from "../_shared/ai-budget.ts";
+import Anthropic from "npm:@anthropic-ai/sdk@0.131.0";
 
 const ALLOWED_ORIGINS = ["https://plantsstory.com", "https://plantsstory.github.io", "http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8123"];
 const RAKUTEN_ENDPOINT = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701";
@@ -59,7 +60,25 @@ async function rakuten(params: Record<string, string>) {
   throw new Error("楽天 API: アクセスが集中しています（429）");
 }
 
+// the engine of the origin research (Secret AI_MODEL): a Claude model id, or "openai"
+const AI_MODEL = Deno.env.get("AI_MODEL") || "openai";
+
 async function askModel(system: string, user: string) {
+  if (AI_MODEL !== "openai") {
+    const client = new Anthropic({ apiKey: Deno.env.get("ANTHROPIC_API_KEY") });
+    const res = await client.messages.create({
+      model: AI_MODEL,
+      max_tokens: 16000,
+      system,
+      output_config: { effort: "medium" },
+      messages: [{ role: "user", content: user }],
+    });
+    if (res.stop_reason === "refusal") throw new Error("Claude declined the request");
+    let text = "";
+    for (const b of res.content) if (b.type === "text") text += b.text;
+    const m = text.match(/\[[\s\S]*\]/);
+    return { picks: m ? JSON.parse(m[0]) : [], usage: { input_tokens: res.usage.input_tokens, output_tokens: res.usage.output_tokens }, provider: "anthropic", model: res.model || AI_MODEL };
+  }
   const key = Deno.env.get("OPENAI_API_KEY");
   if (!key) throw new Error("OPENAI_API_KEY がありません");
   const r = await fetch("https://api.openai.com/v1/responses", {
@@ -72,7 +91,7 @@ async function askModel(system: string, user: string) {
   let text = "";
   for (const item of data?.output || []) if (item.type === "message") for (const c of item.content || []) if (c.type === "output_text") text += c.text || "";
   const m = text.match(/\[[\s\S]*\]/);
-  return { picks: m ? JSON.parse(m[0]) : [], usage: data?.usage };
+  return { picks: m ? JSON.parse(m[0]) : [], usage: data?.usage, provider: "openai", model: OPENAI_MODEL };
 }
 
 const SYSTEM = `あなたは室内でアロイド（アンスリウムなど熱帯の観葉植物）を育てる人のための道具の目録を編集しています。
@@ -145,8 +164,8 @@ serve(async (req) => {
     // 2) the model picks and writes; candidates are numbered across keywords
     const listing = pool.map((p, i) => `#${i} [キーワード: ${p.q.keyword} / max ${p.q.max_items}] ${p.it.itemName} ｜ ショップ: ${p.it.shopName} ｜ レビュー ${p.it.reviewCount}件 ★${p.it.reviewAverage} ｜ 説明: ${String(p.it.itemCaption || "").replace(/\s+/g, " ").slice(0, 260)}`).join("\n");
     const prompt = `部門: ${g.label}\n既存の掲載品: ${(existing || []).map((x: any) => x.product_name).join(" / ") || "なし"}\n\n候補:\n${listing}`;
-    const { picks, usage } = await askModel(SYSTEM, prompt);
-    db.from("ai_usage_log").insert({ provider: "openai", model: OPENAI_MODEL, purpose: "tools_research:" + genre, input_tokens: usage?.input_tokens, output_tokens: usage?.output_tokens }).then(() => {}, () => {});
+    const { picks, usage, provider, model } = await askModel(SYSTEM, prompt);
+    db.from("ai_usage_log").insert({ provider, model, purpose: "tools_research:" + genre, input_tokens: usage?.input_tokens, output_tokens: usage?.output_tokens }).then(() => {}, () => {});
 
     // 3) insert; keep per-keyword caps even if the model ignores them
     const perKeyword: Record<string, number> = {};

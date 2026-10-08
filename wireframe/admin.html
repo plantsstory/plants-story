@@ -1080,7 +1080,12 @@ async function loadAiUsage() {
       return;
     }
     var rows = res.data || [];
-    var openai = rows.filter(function(r) { return r.provider === 'openai'; });
+    // every engine (OpenAI and Claude), priced per model as the Edge Functions do (_shared/ai-budget.ts)
+    var openai = rows.filter(function(r) { return r.provider === 'openai' || r.provider === 'anthropic'; });
+    var PRICE = { 'claude-opus-5-5': [4, 20], 'claude-sonnet-5-5': [2, 10], 'claude-haiku-5-5': [0.10, 0.50], 'gpt-5-nano': [0.05, 0.40], 'gpt-5-mini': [0.25, 2] };
+    var priceOf = function(m) { m = String(m || ''); var k = Object.keys(PRICE).sort(function(a, b) { return b.length - a.length; }).filter(function(x) { return m.indexOf(x) === 0; })[0]; return PRICE[k] || PRICE['gpt-5-mini']; };
+    var usdTotal = 0;
+    openai.forEach(function(r) { var p = priceOf(r.model); usdTotal += (r.input_tokens || 0) / 1e6 * p[0] + (r.output_tokens || 0) / 1e6 * p[1] + (r.web_search_calls || 0) * 0.01; });
     var inTok = 0, outTok = 0, searches = 0;
     var byModel = {};
     openai.forEach(function(r) {
@@ -1095,16 +1100,14 @@ async function loadAiUsage() {
       byModel[m].searches += r.web_search_calls || 0;
     });
 
-    var cost = (inTok / 1e6) * AI_PRICING.input_per_1m
-             + (outTok / 1e6) * AI_PRICING.output_per_1m
-             + (searches / 1000) * AI_PRICING.web_search_per_1k;
+    var cost = usdTotal;
 
     document.getElementById('stat-ai-calls').textContent = openai.length;
     document.getElementById('stat-ai-tokens').textContent =
       (inTok + outTok) >= 1e6 ? ((inTok + outTok) / 1e6).toFixed(2) + 'M' : Math.round((inTok + outTok) / 1000) + 'K';
     document.getElementById('stat-ai-searches').textContent = searches;
-    // the same estimate the Edge Functions stop at (AI_MONTHLY_BUDGET_YEN, default 1,200 yen; Japan-time month)
-    document.getElementById('stat-ai-cost').textContent = '$' + cost.toFixed(2) + '（約 ' + Math.round(cost * 155).toLocaleString('ja-JP') + ' 円 / 上限 1,200 円）';
+    // the same estimate the Edge Functions stop at (Secret AI_MONTHLY_BUDGET_YEN = 12,000 yen, inside the $100/month Claude credit; Japan-time month)
+    document.getElementById('stat-ai-cost').textContent = '$' + cost.toFixed(2) + '（約 ' + Math.round(cost * 155).toLocaleString('ja-JP') + ' 円 / 上限 12,000 円）';
 
     // Per-model breakdown table
     var bd = document.getElementById('ai-usage-breakdown');
@@ -1117,7 +1120,8 @@ async function loadAiUsage() {
         html += '<tr style="text-align:left;color:var(--color-gray);"><th style="padding:4px 8px;">モデル</th><th style="padding:4px 8px;">回数</th><th style="padding:4px 8px;">入力</th><th style="padding:4px 8px;">出力</th><th style="padding:4px 8px;">検索</th><th style="padding:4px 8px;">概算</th></tr>';
         models.forEach(function(m) {
           var s = byModel[m];
-          var c = (s.inTok / 1e6) * AI_PRICING.input_per_1m + (s.outTok / 1e6) * AI_PRICING.output_per_1m + (s.searches / 1000) * AI_PRICING.web_search_per_1k;
+          var pm = priceOf(m);
+          var c = (s.inTok / 1e6) * pm[0] + (s.outTok / 1e6) * pm[1] + s.searches * 0.01;
           html += '<tr><td style="padding:4px 8px;">' + escapeHtml(m) + '</td><td style="padding:4px 8px;">' + s.calls + '</td><td style="padding:4px 8px;">' + s.inTok.toLocaleString() + '</td><td style="padding:4px 8px;">' + s.outTok.toLocaleString() + '</td><td style="padding:4px 8px;">' + s.searches + '</td><td style="padding:4px 8px;">$' + c.toFixed(3) + '</td></tr>';
         });
         html += '</table>';
