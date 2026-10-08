@@ -92,11 +92,11 @@ function staticEntryHtml(c, ctx) {
     cells += cell('近縁とされる種', escAttr(s.closest_species || ''));
   } else {
     const who = s.breeder || s.namer || o.discoverer_or_breeder || '';
-    cells += cell(type === 'clone' && !s.breeder && s.namer ? '命名者' : '作出者', escAttr(who) || (type === 'seedling' || individual ? '' : (absent.breeder === 'not_applicable' ? '<span class="absent">該当なし（流通ラベル）</span>' : none)));
+    cells += cell(type === 'clone' && !s.breeder && !o.discoverer_or_breeder && s.namer ? '命名者' : '作出者', escAttr(who) || (type === 'seedling' || individual ? '' : (absent.breeder === 'not_applicable' ? '<span class="absent">該当なし（流通ラベル）</span>' : none)));
     cells += cell(type === 'seedling' ? '播種日' : '命名年', escAttr(type === 'seedling' ? String(s.sowing_date || '').replace(/^(\d{4})-(\d{2})-(\d{2}).*$/, '$1.$2.$3') : yearOf(s.naming_year || o.discovery_year)));
     if (c.parent_a_text || c.parent_b_text) cells += cell('交配式', sciHtml((c.parent_a_text || '不明') + ' × ' + (c.parent_b_text || '不明')));
   }
-  if (type !== 'seedling') cells += '<div class="specimen__cell specimen__cell--wide specimen__cell--verify"><span class="specimen__k">検証</span><span class="specimen__v">' + (c.verified_at ? '<span class="verified-mark">✓</span> 検証済 <span class="num">' + String(c.verified_at).slice(0, 10).replace(/-/g, '.') + '</span>' : '未検証') + '</span></div>';
+  if (type !== 'seedling') cells += '<div class="specimen__cell specimen__cell--wide specimen__cell--verify"><span class="specimen__k">検証</span><span class="specimen__v">' + (c.verified_at ? '<span class="verified-mark">✓</span> 検証済 <span class="num">' + new Date(c.verified_at).toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' }).replace(/-/g, '.') + '</span>' : '未検証') + '</span></div>';
   const aliases = (c.aliases || []).filter(a => /[A-Za-z]/.test(a) && !/[゠-ヿ]/.test(a)).slice(0, 3);
   const rest = name.startsWith(genus + ' ') ? name.slice(genus.length + 1) : name;
   let text = String(o.body || s.notes || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
@@ -201,6 +201,10 @@ async function main() {
   const allCultivars = await fetchJSON('/rest/v1/cultivars?select=id,cultivar_name,genus,type,origins,aliases,updated_at,verified_at,parent_a_id,parent_b_id,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=genus,cultivar_name');
   const cultivars = allCultivars.filter(c => visibleGenusNames.has(c.genus || 'Anthurium'));
   const images = await fetchJSON('/rest/v1/cultivar_images?select=cultivar_name,storage_path&order=display_order');
+  const firstByDate = {};
+  for (const img of await fetchJSON('/rest/v1/cultivar_images?select=cultivar_name,storage_path&order=created_at')) {
+    if (!firstByDate[img.cultivar_name] && !/^pv:/.test(img.storage_path || '')) firstByDate[img.cultivar_name] = img.storage_path;
+  }
 
   const imageMap = {};
   for (const img of images) {
@@ -240,7 +244,7 @@ async function main() {
   // 「図版 n」 = the entry id
   const igStatic = html => {
     const plates = publicCultivars.filter(c => !(c.tags || []).includes('individual') && RecordGate.state(c) === 'ok' && c.id)
-      .map(c => ({ c, p: imageMap[c.cultivar_name] && !/^pv:/.test(imageMap[c.cultivar_name]) ? imageMap[c.cultivar_name] : '' }))
+      .map(c => ({ c, p: firstByDate[c.cultivar_name] || '' }))
       .sort((a, b) => (!!b.p - !!a.p) || (b.c.id - a.c.id));
     const li = plates.map(({ c, p }) => {
       const g = c.genus || 'Anthurium';
@@ -251,7 +255,7 @@ async function main() {
     }).join('');
     const art = '<article id="static-entry" class="container container--narrow static-entry"><nav class="breadcrumb" aria-label="パンくずリスト"><a href="' + SITE + '/">トップ</a><span class="breadcrumb__sep">/</span><span>Instagram の図版</span></nav>'
       + '<h1 class="section-title">Instagram の図版</h1><p class="people__intro">投稿の「図版」の番号から、その植物の由来のページへ。番号は変わりません。</p><ol class="ig-grid">' + li + '</ol></article>';
-    return html.replace(/(<main[^>]*>)/, '$1\n' + art).replace(/<body([^>]*)>/, (m, at) => /class="/.test(at) ? m.replace('class="', 'class="stub-entry-page ') : '<body' + at + ' class="stub-entry-page">');
+    return html.replace('<img src="images/anthurium.png"', '<img loading="lazy" src="images/anthurium.png"').replace(/(<main[^>]*>)/, '$1\n' + art).replace(/<body([^>]*)>/, (m, at) => /class="/.test(at) ? m.replace('class="', 'class="stub-entry-page ') : '<body' + at + ' class="stub-entry-page">');
   };
   for (const r of staticRoutes) {
     const url = SITE + '/' + r.dir + '/';
@@ -420,7 +424,7 @@ async function main() {
     if (at >= 0 && at < order.length - 1) ctx.next = { name: EntryMeta.name(order[at + 1]), url: entryUrl(order[at + 1]) };
     // the entry's photo is asked for first; the front page's plate (hidden here) is not fetched at all (T156)
     const htmlFast = photo
-      ? html.replace('</head>', '<link rel="preload" as="image" href="' + escAttr(photo) + '" fetchpriority="high">\n</head>').replace('<img src="images/anthurium.png"', '<img loading="lazy" src="images/anthurium.png"')
+      ? html.replace('<meta charset="UTF-8">', '<meta charset="UTF-8">\n  <link rel="preload" as="image" href="' + escAttr(photo) + '" fetchpriority="high">').replace('<img src="images/anthurium.png"', '<img loading="lazy" src="images/anthurium.png"')
       : html.replace('<img src="images/anthurium.png"', '<img loading="lazy" src="images/anthurium.png"');
     const htmlWithEntry = RecordGate.state(c) === 'ok' ? htmlFast.replace(/(<main[^>]*>)/, '$1\n' + staticEntryHtml(c, ctx)).replace(/<body([^>]*)>/, (m, at) => /class="/.test(at) ? m.replace('class="', 'class="stub-entry-page ') : '<body' + at + ' class="stub-entry-page">') : htmlFast;
 

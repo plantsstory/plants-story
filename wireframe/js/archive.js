@@ -428,6 +428,12 @@
   window.renderIgPage = function () {
     var body = document.getElementById('ig-body');
     if (!body) return;
+    if (!window._photoTimes && !window._igWaited) {
+      // the photo list decides the order: without it the photo-less plates come first and then jump (T163)
+      clearTimeout(window._igWait);
+      window._igWait = setTimeout(function () { window._igWaited = true; window.renderIgPage(); }, 6000);
+      return;
+    }
     waitForData(function () {
       var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
       var thumbs = window._thumbMap || {};
