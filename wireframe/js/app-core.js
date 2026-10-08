@@ -1445,13 +1445,9 @@ if (false) {
 
   // --- IP address helper (cached per session, global) ---
   window._cachedIp = null;
-  window.getUserIp = function() {
-    if (window._cachedIp) return Promise.resolve(window._cachedIp);
-    return fetch('https://api.ipify.org?format=json')
-      .then(function(r) { return r.json(); })
-      .then(function(d) { window._cachedIp = d.ip; return d.ip; })
-      .catch(function() { return null; });
-  };
+  // No outside IP lookup (2026-10-08): the site's CSP blocked api.ipify.org anyway, every write needs a login and the
+  // limits count per account. Callers still get a promise, now of null.
+  window.getUserIp = function() { return Promise.resolve(null); };
 
   var supabase = null;
   try {
