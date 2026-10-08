@@ -2262,9 +2262,19 @@
     if (!el || !window._currentUser || !window._supabaseClient) return;
     window._supabaseClient.from('member_interest').select('user_id').eq('user_id', window._currentUser.id).maybeSingle().then(function (r) {
       var joined = !!(r && r.data);
-      el.innerHTML = joined ? '· 受付開始のお知らせ: 登録済み' : '· <button type="button" class="mypost-notify-btn">会員の受付開始を知らせる</button>';
-      var b = el.querySelector('button');
-      if (b) b.addEventListener('click', function () { if (window.joinMemberNotify) window.joinMemberNotify(source); setTimeout(function () { drawNotifyLink(el, source); }, 1200); });
+      // what it is, in so many words: one e-mail when sign-up opens; and a way back out on the same line (board 11 T154)
+      el.innerHTML = joined
+        ? '· 受付開始のメール: 登録済み · <button type="button" class="mypost-notify-btn" data-notify-leave>取り消す</button>'
+        : '· <button type="button" class="mypost-notify-btn" data-notify-join>会員の受付開始をメールで受け取る（1 回だけ）</button>';
+      var join = el.querySelector('[data-notify-join]'), leave = el.querySelector('[data-notify-leave]');
+      if (join) join.addEventListener('click', function () { if (window.joinMemberNotify) window.joinMemberNotify(source); setTimeout(function () { drawNotifyLink(el, source); }, 1200); });
+      if (leave) leave.addEventListener('click', function () {
+        window._supabaseClient.from('member_interest').delete().eq('user_id', window._currentUser.id).then(function (d) {
+          if (d.error) { showToast('取り消せませんでした。時間をおいてお試しください', true); return; }
+          showToast('お知らせの登録を取り消しました');
+          drawNotifyLink(el, source);
+        });
+      });
     }, function () {});
   }
   window.drawNotifyLink = drawNotifyLink;
