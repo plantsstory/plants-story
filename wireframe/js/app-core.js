@@ -643,7 +643,7 @@ function showGenus(genusName) {
 
 // ---- Path-based routing (History API) ----
 // Known simple pages (no sub-parameters)
-var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'mypost', 'guide', 'glossary', 'pricing', 'wanted'];
+var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'mypost', 'guide', 'glossary', 'pricing', 'wanted', 'ig'];
 // Known genus names for URL mapping
 var knownGenera = []; // Populated dynamically from genera table
 // Base path: '/' on custom domain, '/plants-story/' on GitHub Pages
@@ -766,6 +766,7 @@ function navigateTo(page, options, pushHistory) {
   if (page === 'locality' && typeof window.renderLocalityPage === 'function') window.renderLocalityPage(options.place || '');
   if (page === 'names' && typeof window.renderNamesPage === 'function') window.renderNamesPage(options.nameSlug || '');
   if (page === 'wanted' && typeof window.renderWantedPage === 'function') window.renderWantedPage();
+  if (page === 'ig' && typeof window.renderIgPage === 'function') window.renderIgPage();
   if (page === 'tools' && typeof window.renderToolsPage === 'function') window.renderToolsPage(options.tool || '', options.genre || '');
   if (page === 'genus' && options.genus) showGenus(options.genus);
   if (page === 'cultivar' && options.cultivar && !options._skipUpdate) {
@@ -815,6 +816,7 @@ function navigateTo(page, options, pushHistory) {
       search: '検索結果 - ' + _defaultTitle,
       mypost: '自分の記録 - ' + _defaultTitle,
       wanted: '写真を募集中 — 写真のないアンスリウム | Aroid Origins',
+      ig: 'Instagram の図版 | Aroid Origins',
       people: '人物索引 - ' + _defaultTitle,
       locality: '産地索引 - ' + _defaultTitle,
       tools: '道具の目録 - ' + _defaultTitle,
@@ -836,6 +838,7 @@ function navigateTo(page, options, pushHistory) {
       search: 'アロイド植物の品種名で検索 - Anthurium, Monstera, Philodendronなど',
       mypost: 'あなたが記録した品種',
       wanted: '由来は記録されているのに、写真がまだない品種の一覧です。自分で撮った写真を 1 枚から載せられます。',
+      ig: 'Instagram の投稿の「図版」の番号から、その植物の由来のページへ。',
       people: 'アロイド品種の記載者・採集者・作出者の索引。人物ごとに関連する品種をたどれます',
       locality: 'タイプ産地（国）ごとに原種をたどる索引。コロンビア、パナマ、ペルーなど',
       glossary: 'sp. / aff. / cf.、記載者、タイプ産地、交配式、F1、クローン、TC など由来を読むための用語集',

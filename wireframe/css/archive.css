@@ -1765,3 +1765,11 @@ html.app-ui .mobile-nav [data-i18n="nav_contribute_mobile"] { display: none !imp
 .breadcrumb { flex-wrap: nowrap; min-width: 0; }
 .breadcrumb > a:first-child, .breadcrumb__sep { flex-shrink: 0; white-space: nowrap; }
 .breadcrumb > :last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* board 11 T147: /ig/ — three plates a row, the plate number under each */
+.ig-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2); }
+.ig-grid a { display: block; text-decoration: none; color: inherit; }
+.ig-grid__img { display: flex; align-items: center; justify-content: center; aspect-ratio: 4 / 5; background: var(--color-plate, #EDE9E0); overflow: hidden; }
+.ig-grid__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ig-grid__name { font-size: var(--fs-label); padding: var(--s1); text-align: center; line-height: 1.3; }
+.ig-grid__no { display: block; font-size: var(--fs-label); color: var(--color-mid); margin-top: var(--s1); }

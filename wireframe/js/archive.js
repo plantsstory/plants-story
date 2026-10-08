@@ -417,6 +417,46 @@
       body.innerHTML = html + '</ol>';
     });
   };
+  // /ig/: every recorded entry as a plate, newest first, 「図版 n」 = the entry's id (board 11 T147)
+  window.igPlateNo = function (fullName) {
+    var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
+    var e = store[fullName];
+    return e && e._id ? e._id : '';
+  };
+  window.renderIgPage = function () {
+    var body = document.getElementById('ig-body');
+    if (!body) return;
+    waitForData(function () {
+      var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
+      var thumbs = window._thumbMap || {};
+      var seen = {}, list = [];
+      Object.keys(store).forEach(function (k) {
+        var e = store[k];
+        if (!e || !e._id || seen[e._id] || e._type === 'seedling' || / \[Seedling\]$/.test(k)) return;
+        seen[e._id] = true;
+        var d;
+        try { d = describe(k, e, e._type); } catch (er) { return; }
+        if (d.state !== 'ok' || d.isIndividual) return;
+        list.push({ d: d, no: e._id });
+      });
+      // the plates with a photo first (newest first), then the ones still waiting for a photo
+      list.forEach(function (x) { x.photo = !!thumbs[x.d.displayName]; });
+      list.sort(function (a, b) { return (b.photo - a.photo) || (b.no - a.no); });
+      var html = '<ol class="ig-grid">';
+      list.forEach(function (x) {
+        var p = thumbs[x.d.displayName], src = p && window.galleryImg ? window.galleryImg(p, 360) : '';
+        html += '<li>' + link(x.d, '<span class="ig-grid__img">' + (src ? '<img src="' + esc(src) + '" alt="" loading="lazy" decoding="async">' : '<span class="ig-grid__name">' + sciNameHtml(x.d.shownName) + '</span>') + '</span>'
+          + '<span class="ig-grid__no num">図版 ' + x.no + '</span>') + '</li>';
+      });
+      body.innerHTML = html + '</ol>';
+    });
+  };
+  // /wanted/ and /ig/ depend on which entries have a photo: draw them again once the photo list is in
+  document.addEventListener('ao:thumbs', function () {
+    var w = document.getElementById('page-wanted'), g = document.getElementById('page-ig');
+    if (w && w.classList.contains('active')) window.renderWantedPage();
+    if (g && g.classList.contains('active')) window.renderIgPage();
+  });
   window.entryCiteLine = function (fullName, entry, type) {
     try { return citeHtml(describe(fullName, entry, type)); } catch (e) { return ''; }
   };
@@ -507,7 +547,16 @@
     if (d.state === 'ok' && window.ogSlug) {
       html += '<p class="story__share"><button type="button" class="story__copy" data-story-copy>' + esc(T('story_copy')) + '</button>'
         + '<a class="story__img" href="' + esc(base + 'images/ig/' + window.ogSlug(d.genus, d.fullName) + '.png') + '" download target="_blank" rel="noopener">' + esc(T('story_save_image')) + '</a></p>';
-      _storyPost = [d.shownName + (citeHtml(d) ? ' — ' + citeHtml(d).replace(/<[^>]+>/g, '') : ''), excerpt(text, 120), (window.getShareUrl ? window.getShareUrl(d.fullName) : ''), '#アンスリウム #Anthurium #AroidOrigins'].filter(Boolean).join('\n\n');
+      // Instagram does not link a URL in a caption: the profile link goes to /ig/, where the plate number leads on
+      // (T147). Tags only from the registered name and its katakana alias, never guessed.
+      var plate = window.igPlateNo ? window.igPlateNo(d.fullName) : '';
+      var tags = ['#アンスリウム', '#Anthurium'];
+      var st = (window.cultivarData || {})[d.fullName] || {};
+      var kanaAlias = (st._aliases || []).filter(function (a) { return /[ァ-ヺー]/.test(a); })[0];
+      if (kanaAlias) tags.push('#' + kanaAlias.replace(/[・\s]/g, ''));
+      if (!/\b(sp|aff|cf)\./.test(d.fullName) && d.genus && d.epithet) tags.push('#' + (d.genus + d.epithet).toLowerCase().replace(/[^a-z0-9]/g, ''));
+      tags.push('#AroidOrigins');
+      _storyPost = [d.shownName + (citeHtml(d) ? ' — ' + citeHtml(d).replace(/<[^>]+>/g, '') : ''), excerpt(text, 120), plate ? 'プロフィールのリンク → 図版 ' + plate : (window.getShareUrl ? window.getShareUrl(d.fullName) : ''), tags.join(' ')].filter(Boolean).join('\n\n');
     }
     body.innerHTML = html;
     if (window.linkGlossaryTerms) window.linkGlossaryTerms(body.querySelector('.story__body'), 3);

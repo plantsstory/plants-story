@@ -549,6 +549,7 @@ function loadCultivarThumbnails() {
         }
       });
       if (typeof window.renderStoryOfDay === 'function') window.renderStoryOfDay();
+      document.dispatchEvent(new CustomEvent('ao:thumbs'));   // pages that sort by having a photo draw again
       if (typeof window.refreshEntriesLedger === 'function') window.refreshEntriesLedger(); // new entries / people / places
       // Re-render all genus pages to apply thumbnails
       (window._generaData || []).forEach(function(gObj) {
