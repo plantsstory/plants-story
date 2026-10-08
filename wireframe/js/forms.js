@@ -2635,8 +2635,12 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     if (sb) {
       // the list's thumbnail stands in until the photos arrive (T128): no empty frame while they load
       var standIn = null, tp = !samePlant && window._thumbMap && window._thumbMap[cultivarName];
-      if (tp && window.galleryImg) {
-        standIn = createGalleryItem(window.galleryImg(tp, 1200), {});
+      // on a page opened from a shared link the list's thumbnails are not in yet: the stub's own photo stands in (T164b)
+      var stubImg = !samePlant && document.querySelector('#static-entry .static-entry__plate img');
+      var standSrc = tp && window.galleryImg ? window.galleryImg(tp, 1200)
+        : (stubImg && stubImg.getAttribute('alt') === cultivarName ? (stubImg.currentSrc || stubImg.src) : '');
+      if (standSrc) {
+        standIn = createGalleryItem(standSrc, {});
         standIn.classList.add('gallery__item--standin');
         gallery.insertBefore(standIn, galleryUpload);
         galleryCarouselIdx = 0;
@@ -2644,12 +2648,12 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       }
       // Fetch from Supabase
       fetchImagesFromSupabase(cultivarName).then(function(images) {
-        if (standIn) standIn.remove();
         // Check cultivar hasn't changed while loading
         var detailPage = document.getElementById('page-cultivar');
         var h1 = detailPage ? detailPage.querySelector('h1') : null;
-        if (!h1 || h1Key(h1) !== cultivarName) return;
+        if (!h1 || h1Key(h1) !== cultivarName) { if (standIn) standIn.remove(); return; }
         if (samePlant) clearOld();
+        var fresh = [];
 
         images.forEach(function(img) {
           var url = getPublicUrl(img.storage_path);
@@ -2663,6 +2667,8 @@ updateCultivarDetail = function(cultivarName, rowEl) {
             linkUrl: img.link_url,
             ownerId: img.user_id
           });
+          if (standIn) item.style.display = 'none';
+          fresh.push(url);
           gallery.insertBefore(item, galleryUpload);
           // a private photo: a signed URL for an hour, only its owner can get one (T125)
           if (/^pv:/.test(img.storage_path || '')) {
@@ -2672,9 +2678,22 @@ updateCultivarDetail = function(cultivarName, rowEl) {
             });
           }
         });
-        galleryCarouselIdx = 0;
-        updateGalleryCarousel();
+        // the stand-in leaves only once the first new photo can be shown (4 s at most): no empty plate between them
+        var swapped = false;
+        var swap = function() {
+          if (swapped) return; swapped = true;
+          if (standIn) standIn.remove();
+          galleryCarouselIdx = 0;
+          updateGalleryCarousel();
+        };
+        if (standIn && fresh[0] && !/^pv:/.test(fresh[0])) {
+          var pre = new Image();
+          pre.src = fresh[0];
+          (pre.decode ? pre.decode() : Promise.reject()).then(swap, swap);
+          setTimeout(swap, 4000);
+        } else swap();
       }).catch(function(err) {
+        if (standIn) standIn.remove();
         console.warn('Failed to load gallery from Supabase, falling back to localStorage:', err);
         renderLocalGallery(cultivarName, gallery, galleryUpload);
       });
