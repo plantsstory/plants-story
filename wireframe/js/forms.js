@@ -2623,16 +2623,18 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     var galleryUpload = document.getElementById('gallery-upload');
     if (!galleryUpload) return;
     var gallery = galleryUpload.parentNode;
-
-    // Remove all user-uploaded items
-    gallery.querySelectorAll('.gallery__item[data-user-upload]').forEach(function(el) {
-      el.remove();
-    });
+    // the same plant drawn again keeps its photos until the new list is in (T164); another plant starts empty
+    var samePlant = gallery.getAttribute('data-for') === cultivarName && !!gallery.querySelector('.gallery__item[data-user-upload]');
+    gallery.setAttribute('data-for', cultivarName);
+    var clearOld = function() {
+      gallery.querySelectorAll('.gallery__item[data-user-upload]').forEach(function(el) { el.remove(); });
+    };
+    if (!samePlant) clearOld();
 
     var sb = getSupabase();
     if (sb) {
       // the list's thumbnail stands in until the photos arrive (T128): no empty frame while they load
-      var standIn = null, tp = window._thumbMap && window._thumbMap[cultivarName];
+      var standIn = null, tp = !samePlant && window._thumbMap && window._thumbMap[cultivarName];
       if (tp && window.galleryImg) {
         standIn = createGalleryItem(window.galleryImg(tp, 1200), {});
         standIn.classList.add('gallery__item--standin');
@@ -2647,6 +2649,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
         var detailPage = document.getElementById('page-cultivar');
         var h1 = detailPage ? detailPage.querySelector('h1') : null;
         if (!h1 || h1Key(h1) !== cultivarName) return;
+        if (samePlant) clearOld();
 
         images.forEach(function(img) {
           var url = getPublicUrl(img.storage_path);

@@ -922,8 +922,12 @@ function renderOrigins(cultivarName) {
   var displayName = cultivarName.replace(' [Seedling]', '');
   var _sb = window._supabaseClient;
 
-  // Show loading state
-  container.innerHTML = '<div class="p-xl">' + skeletonLines(4) + '</div>';
+  // Show loading state — only for another plant: the same plant drawn again keeps its text until the new one
+  // arrives, so a page opened from a shared link does not blank when the full archive comes in (board 11 T164)
+  if (container.getAttribute('data-for') !== displayName || !container.children.length) {
+    container.innerHTML = '<div class="p-xl">' + skeletonLines(4) + '</div>';
+  }
+  container.setAttribute('data-for', displayName);
 
   if (!_sb) {
     // No Supabase: use local data only
