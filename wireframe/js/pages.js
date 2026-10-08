@@ -1422,7 +1422,7 @@ function getFilteredItems(genusEl) {
     if (!isSeedlingView && isIndividualItem(item)) return false; // folded under the species row
     if (filterType !== 'all' && item.meta.type !== filterType) return false;
     if (q) {
-      var nameMatch = item.fullName.toLowerCase().indexOf(q) !== -1 || (item.entry._aliases || []).some(function(a) { return String(a).toLowerCase().indexOf(q) !== -1; });
+      var nameMatch = nameMatches(item, q);
       var creatorMatch = item.entry._creatorName && item.entry._creatorName.toLowerCase().indexOf(q) !== -1;
       var posterMatch = item.entry._posterName && item.entry._posterName.toLowerCase().indexOf(q) !== -1;
       if (!nameMatch && !creatorMatch && !posterMatch) return false;
@@ -1712,28 +1712,42 @@ function renderPaginationUI(scope, page, totalPages, totalCount, searchQuery) {
 function globalSearch(query) {
   var q = query.toLowerCase().trim();
   if (!q) return;
+  // searched before the archive has loaded (a search link, or typing at once): wait for it, then search
+  if (!window._dataFullyLoaded) {
+    var summaryWait = document.getElementById('search-summary');
+    if (summaryWait) summaryWait.textContent = '読み込み中…';
+    clearTimeout(globalSearch._wait);
+    globalSearch._tries = (globalSearch._q === q ? globalSearch._tries || 0 : 0) + 1;
+    globalSearch._q = q;
+    if (globalSearch._tries < 50) { globalSearch._wait = setTimeout(function() { globalSearch(query); }, 300); return; }
+  }
+  globalSearch._tries = 0;
   trackEvent('search', { search_term: q });
 
   // -- Cultivar search (data-driven from _genusItems, visible genera only) --
   var visibleSlugs = {};
   (window._generaData || []).forEach(function(g) { visibleSlugs[g.slug] = true; });
-  var cultivarResults = [];
+  var cultivarResults = [], searchable = [];
   Object.keys(_genusItems).forEach(function(slug) {
     if (!visibleSlugs[slug]) return;
     (_genusItems[slug] || []).forEach(function(item) {
-      var aliasHit = (item.entry._aliases || []).some(function(a) { return String(a).toLowerCase().indexOf(q) !== -1; });
-      if (item.fullName.toLowerCase().indexOf(q) !== -1 || aliasHit) {
-        cultivarResults.push(item);
-      }
+      searchable.push(item);
+      if (nameMatches(item, q)) cultivarResults.push(item);
     });
   });
+  // nothing found: names spelled one letter differently (スペーズ / スペード, ビューム / ビウム)
+  var nearlyOnly = false;
+  if (!cultivarResults.length) {
+    cultivarResults = searchable.filter(function(item) { return nameNearly(item, q); });
+    nearlyOnly = cultivarResults.length > 0;
+  }
 
   // Update title
   var title = document.getElementById('search-title');
   if (title) title.textContent = '"' + query + '" の検索結果';
 
   var summaryEl = document.getElementById('search-summary');
-  if (summaryEl) summaryEl.textContent = t('results_count').replace('{n}', cultivarResults.length);
+  if (summaryEl) summaryEl.textContent = t('results_count').replace('{n}', cultivarResults.length) + (nearlyOnly ? '（表記の近い名前）' : '');
 
   // Render cultivar results from data (not DOM cloning)
   var cultivarList = document.getElementById('search-cultivar-list');

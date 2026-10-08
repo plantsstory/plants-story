@@ -133,6 +133,50 @@ function italicizeSciNames(html) {
     .replace(/(^|[^A-Za-z])([AMP])\.\s?(?!(?:sp|aff|cf)\b)([a-z][a-z-]{3,})\b/g, '$1<i>$2. $3</i>');
 }
 window.italicizeSciNames = italicizeSciNames;
+
+// ---- Name search: one folded form for the query, the names and the aliases (2026-10-08) ----
+// 「アンスリウム クリスタリナム」「くりすたりなむ」「ﾜﾛｸｱﾅﾑ」「ワロッキアナム」 all find crystallinum / warocqueanum.
+function foldName(s) {
+  s = String(s || '').normalize('NFKC').toLowerCase();
+  s = s.replace(/[\u3041-\u3096]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) + 0x60); });   // hiragana → katakana
+  s = s.replace(/アンスリウム|アンスリューム|アンスリュウム|anthurium|モンステラ|monstera|フィロデンドロン|philodendron/g, '');
+  s = s.replace(/[\s・･\-‐–—'"‘’“”`.,、。()（）]/g, '');
+  return s.replace(/ヴァ/g, 'バ').replace(/ヴィ/g, 'ビ').replace(/ヴェ/g, 'ベ').replace(/ヴォ/g, 'ボ').replace(/ヴ/g, 'ブ')
+    .replace(/[ーッ]/g, '')
+    .replace(/ァ/g, 'ア').replace(/ィ/g, 'イ').replace(/ゥ/g, 'ウ').replace(/ェ/g, 'エ').replace(/ォ/g, 'オ')
+    .replace(/ャ/g, 'ヤ').replace(/ュ/g, 'ユ').replace(/ョ/g, 'ヨ').replace(/ヂ/g, 'ジ').replace(/ヅ/g, 'ズ');
+}
+function editDistance(a, b) {
+  if (Math.abs(a.length - b.length) > 2) return 99;
+  var prev = [], cur, i, j;
+  for (j = 0; j <= b.length; j++) prev[j] = j;
+  for (i = 1; i <= a.length; i++) {
+    cur = [i];
+    for (j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+// the folded names an entry answers to: its name (genus dropped) and every alias
+function nameKeys(item) {
+  var keys = [foldName(item.fullName)];
+  (item.entry && item.entry._aliases || []).forEach(function (a) { keys.push(foldName(a)); });
+  return keys.filter(Boolean);
+}
+// strict: the folded query inside a name or an alias. An empty folded query (only 「アンスリウム」) matches all.
+function nameMatches(item, query) {
+  var fq = foldName(query);
+  if (!fq) return true;
+  return nameKeys(item).some(function (k) { return k.indexOf(fq) !== -1; });
+}
+// loose (when nothing matched): a slip of one letter, two in a long name
+function nameNearly(item, query) {
+  var fq = foldName(query);
+  if (fq.length < 4) return false;
+  var allow = fq.length >= 8 ? 2 : 1;
+  return nameKeys(item).some(function (k) { return editDistance(fq, k) <= allow; });
+}
+window.foldName = foldName; window.nameMatches = nameMatches; window.nameNearly = nameNearly;
 function getBadgeInfo(type, name) { return { cls: 'badge--' + (type || 'species'), txt: type || 'species' }; }
 function paginateGenus(genusEl, page) {}
 // An "individual" is a numbered/named single plant of a species ('HR1'); it lives on the species page, not in lists
