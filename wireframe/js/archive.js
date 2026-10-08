@@ -515,7 +515,13 @@
     text = String(text || '').replace(/\s+/g, ' ').trim();
     if (text.length <= max) return text;
     var cut = text.slice(0, max);
-    var m = Math.max(cut.lastIndexOf('。'), cut.lastIndexOf('. '), cut.lastIndexOf('！'), cut.lastIndexOf('？'));
+    // Japanese text ends a sentence only at 。！？ — 「A. warocqueanum」「R. L. Dressler」「Gard. Chron.」 are not ends;
+    // English text at '. ' after a word of three letters or more that is not capitalised (board 11)
+    var m = Math.max(cut.lastIndexOf('。'), cut.lastIndexOf('！'), cut.lastIndexOf('？'));
+    if (m < 0 && !/[぀-ヿ一-鿿]/.test(cut)) {
+      var re = /[a-z0-9)]{3,}\. /g, hit;
+      while ((hit = re.exec(cut))) m = hit.index + hit[0].length - 2;
+    }
     if (m > max * 0.5) return cut.slice(0, m + 1);
     return cut + '…';
   }
