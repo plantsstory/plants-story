@@ -442,13 +442,25 @@
       // the plates with a photo first (newest first), then the ones still waiting for a photo
       list.forEach(function (x) { x.photo = !!thumbs[x.d.displayName]; });
       list.sort(function (a, b) { return (b.photo - a.photo) || (b.no - a.no); });
-      var html = '<ol class="ig-grid">';
+      var html = '<form class="ig-find" id="ig-find"><label for="ig-find-no">図版の番号</label><input type="number" inputmode="numeric" id="ig-find-no" min="1"><button type="submit" class="btn btn--primary">開く</button></form><ol class="ig-grid">';
       list.forEach(function (x) {
         var p = thumbs[x.d.displayName], src = p && window.galleryImg ? window.galleryImg(p, 360) : '';
-        html += '<li>' + link(x.d, '<span class="ig-grid__img">' + (src ? '<img src="' + esc(src) + '" alt="" loading="lazy" decoding="async">' : '<span class="ig-grid__name">' + sciNameHtml(x.d.shownName) + '</span>') + '</span>'
+        html += '<li id="p' + x.no + '">' + link(x.d, '<span class="ig-grid__img">' + (src ? '<img src="' + esc(src) + '" alt="' + esc(x.d.shownName) + '" loading="lazy" decoding="async">' : '<span class="ig-grid__name">' + sciNameHtml(x.d.shownName) + '</span>') + '</span>'
           + '<span class="ig-grid__no num">図版 ' + x.no + '</span>') + '</li>';
       });
       body.innerHTML = html + '</ol>';
+      var form = document.getElementById('ig-find');
+      if (form) form.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        var no = parseInt(document.getElementById('ig-find-no').value, 10);
+        var hit = list.filter(function (x) { return x.no === no; })[0];
+        if (!hit) { showToast('図版 ' + (no || '') + ' は見つかりませんでした', true); return; }
+        if (typeof navigateTo === 'function') navigateTo('cultivar', { cultivar: hit.d.fullName });
+        if (typeof gtag === 'function') gtag('event', 'ig_find', { plate: no });
+      });
+      // /ig/#p53 opens plate 53 directly
+      var m = /^#p(\d+)$/.exec(location.hash || '');
+      if (m) { var el = document.getElementById('p' + m[1]); if (el) el.scrollIntoView({ block: 'center' }); }
     });
   };
   // /wanted/ and /ig/ depend on which entries have a photo: draw them again once the photo list is in
@@ -847,8 +859,10 @@
       // the other names only (this entry is not listed against itself), then the page that tells them apart (board 11)
       var bare = function (n) { return String(n || '').replace(/^Anthurium\s+/, '').trim(); };
       var self = bare(d.shownName || d.displayName || d.fullName);
-      var others = String(hit.title || '').split('・').filter(function (n) { return bare(n) !== self; }).join('・');
-      el.innerHTML = '<p class="names-note">' + esc(T('names_note')) + ' ' + namesTitleHtml(others) + ' — <a href="' + esc(base + 'names/' + hit.slug + '/') + '" data-nav="names" data-name-slug="' + esc(hit.slug) + '">' + esc(T('names_note_link')) + ' →</a></p>';
+      var others = (hit.items || []).map(function (it) { return it.entry || it.name; }).filter(function (n) { return n && n !== d.fullName && bare(n) !== self; })
+        .map(function (n) { return sciNameHtml(String(n).replace(/^Anthurium\s+(?=')/, '')); }).join('・');
+      if (!others) return;
+      el.innerHTML = '<p class="names-note">' + esc(T('names_note')) + ' ' + others + ' — <a href="' + esc(base + 'names/' + hit.slug + '/') + '" data-nav="names" data-name-slug="' + esc(hit.slug) + '">' + esc(T('names_note_link')) + ' →</a></p>';
     });
   }
 

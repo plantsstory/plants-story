@@ -1075,6 +1075,14 @@ function renderOriginsInner(cultivarName, container) {
   var data = cultivarData[cultivarName];
   var isSeedling = data && data._type === 'seedling';
   var _sb = window._supabaseClient;
+  var originsHead = container.parentNode && container.parentNode.querySelector('h2.section-title');
+  if (originsHead) originsHead.style.display = '';
+  if (isSeedling && !(data && data.formula) && !(data && (data.origins || []).some(function(o) { return o && !o._type && (String(o.body || '').trim() || o.structured); }))) {
+    // a seedling with nothing written yet: the cross formula and photos above say what there is (board 11 T153)
+    container.innerHTML = '';
+    if (originsHead) originsHead.style.display = 'none';
+    return;
+  }
   if (!data || !data.origins || data.origins.length === 0) {
     container.innerHTML = '<div class="text-center text-muted p-xl">' + t('no_origin_data') + '</div>';
     if (data && data.formula) {

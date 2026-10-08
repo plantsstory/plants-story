@@ -1781,3 +1781,10 @@ html.pv-plate .sheet--plate > :not(.sheet__pv) { display: none; }
 html.pv-plate .sheet__pv { display: block; margin: 0; font-size: var(--fs-small); color: var(--color-mid); }
 html.pv-plate .sheet__pv-k { font-family: var(--font-display); font-size: var(--fs-body); color: var(--color-ink); }
 html.pv-plate .sheet__pv a { display: inline-block; min-height: var(--tap); line-height: var(--tap); }
+
+/* board 11 T153: the preview label lines up with its rules; /ig/ number box */
+html.pv-plate .gallery__empty .sheet--plate { padding: var(--s3) 0 !important; display: block; }
+.ig-find { display: flex; align-items: center; gap: var(--s2); margin: 0 0 var(--s3); }
+.ig-find label { font-size: var(--fs-small); color: var(--color-mid); }
+.ig-find input { width: 6em; min-height: var(--tap); font-size: var(--fs-body); }
+.ig-find .btn { min-height: var(--tap); }

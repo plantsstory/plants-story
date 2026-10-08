@@ -286,6 +286,9 @@ if (btnAddRecord && btnAddOrigin) {
     if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 }
+// the preview label's link (T148) opens the photo sheet too
+var plateLabelLink = document.querySelector('[data-pv-photo]');
+if (plateLabelLink) plateLabelLink.addEventListener('click', function(e) { e.preventDefault(); var b = document.getElementById('detail-add-photo-btn'); if (b) b.click(); });
 var plateEmptyCta = document.getElementById('plate-empty-cta');
 if (plateEmptyCta) {
   plateEmptyCta.addEventListener('click', function(e) {

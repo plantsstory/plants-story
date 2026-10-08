@@ -871,7 +871,7 @@ function navigateTo(page, options, pushHistory) {
           return;
         }
       }
-      var noindexPages = { search: true, contribute: true, mypost: true, favorites: true, profile: true, 'profile-edit': true, notfound: true };
+      var noindexPages = { search: true, contribute: true, mypost: true, favorites: true, profile: true, 'profile-edit': true, notfound: true, ig: true };
       updateMeta({ title: pageTitles[page] || _defaultTitle, description: pageDescriptions[page] || _defaultDesc, path: page === 'top' ? '' : page, noindex: !!noindexPages[page] });
       // Remove genus JSON-LD on non-genus pages
       var gjld = document.getElementById('genus-jsonld');
