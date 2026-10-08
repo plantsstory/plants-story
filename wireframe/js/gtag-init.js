@@ -44,3 +44,26 @@ gtag('config', 'G-KJK72JH471', { send_page_view: true });
   };
   document.head.appendChild(s);
 }());
+
+// Script errors on readers' phones reach GA as js_error (board 11 T158): the launch week is not for changes, so the
+// errors must be seen without anyone reporting them. Our own files only, five a page, no personal data in the text.
+(function() {
+  var sent = 0;
+  function report(msg, src, line) {
+    if (sent >= 5 || typeof gtag !== 'function') return;
+    src = String(src || '');
+    if (src && !/plantsstory\.com|localhost|\/js\//.test(src)) return;   // extensions and third parties stay out
+    sent++;
+    gtag('event', 'js_error', {
+      message: String(msg || '').slice(0, 100),
+      where: src.replace(/^.*\/(js\/[^?#]+).*$/, '$1') + ':' + (line || 0),
+      page: location.pathname.slice(0, 80),
+      non_interaction: true
+    });
+  }
+  window.addEventListener('error', function(e) { if (e && e.message) report(e.message, e.filename, e.lineno); });
+  window.addEventListener('unhandledrejection', function(e) {
+    var r = e && e.reason;
+    report('promise: ' + (r && r.message ? r.message : String(r)), (r && r.stack && (String(r.stack).match(/https?:\/\/[^\s)]+/) || [''])[0]) || '/js/', 0);
+  });
+}());
