@@ -34,7 +34,15 @@ function wrap(text, cols, maxLines) {
   const out = []; let line = '', w = 0;
   for (const ch of String(text || '')) {
     const cw = /[　-鿿＀-￯]/.test(ch) ? 2 : 1;
-    if (w + cw > cols * 2) { out.push(line); line = ''; w = 0; if (out.length === maxLines) break; }
+    if (w + cw > cols * 2) {
+      // line-break rules (layout only, the words stay as written): no line starts with 。、）」, and an opening
+      // quote or bracket does not hang at the end of a line (board 11)
+      if (/[。、，．）」』！？]/.test(ch)) { line += ch; w += cw; continue; }
+      let carry = '';
+      const m = line.match(/(['‘“「『（(]+)$/);
+      if (m && m[1].length < line.length) { carry = m[1]; line = line.slice(0, -carry.length); }
+      out.push(line); line = carry; w = carry.length; if (out.length === maxLines) break;
+    }
     line += ch; w += cw;
   }
   if (line && out.length < maxLines) out.push(line);
