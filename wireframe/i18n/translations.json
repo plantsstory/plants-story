@@ -329,11 +329,11 @@
     "en": "Contact"
   },
   "search_placeholder": {
-    "jp": "品種名・カタカナで検索",
+    "jp": "学名・品種名で検索",
     "en": "Search by name"
   },
   "genus_search": {
-    "jp": "品種名・カタカナで検索（例: ワロクアナム）",
+    "jp": "学名・品種名で検索（例: warocqueanum）",
     "en": "Search within genus..."
   },
   "source_label": {
@@ -1509,8 +1509,8 @@
     "en": "Private record — nobody else can see this."
   },
   "search_no_results_hint": {
-    "jp": "学名・品種名・カタカナで探せます。収録されていなければ、依頼するか自分で登録できます。",
-    "en": "Search by scientific name, cultivar name or katakana. If it is not here yet, ask for it or record it yourself."
+    "jp": "学名・品種名で探せます。収録されていなければ、依頼するか自分で登録できます。",
+    "en": "Search by scientific name or cultivar name. If it is not here yet, ask for it or record it yourself."
   },
   "state_unrecorded": {
     "jp": "記録不足",
