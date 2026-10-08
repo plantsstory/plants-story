@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { budgetGate, budgetRefusal } from "../_shared/ai-budget.ts";
+import Anthropic from "npm:@anthropic-ai/sdk@0.131.0";
 
 const ALLOWED_ORIGINS = [
   "https://plantsstory.com",
@@ -179,13 +180,18 @@ async function searchIPNI(genus: string, species: string): Promise<{ year: strin
     const data = await res.json();
     const results = data?.results || [];
 
-    // Find species-rank match
-    const match = results.find((r: any) =>
+    // Find species-rank match. A name can have two records: an invalid first publication
+    // (nom. inval., e.g. A. nutibarense, Aroideana 2005: holotype herbarium not given) and the one that
+    // validated it (Novon 2008). Take the valid one: accepted in POWO, not nom. inval./illeg.
+    const candidates = results.filter((r: any) =>
       (r.rank === "SPECIES" || r.rank === "spec.") &&
       !r.suppressed &&
       r.genus?.toLowerCase() === genus.toLowerCase() &&
       r.species?.toLowerCase() === species.toLowerCase()
     );
+    const invalid = (r: any) => /nom\. (inval|illeg)/i.test(String(r.nameStatusType || r.nameStatus || ""));
+    const score = (r: any) => (r.inPowo ? 2 : 0) + (invalid(r) ? 0 : 1) + (r.validationOf ? 1 : 0);
+    const match = candidates.sort((x: any, y: any) => score(y) - score(x))[0];
 
     if (match?.publicationYear) {
       return {
@@ -889,6 +895,77 @@ function logAiUsage(entry: {
 
 // Per-request context for usage attribution (set once at request start)
 let _usageCultivar = "";
+// Which engine answers this request: "openai" (gpt-5-mini) or a Claude model id. Set once per request.
+const CLAUDE_MODELS = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"];
+let _llm = "openai";
+
+// ============================================================
+// Claude (Anthropic API) with the web search server tool — same contract as callOpenAI
+// ============================================================
+async function callClaude(
+  systemPrompt: string,
+  userPrompt: string,
+  useSearch = false,
+  purpose = "",
+  maxSearches = 3
+): Promise<GeminiResponse> {
+  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
+  if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
+  const client = new Anthropic({ apiKey });
+  const ceiling = parseInt(Deno.env.get("RESEARCH_MAX_SEARCHES") || "5", 10);
+  const tools: Anthropic.Beta.Messages.BetaToolUnion[] = useSearch
+    ? [{ type: "web_search_20260209", name: "web_search", max_uses: Math.max(1, Math.min(maxSearches, ceiling)) }]
+    : [];
+  const messages: Anthropic.Beta.Messages.BetaMessageParam[] = [{ role: "user", content: userPrompt }];
+  let text = "";
+  const seen = new Set<string>();
+  const sources: { url: string; label: string }[] = [];
+  let inTok = 0, outTok = 0, searches = 0, servedBy = _llm;
+  // a long server-side search loop can pause; resume it (at most twice) by sending the turn back
+  for (let round = 0; round < 3; round++) {
+    // a declined request is re-run by the API on a fallback model ("default"; Opus/Sonnet 5.5 only)
+    const withFallback = _llm === "claude-opus-5-5" || _llm === "claude-sonnet-5-5";
+    const res = await client.beta.messages.create({
+      ...(withFallback ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" } : {}),
+      model: _llm,
+      max_tokens: 16000,
+      system: systemPrompt,
+      output_config: { effort: "medium" },
+      tools,
+      messages,
+    });
+    servedBy = res.model || servedBy;
+    inTok += res.usage?.input_tokens || 0;
+    outTok += res.usage?.output_tokens || 0;
+    // deno-lint-ignore no-explicit-any
+    searches += (res.usage as any)?.server_tool_use?.web_search_requests || 0;
+    if (res.stop_reason === "refusal") throw new Error("Claude declined the request");
+    for (const block of res.content) {
+      if (block.type !== "text") continue;
+      text += block.text || "";
+      for (const c of block.citations || []) {
+        // deno-lint-ignore no-explicit-any
+        const cc = c as any;
+        if (cc.type === "web_search_result_location" && cc.url && !seen.has(cc.url)) {
+          seen.add(cc.url);
+          sources.push({ url: cc.url, label: cc.title || cc.url });
+        }
+      }
+    }
+    if (res.stop_reason !== "pause_turn") break;
+    messages.push({ role: "assistant", content: res.content });
+  }
+  logAiUsage({
+    provider: "anthropic",
+    model: servedBy,
+    purpose,
+    cultivar_name: _usageCultivar,
+    input_tokens: inTok,
+    output_tokens: outTok,
+    web_search_calls: searches,
+  });
+  return { text, sources };
+}
 
 async function callOpenAI(
   apiKey: string,
@@ -899,6 +976,7 @@ async function callOpenAI(
   purpose = "",
   maxSearches = 3
 ): Promise<GeminiResponse> {
+  if (_llm !== "openai") return callClaude(systemPrompt, userPrompt, useSearch, purpose, maxSearches);
   const body: Record<string, unknown> = {
     model: OPENAI_MODEL,
     instructions: systemPrompt,
@@ -1685,8 +1763,12 @@ serve(async (req: Request) => {
       );
     }
 
-    const { cultivar_id, genus, cultivar_name, type, manual_origins, user_text, user_sources, preview, keywords, youtube_channels } = await req.json();
+    const { cultivar_id, genus, cultivar_name, type, manual_origins, user_text, user_sources, preview, keywords, youtube_channels, llm } = await req.json();
     _usageCultivar = cultivar_name || "";
+    // engine: the Secret AI_MODEL ("openai" or a Claude model id); an admin may pick one per request (model comparison)
+    const defaultLlm = Deno.env.get("AI_MODEL") || "openai";
+    const wantLlm = authUser.app_metadata?.role === "admin" && typeof llm === "string" ? llm : defaultLlm;
+    _llm = wantLlm === "openai" || CLAUDE_MODELS.includes(wantLlm) ? wantLlm : "openai";
 
     if ((!cultivar_id && !preview) || !cultivar_name) {
       return new Response(
@@ -1911,7 +1993,7 @@ serve(async (req: Request) => {
         let speciesGrounding: { url: string; label: string }[] = [];
 
         // LLM cascade: OpenAI w/ web search (primary) → Groq → Gemini (grounded, last resort)
-        if (openaiApiKey) {
+        if (openaiApiKey || _llm !== "openai") {
           try {
             console.log("[Structured] Trying OpenAI (web search)...");
             const { text, sources: oSources } = await callOpenAI(
@@ -2117,7 +2199,7 @@ serve(async (req: Request) => {
           let researchResult: any = null;
           let researchGrounding: { url: string; label: string }[] = [];
 
-          if (openaiApiKey) {
+          if (openaiApiKey || _llm !== "openai") {
             try {
               console.log("[KeywordResearch] Trying OpenAI (web search)...");
               const { text, sources: oSources } = await callOpenAI(openaiApiKey,
@@ -2282,7 +2364,7 @@ serve(async (req: Request) => {
           let verifyGrounding: { url: string; label: string }[] = [];
 
           // LLM cascade for verification (primary model gets live web search)
-          if (openaiApiKey) {
+          if (openaiApiKey || _llm !== "openai") {
             try {
               console.log("[Verify] Trying OpenAI (web search)...");
               const { text, sources: oSources } = await callOpenAI(
@@ -2372,7 +2454,7 @@ serve(async (req: Request) => {
             );
 
             // LLM cascade for structured extraction
-            if (openaiApiKey) {
+            if (openaiApiKey || _llm !== "openai") {
               try {
                 console.log("[CultivarStructured] Trying OpenAI...");
                 const { text } = await callOpenAI(
@@ -2547,7 +2629,7 @@ serve(async (req: Request) => {
         let researchResult: any = null;
         let fallbackGrounding: { url: string; label: string }[] = [];
 
-        if (openaiApiKey) {
+        if (openaiApiKey || _llm !== "openai") {
           try {
             console.log("Trying OpenAI (web search) for cultivar research...");
             const { text, sources: oSources } = await callOpenAI(

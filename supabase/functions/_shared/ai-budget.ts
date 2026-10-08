@@ -8,8 +8,11 @@ const PRICES: Record<string, { in: number; out: number }> = {
   "gpt-5-nano": { in: 0.05, out: 0.40 },
   "gpt-5-mini": { in: 0.25, out: 2.00 },
   "gpt-6-luna": { in: 0.10, out: 0.50 },
+  "claude-opus-5-5": { in: 4.00, out: 20.00 },
+  "claude-sonnet-5-5": { in: 2.00, out: 10.00 },
+  "claude-haiku-5-5": { in: 0.10, out: 0.50 },
 };
-const SEARCH_USD = 0.01;            // web search: $10 per 1,000 calls
+const SEARCH_USD = 0.01;            // web search: $10 per 1,000 calls (OpenAI and Anthropic alike)
 const FALLBACK = PRICES["gpt-5-mini"];
 
 function priceOf(model: string) {
