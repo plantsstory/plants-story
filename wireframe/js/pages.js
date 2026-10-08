@@ -1093,6 +1093,9 @@ function renderOriginsInner(cultivarName, container) {
       .map(function(p) { return '<p>' + italicizeSciNames(escHtml(p)).replace(/\n/g, '<br>') + '</p>'; }).join('');
   }
   origins.forEach(function(origin, i) {
+    // the cross formula is drawn above; a record with no words, fields or sources is not drawn (board 11)
+    if (!origin || origin._type === 'formula') return;
+    if (!String(origin.body || '').trim() && !String(origin.body_en || '').trim() && !origin.structured && !(origin.sources || []).length) return;
     var rh = '';
     var trustNum = Math.max(0, Math.min(100, parseInt(origin.trust, 10) || 0));
     var isDb = origin.source_type === 'ipni_powo';

@@ -795,7 +795,11 @@
     loadNames(function (j) {
       var hit = (j.pages || []).filter(function (pg) { return pg.items.some(function (it) { return it.entry === d.fullName; }); })[0];
       if (!hit) return;
-      el.innerHTML = '<p class="names-note">' + esc(T('names_note')) + ' <a href="' + esc(base + 'names/' + hit.slug + '/') + '" data-nav="names" data-name-slug="' + esc(hit.slug) + '">' + namesTitleHtml(hit.title) + ' →</a></p>';
+      // the other names only (this entry is not listed against itself), then the page that tells them apart (board 11)
+      var bare = function (n) { return String(n || '').replace(/^Anthurium\s+/, '').trim(); };
+      var self = bare(d.shownName || d.displayName || d.fullName);
+      var others = String(hit.title || '').split('・').filter(function (n) { return bare(n) !== self; }).join('・');
+      el.innerHTML = '<p class="names-note">' + esc(T('names_note')) + ' ' + namesTitleHtml(others) + ' — <a href="' + esc(base + 'names/' + hit.slug + '/') + '" data-nav="names" data-name-slug="' + esc(hit.slug) + '">' + esc(T('names_note_link')) + ' →</a></p>';
     });
   }
 
@@ -1041,12 +1045,11 @@
     var prev = idx > 0 ? group[idx - 1] : null;
     var next = idx >= 0 && idx < group.length - 1 ? group[idx + 1] : null;
 
-    var html = lineageHtml(d, all, children)
-      + '<div class="related__grid">'
-      + relatedGroupHtml('related_siblings', siblings)
+    var groups = relatedGroupHtml('related_siblings', siblings)
       + relatedGroupHtml('related_same_locality', sameCountry, d.country ? '<a href="' + esc(base + 'locality/' + encodeURIComponent(countrySlug(d.country)) + '/') + '" data-nav="locality" data-place="' + esc(countrySlug(d.country)) + '">' + esc(T('related_same_locality_n').replace('{country}', countryLabel(d.country)).replace('{n}', sameCountry.length)) + ' →</a>' : '')
-      + relatedGroupHtml('related_same_person', samePerson)
-      + '</div>';
+      + relatedGroupHtml('related_same_person', samePerson);
+    // no empty frame under the heading when there is nothing to list (board 11)
+    var html = lineageHtml(d, all, children) + (groups ? '<div class="related__grid">' + groups + '</div>' : '');
     if (prev || next) {
       html += '<nav class="related__nav" aria-label="' + esc(T('related_title')) + '">';
       if (prev) html += link(prev, '<span class="mono">← ' + esc(T('related_prev')) + '</span><span class="related__nav-name">' + sciNameHtml(prev.shownName) + '</span>');
@@ -2135,7 +2138,7 @@
           (ir.data || []).forEach(function (i) { count[i.cultivar_name] = (count[i.cultivar_name] || 0) + 1; if (!first[i.cultivar_name]) first[i.cultivar_name] = i.storage_path; });
           rows.forEach(function (r) { count[r.cultivar_name] = count[shown(r.cultivar_name)]; first[r.cultivar_name] = first[shown(r.cultivar_name)]; });
           var priv = rows.filter(function (r) { return r.is_private; }).length;
-          var html = '<p class="mypost-counts">記録 <span class="num">' + rows.length + '</span>' + (priv ? ' · 非公開 <span class="num">' + priv + '</span>' : '') + '</p>';
+          var html = '<p class="mypost-counts">記録 <span class="num">' + rows.length + '</span>' + (priv ? ' · 非公開 <span class="num">' + priv + '</span>' : '') + ' · <button type="button" class="mypost-notify-btn" data-my-export>書き出す（CSV）</button></p>';
           // the free seedling allowance and, beside it, the members' notice (board 9 D9)
           var seeds = rows.filter(function (r) { return r.type === 'seedling'; }).length;
           html += '<p class="mypost-quota">実生 <span class="num">' + seeds + ' / 20</span>（無料） <span id="mypost-notify"></span></p><div id="mypost-updates"></div><ol class="entries">';
@@ -2160,6 +2163,37 @@
         });
       });
   }
+  // 「書き出す（CSV）」: the person's own entries and photos, private ones included; free, also after membership ends (T132)
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-my-export]');
+    if (!b || !window._supabaseClient || !window._currentUser) return;
+    b.disabled = true;
+    window._supabaseClient.rpc('my_export').then(function (r) {
+      b.disabled = false;
+      var d = r && r.data;
+      if (!d || d.success === false) { showToast('書き出せませんでした。もう一度お試しください', true); return; }
+      var q = function (v) { v = v == null ? '' : String(v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+      var day = function (t) { return t ? String(t).slice(0, 10).replace(/-/g, '.') : ''; };
+      var kind = { species: '原種', clone: 'Clone', hybrid: 'Hybrid', seedling: '実生', unknown: '不明' };
+      var base = (window._SUPABASE_URL || '') + '/storage/v1/object/public/gallery-images/';
+      var lines = [['種類', '名前', '区分', '公開', '作出者・記載者', '母', '父', '播種日', '本文', '撮影日', '写真のひとこと', '撮影者', 'リンク', '写真', '登録日'].join(',')];
+      (d.entries || []).forEach(function (x) {
+        lines.push(['記録', String(x.name || '').replace(' [Seedling]', ''), kind[x.type] || x.type || '', x.private ? '非公開' : '公開', x.breeder, x.parent_a, x.parent_b, day(x.sowing_date), x.body, '', '', '', '', '', day(x.created_at)].map(q).join(','));
+      });
+      (d.photos || []).forEach(function (x) {
+        var pv = /^pv:/.test(x.path || '');
+        lines.push(['写真', x.name, '', pv ? '非公開' : '公開', '', '', '', '', '', day(x.taken_on), x.caption, x.credit, x.link, pv ? '（非公開の写真はサイトの中だけで見られます）' : base + x.path, day(x.created_at)].map(q).join(','));
+      });
+      var blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'aroid-origins-' + new Date().toISOString().slice(0, 10) + '.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+      showToast('記録 ' + (d.entries || []).length + ' 件・写真 ' + (d.photos || []).length + ' 枚を書き出しました');
+      if (typeof gtag === 'function') gtag('event', 'my_export', { entries: (d.entries || []).length, photos: (d.photos || []).length });
+    }, function () { b.disabled = false; showToast('書き出せませんでした。もう一度お試しください', true); });
+  });
   // 「会員の受付開始を知らせる」 / 「登録済み · 取り消す」 (the list lives in member_interest; join/leave in app-core)
   function drawNotifyLink(el, source) {
     if (!el || !window._currentUser || !window._supabaseClient) return;

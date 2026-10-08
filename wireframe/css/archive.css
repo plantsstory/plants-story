@@ -1760,3 +1760,8 @@ html.app-ui .mobile-nav [data-i18n="nav_contribute_mobile"] { display: none !imp
 /* board 9 T128: the stand-in and the photos being sent */
 .gallery__item--sending .gallery__img img { opacity: 0.6; }
 .gallery__item--standin .gallery__actions, .gallery__item--sending .gallery__actions { display: none; }
+
+/* board 11: the breadcrumb keeps 「トップ」 on one line; a long name ends in … */
+.breadcrumb { flex-wrap: nowrap; min-width: 0; }
+.breadcrumb > a:first-child, .breadcrumb__sep { flex-shrink: 0; white-space: nowrap; }
+.breadcrumb > :last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -38,10 +38,13 @@
     return m ? m[1] + ' sp. "' + m[2] + '"' : name;
   }
   function kana(rec) { return ((rec && rec.aliases) || []).filter(function (a) { return KATAKANA.test(a); })[0] || ''; }
+  function breederOf(rec) { var o = records(rec)[0] || {}, s = o.structured || {}; return clean(s.breeder) || clean(o.discoverer_or_breeder); }
   function whoAndYear(rec) {
     var o = records(rec)[0] || {}, s = o.structured || {};
     var type = (rec && rec.type) || s.origin_type || 'species';
-    var who = type === 'species' ? clean(s.author_name) : (clean(s.breeder) || clean(o.discoverer_or_breeder) || clean(s.namer));
+    // a person who only named the plant is 「命名」, not its maker (board 11 T145)
+    var namer = clean(s.namer);
+    var who = type === 'species' ? clean(s.author_name) : (breederOf(rec) || (namer ? '命名 ' + namer : ''));
     var year = yearOf(s.publication_year) || yearOf(o.discovery_year) || yearOf(s.naming_year);
     return [who, year].filter(Boolean).join(' ');
   }
@@ -53,7 +56,8 @@
     var k = kana(rec), tail = whoAndYear(rec), name = displayName(rec);
     var o = records(rec)[0] || {}, s = o.structured || {};
     var type = (rec && rec.type) || s.origin_type || 'species';
-    var what = type === 'species' ? 'の学名と由来' : type === 'seedling' ? 'の由来' : 'の由来・作出者';
+    // 「作出者」 only when the record names one (a wild-origin clone, or a named-only plant, is 「の由来」)
+    var what = type === 'species' ? 'の学名と由来' : (type === 'seedling' || !breederOf(rec)) ? 'の由来' : 'の由来・作出者';
     var gk = GENUS_KANA[name.split(' ')[0]];
     var head = k ? (gk ? gk + '・' : '') + k + '（' + name + '）' : name;
     return head + what + (tail ? ' — ' + tail : '') + ' · Aroid Origins';
