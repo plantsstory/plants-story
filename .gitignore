@@ -39,3 +39,8 @@ wireframe/pricing/
 wireframe/images/og/
 wireframe/images/ig/
 wireframe/data/name-check.json
+
+# generated names and wanted stubs (CI)
+wireframe/names/
+wireframe/wanted/
+wireframe/data/build-stamp.txt
