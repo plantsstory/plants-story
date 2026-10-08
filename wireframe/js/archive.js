@@ -2138,7 +2138,7 @@
           var html = '<p class="mypost-counts">記録 <span class="num">' + rows.length + '</span>' + (priv ? ' · 非公開 <span class="num">' + priv + '</span>' : '') + '</p>';
           // the free seedling allowance and, beside it, the members' notice (board 9 D9)
           var seeds = rows.filter(function (r) { return r.type === 'seedling'; }).length;
-          html += '<p class="mypost-quota">実生 <span class="num">' + seeds + ' / 20</span>（無料） <span id="mypost-notify"></span></p><ol class="entries">';
+          html += '<p class="mypost-quota">実生 <span class="num">' + seeds + ' / 20</span>（無料） <span id="mypost-notify"></span></p><div id="mypost-updates"></div><ol class="entries">';
           var baseUrl = window._SUPABASE_URL || '';
           rows.forEach(function (r) {
             var cached = (typeof cultivarData !== 'undefined' && cultivarData[r.cultivar_name]) || null;
@@ -2147,9 +2147,8 @@
             var thumb = first[r.cultivar_name] && baseUrl ? (window.galleryImg ? window.galleryImg(first[r.cultivar_name], 120) : baseUrl + '/storage/v1/object/public/gallery-images/' + first[r.cultivar_name]) : '';
             var line = window.entryLine(d, { thumb: thumb, noPerson: true });
             var n = count[r.cultivar_name] || 0;
-            var acts = r.is_private
-              ? '<span class="mypost-acts__note">非公開の実生（写真はまだ載せられません）</span>'
-              : '<button type="button" data-my="pick" data-key="' + esc(r.cultivar_name) + '">写真を追加</button> · <button type="button" data-my="shoot" data-key="' + esc(r.cultivar_name) + '">撮る</button>'
+            var acts = (r.is_private ? '<span class="mypost-acts__note">非公開（写真もあなただけ）</span> ' : '')
+              + '<button type="button" data-my="pick" data-key="' + esc(r.cultivar_name) + '">写真を追加</button> · <button type="button" data-my="shoot" data-key="' + esc(r.cultivar_name) + '">撮る</button>'
                 + (r.type === 'seedling' ? '' : ' · <button type="button" data-my="record" data-key="' + esc(r.cultivar_name) + '">記録を追加</button>');
             var date = r.created_at ? String(r.created_at).slice(0, 10).replace(/-/g, '.') : '';
             line = line.replace(/<\/li>$/, '<p class="mypost-acts"><span class="mypost-acts__meta">写真 <span class="num">' + n + '</span> · <span class="num">' + esc(date) + '</span></span>' + acts + '</p></li>');
@@ -2157,6 +2156,7 @@
           });
           grid.innerHTML = html + '</ol>';
           drawNotifyLink($('mypost-notify'), 'mypost');
+          if (window.drawMyUpdates) window.drawMyUpdates($('mypost-updates'));
         });
       });
   }
@@ -2250,6 +2250,71 @@
   });
   var hb = $('header-back');
   if (hb) hb.addEventListener('click', function () { history.back(); });
+  // 「前回から」 on the top page: what the archive gained since this browser's last visit (T124)
+  var fmtDay = function (t) { var d = new Date(t); return (d.getMonth() + 1) + '.' + d.getDate(); };
+  function sinceLine() {
+    var page = document.getElementById('page-top');
+    if (!page || !page.classList.contains('active')) return;
+    var last = null;
+    try { last = localStorage.getItem('ao-last-visit'); } catch (e) {}
+    var stamp = function () { try { localStorage.setItem('ao-last-visit', new Date().toISOString()); } catch (e) {} };
+    if (!last) { stamp(); return; }
+    if (Date.now() - new Date(last).getTime() < 30 * 60 * 1000) return;   // the same visit
+    var t0 = Date.now();
+    (function draw() {
+      if ((!window._dataFullyLoaded || !window._photoTimes) && Date.now() - t0 < 8000) { setTimeout(draw, 400); return; }
+      var items = (typeof _genusItems !== 'undefined') ? [].concat.apply([], Object.keys(_genusItems).map(function (k) { return _genusItems[k] || []; })) : [];
+      var entries = items.filter(function (it) { return it.meta && it.meta.type !== 'seedling' && it.meta.created_at && it.meta.created_at > last; }).length;
+      var photos = (window._photoTimes || []).filter(function (t) { return t > last; }).length;
+      stamp();
+      if (!entries && !photos) return;
+      var el = document.getElementById('since-line');
+      if (!el) { el = document.createElement('p'); el.id = 'since-line'; el.className = 'since-line'; var c = page.querySelector('.container'); if (c) c.insertBefore(el, c.firstChild); }
+      el.innerHTML = '前回（<span class="num">' + fmtDay(last) + '</span>）から — ' + [entries ? '収録 <span class="num">+' + entries + '</span>' : '', photos ? '写真 <span class="num">+' + photos + '</span>' : ''].filter(Boolean).join(' · ');
+      if (typeof gtag === 'function') gtag('event', 'since_line', { entries: entries, photos: photos });
+    })();
+  }
+  document.addEventListener('ao:page', function (e) { if (e.detail === 'top') setTimeout(sinceLine, 0); });
+  // 記録: what happened to my entries since I last looked (my_updates), at most five lines (T124)
+  window.drawMyUpdates = function (holder) {
+    if (!holder || !window._currentUser || !window._supabaseClient) return;
+    var key = 'ao-last-mypost:' + window._currentUser.id, since = null;
+    try { since = localStorage.getItem(key); } catch (e) {}
+    var from = since || new Date(Date.now() - 14 * 864e5).toISOString();
+    window._supabaseClient.rpc('my_updates', { p_since: from }).then(function (r) {
+      try { localStorage.setItem(key, new Date().toISOString()); } catch (e) {}
+      var d = r && r.data;
+      if (!d || d.success === false) return;
+      var shown = function (n) { return esc(String(n || '').replace(' [Seedling]', '')); };
+      var lines = [];
+      (d.photos || []).forEach(function (x) { lines.push('<i>' + shown(x.name) + '</i> に写真が足されました'); });
+      (d.records || []).forEach(function (x) { lines.push('<i>' + shown(x.name) + '</i> に記録が足されました'); });
+      (d.verified || []).forEach(function (x) { lines.push('<i>' + shown(x.name) + '</i> が検証済になりました'); });
+      (d.as_parent || []).forEach(function (x) { lines.push('<i>' + shown(x.parent) + '</i> が <i>' + shown(x.name) + '</i> の親として登録されました'); });
+      if (!lines.length) return;
+      holder.innerHTML = '<p class="mypost-updates__head">' + (since ? '前回（<span class="num">' + fmtDay(since) + '</span>）から' : 'この 2 週間') + '</p><ul class="mypost-updates">'
+        + lines.slice(0, 5).map(function (l) { return '<li>' + l + '</li>'; }).join('') + '</ul>';
+    });
+  };
+  // back after 30+ minutes away: read the archive again (a reload served from the cache), unless the person is in
+  // the middle of something — a form, an open sheet (T127)
+  var hiddenAt = 0;
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') { hiddenAt = Date.now(); return; }
+    if (!hiddenAt || Date.now() - hiddenAt < 30 * 60 * 1000) return;
+    var busy = currentPage() === 'contribute' || document.querySelector('dialog[open]') || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName));
+    if (!busy && navigator.onLine !== false) location.reload();
+  });
+  window.addEventListener('offline', function () { showToast('電波がありません。電波が戻ると、そのまま続けられます', true); });
+  // a touch on a list row starts loading that plant's photo (T128)
+  document.addEventListener('pointerdown', function (e) {
+    var row = e.target.closest && e.target.closest('[data-nav="cultivar"]');
+    if (!row || !window._thumbMap || !window.galleryImg) return;
+    var k = row.getAttribute('data-key') || ((row.querySelector('[data-key]') || {}).getAttribute ? row.querySelector('[data-key]').getAttribute('data-key') : '');
+    var shown = String(k || '').replace(' [Seedling]', '');
+    var p = window._thumbMap[shown];
+    if (p) { var im = new Image(); im.src = window.galleryImg(p, 1200); }
+  }, { passive: true, capture: true });
   // the first page was shown before this script ran
   function firstMark() { markBar(currentPage()); if (currentPage() === 'contribute') stepperInit(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', firstMark); else setTimeout(firstMark, 0);

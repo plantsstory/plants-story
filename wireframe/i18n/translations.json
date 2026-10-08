@@ -2153,7 +2153,7 @@
     "en": "Article 9-2 Paid service (membership)"
   },
   "terms_9a_body": {
-    "jp": "本サービスの一部機能（実生の6件目以降の投稿、AI 再調査リクエストの優先審査）は、有料の会員契約で利用できます。会員の受付は現在準備中で、受付開始まで有料のお申込みはできません。",
+    "jp": "本サービスの一部機能（無料枠〔会員の受付を始めるまで20件、受付開始後は5件〕を超える実生の投稿、AI 再調査リクエストの優先審査）は、有料の会員契約で利用できます。会員の受付は現在準備中で、受付開始まで有料のお申込みはできません。",
     "en": "Some features (seedling notes beyond five, priority review of AI re-check requests) come with a paid membership. Membership sign-up is in preparation; no paid sign-up is possible until it opens."
   },
   "terms_9a_list": {

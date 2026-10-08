@@ -246,13 +246,44 @@ if (btnAddOrigin) {
 }
 // "記録を追加" in the action row and the empty plate CTA delegate to the existing buttons
 var btnAddRecord = document.getElementById('detail-add-record-btn');
+// on a phone the form opens as a full-screen sheet: moved into #record-sheet and back on close (ids unchanged, T126)
+function recordSheetWanted() { return window.matchMedia && window.matchMedia('(max-width: 640px)').matches && typeof HTMLDialogElement !== 'undefined'; }
+var _recordFormHome = null, _recordScrollY = 0;
+function openRecordSheet() {
+  var dlg = document.getElementById('record-sheet'), body = document.getElementById('record-sheet-body');
+  if (!dlg || !body || !addOriginForm || dlg.open) return;
+  _recordFormHome = { parent: addOriginForm.parentNode, next: addOriginForm.nextSibling };
+  _recordScrollY = window.scrollY;
+  var h1 = document.querySelector('#page-cultivar h1');
+  document.getElementById('record-sheet-name').innerHTML = h1 ? h1.innerHTML : '';
+  body.appendChild(addOriginForm);
+  dlg.showModal();
+  var desc = document.getElementById('ao-description'); if (desc) setTimeout(function() { desc.focus(); }, 60);
+}
+window.closeRecordSheet = function() {
+  var dlg = document.getElementById('record-sheet');
+  if (!dlg || !_recordFormHome) return;
+  _recordFormHome.parent.insertBefore(addOriginForm, _recordFormHome.next);
+  _recordFormHome = null;
+  if (dlg.open) dlg.close();
+  window.scrollTo(0, _recordScrollY);
+};
+(function() {
+  var dlg = document.getElementById('record-sheet');
+  if (!dlg) return;
+  document.getElementById('record-sheet-close').addEventListener('click', function() {
+    var cancel = document.getElementById('btn-cancel-origin'); if (cancel) cancel.click(); else window.closeRecordSheet();
+  });
+  dlg.addEventListener('cancel', function(e) { e.preventDefault(); window.closeRecordSheet(); });
+})();
 if (btnAddRecord && btnAddOrigin) {
   btnAddRecord.addEventListener('click', function() {
     var _h = document.querySelector('#page-cultivar h1');
     if (window.requireLogin && !window.requireLogin({ a: 'record', k: _h ? h1Key(_h) : '' })) return;
+    if (addOriginForm && addOriginForm.style.display !== 'block') btnAddOrigin.click();
+    if (recordSheetWanted()) { openRecordSheet(); return; }
     var sec = document.getElementById('add-origin-section');
     if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    if (addOriginForm && addOriginForm.style.display !== 'block') btnAddOrigin.click();
   });
 }
 var plateEmptyCta = document.getElementById('plate-empty-cta');
@@ -267,6 +298,7 @@ if (btnCancelOrigin) {
   btnCancelOrigin.addEventListener('click', function() {
     addOriginToggle.style.display = 'block';
     addOriginForm.style.display = 'none';
+    if (window.closeRecordSheet) window.closeRecordSheet();
   });
 }
 
@@ -2098,6 +2130,7 @@ document.addEventListener('click', function(e) {
         originForm.style.display = 'none';
         var toggle = document.getElementById('add-origin-toggle');
         if (toggle) toggle.style.display = 'block';
+        if (window.closeRecordSheet) window.closeRecordSheet();
         var recs = document.getElementById('origins-container') || document.getElementById('add-origin-section');
         if (recs && recs.scrollIntoView) recs.scrollIntoView({ behavior: 'smooth', block: 'start' });
         showToast((cType === 'clone' || cType === 'hybrid') && descText ? t('origin_added') + '。AI が出典を確かめています' : t('origin_added'));
@@ -2274,6 +2307,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
 
   // --- Supabase Storage helpers ---
   function getPublicUrl(storagePath) {
+    if (/^pv:/.test(storagePath || '')) return '';   // private: a signed URL is set after the item is drawn
     // the detail gallery shows photos at most ~600px wide; 1200 keeps them sharp on phones
     if (BUCKET_NAME === 'gallery-images' && window.galleryImg) return window.galleryImg(storagePath, 1200);
     return getSupabaseUrl() + '/storage/v1/object/public/' + BUCKET_NAME + '/' + storagePath;
@@ -2289,15 +2323,18 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       var compressed = results[0];
       var userIp = results[1];
       var ext = 'jpg';
-      var path = safeName + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
-      return sb.storage.from(BUCKET_NAME).upload(path, compressed, {
+      // a private seedling's photo is private too: its own bucket under the uploader's folder (T125)
+      var entry = (typeof cultivarData !== 'undefined') && (cultivarData[cultivarName + ' [Seedling]'] || cultivarData[cultivarName]);
+      var priv = !!(entry && entry._isPrivate && window._currentUser);
+      var path = (priv ? window._currentUser.id + '/' : '') + safeName + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+      return sb.storage.from(priv ? 'private-images' : BUCKET_NAME).upload(path, compressed, {
         contentType: 'image/jpeg',
         upsert: false
       }).then(function(res) {
         if (res.error) throw res.error;
         var row = {
           cultivar_name: cultivarName,
-          storage_path: path
+          storage_path: (priv ? 'pv:' : '') + path
         };
         if (caption) row.caption = caption;
         if (linkUrl) row.link_url = linkUrl;
@@ -2451,11 +2488,21 @@ updateCultivarDetail = function(cultivarName, rowEl) {
   function sendPhotos(cultivarName, files, captions, link, extra) {
     var total = files.length, done = 0;
     captions = captions.slice();
+    // the photos being sent show at once in the gallery, marked 送信中 (T128); the redraw after sending replaces them
+    var gal = document.getElementById('gallery-upload'), pending = [];
+    var onPage = (function() { var h = document.querySelector('#page-cultivar h1'); return h && h1Key(h).replace(' [Seedling]', '') === String(cultivarName).replace(' [Seedling]', ''); })();
+    if (gal && onPage) files.forEach(function(f) {
+      var it = createGalleryItem(URL.createObjectURL(f), { caption: '送信中…' });
+      it.classList.add('gallery__item--sending'); it.removeAttribute('data-user-upload');
+      gal.parentNode.insertBefore(it, gal); pending.push(it);
+    });
+    var clearPending = function() { pending.forEach(function(it) { it.remove(); }); pending = []; };
     var sending = showToast('写真を送っています… 0 / ' + total, false, { sticky: true });
     var msg = sending && sending.querySelector('.toast__msg');
     (function next() {
       if (!files.length) {
         if (sending) sending.remove();
+        clearPending();
         if (typeof renderGalleryForCultivar === 'function') renderGalleryForCultivar(cultivarName);
         if (typeof loadCultivarThumbnails === 'function') loadCultivarThumbnails();
         showToast(total > 1 ? '写真を ' + total + ' 枚載せました' : '写真を載せました');
@@ -2471,6 +2518,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
         next();
       }).catch(function(err) {
         if (sending) sending.remove();
+        clearPending();
         console.warn('Photo upload failed:', err);
         if (done && typeof renderGalleryForCultivar === 'function') renderGalleryForCultivar(cultivarName);
         showToast((done ? done + ' 枚は載りました。残りの ' + files.length + ' 枚を' : '写真を') + '送れませんでした', true, { sticky: true, action: { label: 'もう一度', fn: function() { sendPhotos(cultivarName, files, captions, link, extra); } } });
@@ -2495,7 +2543,8 @@ updateCultivarDetail = function(cultivarName, rowEl) {
   function deleteImageFromSupabase(imageId, storagePath) {
     var sb = getSupabase();
     if (!sb) return Promise.reject('No Supabase');
-    return sb.storage.from(BUCKET_NAME).remove([storagePath]).then(function() {
+    var pv = /^pv:/.test(storagePath || '');
+    return sb.storage.from(pv ? 'private-images' : BUCKET_NAME).remove([pv ? storagePath.slice(3) : storagePath]).then(function() {
       return sb.from('cultivar_images').delete().eq('id', imageId);
     });
   }
@@ -2579,8 +2628,18 @@ updateCultivarDetail = function(cultivarName, rowEl) {
 
     var sb = getSupabase();
     if (sb) {
+      // the list's thumbnail stands in until the photos arrive (T128): no empty frame while they load
+      var standIn = null, tp = window._thumbMap && window._thumbMap[cultivarName];
+      if (tp && window.galleryImg) {
+        standIn = createGalleryItem(window.galleryImg(tp, 1200), {});
+        standIn.classList.add('gallery__item--standin');
+        gallery.insertBefore(standIn, galleryUpload);
+        galleryCarouselIdx = 0;
+        updateGalleryCarousel();
+      }
       // Fetch from Supabase
       fetchImagesFromSupabase(cultivarName).then(function(images) {
+        if (standIn) standIn.remove();
         // Check cultivar hasn't changed while loading
         var detailPage = document.getElementById('page-cultivar');
         var h1 = detailPage ? detailPage.querySelector('h1') : null;
@@ -2599,6 +2658,13 @@ updateCultivarDetail = function(cultivarName, rowEl) {
             ownerId: img.user_id
           });
           gallery.insertBefore(item, galleryUpload);
+          // a private photo: a signed URL for an hour, only its owner can get one (T125)
+          if (/^pv:/.test(img.storage_path || '')) {
+            getSupabase().storage.from('private-images').createSignedUrl(img.storage_path.slice(3), 3600).then(function(r) {
+              var el = item.querySelector('img');
+              if (el && r && r.data && r.data.signedUrl) { el.src = r.data.signedUrl; el.removeAttribute('data-src'); }
+            });
+          }
         });
         galleryCarouselIdx = 0;
         updateGalleryCarousel();

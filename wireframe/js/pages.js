@@ -537,13 +537,14 @@ function loadCultivarThumbnails() {
     return;
   }
   sb.from('cultivar_images')
-    .select('cultivar_name, storage_path')
+    .select('cultivar_name, storage_path, created_at')
     .order('created_at', { ascending: true })
     .then(function(res) {
       _thumbMapLoaded = true;
       if (res.error || !res.data) return;
+      window._photoTimes = res.data.map(function(img) { return img.created_at; });   // for 「前回から」 (T124)
       res.data.forEach(function(img) {
-        if (!_thumbMap[img.cultivar_name]) {
+        if (!_thumbMap[img.cultivar_name] && !/^pv:/.test(img.storage_path || '')) {
           _thumbMap[img.cultivar_name] = img.storage_path;
         }
       });
@@ -1353,7 +1354,7 @@ function updateCultivarDetail(cultivarName, rowEl) {
   }
   var addPhotoBtn = document.getElementById('detail-add-photo-btn');
   // a public seedling takes photos from its owner (growth records); private ones wait for T125 (board 9)
-  var ownSeedling = isSeedlingDetail && cData && !cData._isPrivate && window._currentUser && cData._userId === window._currentUser.id;
+  var ownSeedling = isSeedlingDetail && cData && window._currentUser && cData._userId === window._currentUser.id;
   if (addPhotoBtn) addPhotoBtn.style.display = (isSeedlingDetail && !ownSeedling) ? 'none' : '';
   // a seedling has no record form, so its 「記録を追加」 would do nothing
   var addRecordBtn = document.getElementById('detail-add-record-btn');

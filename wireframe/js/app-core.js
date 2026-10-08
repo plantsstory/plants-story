@@ -1460,7 +1460,7 @@ if (false) {
       // Photos at the width they are shown: originals are 1.5–5 MB phone photos.
       // galleryImg(path, w) → resized copy; if the resize service fails, the <img> falls back to the original once.
       window.galleryImg = function (path, w) {
-        if (!path) return '';
+        if (!path || /^pv:/.test(path)) return '';   // private photos are never public URLs (T125)
         var p = String(path).split('/').map(encodeURIComponent).join('/');
         return SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + p + '?width=' + (w || 640) + '&height=' + ((w || 640) * 2) + '&resize=contain&quality=72';   // fit inside w × 2w, keeping the shape
       };
@@ -3146,7 +3146,11 @@ if (false) {
     // Fetch only needed columns to reduce payload size
     if (supabase) {
       supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, verified_at, verification_note, parent_a_text, parent_b_text, parent_a_id, parent_b_id, is_private, ai_status, selected_from_id, updated_at, formula_status').then(function(res) {
-        if (res.error || !res.data) return;
+        if (res.error || !res.data) {
+          // the archive could not be read (no signal, a blip): say so instead of 「読み込み中…」 for ever (T127)
+          showToast(navigator.onLine === false ? '電波がありません' : '読み込めませんでした', true, { sticky: true, action: { label: 'もう一度', fn: function() { location.reload(); } } });
+          return;
+        }
 
         // Collect unique user_ids to fetch profiles
         var userIds = [];
