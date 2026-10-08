@@ -898,6 +898,8 @@ let _usageCultivar = "";
 // Which engine answers this request: "openai" (gpt-5-mini) or a Claude model id. Set once per request.
 const CLAUDE_MODELS = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"];
 let _llm = "openai";
+// an admin batch may ask for more searches on the species step (capped by RESEARCH_MAX_SEARCHES)
+let _speciesSearches = 0;
 
 // ============================================================
 // Claude (Anthropic API) with the web search server tool — same contract as callOpenAI
@@ -1763,12 +1765,13 @@ serve(async (req: Request) => {
       );
     }
 
-    const { cultivar_id, genus, cultivar_name, type, manual_origins, user_text, user_sources, preview, keywords, youtube_channels, llm } = await req.json();
+    const { cultivar_id, genus, cultivar_name, type, manual_origins, user_text, user_sources, preview, keywords, youtube_channels, llm, searches } = await req.json();
     _usageCultivar = cultivar_name || "";
     // engine: the Secret AI_MODEL ("openai" or a Claude model id); an admin may pick one per request (model comparison)
     const defaultLlm = Deno.env.get("AI_MODEL") || "openai";
     const wantLlm = authUser.app_metadata?.role === "admin" && typeof llm === "string" ? llm : defaultLlm;
     _llm = wantLlm === "openai" || CLAUDE_MODELS.includes(wantLlm) ? wantLlm : "openai";
+    _speciesSearches = authUser.app_metadata?.role === "admin" && Number.isInteger(searches) ? searches : 0;
 
     if ((!cultivar_id && !preview) || !cultivar_name) {
       return new Response(
@@ -2001,7 +2004,7 @@ serve(async (req: Request) => {
               "You are a botanical researcher. Return ONLY valid JSON, no markdown.",
               structuredPrompt, 2000, true, "species-structured",
               // the botanical databases already gave the protologue facts: one search for the rest, else three
-              botResult.authors && botResult.publicationYear && botResult.nativeDistribution.length ? 1 : 3
+              _speciesSearches || (botResult.authors && botResult.publicationYear && botResult.nativeDistribution.length ? 1 : 3)
             );
             const parsed = extractJson(text);
             if (parsed?.notes) {

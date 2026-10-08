@@ -21,6 +21,7 @@
   <script src="js/admin-verify.js?v=20261008f"></script>
   <script src="js/admin-contact.js?v=20261008f"></script>
   <script src="js/admin-checks.js?v=20261008f"></script>
+  <script src="js/admin-suggest.js?v=20261008f"></script>
   <script src="js/admin-shops.js?v=20261008f"></script>
 </head>
 <body>
@@ -979,6 +980,7 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
     if (section === 'contact' && window.loadContactMessages) window.loadContactMessages();
     if (section === 'dashboard' && window.loadMemberInterestCount) window.loadMemberInterestCount();
     if (section === 'dashboard' && window.loadNameChecks) window.loadNameChecks();
+    if (section === 'dashboard' && window.loadAiSuggestions) window.loadAiSuggestions();
     if (section === 'plants' && window.loadPlants) window.loadPlants();
     if (section === 'keyword-research') populateKRSelect();
     closeNav();
