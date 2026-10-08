@@ -2341,6 +2341,10 @@ if (false) {
     }
     (function step() {
       tries++;
+      if (ri.a === 'mypost') {
+        if (typeof navigateTo === 'function') navigateTo('mypost', {}, true);
+        return;
+      }
       if (ri.a === 'record' || ri.a === 'photo') {
         if (!entryReady()) { if (tries < 40) setTimeout(step, 250); return; }
         if (ri.a === 'record') {
@@ -2804,8 +2808,8 @@ if (false) {
       var shown = window.EntryMeta ? window.EntryMeta.name({ cultivar_name: displayName, type: meta.type, origins: entry.origins || [], species_qualifier: entry._qualifier }) : displayName;
       h += '<div class="cultivar-row__info"><div class="cultivar-row__name entry__name" data-key="' + escHtml(fullName) + '">' + sciNameHtml(shown)
         + ((entry._isPrivate || meta.is_private) ? ' <span class="badge badge--private">' + t('private_badge') + '</span>' : '') + '</div>'
-        + '<div class="entry__sub">' + parts.sub + (nInd0 ? ' · ' + escHtml(t('individuals_count').replace('{n}', nInd0)) : '') + '</div></div>'
-        + parts.state + '</div>';
+        + '<div class="entry__sub">' + parts.sub + (nInd0 ? ' · ' + escHtml(t('individuals_count').replace('{n}', nInd0)) : '') + parts.state + '</div></div>'
+        + '</div>';
       return h;
     }
     h += '<div class="cultivar-row__thumb' + (locked ? ' seedling-thumb--locked' : '') + '">' + thumbContent + '</div>';

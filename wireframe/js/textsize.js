@@ -2,14 +2,17 @@
    Loaded in <head> so the choice is applied before the first paint: every size in the
    stylesheets is rem-based, so moving the root size scales body text, headings and labels
    together. The choice is per browser (localStorage). */
-// Preview switch for the app-like screens (BOARD 10-08): ?preview=app on, ?preview=off off; this browser only.
+// The app-like screens are on for everyone (board 9, T117). ?preview=off turns them off on this browser
+// (the old one-page screens), ?preview=app turns them back on.
 (function () {
+  var off = false;
   try {
     var q = location.search;
-    if (/[?&]preview=app\b/.test(q)) localStorage.setItem('ao-preview-app', '1');
-    if (/[?&]preview=off\b/.test(q)) localStorage.removeItem('ao-preview-app');
-    if (localStorage.getItem('ao-preview-app') === '1') document.documentElement.classList.add('app-ui');
+    if (/[?&]preview=off\b/.test(q)) localStorage.setItem('ao-preview-app', '0');
+    if (/[?&]preview=app\b/.test(q)) localStorage.removeItem('ao-preview-app');
+    off = localStorage.getItem('ao-preview-app') === '0';
   } catch (e) {}
+  if (!off) document.documentElement.classList.add('app-ui');
 })();
 (function () {
   'use strict';

@@ -361,7 +361,8 @@
     if (d.type === 'seedling') return '';
     if (d.state !== 'ok') return '<span class="entry__state entry__state--' + esc(d.state) + '">' + esc(T('state_' + d.state)) + '</span>';
     if (!d.hasSources) return '<span class="entry__state">' + esc(T('record_by_user')) + '</span>';
-    if (d.trust > 0) return '<span class="entry__state entry__state--pct">' + (d.verifiedAt ? '<span class="verified-mark" title="' + esc(T('verified_title')) + '">✓</span> ' : '') + '<span class="num">' + d.trust + '%</span></span>';
+    // lists show ✓ for a verified record; the % is on the plant page (board 9)
+    if (d.verifiedAt) return '<span class="entry__state entry__state--pct"><span class="verified-mark" title="' + esc(T('verified_title')) + '">✓</span></span>';
     return '';
   }
   // pieces for list rows drawn elsewhere (the genus list in app-core.js)
@@ -378,8 +379,8 @@
     return '<li class="entry"><a class="entry__link" href="' + esc(d.href) + '" data-nav="cultivar" data-key="' + esc(d.fullName) + '">'
       + '<span class="entry__thumb' + (thumb ? '' : ' entry__thumb--empty') + '" aria-hidden="true">' + thumb + '</span>'
       + '<span class="entry__main"><span class="entry__name">' + sciNameHtml(d.shownName) + '</span>'
-      + '<span class="entry__sub">' + entrySubHtml(d, opts) + '</span></span>'
-      + entryStateHtml(d) + '</a></li>';
+      + '<span class="entry__sub">' + entrySubHtml(d, opts) + entryStateHtml(d) + '</span></span>'
+      + '</a></li>';
   };
 
   window._describeEntry = function (fullName, entry, type) { return describe(fullName, entry, type); };
@@ -838,17 +839,27 @@
     if (!flag || flag !== d.fullName) { el.classList.add('d-none'); el.innerHTML = ''; return; }
     try { sessionStorage.removeItem('just_recorded'); } catch (e) {}
     var text = window.shareTextFor(d);
-    el.innerHTML = '<p class="share-band__title mono">' + esc(T('share_band_title')) + '</p>'
+    // four actions after recording (board 9 D6): share · add a photo · add a record · see my records
+    var noPhoto = !document.querySelector('#page-cultivar .gallery__item[data-user-upload], #page-cultivar .plate img');
+    el.innerHTML = '<p class="share-band__title">' + esc(T('share_band_title')) + '</p>'
       + '<p class="share-band__text">' + esc(text) + '</p>'
-      + '<p class="share-band__actions mono"><button type="button" class="share-band__btn" id="share-band-copy">' + esc(T('share_band_copy')) + '</button>'
-      + '<a class="share-band__btn" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '" id="share-band-x">' + esc(T('share_band_x')) + '</a>'
-      + '<button type="button" class="share-band__close" id="share-band-close" aria-label="close">×</button></p>';
+      + '<p class="share-band__actions">'
+      + '<button type="button" class="share-band__btn' + (noPhoto ? '' : ' share-band__btn--main') + '" id="share-band-share">共有</button>'
+      + '<button type="button" class="share-band__btn' + (noPhoto ? ' share-band__btn--main' : '') + '" id="share-band-photo">写真を足す</button>'
+      + (d.type === 'seedling' ? '' : '<button type="button" class="share-band__btn" id="share-band-record">記録を追加</button>')
+      + '<a class="share-band__btn" href="' + esc(base + 'mypost') + '" data-nav="mypost">記録を見る</a>'
+      + '<button type="button" class="share-band__close" id="share-band-close" aria-label="閉じる">×</button></p>'
+      + '<p class="share-band__note">共有したときのカード画像は、30 分ほどで用意されます。</p>';
     el.classList.remove('d-none');
     var track = function (ch) { if (typeof gtag === 'function') gtag('event', 'share_click', { cultivar: d.displayName, channel: ch, source: 'submit' }); };
-    document.getElementById('share-band-copy').addEventListener('click', function () {
-      navigator.clipboard.writeText(text).then(function () { showToast(T('share_band_copied')); track('copy'); });
+    var url = window.getShareUrl ? window.getShareUrl() : location.href;
+    document.getElementById('share-band-share').addEventListener('click', function () {
+      if (navigator.share) { navigator.share({ text: text, url: url }).then(function () { track('os'); }, function () {}); return; }
+      navigator.clipboard.writeText(text + ' ' + url).then(function () { showToast(T('share_band_copied')); track('copy'); });
     });
-    document.getElementById('share-band-x').addEventListener('click', function () { track('x'); });
+    document.getElementById('share-band-photo').addEventListener('click', function () { var pb = document.getElementById('detail-add-photo-btn'); if (pb) pb.click(); });
+    var rb = document.getElementById('share-band-record');
+    if (rb) rb.addEventListener('click', function () { var r = document.getElementById('detail-add-record-btn'); if (r) r.click(); });
     document.getElementById('share-band-close').addEventListener('click', function () { el.classList.add('d-none'); });
   }
   /* 取扱店 — PR: paid listings, per genus (never tied to one plant), at most three, rotated daily */
@@ -1750,10 +1761,19 @@
   document.addEventListener('ao:page', function (e) { document.body.classList.remove('appbar-away'); markBar(e.detail); if (e.detail === 'contribute') setTimeout(stepperInit, 0); });
   var post = $('appbar-post');
   if (post) post.addEventListener('click', function () {
-    if (currentPage() === 'cultivar' && entryName()) { openPostSheet(); return; }
-    var link = document.querySelector('.header [data-nav="contribute"]');
-    if (link) link.click();
+    if (typeof gtag === 'function') gtag('event', 'appbar_click', { item: 'post' });
+    openPostSheet();
   });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('.appbar [data-appbar]');
+    if (a && typeof gtag === 'function') gtag('event', 'appbar_click', { item: a.getAttribute('data-appbar') });
+  }, true);
+  var mine = document.querySelector('.appbar [data-appbar="mypost"]');
+  if (mine) mine.addEventListener('click', function (e) {
+    if (window._currentUser || !window._supabaseClient || !window.requireLogin) return;
+    e.preventDefault(); e.stopPropagation();
+    window.requireLogin({ a: 'mypost', path: (typeof _basePath !== 'undefined' ? _basePath : '/') + 'mypost' });
+  }, true);
   var more = $('appbar-more');
   if (more) more.addEventListener('click', function () { var h = $('hamburger'); if (h) h.click(); });
   // the bar steps aside while the keyboard is up
@@ -1778,18 +1798,25 @@
   }, { passive: true });
 
   // ---- 「＋投稿」 sheet on a plant page ----
+  // three choices on every page (board 9 D3); on a plant page photo and seedling belong to that plant
+  var _sheetOnEntry = false;
   function openPostSheet() {
     var dlg = $('post-sheet');
     if (!dlg || typeof dlg.showModal !== 'function') return;
+    _sheetOnEntry = currentPage() === 'cultivar' && !!entryName();
     var std = document.querySelector('#page-cultivar .detail-standard');
     var h1 = document.querySelector('#page-cultivar h1');
-    $('post-sheet-kind').textContent = std ? std.textContent.trim() : '';
-    $('post-sheet-name').innerHTML = h1 ? h1.innerHTML : '';
+    $('post-sheet-kind').textContent = _sheetOnEntry && std ? std.textContent.trim() : '';
+    $('post-sheet-name').innerHTML = _sheetOnEntry && h1 ? h1.innerHTML : '何を記録しますか';
+    $('post-sheet-photo-d').textContent = _sheetOnEntry ? 'この品種に、自分で撮った写真を' : '写真のない品種に、自分で撮った写真を';
+    $('post-sheet-seedling-d').textContent = _sheetOnEntry ? 'この品種を母に、交配式と播種日' : '自分で播いた株の交配式と播種日';
     var ind = $('detail-add-individual'), sdl = $('detail-add-seedling'), rec = $('detail-add-record-btn'), ph = $('detail-add-photo-btn');
-    $('post-sheet-ind').classList.toggle('d-none', !ind || ind.classList.contains('d-none'));
-    $('post-sheet-seedling').classList.toggle('d-none', !sdl || sdl.classList.contains('d-none'));
-    dlg.querySelector('[data-post-act="record"]').parentNode.classList.toggle('d-none', !rec || rec.style.display === 'none');
-    dlg.querySelector('[data-post-act="photo"]').parentNode.classList.toggle('d-none', !ph || ph.style.display === 'none');
+    $('post-sheet-entry-more').classList.toggle('d-none', !_sheetOnEntry);
+    $('post-sheet-ind').classList.toggle('d-none', !_sheetOnEntry || !ind || ind.classList.contains('d-none'));
+    dlg.querySelector('[data-post-act="record"]').parentNode.classList.toggle('d-none', !_sheetOnEntry || !rec || rec.style.display === 'none');
+    // on a plant page without a photo button (another person's seedling) there is nothing to add a photo to
+    dlg.querySelector('[data-post-act="photo"]').parentNode.classList.toggle('d-none', _sheetOnEntry && (!ph || ph.style.display === 'none'));
+    dlg.querySelector('[data-post-act="seedling"]').parentNode.classList.toggle('d-none', _sheetOnEntry && (!sdl || sdl.classList.contains('d-none')));
     dlg.showModal();
   }
   var ps = $('post-sheet');
@@ -1800,9 +1827,23 @@
     var act = b.getAttribute('data-post-act');
     ps.close();
     // each row hands over to the button that already does it (same login check, same form)
+    if (typeof gtag === 'function') gtag('event', 'post_sheet_choice', { choice: act, on_entry: _sheetOnEntry ? 1 : 0 });
     var map = { photo: 'detail-add-photo-btn', record: 'detail-add-record-btn', individual: 'detail-add-individual', seedling: 'detail-add-seedling' };
-    if (map[act]) { var el = $(map[act]); if (el) el.click(); }
-    else if (act === 'new') { var l = document.querySelector('.header [data-nav="contribute"]'); if (l) l.click(); }
+    if (_sheetOnEntry && map[act]) { var el = $(map[act]); if (el) el.click(); return; }
+    var base = (typeof _basePath !== 'undefined' ? _basePath : '/');
+    if (act === 'photo') {
+      // off a plant page: the entries waiting for a photo (/wanted/ once it exists), else the person's records
+      if ($('page-wanted')) { if (typeof navigateTo === 'function') navigateTo('wanted', {}); return; }
+      if (window.requireLogin && !window.requireLogin({ a: 'mypost', path: base + 'mypost' })) return;
+      if (typeof navigateTo === 'function') navigateTo('mypost', {});
+      showToast('写真を足す品種の「写真を追加」を押してください');
+      return;
+    }
+    // seedling / new name: the contribute form (the header link carries the login check and the kind)
+    var l = document.createElement('a');
+    l.href = base + 'contribute'; l.setAttribute('data-nav', 'contribute');
+    if (act === 'seedling') l.setAttribute('data-contribute-type', 'seedling');
+    l.style.display = 'none'; document.body.appendChild(l); l.click(); l.remove();
   });
 
   // ---- posting in five steps (§4-4): 区分 → 名前 → 由来 → 写真 → 確認 ----
@@ -1842,14 +1883,17 @@
     // heading line and bottom bar
     var head = document.createElement('div');
     head.className = 'cstep-head'; head.id = 'cstep-head';
-    head.innerHTML = '<p class="cstep-head__label"><span class="num" id="cstep-count"></span> <span id="cstep-name"></span></p><ol class="cstep-head__ticks">' + STEPS.map(function () { return '<li></li>'; }).join('') + '</ol>';
+    head.innerHTML = '<p class="cstep-head__label"><span class="num" id="cstep-count"></span> · <span id="cstep-name"></span></p><ol class="cstep-head__ticks">' + STEPS.map(function () { return '<li></li>'; }).join('') + '</ol>';
     infoCard.parentNode.insertBefore(head, infoCard);
     var bar = document.createElement('div');
     bar.className = 'cstep-bar'; bar.id = 'cstep-bar';
     bar.innerHTML = '<button type="button" class="btn btn--secondary" id="cstep-back">戻る</button><button type="button" class="btn btn--primary" id="cstep-next">次へ</button>';
     p.appendChild(bar);
     $('cstep-back').addEventListener('click', function () { if (step > 1) history.back(); });
-    $('cstep-next').addEventListener('click', function () { if (check(step)) go(step + 1, true); });
+    $('cstep-next').addEventListener('click', function () {
+      if (step === 5) { var sbtn = $('contribute-submit-btn'); if (sbtn) sbtn.click(); return; }
+      if (check(step)) go(step + 1, true);
+    });
     // choosing the kind moves on by itself (unless the choice was undone, e.g. a seedling needing a login)
     p.querySelectorAll('input[name="cultivar-type"]').forEach(function (r) {
       r.addEventListener('change', function (ev) {
@@ -1870,12 +1914,47 @@
       var nm = $('cultivar-name-input');
       if (nm && !nm.value.trim()) { showToast('名前を入れてください', true); var f = document.querySelector('#name-builder input:not([readonly])'); if (f) f.focus(); return false; }
       var dup = $('duplicate-alert');
-      if (dup && !dup.classList.contains('d-none') && dup.offsetParent) { showToast('この品種はもう収録されています。写真や記録はそのページから足せます', true); return false; }
+      if (dup && dup.getAttribute('data-kind') === 'exact' && dup.offsetParent) { showToast('この品種はもう収録されています。写真や記録はそのページから足せます', true); return false; }
     }
     return true;
   }
   function val(id) { var el = $(id); return el ? String(el.value || '').trim() : ''; }
   function review() {
+    var type = (document.querySelector('#page-contribute input[name="cultivar-type"]:checked') || {}).value || 'species';
+    var genus = ($('contribute-genus-select') || {}).value || 'Anthurium';
+    var full = window.buildContributeFullName ? window.buildContributeFullName(genus, type, val('cultivar-name-input')) : val('cultivar-name-input');
+    var sciHtml = function (t) { return typeof italicizeSciNames === 'function' ? italicizeSciNames(esc(t)) : esc(t); };
+    var sub = (document.querySelector('#species-subcategory input:checked') || {}).value || '';
+    var kinds = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: '実生' };
+    var kindLine = kinds[type] + (type === 'species' && sub && sub !== 'species' ? '（未記載 ' + esc(sub) + '.）' : '');
+    var words = val('sf-notes');
+    var pair = function (sel) { var ins = document.querySelectorAll(sel + ' input'); return ins.length >= 2 ? [ins[0].value.trim(), ins[1].value.trim()] : ['', '']; };
+    var pp = type === 'clone' ? pair('#formula-inputs') : type === 'hybrid' ? pair('#hybrid-formula-inputs') : type === 'seedling' ? pair('#seedling-formula-inputs') : ['', ''];
+    var known = function (n) { if (!n) return ''; var hit = window.findContributeDuplicate ? window.findContributeDuplicate(/^[A-Z][a-z]+ /.test(n) ? n : genus + ' ' + n, genus).exact : null; return sciHtml(n) + ' <span class="cstep-tag">' + (hit ? '登録済み' : '未登録') + '</span>'; };
+    var cross = pp[0] || pp[1] ? known(pp[0] || '不明') + ' × ' + known(pp[1] || '不明') : '';
+    var aiFields = window._aiAutofillValues ? Object.keys(window._aiAutofillValues) : [];
+    var FIELD = { author_name: '記載者', publication_year: '発表年', collector: '採集者', collection_year: '採集年', type_locality: 'タイプ産地', known_habitats: '分布' };
+    // what the record gate will say about this draft
+    var draft = { _type: type, origins: [{ trust: 30, source_type: 'manual', body: words, structured: { origin_type: type, author_name: val('sf-author-name'), publication_year: val('sf-publication-year'), type_locality: val('sf-type-locality'), known_habitats: val('sf-known-habitats'), namer: val('sf-clone-namer'), breeder: val('sf-hybrid-breeder') || val('creator-name-input'), formula: (pp[0] && pp[1]) ? { parentA: pp[0], parentB: pp[1] } : null } }] };
+    var gate = '';
+    try { gate = typeof window.recordStateOf === 'function' ? window.recordStateOf(full, draft, { type: type }) : ''; } catch (e) { gate = ''; }
+    var priv = $('seedling-private') && $('seedling-private').checked && type === 'seedling';
+    var scope = priv ? 'あなただけ（非公開の実生）' : gate && gate !== 'ok' ? 'このままだと記録不足として一覧では畳まれます（作出者か交配式、または出典があれば収録）' : '一覧・検索・共有に出ます';
+    var rows = [
+      ['登録名', sciHtml(full.replace(' [Seedling]', '')), 2],
+      ['区分', esc(kindLine), 1],
+      ['本文', words ? '<span class="cstep-words">' + esc(words) + '</span><span class="cstep-note">あなたの文のまま載ります。編集部と AI は書き換えません</span>' : '<span class="absent">（本文なし。項目から 1 行を作ります）</span>', 3],
+      ['交配式', cross || '<span class="absent">（なし）</span>', 3],
+      ['AI 下書き', aiFields.length ? esc(aiFields.map(function (f) { return FIELD[f] || f; }).join('・')) + ' <span class="cstep-tag">確かめてください</span>' : '<span class="absent">（なし）</span>', 3],
+      ['公開の範囲', esc(scope), 1]
+    ];
+    var photos = document.querySelectorAll('#contribute-preview img').length;
+    var html = '<div class="specimen">' + rows.map(function (r) {
+      return '<div class="specimen__cell"><span class="specimen__k">' + esc(r[0]) + '</span><span class="specimen__v"><span>' + r[1] + '</span> <a href="#" class="cstep-fix" data-goto="' + r[2] + '">直す</a></span></div>';
+    }).join('') + '</div>';
+    html += '<p class="cstep-review__scope">写真 ' + (photos ? photos + ' 枚' : 'なし（あとから足せます）') + '</p>';
+    $('cstep-review').innerHTML = html;
+    return;
     var type = (document.querySelector('#page-contribute input[name="cultivar-type"]:checked') || {}).value || 'species';
     var kinds = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: '実生' };
     var rows = [['区分', esc(kinds[type] || type), 1], ['名前', typeof italicizeSciNames === 'function' ? italicizeSciNames(esc(val('cultivar-name-input'))) : esc(val('cultivar-name-input')), 2]];
@@ -1904,9 +1983,13 @@
     $('cstep-name').textContent = STEPS[n - 1];
     Array.prototype.forEach.call($('cstep-head').querySelectorAll('li'), function (li, i) { li.classList.toggle('is-done', i < n); });
     $('cstep-back').disabled = n === 1;
-    $('cstep-next').classList.toggle('d-none', n === 5);
+    // step 5: the bar's main button records (the form's own submit button is hidden while stepped)
+    $('cstep-next').textContent = n === 5 ? 'この内容で記録する' : '次へ';
     if (n === 5) review();
+    // a name-check notice from the previous step is not left on screen (R8)
+    document.querySelectorAll('#toast-container .toast-error').forEach(function (t) { t.remove(); });
     if (push) history.pushState({ page: 'contribute', cstep: n }, '', location.href);
+    if (typeof gtag === 'function') gtag('event', 'contribute_step', { step: n });
     window.scrollTo(0, 0);
   }
   function stepperInit() {
@@ -1925,9 +2008,14 @@
     document.body.classList.add('appbar-hidden');
     // the one genus that is open is chosen for the person
     var sel = $('contribute-genus-select');
-    if (sel && !sel.value) {
+    if (sel) {
       var opts = Array.prototype.filter.call(sel.options, function (o) { return !o.disabled && o.value; });
-      if (opts.length === 1) { sel.value = opts[0].value; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+      if (opts.length === 1) {
+        if (!sel.value) { sel.value = opts[0].value; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+        var grp = sel.closest('.form-group');
+        if (grp && !grp.querySelector('.cstep-genus')) { var line = document.createElement('p'); line.className = 'cstep-genus'; line.innerHTML = '属 <i>' + esc(opts[0].textContent.trim()) + '</i>'; grp.appendChild(line); }
+        if (grp) grp.classList.add('cstep-one-genus');
+      }
     }
     var st = history.state && history.state.cstep;
     go(st || 1, false);
@@ -1960,9 +2048,11 @@
     if (!grid) return;
     grid.className = 'mypost-list';
     if (!window._currentUser) {
-      grid.innerHTML = '';
+      grid.innerHTML = '<p class="mypost-login"><button type="button" class="btn btn--primary" id="mypost-login-btn">Google でログイン</button></p>';
       if (loginMsg) { loginMsg.style.display = ''; loginMsg.classList.remove('d-none'); }
       if (emptyMsg) emptyMsg.style.display = 'none';
+      var lb = $('mypost-login-btn');
+      if (lb) lb.addEventListener('click', function () { if (window.requireLogin) window.requireLogin({ a: 'mypost', path: (typeof _basePath !== 'undefined' ? _basePath : '/') + 'mypost' }); });
       return;
     }
     if (loginMsg) loginMsg.style.display = 'none';
@@ -2039,6 +2129,12 @@
     });
   });
   document.addEventListener('ao:photo-sent', function () { if (on() && currentPage() === 'mypost') loadMine(); });
+  // measuring the new screens (board 9 T115): which interface, and opened from the home screen or not
+  if (typeof gtag === 'function') {
+    var dm = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser';
+    gtag('set', 'user_properties', { app_ui: on() ? '1' : '0', display_mode: dm });
+    try { if (!sessionStorage.getItem('ao-dm-sent')) { gtag('event', 'display_mode', { mode: dm, app_ui: on() ? 1 : 0 }); sessionStorage.setItem('ao-dm-sent', '1'); } } catch (e) {}
+  }
   // the first page was shown before this script ran
   function firstMark() { markBar(currentPage()); if (currentPage() === 'contribute') stepperInit(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', firstMark); else setTimeout(firstMark, 0);

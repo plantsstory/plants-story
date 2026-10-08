@@ -13,7 +13,7 @@
   --color-primary-dark: #1F4234;
   --color-primary-light: #7FA593;
   --color-accent: #2F5D4A;
-  --color-accent-warm: #A8712E; /* ochre for numerals & years */
+  --color-accent-warm: #8F5E1E; /* ochre for numerals & years (4.92:1 on paper; board 9) */
 
   --color-black: var(--color-ink);
   --color-dark: var(--color-ink);

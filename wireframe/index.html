@@ -15,8 +15,8 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.yahoo.co.jp https://i.moshimo.com; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJK72JH471"></script>
-  <script src="js/textsize.js?v=20261008j"></script>
-  <script src="js/gtag-init.js?v=20261008j"></script>
+  <script src="js/textsize.js?v=20261008k"></script>
+  <script src="js/gtag-init.js?v=20261008k"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -57,13 +57,13 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20261008j">
-  <link rel="stylesheet" href="css/reset.css?v=20261008j">
-  <link rel="stylesheet" href="css/layout.css?v=20261008j">
-  <link rel="stylesheet" href="css/components.css?v=20261008j">
-  <link rel="stylesheet" href="css/pages.css?v=20261008j">
-  <link rel="stylesheet" href="css/utilities.css?v=20261008j">
-  <link rel="stylesheet" href="css/archive.css?v=20261008j">
+  <link rel="stylesheet" href="css/variables.css?v=20261008k">
+  <link rel="stylesheet" href="css/reset.css?v=20261008k">
+  <link rel="stylesheet" href="css/layout.css?v=20261008k">
+  <link rel="stylesheet" href="css/components.css?v=20261008k">
+  <link rel="stylesheet" href="css/pages.css?v=20261008k">
+  <link rel="stylesheet" href="css/utilities.css?v=20261008k">
+  <link rel="stylesheet" href="css/archive.css?v=20261008k">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -543,19 +543,20 @@
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="hybrid">
               <span data-i18n="type_hybrid">Hybrid</span>
-              <span class="type-def">ひとつの交配式から生まれた実生群の名前</span>
+              <span class="type-def">同じ交配から生まれた複数の株に付く名前（選んだ株が複数ある場合も）</span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="clone">
               <span data-i18n="type_clone">Clone</span>
-              <span class="type-def">1 株（オリジナル個体）とその株分け・組織培養株の名前</span>
+              <span class="type-def">1 株（オリジナル個体）と、その株分け・組織培養株だけが名乗る名前。実生（F 個体）は別の株</span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="seedling">
               <span data-i18n="type_seedling">実生 (Seedling)</span>
-              <span class="type-def">自分で播いた記録（交配式・播種日・作出者）</span>
+              <span class="type-def">自分で播いた記録（交配式・播種日・作出者）。名前を付けて配ったら Hybrid か Clone として別に登録</span>
             </label>
           </div>
+          <p class="type-def type-def--hint">迷ったら、作出者や配った人の説明に従ってください。説明がなければ Clone（名前は 1 株のオリジナル個体を指します）。</p>
         </div>
       </div>
 
@@ -1546,7 +1547,7 @@
     <a href="/" data-nav="top" class="appbar__item" data-appbar="top">図鑑</a>
     <a href="/anthurium/" data-nav="genus" data-genus="anthurium" class="appbar__item" data-appbar="genus">一覧</a>
     <button type="button" class="appbar__item appbar__post" id="appbar-post">＋投稿</button>
-    <a href="/mypost" data-nav="mypost" class="appbar__item" data-appbar="mypost">自分の記録</a>
+    <a href="/mypost" data-nav="mypost" class="appbar__item" data-appbar="mypost">記録</a>
     <button type="button" class="appbar__item" id="appbar-more" aria-controls="mobileNav">その他</button>
   </nav>
 
@@ -1555,20 +1556,20 @@
     <p class="sheet-dialog__kind" id="post-sheet-kind"></p>
     <h3 class="dialog-title" id="post-sheet-name"></h3>
     <ul class="sheet-rows">
-      <li><button type="button" data-post-act="photo">写真を追加 <span aria-hidden="true">→</span></button></li>
-      <li><button type="button" data-post-act="record">記録を追加 <span aria-hidden="true">→</span></button></li>
-      <li id="post-sheet-ind"><button type="button" data-post-act="individual">個体を追加 <span aria-hidden="true">→</span></button></li>
+      <li><button type="button" data-post-act="photo"><span><span class="sheet-rows__t">写真を足す</span><span class="sheet-rows__d" id="post-sheet-photo-d">写真のない品種に、自分で撮った写真を</span></span> <span aria-hidden="true">→</span></button></li>
+      <li><button type="button" data-post-act="seedling"><span><span class="sheet-rows__t">実生を記録</span><span class="sheet-rows__d" id="post-sheet-seedling-d">自分で播いた株の交配式と播種日</span></span> <span aria-hidden="true">→</span></button></li>
+      <li><button type="button" data-post-act="new"><span><span class="sheet-rows__t">新しい名前を登録</span><span class="sheet-rows__d">まだ収録されていない原種・Clone・Hybrid</span></span> <span aria-hidden="true">→</span></button></li>
     </ul>
-    <ul class="sheet-rows sheet-rows--more">
-      <li><button type="button" data-post-act="new">新しい品種を登録 <span aria-hidden="true">→</span></button></li>
-      <li id="post-sheet-seedling"><button type="button" data-post-act="seedling">この品種を親に実生を記録 <span aria-hidden="true">→</span></button></li>
+    <ul class="sheet-rows sheet-rows--more" id="post-sheet-entry-more">
+      <li><button type="button" data-post-act="record">この品種に記録を追加 <span aria-hidden="true">→</span></button></li>
+      <li id="post-sheet-ind"><button type="button" data-post-act="individual">この原種の個体を追加 <span aria-hidden="true">→</span></button></li>
     </ul>
     <div class="dialog-actions"><button type="button" class="btn btn--secondary btn--sm" data-post-act="close">閉じる</button></div>
   </dialog>
 
   <!-- Photo sheet: replaces the two prompt() questions (BOARD 10-08 §4-3) -->
   <dialog id="photo-sheet" class="dialog-clean sheet-dialog" aria-labelledby="photo-sheet-title">
-    <h3 class="dialog-title" id="photo-sheet-title">写真を載せる</h3>
+    <h3 class="dialog-title" id="photo-sheet-title" tabindex="-1" autofocus>写真を載せる</h3>
     <p class="sheet-dialog__kind" id="photo-sheet-name"></p>
     <div class="photo-sheet__plates" id="photo-sheet-plates"></div>
     <div class="form-group">
@@ -1583,6 +1584,13 @@
     <details class="contribute-fold"><summary>リンクを付ける（Instagram など）</summary>
       <div class="form-group"><input type="url" id="photo-sheet-link" class="form-input" placeholder="https://" aria-label="リンク"></div>
     </details>
+    <fieldset class="form-group d-none photo-sheet__kind" id="photo-sheet-kind">
+      <legend class="form-label">写っている株</legend>
+      <label class="form-radio"><input type="radio" name="photo-sheet-kind" value="original"> <span>オリジナル由来（株分け・組織培養）</span></label>
+      <label class="form-radio"><input type="radio" name="photo-sheet-kind" value="f_seedling"> <span>実生（F 個体）</span></label>
+      <label class="form-radio"><input type="radio" name="photo-sheet-kind" value="unknown" checked> <span>わからない</span></label>
+    </fieldset>
+    <label class="photo-sheet__own d-none" id="photo-sheet-own-row"><input type="checkbox" id="photo-sheet-own"> <span>自分で撮った写真です。撮影者として「<span id="photo-sheet-own-name"></span>」が載ります（この確認は最初の 1 回だけ）</span></label>
     <p class="photo-sheet__note">自分で撮った写真だけを載せてください。載せた写真はあとから自分で消せます。</p>
     <div class="dialog-actions">
       <button type="button" class="btn btn--secondary btn--sm" id="photo-sheet-cancel">やめる</button>
@@ -1622,14 +1630,14 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/record-gate.js?v=20261008j"></script>
-  <script src="js/app-core.js?v=20261008j"></script>
-  <script src="js/pages.js?v=20261008j"></script>
-  <script src="js/forms.js?v=20261008j"></script>
-  <script src="js/entry-meta.js?v=20261008j"></script>
-  <script src="js/archive.js?v=20261008j"></script>
-  <script src="js/tool-gate.js?v=20261008j"></script>
-  <script src="js/tools.js?v=20261008j"></script>
+  <script src="js/record-gate.js?v=20261008k"></script>
+  <script src="js/app-core.js?v=20261008k"></script>
+  <script src="js/pages.js?v=20261008k"></script>
+  <script src="js/forms.js?v=20261008k"></script>
+  <script src="js/entry-meta.js?v=20261008k"></script>
+  <script src="js/archive.js?v=20261008k"></script>
+  <script src="js/tool-gate.js?v=20261008k"></script>
+  <script src="js/tools.js?v=20261008k"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1639,11 +1647,11 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261008j"></script>
+  <script src="js/dialogs.js?v=20261008k"></script>
 
   <!-- AI re-research request dialog -->
   <!-- Asked before anything is typed: posting, photos and records need a login (2026-10-08 app-ux) -->
-  <dialog id="login-sheet" class="dialog-clean login-sheet" aria-labelledby="login-sheet-title">
+  <dialog id="login-sheet" class="dialog-clean sheet-dialog login-sheet" aria-labelledby="login-sheet-title">
     <h3 class="dialog-title" id="login-sheet-title" data-i18n="login_sheet_title">ログインしてから始めます</h3>
     <p class="text-sm" id="login-sheet-text" data-i18n="login_sheet_text">投稿・写真・記録の追加には Google のログインが要ります。ログインのあと、この続きから始められます。</p>
     <p class="text-sm d-none" id="login-sheet-inapp" data-i18n="login_sheet_inapp">このアプリの中のブラウザでは Google のログインが使えません。右上の「…」から「ブラウザで開く」を選んでください。</p>
@@ -1690,6 +1698,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261008j"></script>
+<script src="js/sw-register.js?v=20261008k"></script>
 </body>
 </html>

@@ -1302,7 +1302,39 @@ document.addEventListener('click', function(e) {
     });
   });
 
-  // Exact-match duplicate detection only (skip in edit mode)
+  // ---- One name builder for the duplicate check, the review step and the submit (board 9, T111) ----
+  // A Clone/Hybrid name that already carries quotes (an epithet and a cultivar: crystallinum 'Test') keeps them;
+  // a bare cultivar name is quoted; a seedling is its cross plus ' [Seedling]'.
+  window.buildContributeFullName = function(genus, type, name) {
+    name = String(name || '').replace(/[‘’]/g, "'").replace(/\s+/g, ' ').trim();
+    if (type === 'species') return genus + ' ' + name.replace(/^'+|'+$/g, '');
+    if (type === 'seedling') return genus + ' ' + name.replace(/^'+|'+$/g, '').replace(/\s*[x×X]\s*(?=[A-Za-z'"])/g, ' × ').replace(/\s+/g, ' ').trim() + ' [Seedling]';
+    if (/'[^']+'/.test(name)) return genus + ' ' + name;            // epithet + 'Cultivar' as built by the name fields
+    return genus + " '" + name.replace(/^'+|'+$/g, '') + "'";
+  };
+  // the same entry, however it is written: case, quote marks, spaces, × and the genus prefix of an alias
+  function nameKey(s, genus) {
+    s = String(s || '').normalize('NFKC').toLowerCase().replace(/[‘’"“”]/g, "'").replace(/\s*[x×]\s*(?=['a-z])/g, ' × ').replace(/\s+/g, ' ').trim();
+    if (genus && s.indexOf(genus.toLowerCase() + ' ') !== 0) s = genus.toLowerCase() + ' ' + s;
+    return s;
+  }
+  // exact: stop. Look-alike (folded name or one letter apart): mention it, never link the entries.
+  window.findContributeDuplicate = function(fullName, genus) {
+    var key = nameKey(fullName, genus), exact = null, near = [];
+    var fq = window.foldName ? window.foldName(fullName) : '';
+    Object.keys(cultivarData).forEach(function(name) {
+      if (exact) return;
+      var e = cultivarData[name] || {};
+      var keys = [name].concat(e._aliases || []);
+      if (keys.some(function(k) { return nameKey(k, genus) === key; })) { exact = name; return; }
+      if (fq && window.foldName && keys.some(function(k) { var fk = window.foldName(k); return fk && (fk === fq || (fq.length >= 5 && window.nameNearly && window.nameNearly({ fullName: k, entry: {} }, fullName))); })) {
+        if (near.indexOf(name) === -1 && name.replace(' [Seedling]', '') !== fullName.replace(' [Seedling]', '')) near.push(name);
+      }
+    });
+    return { exact: exact, near: exact ? [] : near.slice(0, 3) };
+  };
+
+  // Duplicate detection (skip in edit mode): exact → stop, look-alike → a note only
   if (contributeName && duplicateAlert) {
     contributeName.addEventListener('input', function() {
       if (editMode) { duplicateAlert.style.display = 'none'; return; }
@@ -1311,27 +1343,19 @@ document.addEventListener('click', function(e) {
       var genus = contributeGenus ? contributeGenus.value : ((window._generaData && window._generaData[0]) ? window._generaData[0].name : '');
       var currentType = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
       currentType = currentType ? currentType.value : 'species';
-      var exactKey;
-      var cleanVal = inputVal.replace(/^'+|'+$/g, '');
-      if (currentType === 'species') {
-        exactKey = genus.toLowerCase() + ' ' + cleanVal;
-      } else if (currentType === 'seedling') {
-        exactKey = genus.toLowerCase() + " '" + cleanVal + "' [seedling]";
-      } else {
-        exactKey = genus.toLowerCase() + " '" + cleanVal + "'";
-      }
-      var found = null;
-      Object.keys(cultivarData).forEach(function(name) {
-        if (name.toLowerCase() === exactKey) {
-          found = name;
-        }
-      });
-      if (found) {
+      var dup = window.findContributeDuplicate(window.buildContributeFullName(genus, currentType, this.value.trim()), genus);
+      var msgEl = duplicateAlert.querySelector('.text-sm.text-muted');
+      if (dup.exact) {
         duplicateAlert.style.display = 'block';
-        var msgEl = duplicateAlert.querySelector('.text-sm.text-muted');
-        if (msgEl) msgEl.textContent = '「' + found.replace(' [Seedling]', '') + '」は既に登録済みです。由来を追加する場合は品種ページから行えます。';
+        duplicateAlert.setAttribute('data-kind', 'exact');
+        if (msgEl) msgEl.textContent = '「' + dup.exact.replace(' [Seedling]', '') + '」は既に登録済みです。写真や記録はその品種のページから足せます。';
+      } else if (dup.near.length) {
+        duplicateAlert.style.display = 'block';
+        duplicateAlert.setAttribute('data-kind', 'near');
+        if (msgEl) msgEl.textContent = '似た名前があります: ' + dup.near.map(function(n) { return '「' + n.replace(' [Seedling]', '') + '」'; }).join('') + '。同じ植物ならそのページへ。別の品種ならこのまま続けられます。';
       } else {
         duplicateAlert.style.display = 'none';
+        duplicateAlert.removeAttribute('data-kind');
       }
     });
   }
@@ -1368,20 +1392,12 @@ document.addEventListener('click', function(e) {
         return;
       }
 
-      // Build full name — strip existing quotes to avoid double-quoting
+      // Build the full name with the shared builder (the review step shows exactly this)
+      var fullName = window.buildContributeFullName(genus, type, name);
       name = name.replace(/^'+|'+$/g, '');
-      var fullName;
-      if (type === 'species') {
-        fullName = genus + ' ' + name;
-      } else if (type === 'seedling') {
-        // Seedlings are named by their cross (母 × 父); never wrap the whole formula in quotes
-        fullName = genus + ' ' + name.replace(/\s*[x×X]\s*(?=[A-Za-z'"])/g, ' × ').replace(/\s+/g, ' ').trim() + ' [Seedling]';
-      } else {
-        fullName = genus + " '" + name + "'";
-      }
 
-      // Check duplicate (skip in edit mode unless name changed to a *different* existing one)
-      if (!editMode && cultivarData[fullName]) { showToast(t('error_duplicate'), true); return; }
+      // Check duplicate (skip in edit mode unless name changed to a *different* existing one): names and aliases, normalized
+      if (!editMode && (cultivarData[fullName] || window.findContributeDuplicate(fullName, genus).exact)) { showToast(t('error_duplicate'), true); return; }
       if (editMode) {
         // Normalize both names for comparison (strip quotes/whitespace differences)
         var normFull = fullName.replace(/'+/g, "'").trim();
@@ -1674,7 +1690,8 @@ document.addEventListener('click', function(e) {
           body: ownWords || autoBody,
           body_generated: !ownWords,
           provenance: ownWords ? 'contributor' : 'generated',
-          structured: structured,
+          // the words are the body; notes would only repeat them
+          structured: ownWords ? Object.assign({}, structured, { notes: null }) : structured,
           source_type: 'manual',
           sources: contributeSources.map(function(url) { return { icon: '\u{1F310}', text: url }; }),
           author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
@@ -2084,6 +2101,7 @@ document.addEventListener('click', function(e) {
         var recs = document.getElementById('origins-container') || document.getElementById('add-origin-section');
         if (recs && recs.scrollIntoView) recs.scrollIntoView({ behavior: 'smooth', block: 'start' });
         showToast((cType === 'clone' || cType === 'hybrid') && descText ? t('origin_added') + '。AI が出典を確かめています' : t('origin_added'));
+        if (typeof gtag === 'function') gtag('event', 'origin_added', { type: cType, with_text: descText ? 1 : 0 });
       }).catch(failed);
     });
   }
@@ -2261,7 +2279,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     return getSupabaseUrl() + '/storage/v1/object/public/' + BUCKET_NAME + '/' + storagePath;
   }
 
-  function uploadToSupabase(file, cultivarName, caption, linkUrl, displayOrder) {
+  function uploadToSupabase(file, cultivarName, caption, linkUrl, displayOrder, extra) {
     // photos are filed under the shown name: a seedling's ' [Seedling]' is not part of it (renderGalleryForCultivar reads it so)
     cultivarName = String(cultivarName || '').replace(' [Seedling]', '');
     var sb = getSupabase();
@@ -2286,6 +2304,9 @@ updateCultivarDetail = function(cultivarName, rowEl) {
         if (userIp) row.created_ip = userIp;
         if (window._currentUser) row.user_id = window._currentUser.id;
         if (typeof displayOrder === 'number') row.display_order = displayOrder;
+        // who took it (after the uploader confirmed it is their own photo) and which plant it shows (board 9)
+        if (extra && extra.credit) row.credit = String(extra.credit).slice(0, 80);
+        if (extra && extra.specimen_kind && extra.specimen_kind !== 'unknown') row.specimen_kind = extra.specimen_kind;
         return sb.from('cultivar_images').insert(row).select().then(function(dbRes) {
           if (dbRes.error) throw dbRes.error;
           return dbRes.data[0];
@@ -2347,43 +2368,89 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     files = (files || []).filter(function(f) { return validateFile(f); });
     if (!files.length) return;
     if (files.length > 3) { showToast('一度に載せられるのは 3 枚までです。最初の 3 枚にしました'); files = files.slice(0, 3); }
-    _sheetFiles = files; _sheetName = cultivarName;
+    _sheetFiles = files; _sheetName = cultivarName; _sheetDates = files.map(function() { return ''; });
     var shown = cultivarName.replace(/ \[Seedling\]$/, '');
     document.getElementById('photo-sheet-name').innerHTML = typeof italicizeSciNames === 'function' ? italicizeSciNames(escHtml(shown)) : escHtml(shown);
     var plates = document.getElementById('photo-sheet-plates');
     plates.innerHTML = '';
-    files.forEach(function(f) {
+    var single = files.length === 1;
+    var dateGroup = document.getElementById('photo-sheet-date').closest('.form-group');
+    if (dateGroup) dateGroup.classList.toggle('d-none', !single);
+    files.forEach(function(f, i) {
       var fig = document.createElement('figure');
       var img = document.createElement('img');
       img.alt = ''; img.src = URL.createObjectURL(f);
       img.onload = function() { URL.revokeObjectURL(img.src); };
-      fig.appendChild(img); plates.appendChild(fig);
+      fig.appendChild(img);
+      if (!single) { var cap = document.createElement('figcaption'); cap.className = 'photo-sheet__date'; cap.textContent = '…'; fig.appendChild(cap); }
+      plates.appendChild(fig);
     });
     var dateEl = document.getElementById('photo-sheet-date'), hint = document.getElementById('photo-sheet-date-hint');
     dateEl.value = ''; hint.textContent = '';
     document.getElementById('photo-sheet-caption').value = '';
     document.getElementById('photo-sheet-link').value = '';
-    exifDate(files[0]).then(function(d) {
-      dateEl.value = d;
-      hint.textContent = d ? '写真に記録された日付です' : '写真に日付がありません。わかれば入れてください';
+    // each photo its own date, from its own EXIF; a photo without one has none (never the date of another)
+    files.forEach(function(f, i) {
+      exifDate(f).then(function(d) {
+        _sheetDates[i] = d;
+        if (single) {
+          dateEl.value = d;
+          hint.textContent = d ? '写真に記録された日付です' : '写真に日付がありません。わかれば入れてください';
+        } else {
+          var caps = plates.querySelectorAll('.photo-sheet__date');
+          if (caps[i]) caps[i].textContent = d ? '撮影 ' + d.replace(/-/g, '.') : '日付なし';
+        }
+      });
     });
+    // which plant a Clone/Hybrid photo shows (default: not known → nothing is written)
+    var e = (typeof cultivarData !== 'undefined' && (cultivarData[cultivarName] || cultivarData[shown])) || {};
+    var kindBox = document.getElementById('photo-sheet-kind');
+    if (kindBox) {
+      kindBox.classList.toggle('d-none', !(e._type === 'clone' || e._type === 'hybrid'));
+      var def = kindBox.querySelector('input[value="unknown"]'); if (def) def.checked = true;
+    }
+    // the first photo from this account: confirm it is their own; their profile name is shown as the photographer
+    var ownBox = document.getElementById('photo-sheet-own-row'), own = document.getElementById('photo-sheet-own');
+    var confirmed = false;
+    try { confirmed = localStorage.getItem('ao-photo-own-ok') === '1'; } catch (er) {}
+    var me = window._currentUser || {};
+    var myName = (window._profileCache && window._profileCache[me.id]) || (me.user_metadata && me.user_metadata.full_name) || '';
+    if (ownBox) {
+      ownBox.classList.toggle('d-none', confirmed);
+      var nm = document.getElementById('photo-sheet-own-name'); if (nm) nm.textContent = myName || 'プロフィールの名前';
+      if (own) own.checked = false;
+    }
     if (!dlg._wired) {
       dlg._wired = true;
       document.getElementById('photo-sheet-cancel').addEventListener('click', function() { dlg.close(); });
-      dlg.addEventListener('click', function(e) { if (e.target === dlg) dlg.close(); });
+      dlg.addEventListener('click', function(ev) { if (ev.target === dlg) dlg.close(); });
       document.getElementById('photo-sheet-send').addEventListener('click', function() {
-        var d = dateEl.value, note = document.getElementById('photo-sheet-caption').value.trim();
+        var ownRow = document.getElementById('photo-sheet-own-row'), ownChk = document.getElementById('photo-sheet-own');
+        if (ownRow && !ownRow.classList.contains('d-none') && ownChk && !ownChk.checked) { showToast('自分で撮った写真かどうか、確かめてください', true); return; }
+        if (ownRow && !ownRow.classList.contains('d-none')) { try { localStorage.setItem('ao-photo-own-ok', '1'); } catch (er) {} }
+        var note = document.getElementById('photo-sheet-caption').value.trim();
         var link = document.getElementById('photo-sheet-link').value.trim();
         if (link && !/^https?:\/\//i.test(link)) { showToast('リンクは https:// から始めてください', true); return; }
-        var caption = [d ? '撮影 ' + d.replace(/-/g, '.') : '', note].filter(Boolean).join(' · ');
+        var dates = _sheetFiles.length === 1 ? [document.getElementById('photo-sheet-date').value] : _sheetDates.slice();
+        var captions = dates.map(function(d) { return [d ? '撮影 ' + d.replace(/-/g, '.') : '', note].filter(Boolean).join(' · '); });
+        var kindIn = document.querySelector('#photo-sheet-kind:not(.d-none) input:checked');
+        var u = window._currentUser || {};
+        var extra = {
+          credit: (window._profileCache && window._profileCache[u.id]) || (u.user_metadata && u.user_metadata.full_name) || '',
+          specimen_kind: kindIn ? kindIn.value : 'unknown'
+        };
         dlg.close();
-        sendPhotos(_sheetName, _sheetFiles.slice(), caption, link);
+        if (typeof gtag === 'function') gtag('event', 'photo_sheet_send', { count: _sheetFiles.length });
+        sendPhotos(_sheetName, _sheetFiles.slice(), captions, link, extra);
       });
     }
+    if (typeof gtag === 'function') gtag('event', 'photo_sheet_open', { count: files.length });
     dlg.showModal();
   };
-  function sendPhotos(cultivarName, files, caption, link) {
+  var _sheetDates = [];
+  function sendPhotos(cultivarName, files, captions, link, extra) {
     var total = files.length, done = 0;
+    captions = captions.slice();
     var sending = showToast('写真を送っています… 0 / ' + total, false, { sticky: true });
     var msg = sending && sending.querySelector('.toast__msg');
     (function next() {
@@ -2398,15 +2465,15 @@ updateCultivarDetail = function(cultivarName, rowEl) {
         return;
       }
       if (msg) msg.textContent = '写真を送っています… ' + (done + 1) + ' / ' + total;
-      uploadToSupabase(files[0], cultivarName, caption, link).then(function() {
-        files.shift(); done++;
+      uploadToSupabase(files[0], cultivarName, captions[0] || '', link, undefined, extra).then(function() {
+        files.shift(); captions.shift(); done++;
         trackEvent('gallery_upload', { cultivar_name: cultivarName, via: 'sheet' });
         next();
       }).catch(function(err) {
         if (sending) sending.remove();
         console.warn('Photo upload failed:', err);
         if (done && typeof renderGalleryForCultivar === 'function') renderGalleryForCultivar(cultivarName);
-        showToast((done ? done + ' 枚は載りました。残りの ' + files.length + ' 枚を' : '写真を') + '送れませんでした', true, { sticky: true, action: { label: 'もう一度', fn: function() { sendPhotos(cultivarName, files, caption, link); } } });
+        showToast((done ? done + ' 枚は載りました。残りの ' + files.length + ' 枚を' : '写真を') + '送れませんでした', true, { sticky: true, action: { label: 'もう一度', fn: function() { sendPhotos(cultivarName, files, captions, link, extra); } } });
       });
     })();
   }
@@ -3152,6 +3219,8 @@ document.addEventListener('click', function(e) {
   window.clearContributeDraft = function() { try { localStorage.removeItem(KEY); } catch (e) {} var n = document.getElementById('draft-note'); if (n) n.remove(); };
   window.restoreContributeDraft = function() {
     if (editing()) return false;
+    if (window._draftRestoredOnce) return false;   // once per page load: stepping back does not re-announce it (R4)
+    window._draftRestoredOnce = true;
     var data = null;
     try { data = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
     if (!data || !data.fields || Date.now() - (data.savedAt || 0) > 30 * 24 * 3600 * 1000) return false;

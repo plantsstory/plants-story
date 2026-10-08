@@ -4,8 +4,9 @@ on:
   push:
     branches: [master, main]
   schedule:
-    # Daily 03:00 JST — keeps sitemap & SEO stubs fresh as cultivars are added
-    - cron: '0 18 * * *'
+    # Every 30 minutes: a new entry gets its page, share card and sitemap line within 30 minutes (board 9, T116).
+    # A run with nothing new stops after the first check (the build stamp is the same as the live site's).
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -28,26 +29,46 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Has the archive changed since the live build?
+        id: changed
+        run: |
+          NOW=$(node scripts/build-stamp.js)
+          LIVE=$(curl -fsS https://plantsstory.com/data/build-stamp.txt || echo none)
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$NOW" = "$LIVE" ]; then echo 'run=false' >> "$GITHUB_OUTPUT"; echo 'Nothing new: skipped'; else echo 'run=true' >> "$GITHUB_OUTPUT"; fi
       - name: Install dependencies
+        if: steps.changed.outputs.run == 'true'
         run: npm ci
       - name: Check that stubs and site pick the same country
+        if: steps.changed.outputs.run == 'true'
         run: node scripts/check-geo-parity.js
       - name: Check names and texts (report only)
+        if: steps.changed.outputs.run == 'true'
         run: node scripts/check-names.js
       - name: Check that every PNG decodes (report only)
+        if: steps.changed.outputs.run == 'true'
         run: node scripts/check-png.js
         continue-on-error: true
       - name: Generate sitemap from Supabase
+        if: steps.changed.outputs.run == 'true'
         run: node scripts/generate-sitemap.js
       - name: Render share cards
+        if: steps.changed.outputs.run == 'true'
         run: node scripts/make-og-cards.js
       - name: Render Instagram images
+        if: steps.changed.outputs.run == 'true'
         run: node scripts/make-ig-images.js
+      - name: Record the build stamp
+        if: steps.changed.outputs.run == 'true'
+        run: node scripts/build-stamp.js --write
       - name: Generate static SEO stub pages
+        if: steps.changed.outputs.run == 'true'
         run: node scripts/generate-static-pages.js
       - uses: actions/configure-pages@v5
+        if: steps.changed.outputs.run == 'true'
       - uses: actions/upload-pages-artifact@v3
+        if: steps.changed.outputs.run == 'true'
         with:
           path: wireframe
       - id: deployment
+        if: steps.changed.outputs.run == 'true'
         uses: actions/deploy-pages@v4

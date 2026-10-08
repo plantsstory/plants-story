@@ -1672,3 +1672,69 @@ body:has(.pwa-install-banner--visible) { padding-bottom: 64px; }
 @media (max-width: 640px) {
   html.app-ui body:not(.appbar-away):not(.appbar-hidden) #sw-update-banner { bottom: calc(53px + 12px + env(safe-area-inset-bottom)) !important; }
 }
+
+/* -- board 9 deploy B (T114): R1–R8 and the six visual changes -- */
+/* visual 2: the state ends the second line */
+.entry__sub .entry__state { display: inline; margin-left: var(--s2); padding-top: 0; align-self: auto; float: none; }
+.entry__sub .entry__state--pct { color: var(--color-primary); }
+/* visual 5: index rows wrap only when they do not fit */
+.people__list li { flex-wrap: wrap; }
+.people__list a { flex: 1 1 auto; }
+.people__list li > span.mono, .people__list li > .num { margin-left: auto; }
+/* R5: the step bar is no wider than the form on a desktop */
+.contribute--stepped .cstep-bar { padding-inline: max(16px, calc((100% - 536px) / 2)); }
+/* R3: the form's own submit button hides while stepped (the bar records) */
+.contribute--stepped #contribute-submit-btn { display: none !important; }
+/* R6: no repeated intro, card headings or a one-option select inside the steps */
+.contribute--stepped .card > h2, .contribute--stepped .cstep-one-genus > label, .contribute--stepped .cstep-one-genus > select { display: none; }
+.cstep-genus { margin: 0; font-size: var(--fs-small); color: var(--color-mid); }
+.contribute--stepped #clone-image-hint { display: none !important; }
+/* R7: the photo sheet's actions 1:2; small action links 44px wide */
+.photo-sheet .dialog-actions, #photo-sheet .dialog-actions { display: flex; gap: var(--s2); }
+#photo-sheet .dialog-actions .btn { min-height: var(--tap); }
+#photo-sheet #photo-sheet-cancel { flex: 1; }
+#photo-sheet #photo-sheet-send { flex: 2; }
+#photo-sheet-title:focus { outline: none; }
+.mypost-acts button { min-width: var(--tap); }
+.mypost-login { margin: var(--s3) 0; }
+/* R8: hover colours only where there is a hover; no duplicate + 投稿 in the desktop header */
+@media (hover: none) { .btn--primary:hover { background: var(--color-ink); border-color: var(--color-ink); } }
+@media (min-width: 641px) { .header__nav-link--cta { display: none !important; } }
+html.app-ui .mobile-nav [data-i18n="nav_contribute_mobile"] { display: none !important; }
+.mobile-nav .mobile-nav__divider { padding-left: var(--s3); padding-right: var(--s3); }
+@media (max-width: 640px) {
+  /* visual 3: no dashed frames in lists on a phone (the space keeps names aligned); the plate band stays */
+  .entry__thumb--empty, .genus-content .cultivar-row__thumb.entry__thumb--empty { border-color: transparent; }
+  /* visual 4: the bar in the small size */
+  html.app-ui .appbar__item { font-size: var(--fs-small); }
+  /* visual 6: today's leaf in a portrait frame */
+  .story__figure { aspect-ratio: 4 / 5; max-height: 60svh; }
+}
+
+/* board 9 T111: the review step */
+.cstep-tag { font-size: var(--fs-label); color: var(--color-mid); border: 1px solid var(--color-rule); padding: 0 var(--s1); margin-left: var(--s1); white-space: nowrap; }
+.cstep-words { display: block; white-space: pre-wrap; }
+.cstep-note { display: block; font-size: var(--fs-label); color: var(--color-mid); margin-top: var(--s1); }
+.type-def--hint { font-size: var(--fs-small); color: var(--color-mid); margin: var(--s2) 0 0; }
+.cstep-review .specimen__v { align-items: flex-start; }
+
+/* board 9 T112: photo sheet — per-photo dates, plant kind, own-photo confirmation */
+.photo-sheet__plates figure { flex-direction: column; }
+.photo-sheet__date { font-size: var(--fs-label); color: var(--color-mid); padding: var(--s1) 0; text-align: center; }
+.photo-sheet__kind { border: 0; padding: 0; margin: var(--s3) 0 0; }
+.photo-sheet__kind .form-radio { display: flex; align-items: center; gap: var(--s2); min-height: var(--tap); }
+.photo-sheet__own { display: flex; gap: var(--s2); align-items: flex-start; font-size: var(--fs-small); margin: var(--s3) 0 0; min-height: var(--tap); }
+.photo-sheet__own input { margin-top: 4px; accent-color: var(--color-ink); }
+#photo-sheet input[type=radio] { accent-color: var(--color-ink); }
+
+/* board 9 T113: the three choices */
+.sheet-rows button > span:first-child { display: flex; flex-direction: column; gap: 2px; }
+.sheet-rows__t { font-size: var(--fs-body); color: var(--color-ink); }
+.sheet-rows__d { font-size: var(--fs-small); color: var(--color-mid); }
+.sheet-rows button { align-items: center; padding: var(--s2) 0; }
+/* board 9 D6: the band after recording — four actions, 44px, the main one filled */
+.share-band__actions { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+.share-band__btn { min-height: var(--tap); padding: 0 var(--s2); border: 1px solid var(--color-ink); border-radius: 2px; font-family: var(--font-primary); font-size: var(--fs-small); letter-spacing: 0.02em; text-transform: none; display: inline-flex; align-items: center; }
+.share-band__btn--main { background: var(--color-ink); color: var(--color-paper); }
+.share-band__note { font-size: var(--fs-label); color: var(--color-mid); margin: var(--s2) 0 0; }
+.share-band__close { min-width: var(--tap); min-height: var(--tap); margin-left: auto; }

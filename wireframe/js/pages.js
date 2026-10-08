@@ -1352,7 +1352,9 @@ function updateCultivarDetail(cultivarName, rowEl) {
     if (addOriginForm) addOriginForm.style.display = 'none';
   }
   var addPhotoBtn = document.getElementById('detail-add-photo-btn');
-  if (addPhotoBtn) addPhotoBtn.style.display = isSeedlingDetail ? 'none' : '';
+  // a public seedling takes photos from its owner (growth records); private ones wait for T125 (board 9)
+  var ownSeedling = isSeedlingDetail && cData && !cData._isPrivate && window._currentUser && cData._userId === window._currentUser.id;
+  if (addPhotoBtn) addPhotoBtn.style.display = (isSeedlingDetail && !ownSeedling) ? 'none' : '';
   // a seedling has no record form, so its 「記録を追加」 would do nothing
   var addRecordBtn = document.getElementById('detail-add-record-btn');
   if (addRecordBtn) addRecordBtn.style.display = isSeedlingDetail ? 'none' : '';
