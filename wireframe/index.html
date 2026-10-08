@@ -13,19 +13,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.yahoo.co.jp https://i.moshimo.com; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
+  <!-- Connections and the data library first (board 11 T162): the meta CSP stops the browser looking ahead, so the
+       hints that sat after the stylesheets were found late. The library is a plain script (no CORS), so its host is
+       warmed without crossorigin; the data host twice, for the API (CORS) and the photos (no CORS). -->
+  <link rel="preconnect" href="https://jpgbehsrglsiwijglhjo.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://jpgbehsrglsiwijglhjo.supabase.co">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1">
   <!-- Own scripts fetched in parallel (the meta CSP stops the browser's own look-ahead); they still run in order at
        the end of the body. gtag.js is loaded by gtag-init.js once the page is parsed (board 11 T156). -->
-  <link rel="preload" as="script" href="js/record-gate.js?v=20261008y">
-  <link rel="preload" as="script" href="js/app-core.js?v=20261008y">
-  <link rel="preload" as="script" href="js/pages.js?v=20261008y">
-  <link rel="preload" as="script" href="js/forms.js?v=20261008y">
-  <link rel="preload" as="script" href="js/entry-meta.js?v=20261008y">
-  <link rel="preload" as="script" href="js/archive.js?v=20261008y">
-  <link rel="preload" as="script" href="js/tool-gate.js?v=20261008y">
-  <link rel="preload" as="script" href="js/tools.js?v=20261008y">
-  <link rel="preload" as="script" href="js/dialogs.js?v=20261008y">
-  <script src="js/textsize.js?v=20261008y"></script>
-  <script src="js/gtag-init.js?v=20261008y"></script>
+  <link rel="preload" as="script" href="js/record-gate.js?v=20261008z">
+  <link rel="preload" as="script" href="js/app-core.js?v=20261008z">
+  <link rel="preload" as="script" href="js/pages.js?v=20261008z">
+  <link rel="preload" as="script" href="js/forms.js?v=20261008z">
+  <link rel="preload" as="script" href="js/entry-meta.js?v=20261008z">
+  <link rel="preload" as="script" href="js/archive.js?v=20261008z">
+  <link rel="preload" as="script" href="js/tool-gate.js?v=20261008z">
+  <link rel="preload" as="script" href="js/tools.js?v=20261008z">
+  <link rel="preload" as="script" href="js/dialogs.js?v=20261008z">
+  <script src="js/textsize.js?v=20261008z"></script>
+  <script src="js/gtag-init.js?v=20261008z"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -66,18 +75,14 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20261008y">
-  <link rel="stylesheet" href="css/reset.css?v=20261008y">
-  <link rel="stylesheet" href="css/layout.css?v=20261008y">
-  <link rel="stylesheet" href="css/components.css?v=20261008y">
-  <link rel="stylesheet" href="css/pages.css?v=20261008y">
-  <link rel="stylesheet" href="css/utilities.css?v=20261008y">
-  <link rel="stylesheet" href="css/archive.css?v=20261008y">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/variables.css?v=20261008z">
+  <link rel="stylesheet" href="css/reset.css?v=20261008z">
+  <link rel="stylesheet" href="css/layout.css?v=20261008z">
+  <link rel="stylesheet" href="css/components.css?v=20261008z">
+  <link rel="stylesheet" href="css/pages.css?v=20261008z">
+  <link rel="stylesheet" href="css/utilities.css?v=20261008z">
+  <link rel="stylesheet" href="css/archive.css?v=20261008z">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  <link rel="preconnect" href="https://jpgbehsrglsiwijglhjo.supabase.co" crossorigin>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1"></script>
 </head>
 <body>
@@ -1666,14 +1671,14 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/record-gate.js?v=20261008y"></script>
-  <script src="js/app-core.js?v=20261008y"></script>
-  <script src="js/pages.js?v=20261008y"></script>
-  <script src="js/forms.js?v=20261008y"></script>
-  <script src="js/entry-meta.js?v=20261008y"></script>
-  <script src="js/archive.js?v=20261008y"></script>
-  <script src="js/tool-gate.js?v=20261008y"></script>
-  <script src="js/tools.js?v=20261008y"></script>
+  <script src="js/record-gate.js?v=20261008z"></script>
+  <script src="js/app-core.js?v=20261008z"></script>
+  <script src="js/pages.js?v=20261008z"></script>
+  <script src="js/forms.js?v=20261008z"></script>
+  <script src="js/entry-meta.js?v=20261008z"></script>
+  <script src="js/archive.js?v=20261008z"></script>
+  <script src="js/tool-gate.js?v=20261008z"></script>
+  <script src="js/tools.js?v=20261008z"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1683,7 +1688,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261008y"></script>
+  <script src="js/dialogs.js?v=20261008z"></script>
 
   <!-- AI re-research request dialog -->
   <!-- Asked before anything is typed: posting, photos and records need a login (2026-10-08 app-ux) -->
@@ -1735,6 +1740,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261008y"></script>
+<script src="js/sw-register.js?v=20261008z"></script>
 </body>
 </html>
