@@ -1,9 +1,9 @@
 // Monthly AI budget (owner, 2026-10-08: 「月の上限を定める＋1クリックを安くする」).
-// The month's spend is estimated from ai_usage_log at OpenAI's published prices. Once the month
-// (Japan time) reaches AI_MONTHLY_BUDGET_YEN, every AI run stops, the admin's included, until the
-// next month. OpenAI's own monthly limit, set by the owner in the OpenAI dashboard, is the second wall.
+// The period's spend is estimated from ai_usage_log at the published prices. Once the period (from the 12th,
+// the day the Claude credit renews) reaches AI_MONTHLY_BUDGET_YEN, every AI run stops, the admin's
+// included, until the next period. The Claude Console spend limit, set by the owner, is the second wall.
 
-// USD per 1M tokens (developers.openai.com/api/docs/pricing, checked 2026-10-08)
+// USD per 1M tokens (OpenAI and Anthropic price pages, checked 2026-10-08)
 const PRICES: Record<string, { in: number; out: number }> = {
   "gpt-5-nano": { in: 0.05, out: 0.40 },
   "gpt-5-mini": { in: 0.25, out: 2.00 },
@@ -31,10 +31,14 @@ export function yenPerUsd() {
   return parseFloat(Deno.env.get("AI_YEN_PER_USD") || "155");
 }
 
-// start of this month in Japan time, as an ISO string
+// start of the current budget period, as an ISO string. The period follows the Claude credit, which is
+// granted with the owner's Max plan on the 12th (AI_BUDGET_RESET_DAY, UTC); 1 means the calendar month.
 function monthStartJst() {
-  const jst = new Date(Date.now() + 9 * 3600e3);
-  return new Date(Date.UTC(jst.getUTCFullYear(), jst.getUTCMonth(), 1) - 9 * 3600e3).toISOString();
+  const day = Math.min(28, Math.max(1, parseInt(Deno.env.get("AI_BUDGET_RESET_DAY") || "12", 10)));
+  const now = new Date();
+  let y = now.getUTCFullYear(), m = now.getUTCMonth();
+  if (now.getUTCDate() < day) { m -= 1; if (m < 0) { m = 11; y -= 1; } }
+  return new Date(Date.UTC(y, m, day)).toISOString();
 }
 
 // deno-lint-ignore no-explicit-any

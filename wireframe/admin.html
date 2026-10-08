@@ -1067,9 +1067,10 @@ var AI_PRICING = {
 
 async function loadAiUsage() {
   try {
-    var monthStart = new Date();
-    monthStart.setDate(1);
-    monthStart.setHours(0, 0, 0, 0);
+    // the budget period starts on the 12th (UTC), when the Claude credit renews — same as _shared/ai-budget.ts
+    var _n = new Date(), _y = _n.getUTCFullYear(), _m = _n.getUTCMonth();
+    if (_n.getUTCDate() < 12) { _m -= 1; if (_m < 0) { _m = 11; _y -= 1; } }
+    var monthStart = new Date(Date.UTC(_y, _m, 12));
     var res = await sb.from('ai_usage_log')
       .select('provider,model,purpose,input_tokens,output_tokens,web_search_calls,created_at')
       .gte('created_at', monthStart.toISOString())
