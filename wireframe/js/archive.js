@@ -386,6 +386,8 @@
   window._describeEntry = function (fullName, entry, type) { return describe(fullName, entry, type); };
   // /wanted/: recorded entries with no photo yet, the most searched first (board 9 D10)
   var WANTED_FIRST = ['Anthurium clarinervium', 'Anthurium luxurians', 'Anthurium regale', "Anthurium 'Dark Mama'", 'Anthurium antolakii'];
+  // only the genera the site shows (Anthurium for now): hidden genera stay out of /wanted/ and /ig/ (board 11)
+  var shownGenus = function (d) { var gs = window._generaData || []; return !gs.length || gs.some(function (g) { return g.name === d.genus; }); };
   window.renderWantedPage = function () {
     var body = document.getElementById('wanted-body');
     if (!body) return;
@@ -399,7 +401,7 @@
         seen[e._id || k] = true;
         var d;
         try { d = describe(k, e, e._type); } catch (er) { return; }
-        if (d.state !== 'ok' || d.isIndividual || thumbs[d.displayName]) return;
+        if (d.state !== 'ok' || d.isIndividual || thumbs[d.displayName] || !shownGenus(d)) return;
         list.push(d);
       });
       list.sort(function (a, b) {
@@ -436,7 +438,7 @@
         seen[e._id] = true;
         var d;
         try { d = describe(k, e, e._type); } catch (er) { return; }
-        if (d.state !== 'ok' || d.isIndividual) return;
+        if (d.state !== 'ok' || d.isIndividual || !shownGenus(d)) return;
         list.push({ d: d, no: e._id });
       });
       // the plates with a photo first (newest first), then the ones still waiting for a photo
@@ -449,6 +451,7 @@
           + '<span class="ig-grid__no num">図版 ' + x.no + '</span>') + '</li>';
       });
       body.innerHTML = html + '</ol>';
+      if (window.releaseStaticEntry) window.releaseStaticEntry();   // the stub's plates give way (T157)
       var form = document.getElementById('ig-find');
       if (form) form.addEventListener('submit', function (ev) {
         ev.preventDefault();

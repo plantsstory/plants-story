@@ -236,6 +236,23 @@ async function main() {
     { dir: 'pricing', title: '料金とサービス内容 | Aroid Origins', description: 'Aroid Origins の料金とサービス内容。閲覧は無料、実生の投稿は会員の受付まで20件まで無料。会員（月額500円・年額5,000円、受付準備中）は実生の投稿無制限とAI再調査の優先審査。' },
     { dir: 'glossary', title: '由来の用語集 — sp. / aff. / cf.、記載者、タイプ産地、交配式、クローン | Aroid Origins', description: 'アロイド品種の由来を読むための用語集。学名と記載、sp./aff./cf.、タイプ産地、交配式、F1、オリジナル個体、クローン、TC、流通名、信頼度 Tier の意味を解説します。' },
   ];
+  // /ig/ in plain HTML (T157): the same plates as the app draws — recorded entries, photos first, newest first,
+  // 「図版 n」 = the entry id
+  const igStatic = html => {
+    const plates = publicCultivars.filter(c => !(c.tags || []).includes('individual') && RecordGate.state(c) === 'ok' && c.id)
+      .map(c => ({ c, p: imageMap[c.cultivar_name] && !/^pv:/.test(imageMap[c.cultivar_name]) ? imageMap[c.cultivar_name] : '' }))
+      .sort((a, b) => (!!b.p - !!a.p) || (b.c.id - a.c.id));
+    const li = plates.map(({ c, p }) => {
+      const g = c.genus || 'Anthurium';
+      const rest = String(c.cultivar_name).startsWith(g + ' ') ? String(c.cultivar_name).slice(g.length + 1) : String(c.cultivar_name);
+      const href = SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(rest) + '/';
+      const src = p ? SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + p.split('/').map(encodeURIComponent).join('/') + '?width=360&height=720&resize=contain&quality=72' : '';
+      return '<li id="p' + c.id + '"><a href="' + escAttr(href) + '"><span class="ig-grid__img">' + (src ? '<img src="' + escAttr(src) + '" alt="' + escAttr(EntryMeta.name(c)) + '" loading="lazy" decoding="async">' : '<span class="ig-grid__name">' + sciHtml(EntryMeta.name(c)) + '</span>') + '</span><span class="ig-grid__no num">図版 ' + c.id + '</span></a></li>';
+    }).join('');
+    const art = '<article id="static-entry" class="container container--narrow static-entry"><nav class="breadcrumb" aria-label="パンくずリスト"><a href="' + SITE + '/">トップ</a><span class="breadcrumb__sep">/</span><span>Instagram の図版</span></nav>'
+      + '<h1 class="section-title">Instagram の図版</h1><p class="people__intro">投稿の「図版」の番号から、その植物の由来のページへ。番号は変わりません。</p><ol class="ig-grid">' + li + '</ol></article>';
+    return html.replace(/(<main[^>]*>)/, '$1\n' + art).replace(/<body([^>]*)>/, (m, at) => /class="/.test(at) ? m.replace('class="', 'class="stub-entry-page ') : '<body' + at + ' class="stub-entry-page">');
+  };
   for (const r of staticRoutes) {
     const url = SITE + '/' + r.dir + '/';
     const html = buildStub(template, {
@@ -247,7 +264,7 @@ async function main() {
     });
     const dir = path.join(WIREFRAME, r.dir);
     fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
+    fs.writeFileSync(path.join(dir, 'index.html'), r.dir === 'ig' ? igStatic(html) : html, 'utf8');
     written++;
   }
 

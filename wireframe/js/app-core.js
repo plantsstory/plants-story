@@ -604,7 +604,7 @@ function showPage(pageId) {
   var staticEntry = document.getElementById('static-entry');
   // A plant page keeps the stub's first screen until it has drawn its own (archive.js calls releaseStaticEntry);
   // any other page replaces it at once. 8 s at most, so a failed load never leaves the stub up.
-  if (staticEntry && pageId === 'cultivar' && document.body.classList.contains('stub-entry-page')) {
+  if (staticEntry && (pageId === 'cultivar' || pageId === 'ig') && document.body.classList.contains('stub-entry-page')) {
     document.documentElement.setAttribute('data-boot', 'entry');
     clearTimeout(window._staticEntryTimer);
     window._staticEntryTimer = setTimeout(window.releaseStaticEntry, 8000);
