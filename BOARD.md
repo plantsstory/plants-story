@@ -386,6 +386,8 @@
 | T160 | ~~告知画像の目視（launch-1・3・5 と 10/18〜26 の 9 枚）。'Galaxy' で開きの引用符が行末に残る → 改行の規則だけ直す（本文は不変）~~ **10-08 済** | Claude Code | 10/08 | 告知 |
 | T161 | ~~`scripts/launch-check.js`（M1・M2・共有リンク・sitemap 全 URL と canonical・/ig/・法務・目録の公開条件。読むだけ）~~ **10-08 済**。10-08 夜の結果: NG 0・注意 5（T95 の 4 名と、使用記録のある道具 0 点）。10/17 19:00 に `node scripts/launch-check.js` | Claude Code | 10/08 | 10/17 19:00 の点検 |
 | T162 | ~~接続の予告（preconnect）と supabase-js の preload を head の先頭に。jsDelivr は crossorigin なし（素のスクリプトに合わせる）、データのホストは API と写真の 2 本~~ **10-08 済** | Claude Code | 10/08 | 告知の離脱 |
+| T163 | ~~再計測（h1 3.9→2.6 秒・写真 4.0→2.9 秒、/ig/ h1 8.3→3.0 秒）で見つかった点: /ig/ は写真の一覧を待って描く（並び替えのずれをなくす）・スタブはアプリと同じ写真・写真の preload を head の先頭へ・gtag-init を CSS の後へ・スタブの命名者/作出者と検証日（日本時間）をアプリに合わせる~~ **10-08 済（6巡目）**。残り: 品種ページのスタブからアプリへの切り替え時のちらつき（T93/T98 の範囲）、Cloudflare の beacon が CSP で止まる（送信はされない） | Claude Code | 10/08 | 告知の離脱 |
+| T95 補 | 4 名の登録用下書き `docs/board/2026-10-08-t95-drafts.md`（出典つき。Dorayaki は Clone・交配式は disputed、Michelle は magnificum 'Michelle'、Zara は Hybrid・交配式 partial、RVDP は Clone で 'Dark Phoenix' とは別）。登録は各日 | Claude Code | 10/11〜16 | M2 |
 | 条件到達時 | `/seedlings/` 索引（公開実生 ≥20・投稿者 ≥5）／ ヘッダー EN（非 ja ≥15%）／ 楽天・Yahoo! のもしも移行（アフィリ確定額 2ヶ月連続 ≥3,000円）／ 道具一覧のサムネイル（オーナーが 10/14 プレビューで求めた場合、自前写真のみ） | Claude Code | — | — |
 
 **第6回（10-03）の実装順**: T48 → T49 → T50 → T51 → T52 → T53 → T54 → T55 → T24 → T26 → T56 → T57（告知前必須、全体 10/13）→ T58 → T33（10/24 前）。T59 は各本番後。詳細は `docs/board/2026-10-03.md` §2。
