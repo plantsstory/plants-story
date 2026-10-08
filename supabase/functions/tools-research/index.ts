@@ -110,13 +110,18 @@ const SYSTEM = `あなたは室内でアロイド（アンスリウムなど熱�
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors(req) });
   try {
+    const body = await req.json().catch(() => ({}));
+    // the weekly price and stock check from pg_cron (board 11 T149): a token only the database and this function
+    // know, good for mode "refresh" and nothing else
+    const cronToken = Deno.env.get("CRON_TOKEN") || "";
+    const fromCron = cronToken.length >= 32 && req.headers.get("x-cron-token") === cronToken && body.mode === "refresh";
     // admin only
     const auth = req.headers.get("Authorization") || "";
     const userClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } });
     const { data: { user } } = await userClient.auth.getUser().catch(() => ({ data: { user: null } }));
     // the service key (server-side checks only) counts as admin
     // a key that can list auth users is a real service key (checked only when the caller is not an admin user)
-    const isService = (!user || user.app_metadata?.role !== "admin") && await (async () => {
+    const isService = fromCron || (!user || user.app_metadata?.role !== "admin") && await (async () => {
       try { const c = createClient(Deno.env.get("SUPABASE_URL")!, auth.replace(/^Bearer /, "")); const r = await c.auth.admin.listUsers({ page: 1, perPage: 1 }); return !r.error; } catch (_e) { return false; }
     })();
     if (!isService && (!user || user.app_metadata?.role !== "admin")) return json(req, { error: "admin only" }, 403);
@@ -124,7 +129,6 @@ serve(async (req) => {
     // the same monthly AI budget as the origin research
     const gate = await budgetGate(db);
     if (!gate.ok) return json(req, { error: budgetRefusal(gate.spent, gate.budget) }, 429);
-    const body = await req.json().catch(() => ({}));
     if (isService && body.referrer) REFERRER = String(body.referrer);   // checks from the server only
 
     if (body.mode === "refresh") {
