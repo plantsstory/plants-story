@@ -1103,7 +1103,8 @@ async function loadAiUsage() {
     document.getElementById('stat-ai-tokens').textContent =
       (inTok + outTok) >= 1e6 ? ((inTok + outTok) / 1e6).toFixed(2) + 'M' : Math.round((inTok + outTok) / 1000) + 'K';
     document.getElementById('stat-ai-searches').textContent = searches;
-    document.getElementById('stat-ai-cost').textContent = '$' + cost.toFixed(2);
+    // the same estimate the Edge Functions stop at (AI_MONTHLY_BUDGET_YEN, default 1,200 yen; Japan-time month)
+    document.getElementById('stat-ai-cost').textContent = '$' + cost.toFixed(2) + '（約 ' + Math.round(cost * 155).toLocaleString('ja-JP') + ' 円 / 上限 1,200 円）';
 
     // Per-model breakdown table
     var bd = document.getElementById('ai-usage-breakdown');

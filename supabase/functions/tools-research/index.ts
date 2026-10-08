@@ -7,6 +7,7 @@
 // (it is in every Rakuten link on the site), so it lives here.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { budgetGate, budgetRefusal } from "../_shared/ai-budget.ts";
 
 const ALLOWED_ORIGINS = ["https://plantsstory.com", "https://plantsstory.github.io", "http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8123"];
 const RAKUTEN_ENDPOINT = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701";
@@ -101,6 +102,9 @@ serve(async (req) => {
     })();
     if (!isService && (!user || user.app_metadata?.role !== "admin")) return json(req, { error: "admin only" }, 403);
     const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    // the same monthly AI budget as the origin research
+    const gate = await budgetGate(db);
+    if (!gate.ok) return json(req, { error: budgetRefusal(gate.spent, gate.budget) }, 429);
     const body = await req.json().catch(() => ({}));
     if (isService && body.referrer) REFERRER = String(body.referrer);   // checks from the server only
 

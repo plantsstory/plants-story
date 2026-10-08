@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { budgetGate, budgetRefusal } from "../_shared/ai-budget.ts";
 
 const ALLOWED_ORIGINS = [
   "https://plantsstory.com",
@@ -811,8 +812,9 @@ async function callGemini(
 // Search directive appended to prompts when grounding is enabled
 const SEARCH_INSTRUCTIONS = `
 
-=== LIVE WEB SEARCH (Google Search grounding is ENABLED) ===
-You can and SHOULD search the web before answering. Actively search for:
+=== LIVE WEB SEARCH (a few searches only — each one is billed) ===
+Plan before searching: use the most specific query first and stop as soon as you have a citable
+primary source. Useful queries:
 - The exact cultivar/species name + "origin", "breeder", "parentage", "history", "protologue", "type specimen", "patent USPP"
 - "International Aroid Society", "Aroideana" + the name
 - The breeder's own website / Instagram / YouTube announcements (primary sources)
@@ -894,7 +896,8 @@ async function callOpenAI(
   userPrompt: string,
   maxTokens = 2048,
   useSearch = false,
-  purpose = ""
+  purpose = "",
+  maxSearches = 3
 ): Promise<GeminiResponse> {
   const body: Record<string, unknown> = {
     model: OPENAI_MODEL,
@@ -904,9 +907,12 @@ async function callOpenAI(
     max_output_tokens: Math.max(maxTokens * 3, 8192),
   };
   if (useSearch) {
-    body.tools = [{ type: "web_search" }];
-    // Each search call is billed (~¥1.5); 8 is enough for a thorough run
-    body.max_tool_calls = parseInt(Deno.env.get("RESEARCH_MAX_SEARCHES") || "8", 10);
+    // "low": less page text per search comes back as billed input tokens
+    body.tools = [{ type: "web_search", search_context_size: "low" }];
+    // Each search call is billed ($10 per 1,000 ≈ ¥1.5) and was ~85% of a run's cost at 8–10 searches;
+    // the caller sets how many this purpose needs, RESEARCH_MAX_SEARCHES caps it (owner 10-08: cheaper runs)
+    const ceiling = parseInt(Deno.env.get("RESEARCH_MAX_SEARCHES") || "5", 10);
+    body.max_tool_calls = Math.max(1, Math.min(maxSearches, ceiling));
   }
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
@@ -1705,6 +1711,23 @@ serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
     const isAdmin = authUser.app_metadata?.role === "admin";
+    // Monthly AI budget (Japan-time month): every run stops at AI_MONTHLY_BUDGET_YEN, the admin's included
+    const gate = await budgetGate(serviceClient);
+    if (!gate.ok) {
+      console.log(`[Budget] refused: spent ¥${gate.spent} of ¥${gate.budget}`);
+      return new Response(
+        JSON.stringify({ error: budgetRefusal(gate.spent, gate.budget) }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    // Log this request first and count afterwards (this one included), so requests sent at the same
+    // moment all see each other and cannot slip past the limits together. A refused request removes its row.
+    const { data: logRow } = await serviceClient.from("research_origin_requests")
+      .insert({ user_id: authUser.id, cultivar_name: cultivar_name }).select("id").single();
+    const refuse = async (message: string) => {
+      if (logRow?.id) await serviceClient.from("research_origin_requests").delete().eq("id", logRow.id);
+      return new Response(JSON.stringify({ error: message }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    };
     const rateLimit = isAdmin ? 200 : 10; // Admin: 200/hour, User: 10/hour
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const { count: recentCount } = await serviceClient
@@ -1713,11 +1736,8 @@ serve(async (req: Request) => {
       .eq("user_id", authUser.id)
       .gte("requested_at", oneHourAgo);
 
-    if ((recentCount ?? 0) >= rateLimit) {
-      return new Response(
-        JSON.stringify({ error: `Rate limit exceeded. Maximum ${rateLimit} research requests per hour.` }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if ((recentCount ?? 0) > rateLimit) {
+      return await refuse(`Rate limit exceeded. Maximum ${rateLimit} research requests per hour.`);
     }
     // Same name, same user: at most 3 runs per day (each run costs ~¥20 in web searches)
     if (!isAdmin && cultivar_name) {
@@ -1728,11 +1748,8 @@ serve(async (req: Request) => {
         .eq("user_id", authUser.id)
         .eq("cultivar_name", cultivar_name)
         .gte("requested_at", oneDayAgo);
-      if ((sameNameCount ?? 0) >= 3) {
-        return new Response(
-          JSON.stringify({ error: "この品種の AI 調査は1日3回までです。時間をおいてお試しください。" }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+      if ((sameNameCount ?? 0) > 3) {
+        return await refuse("この品種の AI 調査は1日3回までです。時間をおいてお試しください。");
       }
     }
     // Cost guardrails (each run costs roughly ¥15–20 in web searches):
@@ -1746,20 +1763,17 @@ serve(async (req: Request) => {
         .select("id", { count: "exact", head: true })
         .eq("user_id", authUser.id)
         .gte("requested_at", oneDayAgoAll);
-      if ((userDayCount ?? 0) >= 3) {
-        return new Response(
-          JSON.stringify({ error: "AI 調査は1日3回までです。明日以降にお試しください。" }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+      if ((userDayCount ?? 0) > 3) {
+        return await refuse("AI 調査は1日3回までです。明日以降にお試しください。");
       }
       const dailyCap = parseInt(Deno.env.get("RESEARCH_DAILY_CAP") || "15", 10);
       const { count: siteDayCount } = await serviceClient
         .from("research_origin_requests")
         .select("id", { count: "exact", head: true })
         .gte("requested_at", oneDayAgoAll);
-      if ((siteDayCount ?? 0) >= dailyCap) {
+      if ((siteDayCount ?? 0) > dailyCap) {
         // Alert once per day (first refusal after the cap is hit)
-        if ((siteDayCount ?? 0) === dailyCap) {
+        if ((siteDayCount ?? 0) === dailyCap + 1) {
           const resendKey = Deno.env.get("RESEND_API_KEY");
           if (resendKey) {
             try {
@@ -1776,10 +1790,7 @@ serve(async (req: Request) => {
             } catch { /* best effort */ }
           }
         }
-        return new Response(
-          JSON.stringify({ error: "本日の AI 調査枠が上限に達しました。明日以降にお試しください（登録自体は可能です）。" }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return await refuse("本日の AI 調査枠が上限に達しました。明日以降にお試しください（登録自体は可能です）。");
       }
       if (cultivar_id) {
         const { data: recentRow } = await serviceClient
@@ -1789,19 +1800,12 @@ serve(async (req: Request) => {
           .maybeSingle();
         const researchedAt = recentRow?.ai_research_data?.researched_at;
         if (researchedAt && Date.now() - new Date(researchedAt).getTime() < 30 * 24 * 60 * 60 * 1000) {
-          return new Response(
-            JSON.stringify({ error: "この品種は30日以内に AI 調査済みです。内容の修正は「由来を追加」からお願いします。" }),
-            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+          return await refuse("この品種は30日以内に AI 調査済みです。内容の修正は「由来を追加」からお願いします。");
         }
       }
     }
 
-    // Log this request for rate limiting
-    await serviceClient.from("research_origin_requests").insert({
-      user_id: authUser.id,
-      cultivar_name: cultivar_name,
-    });
+    // (this request was logged above, before the counts)
 
     // ── manual_origins can replace existing origins wholesale, so only the
     //    cultivar owner or an admin may supply them. The origin-contribution
@@ -1848,8 +1852,9 @@ serve(async (req: Request) => {
 
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const geminiApiKey = Deno.env.get("GEMINI_API_KEY") || "";
-    const groqApiKey = Deno.env.get("GROQ_API_KEY") || "";
+    // Gemini / Groq fallbacks retired 2026-10-08 (only OpenAI ran for months); keys can be deleted
+    const geminiApiKey = "";
+    const groqApiKey = "";
     const openaiApiKey = Deno.env.get("OPENAI_API_KEY") || "";
     const youtubeApiKey = Deno.env.get("YOUTUBE_API_KEY") || "";
 
@@ -1912,7 +1917,9 @@ serve(async (req: Request) => {
             const { text, sources: oSources } = await callOpenAI(
               openaiApiKey,
               "You are a botanical researcher. Return ONLY valid JSON, no markdown.",
-              structuredPrompt, 2000, true, "species-structured"
+              structuredPrompt, 2000, true, "species-structured",
+              // the botanical databases already gave the protologue facts: one search for the rest, else three
+              botResult.authors && botResult.publicationYear && botResult.nativeDistribution.length ? 1 : 3
             );
             const parsed = extractJson(text);
             if (parsed?.notes) {
@@ -2115,7 +2122,7 @@ serve(async (req: Request) => {
               console.log("[KeywordResearch] Trying OpenAI (web search)...");
               const { text, sources: oSources } = await callOpenAI(openaiApiKey,
                 "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
-                researchPrompt, 3000, true, "keyword-research");
+                researchPrompt, 3000, true, "keyword-research", 4);
               researchResult = extractJson(text);
               if (researchResult?.origins?.length) {
                 researchSource = "openai-web-search";
@@ -2281,7 +2288,7 @@ serve(async (req: Request) => {
               const { text, sources: oSources } = await callOpenAI(
                 openaiApiKey,
                 "You are a botanical fact-checker. Respond ONLY with valid JSON, no markdown.",
-                verifyPrompt + SEARCH_INSTRUCTIONS, 3000, true, "verify"
+                verifyPrompt + SEARCH_INSTRUCTIONS, 3000, true, "verify", 3
               );
               verifyResult = extractJson(text);
               if (verifyResult?.verification_tier) {
@@ -2546,7 +2553,7 @@ serve(async (req: Request) => {
             const { text, sources: oSources } = await callOpenAI(
               openaiApiKey,
               "You are a botanical taxonomist. Respond ONLY with valid JSON, no markdown.",
-              researchPrompt, 3000, true, "fallback-research"
+              researchPrompt, 3000, true, "fallback-research", 4
             );
             researchResult = extractJson(text);
             if (researchResult?.origins?.length) {
