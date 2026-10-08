@@ -1797,3 +1797,5 @@ html:not(.pv-reading) .pv-reading-link, html:not(.pv-reading) #reading-for-secti
 .reading-item__summary { margin: var(--s2) 0 0; font-size: var(--fs-body); }
 .reading-item__plants { margin: var(--s2) 0 0; }
 .reading-tabs { margin: 0 0 var(--s3); }
+.reading-item .reading-item__title { display: block; }
+.reading-item .entry__sub { display: block; margin-top: var(--s1); }
