@@ -1,0 +1,1448 @@
+{
+ "imgs": null,
+ "rows": [
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:40:46.222Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:40:42.755589+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium alcicorne",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 101,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: (P.Willemet) Desv. (1827). 発見者: P. Willemet (1800). 採取地: Mauritius. 生息地: Seychelles, Zambia, Tanzania, Zimbabwe, Kenya, Mauritius, Mozambique, Réunion, Comoros, Madagascar. 葉は長楕円形で、濃い緑色をしています。葉の表面は滑らかで、裏面は白い綿毛で覆われています。葉脈は網状で、葉の先端は尖っています。葉柄は長く、太い毛で覆われています。植物全体に、ユニークな形状と色合いが特徴です。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17177390-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177390-1"
+      }
+     ],
+     "structured": {
+      "author_name": "(P.Willemet) Desv.",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17177390-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177390-1"
+       }
+      ],
+      "collection_year": 1800,
+      "collector": "P. Willemet",
+      "known_habitats": "Seychelles, Zambia, Tanzania, Zimbabwe, Kenya, Mauritius, Mozambique, Réunion, Comoros, Madagascar",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1827,
+      "type_locality": "Mauritius"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-03-22T17:40:42.755589+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 30,
+    "origins_count": 2,
+    "research_source": "groq-llama3.3-70b",
+    "researched_at": "2026-03-22T17:44:44.708Z"
+   },
+   "ai_status": "completed",
+   "aliases": [
+    "angolense"
+   ],
+   "created_at": "2026-03-22T17:44:41.3405+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium elephantotis",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 106,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: Schweinf. (1871). 発見者: Schweinfurth (1869). 採取地: Gabon. 生息地: Nigeria, Ghana, Rwanda, Gabon, Ethiopia, Sudan, Sierra Leone, Tanzania, Burundi, Malawi, Ivory Coast, Mozambique, Guinea, Uganda, Angola, Zaire, Cameroon, Zambia, Central African Republic, Liberia, Kenya. 葉は長楕円形で、表面は光沢があり、濃緑色をしています。葉脈は網状で、葉の先端は尖っています。葉の質感は厚く、革質です。葉の付け根には長い葉鞘があります。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17177420-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177420-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17177470-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177470-1"
+      }
+     ],
+     "structured": {
+      "author_name": "Schweinf.",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17177420-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177420-1"
+       },
+       {
+        "url": "https://www.ipni.org/n/17177470-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177470-1"
+       }
+      ],
+      "collection_year": 1869,
+      "collector": "Schweinfurth",
+      "known_habitats": "Nigeria, Ghana, Rwanda, Gabon, Ethiopia, Sudan, Sierra Leone, Tanzania, Burundi, Malawi, Ivory Coast, Mozambique, Guinea, Uganda, Angola, Zaire, Cameroon, Zambia, Central African Republic, Liberia, Kenya",
+      "notes": null,
+      "origin_type": "species",
+      "publication_year": 1871,
+      "type_locality": "Gabon"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-09-04T12:22:21.380587+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:20:56.664Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:20:50.484287+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium willinckii",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 90,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: T.Moore (1875). 生息地: 不明. Platycerium willinckiiは、葉が長い楕円形で、表面は暗緑色、裏面は淡黄色をしている。葉の質感は硬い。葉脈のパターンは網状で、葉の先端は尖っている。葉柄は短く、太い。植物の全体的な外見は、他のPlatycerium属の種と似ているが、葉の形状や色が異なる。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17177570-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177570-1"
+      }
+     ],
+     "structured": {
+      "author_name": "T.Moore",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17177570-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177570-1"
+       }
+      ],
+      "collector": null,
+      "known_habitats": "不明",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1875,
+      "type_locality": ""
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-09-06T16:26:09.051805+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:40:01.999Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:39:56.639188+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium wandae",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 100,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: Racib. (1902). 発見者: Raciborski. 採取地: New Guinea. 生息地: Maluku, Bismarck Archipelago, New Guinea. 葉は長卵形で、表面は暗緑色、裏面は淡緑色です。葉脈は網状で、葉の先端は尖っています。葉の質感は厚く、革質です。葉の付け根には短い葉鞘があります。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17177560-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177560-1"
+      }
+     ],
+     "structured": {
+      "author_name": "Racib.",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17177560-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177560-1"
+       }
+      ],
+      "collector": "Raciborski",
+      "known_habitats": "Maluku, Bismarck Archipelago, New Guinea",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1902,
+      "type_locality": "New Guinea"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-03-22T17:39:56.639188+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:31:39.192Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:31:32.609177+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium veitchii",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 91,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: (Underw.) C.Chr. (1906). 発見者: Underwood (1902). 採取地: Queensland, Australia. 生息地: Queensland. 葉は長楕円形で、濃い緑色をしている。葉の表面は滑らかで、裏面は白い綿毛が密生している。葉脈は網状で、明瞭である。葉柄は長く、太い。植物全体に、独特の美しさがある。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17177540-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177540-1"
+      }
+     ],
+     "structured": {
+      "author_name": "(Underw.) C.Chr.",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17177540-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177540-1"
+       }
+      ],
+      "collection_year": 1902,
+      "collector": "Underwood",
+      "known_habitats": "Queensland",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1906,
+      "type_locality": "Queensland, Australia"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-03-22T17:31:32.609177+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:41:37.917Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:41:31.878919+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium ellisii",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 102,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: Baker (1876). 採取地: Madagascar. 生息地: Madagascar. Platycerium ellisiiは、葉が長い楕円形で、濃い緑色をしています。葉の表面は滑らかで、葉脈は網状に広がっています。葉の付け根は太い毛で覆われています。植物全体に、独特の凹凸のある葉が特徴的です。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17177480-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177480-1"
+      }
+     ],
+     "structured": {
+      "author_name": "Baker",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17177480-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177480-1"
+       }
+      ],
+      "collector": null,
+      "known_habitats": "Madagascar",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1876,
+      "type_locality": "Madagascar"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-09-06T16:26:09.051805+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:42:55.275Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:42:50.247259+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium madagascariense",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 104,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: Baker (1876). 採取地: Madagascar. 生息地: Madagascar. Platycerium madagascarienseはマダガスカル原産のシダ植物です。葉は長い葉柄に付いており、葉身は楕円形で濃緑色をしています。葉の表面は滑らかで、葉脈は網状に広がっています。葉の付け根には毛が生えていることがあります。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17177510-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177510-1"
+      }
+     ],
+     "structured": {
+      "author_name": "Baker",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17177510-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177510-1"
+       }
+      ],
+      "collector": null,
+      "known_habitats": "Madagascar",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1876,
+      "type_locality": "Madagascar"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-09-06T16:26:09.051805+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:43:23.191Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:43:17.773747+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium quadridichotomum",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 105,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: (Bonap.) Tardieu (1959). 採取地: Madagascar. 生息地: Madagascar. Platycerium quadridichotomumは、葉が二次的に分岐する特徴的な観葉植物です。葉の形状は楕円形で、表面は光沢があり、濃緑色をしています。葉脈のパターンは網状で、葉の先端は尖っています。葉の質感は厚く、革質です。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17411090-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17411090-1"
+      }
+     ],
+     "structured": {
+      "author_name": "(Bonap.) Tardieu",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17411090-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17411090-1"
+       }
+      ],
+      "collector": null,
+      "known_habitats": "Madagascar",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1959,
+      "type_locality": "Madagascar"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-09-06T16:26:09.051805+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:33:04.423Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:32:58.516583+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium bifurcatum",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 92,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: (Cav.) C.Chr. (1906). 発見者: Cavanilles. 採取地: New South Wales. 生息地: New South Wales, New Caledonia, Queensland, Jawa, Lesser Sunda Is., Sulawesi, Norfolk Is.. 葉は長さ20-30cm、幅10-15cmで、披針形をしており、表面は暗緑色、裏面は淡緑色です。葉脈は網状で、葉の先端は二又に分かれます。葉の質感は革質で、表面に細かい毛が生えています。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17177460-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177460-1"
+      }
+     ],
+     "structured": {
+      "author_name": "(Cav.) C.Chr.",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17177460-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177460-1"
+       }
+      ],
+      "collector": "Cavanilles",
+      "known_habitats": "New South Wales, New Caledonia, Queensland, Jawa, Lesser Sunda Is., Sulawesi, Norfolk Is.",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1906,
+      "type_locality": "New South Wales"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-03-22T17:32:58.516583+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:39:15.340Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:39:10.253492+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium wallichii",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 99,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: Hook. (1858). 発見者: Wallich (1828). 採取地: Nepal. 生息地: Thailand, Myanmar, China South-Central, Assam, Vietnam, Bangladesh. 葉は楕円形で、表面は暗緑色、裏面は淡緑色です。葉脈は網状で、葉の先端は尖っています。葉の質感は厚く、革質です。葉の付け根には短い葉鞘があります。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17177550-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177550-1"
+      }
+     ],
+     "structured": {
+      "author_name": "Hook.",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17177550-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177550-1"
+       }
+      ],
+      "collection_year": 1828,
+      "collector": "Wallich",
+      "known_habitats": "Thailand, Myanmar, China South-Central, Assam, Vietnam, Bangladesh",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1858,
+      "type_locality": "Nepal"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-03-22T17:39:10.253492+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:45:20.485Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:45:15.209396+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium andinum",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 107,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: Baker (1891). 採取地: Andes, Peru. 生息地: Peru, Bolivia. Platycerium andinumは、葉が長い披針形で、濃い緑色をしています。葉の表面は滑らかで、葉脈は網状に広がっています。葉の付け根には、毛が生えていることがあります。植物全体に、独特の凹凸が見られます。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/201729-2"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:201729-2"
+      }
+     ],
+     "structured": {
+      "author_name": "Baker",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/201729-2"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:201729-2"
+       }
+      ],
+      "collector": null,
+      "known_habitats": "Peru, Bolivia",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1891,
+      "type_locality": "Andes, Peru"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-09-06T16:26:09.051805+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:36:27.391Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:36:21.724253+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium ridleyi",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 95,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: Christ (1909). 発見者: Christ. 採取地: Malaya. 生息地: Malaya, Thailand, Sumatera, Borneo. 葉は楕円形で濃い緑色、表面は滑らかで光沢があります。葉脈は網状で、葉の先端は尖っています。葉柄は長く、葉の付け根は心形です。植物全体にややつやのある感があります。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17256060-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17256060-1"
+      }
+     ],
+     "structured": {
+      "author_name": "Christ",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17256060-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17256060-1"
+       }
+      ],
+      "collector": "Christ",
+      "known_habitats": "Malaya, Thailand, Sumatera, Borneo",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1909,
+      "type_locality": "Malaya"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-03-22T17:36:21.724253+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:37:18.057Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:37:12.835815+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium coronarium",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 96,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: (Konig) Desv. (1827). 発見者: Konig. 採取地: Malaya. 生息地: Malaya, Philippines, Laos, Sumatera, Borneo, Cambodia, Thailand, Vietnam, Myanmar. 葉は楕円形で、濃い緑色をしています。葉の表面は滑らかで、葉脈は網状に広がっています。葉の付け根は短い葉柄で、葉身は長さ20cmほどになります。葉の色や形は変異が少なく、種特有の特徴を持ちます。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17237070-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17237070-1"
+      }
+     ],
+     "structured": {
+      "author_name": "(Konig) Desv.",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17237070-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17237070-1"
+       }
+      ],
+      "collector": "Konig",
+      "known_habitats": "Malaya, Philippines, Laos, Sumatera, Borneo, Cambodia, Thailand, Vietnam, Myanmar",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1827,
+      "type_locality": "Malaya"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-03-22T17:37:12.835815+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:34:20.123Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:34:14.770681+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium hillii",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 93,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: T.Moore (1878). 採取地: Queensland, Australia. 生息地: Queensland. Platycerium hilliiは、葉が広がった形状をしており、質感は硬い。葉の色は緑で、葉脈のパターンは網状である。ペティオールは短く、太い。葉の形状は楕円形で、先端は尖っている。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17177500-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177500-1"
+      }
+     ],
+     "structured": {
+      "author_name": "T.Moore",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17177500-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177500-1"
+       }
+      ],
+      "collector": null,
+      "known_habitats": "Queensland",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1878,
+      "type_locality": "Queensland, Australia"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-09-06T16:26:09.051805+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:35:17.428Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:35:12.200085+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium superbum",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 94,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: Jonch. & Hennipman (1970). 発見者: Joncheere & Hennipman. 採取地: Queensland, Australia. 生息地: Queensland, New South Wales. Platycerium superbumは、葉が広い扇形をしていて、表面は暗緑色、裏面は茶色をしています。葉の質感は硬く、葉脈のパターンは網状です。葉の付け根には毛が生えています。葉の形状は、他の種と比べて独特です。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17448430-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17448430-1"
+      }
+     ],
+     "structured": {
+      "author_name": "Jonch. & Hennipman",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17448430-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17448430-1"
+       }
+      ],
+      "collector": "Joncheere & Hennipman",
+      "known_habitats": "Queensland, New South Wales",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1970,
+      "type_locality": "Queensland, Australia"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-03-22T17:35:12.200085+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:37:59.239Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:37:56.43566+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium grande",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 97,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: (A.Cunn. ex Hook.) J.Sm. (1841). 発見者: A. Cunningham (1838). 採取地: Sulawesi, Indonesia. 生息地: Sulawesi, Philippines. 葉は楕円形で濃い緑色、表面は滑らか、葉脈は網状。葉の付け根は長い葉柄で、葉身は厚い。葉の先端は尖っている。植物全体にワックスのような質感がある。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17177490-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177490-1"
+      }
+     ],
+     "structured": {
+      "author_name": "(A.Cunn. ex Hook.) J.Sm.",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17177490-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177490-1"
+       }
+      ],
+      "collection_year": 1838,
+      "collector": "A. Cunningham",
+      "known_habitats": "Sulawesi, Philippines",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1841,
+      "type_locality": "Sulawesi, Indonesia"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-03-22T17:37:56.43566+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:38:43.583Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:38:37.222492+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium holttumii",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 98,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: Jonch. & Hennipman (1970). 発見者: Joncheere & Hennipman. 採取地: South-Central China. 生息地: Laos, Vietnam, Thailand, Malaya, Cambodia, China South-Central. Platycerium holttumiiは、葉の形状が楕円形で、葉の色は緑色、葉の質感は革質で、葉脈パターンは網状である。葉の付け根には短い葉柄がある。南中国や東南アジアの熱帯雨林に生息する。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17448400-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17448400-1"
+      }
+     ],
+     "structured": {
+      "author_name": "Jonch. & Hennipman",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17448400-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17448400-1"
+       }
+      ],
+      "collector": "Joncheere & Hennipman",
+      "known_habitats": "Laos, Vietnam, Thailand, Malaya, Cambodia, China South-Central",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1970,
+      "type_locality": "South-Central China"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-03-22T17:38:37.222492+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  },
+  {
+   "ai_research_data": {
+    "best_trust": 95,
+    "origins_count": 2,
+    "research_source": "ipni-powo",
+    "researched_at": "2026-03-22T17:42:14.075Z"
+   },
+   "ai_status": "completed",
+   "aliases": null,
+   "created_at": "2026-03-22T17:42:08.400851+00:00",
+   "created_ip": "110.135.137.123",
+   "cultivar_name": "Platycerium stemaria",
+   "edit_key_hash": "034c5253b305b3105104304670429ff4cf6a502d5732ecef2f511f0582a04584",
+   "formula_status": null,
+   "genus": "Platycerium",
+   "id": 103,
+   "is_private": false,
+   "locality": null,
+   "name_status": null,
+   "origin_added_ip": null,
+   "origins": [
+    {
+     "author": {
+      "date": "2026-03-22",
+      "isAI": false,
+      "name": "User"
+     },
+     "body": "発表者: (P.Beauv.) Desv. (1827). 発見者: P. Beauvois. 採取地: West Africa. 生息地: Uganda, Equatorial Guinea, Tanzania, Gabon, Gulf of Guinea Is., Mozambique, Cameroon, Angola, Zimbabwe, Liberia, Madagascar, Benin, Zaire, Comoros, Sierra Leone, Ghana, Seychelles, Guinea, Senegal, Ivory Coast, Nigeria, Kenya, Sudan. 葉は長卵形で、表面は暗緑色、裏面は淡緑色です。葉脈は網状で、葉の先端は尖ります。葉の質感は革質で、表面に細かい毛が生えています。葉の付け根には長い葉鞘があります。",
+     "source_type": "manual",
+     "sources": [
+      {
+       "icon": "🌐",
+       "text": "https://www.ipni.org/n/17177520-1"
+      },
+      {
+       "icon": "🌐",
+       "text": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177520-1"
+      }
+     ],
+     "structured": {
+      "author_name": "(P.Beauv.) Desv.",
+      "citation_links": [
+       {
+        "url": "https://www.ipni.org/n/17177520-1"
+       },
+       {
+        "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:17177520-1"
+       }
+      ],
+      "collector": "P. Beauvois",
+      "known_habitats": "Uganda, Equatorial Guinea, Tanzania, Gabon, Gulf of Guinea Is., Mozambique, Cameroon, Angola, Zimbabwe, Liberia, Madagascar, Benin, Zaire, Comoros, Sierra Leone, Ghana, Seychelles, Guinea, Senegal, Ivory Coast, Nigeria, Kenya, Sudan",
+      "notes": "",
+      "origin_type": "species",
+      "publication_year": 1827,
+      "type_locality": "West Africa"
+     },
+     "trust": 30,
+     "trustClass": "trust--low",
+     "votes": {
+      "agree": 0,
+      "disagree": 0
+     }
+    }
+   ],
+   "parent_a_id": null,
+   "parent_a_text": null,
+   "parent_b_id": null,
+   "parent_b_text": null,
+   "selected_from_id": null,
+   "species_qualifier": null,
+   "tags": null,
+   "type": "species",
+   "updated_at": "2026-03-22T17:42:08.400851+00:00",
+   "user_id": "629508da-9fdd-4d3a-9ec6-22fd3bdb7346",
+   "verification_note": null,
+   "verified_at": null,
+   "verified_by": null,
+   "votes": {}
+  }
+ ]
+}

@@ -1246,7 +1246,8 @@ function updateCultivarDetail(cultivarName, rowEl) {
     noindex: detectedType === 'seedling' || (typeof window.recordStateOf === 'function' && cData && window.recordStateOf(cultivarName, cData, { type: detectedType }) !== 'ok')
   });
   // Pass extra structured data for rich JSON-LD
-  var jsonLdExtra = { image: ogImageUrl, alternateName: (cData && cData._aliases) || [] };
+  // aliases that contradict the kind (sp./aff. on a non-species) stay out of the structured data too
+  var jsonLdExtra = { image: ogImageUrl, alternateName: ((cData && cData._aliases) || []).filter(function(a) { return detectedType === 'species' || !/\b(sp|aff|cf)\./.test(a); }) };
   if (cData && cData.origins && cData.origins.length > 0) {
     var maxTrust = cData.origins.reduce(function(m, o) { return Math.max(m, o.trust || 0); }, 0);
     jsonLdExtra.trustPct = maxTrust;

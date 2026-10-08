@@ -56,3 +56,49 @@
   });
   document.addEventListener('DOMContentLoaded', function () { setTimeout(function () { if (window.loadAiSuggestions) window.loadAiSuggestions(); }, 1400); });
 })();
+
+/* Admin: recent changes to the origin records (board 9, T110). Every change is kept in origin_history;
+   「取り消す」 puts the record back as it was before that change (RPC revert_origin_change). */
+(function () {
+  'use strict';
+  function esc(s) { return escapeHtml(String(s == null ? '' : s)); }
+  var PROV = { contributor: '人', database: 'DB', ai: 'AI', generated: '自動', editorial: '編集部' };
+  function brief(origins) {
+    return (origins || []).filter(function (o) { return o && !o._type; }).map(function (o) {
+      return (PROV[o.provenance] || '?') + (o.provenance === 'contributor' ? '［鍵］' : '') + ' ' + String(o.body || '').slice(0, 40);
+    }).join(' / ');
+  }
+  window.loadOriginHistory = async function () {
+    var dash = document.getElementById('sec-dashboard');
+    if (!dash) return;
+    var h = document.getElementById('origin-history-card');
+    if (!h) { h = document.createElement('div'); h.id = 'origin-history-card'; h.className = 'stat-card'; h.style.marginTop = 'var(--space-sm)'; dash.appendChild(h); }
+    var r = await sb.from('origin_history').select('id, cultivar_id, changed_at, changed_by, old_origins, new_origins').order('changed_at', { ascending: false }).limit(20);
+    if (r.error) { h.textContent = '由来の変更履歴: 読み込めませんでした（' + r.error.message + '）'; return; }
+    var ids = Array.from(new Set((r.data || []).map(function (x) { return x.cultivar_id; })));
+    var names = {};
+    if (ids.length) { var c = await sb.from('cultivars').select('id, cultivar_name').in('id', ids); (c.data || []).forEach(function (x) { names[x.id] = x.cultivar_name; }); }
+    var html = '<strong>由来の変更履歴</strong> <span style="font-size:var(--font-size-xs);color:var(--color-gray);">（新しい順 20 件。［鍵］は人が書いた本文で、本人以外は書き換えられません）</span>'
+      + '<details style="margin-top:6px;"><summary style="cursor:pointer;">一覧を開く</summary>';
+    (r.data || []).forEach(function (x) {
+      html += '<div class="oh-row" data-id="' + x.id + '" style="border-top:1px solid var(--color-light,#ddd);padding:6px 0;font-size:var(--font-size-xs);">'
+        + '<div><em>' + esc(names[x.cultivar_id] || ('#' + x.cultivar_id)) + '</em> — ' + esc(String(x.changed_at).slice(0, 16).replace('T', ' ')) + '</div>'
+        + '<div style="color:var(--color-gray);">前: ' + esc(brief(x.old_origins)) + '</div>'
+        + '<div>後: ' + esc(brief(x.new_origins)) + '</div>'
+        + '<button type="button" class="btn btn-secondary btn-sm" data-oh-revert style="margin-top:4px;">この変更を取り消す</button></div>';
+    });
+    h.innerHTML = html + '</details>';
+  };
+  document.addEventListener('click', async function (e) {
+    var b = e.target.closest && e.target.closest('[data-oh-revert]');
+    if (!b) return;
+    var row = b.closest('.oh-row');
+    if (!confirm('この変更の前の状態に戻します。よろしいですか？')) return;
+    b.disabled = true;
+    var r = await sb.rpc('revert_origin_change', { p_history_id: Number(row.getAttribute('data-id')) });
+    if (r.error || !r.data || r.data.success === false) { toast('戻せませんでした: ' + ((r.error && r.error.message) || (r.data && r.data.error) || '')); b.disabled = false; return; }
+    toast('元に戻しました');
+    window.loadOriginHistory();
+  });
+  document.addEventListener('DOMContentLoaded', function () { setTimeout(function () { if (window.loadOriginHistory) window.loadOriginHistory(); }, 1600); });
+})();

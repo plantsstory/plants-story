@@ -2499,14 +2499,17 @@ serve(async (req: Request) => {
             // Build structured object from AI result
             const cs = cultivarStructured || {};
             const structuredObj: any = { origin_type: plantType };
+            // the body below is the person's words; these fields are the AI's reading of it, marked as such
+            // (board 9: AI values carry their own provenance; an unknown is empty, never the string 不明)
+            const realVal = (v: any) => (v && v !== "不明" ? v : null);
             if (plantType === "clone") {
-              structuredObj.namer = cs.namer || "不明";
+              structuredObj.namer = realVal(cs.namer);
               structuredObj.naming_year = cs.naming_year || null;
             } else if (plantType === "hybrid") {
-              structuredObj.breeder = cs.breeder || "不明";
+              structuredObj.breeder = realVal(cs.breeder);
               structuredObj.naming_year = cs.naming_year || null;
             } else if (plantType === "seedling") {
-              structuredObj.breeder = cs.breeder || "不明";
+              structuredObj.breeder = realVal(cs.breeder);
               structuredObj.sowing_date = cs.sowing_date || null;
             }
             if (cs.formula && (cs.formula.parentA || cs.formula.parentB)) {
@@ -2515,7 +2518,9 @@ serve(async (req: Request) => {
                 parentB: cs.formula.parentB || "",
               };
             }
-            structuredObj.notes = cs.notes || effectiveUserText.substring(0, 150);
+            // notes are the AI's own summary when it gives one; the person's text is the body and is not copied here
+            structuredObj.notes = realVal(cs.notes);
+            structuredObj.ai_draft_fields = ["namer", "breeder", "naming_year", "sowing_date", "formula", "notes"].filter((f) => structuredObj[f] != null);
             structuredObj.citation_links = sourcesArr
               .filter((s: any) => s.url)
               .map((s: any) => ({ url: s.url, label: s.label || s.url }));
@@ -2523,6 +2528,7 @@ serve(async (req: Request) => {
             originEntries.push({
               body: effectiveUserText,
               body_en: cs.notes_en || "",
+              body_en_by: cs.notes_en ? "ai" : undefined,
               trust,
               trustClass,
               source_type: "ai_verified",
@@ -2564,16 +2570,16 @@ serve(async (req: Request) => {
             const tierInfo = TIER_CONFIG.D;
             const fallbackStructured: any = { origin_type: plantType };
             if (plantType === "clone") {
-              fallbackStructured.namer = "不明";
+              fallbackStructured.namer = null;
               fallbackStructured.naming_year = null;
             } else if (plantType === "hybrid") {
-              fallbackStructured.breeder = "不明";
+              fallbackStructured.breeder = null;
               fallbackStructured.naming_year = null;
             } else if (plantType === "seedling") {
-              fallbackStructured.breeder = "不明";
+              fallbackStructured.breeder = null;
               fallbackStructured.sowing_date = null;
             }
-            fallbackStructured.notes = effectiveUserText.substring(0, 150);
+            fallbackStructured.notes = null;
             fallbackStructured.citation_links = effectiveUserSources
               .filter(Boolean)
               .map(u => ({ url: u, label: u }));

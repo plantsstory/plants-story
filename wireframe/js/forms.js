@@ -630,17 +630,8 @@ document.addEventListener('click', function(e) {
     // Pre-fill 補足欄 (shared textarea)
     if (contributeDesc) {
       contributeDesc.value = '';
-      if (editStructured && editStructured.notes) {
-        contributeDesc.value = editStructured.notes;
-      } else if (data.origins) {
-        // Fallback: use body from first non-formula origin (legacy data)
-        for (var i = 0; i < data.origins.length; i++) {
-          if (data.origins[i]._type !== 'formula' && data.origins[i].body) {
-            contributeDesc.value = data.origins[i].body;
-            break;
-          }
-        }
-      }
+      // only the notes themselves: copying the body here made notes repeat the text on save (BOARD 10-08)
+      if (editStructured && editStructured.notes) contributeDesc.value = editStructured.notes;
     }
 
     // Pre-fill type-specific structured fields
@@ -1253,6 +1244,11 @@ document.addEventListener('click', function(e) {
             renderContributeSources();
           }
           window._aiAutofillUsed = true;
+          // remember what the AI wrote, field by field, to mark it on the record (BOARD 10-08)
+          window._aiAutofillValues = {};
+          ['author_name', 'publication_year', 'collector', 'collection_year', 'type_locality', 'known_habitats'].forEach(function(f) {
+            var v = s[f]; if (v != null && v !== '' && v !== '不明') window._aiAutofillValues[f] = String(v);
+          });
           if (aiAutofillStatus) aiAutofillStatus.textContent = '記入完了 — 内容を確認してください';
         } else {
           if (aiAutofillStatus) aiAutofillStatus.textContent = 'データが見つかりませんでした';
@@ -1492,17 +1488,14 @@ document.addEventListener('click', function(e) {
           if (o._type === 'formula') return o;
           if (!foundOrigin) {
             foundOrigin = true;
-            var hasUserInput = autoBody || (structured.notes && structured.notes.trim());
+            // the body is someone's words (BOARD 10-08): editing changes the fields, never the text or who wrote it.
+            // Only a body the site generated from the fields (body_generated), or an empty one, follows the new fields.
+            var regen = o.body_generated || !String(o.body || '').trim();
             var updatedOrigin = Object.assign({}, o, {
-              body: autoBody || o.body,
+              body: regen ? (autoBody || o.body || '') : o.body,
               structured: structured,
               sources: updatedSources.length > 0 ? updatedSources : o.sources
             });
-            // ユーザーが内容を入力した場合、manualとしてマーク（AI再調査時の上書き防止）
-            if (hasUserInput) {
-              updatedOrigin.source_type = 'manual';
-              updatedOrigin.author = { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) };
-            }
             return updatedOrigin;
           }
           return o;
@@ -1671,18 +1664,27 @@ document.addEventListener('click', function(e) {
       var autoBody = generateBodyFromStructured(structured);
       // Check if structured has any meaningful content
       var hasStructuredContent = autoBody || structured.notes || (structured.formula && structured.formula.parentA);
+      // the person's own words are the body, as written; the fields stay in structured (BOARD 10-08)
+      var ownWords = String(structured.notes || '').trim();
 
       if (hasStructuredContent) {
         // User provided structured origin
         var origin = {
           trust: isSeedling ? 50 : 30, trustClass: isSeedling ? 'trust--mid' : 'trust--low',
-          body: autoBody,
+          body: ownWords || autoBody,
+          body_generated: !ownWords,
+          provenance: ownWords ? 'contributor' : 'generated',
           structured: structured,
           source_type: 'manual',
           sources: contributeSources.map(function(url) { return { icon: '\u{1F310}', text: url }; }),
           author: { isAI: false, name: 'User', date: new Date().toISOString().slice(0, 10) },
           votes: { agree: 0, disagree: 0 }
         };
+        // D: values the AI auto-fill put in, still unchanged at submit, are marked as an AI draft
+        if (window._aiAutofillValues) {
+          var aiFields = Object.keys(window._aiAutofillValues).filter(function(f) { return String(structured[f] == null ? '' : structured[f]) === String(window._aiAutofillValues[f]); });
+          if (aiFields.length) origin.structured = Object.assign({}, origin.structured, { ai_draft_fields: aiFields });
+        }
       } else if (!isSeedling && type !== 'species') {
         // AI will fill in later (not for seedlings or species)
         // Species uses the AI auto-fill button before registration
@@ -2000,14 +2002,15 @@ document.addEventListener('click', function(e) {
       }
 
       // Auto-generate body for backward compat
+      // the person's words are the body as written; without words, one line from the fields (T66 names)
       var bodyParts = [];
-      if (aoStructured.author_name) bodyParts.push('発表者: ' + aoStructured.author_name);
-      if (aoStructured.collector) bodyParts.push('発見者: ' + aoStructured.collector);
-      if (aoStructured.type_locality) bodyParts.push('採取地: ' + aoStructured.type_locality);
-      if (aoStructured.breeder || aoStructured.namer) bodyParts.push((aoStructured.breeder || aoStructured.namer));
-      if (aoStructured.formula) bodyParts.push(aoStructured.formula.parentA + ' × ' + aoStructured.formula.parentB);
-      if (descText) bodyParts.push(descText);
-      var autoBody = bodyParts.join('. ');
+      if (aoStructured.author_name) bodyParts.push('記載者: ' + aoStructured.author_name);
+      if (aoStructured.collector) bodyParts.push('採集者: ' + aoStructured.collector);
+      if (aoStructured.type_locality) bodyParts.push('タイプ産地: ' + aoStructured.type_locality);
+      if (aoStructured.breeder || aoStructured.namer) bodyParts.push((aoStructured.breeder ? '作出者: ' : '命名者: ') + (aoStructured.breeder || aoStructured.namer));
+      if (aoStructured.formula) bodyParts.push('交配式: ' + aoStructured.formula.parentA + ' × ' + aoStructured.formula.parentB);
+      var autoBody = descText || bodyParts.join('. ');
+      var aoBodyGenerated = !descText;
 
       // Require at least some content
       if (!autoBody && !descText) { showToast(t('origin_desc_required'), true); return; }
@@ -2022,6 +2025,7 @@ document.addEventListener('click', function(e) {
       var newOrigin = {
         trust: 25, trustClass: 'trust--low',
         body: autoBody,
+        body_generated: aoBodyGenerated,
         structured: aoStructured,
         source_type: 'manual',
         sources: originSources.map(function(url) { return { icon: '\u{1F310}', text: url }; }),
@@ -2258,6 +2262,8 @@ updateCultivarDetail = function(cultivarName, rowEl) {
   }
 
   function uploadToSupabase(file, cultivarName, caption, linkUrl, displayOrder) {
+    // photos are filed under the shown name: a seedling's ' [Seedling]' is not part of it (renderGalleryForCultivar reads it so)
+    cultivarName = String(cultivarName || '').replace(' [Seedling]', '');
     var sb = getSupabase();
     if (!sb) return Promise.reject('No Supabase');
     var safeName = cultivarName.replace(/[^a-zA-Z0-9_' -]/g, '_');

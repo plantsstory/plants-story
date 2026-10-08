@@ -49,8 +49,14 @@ function check(rows) {
     // the text
     const o = top(r);
     if (!o) continue;
-    const body = String(o.body || '');
     const s = o.structured || {};
+    // a contributor's text is theirs: its wording is not checked (board 9). Only the site's own texts are.
+    const byPerson = (o.source_type === 'manual' || (o.author && o.author.isAI === false)) && !o.body_generated;
+    const body = byPerson ? '' : String(o.body || '');
+    // what is checked for every record: notes that repeat the body, the string 不明 in a field, an alias that contradicts the kind
+    if (s.notes && String(s.notes).trim() && String(s.notes).trim() === String(o.body || '').trim()) add(r, 'warn', 'notes_repeat', '補足欄が本文と同じです（補足は本文にないことだけ）');
+    for (const f of ['author_name', 'collector', 'type_locality', 'known_habitats', 'breeder', 'namer']) if (s[f] === '不明') add(r, 'warn', 'unknown_string', f + ' に「不明」の文字が入っています（空欄にする）');
+    if (r.type !== 'species') for (const al of (r.aliases || [])) if (/\b(sp|aff|cf)\./.test(al)) add(r, 'warn', 'alias_kind', '別名「' + al + '」の sp./aff. が区分（' + r.type + '）と合いません（表示はしない）');
     if (/(氏|さん|様)(が|は|の|と|、|。|）)/.test(body) || /\b(Mr|Mrs|Ms|Dr)\.\s/.test(body)) add(r, 'warn', 'honorific', '本文に敬称があります');
     if (/\d{4}-\d{2}-\d{2}/.test(body)) add(r, 'warn', 'iso_date', '本文の日付が YYYY-MM-DD です（YYYY.MM.DD にする）');
     for (const sent of body.split(/(?<=。)/)) {

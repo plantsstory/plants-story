@@ -124,7 +124,9 @@
     d.namingYear = yearOf(s.naming_year);
     d.sowing = clean(s.sowing_date);
     d.year = d.pubYear || d.namingYear || yearOf(d.sowing);
-    d.text = clean(s.notes) || clean(o && o.body) || '';
+    // a contributor's record speaks in their own words: the body first (notes are only what the body does not say)
+    var byPerson = o && (o.source_type === 'manual' || (o.author && o.author.isAI === false)) && !o.body_generated;
+    d.text = byPerson ? (clean(o.body) || clean(s.notes) || '') : (clean(s.notes) || clean(o && o.body) || '');
     // a % is shown only for a record that cites something (same rule as the record head)
     d.hasSources = !!o && (o.source_type === 'ipni_powo' || (o.sources || []).some(function (x) { return x && clean(x.url); }) || !!clean(o.source_url));
     d.textEn = clean(o && o.body_en) || d.text;
@@ -683,7 +685,9 @@
     // an individual: who brought it in and where it came from
     if (d.isIndividual) cells += cell('spec_introduced_by', linkPeople(d.introducedBy)) + cell('spec_region', distributionHtml(d.originRegion || d.formLocality || d.locality || d.habitat));
     // on the label: at most three Latin-script names; katakana stays for search and JSON-LD
-    var labelAliases = (d.aliases || []).filter(function (a, i, arr) { return /[A-Za-z]/.test(a) && !/[゠-ヿ]/.test(a) && arr.indexOf(a) === i; }).slice(0, 3);
+    // an alias with sp./aff./cf. on a Hybrid, Clone or individual contradicts the kind: kept for search, not shown
+    var qualifierClash = function (a) { return d.type !== 'species' && /\b(sp|aff|cf)\./.test(a); };
+    var labelAliases = (d.aliases || []).filter(function (a, i, arr) { return /[A-Za-z]/.test(a) && !/[゠-ヿ]/.test(a) && arr.indexOf(a) === i && !qualifierClash(a); }).slice(0, 3);
     // under the name, not in the label (BOARD 10-07 T73)
     var aliasEl = document.getElementById('detail-aliases');
     if (aliasEl) {
@@ -1972,10 +1976,13 @@
         var rows = res.data || [];
         if (!rows.length) { grid.innerHTML = ''; if (emptyMsg) { emptyMsg.style.display = ''; emptyMsg.classList.remove('d-none'); } return; }
         if (emptyMsg) emptyMsg.style.display = 'none';
-        var names = rows.map(function (r) { return r.cultivar_name; });
+        // photos are filed under the shown name (a seedling without ' [Seedling]')
+        var shown = function (n) { return String(n || '').replace(' [Seedling]', ''); };
+        var names = rows.map(function (r) { return shown(r.cultivar_name); });
         return sbc.from('cultivar_images').select('cultivar_name, storage_path').in('cultivar_name', names).then(function (ir) {
           var count = {}, first = {};
           (ir.data || []).forEach(function (i) { count[i.cultivar_name] = (count[i.cultivar_name] || 0) + 1; if (!first[i.cultivar_name]) first[i.cultivar_name] = i.storage_path; });
+          rows.forEach(function (r) { count[r.cultivar_name] = count[shown(r.cultivar_name)]; first[r.cultivar_name] = first[shown(r.cultivar_name)]; });
           var priv = rows.filter(function (r) { return r.is_private; }).length;
           var html = '<p class="mypost-counts">記録 <span class="num">' + rows.length + '</span>' + (priv ? ' · 非公開 <span class="num">' + priv + '</span>' : '') + '</p><ol class="entries">';
           var baseUrl = window._SUPABASE_URL || '';
