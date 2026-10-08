@@ -472,6 +472,79 @@
       if (m) { var el = document.getElementById('p' + m[1]); if (el) el.scrollIntoView({ block: 'center' }); }
     });
   };
+  /* ---------- 読みもの (board 12): articles by people who know these plants ---------- */
+  var _articles = null, _articlesWaiters = [];
+  function loadArticles(cb) {
+    if (_articles) { cb(_articles); return; }
+    _articlesWaiters.push(cb);
+    if (_articlesWaiters.length > 1) return;
+    var sbc = window._supabaseClient;
+    var done = function (rows) { _articles = rows || []; var w = _articlesWaiters; _articlesWaiters = []; w.forEach(function (f) { f(_articles); }); };
+    if (!sbc) { done([]); return; }
+    sbc.from('articles').select('id, url, title, author, site, lang, published_on, kind, credential, summary, topics')
+      .eq('is_published', true).order('published_on', { ascending: false, nullsFirst: false }).limit(500)
+      .then(function (r) { done(r && !r.error ? r.data : []); }, function () { done([]); });
+  }
+  var extLink = function (a, inner, cls) {
+    return '<a' + (cls ? ' class="' + cls + '"' : '') + ' href="' + esc(a.url) + '" target="_blank" rel="noopener noreferrer">' + inner
+      + '<span aria-hidden="true"> ↗</span><span class="visually-hidden">（外部サイト）</span></a>';
+  };
+  var yearOfDate = function (v) { return v ? String(v).slice(0, 4) : ''; };
+  var entryByName = function (n) {
+    var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
+    var e = store[n];
+    if (!e) return null;
+    try { return describe(n, e, e._type); } catch (er) { return null; }
+  };
+  window.renderReadingPage = function () {
+    var body = document.getElementById('reading-body');
+    if (!body) return;
+    waitForData(function () {
+      loadArticles(function (rows) {
+        if (!rows.length) { body.innerHTML = '<p class="people__intro">準備中です。</p>'; return; }
+        var ja = rows.filter(function (a) { return a.lang === 'ja'; }).length, en = rows.filter(function (a) { return a.lang === 'en'; }).length;
+        var html = '<p class="mypost-counts">記事 <span class="num">' + rows.length + '</span> 件 · 日本語 <span class="num">' + ja + '</span> · 英語 <span class="num">' + en + '</span></p>';
+        if (en >= 3 && ja >= 1) html += '<div class="genus-tabs reading-tabs" role="tablist"><button type="button" class="genus-tab active" data-reading-lang="">全部</button><button type="button" class="genus-tab" data-reading-lang="ja">日本語</button><button type="button" class="genus-tab" data-reading-lang="en">英語</button></div>';
+        html += '<ol class="entries reading-list">';
+        rows.forEach(function (a) {
+          var sub = [esc(a.author), esc(a.site), a.published_on ? '<span class="year">' + esc(yearOfDate(a.published_on)) + '</span>' : '', a.lang === 'en' ? '英語' : ''].filter(Boolean).join(' · ');
+          var plants = (a.topics || []).map(function (n) { var d = entryByName(n); return d && d.state === 'ok' ? link(d, sciNameHtml(d.shownName)) : ''; }).filter(Boolean);
+          html += '<li class="entry reading-item" data-lang="' + esc(a.lang) + '"><div class="entry__main">'
+            + extLink(a, esc(a.title), 'entry__name reading-item__title')
+            + '<span class="entry__sub">' + sub + '</span>'
+            + (a.credential ? '<span class="entry__sub reading-item__cred">' + esc(a.credential) + '</span>' : '')
+            + '<p class="people__note reading-item__summary">' + (window.italicizeSciNames ? window.italicizeSciNames(esc(a.summary)) : esc(a.summary)) + '</p>'
+            + (plants.length ? '<p class="related__exit reading-item__plants">' + plants.join(' · ') + '</p>' : '')
+            + '</div></li>';
+        });
+        body.innerHTML = html + '</ol>';
+        body.querySelectorAll('[data-reading-lang]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            var v = b.getAttribute('data-reading-lang');
+            body.querySelectorAll('[data-reading-lang]').forEach(function (x) { x.classList.toggle('active', x === b); });
+            body.querySelectorAll('.reading-item').forEach(function (li) { li.style.display = !v || li.getAttribute('data-lang') === v ? '' : 'none'; });
+          });
+        });
+      });
+    });
+  };
+  // 「この植物についての記事」 on a plant page: topics match the entry's name exactly (never a partial match)
+  function renderArticlesFor(d) {
+    var sec = document.getElementById('reading-for-section'), box = document.getElementById('reading-for-container');
+    if (!sec || !box) return;
+    sec.classList.add('d-none'); box.innerHTML = '';
+    loadArticles(function (rows) {
+      var mine = rows.filter(function (a) { return (a.topics || []).indexOf(d.fullName) !== -1; });
+      var h1 = document.querySelector('#page-cultivar h1');
+      if (!mine.length || !h1 || h1Key(h1) !== d.fullName) return;
+      var li = function (a) { return '<li>' + extLink(a, esc(a.title)) + ' <span class="num">' + [esc(a.site), esc(yearOfDate(a.published_on))].filter(Boolean).join(' · ') + '</span></li>'; };
+      var html = '<div class="related__group"><ul>' + mine.slice(0, 3).map(li).join('') + '</ul>';
+      if (mine.length > 3) html += '<details class="timeline__fold"><summary>ほか ' + (mine.length - 3) + ' 件</summary><ul>' + mine.slice(3).map(li).join('') + '</ul></details>';
+      html += '</div><p class="related__exit"><a href="' + esc(base + 'reading/') + '" data-nav="reading">読みもの一覧へ →</a></p>';
+      box.innerHTML = html;
+      sec.classList.remove('d-none');
+    });
+  }
   // /wanted/ and /ig/ depend on which entries have a photo: draw them again once the photo list is in
   document.addEventListener('ao:thumbs', function () {
     var w = document.getElementById('page-wanted'), g = document.getElementById('page-ig');
@@ -1409,6 +1482,7 @@
     if (plb) plb.classList.toggle('d-none', d.type === 'seedling');
     renderRelated(d, all);
     renderNameNote(d);
+    renderArticlesFor(d);
     renderIndividuals(d, all);
     renderGateNote(d);
     renderShareBand(d, entry);

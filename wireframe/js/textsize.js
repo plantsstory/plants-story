@@ -13,6 +13,12 @@
     off = localStorage.getItem('ao-preview-app') === '0';
   } catch (e) {}
   if (!off) document.documentElement.classList.add('app-ui');
+  // board 12: 「読みもの」 links and the plant-page section, shown only with ?preview=reading until the owner's OK
+  try {
+    if (/[?&]preview=reading(?:&|$)/.test(location.search)) localStorage.setItem('ao-preview-reading', '1');
+    if (/[?&]preview=reading-off(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-reading');
+    if (localStorage.getItem('ao-preview-reading') === '1') document.documentElement.classList.add('pv-reading');
+  } catch (e) {}
   // board 11 T148: the empty plate as a specimen label, shown only to whoever opens ?preview=plate until approved
   try {
     if (/[?&]preview=plate(?:&|$)/.test(location.search)) localStorage.setItem('ao-preview-plate', '1');

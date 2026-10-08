@@ -643,7 +643,7 @@ function showGenus(genusName) {
 
 // ---- Path-based routing (History API) ----
 // Known simple pages (no sub-parameters)
-var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'mypost', 'guide', 'glossary', 'pricing', 'wanted', 'ig'];
+var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'mypost', 'guide', 'glossary', 'pricing', 'wanted', 'ig', 'reading'];
 // Known genus names for URL mapping
 var knownGenera = []; // Populated dynamically from genera table
 // Base path: '/' on custom domain, '/plants-story/' on GitHub Pages
@@ -767,6 +767,7 @@ function navigateTo(page, options, pushHistory) {
   if (page === 'names' && typeof window.renderNamesPage === 'function') window.renderNamesPage(options.nameSlug || '');
   if (page === 'wanted' && typeof window.renderWantedPage === 'function') window.renderWantedPage();
   if (page === 'ig' && typeof window.renderIgPage === 'function') window.renderIgPage();
+  if (page === 'reading' && typeof window.renderReadingPage === 'function') window.renderReadingPage();
   if (page === 'tools' && typeof window.renderToolsPage === 'function') window.renderToolsPage(options.tool || '', options.genre || '');
   if (page === 'genus' && options.genus) showGenus(options.genus);
   if (page === 'cultivar' && options.cultivar && !options._skipUpdate) {
@@ -817,6 +818,7 @@ function navigateTo(page, options, pushHistory) {
       mypost: '自分の記録 - ' + _defaultTitle,
       wanted: '写真を募集中 — 写真のないアンスリウム | Aroid Origins',
       ig: 'Instagram の図版 | Aroid Origins',
+      reading: '読みもの — アンスリウムの分類・交配・現地の記事 | Aroid Origins',
       people: '人物索引 - ' + _defaultTitle,
       locality: '産地索引 - ' + _defaultTitle,
       tools: '道具の目録 - ' + _defaultTitle,
@@ -839,6 +841,7 @@ function navigateTo(page, options, pushHistory) {
       mypost: 'あなたが記録した品種',
       wanted: '由来は記録されているのに、写真がまだない品種の一覧です。自分で撮った写真を 1 枚から載せられます。',
       ig: 'Instagram の投稿の「図版」の番号から、その植物の由来のページへ。',
+      reading: '分類・交配・現地・栽培について、経験のある人が書いた記事の索引。紹介文は編集部、本文は各サイトで。',
       people: 'アロイド品種の記載者・採集者・作出者の索引。人物ごとに関連する品種をたどれます',
       locality: 'タイプ産地（国）ごとに原種をたどる索引。コロンビア、パナマ、ペルーなど',
       glossary: 'sp. / aff. / cf.、記載者、タイプ産地、交配式、F1、クローン、TC など由来を読むための用語集',
@@ -871,7 +874,7 @@ function navigateTo(page, options, pushHistory) {
           return;
         }
       }
-      var noindexPages = { search: true, contribute: true, mypost: true, favorites: true, profile: true, 'profile-edit': true, notfound: true, ig: true };
+      var noindexPages = { search: true, contribute: true, mypost: true, favorites: true, profile: true, 'profile-edit': true, notfound: true, ig: true, reading: !document.documentElement.classList.contains('pv-reading-open') };
       updateMeta({ title: pageTitles[page] || _defaultTitle, description: pageDescriptions[page] || _defaultDesc, path: page === 'top' ? '' : page, noindex: !!noindexPages[page] });
       // Remove genus JSON-LD on non-genus pages
       var gjld = document.getElementById('genus-jsonld');

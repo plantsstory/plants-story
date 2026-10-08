@@ -1788,3 +1788,12 @@ html.pv-plate .gallery__empty .sheet--plate { padding: var(--s3) 0 !important; d
 .ig-find label { font-size: var(--fs-small); color: var(--color-mid); }
 .ig-find input { width: 6em; min-height: var(--tap); font-size: var(--fs-body); }
 .ig-find .btn { min-height: var(--tap); }
+
+/* board 12: 読みもの — until the owner's OK the links and the plant-page section show with ?preview=reading only */
+html:not(.pv-reading) .pv-reading-link, html:not(.pv-reading) #reading-for-section { display: none !important; }
+.reading-list .entry__main { display: block; }
+.reading-item { padding: var(--s3) 0; }
+.reading-item__title { display: inline; font-size: var(--fs-body); }
+.reading-item__summary { margin: var(--s2) 0 0; font-size: var(--fs-body); }
+.reading-item__plants { margin: var(--s2) 0 0; }
+.reading-tabs { margin: 0 0 var(--s3); }

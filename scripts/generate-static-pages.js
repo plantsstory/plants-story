@@ -231,6 +231,8 @@ async function main() {
   const staticRoutes = [
     { dir: 'about', title: 'この図鑑について | Aroid Origins', description: '誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑「Aroid Origins」の記録の方針・料金・運営情報。' },
     { dir: 'wanted', title: '写真を募集中 — 写真のないアンスリウム | Aroid Origins', description: '由来は記録されているのに、写真がまだない品種の一覧です。自分で撮った写真を 1 枚から載せられます。' },
+    // 読みもの (board 12): noindex until the owner's OK
+    { dir: 'reading', noindex: true, title: '読みもの — アンスリウムの分類・交配・現地の記事 | Aroid Origins', description: '分類・交配・現地・栽培について、経験のある人が書いた記事の索引。紹介文は編集部、本文は各サイトで。' },
     { dir: 'ig', noindex: true, title: 'Instagram の図版 | Aroid Origins', description: 'Instagram の投稿の「図版」の番号から、その植物の由来のページへ。' },
     { dir: 'guide', title: '使い方ガイド | Aroid Origins', description: '品種の検索・由来の閲覧・投稿・画像アップロードなど、Aroid Originsの使い方を解説します。' },
     { dir: 'terms', title: '利用規約 | Aroid Origins', description: 'Aroid Originsの利用規約。投稿コンテンツの取り扱い、会員（受付準備中）、道具の目録とアフィリエイト、禁止行為について定めています。' },

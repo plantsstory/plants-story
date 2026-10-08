@@ -14,15 +14,16 @@
   <link rel="stylesheet" href="css/utilities.css">
   <link rel="stylesheet" href="css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/record-gate.js?v=20261008zc"></script>
-  <script src="js/tool-gate.js?v=20261008zc"></script>
-  <script src="js/admin-ledger.js?v=20261008zc"></script>
-  <script src="js/admin-tools-research.js?v=20261008zc"></script>
-  <script src="js/admin-verify.js?v=20261008zc"></script>
-  <script src="js/admin-contact.js?v=20261008zc"></script>
-  <script src="js/admin-checks.js?v=20261008zc"></script>
-  <script src="js/admin-suggest.js?v=20261008zc"></script>
-  <script src="js/admin-shops.js?v=20261008zc"></script>
+  <script src="js/record-gate.js?v=20261008zd"></script>
+  <script src="js/tool-gate.js?v=20261008zd"></script>
+  <script src="js/admin-ledger.js?v=20261008zd"></script>
+  <script src="js/admin-tools-research.js?v=20261008zd"></script>
+  <script src="js/admin-verify.js?v=20261008zd"></script>
+  <script src="js/admin-contact.js?v=20261008zd"></script>
+  <script src="js/admin-checks.js?v=20261008zd"></script>
+  <script src="js/admin-suggest.js?v=20261008zd"></script>
+  <script src="js/admin-shops.js?v=20261008zd"></script>
+  <script src="js/admin-articles.js?v=20261008zd"></script>
 </head>
 <body>
 
@@ -76,6 +77,7 @@
       <a href="#" data-section="affiliates">道具（アフィリエイト）</a>
       <a href="#" data-section="contact">お問い合わせ <span id="contact-badge" class="d-none" style="background:#A8712E;color:#fff;border-radius:10px;padding:0 6px;font-size:0.7rem;"></span></a>
       <a href="#" data-section="shops">取扱店</a>
+      <a href="#" data-section="articles">読みもの</a>
       <a href="#" data-section="ledger">帳簿</a>
       <a href="#" data-section="plants">株台帳</a>
       <a href="#" data-section="users">ユーザー管理</a>
@@ -331,6 +333,12 @@
       <section id="sec-shops" class="hidden">
         <h2 class="section-title">取扱店</h2>
         <div id="shops-root"></div>
+      </section>
+
+      <!-- ---- ARTICLES (読みもの, board 12) ---- -->
+      <section id="sec-articles" class="hidden">
+        <h2 class="section-title">読みもの</h2>
+        <div id="articles-root"></div>
       </section>
 
       <!-- ---- LEDGER (帳簿) ---- -->
@@ -977,6 +985,7 @@ document.querySelectorAll('.admin-nav a').forEach(function(link) {
     if (section === 'ledger' && window.loadLedger) window.loadLedger();
     if (section === 'verify' && window.loadVerify) window.loadVerify();
     if (section === 'shops' && window.loadShops) window.loadShops();
+    if (section === 'articles' && window.loadArticlesAdmin) window.loadArticlesAdmin();
     if (section === 'contact' && window.loadContactMessages) window.loadContactMessages();
     if (section === 'dashboard' && window.loadMemberInterestCount) window.loadMemberInterestCount();
     if (section === 'dashboard' && window.loadNameChecks) window.loadNameChecks();
