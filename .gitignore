@@ -43,4 +43,5 @@ wireframe/data/name-check.json
 # generated names and wanted stubs (CI)
 wireframe/names/
 wireframe/wanted/
+wireframe/ig/
 wireframe/data/build-stamp.txt

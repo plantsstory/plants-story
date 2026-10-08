@@ -157,7 +157,7 @@
     d.nameStatus = entry._nameStatus || null;
     d.formLocality = clean(entry._locality);
     d.creator = clean(d.formula && d.formula.creatorName);
-    d.href = base + genus.toLowerCase() + '/' + encodeURIComponent(epithet);
+    d.href = base + genus.toLowerCase() + '/' + encodeURIComponent(epithet) + '/';   // the canonical form (no 301)
     // the name readers see (T69: undescribed species stored without sp.); displayName stays the stored key
     d.shownName = window.EntryMeta ? window.EntryMeta.name({ cultivar_name: displayName, type: type, origins: entry.origins || [], species_qualifier: entry._qualifier }) : displayName;
     return d;
@@ -1360,7 +1360,7 @@
       var hit = resolveLooseName(displayName, store);
       if (hit && typeof window.updateCultivarDetail === 'function') {
         var hd = describe(hit, store[hit], store[hit]._type);
-        try { history.replaceState(history.state, '', hd.href + '/'); } catch (e) { /* ignore */ }
+        try { history.replaceState(history.state, '', hd.href); } catch (e) { /* ignore */ }
         window.updateCultivarDetail(hit);
         return;
       }

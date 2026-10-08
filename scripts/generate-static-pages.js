@@ -115,6 +115,11 @@ function staticEntryHtml(c, ctx) {
   const lines = [];
   if (ctx.people && ctx.people.length) lines.push((type === 'species' ? '記載者・採集者: ' : '人物: ') + ctx.people.map(x => lk(x)).join('、'));
   if (ctx.place) lines.push('産地: ' + lk(ctx.place));
+  if (ctx.parents && ctx.parents.length) lines.push('交配親: ' + ctx.parents.map(x => lk(x, true)).join(' × '));
+  if (ctx.selectedFrom) lines.push('選抜元: ' + lk(ctx.selectedFrom, true));
+  if (ctx.children && ctx.children.length) lines.push('この' + (type === 'species' ? '種' : '品種') + 'を親にした記録: ' + ctx.children.map(x => lk(x, true)).join('、'));
+  if (ctx.selections && ctx.selections.length) lines.push('選抜された個体: ' + ctx.selections.map(x => lk(x, true)).join('、'));
+  if (ctx.namesPage) lines.push('取り違えやすい名前: <a href="' + escAttr(ctx.namesPage.url) + '">' + namesTitle(ctx.namesPage.name) + '</a>');
   if (ctx.prev || ctx.next) lines.push([ctx.prev ? '← ' + lk(ctx.prev, true) : '', ctx.next ? lk(ctx.next, true) + ' →' : ''].filter(Boolean).join(' · '));
   if (ctx.genusList) lines.push(lk(ctx.genusList) + ' →');
   if (lines.length) h += '<nav class="static-entry__links" aria-label="関連">' + lines.map(x => '<p>' + x + '</p>').join('') + '</nav>';
@@ -193,7 +198,7 @@ async function main() {
     genera = await fetchJSON('/rest/v1/genera?select=slug,name&order=display_order');
   }
   const visibleGenusNames = new Set(genera.map(g => g.name));
-  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,origins,aliases,updated_at,verified_at,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=genus,cultivar_name');
+  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=id,cultivar_name,genus,type,origins,aliases,updated_at,verified_at,parent_a_id,parent_b_id,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=genus,cultivar_name');
   const cultivars = allCultivars.filter(c => visibleGenusNames.has(c.genus || 'Anthurium'));
   const images = await fetchJSON('/rest/v1/cultivar_images?select=cultivar_name,storage_path&order=display_order');
 
@@ -296,6 +301,26 @@ async function main() {
     written++;
   }
 
+  // parents ⇄ children and selections, by id or by the exact registered name only (never a partial match)
+  const NAMES_PAGES = JSON.parse(fs.readFileSync(path.join(WIREFRAME, 'data', 'names.json'), 'utf8')).pages || [];
+  const linkable = new Map();   // id → row, only entries with a page worth following (recorded)
+  for (const c of publicCultivars) if (RecordGate.state(c) === 'ok') linkable.set(c.id, c);
+  const byExactName = new Map(); for (const c of linkable.values()) byExactName.set(c.cultivar_name, c);
+  const parentOf = (id, text) => (id && linkable.get(id)) || (text && byExactName.get(String(text).trim())) || null;
+  const relUrl = x => {
+    const g2 = x.genus || 'Anthurium';
+    const r2 = String(x.cultivar_name).startsWith(g2 + ' ') ? String(x.cultivar_name).slice(g2.length + 1) : String(x.cultivar_name);
+    return SITE + '/' + g2.toLowerCase() + '/' + encodeURIComponent(r2) + '/';
+  };
+  const childrenOf = new Map(), selectionsOf = new Map();
+  for (const k of linkable.values()) {
+    for (const p of [parentOf(k.parent_a_id, k.parent_a_text), parentOf(k.parent_b_id, k.parent_b_text)]) {
+      if (p && p.id !== k.id) { const arr = childrenOf.get(p.id) || []; if (!arr.includes(k)) arr.push(k); childrenOf.set(p.id, arr); }
+    }
+    const sf = k.selected_from_id && linkable.get(k.selected_from_id);
+    if (sf) { const arr = selectionsOf.get(sf.id) || []; arr.push(k); selectionsOf.set(sf.id, arr); }
+  }
+
   // ---- Cultivar pages ----
   // entry stubs: named entries and the public seedlings (a shared seedling page shows a card, BOARD 10-07b T85)
   const seedlingRows = cultivars.filter(c => c.type === 'seedling' || String(c.cultivar_name).includes('[Seedling]'));
@@ -357,12 +382,22 @@ async function main() {
       const cc = c.type === 'species' ? (geo.countryOf(st.type_locality) || geo.countriesOf(st.known_habitats)[0] || '') : '';
       if (cc) ctx.place = { name: geo.countryJa(cc) + 'の原種', url: SITE + '/locality/' + encodeURIComponent(geo.countrySlug(cc)) + '/' };
     }
+    {
+      const ref = x => ({ name: EntryMeta.name(x), url: relUrl(x) });
+      ctx.parents = [parentOf(c.parent_a_id, c.parent_a_text), parentOf(c.parent_b_id, c.parent_b_text)].filter(p => p && p.id !== c.id).map(ref);
+      ctx.children = (childrenOf.get(c.id) || []).slice(0, 8).map(ref);
+      const sf = c.selected_from_id && linkable.get(c.selected_from_id);
+      ctx.selectedFrom = sf ? ref(sf) : null;
+      ctx.selections = (selectionsOf.get(c.id) || []).slice(0, 8).map(ref);
+      const np = NAMES_PAGES.find(pg => (pg.items || []).some(it => it.entry === c.cultivar_name));
+      ctx.namesPage = np ? { name: np.title, url: SITE + '/names/' + np.slug + '/' } : null;
+    }
     const order = entryOrder[c.genus || 'Anthurium'] || [];
     const at = order.indexOf(c);
     const entryUrl = x => {
       const g2 = x.genus || 'Anthurium';
       const r2 = String(x.cultivar_name).startsWith(g2 + ' ') ? String(x.cultivar_name).slice(g2.length + 1) : String(x.cultivar_name);
-      return SITE + '/' + g2.toLowerCase() + '/' + encodeURIComponent(r2).replace(/'/g, '%27') + '/';
+      return SITE + '/' + g2.toLowerCase() + '/' + encodeURIComponent(r2) + '/';
     };
     if (at > 0) ctx.prev = { name: EntryMeta.name(order[at - 1]), url: entryUrl(order[at - 1]) };
     if (at >= 0 && at < order.length - 1) ctx.next = { name: EntryMeta.name(order[at + 1]), url: entryUrl(order[at + 1]) };
@@ -431,7 +466,7 @@ async function main() {
   {
     const NAMES = JSON.parse(fs.readFileSync(path.join(WIREFRAME, 'data', 'names.json'), 'utf8')).pages || [];
     fs.rmSync(path.join(WIREFRAME, 'names'), { recursive: true, force: true });
-    const entryUrl = n => { const g = n.split(' ')[0]; const r = n.slice(g.length + 1); return SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(r).replace(/'/g, '%27') + '/'; };
+    const entryUrl = n => { const g = n.split(' ')[0]; const r = n.slice(g.length + 1); return SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(r) + '/'; };
     let ih = buildStub(template, { title: '名前の違い — 似た名前の別の植物 | Aroid Origins', description: NAMES.map(x => x.title).join('、'), url: SITE + '/names/', ogType: 'website' });
     ih = ih.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="名前の違い"><ul>' + NAMES.map(x => '<li><a href="' + SITE + '/names/' + x.slug + '/">' + namesTitle(x.title) + '</a></li>').join('') + '</ul></nav>');
     fs.mkdirSync(path.join(WIREFRAME, 'names'), { recursive: true });
@@ -501,7 +536,7 @@ async function main() {
     const linkOf = r => {
       const g = r.genus || 'Anthurium';
       const rest = String(r.cultivar_name).startsWith(g + ' ') ? String(r.cultivar_name).slice(g.length + 1) : String(r.cultivar_name);
-      return '<li><a href="' + SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(rest).replace(/'/g, '%27') + '/">' + escAttr(EntryMeta.name(r)) + '</a></li>';
+      return '<li><a href="' + SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(rest) + '/">' + escAttr(EntryMeta.name(r)) + '</a></li>';
     };
     const links = (l.typeRows.length ? '<li>タイプ産地が' + escAttr(l.ja) + '</li>' + l.typeRows.map(linkOf).join('') : '')
       + (l.rangeRows.length ? '<li>分布に' + escAttr(l.ja) + 'を含む</li>' + l.rangeRows.map(linkOf).join('') : '');
