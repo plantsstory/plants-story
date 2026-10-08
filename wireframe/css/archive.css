@@ -1615,3 +1615,60 @@ html[data-boot="entry"] #page-cultivar { display: none !important; }
   @keyframes sheet-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 }
 .mypost-acts__meta { flex-basis: 100%; }
+
+/* -- 2026-10-08 375px audit (design): underlines on the words, 44px rows, sans for Japanese, bottom bar -- */
+/* 1–2: the underline sits on the word, not at the bottom of the 44px tap area */
+.specimen__v a { border-bottom: 0; text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: var(--color-rule-strong); text-underline-offset: 0.25em; }
+.vote-btn { border-bottom: 0 !important; text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: var(--color-rule-strong); text-underline-offset: 0.3em; }
+.vote-btn--active, .vote-btn--active-down { text-decoration-color: var(--color-ink); }
+/* 3: index rows (people, places) 44px high */
+.people__list li { padding: 0; border-bottom: 1px solid var(--color-rule); align-items: center; }
+.people__list a { display: flex; align-items: center; min-height: var(--tap); flex: 1; }
+.people__list .mono, .people__list .num { font-family: var(--font-primary); font-size: var(--fs-small); color: var(--color-mid); font-variant-numeric: lining-nums tabular-nums; }
+/* 4: related groups */
+.related__group h3 { font-family: var(--font-primary); text-transform: none; letter-spacing: 0.02em; }
+.related__group h3 a { display: inline-flex; align-items: center; min-height: var(--tap); }
+.related__group li { padding-block: 0; }
+.timeline__decade a, .related__group li a { padding-block: 0; min-height: var(--tap); display: flex; align-items: center; }
+/* 7–8: action row on one line, the genus exit aligned */
+.detail-actions > .btn, #page-cultivar div:has(> #share-btn) .btn { margin-right: 0; }
+#share-btn { justify-content: flex-start; }
+.related__exit { align-items: center; }
+/* 9–10 */
+.header__logo { display: inline-flex; align-items: center; min-height: var(--tap); }
+.glossary-toc__back a { display: inline-flex; align-items: center; min-height: var(--tap); }
+#page-glossary > .container { padding-top: 0; }
+/* 11: Japanese in the sans; only numbers keep the mono */
+.breadcrumb, .record__label, .detail-colophon, .story__cite, .story__label .mono, .masthead__ledger dt, .textsize__label,
+.related__nav .mono, .people__roles, .people__group h2, .genus-request-link, #page-locality span.num {
+  font-family: var(--font-primary); letter-spacing: 0.02em; text-transform: none;
+}
+/* 12: the seedling tab like the others */
+.genus-tab[data-tab="seedlings"] { font-family: var(--font-primary); font-size: 0.9375rem; letter-spacing: 0.02em; }
+/* 13: form controls in ink; a back button that cannot be used looks so */
+#page-contribute input[type=radio], #page-contribute input[type=checkbox], .photo-sheet input[type=checkbox] { accent-color: var(--color-ink); }
+#cstep-back:disabled { color: var(--color-mid); border-color: var(--color-rule); }
+/* 19: the facts table starts where the specimen label does */
+.people__facts > div { grid-template-columns: 6.5em 1fr; }
+/* 20: install banner */
+.pwa-install-banner__close { min-width: var(--tap); min-height: var(--tap); }
+body:has(.pwa-install-banner--visible) { padding-bottom: 64px; }
+@media (max-width: 640px) {
+  /* 14 + H3: the space under the page is a fixed amount (53px bar + 35px home-indicator), not env(), which moves while Safari's toolbar does */
+  html.app-ui body { padding-bottom: 88px; }
+  html.app-ui body.appbar-hidden { padding-bottom: 0; }
+  /* 6: while typing, the step bar sits under the form instead of over the field */
+  html.app-ui body.kb-open .contribute--stepped .cstep-bar { position: static; padding-bottom: var(--s2); }
+  /* H1: the bar slides away while scrolling down (Safari's toolbar does the same), back on the way up */
+  html.app-ui .appbar { padding-bottom: max(env(safe-area-inset-bottom), var(--s2)); transition: transform 200ms ease, visibility 200ms; }
+  html.app-ui body.appbar-away .appbar { transform: translateY(100%); visibility: hidden; }
+  html.app-ui body.appbar-away #toast-container { bottom: calc(12px + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 640px) and (display-mode: standalone) { html.app-ui body.appbar-away .appbar { transform: none; visibility: visible; } }
+@media (prefers-reduced-motion: reduce) { html.app-ui .appbar { transition: none; } }
+/* the update notice: Japanese in the sans, 44px buttons, above the bottom bar */
+#sw-update-banner { font-family: var(--font-primary) !important; font-size: var(--fs-small) !important; letter-spacing: 0.02em !important; bottom: calc(12px + env(safe-area-inset-bottom)) !important; }
+#sw-update-banner button { min-height: var(--tap); min-width: var(--tap); }
+@media (max-width: 640px) {
+  html.app-ui body:not(.appbar-away):not(.appbar-hidden) #sw-update-banner { bottom: calc(53px + 12px + env(safe-area-inset-bottom)) !important; }
+}

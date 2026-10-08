@@ -721,6 +721,10 @@
     return '<li class="names__item"><p class="names__name">' + title + '<span class="names__kind">' + esc(it.kind || (e ? kindWord(e) : '')) + '</span></p>'
       + '<p class="names__text">' + window.italicizeSciNames(esc(it.text || '')) + '</p>' + (src ? '<p class="names__src">' + esc(T('source_label')) + ' ' + src + '</p>' : '') + '</li>';
   }
+  // a names title: scientific names and a bare epithet (crystallinum) in italics, cultivar names in quotes stay roman
+  function namesTitleHtml(t) {
+    return window.italicizeSciNames(esc(t)).replace(/(^|[\s・（(])([a-z][a-z-]{3,})(?=[\s・）)]|$)/g, '$1<i>$2</i>');
+  }
   window.renderNamesPage = function (slug) {
     var body = document.getElementById('names-body'), title = document.getElementById('names-title'), crumb = document.getElementById('names-crumb');
     if (!body) return;
@@ -733,12 +737,12 @@
           if (title) title.textContent = '名前の違い';
           if (crumb) crumb.textContent = '名前の違い';
           body.innerHTML = '<p class="people__intro">名前が似ていても別の植物、という例をまとめています。</p><ul class="names__index">'
-            + pages.map(function (x) { return '<li><a href="' + esc(base + 'names/' + x.slug + '/') + '" data-nav="names" data-name-slug="' + esc(x.slug) + '">' + esc(x.title) + '</a></li>'; }).join('') + '</ul>';
+            + pages.map(function (x) { return '<li><a href="' + esc(base + 'names/' + x.slug + '/') + '" data-nav="names" data-name-slug="' + esc(x.slug) + '">' + namesTitleHtml(x.title) + '</a></li>'; }).join('') + '</ul>';
           if (typeof updateMeta === 'function') setTimeout(function () { updateMeta({ title: '名前の違い — 似た名前の別の植物 | Aroid Origins', description: pages.map(function (x) { return x.title; }).join('、'), path: 'names/' }); }, 0);
           return;
         }
-        if (title) title.textContent = pg.title;
-        if (crumb) crumb.textContent = pg.title;
+        if (title) title.innerHTML = namesTitleHtml(pg.title);
+        if (crumb) crumb.innerHTML = namesTitleHtml(pg.title);
         body.innerHTML = '<p class="names__lead">' + window.italicizeSciNames(esc(pg.lead)) + '</p><ol class="names__list">' + pg.items.map(function (it) { return nameItemHtml(it, store); }).join('') + '</ol>'
           + '<p class="names__summary">' + window.italicizeSciNames(esc(pg.summary)) + '</p><p class="related__exit"><a href="' + esc(base + 'names/') + '" data-nav="names">名前の違いの一覧 →</a></p>';
         if (typeof updateMeta === 'function') setTimeout(function () { updateMeta({ title: pg.title + ' | Aroid Origins', description: (pg.lead + ' ' + pg.summary).slice(0, 120), path: 'names/' + pg.slug + '/' }); }, 0);
@@ -753,7 +757,7 @@
     loadNames(function (j) {
       var hit = (j.pages || []).filter(function (pg) { return pg.items.some(function (it) { return it.entry === d.fullName; }); })[0];
       if (!hit) return;
-      el.innerHTML = '<p class="names-note">' + esc(T('names_note')) + ' <a href="' + esc(base + 'names/' + hit.slug + '/') + '" data-nav="names" data-name-slug="' + esc(hit.slug) + '">' + esc(hit.title) + ' →</a></p>';
+      el.innerHTML = '<p class="names-note">' + esc(T('names_note')) + ' <a href="' + esc(base + 'names/' + hit.slug + '/') + '" data-nav="names" data-name-slug="' + esc(hit.slug) + '">' + namesTitleHtml(hit.title) + ' →</a></p>';
     });
   }
 
@@ -1116,7 +1120,7 @@
     var facts = '<dl class="ledger people__facts">';
     facts += '<div><dt>' + esc(T('people_entries')) + '</dt><dd>' + p.entries.length + '</dd></div>';
     if (years.length) facts += '<div><dt>' + esc(T('people_years')) + '</dt><dd>' + Math.min.apply(null, years) + (years.length > 1 ? '–' + Math.max.apply(null, years) : '') + '</dd></div>';
-    if (countries.length) facts += '<div><dt>' + esc(T('people_localities')) + '</dt><dd class="people__facts-small">' + esc(countries.join(', ')) + '</dd></div>';
+    if (countries.length) facts += '<div><dt>' + esc(T('people_localities')) + '</dt><dd class="people__facts-small">' + esc(countries.map(function (c) { return window.countryLabel ? window.countryLabel(c) : c; }).join('、')) + '</dd></div>';
     facts += '</dl>';
     var authLine = auth ? [auth.name && auth.name !== p.key ? p.key : '', auth.years, auth.ipni && auth.ipni !== p.key ? 'IPNI: ' + auth.ipni : ''].filter(Boolean).join(' · ') : '';
     var html = '<p class="people__roles mono">' + rolesLine(p) + (authLine ? ' · ' + esc(authLine) : '') + '</p>' + (auth && auth.note ? '<p class="people__note">' + esc(auth.note) + '</p>' : '') + facts + '<h2 class="section-title"><span>' + esc(T('people_entries')) + '</span></h2><div id="people-ledger"></div>';
@@ -1735,11 +1739,11 @@
     if (!on()) return;
     document.querySelectorAll('.appbar [data-appbar]').forEach(function (a) {
       var k = a.getAttribute('data-appbar');
-      if (k === pageId) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+      if (k === pageId || (k === 'genus' && pageId === 'cultivar')) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
     document.body.classList.toggle('appbar-hidden', pageId === 'contribute' && !!$('page-contribute') && $('page-contribute').classList.contains('contribute--stepped'));
   }
-  document.addEventListener('ao:page', function (e) { markBar(e.detail); if (e.detail === 'contribute') setTimeout(stepperInit, 0); });
+  document.addEventListener('ao:page', function (e) { document.body.classList.remove('appbar-away'); markBar(e.detail); if (e.detail === 'contribute') setTimeout(stepperInit, 0); });
   var post = $('appbar-post');
   if (post) post.addEventListener('click', function () {
     if (currentPage() === 'cultivar' && entryName()) { openPostSheet(); return; }
@@ -1749,11 +1753,25 @@
   var more = $('appbar-more');
   if (more) more.addEventListener('click', function () { var h = $('hamburger'); if (h) h.click(); });
   // the bar steps aside while the keyboard is up
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', function () {
-      document.body.classList.toggle('kb-open', window.visualViewport.height < window.innerHeight * 0.75);
-    });
+  function kb() {
+    var vv = window.visualViewport, a = document.activeElement;
+    var typing = a && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) && !/^(checkbox|radio|button|submit|file|range)$/.test(a.type || '');
+    document.body.classList.toggle('kb-open', !!typing && (!vv || (vv.scale < 1.05 && (window.innerHeight - vv.height) > 150)));
   }
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', kb);
+  document.addEventListener('focusin', kb);
+  document.addEventListener('focusout', function () { setTimeout(kb, 120); });
+  // H1: like Safari's own toolbar, the bar slides away while scrolling down and comes back on the way up
+  // or at the end of the page (always shown when opened from the home screen)
+  var lastY = window.scrollY, standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+  window.addEventListener('scroll', function () {
+    if (!on() || standalone) return;
+    var y = window.scrollY, dy = y - lastY;
+    if (Math.abs(dy) < 8) return;
+    var atEnd = window.innerHeight + y >= document.documentElement.scrollHeight - 40;
+    document.body.classList.toggle('appbar-away', dy > 0 && y > 120 && !atEnd);
+    lastY = y;
+  }, { passive: true });
 
   // ---- 「＋投稿」 sheet on a plant page ----
   function openPostSheet() {

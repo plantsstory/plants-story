@@ -52,6 +52,14 @@ function sciHtml(name) {
     return part.split(/(\s+)/).map(w => (/^[A-Za-z][A-Za-z.-]*$/.test(w) && !/^(sp|aff|cf|var|subsp)\.$/.test(w)) ? '<i>' + escAttr(w) + '</i>' : escAttr(w)).join('');
   }).join('').replace(/<\/i>(\s+)<i>/g, '$1');
 }
+// scientific names inside prose, as italicizeSciNames does on the site (app-core.js)
+function sciText(text) {
+  const G = 'Anthurium|Monstera|Philodendron|Platycerium|Alocasia|Syngonium|Rhaphidophora|Amydrium|Epipremnum';
+  return escAttr(text)
+    .replace(new RegExp('\\b(' + G + ')\\s+(?!(?:sp|aff|cf|var|subsp|ssp|x)\\b)([a-z][a-z-]{2,})\\b', 'g'), '<i>$1 $2</i>')
+    .replace(new RegExp('\\b(' + G + ')(?=\\s+(?:sp|aff|cf)\\.)', 'g'), '<i>$1</i>');
+}
+function namesTitle(t) { return sciText(t).replace(/(^|[\s・（(])([a-z][a-z-]{3,})(?=[\s・）)]|$)/g, '$1<i>$2</i>'); }
 function staticEntryHtml(c, ctx) {
   // laid out like the plant page (same classes), so the page does not move when the app takes over (BOARD 10-07b T98)
   const os = (c.origins || []).filter(o => o && !o._type).sort((a, b) => (parseInt(b.trust, 10) || 0) - (parseInt(a.trust, 10) || 0));
@@ -101,7 +109,7 @@ function staticEntryHtml(c, ctx) {
   if (cells) h += '<div class="specimen">' + cells + '</div>';
   h += '<div class="static-entry__actions" aria-hidden="true"></div>';
   if (ctx.photo) h += '<figure class="static-entry__plate"><img src="' + escAttr(ctx.photo) + '" alt="' + escAttr(c.cultivar_name) + '" width="720" decoding="async"></figure>';
-  if (text) h += '<h2 class="section-title">由来の記録</h2><div class="record__body"><p>' + escAttr(text) + '</p></div>';
+  if (text) h += '<h2 class="section-title">由来の記録</h2><div class="record__body"><p>' + sciText(text) + '</p></div>';
   // links a crawler can follow from every entry (BOARD 10-07b T84): people, place, neighbours, the genus list
   const lk = (x, sci) => '<a href="' + escAttr(x.url) + '">' + (sci ? sciHtml(x.name) : escAttr(x.name)) + '</a>';
   const lines = [];
@@ -422,7 +430,7 @@ async function main() {
     fs.rmSync(path.join(WIREFRAME, 'names'), { recursive: true, force: true });
     const entryUrl = n => { const g = n.split(' ')[0]; const r = n.slice(g.length + 1); return SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(r).replace(/'/g, '%27') + '/'; };
     let ih = buildStub(template, { title: '名前の違い — 似た名前の別の植物 | Aroid Origins', description: NAMES.map(x => x.title).join('、'), url: SITE + '/names/', ogType: 'website' });
-    ih = ih.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="名前の違い"><ul>' + NAMES.map(x => '<li><a href="' + SITE + '/names/' + x.slug + '/">' + escAttr(x.title) + '</a></li>').join('') + '</ul></nav>');
+    ih = ih.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="名前の違い"><ul>' + NAMES.map(x => '<li><a href="' + SITE + '/names/' + x.slug + '/">' + namesTitle(x.title) + '</a></li>').join('') + '</ul></nav>');
     fs.mkdirSync(path.join(WIREFRAME, 'names'), { recursive: true });
     fs.writeFileSync(path.join(WIREFRAME, 'names', 'index.html'), ih, 'utf8');
     written++;
@@ -434,7 +442,7 @@ async function main() {
           { '@type': 'ListItem', 'position': 2, 'name': '名前の違い', 'item': SITE + '/names/' },
           { '@type': 'ListItem', 'position': 3, 'name': pg.title, 'item': url } ] }] });
       const items = pg.items.map(it => '<li><p class="names__name">' + (it.entry ? '<a href="' + entryUrl(it.entry) + '">' + sciHtml(it.entry) + '</a>' : sciHtml(it.name)) + ' — ' + escAttr(it.kind || '') + '</p><p>' + escAttr(it.text) + '</p></li>').join('');
-      ph = ph.replace(/(<main[^>]*>)/, '$1\n<article id="static-entry" class="container static-entry"><p class="detail-standard">名前の違い</p><h1 class="detail-title">' + escAttr(pg.title) + '</h1><p class="static-entry__text">' + escAttr(pg.lead) + '</p><ol>' + items + '</ol><p class="static-entry__text">' + escAttr(pg.summary) + '</p></article>');
+      ph = ph.replace(/(<main[^>]*>)/, '$1\n<article id="static-entry" class="container static-entry"><p class="detail-standard">名前の違い</p><h1 class="detail-title">' + namesTitle(pg.title) + '</h1><p class="static-entry__text">' + escAttr(pg.lead) + '</p><ol>' + items + '</ol><p class="static-entry__text">' + escAttr(pg.summary) + '</p></article>');
       fs.mkdirSync(path.join(WIREFRAME, 'names', pg.slug), { recursive: true });
       fs.writeFileSync(path.join(WIREFRAME, 'names', pg.slug, 'index.html'), ph, 'utf8');
       written++;
