@@ -2231,7 +2231,7 @@
       });
       (d.photos || []).forEach(function (x) {
         var pv = /^pv:/.test(x.path || '');
-        lines.push(['写真', x.name, '', pv ? '非公開' : '公開', '', '', '', '', '', day(x.taken_on), x.caption, x.credit, x.link, pv ? '（非公開の写真はサイトの中だけで見られます）' : base + x.path, day(x.created_at)].map(q).join(','));
+        lines.push(['写真', x.name, '', pv ? '非公開' : '公開', '', '', '', '', '', day(x.taken_on), x.caption, x.credit, x.link, pv ? '（非公開の写真はサイトの中だけで見られます）' : base + String(x.path || '').split('/').map(encodeURIComponent).join('/'), day(x.created_at)].map(q).join(','));
       });
       var blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
       var a = document.createElement('a');
