@@ -57,6 +57,7 @@ async function main() {
     { loc: '/tokushoho/', changefreq: 'monthly', priority: '0.3' },
     { loc: '/contact/', changefreq: 'monthly', priority: '0.3' },
     { loc: '/glossary/', changefreq: 'monthly', priority: '0.5' },
+    { loc: '/wanted/', changefreq: 'daily', priority: '0.5' },
     { loc: '/pricing/', changefreq: 'monthly', priority: '0.6' },
   ];
   for (const p of staticPages) {

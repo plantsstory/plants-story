@@ -384,6 +384,39 @@
   };
 
   window._describeEntry = function (fullName, entry, type) { return describe(fullName, entry, type); };
+  // /wanted/: recorded entries with no photo yet, the most searched first (board 9 D10)
+  var WANTED_FIRST = ['Anthurium clarinervium', 'Anthurium luxurians', 'Anthurium regale', "Anthurium 'Dark Mama'", 'Anthurium antolakii'];
+  window.renderWantedPage = function () {
+    var body = document.getElementById('wanted-body');
+    if (!body) return;
+    waitForData(function () {
+      var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
+      var thumbs = window._thumbMap || {};
+      var seen = {}, list = [];
+      Object.keys(store).forEach(function (k) {
+        var e = store[k];
+        if (!e || seen[e._id || k] || e._type === 'seedling' || / \[Seedling\]$/.test(k)) return;
+        seen[e._id || k] = true;
+        var d;
+        try { d = describe(k, e, e._type); } catch (er) { return; }
+        if (d.state !== 'ok' || d.isIndividual || thumbs[d.displayName]) return;
+        list.push(d);
+      });
+      list.sort(function (a, b) {
+        var ia = WANTED_FIRST.indexOf(a.fullName), ib = WANTED_FIRST.indexOf(b.fullName);
+        if (ia !== ib) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+        return a.displayName.localeCompare(b.displayName);
+      });
+      if (!list.length) { body.innerHTML = '<p class="people__intro">いまは写真のない品種はありません。</p>'; return; }
+      var html = '<p class="mypost-counts">写真を募集中 <span class="num">' + list.length + '</span> 品種</p><ol class="entries">';
+      list.forEach(function (d) {
+        var line = window.entryLine(d, { noPerson: true });
+        line = line.replace(/<\/li>$/, '<p class="mypost-acts"><button type="button" data-wanted-pick="' + esc(d.fullName) + '">写真を追加</button></p></li>');
+        html += line;
+      });
+      body.innerHTML = html + '</ol>';
+    });
+  };
   window.entryCiteLine = function (fullName, entry, type) {
     try { return citeHtml(describe(fullName, entry, type)); } catch (e) { return ''; }
   };
@@ -850,6 +883,11 @@
       + '<a class="share-band__btn" href="' + esc(base + 'mypost') + '" data-nav="mypost">記録を見る</a>'
       + '<button type="button" class="share-band__close" id="share-band-close" aria-label="閉じる">×</button></p>'
       + '<p class="share-band__note">共有したときのカード画像は、30 分ほどで用意されます。</p>';
+    // after the third seedling or later: the allowance left and the members' notice, one line (board 9 D9)
+    if (d.type === 'seedling' && window._currentUser && typeof cultivarData !== 'undefined') {
+      var mine = Object.keys(cultivarData).filter(function (k) { var e = cultivarData[k]; return e && e._type === 'seedling' && e._userId === window._currentUser.id && / \[Seedling\]$/.test(k); }).length;
+      if (mine >= 3) { el.innerHTML += '<p class="share-band__note">実生の無料枠 あと <span class="num">' + Math.max(0, 20 - mine) + '</span> 件 <span id="band-notify"></span></p>'; if (window.drawNotifyLink) window.drawNotifyLink(document.getElementById('band-notify'), 'seedling_done'); }
+    }
     el.classList.remove('d-none');
     var track = function (ch) { if (typeof gtag === 'function') gtag('event', 'share_click', { cultivar: d.displayName, channel: ch, source: 'submit' }); };
     var url = window.getShareUrl ? window.getShareUrl() : location.href;
@@ -1774,6 +1812,23 @@
     e.preventDefault(); e.stopPropagation();
     window.requireLogin({ a: 'mypost', path: (typeof _basePath !== 'undefined' ? _basePath : '/') + 'mypost' });
   }, true);
+  // the row the reader taps is remembered, so Back can bring it on screen (T121)
+  document.addEventListener('click', function (e) {
+    var n = e.target.closest && e.target.closest('[data-nav]');
+    if (!n) return;
+    var inner = n.querySelector('[data-key]');
+    window._lastNavKey = n.getAttribute('data-key') || (inner && inner.getAttribute('data-key')) || null;
+  }, true);
+  // tapping the tab you are on: back to the top; on 一覧, the search field (T121)
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('.appbar [data-appbar][aria-current]');
+    if (!a || !on()) return;
+    var k = a.getAttribute('data-appbar');
+    if (k !== currentPage()) return;
+    e.preventDefault(); e.stopPropagation();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (k === 'genus') { var si = document.querySelector('.page.active input[type=search], .page.active .genus-search input'); if (si) setTimeout(function () { si.focus(); }, 300); }
+  }, true);
   var more = $('appbar-more');
   if (more) more.addEventListener('click', function () { var h = $('hamburger'); if (h) h.click(); });
   // the bar steps aside while the keyboard is up
@@ -2064,7 +2119,13 @@
       .then(function (res) {
         if (res.error) { grid.innerHTML = '<p class="error-text">読み込めませんでした。もう一度開いてください</p>'; return; }
         var rows = res.data || [];
-        if (!rows.length) { grid.innerHTML = ''; if (emptyMsg) { emptyMsg.style.display = ''; emptyMsg.classList.remove('d-none'); } return; }
+        if (!rows.length) {
+          // nothing yet: the allowance and the members' notice still show (board 9 D9)
+          grid.innerHTML = '<p class="mypost-quota">実生 <span class="num">0 / 20</span>（無料） <span id="mypost-notify"></span></p>';
+          drawNotifyLink($('mypost-notify'), 'mypost');
+          if (emptyMsg) { emptyMsg.style.display = ''; emptyMsg.classList.remove('d-none'); }
+          return;
+        }
         if (emptyMsg) emptyMsg.style.display = 'none';
         // photos are filed under the shown name (a seedling without ' [Seedling]')
         var shown = function (n) { return String(n || '').replace(' [Seedling]', ''); };
@@ -2074,7 +2135,10 @@
           (ir.data || []).forEach(function (i) { count[i.cultivar_name] = (count[i.cultivar_name] || 0) + 1; if (!first[i.cultivar_name]) first[i.cultivar_name] = i.storage_path; });
           rows.forEach(function (r) { count[r.cultivar_name] = count[shown(r.cultivar_name)]; first[r.cultivar_name] = first[shown(r.cultivar_name)]; });
           var priv = rows.filter(function (r) { return r.is_private; }).length;
-          var html = '<p class="mypost-counts">記録 <span class="num">' + rows.length + '</span>' + (priv ? ' · 非公開 <span class="num">' + priv + '</span>' : '') + '</p><ol class="entries">';
+          var html = '<p class="mypost-counts">記録 <span class="num">' + rows.length + '</span>' + (priv ? ' · 非公開 <span class="num">' + priv + '</span>' : '') + '</p>';
+          // the free seedling allowance and, beside it, the members' notice (board 9 D9)
+          var seeds = rows.filter(function (r) { return r.type === 'seedling'; }).length;
+          html += '<p class="mypost-quota">実生 <span class="num">' + seeds + ' / 20</span>（無料） <span id="mypost-notify"></span></p><ol class="entries">';
           var baseUrl = window._SUPABASE_URL || '';
           rows.forEach(function (r) {
             var cached = (typeof cultivarData !== 'undefined' && cultivarData[r.cultivar_name]) || null;
@@ -2092,9 +2156,21 @@
             html += line;
           });
           grid.innerHTML = html + '</ol>';
+          drawNotifyLink($('mypost-notify'), 'mypost');
         });
       });
   }
+  // 「会員の受付開始を知らせる」 / 「登録済み · 取り消す」 (the list lives in member_interest; join/leave in app-core)
+  function drawNotifyLink(el, source) {
+    if (!el || !window._currentUser || !window._supabaseClient) return;
+    window._supabaseClient.from('member_interest').select('user_id').eq('user_id', window._currentUser.id).maybeSingle().then(function (r) {
+      var joined = !!(r && r.data);
+      el.innerHTML = joined ? '· 受付開始のお知らせ: 登録済み' : '· <button type="button" class="mypost-notify-btn">会員の受付開始を知らせる</button>';
+      var b = el.querySelector('button');
+      if (b) b.addEventListener('click', function () { if (window.joinMemberNotify) window.joinMemberNotify(source); setTimeout(function () { drawNotifyLink(el, source); }, 1200); });
+    }, function () {});
+  }
+  window.drawNotifyLink = drawNotifyLink;
   function hookMyPosts() {
     if (_loadMyPostsPlain || typeof window.loadMyPosts !== 'function') return;
     _loadMyPostsPlain = window.loadMyPosts;
@@ -2103,6 +2179,15 @@
   hookMyPosts();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hookMyPosts);
   var _pickFor = '';
+  // /wanted/ rows: log in first (a file chosen before the login would be lost), then the picker, inside the tap
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-wanted-pick]');
+    if (!b) return;
+    var key = b.getAttribute('data-wanted-pick');
+    if (window.requireLogin && !window.requireLogin({ a: 'photo', k: key, path: location.pathname })) return;
+    _pickFor = key;
+    var inp = $('sheet-pick-input'); if (inp) inp.click();
+  });
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-my]');
     if (!b) return;
@@ -2135,6 +2220,36 @@
     gtag('set', 'user_properties', { app_ui: on() ? '1' : '0', display_mode: dm });
     try { if (!sessionStorage.getItem('ao-dm-sent')) { gtag('event', 'display_mode', { mode: dm, app_ui: on() ? 1 : 0 }); sessionStorage.setItem('ao-dm-sent', '1'); } } catch (e) {}
   }
+  // ?do=photo|record|seedling|new|mypost&k=<entry>: the action asked for elsewhere (an in-app browser's copied link,
+  // a home-screen shortcut) continues here — after the login if needed (board 9 T118/T122)
+  (function () {
+    var q = new URLSearchParams(location.search), act = q.get('do'), k = q.get('k') || '';
+    if (!act) return;
+    q.delete('do'); q.delete('k');
+    history.replaceState(history.state, '', location.pathname + (q.toString() ? '?' + q.toString() : '') + location.hash);
+    var base = (typeof _basePath !== 'undefined' ? _basePath : '/');
+    var intent = act === 'photo' ? { a: 'photo', k: k } : act === 'record' ? { a: 'record', k: k } : act === 'mypost' ? { a: 'mypost', path: base + 'mypost' }
+      : { a: 'contribute', type: act === 'seedling' ? 'seedling' : '', parent: act === 'seedling' ? k : '', path: base + 'contribute' };
+    var t0 = Date.now();
+    (function go() {
+      if (!window._dataFullyLoaded && Date.now() - t0 < 8000) { setTimeout(go, 300); return; }
+      setTimeout(function () {
+        if (!window._currentUser) { if (window.requireLogin) window.requireLogin(intent); return; }
+        if ((act === 'photo' || act === 'record') && k && typeof navigateTo === 'function') navigateTo('cultivar', { cultivar: k });
+        if (window.resumeLoginIntentPublic) window.resumeLoginIntentPublic(intent);
+      }, 900);
+    })();
+  })();
+  // opened from the home screen: no browser Back button, so the header has one after the first move
+  var standaloneMode = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+  var moves = 0;
+  document.addEventListener('ao:page', function () {
+    moves++;
+    var b = $('header-back');
+    if (b) b.classList.toggle('d-none', !(standaloneMode && moves > 1));
+  });
+  var hb = $('header-back');
+  if (hb) hb.addEventListener('click', function () { history.back(); });
   // the first page was shown before this script ran
   function firstMark() { markBar(currentPage()); if (currentPage() === 'contribute') stepperInit(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', firstMark); else setTimeout(firstMark, 0);

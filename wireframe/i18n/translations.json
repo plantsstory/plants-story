@@ -1049,7 +1049,7 @@
     "en": " posts"
   },
   "about_plan_desc": {
-    "jp": "品種情報・実生の閲覧・検索はすべて無料です。実生の投稿は5件まで無料です。会員（月額500円・年額5,000円）になると、次の2つが使えます。会員の受付は準備中です。",
+    "jp": "品種情報・実生の閲覧・検索はすべて無料です。実生の投稿は会員の受付を始めるまで20件（受付開始後は5件）まで無料です。会員（月額500円・年額5,000円）になると、次の2つが使えます。会員の受付は準備中です。",
     "en": "Reading and searching are free, and seedling notes are free up to five. Members (¥500/month or ¥5,000/year) get the two items below. Membership sign-up is in preparation."
   },
   "about_plan_features": {
@@ -2157,7 +2157,7 @@
     "en": "Some features (seedling notes beyond five, priority review of AI re-check requests) come with a paid membership. Membership sign-up is in preparation; no paid sign-up is possible until it opens."
   },
   "terms_9a_list": {
-    "jp": "料金: 月額500円（税込）または年額5,000円（税込）\n決済は決済代行会社（PAY.JP または Stripe）の決済基盤を利用します\n閲覧は無料です。実生の投稿は1ユーザーにつき5件まで無料です\n原種・Hybrid・Clone の閲覧・投稿は無料です\n運営者の判断により、特定のユーザーに会員資格を無料で付与する場合があります。付与・取消は運営者の裁量によります",
+    "jp": "料金: 月額500円（税込）または年額5,000円（税込）\n決済は決済代行会社（PAY.JP または Stripe）の決済基盤を利用します\n閲覧は無料です。実生の投稿は1ユーザーにつき、会員の受付を始めるまで20件（受付開始後は5件）まで無料です。受付開始の30日前にサイトでお知らせします。それまでに記録したものは、その後も残ります\n原種・Hybrid・Clone の閲覧・投稿は無料です\n運営者の判断により、特定のユーザーに会員資格を無料で付与する場合があります。付与・取消は運営者の裁量によります",
     "en": "Fee: ¥500 per month or ¥5,000 per year (tax included)\nPayments are processed by a payment provider (PAY.JP or Stripe)\nReading is free; seedling notes are free up to five per user\nReading and posting species, hybrids and clones is free\nThe operator may grant a free membership to particular users at its discretion"
   },
   "terms_9b_body": {

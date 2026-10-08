@@ -643,7 +643,7 @@ function showGenus(genusName) {
 
 // ---- Path-based routing (History API) ----
 // Known simple pages (no sub-parameters)
-var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'mypost', 'guide', 'glossary', 'pricing'];
+var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'mypost', 'guide', 'glossary', 'pricing', 'wanted'];
 // Known genus names for URL mapping
 var knownGenera = []; // Populated dynamically from genera table
 // Base path: '/' on custom domain, '/plants-story/' on GitHub Pages
@@ -751,6 +751,9 @@ var parseHash = parseRoute;
 
 function navigateTo(page, options, pushHistory) {
   options = options || {};
+  // where the reader was, taken before the new page scrolls to the top (board 9 T121: it used to save 0)
+  var _leaveY = window.scrollY, _leaveKey = window._lastNavKey || null;
+  window._lastNavKey = null;
   showPage(page);
   // Reset edit mode when navigating to contribute page via hash (not from detail page edit flow)
   if (page === 'contribute' && !options._editFlow && typeof window.exitEditMode === 'function') {
@@ -762,6 +765,7 @@ function navigateTo(page, options, pushHistory) {
   if (page === 'people' && typeof window.renderPeoplePage === 'function') window.renderPeoplePage(options.person || '');
   if (page === 'locality' && typeof window.renderLocalityPage === 'function') window.renderLocalityPage(options.place || '');
   if (page === 'names' && typeof window.renderNamesPage === 'function') window.renderNamesPage(options.nameSlug || '');
+  if (page === 'wanted' && typeof window.renderWantedPage === 'function') window.renderWantedPage();
   if (page === 'tools' && typeof window.renderToolsPage === 'function') window.renderToolsPage(options.tool || '', options.genre || '');
   if (page === 'genus' && options.genus) showGenus(options.genus);
   if (page === 'cultivar' && options.cultivar && !options._skipUpdate) {
@@ -810,6 +814,7 @@ function navigateTo(page, options, pushHistory) {
       contact: 'お問い合わせ - ' + _defaultTitle,
       search: '検索結果 - ' + _defaultTitle,
       mypost: '自分の記録 - ' + _defaultTitle,
+      wanted: '写真を募集中 — 写真のないアンスリウム | Aroid Origins',
       people: '人物索引 - ' + _defaultTitle,
       locality: '産地索引 - ' + _defaultTitle,
       tools: '道具の目録 - ' + _defaultTitle,
@@ -830,10 +835,11 @@ function navigateTo(page, options, pushHistory) {
       contact: 'Aroid Originsへのお問い合わせ',
       search: 'アロイド植物の品種名で検索 - Anthurium, Monstera, Philodendronなど',
       mypost: 'あなたが記録した品種',
+      wanted: '由来は記録されているのに、写真がまだない品種の一覧です。自分で撮った写真を 1 枚から載せられます。',
       people: 'アロイド品種の記載者・採集者・作出者の索引。人物ごとに関連する品種をたどれます',
       locality: 'タイプ産地（国）ごとに原種をたどる索引。コロンビア、パナマ、ペルーなど',
       glossary: 'sp. / aff. / cf.、記載者、タイプ産地、交配式、F1、クローン、TC など由来を読むための用語集',
-      pricing: 'Aroid Origins の料金とサービス内容。閲覧は無料、実生の投稿は5件まで無料。会員（月額500円・年額5,000円）は受付準備中'
+      pricing: 'Aroid Origins の料金とサービス内容。閲覧は無料、実生の投稿は会員の受付まで20件まで無料。会員（月額500円・年額5,000円）は受付準備中'
     };
     if (page === 'genus' && options.genus) {
       var gName = options.genus.charAt(0).toUpperCase() + options.genus.slice(1);
@@ -885,7 +891,8 @@ function navigateTo(page, options, pushHistory) {
   if (pushHistory !== false) {
     // Save scroll position of current page before navigating away
     var currentState = history.state || {};
-    currentState._scrollY = window.scrollY;
+    currentState._scrollY = _leaveY;
+    if (_leaveKey) currentState._navKey = _leaveKey;
     history.replaceState(currentState, '');
 
     var routePath = buildPath(page, options);
@@ -925,11 +932,25 @@ window.addEventListener('popstate', function(e) {
     gtag('event', 'page_view', { page_location: location.href, page_title: document.title });
   }
   // Restore scroll position if saved
-  if (state._scrollY !== undefined) {
-    setTimeout(function() { window.scrollTo(0, state._scrollY); }, 50);
-  }
+  if (state._scrollY !== undefined) restoreScroll(state._scrollY, state._navKey);
   _isPopstate = false;
 });
+
+// back to where the reader was: wait (up to 2.5 s) until the page is tall enough, then make sure the row they
+// tapped is on screen (board 9 T121)
+function restoreScroll(y, key) {
+  var t0 = Date.now();
+  (function tryIt() {
+    var tall = document.documentElement.scrollHeight >= y + window.innerHeight - 4;
+    if (!tall && Date.now() - t0 < 2500) { requestAnimationFrame(tryIt); return; }
+    window.scrollTo(0, y);
+    if (key) {
+      var el = null;
+      document.querySelectorAll('.page.active [data-key]').forEach(function(x) { if (!el && x.getAttribute('data-key') === key) el = x; });
+      if (el) { var r = el.getBoundingClientRect(); if (r.top < 60 || r.bottom > window.innerHeight - 60) el.scrollIntoView({ block: 'center' }); }
+    }
+  })();
+}
 
 // Handle initial route on page load (deferred until genera are loaded)
 function handleInitialRoute() {
@@ -2318,20 +2339,40 @@ if (false) {
       document.getElementById('login-sheet-cancel').addEventListener('click', function() { dlg.close(); });
       document.getElementById('login-sheet-go').addEventListener('click', function() { dlg.close(); startLoginWithIntent(dlg._intent); });
       document.getElementById('login-sheet-copy').addEventListener('click', function() {
-        var url = window.location.href;
+        var url = resumeUrl(dlg._intent);
         (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function() { showToast('リンクをコピーしました'); }, function() { window.prompt('このリンクをコピーしてください', url); });
       });
       dlg.addEventListener('click', function(e) { if (e.target === dlg) dlg.close(); });
     }
     var inApp = IN_APP_UA.test(navigator.userAgent || '');
+    var android = /Android/i.test(navigator.userAgent || '');
     document.getElementById('login-sheet-inapp').classList.toggle('d-none', !inApp);
     document.getElementById('login-sheet-copy').classList.toggle('d-none', !inApp);
     document.getElementById('login-sheet-go').classList.toggle('d-none', inApp);
+    // Android: open the same action in Chrome directly (intent://); iPhone: copy the link and open it in Safari
+    var chromeBtn = document.getElementById('login-sheet-chrome');
+    if (chromeBtn) {
+      chromeBtn.classList.toggle('d-none', !(inApp && android));
+      var ru = resumeUrl(intent || {});
+      chromeBtn.href = 'intent://' + ru.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
+    }
     dlg._intent = intent || {};
     dlg.showModal();
     if (typeof gtag === 'function') gtag('event', 'login_gate', { action: (intent && intent.a) || 'other', in_app: inApp ? 1 : 0 });
     return false;
   };
+  // the page link plus what the person was doing (?do=photo|record|seedling|new|mypost&k=<entry>)
+  function resumeUrl(intent) {
+    intent = intent || {};
+    var doMap = { photo: 'photo', record: 'record', individual: 'new', mypost: 'mypost', contribute: intent.type === 'seedling' ? 'seedling' : 'new' };
+    var u = new URL(window.location.href);
+    u.searchParams.delete('do'); u.searchParams.delete('k');
+    if (doMap[intent.a]) u.searchParams.set('do', doMap[intent.a]);
+    if (intent.k) u.searchParams.set('k', intent.k);
+    else if (intent.parent) u.searchParams.set('k', intent.parent);
+    return u.toString();
+  }
+  window.resumeLoginIntentPublic = function(ri) { resumeLoginIntent(Object.assign({ t: Date.now() }, ri)); };
   // after the login: wait for the page to draw, then reopen the action
   function resumeLoginIntent(ri) {
     var tries = 0;

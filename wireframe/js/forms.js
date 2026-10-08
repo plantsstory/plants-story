@@ -1114,7 +1114,7 @@ document.addEventListener('click', function(e) {
 
   document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(radio) {
     radio.addEventListener('change', function() {
-      // Seedling posting: login required; first 5 posts free, then subscription
+      // Seedling posting: login required; free up to the server's free_limit (20 until members can join, board 9)
       if (this.value === 'seedling') {
         if (!window._currentUser) {
           revertToSpecies(this);
@@ -1907,7 +1907,7 @@ document.addEventListener('click', function(e) {
         console.error('Submit error details:', err);
         var msg = err.message || String(err);
         if (msg.indexOf('Seedling quota exceeded') !== -1) {
-          handleSubmitError('無料投稿枠（5件）を使い切りました。続けて投稿するにはサブスクリプションが必要です');
+          handleSubmitError('無料の実生の記録枠を使い切りました。会員の受付を始めたらお知らせします');
           showPaywallModal('contribute_quota');
         } else {
           handleSubmitError('エラー: ' + msg);
@@ -2593,7 +2593,8 @@ updateCultivarDetail = function(cultivarName, rowEl) {
             storagePath: img.storage_path,
             realVotes: img.real_votes,
             fakeVotes: img.fake_votes,
-            caption: img.caption,
+            // who took it and which plant it shows (board 9): only what the uploader confirmed is shown
+            caption: [img.caption, img.specimen_kind === 'original' ? 'オリジナル由来' : img.specimen_kind === 'f_seedling' ? '実生（F 個体）' : '', img.credit ? '撮影: ' + img.credit : ''].filter(Boolean).join(' · '),
             linkUrl: img.link_url,
             ownerId: img.user_id
           });

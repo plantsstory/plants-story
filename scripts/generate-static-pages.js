@@ -221,12 +221,13 @@ async function main() {
   // ---- Static SPA routes (previously HTTP 404 despite being in the sitemap) ----
   const staticRoutes = [
     { dir: 'about', title: 'この図鑑について | Aroid Origins', description: '誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑「Aroid Origins」の記録の方針・料金・運営情報。' },
+    { dir: 'wanted', title: '写真を募集中 — 写真のないアンスリウム | Aroid Origins', description: '由来は記録されているのに、写真がまだない品種の一覧です。自分で撮った写真を 1 枚から載せられます。' },
     { dir: 'guide', title: '使い方ガイド | Aroid Origins', description: '品種の検索・由来の閲覧・投稿・画像アップロードなど、Aroid Originsの使い方を解説します。' },
     { dir: 'terms', title: '利用規約 | Aroid Origins', description: 'Aroid Originsの利用規約。投稿コンテンツの取り扱い、会員（受付準備中）、道具の目録とアフィリエイト、禁止行為について定めています。' },
     { dir: 'privacy', title: 'プライバシーポリシー | Aroid Origins', description: 'Aroid Originsの個人情報・Cookie・アクセス解析（GA4）・外部送信（アフィリエイト、楽天ウェブサービス）・決済情報の取り扱いについて説明します。' },
     { dir: 'contact', title: 'お問い合わせ | Aroid Origins', description: 'Aroid Originsへのお問い合わせ・不具合報告・コンテンツ削除要請の窓口です。' },
     { dir: 'tokushoho', title: '特定商取引法に基づく表記 | Aroid Origins', description: 'Aroid Origins（運営者: 久恒 佑太）の特定商取引法に基づく表記。会員の受付は準備中で、現在販売はありません。受付開始後の販売価格・支払方法・契約期間・解約の条件。' },
-    { dir: 'pricing', title: '料金とサービス内容 | Aroid Origins', description: 'Aroid Origins の料金とサービス内容。閲覧は無料、実生の投稿は5件まで無料。会員（月額500円・年額5,000円、受付準備中）は実生の投稿無制限とAI再調査の優先審査。' },
+    { dir: 'pricing', title: '料金とサービス内容 | Aroid Origins', description: 'Aroid Origins の料金とサービス内容。閲覧は無料、実生の投稿は会員の受付まで20件まで無料。会員（月額500円・年額5,000円、受付準備中）は実生の投稿無制限とAI再調査の優先審査。' },
     { dir: 'glossary', title: '由来の用語集 — sp. / aff. / cf.、記載者、タイプ産地、交配式、クローン | Aroid Origins', description: 'アロイド品種の由来を読むための用語集。学名と記載、sp./aff./cf.、タイプ産地、交配式、F1、オリジナル個体、クローン、TC、流通名、信頼度 Tier の意味を解説します。' },
   ];
   for (const r of staticRoutes) {

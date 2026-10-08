@@ -3,19 +3,45 @@
   "name": "Aroid Origins",
   "short_name": "Aroid Origins",
   "description": "誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。",
-  "start_url": "/",
+  "start_url": "/?src=pwa",
   "scope": "/",
   "display": "standalone",
   "background_color": "#F4F1EA",
   "theme_color": "#F4F1EA",
   "lang": "ja",
   "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "投稿する", "url": "/contribute" },
-    { "name": "Anthurium の一覧", "url": "/anthurium/" }
+    {
+      "name": "写真を足す",
+      "short_name": "写真",
+      "url": "/wanted/?src=pwa"
+    },
+    {
+      "name": "実生を記録",
+      "short_name": "実生",
+      "url": "/contribute?do=seedling&src=pwa"
+    },
+    {
+      "name": "記録",
+      "short_name": "記録",
+      "url": "/mypost?src=pwa"
+    }
   ]
 }

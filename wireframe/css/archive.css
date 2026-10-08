@@ -1738,3 +1738,6 @@ html.app-ui .mobile-nav [data-i18n="nav_contribute_mobile"] { display: none !imp
 .share-band__btn--main { background: var(--color-ink); color: var(--color-paper); }
 .share-band__note { font-size: var(--fs-label); color: var(--color-mid); margin: var(--s2) 0 0; }
 .share-band__close { min-width: var(--tap); min-height: var(--tap); margin-left: auto; }
+
+/* board 9 T122: 「← 戻る」 when opened from the home screen */
+.header__back { background: none; border: 0; padding: 0 var(--s2) 0 0; min-height: var(--tap); font: inherit; font-size: var(--fs-small); color: var(--color-ink); cursor: pointer; }

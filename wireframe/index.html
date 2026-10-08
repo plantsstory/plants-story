@@ -15,8 +15,8 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.yahoo.co.jp https://i.moshimo.com; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJK72JH471"></script>
-  <script src="js/textsize.js?v=20261008k"></script>
-  <script src="js/gtag-init.js?v=20261008k"></script>
+  <script src="js/textsize.js?v=20261008l"></script>
+  <script src="js/gtag-init.js?v=20261008l"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -57,13 +57,13 @@
     "logo": "https://plantsstory.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20261008k">
-  <link rel="stylesheet" href="css/reset.css?v=20261008k">
-  <link rel="stylesheet" href="css/layout.css?v=20261008k">
-  <link rel="stylesheet" href="css/components.css?v=20261008k">
-  <link rel="stylesheet" href="css/pages.css?v=20261008k">
-  <link rel="stylesheet" href="css/utilities.css?v=20261008k">
-  <link rel="stylesheet" href="css/archive.css?v=20261008k">
+  <link rel="stylesheet" href="css/variables.css?v=20261008l">
+  <link rel="stylesheet" href="css/reset.css?v=20261008l">
+  <link rel="stylesheet" href="css/layout.css?v=20261008l">
+  <link rel="stylesheet" href="css/components.css?v=20261008l">
+  <link rel="stylesheet" href="css/pages.css?v=20261008l">
+  <link rel="stylesheet" href="css/utilities.css?v=20261008l">
+  <link rel="stylesheet" href="css/archive.css?v=20261008l">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -80,6 +80,7 @@
        ======================================== -->
   <header class="header">
     <div class="container header__inner">
+      <button type="button" class="header__back d-none" id="header-back" aria-label="前の画面へ">← 戻る</button>
       <a class="header__logo" href="/" data-nav="top">AROID ORIGINS</a>
       <nav class="header__nav" aria-label="メインナビゲーション">
         <span id="header-nav-genera"></span>
@@ -813,7 +814,7 @@
       <ul class="terms-list" data-i18n-list="terms_9a_list">
         <li>料金: 月額500円（税込）または年額5,000円（税込）</li>
         <li>決済は決済代行会社（PAY.JP または Stripe）の決済基盤を利用します</li>
-        <li>閲覧は無料です。実生の投稿は1ユーザーにつき5件まで無料です</li>
+        <li>閲覧は無料です。実生の投稿は1ユーザーにつき、会員の受付を始めるまで20件（受付開始後は5件）まで無料です。受付開始の30日前にサイトでお知らせします。それまでに記録したものは、その後も残ります</li>
         <li>原種・Hybrid・Clone の閲覧・投稿は無料です</li>
         <li>運営者の判断により、特定のユーザーに会員資格を無料で付与する場合があります。付与・取消は運営者の裁量によります</li>
       </ul>
@@ -824,7 +825,7 @@
         <li>会員契約は契約期間の終了時に同一プランで自動更新されます</li>
         <li>解約はプロフィール編集ページから随時行うことができます</li>
         <li>解約した場合、現在の契約期間の終了日まではサービスを利用できます</li>
-        <li>解約後も、ご自身が投稿した実生の閲覧・編集・削除は引き続き可能です。ただし、無料枠（5件）を超える新規投稿には会員の再契約が必要です</li>
+        <li>解約後も、ご自身が投稿した実生の閲覧・編集・削除は引き続き可能です。ただし、無料枠（会員の受付を始めるまで20件（受付開始後は5件））を超える新規投稿には会員の再契約が必要です</li>
       </ul>
 
       <h2 data-i18n="terms_9d_title">第9条の5 取扱店の掲載</h2>
@@ -959,7 +960,7 @@
         </tr>
         <tr>
           <th>役務の内容</th>
-          <td>「会員」: 実生の記録を無料枠（5件）を超えて投稿できること（非公開の記録も含む）と、AI 再調査リクエストの優先審査（48時間以内に可否）。閲覧は全員無料。物品の販売・配送はありません</td>
+          <td>「会員」: 実生の記録を無料枠（会員の受付を始めるまで20件（受付開始後は5件））を超えて投稿できること（非公開の記録も含む）と、AI 再調査リクエストの優先審査（48時間以内に可否）。閲覧は全員無料。物品の販売・配送はありません</td>
         </tr>
         <tr>
           <th data-i18n="tokushoho_seller_label">販売業者</th>
@@ -1040,7 +1041,7 @@
       </ul>
 
       <h2 data-i18n="about_plan_title">料金プラン</h2>
-      <p data-i18n="about_plan_desc">品種情報・実生の閲覧・検索はすべて無料です。実生の投稿は5件まで無料です。会員（月額500円・年額5,000円）になると、次の2つが使えます。会員の受付は準備中です。</p>
+      <p data-i18n="about_plan_desc">品種情報・実生の閲覧・検索はすべて無料です。実生の投稿は会員の受付を始めるまで20件（受付開始後は5件）まで無料です。会員（月額500円・年額5,000円）になると、次の2つが使えます。会員の受付は準備中です。</p>
       <ul class="terms-list" data-i18n-list="about_plan_features">
         <li>実生の投稿 無制限（非公開の記録も含む）</li>
         <li>AI 再調査リクエストの優先審査（48時間以内に可否）</li>
@@ -1185,11 +1186,11 @@
       <ul class="terms-list">
         <li>すべての品種ページ・由来記録・写真・人物索引・産地索引・年表の閲覧</li>
         <li>原種・Hybrid・Clone の投稿、由来の追加、写真の投稿、投票</li>
-        <li>実生の閲覧と、1ユーザーにつき5件までの実生投稿</li>
+        <li>実生の閲覧と、1ユーザーにつき会員の受付を始めるまで20件（受付開始後は5件）までの実生投稿</li>
       </ul>
 
       <h2>会員（有料）</h2>
-      <p>会員になると、実生の投稿の上限（5件）がなくなり（非公開の記録も含む）、AI 再調査リクエストを優先して審査します（48時間以内に可否）。閲覧に課金することはありません。<strong>会員の受付は準備中です。</strong>受付開始まで有料のお申込みはできません。</p>
+      <p>会員になると、実生の投稿の上限がなくなり（非公開の記録も含む）、AI 再調査リクエストを優先して審査します（48時間以内に可否）。閲覧に課金することはありません。<strong>会員の受付は準備中です。</strong>受付開始まで有料のお申込みはできません。</p>
       <table class="tokushoho-table">
         <tr><th>プラン</th><td>月額 500円（税込）／ 年額 5,000円（税込）</td></tr>
         <tr><th>提供内容</th><td>実生の投稿 無制限（非公開の記録も含む）、AI 再調査リクエストの優先審査（48時間以内に可否）</td></tr>
@@ -1334,6 +1335,15 @@
   </section>
 
   <!-- PAGE: NOT FOUND (unknown paths; noindex) -->
+  <section id="page-wanted" class="page">
+    <div class="container container--narrow">
+      <nav class="breadcrumb" aria-label="パンくずリスト"><a href="/" data-nav="top">トップ</a><span class="breadcrumb__sep">/</span><span>写真を募集中</span></nav>
+      <h1 class="section-title">写真を募集中</h1>
+      <p class="people__intro">由来は記録されているのに、写真がまだない品種です。自分で撮った写真を 1 枚から載せられます（撮影者としてプロフィールの名前が載ります）。</p>
+      <div id="wanted-body"><div class="loading-text p-xl">…</div></div>
+    </div>
+  </section>
+
   <section id="page-names" class="page">
     <div class="container container--narrow">
       <nav class="breadcrumb" aria-label="パンくずリスト"><a href="/" data-nav="top">トップ</a><span class="breadcrumb__sep">/</span><span id="names-crumb">名前の違い</span></nav>
@@ -1499,10 +1509,10 @@
         </svg>
       </div>
       <h3 class="paywall-modal__title" id="paywall-modal-title">会員</h3>
-      <p class="paywall-modal__desc">実生の投稿は<strong>5件まで無料</strong>です。会員になると上限がなくなり、AI 再調査リクエストを優先して審査します。閲覧はどなたでも無料です。</p>
+      <p class="paywall-modal__desc">実生の投稿は<strong>会員の受付を始めるまで20件（受付開始後は5件）まで無料</strong>です。会員になると上限がなくなり、AI 再調査リクエストを優先して審査します。閲覧はどなたでも無料です。</p>
       <div class="paywall-closed d-none" id="paywall-closed">
         <p class="paywall-closed__title mono">会員受付は準備中です</p>
-        <p class="paywall-closed__text">決済の準備が整いしだい受付を始めます。それまで有料のお申込みはできません。閲覧と、実生の投稿5件までは今まで通り無料です。</p>
+        <p class="paywall-closed__text">決済の準備が整いしだい受付を始めます。それまで有料のお申込みはできません。閲覧と、実生の投稿20件までは今まで通り無料です（受付開始後は5件。それまでの記録は残ります）。</p>
         <p class="paywall-closed__text" id="paywall-closed-done">受付を始めたとき、登録したメールアドレスに 1 回だけお知らせします（宣伝メールは送りません）。</p>
         <button class="btn btn--primary" type="button" id="paywall-notify-btn" style="width:100%;min-height:44px;">受付開始をメールで受け取る</button>
         <p class="paywall-closed__text d-none" id="paywall-notify-on">登録しました。受付開始のときに 1 回だけメールします。 <a href="#" id="paywall-notify-cancel">取り消す</a></p>
@@ -1630,14 +1640,14 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/record-gate.js?v=20261008k"></script>
-  <script src="js/app-core.js?v=20261008k"></script>
-  <script src="js/pages.js?v=20261008k"></script>
-  <script src="js/forms.js?v=20261008k"></script>
-  <script src="js/entry-meta.js?v=20261008k"></script>
-  <script src="js/archive.js?v=20261008k"></script>
-  <script src="js/tool-gate.js?v=20261008k"></script>
-  <script src="js/tools.js?v=20261008k"></script>
+  <script src="js/record-gate.js?v=20261008l"></script>
+  <script src="js/app-core.js?v=20261008l"></script>
+  <script src="js/pages.js?v=20261008l"></script>
+  <script src="js/forms.js?v=20261008l"></script>
+  <script src="js/entry-meta.js?v=20261008l"></script>
+  <script src="js/archive.js?v=20261008l"></script>
+  <script src="js/tool-gate.js?v=20261008l"></script>
+  <script src="js/tools.js?v=20261008l"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1647,7 +1657,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261008k"></script>
+  <script src="js/dialogs.js?v=20261008l"></script>
 
   <!-- AI re-research request dialog -->
   <!-- Asked before anything is typed: posting, photos and records need a login (2026-10-08 app-ux) -->
@@ -1658,6 +1668,7 @@
     <div class="dialog-actions">
       <button type="button" class="btn btn--secondary btn--sm" id="login-sheet-cancel" data-i18n="login_sheet_cancel">やめる</button>
       <button type="button" class="btn btn--secondary btn--sm d-none" id="login-sheet-copy" data-i18n="login_sheet_copy">リンクをコピー</button>
+      <a class="btn btn--primary btn--sm d-none" id="login-sheet-chrome" href="#">Chrome で開く</a>
       <button type="button" class="btn btn--sm btn--primary" id="login-sheet-go" data-i18n="login_sheet_go">Google でログイン</button>
     </div>
   </dialog>
@@ -1698,6 +1709,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261008k"></script>
+<script src="js/sw-register.js?v=20261008l"></script>
 </body>
 </html>
