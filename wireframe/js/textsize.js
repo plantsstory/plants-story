@@ -13,6 +13,12 @@
     off = localStorage.getItem('ao-preview-app') === '0';
   } catch (e) {}
   if (!off) document.documentElement.classList.add('app-ui');
+  // board 11 T148: the empty plate as a specimen label, shown only to whoever opens ?preview=plate until approved
+  try {
+    if (/[?&]preview=plate(?:&|$)/.test(location.search)) localStorage.setItem('ao-preview-plate', '1');
+    if (/[?&]preview=plate-off(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-plate');
+    if (localStorage.getItem('ao-preview-plate') === '1') document.documentElement.classList.add('pv-plate');
+  } catch (e) {}
 })();
 (function () {
   'use strict';
