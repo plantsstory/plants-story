@@ -108,7 +108,7 @@ function staticEntryHtml(c, ctx) {
   if (aliases.length) h += '<p class="detail-aliases">別名・旧綴り: ' + escAttr(aliases.join(' / ')) + '</p>';
   if (cells) h += '<div class="specimen">' + cells + '</div>';
   h += '<div class="static-entry__actions" aria-hidden="true"></div>';
-  if (ctx.photo) h += '<figure class="static-entry__plate"><img src="' + escAttr(ctx.photo) + '" alt="' + escAttr(c.cultivar_name) + '" width="720" decoding="async"></figure>';
+  if (ctx.photo) h += '<figure class="static-entry__plate"><img src="' + escAttr(ctx.photo) + '" alt="' + escAttr(c.cultivar_name) + '" width="720" decoding="async" fetchpriority="high"></figure>';
   if (text) h += '<h2 class="section-title">由来の記録</h2><div class="record__body"><p>' + sciText(text) + '</p></div>';
   // links a crawler can follow from every entry (BOARD 10-07b T84): people, place, neighbours, the genus list
   const lk = (x, sci) => '<a href="' + escAttr(x.url) + '">' + (sci ? sciHtml(x.name) : escAttr(x.name)) + '</a>';
@@ -401,7 +401,11 @@ async function main() {
     };
     if (at > 0) ctx.prev = { name: EntryMeta.name(order[at - 1]), url: entryUrl(order[at - 1]) };
     if (at >= 0 && at < order.length - 1) ctx.next = { name: EntryMeta.name(order[at + 1]), url: entryUrl(order[at + 1]) };
-    const htmlWithEntry = RecordGate.state(c) === 'ok' ? html.replace(/(<main[^>]*>)/, '$1\n' + staticEntryHtml(c, ctx)).replace(/<body([^>]*)>/, (m, at) => /class="/.test(at) ? m.replace('class="', 'class="stub-entry-page ') : '<body' + at + ' class="stub-entry-page">') : html;
+    // the entry's photo is asked for first; the front page's plate (hidden here) is not fetched at all (T156)
+    const htmlFast = photo
+      ? html.replace('</head>', '<link rel="preload" as="image" href="' + escAttr(photo) + '" fetchpriority="high">\n</head>').replace('<img src="images/anthurium.png"', '<img loading="lazy" src="images/anthurium.png"')
+      : html.replace('<img src="images/anthurium.png"', '<img loading="lazy" src="images/anthurium.png"');
+    const htmlWithEntry = RecordGate.state(c) === 'ok' ? htmlFast.replace(/(<main[^>]*>)/, '$1\n' + staticEntryHtml(c, ctx)).replace(/<body([^>]*)>/, (m, at) => /class="/.test(at) ? m.replace('class="', 'class="stub-entry-page ') : '<body' + at + ' class="stub-entry-page">') : htmlFast;
 
     const dir = path.join(WIREFRAME, slug, restDir);
     try {

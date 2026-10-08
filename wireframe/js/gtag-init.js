@@ -1,3 +1,18 @@
+// gtag.js itself comes after the page is parsed, so it does not hold up the first view from a slow phone line
+// (board 11 T156); the calls made before then wait in dataLayer and are sent when it arrives.
+(function () {
+  var loaded = false;
+  function load() {
+    if (loaded) return; loaded = true;
+    var g = document.createElement('script');
+    g.async = true;
+    g.src = 'https://www.googletagmanager.com/gtag/js?id=G-KJK72JH471';
+    document.head.appendChild(g);
+  }
+  if (document.readyState !== 'loading') setTimeout(load, 0);
+  else document.addEventListener('DOMContentLoaded', function () { setTimeout(load, 0); });
+  setTimeout(load, 4000);
+})();
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
