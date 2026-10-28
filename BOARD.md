@@ -390,6 +390,7 @@
 | T164 | ~~共有リンクから来た品種ページで、全件の読み込み完了時に同じ品種が描き直され、本文と写真が 1〜2.5 秒消えていた → 同じ品種の描き直しは新しい中身が届くまで古い中身を残す（別の品種へ移るときは従来どおり）~~ **10-08 済（7巡目）** | Claude Code | 10/08 | 告知の離脱 |
 | T164b | ~~引き継ぎの瞬間にスタブの写真を仮置きにし、新しい写真が decode できてから入れ替える~~ **10-08 済**。本番で 4 回とも空のコマ 0・CLS 0・h1 と写真 2.3〜2.9 秒。残り（見た目の範囲、告知後）: スタブ自身の写真が届く前の空の枠 1 コマ、引き継ぎで写真が全幅から矢印つきの大きさへ縮む | Claude Code | 10/08 | 告知の離脱 |
 | T165 | ~~読みもの /reading/（有識者の記事の索引、25 件）・品種ページの「この植物についての記事」・管理画面の登録欄~~ **10-08 済（プレビューのみ）**。オーナーの「可」で全員に公開し、noindex を外して sitemap に入れる | Claude Code | 10/08 | 回遊・信頼 |
+| S1 | ~~Supabase Security Advisor の指摘（オーナーにメール）: RLS なしの 2 表（research_origin_requests・stripe_webhook_errors）を閉じる／旧 insert_with_edit_key（ログインなしで品種を追加できた）を全員から閉じる／管理用・保守用・トリガー関数を anon から外す／get_subscription_status の期限・解約は本人と管理者だけ／search_path 未設定の 10 関数を固定~~ **10-28 済**。残る警告: SECURITY DEFINER 関数の実行権（中で auth.uid() か is_admin() を確かめているもの）・pg_trgm が public（移すと検索の索引が壊れるため据え置き）・漏えいパスワード検査（ログインは Google だけなので影響なし） | Claude Code | 10/28 | 安全 |
 | T95 補 | 4 名の登録用下書き `docs/board/2026-10-08-t95-drafts.md`（出典つき。Dorayaki は Clone・交配式は disputed、Michelle は magnificum 'Michelle'、Zara は Hybrid・交配式 partial、RVDP は Clone で 'Dark Phoenix' とは別）。登録は各日 | Claude Code | 10/11〜16 | M2 |
 | 条件到達時 | `/seedlings/` 索引（公開実生 ≥20・投稿者 ≥5）／ ヘッダー EN（非 ja ≥15%）／ 楽天・Yahoo! のもしも移行（アフィリ確定額 2ヶ月連続 ≥3,000円）／ 道具一覧のサムネイル（オーナーが 10/14 プレビューで求めた場合、自前写真のみ） | Claude Code | — | — |
 
