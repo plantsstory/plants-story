@@ -1459,7 +1459,9 @@ if (false) {
   try {
     if (window.supabase && window.supabase.createClient) {
       supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        auth: { flowType: 'pkce' }
+        // implicit flow (2026-10-30): the session rides in the return URL, so a login that starts in an in-app
+        // browser and ends in Safari/Chrome still completes; PKCE needed the same browser on both ends
+        auth: { flowType: 'implicit' }
       });
       window._supabaseClient = supabase;
       window._SUPABASE_URL = SUPABASE_URL;
@@ -1742,6 +1744,38 @@ if (false) {
   }
 
   if (supabase) {
+    // Arriving from Google: a ?code= must find its verifier here, an ?error= must be said out loud (2026-10-30)
+    (function () {
+      var q = new URLSearchParams(location.search);
+      var code = q.get('code'), err = q.get('error_description') || q.get('error');
+      if (!code && !err) return;
+      var hasVerifier = false;
+      try { hasVerifier = Object.keys(localStorage).some(function (k) { return /code-verifier$/.test(k); }); } catch (e) {}
+      var clean = function () { try { history.replaceState(null, '', location.pathname); } catch (e) {} };
+      if (err) {
+        clean();
+        showToast('ログインできませんでした: ' + err, true, { sticky: true });
+        if (typeof gtag === 'function') gtag('event', 'login_failed', { reason: String(err).slice(0, 60) });
+        return;
+      }
+      if (!hasVerifier) {
+        // the login was finished in a different browser than it was started in (in-app browser, Google app)
+        clean();
+        showToast('ログインの途中で別のブラウザに移ったため、やり直しが必要です。このまま同じ画面でもう一度「ログイン」を押してください', true,
+          { sticky: true, action: { label: 'ログイン', fn: function () { startGoogleLogin(location.pathname, 'retry'); } } });
+        if (typeof gtag === 'function') gtag('event', 'login_failed', { reason: 'verifier_missing' });
+        return;
+      }
+      // the library exchanges the code itself; if that fails, say so
+      setTimeout(function () {
+        if (window._currentUser) return;
+        supabase.auth.getSession().then(function (r) {
+          if (r && r.data && r.data.session) return;
+          showToast('ログインを完了できませんでした。もう一度お試しください', true, { sticky: true, action: { label: 'ログイン', fn: function () { startGoogleLogin(location.pathname, 'retry'); } } });
+          if (typeof gtag === 'function') gtag('event', 'login_failed', { reason: 'exchange_failed' });
+        });
+      }, 6000);
+    })();
     supabase.auth.onAuthStateChange(function(event, session) {
       window._currentUser = session ? session.user : null;
       // a wish made before logging in (「ログインして受付開始のお知らせを受け取る」)
