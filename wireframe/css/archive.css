@@ -1904,3 +1904,10 @@ body.menu-open .pwa-install-banner { display: none !important; }
 .donate-slot { margin: var(--s3) 0 0; font-size: var(--fs-small); }
 .donate-slot[hidden] { display: none; }
 .donate-after { margin: var(--s2) 0 0; font-size: var(--fs-small); }
+/* 10-30 owner: under 品種 the kinds are buttons in plain view — すべて・原種・Clone・Hybrid (the select is gone);
+   「Clone・Hybrid」 shows only while chosen (the home entrance lands on it) */
+.genus-content .sort-bar .filter-chips { display: flex !important; flex-wrap: wrap; gap: var(--s2); flex: 1 1 100%; margin: 0; padding: 0; border: 0; }
+.genus-content .sort-bar .filter-chips .chip { min-height: var(--tap); padding: 0 var(--s3); font-size: var(--fs-body); }
+.genus-content .sort-bar .filter-chips .chip.active { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-paper-2); }
+.genus-content .sort-bar .filter-chip[data-filter-type="cultivar"]:not(.active) { display: none; }
+.genus-content .filter-select { display: none !important; }
