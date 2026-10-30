@@ -1799,3 +1799,48 @@ html:not(.pv-reading) .pv-reading-link, html:not(.pv-reading) #reading-for-secti
 .reading-tabs { margin: 0 0 var(--s3); }
 .reading-item .reading-item__title { display: block; }
 .reading-item .entry__sub { display: block; margin-top: var(--s1); }
+
+/* ============================================================
+   HOME 2026-10-30 — direction B 「フィールドノート」 (board 13). Lives behind html.pv-home until the owner's OK.
+   ============================================================ */
+.ico { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.pv-home-only, .appbar__label--new { display: none; }
+/* beats html.app-ui .appbar__item { display:flex } so the sixth tab never shows without the preview */
+html:not(.pv-home) .appbar__item--new, html.app-ui:not(.pv-home) .appbar__item--new { display: none !important; }
+html.pv-home .pv-home-only { display: grid; }
+html.pv-home .appbar__item--old, html.pv-home .appbar__label--old { display: none !important; }
+html.pv-home .appbar__item--new { display: flex; }
+html.pv-home .appbar__label--new { display: inline; }
+/* entrances: 2×2, hairlines only, icon over label, 96px each */
+.ways { grid-template-columns: 1fr 1fr; margin: var(--s3) -16px 0; border-top: 1px solid var(--color-rule); border-bottom: 1px solid var(--color-rule); }
+.way { display: grid; place-items: center; align-content: center; gap: var(--s2); min-height: 96px; padding: var(--s2); color: var(--color-ink); text-decoration: none; font-weight: 500; border-right: 1px solid var(--color-rule); border-bottom: 1px solid var(--color-rule); }
+.way:nth-child(2n) { border-right: 0; }
+.way:nth-child(n+3) { border-bottom: 0; }
+.way:active { background: var(--color-paper-2); }
+.way .ico { width: 26px; height: 26px; }
+@media (min-width: 641px) { .ways { margin-left: 0; margin-right: 0; border-left: 1px solid var(--color-rule); border-right: 1px solid var(--color-rule); } }
+/* the first screen: tagline, stats and genera line step aside; the plate stays for desktop */
+html.pv-home .masthead__tagline, html.pv-home .masthead__stats, html.pv-home .masthead__meta { display: none; }
+html.pv-home .search-bar { background: var(--color-paper-2); border: 1px solid var(--color-rule); margin: var(--s3) -16px 0; border-left: 0; border-right: 0; }
+@media (min-width: 641px) { html.pv-home .search-bar { margin-left: 0; margin-right: 0; border-left: 1px solid var(--color-rule); border-right: 1px solid var(--color-rule); } }
+html.pv-home .masthead__title { font-size: var(--fs-h2); margin-bottom: 0; }
+html.pv-home .masthead__desc { font-size: var(--fs-small); color: var(--color-mid); margin: var(--s1) 0 0; }
+/* index and timeline move to 調べる on the preview */
+@media (max-width: 640px) { html.pv-home #archive-index, html.pv-home #archive-timeline { display: none; } }
+/* tabs: icon + label; the current one filled */
+@media (max-width: 640px) {
+  html.pv-home.app-ui .appbar__item { flex-direction: column; gap: 2px; min-height: 56px; border-top: 0; font-size: var(--fs-label); }
+  html.pv-home.app-ui .appbar__item .ico { width: 20px; height: 20px; }
+  html.pv-home.app-ui .appbar__item[aria-current="page"] { background: var(--color-primary); color: var(--color-paper-2); border-top-color: transparent; }
+  html.pv-home.app-ui .appbar__post { background: none; color: var(--color-ink); font-weight: 700; }
+  html.pv-home.app-ui .appbar__post .appbar__post-label { font-weight: 700; }
+}
+html:not(.pv-home) .appbar__item .ico, html:not(.pv-home) .appbar__post .ico { display: none; }
+/* 調べる page */
+.explore__h { font-family: var(--font-primary); font-size: var(--fs-label); letter-spacing: 0.08em; color: var(--color-mid); margin: var(--s4) 0 var(--s1); border-bottom: 1px solid var(--color-rule-strong); padding-bottom: var(--s1); }
+.explore__list { list-style: none; margin: 0; padding: 0; }
+.explore__list li { border-bottom: 1px solid var(--color-rule); }
+.explore__list a { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--s2); min-height: 48px; color: var(--color-ink); text-decoration: none; font-size: var(--fs-body); }
+.explore__list a > span:first-child:not(.num) { grid-column: 2; }
+.explore__list .num { font-size: var(--fs-small); }
+.search-bar--explore { margin-bottom: var(--s2); }

@@ -472,6 +472,47 @@
       if (m) { var el = document.getElementById('p' + m[1]); if (el) el.scrollIntoView({ block: 'center' }); }
     });
   };
+  /* ---------- 調べる (board 13, direction B) ---------- */
+  window.renderExplorePage = function () {
+    var page = document.getElementById('page-explore');
+    if (!page) return;
+    waitForData(function () {
+      var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
+      var seen = {}, n = { species: 0, hybrid: 0 };
+      var people = {}, places = {};
+      var thumbs = window._thumbMap || {}, wanted = 0;
+      Object.keys(store).forEach(function (k) {
+        var e = store[k]; if (!e || seen[e._id || k]) return; seen[e._id || k] = true;
+        var d; try { d = describe(k, e, e._type); } catch (er) { return; }
+        if (d.state !== 'ok' || d.isIndividual || d.type === 'seedling') return;
+        if (d.type === 'species') n.species++; else n.hybrid++;
+        if (!thumbs[d.displayName]) wanted++;
+        [d.author, d.collector, d.breeder, d.namer].forEach(function (p) { if (p) people[String(p).trim()] = 1; });
+        if (d.country) places[d.country] = 1;
+      });
+      var set = function (key, v) { var el = page.querySelector('[data-count="' + key + '"]'); if (el) el.textContent = v ? String(v) : ''; };
+      set('species', n.species); set('hybrid', n.hybrid); set('people', Object.keys(people).length); set('places', Object.keys(places).length); set('wanted', wanted);
+      // the explore search box behaves like the top one
+      var inp = page.querySelector('.search-bar__input');
+      if (inp && !inp._wired) { inp._wired = true; inp.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' && inp.value.trim() && typeof navigateTo === 'function') navigateTo('search', { q: inp.value.trim() }); }); }
+    });
+  };
+  // 「交配をたどる」 lands on the genus list with the Hybrid chip chosen (?kind=hybrid)
+  document.addEventListener('ao:page', function (e) {
+    if (e.detail !== 'genus') return;
+    var kind = new URLSearchParams(location.search).get('kind') || (window._pendingKind || '');
+    window._pendingKind = '';
+    if (!kind) return;
+    setTimeout(function () {
+      var chip = document.querySelector('#page-genus .filter-chip[data-filter-type="' + kind + '"], .page.active .filter-chip[data-filter-type="' + kind + '"]');
+      if (chip && !chip.classList.contains('active')) chip.click();
+    }, 80);
+  });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[data-kind]');
+    if (a) window._pendingKind = a.getAttribute('data-kind');
+  }, true);
+
   /* ---------- 読みもの (board 12): articles by people who know these plants ---------- */
   var _articles = null, _articlesWaiters = [];
   function loadArticles(cb) {
