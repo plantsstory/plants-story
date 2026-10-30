@@ -127,14 +127,23 @@ function launchSvgs(byName) {
   ];
 }
 
+// a resized copy first (1080 px wide): an original is ≈5 MB and every deploy fetches each photo (Free plan egress)
+async function fetchPhoto(storagePath) {
+  const p = String(storagePath).split('/').map(encodeURIComponent).join('/');
+  for (const url of [SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + p + '?width=1080&height=1350&resize=contain&quality=80',
+                     SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + p]) {
+    try { const r = await fetch(url); if (r.ok && /^image\//.test(r.headers.get('content-type') || '')) return r; } catch (e) {}
+  }
+  return null;
+}
 async function photoDataUri(storagePath) {
   if (!storagePath) return '';
   try {
-    const r = await fetch(SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + String(storagePath).split('/').map(encodeURIComponent).join('/'));
-    if (!r.ok) return '';
+    const r = await fetchPhoto(storagePath);
+    if (!r) return '';
     const buf = Buffer.from(await r.arrayBuffer());
     if (buf.length > 12 * 1024 * 1024) return '';
-    return 'data:' + (/\.png$/i.test(storagePath) ? 'image/png' : 'image/jpeg') + ';base64,' + buf.toString('base64');
+    return 'data:' + ((r.headers.get('content-type') || '').split(';')[0] || (/\.png$/i.test(storagePath) ? 'image/png' : 'image/jpeg')) + ';base64,' + buf.toString('base64');
   } catch (e) { return ''; }
 }
 
