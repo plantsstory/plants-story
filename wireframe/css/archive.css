@@ -1844,3 +1844,20 @@ html:not(.pv-home) .appbar__item .ico, html:not(.pv-home) .appbar__post .ico { d
 .explore__list a > span:first-child:not(.num) { grid-column: 2; }
 .explore__list .num { font-size: var(--fs-small); }
 .search-bar--explore { margin-bottom: var(--s2); }
+/* メニュー (10-30): the tab bar stays whole above the open menu; a 閉じる header and the tab itself close it */
+.mobile-nav { padding-top: 0; }
+.mobile-nav__head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: var(--s2); min-height: 56px; padding: 0 var(--s3); background: var(--color-paper); border-bottom: 1px solid var(--color-ink); font-weight: 700; }
+.mobile-nav__close { display: inline-flex; align-items: center; gap: var(--s1); min-height: 44px; padding: 0 var(--s2); background: var(--color-paper-2); border: 1px solid var(--color-rule-strong); border-radius: 2px; color: var(--color-ink); font: inherit; font-size: var(--fs-small); font-weight: 500; cursor: pointer; }
+.mobile-nav__close .ico { width: 18px; height: 18px; }
+#appbar-more .i-close, #appbar-more .appbar__label--close { display: none; }
+body.menu-open { overflow: hidden; }
+body.menu-open .pwa-install-banner { display: none !important; }
+@media (max-width: 640px) {
+  html.app-ui .appbar { z-index: 100; }
+  html.app-ui .mobile-nav { bottom: 0; padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+  html.app-ui body.menu-open .appbar__item[aria-current="page"] { background: none !important; color: var(--color-mid) !important; }
+  html.app-ui body.menu-open #appbar-more { background: var(--color-primary); color: var(--color-paper-2); }
+  html.app-ui body.menu-open #appbar-more .i-menu, html.app-ui body.menu-open #appbar-more .appbar__label--new, html.app-ui body.menu-open #appbar-more .appbar__label--old { display: none !important; }
+  html.app-ui body.menu-open #appbar-more .i-close { display: inline-block; }
+  html.app-ui body.menu-open #appbar-more .appbar__label--close { display: inline; }
+}

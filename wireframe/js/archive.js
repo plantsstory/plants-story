@@ -2027,6 +2027,15 @@
   }, true);
   var more = $('appbar-more');
   if (more) more.addEventListener('click', function () { var h = $('hamburger'); if (h) h.click(); });
+  // the menu is closed from several places; one watcher keeps the tab, the page and the bar in step with it
+  var nav = $('mobileNav'), navClose = $('mobile-nav-close');
+  if (navClose) navClose.addEventListener('click', function () { var h = $('hamburger'); if (nav && nav.classList.contains('open') && h) h.click(); else if (nav) nav.classList.remove('open'); });
+  if (nav && window.MutationObserver) new MutationObserver(function () {
+    var isOpen = nav.classList.contains('open');
+    document.body.classList.toggle('menu-open', isOpen);
+    if (isOpen) document.body.classList.remove('appbar-away');
+    if (more) more.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }).observe(nav, { attributes: true, attributeFilter: ['class'] });
   // the bar steps aside while the keyboard is up
   function kb() {
     var vv = window.visualViewport, a = document.activeElement;
