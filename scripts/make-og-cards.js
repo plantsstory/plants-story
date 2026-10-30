@@ -101,7 +101,7 @@ function cardSvg(c, photoDataUri) {
   }
   if (!summary) summary = state === 'ok' ? '' : '記録不足 · 記録を募集中';
   const status = state === 'ok' ? ('記録 ' + n + ' · ' + (o && o.source_type === 'ipni_powo' ? 'IPNI / POWO' : '投稿者の記録')) : '記録不足';
-  const url = 'plantsstory.com/' + genus.toLowerCase() + '/' + rest;
+  const url = 'aroidorigins.com/' + genus.toLowerCase() + '/' + rest;
 
   const size = titleSize(rest);
   const plate = photoDataUri

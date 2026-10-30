@@ -52,7 +52,7 @@ gtag('config', 'G-KJK72JH471', { send_page_view: true });
   function report(msg, src, line) {
     if (sent >= 5 || typeof gtag !== 'function') return;
     src = String(src || '');
-    if (src && !/plantsstory\.com|localhost|\/js\//.test(src)) return;   // extensions and third parties stay out
+    if (src && !/(?:aroidorigins|plantsstory)\.com|localhost|\/js\//.test(src)) return;   // extensions and third parties stay out
     sent++;
     gtag('event', 'js_error', {
       message: String(msg || '').slice(0, 100),

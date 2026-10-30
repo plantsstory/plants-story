@@ -10,7 +10,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { budgetGate, budgetRefusal } from "../_shared/ai-budget.ts";
 import Anthropic from "npm:@anthropic-ai/sdk@0.131.0";
 
-const ALLOWED_ORIGINS = ["https://plantsstory.com", "https://plantsstory.github.io", "http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8123"];
+const ALLOWED_ORIGINS = ["https://aroidorigins.com", "https://plantsstory.github.io", "http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8123"];
 const RAKUTEN_ENDPOINT = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701";
 const RAKUTEN_AFFILIATE_ID = Deno.env.get("RAKUTEN_AFFILIATE_ID") || "51ddadd6.592101ce.51ddadd7.b054826c";
 const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-5-mini";

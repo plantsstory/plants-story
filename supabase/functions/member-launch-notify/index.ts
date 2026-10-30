@@ -13,7 +13,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
  */
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://plantsstory.com",
+  "Access-Control-Allow-Origin": "https://aroidorigins.com",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
@@ -22,7 +22,7 @@ const TEXT = [
   "Aroid Origins の会員受付を始めました。",
   "以前「受付開始をメールで受け取る」を押していただいた方に、この 1 回だけお送りしています。",
   "",
-  "料金とサービス内容: https://plantsstory.com/pricing/",
+  "料金とサービス内容: https://aroidorigins.com/pricing/",
   "",
   "このお知らせは 1 回だけです。今後このメールアドレスに宣伝をお送りすることはありません。",
 ].join("\n");

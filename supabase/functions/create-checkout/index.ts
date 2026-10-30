@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@14?target=deno";
 
 const ALLOWED_ORIGINS = [
-  "https://plantsstory.com",
+  "https://aroidorigins.com",
   "https://plantsstory.github.io",
 ];
 
@@ -82,8 +82,8 @@ serve(async (req: Request) => {
     }
 
     // 4. Redirect URLs (path-based SPA routes)
-    const origin = req.headers.get("origin") || "https://plantsstory.com";
-    const site = ["https://plantsstory.com", "https://plantsstory.github.io"].includes(origin) ? origin : "https://plantsstory.com";
+    const origin = req.headers.get("origin") || "https://aroidorigins.com";
+    const site = ["https://aroidorigins.com", "https://plantsstory.github.io"].includes(origin) ? origin : "https://aroidorigins.com";
     const base = site.endsWith("github.io") ? site + "/plants-story" : site;
     const successUrl = base + "/profile/edit?subscription=success";
     const cancelUrl = base + "/profile/edit?subscription=canceled";
@@ -100,7 +100,7 @@ serve(async (req: Request) => {
       metadata: { supabase_user_id: user.id },
       subscription_data: { metadata: { supabase_user_id: user.id } },
       consent_collection: { terms_of_service: "required" },
-      custom_text: { terms_of_service_acceptance: { message: "[利用規約](https://plantsstory.com/terms/) と [特定商取引法に基づく表記](https://plantsstory.com/tokushoho/) に同意します。期間満了時に自動更新され、解約はプロフィール編集ページからいつでも可能です。" } },
+      custom_text: { terms_of_service_acceptance: { message: "[利用規約](https://aroidorigins.com/terms/) と [特定商取引法に基づく表記](https://aroidorigins.com/tokushoho/) に同意します。期間満了時に自動更新され、解約はプロフィール編集ページからいつでも可能です。" } },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {

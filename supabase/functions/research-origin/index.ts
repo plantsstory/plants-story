@@ -4,7 +4,7 @@ import { budgetGate, budgetRefusal } from "../_shared/ai-budget.ts";
 import Anthropic from "npm:@anthropic-ai/sdk@0.131.0";
 
 const ALLOWED_ORIGINS = [
-  "https://plantsstory.com",
+  "https://aroidorigins.com",
   "https://plantsstory.github.io",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
@@ -221,7 +221,7 @@ async function scrapeIpniTypeData(ipniId: string): Promise<IpniTypeData | null> 
   if (!ipniId) return null;
   const url = `https://www.ipni.org/n/${ipniId}`;
   try {
-    const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; AroidOrigins/1.0; +https://plantsstory.com)" } });
+    const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; AroidOrigins/1.0; +https://aroidorigins.com)" } });
     if (!res.ok) return null;
     const html = await res.text();
 

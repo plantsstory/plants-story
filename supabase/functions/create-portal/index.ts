@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@14?target=deno";
 
 const ALLOWED_ORIGINS = [
-  "https://plantsstory.com",
+  "https://aroidorigins.com",
   "https://plantsstory.github.io",
 ];
 
@@ -66,8 +66,8 @@ serve(async (req: Request) => {
       apiVersion: "2023-10-16",
     });
 
-    const origin = req.headers.get("origin") || "https://plantsstory.com";
-    const site = ["https://plantsstory.com", "https://plantsstory.github.io"].includes(origin) ? origin : "https://plantsstory.com";
+    const origin = req.headers.get("origin") || "https://aroidorigins.com";
+    const site = ["https://aroidorigins.com", "https://plantsstory.github.io"].includes(origin) ? origin : "https://aroidorigins.com";
     const returnUrl = (site.endsWith("github.io") ? site + "/plants-story" : site) + "/profile/edit";
 
     const portalSession = await stripe.billingPortal.sessions.create({

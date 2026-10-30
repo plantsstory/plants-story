@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { payjpRequest, mapPayjpSubscription } from "../_shared/payjp.ts";
 
 const ALLOWED_ORIGINS = [
-  "https://plantsstory.com",
+  "https://aroidorigins.com",
   "https://plantsstory.github.io",
 ];
 

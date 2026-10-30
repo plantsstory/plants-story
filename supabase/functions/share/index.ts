@@ -6,11 +6,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
  *
  * This function used to serve an OGP page, but Supabase's default domain delivers HTML as text/plain
  * (with nosniff and a sandbox CSP), so people saw raw markup and crawlers saw no card. The share button
- * now gives the page URL on plantsstory.com, whose static stub carries the OG tags (BOARD 10-07 board 8).
+ * now gives the page URL on aroidorigins.com, whose static stub carries the OG tags (BOARD 10-07 board 8).
  * Links already sent keep working: this function only redirects to that page.
  */
 
-const SITE_URL = "https://plantsstory.com/";
+const SITE_URL = "https://aroidorigins.com/";
 
 // same form as getShareUrl() in wireframe/js/pages.js: quotes percent-encoded, trailing slash
 export function pageUrl(genus: string, name: string): string {

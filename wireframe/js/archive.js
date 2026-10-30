@@ -965,7 +965,7 @@
     document.head.appendChild(sc);
   }
   function labelHtml(d) {
-    var url = window.getShareUrl ? window.getShareUrl(d.fullName) : 'https://plantsstory.com/';
+    var url = window.getShareUrl ? window.getShareUrl(d.fullName) : 'https://aroidorigins.com/';
     var q = window.qrcode(0, 'M'); q.addData(url); q.make();
     var qr = q.createSvgTag({ cellSize: 2, margin: 0, scalable: true });
     var species = d.type === 'species' && !d.isIndividual;
@@ -1015,7 +1015,7 @@
     var head = [who, d.year].filter(Boolean).join(' ');
     var mid = [head, where].filter(Boolean).join('、');
     // canonical page URL: the static stubs carry the OGP tags, so no proxy is needed in the text
-    var url = window.getShareUrl ? window.getShareUrl(d.fullName) : 'https://plantsstory.com/' + d.genus.toLowerCase() + '/' + encodeURIComponent(d.epithet).replace(/'/g, '%27') + '/';
+    var url = window.getShareUrl ? window.getShareUrl(d.fullName) : 'https://aroidorigins.com/' + d.genus.toLowerCase() + '/' + encodeURIComponent(d.epithet).replace(/'/g, '%27') + '/';
     return d.shownName + (mid ? ' — ' + mid : '') + '｜Aroid Origins ' + url;
   };
   /* one-time band after a registration: 収録しました · この台紙を共有 */

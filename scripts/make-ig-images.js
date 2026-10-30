@@ -59,7 +59,7 @@ function frame(inner) {
   <rect x="40.5" y="40.5" width="${W - 81}" height="${H - 81}" fill="none" stroke="${INK}" stroke-width="1"/>
   ${inner}
   <line x1="80" y1="${H - 120}" x2="${W - 80}" y2="${H - 120}" stroke="${INK}" stroke-width="1"/>
-  <text x="80" y="${H - 78}" font-family="IBM Plex Mono" font-size="26" letter-spacing="2" fill="${GREEN}">plantsstory.com</text>
+  <text x="80" y="${H - 78}" font-family="IBM Plex Mono" font-size="26" letter-spacing="2" fill="${GREEN}">aroidorigins.com</text>
   <text x="${W - 80}" y="${H - 78}" text-anchor="end" font-family="IBM Plex Mono" font-size="24" letter-spacing="3" fill="${MID}">AROID ORIGINS</text>
 </svg>`;
 }

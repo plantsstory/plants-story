@@ -679,7 +679,7 @@ document.addEventListener('click', function(e) {
 });
 
 // ---- Share button ----
-// Share the page itself on plantsstory.com: its static stub carries the OG tags and the share card.
+// Share the page itself on aroidorigins.com: its static stub carries the OG tags and the share card.
 // (The old Supabase share function returned HTML as text/plain; it now only redirects old links here.)
 // Quotes are percent-encoded so X's auto-link keeps the closing ' of 'Ace of Spades'.
 function getShareUrl(cultivarName) {
@@ -687,7 +687,7 @@ function getShareUrl(cultivarName) {
   var genus = display.split(' ')[0].toLowerCase();
   var rest = display.replace(/^\S+\s*/, '');
   var enc = function(s) { return encodeURIComponent(s).replace(/'/g, '%27'); };
-  return 'https://plantsstory.com/' + enc(genus) + '/' + enc(rest) + '/';
+  return 'https://aroidorigins.com/' + enc(genus) + '/' + enc(rest) + '/';
 }
 window.getShareUrl = getShareUrl;
 

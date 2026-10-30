@@ -41,7 +41,7 @@ async function main() {
   const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,origins,updated_at,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=genus,cultivar_name');
   const cultivars = allCultivars.filter(c => visibleGenusNames.has(c.genus || 'Anthurium'));
 
-  const SITE = 'https://plantsstory.com';
+  const SITE = 'https://aroidorigins.com';
   const today = new Date().toISOString().split('T')[0];
 
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';

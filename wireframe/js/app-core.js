@@ -402,10 +402,10 @@ psExport('guardSubmit', guardSubmit);
 
 // Page navigation — detect custom domain vs GitHub Pages
 var _isCustomDomain = location.hostname !== 'plantsstory.github.io';
-var _siteBase = _isCustomDomain ? 'https://plantsstory.com/' : 'https://plantsstory.github.io/plants-story/';
+var _siteBase = _isCustomDomain ? 'https://aroidorigins.com/' : 'https://plantsstory.github.io/plants-story/';
 var _defaultTitle = 'Aroid Origins';
 var _defaultDesc = '誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。';
-var _defaultOgImage = 'https://plantsstory.com/images/og-default-2026-09.png';
+var _defaultOgImage = 'https://aroidorigins.com/images/og-default-2026-09.png';
 // Share card of a cultivar (scripts/lib/og-slug.js and the share function carry the same rule)
 window.ogSlug = function(genus, name) {
   var rest = String(name || '').replace(' [Seedling]', '');
@@ -413,7 +413,7 @@ window.ogSlug = function(genus, name) {
   var s = (String(genus || '') + ' ' + rest).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   return s || 'entry';
 };
-window.ogCardUrl = function(genus, name) { return 'https://plantsstory.com/images/og/' + window.ogSlug(genus, name) + '.png'; };
+window.ogCardUrl = function(genus, name) { return 'https://aroidorigins.com/images/og/' + window.ogSlug(genus, name) + '.png'; };
 
 function updateMeta(opts) {
   opts = opts || {};

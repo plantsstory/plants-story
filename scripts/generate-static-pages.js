@@ -22,7 +22,7 @@ const { ogSlug } = require('./lib/og-slug');
 
 const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
-const SITE = 'https://plantsstory.com';
+const SITE = 'https://aroidorigins.com';
 const WIREFRAME = path.join(__dirname, '..', 'wireframe');
 
 function fetchJSON(urlPath) {
