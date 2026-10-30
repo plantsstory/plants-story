@@ -883,7 +883,7 @@ function navigateTo(page, options, pushHistory) {
           return;
         }
       }
-      var noindexPages = { search: true, contribute: true, mypost: true, favorites: true, profile: true, 'profile-edit': true, notfound: true, ig: true, explore: !document.documentElement.classList.contains('pv-home-open'), reading: !document.documentElement.classList.contains('pv-reading-open') };
+      var noindexPages = { search: true, contribute: true, mypost: true, favorites: true, profile: true, 'profile-edit': true, notfound: true, ig: true, explore: false, reading: !document.documentElement.classList.contains('pv-reading-open') };
       updateMeta({ title: pageTitles[page] || _defaultTitle, description: pageDescriptions[page] || _defaultDesc, path: page === 'top' ? '' : page, noindex: !!noindexPages[page] });
       // Remove genus JSON-LD on non-genus pages
       var gjld = document.getElementById('genus-jsonld');

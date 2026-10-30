@@ -13,12 +13,15 @@
     off = localStorage.getItem('ao-preview-app') === '0';
   } catch (e) {}
   if (!off) document.documentElement.classList.add('app-ui');
-  // board 13: direction B (tabs with icons, the four entrances, 調べる) — ?preview=home on this browser only
+  // board 13: direction B (tabs with icons, the four entrances, 調べる) — on for everyone since 10-30;
+  // ?preview=home-off puts this browser back on the old screen, ?preview=home undoes that
+  var homeOff = false;
   try {
-    if (/[?&]preview=home(?:&|$)/.test(location.search)) localStorage.setItem('ao-preview-home', '1');
-    if (/[?&]preview=home-off(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-home');
-    if (localStorage.getItem('ao-preview-home') === '1') document.documentElement.classList.add('pv-home');
+    if (/[?&]preview=home(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-home');
+    if (/[?&]preview=home-off(?:&|$)/.test(location.search)) localStorage.setItem('ao-preview-home', '0');
+    homeOff = localStorage.getItem('ao-preview-home') === '0';
   } catch (e) {}
+  if (!homeOff) document.documentElement.classList.add('pv-home');
   // board 12: 「読みもの」 links and the plant-page section, shown only with ?preview=reading until the owner's OK
   try {
     if (/[?&]preview=reading(?:&|$)/.test(location.search)) localStorage.setItem('ao-preview-reading', '1');
