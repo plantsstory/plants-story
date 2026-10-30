@@ -1440,7 +1440,8 @@ function getFilteredItems(genusEl) {
     if (isSeedlingView && !isSeedling) return false;
     if (!isSeedlingView && isSeedling) return false;
     if (!isSeedlingView && isIndividualItem(item)) return false; // folded under the species row
-    if (filterType !== 'all' && item.meta.type !== filterType) return false;
+    if (filterType === 'cultivar') { if (item.meta.type !== 'clone' && item.meta.type !== 'hybrid') return false; }
+    else if (filterType !== 'all' && item.meta.type !== filterType) return false;
     if (q) {
       var nameMatch = nameMatches(item, q);
       var creatorMatch = item.entry._creatorName && item.entry._creatorName.toLowerCase().indexOf(q) !== -1;

@@ -1636,6 +1636,7 @@ if (false) {
       html += '<div class="chips filter-chips">';
       html += '<button type="button" class="chip filter-chip active" aria-pressed="true" data-filter-type="all" data-i18n="filter_all_type">すべて</button>';
       html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="species" data-i18n="filter_species">原種</button>';
+      html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="cultivar" data-i18n="filter_cultivar">品種</button>';
       html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="hybrid" data-i18n="filter_hybrid">Hybrid</button>';
       html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="clone" data-i18n="filter_clone">Clone</button>';
       html += '</div>';

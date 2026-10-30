@@ -123,6 +123,10 @@
     "jp": "すべて",
     "en": "All"
   },
+  "filter_cultivar": {
+    "jp": "品種",
+    "en": "Cultivars"
+  },
   "filter_species": {
     "jp": "原種",
     "en": "Species"
