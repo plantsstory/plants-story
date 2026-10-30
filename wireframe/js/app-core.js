@@ -381,6 +381,12 @@ psExport('guardSubmit', guardSubmit);
 
 // SPA redirect restoration (GitHub Pages 404.html redirects here)
 (function() {
+  // A return from Google carries the session in the URL (#access_token=… or ?code=…). The library reads it when
+  // the client is created, further down this file — so nothing here may rewrite the URL first. A stale
+  // spa_redirect_path (set by 404.html when 記録 or a profile was opened) used to do exactly that and the login
+  // was lost every time (2026-10-30).
+  var _authReturn = /(^|[#&?])(access_token|refresh_token|code|error|error_description)=/.test(location.hash + location.search);
+  if (_authReturn) { sessionStorage.removeItem('spa_redirect_path'); return; }
   // Check URL parameter first (more reliable on hard refresh), then sessionStorage
   var params = new URLSearchParams(location.search);
   var redirectPath = params.get('spa_path') || sessionStorage.getItem('spa_redirect_path');
