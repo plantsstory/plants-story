@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>ログインの点検 · Aroid Origins</title>
+<style>
+  body { font-family: "Noto Sans JP", "BIZ UDPGothic", sans-serif; background: #F4F1EA; color: #1E2622; margin: 0; padding: 20px 16px 40px; line-height: 1.7; }
+  h1 { font-size: 1.2rem; margin: 0 0 8px; }
+  p { margin: 0 0 10px; font-size: .95rem; }
+  pre { background: #FBF9F4; border: 1px solid #D9D3C5; padding: 12px; font-size: 12px; white-space: pre-wrap; word-break: break-all; }
+  button { font: inherit; min-height: 48px; padding: 0 18px; border: 1px solid #1E2622; background: #1E2622; color: #F4F1EA; border-radius: 2px; margin: 6px 6px 6px 0; }
+  button.alt { background: transparent; color: #1E2622; }
+  .ok { color: #2F5D4A; font-weight: 700; } .ng { color: #A63A3A; font-weight: 700; }
+</style>
+</head>
+<body>
+<h1>ログインの点検</h1>
+<p>このページは、今のブラウザがログイン情報を持っているかを表示するだけです。何も送信しません。</p>
+<pre id="out">調べています…</pre>
+<button id="login" type="button">ここから Google でログイン</button>
+<button id="copy" type="button" class="alt">結果をコピー</button>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1"></script>
+<script>
+(function () {
+  var URL_ = 'https://jpgbehsrglsiwijglhjo.supabase.co';
+  var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
+  var out = document.getElementById('out');
+  var lines = [];
+  function add(k, v) { lines.push(k + ': ' + v); out.textContent = lines.join('\n'); }
+  add('時刻', new Date().toLocaleString('ja-JP'));
+  add('ブラウザ', navigator.userAgent.replace(/Mozilla\/5\.0 /, ''));
+  add('アドレス', location.origin + location.pathname);
+  add('URL の # 部分', location.hash ? location.hash.slice(0, 60) + '…' : '(なし)');
+  var ls = 'ng';
+  try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); ls = 'ok'; } catch (e) { ls = 'ng: ' + e.message; }
+  add('localStorage 書き込み', ls);
+  var keys = [];
+  try { keys = Object.keys(localStorage).filter(function (k) { return /^sb-/.test(k); }); } catch (e) {}
+  add('保存されたログイン情報の鍵', keys.length ? keys.join(', ') : '(なし)');
+  add('standalone（ホーム画面から起動）', String(window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches));
+  if (!window.supabase) { add('supabase ライブラリ', '読み込めませんでした（CSP や回線）'); return; }
+  var sb = window.supabase.createClient(URL_, KEY, { auth: { flowType: 'implicit' } });
+  sb.auth.onAuthStateChange(function (ev, s) { add('イベント ' + ev, s ? 'セッションあり（' + (s.user && s.user.email ? s.user.email.replace(/^(..).*(@.*)$/, '$1***$2') : 'user') + '）' : 'セッションなし'); });
+  sb.auth.getSession().then(function (r) {
+    if (r.error) { add('getSession', 'エラー: ' + r.error.message); return; }
+    add('getSession', r.data.session ? 'セッションあり。期限 ' + new Date(r.data.session.expires_at * 1000).toLocaleTimeString('ja-JP') : 'セッションなし');
+  });
+  document.getElementById('login').addEventListener('click', function () {
+    sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + '/login-check.html', queryParams: { prompt: 'select_account' } } });
+  });
+  document.getElementById('copy').addEventListener('click', function () {
+    var t = lines.join('\n');
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { add('コピー', '完了'); }, function () { add('コピー', '失敗。長押しで選んでコピーしてください'); });
+  });
+})();
+</script>
+</body>
+</html>
