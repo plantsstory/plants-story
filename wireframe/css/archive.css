@@ -1865,3 +1865,42 @@ body.menu-open .pwa-install-banner { display: none !important; }
 @media (max-width: 640px) {
   html.app-ui .mobile-nav > a[data-nav="top"], html.app-ui #nav-mypost { display: none !important; }
 }
+/* board 14 T179 / T180: suggestions under the search field, and the people / places / children groups */
+.search-bar { position: relative; }
+.suggest { position: absolute; left: 0; right: 0; top: 100%; z-index: 90; margin: 0; padding: 0; list-style: none; background: var(--color-paper-2); border: 1px solid var(--color-ink); box-shadow: 0 6px 16px rgba(30, 38, 34, 0.12); }
+.suggest li { border-bottom: 1px solid var(--color-rule); }
+.suggest li:last-child { border-bottom: 0; }
+.suggest a, .suggest__all { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--s2); width: 100%; min-height: 48px; padding: 0 var(--s3); color: var(--color-ink); text-decoration: none; background: none; border: 0; font: inherit; font-size: var(--fs-body); text-align: left; cursor: pointer; }
+.suggest a > span:first-of-type { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.suggest .ico { width: 20px; height: 20px; color: var(--color-primary); }
+.suggest__k { font-size: var(--fs-label); color: var(--color-mid); }
+.suggest__all { grid-template-columns: 1fr; color: var(--color-primary); font-size: var(--fs-small); }
+.suggest a:active, .suggest__all:active { background: var(--color-paper); }
+.search-extra__h { margin-top: var(--s4); }
+/* board 14 T181: 自分の株 — one next step, the tools from 8 plants, the CSV at the end */
+.mypost-next { margin: var(--s2) 0 var(--s3); }
+.mypost-next button { display: flex; align-items: center; width: 100%; min-height: var(--tap); padding: var(--s2) var(--s3); background: var(--color-paper-2); border: 1px solid var(--color-primary); border-radius: 2px; color: var(--color-primary); font: inherit; font-size: var(--fs-body); font-weight: 500; text-align: left; cursor: pointer; }
+.mypost-tools { display: grid; gap: var(--s2); margin: 0 0 var(--s3); }
+.mypost-tools .chip { min-height: var(--tap); }
+.mypost-tools__row { display: grid; grid-template-columns: 1fr auto; gap: var(--s2); }
+.mypost-tools__row .form-input { min-height: var(--tap); margin: 0; }
+.mypost-filtered { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; font-size: var(--fs-small); color: var(--color-mid); }
+.mypost-filtered[hidden] { display: none; }
+.mypost-foot { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--color-rule); }
+.mypost-none { padding: var(--s4) 0; color: var(--color-mid); list-style: none; }
+/* board 14 T182 / T183 / T184 / T185 */
+.recent { margin-top: var(--s3); }
+.recent[hidden] { display: none; }
+.recent__head { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); border-bottom: 1px solid var(--color-ink); }
+.recent__h { margin: 0; font-size: var(--fs-small); font-weight: 700; }
+.recent__clear { min-height: 44px; padding: 0 var(--s2); background: none; border: 0; color: var(--color-mid); font: inherit; font-size: var(--fs-small); cursor: pointer; }
+.recent__list { margin: 0; padding: 0; list-style: none; }
+.kind-note { margin: var(--s2) 0 0; font-size: var(--fs-small); color: var(--color-mid); line-height: 1.6; }
+.kind-note[hidden] { display: none; }
+.colophon__fold > summary { list-style: none; cursor: pointer; }
+.colophon__fold > summary::-webkit-details-marker { display: none; }
+.colophon__fold > summary h2 { display: inline; }
+@media (max-width: 640px) { .colophon__fold > summary h2::after { content: " ＋"; color: var(--color-mid); } .colophon__fold[open] > summary h2::after { content: " －"; } }
+.donate-slot { margin: var(--s3) 0 0; font-size: var(--fs-small); }
+.donate-slot[hidden] { display: none; }
+.donate-after { margin: var(--s2) 0 0; font-size: var(--fs-small); }

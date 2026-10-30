@@ -1641,6 +1641,7 @@ if (false) {
       html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="hybrid" data-i18n="filter_hybrid">Hybrid</button>';
       html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="clone" data-i18n="filter_clone">Clone</button>';
       html += '</div>';
+      html += '<p class="kind-note" aria-live="polite" hidden></p>';
       html += '<a href="#" class="genus-add-link" data-nav="contribute" data-genus="' + g.name + '" data-i18n="add_cultivar">品種を追加</a>';
       html += '</div>';
 

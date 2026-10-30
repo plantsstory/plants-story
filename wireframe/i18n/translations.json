@@ -333,8 +333,8 @@
     "en": "Contact"
   },
   "search_placeholder": {
-    "jp": "学名・品種名で検索",
-    "en": "Search by name"
+    "jp": "品種名・学名・人名・産地",
+    "en": "Name, person or country"
   },
   "genus_search": {
     "jp": "学名・品種名で検索（例: warocqueanum）",

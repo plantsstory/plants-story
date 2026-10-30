@@ -24,16 +24,16 @@
   <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1">
   <!-- Own scripts fetched in parallel (the meta CSP stops the browser's own look-ahead); they still run in order at
        the end of the body. gtag.js is loaded by gtag-init.js once the page is parsed (board 11 T156). -->
-  <link rel="preload" as="script" href="js/record-gate.js?v=20261030j">
-  <link rel="preload" as="script" href="js/app-core.js?v=20261030j">
-  <link rel="preload" as="script" href="js/pages.js?v=20261030j">
-  <link rel="preload" as="script" href="js/forms.js?v=20261030j">
-  <link rel="preload" as="script" href="js/entry-meta.js?v=20261030j">
-  <link rel="preload" as="script" href="js/archive.js?v=20261030j">
-  <link rel="preload" as="script" href="js/tool-gate.js?v=20261030j">
-  <link rel="preload" as="script" href="js/tools.js?v=20261030j">
-  <link rel="preload" as="script" href="js/dialogs.js?v=20261030j">
-  <script src="js/textsize.js?v=20261030j"></script>
+  <link rel="preload" as="script" href="js/record-gate.js?v=20261030l">
+  <link rel="preload" as="script" href="js/app-core.js?v=20261030l">
+  <link rel="preload" as="script" href="js/pages.js?v=20261030l">
+  <link rel="preload" as="script" href="js/forms.js?v=20261030l">
+  <link rel="preload" as="script" href="js/entry-meta.js?v=20261030l">
+  <link rel="preload" as="script" href="js/archive.js?v=20261030l">
+  <link rel="preload" as="script" href="js/tool-gate.js?v=20261030l">
+  <link rel="preload" as="script" href="js/tools.js?v=20261030l">
+  <link rel="preload" as="script" href="js/dialogs.js?v=20261030l">
+  <script src="js/textsize.js?v=20261030l"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -74,14 +74,14 @@
     "logo": "https://aroidorigins.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20261030j">
-  <link rel="stylesheet" href="css/reset.css?v=20261030j">
-  <link rel="stylesheet" href="css/layout.css?v=20261030j">
-  <link rel="stylesheet" href="css/components.css?v=20261030j">
-  <link rel="stylesheet" href="css/pages.css?v=20261030j">
-  <link rel="stylesheet" href="css/utilities.css?v=20261030j">
-  <link rel="stylesheet" href="css/archive.css?v=20261030j">
-  <script src="js/gtag-init.js?v=20261030j"></script>
+  <link rel="stylesheet" href="css/variables.css?v=20261030l">
+  <link rel="stylesheet" href="css/reset.css?v=20261030l">
+  <link rel="stylesheet" href="css/layout.css?v=20261030l">
+  <link rel="stylesheet" href="css/components.css?v=20261030l">
+  <link rel="stylesheet" href="css/pages.css?v=20261030l">
+  <link rel="stylesheet" href="css/utilities.css?v=20261030l">
+  <link rel="stylesheet" href="css/archive.css?v=20261030l">
+  <script src="js/gtag-init.js?v=20261030l"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1"></script>
 </head>
@@ -135,6 +135,7 @@
         <button type="button" class="textsize__btn textsize__btn--3" data-size="xlarge" aria-pressed="false" title="特大"><span aria-hidden="true">A</span><span class="visually-hidden" data-i18n="textsize_xlarge">特大</span></button>
       </div>
       <button class="header__lang mt-sm" data-i18n="lang_toggle">EN / JP</button>
+      <p class="donate-slot" data-donate-slot="menu" hidden></p>
     </div>
   </nav>
 
@@ -166,7 +167,7 @@
           <p class="masthead__tagline">一葉に、千の物語。</p>
           <p class="masthead__desc" data-i18n="hero_desc">誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。</p>
           <div class="search-bar">
-            <input type="search" enterkeyhint="search" class="search-bar__input" placeholder="学名・品種名で検索" data-i18n-placeholder="search_placeholder" aria-label="品種名を検索">
+            <input type="search" enterkeyhint="search" class="search-bar__input" placeholder="品種名・学名・人名・産地" data-i18n-placeholder="search_placeholder" aria-label="品種名を検索">
             <button class="search-bar__btn" data-nav="search" aria-label="検索"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></button>
           </div>
           <nav class="ways pv-home-only" aria-label="調べ方">
@@ -175,6 +176,7 @@
             <a class="way" href="/people/" data-nav="people"><svg class="ico" aria-hidden="true"><use href="#i-person"/></svg><span>人物をたどる</span></a>
             <a class="way" href="/locality/" data-nav="locality"><svg class="ico" aria-hidden="true"><use href="#i-place"/></svg><span>産地をたどる</span></a>
           </nav>
+          <section class="recent" id="recent-views" aria-label="最近見た品種" hidden></section>
           <p class="masthead__stats" id="masthead-stats"></p>
           <div class="masthead__meta" id="masthead-genera"></div>
         </div>
@@ -214,7 +216,8 @@
 
       <!-- Colophon: what this archive is -->
       <section class="colophon">
-        <h2 data-i18n="colophon_title">この図鑑について</h2>
+        <details class="colophon__fold" id="colophon-fold">
+        <summary><h2 data-i18n="colophon_title">この図鑑について</h2></summary>
         <div>
           <p data-i18n="colophon_p1">誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。原種は記載者・発表年・タイプ産地を学名データベースと一次文献で照合し、交配種・クローンは作出者や交配式をコレクターの投稿から集めています。すべての記録に出典と信頼度を付けています。</p>
           <dl>
@@ -228,6 +231,7 @@
             <a href="#" class="btn btn--secondary" data-nav="guide" data-i18n="footer_guide">使い方</a>
           </div>
         </div>
+        </details>
       </section>
 
     </div>
@@ -785,6 +789,7 @@
 
         <div id="search-cultivar-list" class="card card--no-pad"></div>
       </div>
+      <div id="search-extras"></div>
 
       <!-- Pagination -->
       <div class="pagination">
@@ -1729,6 +1734,7 @@
         <a href="#" data-nav="tokushoho" data-i18n="footer_tokushoho">特定商取引法</a>
         <a href="#" data-nav="contact" data-i18n="footer_contact">お問い合わせ</a>
       </div>
+      <p class="donate-slot" data-donate-slot="footer" hidden></p>
       <div class="footer__lang"><button class="header__lang" data-i18n="lang_toggle">EN / JP</button>
       <div class="textsize" role="group" aria-label="文字サイズ">
         <span class="textsize__label mono" data-i18n="textsize_label">文字サイズ</span>
@@ -1743,14 +1749,14 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/record-gate.js?v=20261030j"></script>
-  <script src="js/app-core.js?v=20261030j"></script>
-  <script src="js/pages.js?v=20261030j"></script>
-  <script src="js/forms.js?v=20261030j"></script>
-  <script src="js/entry-meta.js?v=20261030j"></script>
-  <script src="js/archive.js?v=20261030j"></script>
-  <script src="js/tool-gate.js?v=20261030j"></script>
-  <script src="js/tools.js?v=20261030j"></script>
+  <script src="js/record-gate.js?v=20261030l"></script>
+  <script src="js/app-core.js?v=20261030l"></script>
+  <script src="js/pages.js?v=20261030l"></script>
+  <script src="js/forms.js?v=20261030l"></script>
+  <script src="js/entry-meta.js?v=20261030l"></script>
+  <script src="js/archive.js?v=20261030l"></script>
+  <script src="js/tool-gate.js?v=20261030l"></script>
+  <script src="js/tools.js?v=20261030l"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1760,7 +1766,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261030j"></script>
+  <script src="js/dialogs.js?v=20261030l"></script>
 
   <!-- AI re-research request dialog -->
   <!-- Asked before anything is typed: posting, photos and records need a login (2026-10-08 app-ux) -->
@@ -1812,6 +1818,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261030j"></script>
+<script src="js/sw-register.js?v=20261030l"></script>
 </body>
 </html>

@@ -48,6 +48,8 @@
     { id: 'af_moshimo', label: 'もしもアフィリエイト報酬', credit: '売上高', partner: 'もしもアフィリエイト' },
     { id: 'af_yahoo', label: 'Yahoo!アフィリエイト報酬', credit: '売上高', partner: 'バリューコマース' },
     { id: 'listing', label: '取扱店の掲載料（振込）', credit: '売上高' },
+    // board 14 T185: money sent through OFUSE (no goods or perks in return); how it is treated before the business opens is the owner's call
+    { id: 'ofuse', label: 'OFUSE からの受け取り', credit: '雑収入', partner: 'OFUSE' },
     { id: 'capital_in', label: '個人のお金を事業用口座に入れた', debit: '普通預金', credit: '事業主借', fixed: true },
     { id: 'draw', label: '事業用口座から個人のお金に移した', debit: '事業主貸', credit: '普通預金', fixed: true }
   ];
