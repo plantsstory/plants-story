@@ -90,7 +90,7 @@
   --fs-h3: 1.0625rem;   /* list names, terms, sub-heads */
   --fs-body: 1rem;
   --fs-small: 0.875rem; /* notes, second lines */
-  --fs-label: 0.75rem;  /* dates, numbers, field names; nothing smaller */
+  --fs-label: 0.8125rem; /* dates, numbers, field names; nothing smaller (13px since board 14, for readers in their 30s–60s) */
   --lh-body: 1.85;
   --lh-head: 1.25;
   --s1: 4px;
@@ -98,7 +98,7 @@
   --s3: 16px;
   --s4: 24px;
   --s5: 40px;
-  --tap: 44px;
+  --tap: 48px; /* board 14 */
   --color-green: var(--color-primary); /* was referenced but never defined */
   --font-size-md: var(--fs-body);
 }

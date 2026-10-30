@@ -138,6 +138,7 @@ window.italicizeSciNames = italicizeSciNames;
 // 「アンスリウム クリスタリナム」「くりすたりなむ」「ﾜﾛｸｱﾅﾑ」「ワロッキアナム」 all find crystallinum / warocqueanum.
 function foldName(s) {
   s = String(s || '').normalize('NFKC').toLowerCase();
+  s = s.replace(/×/g, ' ').replace(/(^|\s)x(?=\s|$)/g, ' ').replace(/(^|\s)(?:var|subsp|ssp|f)\.(?=\s)/g, ' ');
   s = s.replace(/[\u3041-\u3096]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) + 0x60); });   // hiragana → katakana
   s = s.replace(/アンスリウム|アンスリューム|アンスリュウム|anthurium|モンステラ|monstera|フィロデンドロン|philodendron/g, '');
   s = s.replace(/[\s・･\-‐–—'"‘’“”`.,、。()（）]/g, '');
@@ -822,7 +823,7 @@ function navigateTo(page, options, pushHistory) {
       tokushoho: '特定商取引法に基づく表記 - ' + _defaultTitle,
       contact: 'お問い合わせ - ' + _defaultTitle,
       search: '検索結果 - ' + _defaultTitle,
-      mypost: '自分の記録 - ' + _defaultTitle,
+      mypost: '自分の株 - ' + _defaultTitle,
       wanted: '写真を募集中 — 写真のないアンスリウム | Aroid Origins',
       ig: 'Instagram の図版 | Aroid Origins',
       reading: '読みもの — アンスリウムの分類・交配・現地の記事 | Aroid Origins',

@@ -560,124 +560,6 @@ function loadCultivarThumbnails() {
 }
 psExport('loadCultivarThumbnails', loadCultivarThumbnails);
 
-// ---- Favorites (Supabase for logged-in users only) ----
-var FAV_KEY = 'plants-story-favorites';
-
-function getFavorites() {
-  if (!window._currentUser) return {};
-  try { return JSON.parse(localStorage.getItem(FAV_KEY) || '{}'); } catch(e) { return {}; }
-}
-
-function isFavorite(name) {
-  return !!getFavorites()[name];
-}
-
-function toggleFavorite(name) {
-  if (!window._currentUser) return false;
-  var favs = getFavorites();
-  var added;
-  if (favs[name]) {
-    delete favs[name];
-    added = false;
-  } else {
-    favs[name] = Date.now();
-    added = true;
-  }
-  localStorage.setItem(FAV_KEY, JSON.stringify(favs));
-  updateFavBtn(name);
-  updateHeaderFavIcon();
-  trackEvent(added ? 'add_favorite' : 'remove_favorite', { cultivar_name: name });
-
-  // Sync to Supabase
-  var sb = window._supabaseClient;
-  var user = window._currentUser;
-  if (sb && user) {
-    if (added) {
-      sb.from('favorites').upsert({ user_id: user.id, cultivar_name: name }, { onConflict: 'user_id,cultivar_name' }).then(function() {});
-    } else {
-      sb.from('favorites').delete().eq('user_id', user.id).eq('cultivar_name', name).then(function() {});
-    }
-  }
-  return added;
-}
-
-// Sync favorites from Supabase on login (server is source of truth)
-function syncFavoritesFromServer() {
-  var sb = window._supabaseClient;
-  var user = window._currentUser;
-  if (!sb || !user) return;
-  // Clear stale local data immediately so count shows 0 until sync completes
-  localStorage.removeItem(FAV_KEY);
-  updateHeaderFavIcon();
-  sb.from('favorites').select('cultivar_name, created_at').eq('user_id', user.id).then(function(res) {
-    if (res.error || !res.data) return;
-    // Server is source of truth — replace local with server data
-    var serverFavs = {};
-    var staleNames = [];
-    res.data.forEach(function(row) {
-      // If data is fully loaded, skip favorites for deleted cultivars
-      if (window._dataFullyLoaded && !cultivarData[row.cultivar_name] && !cultivarData[row.cultivar_name + ' [Seedling]']) {
-        staleNames.push(row.cultivar_name);
-        return;
-      }
-      serverFavs[row.cultivar_name] = new Date(row.created_at).getTime();
-    });
-    localStorage.setItem(FAV_KEY, JSON.stringify(serverFavs));
-    updateHeaderFavIcon();
-    // Delete stale favorites from server
-    if (staleNames.length > 0) {
-      sb.from('favorites').delete().eq('user_id', user.id).in('cultivar_name', staleNames).then(function() {});
-    }
-  });
-}
-psExport('syncFavoritesFromServer', syncFavoritesFromServer);
-
-function updateFavBtn(name) {
-  var btn = document.getElementById('fav-btn');
-  if (!btn) return;
-  if (!window._currentUser) {
-    btn.innerHTML = '&#x2606; お気に入り追加';
-    btn.style.background = '';
-    btn.style.color = '';
-    btn.style.borderColor = '';
-    return;
-  }
-  var fav = isFavorite(name);
-  btn.innerHTML = fav ? '&#x2605; お気に入り済み' : '&#x2606; お気に入り追加';
-  if (fav) {
-    btn.style.background = '#f5c518';
-    btn.style.color = '#fff';
-    btn.style.borderColor = '#f5c518';
-  } else {
-    btn.style.background = '';
-    btn.style.color = '';
-    btn.style.borderColor = '';
-  }
-}
-
-function updateHeaderFavIcon() {
-  var navFav = document.querySelector('.mobile-nav [data-nav="favorites"]');
-  if (!navFav) return;
-  var count = Object.keys(getFavorites()).length;
-  var star = count > 0 ? '&#x2605;' : '&#x2606;';
-  navFav.innerHTML = star + ' ' + t('favorites_title') + (count > 0 ? ' (' + count + ')' : '');
-}
-
-// Fav button click handler
-document.addEventListener('click', function(e) {
-  var btn = e.target.closest('#fav-btn');
-  if (!btn) return;
-  if (!window._currentUser) {
-    showToast('お気に入り機能を使うにはログインしてください');
-    return;
-  }
-  var h1 = document.querySelector('#page-cultivar h1');
-  if (!h1) return;
-  var name = h1Key(h1);
-  var added = toggleFavorite(name);
-  showToast(t(added ? 'favorites_added' : 'favorites_removed'));
-});
-
 // ---- Share button ----
 // Share the page itself on aroidorigins.com: its static stub carries the OG tags and the share card.
 // (The old Supabase share function returned HTML as text/plain; it now only redirects old links here.)
@@ -756,123 +638,6 @@ document.addEventListener('click', function(e) {
   });
 });
 
-// Render favorites page
-function renderFavoritesPage() {
-  var grid = document.getElementById('favorites-grid');
-  if (!grid) return;
-
-  // Require login
-  if (!window._currentUser) {
-    grid.innerHTML = '<div class="text-center grid-full p-xl">' +
-      '<p class="text-muted mb-md">お気に入り機能を使うにはログインしてください</p>' +
-      '<button class="btn btn--primary" onclick="startGoogleLogin(window.location.pathname, \'favorites\')">Googleでログイン</button>' +
-      '</div>';
-    return;
-  }
-
-  var favs = getFavorites();
-  var names = Object.keys(favs).sort(function(a, b) { return favs[b] - favs[a]; });
-
-  if (names.length === 0) {
-    grid.innerHTML = '<div class="text-center text-muted grid-full p-xl">' + t('favorites_empty') + '</div>';
-    return;
-  }
-
-  var sb = window._supabaseClient;
-  var baseUrl = window._SUPABASE_URL;
-
-  // Get thumbnails only for favorited cultivar names (not full table)
-  var thumbPromise;
-  if (sb) {
-    var displayNames = names.map(function(n) { return n.replace(' [Seedling]', ''); });
-    thumbPromise = sb.from('cultivar_images').select('cultivar_name, storage_path').in('cultivar_name', displayNames).then(function(res) {
-      var map = {};
-      if (res.data) res.data.forEach(function(img) { if (!map[img.cultivar_name]) map[img.cultivar_name] = img.storage_path; });
-      return map;
-    });
-  } else {
-    thumbPromise = Promise.resolve({});
-  }
-
-  thumbPromise.then(function(thumbMap) {
-    var html = '';
-    var rendered = 0;
-    names.forEach(function(name) {
-      var cData = cultivarData[name] || cultivarData[name + ' [Seedling]'];
-      if (!cData) return;
-      rendered++;
-      var displayName = name.replace(' [Seedling]', '');
-      var genus = displayName.split(' ')[0];
-      var type = cData._type || 'species';
-      var bi = getBadgeInfo(type, name);
-      var hasOrigins = cData.origins && cData.origins.length > 0 && cData.origins[0].trust > 0;
-      var trustPct = hasOrigins ? cData.origins.reduce(function(max, o) { return Math.max(max, o.trust || 0); }, 0) : 0;
-      var trustClass = getTrustClass(trustPct);
-
-      html += '<div class="card card--clickable" role="link" tabindex="0" data-nav="cultivar" data-key="' + escHtml(name) + '" style="position:relative">';
-
-      // Thumbnail or plant icon
-      if (thumbMap[displayName] && baseUrl) {
-        var url = window.galleryImg ? window.galleryImg(thumbMap[displayName], 480) : baseUrl + '/storage/v1/object/public/gallery-images/' + thumbMap[displayName];
-        html += '<div class="card-img-container"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/%3E" data-src="' + url + '" class="card-img-cover" alt="' + escHtml(displayName) + '" width="260" height="160" decoding="async"></div>';
-      } else {
-        html += '<div class="recent-card__img">';
-        html += '<svg viewBox="0 0 80 60" width="60" height="45"><path d="M40 5C25 0 10 8 8 22C6 36 22 50 40 58C58 50 74 36 72 22C70 8 55 0 40 5Z" fill="#2D6A4F" opacity="0.3"/><path d="M40 5V58" stroke="#1B4332" stroke-width="1.5" fill="none" opacity="0.4"/></svg>';
-        html += '</div>';
-      }
-
-      html += '<div class="p-sm">';
-      html += '<div class="font-bold">' + escHtml(displayName) + '</div>';
-      html += '<div class="text-sm text-muted">' + escHtml(genus) + ' <span class="badge ' + bi.cls + ' badge--inline">' + bi.txt + '</span></div>';
-      if (hasOrigins) {
-        html += '<div class="trust mt-sm"><div class="trust__bar"><div class="trust__fill ' + trustClass + '" style="width:' + trustPct + '%"></div></div><span class="trust__label">' + trustPct + '%</span></div>';
-      }
-      html += '</div>';
-
-      // Remove button
-      html += '<button class="fav-remove-btn" data-fav-remove="' + escHtml(name) + '">&#x2605;</button>';
-
-      html += '</div>';
-    });
-    grid.innerHTML = html || '<div class="text-center text-muted grid-full p-xl">' + t('favorites_empty') + '</div>';
-    // Clean up stale favorites not in cultivarData (only after full data load)
-    if (rendered < names.length && window._dataFullyLoaded) {
-      var cleanFavs = getFavorites();
-      var staleNames = [];
-      names.forEach(function(name) {
-        if (!cultivarData[name] && !cultivarData[name + ' [Seedling]']) {
-          delete cleanFavs[name];
-          staleNames.push(name);
-        }
-      });
-      if (staleNames.length > 0) {
-        localStorage.setItem(FAV_KEY, JSON.stringify(cleanFavs));
-        updateHeaderFavIcon();
-        // Also delete stale favorites from server to prevent them from coming back
-        var sb = window._supabaseClient;
-        var user = window._currentUser;
-        if (sb && user) {
-          sb.from('favorites').delete().eq('user_id', user.id).in('cultivar_name', staleNames).then(function() {});
-        }
-      }
-    }
-    observeLazyImages(grid);
-  });
-}
-
-// Remove from favorites page
-document.addEventListener('click', function(e) {
-  var btn = e.target.closest('[data-fav-remove]');
-  if (!btn) return;
-  e.stopPropagation();
-  var name = btn.getAttribute('data-fav-remove');
-  toggleFavorite(name);
-  showToast(t('favorites_removed'));
-  renderFavoritesPage();
-});
-
-// Initialize header fav icon on load
-setTimeout(updateHeaderFavIcon, 500);
 
 // ---- Render origin cards from data ----
 // Helper: extract formula from origins array and set on data object
@@ -1013,10 +778,10 @@ function renderStructuredOrigin(s) {
     var hasCollection = s.collector || s.collection_year || s.type_locality;
     if (hasCollection) {
       h += '<div class="structured-section">';
-      h += '<div class="structured-section__title">採取情報</div>';
+      h += '<div class="structured-section__title">採集情報</div>';
       h += '<div class="structured-fields">';
       if (s.collector) h += '<div class="structured-field"><span class="structured-field__label">' + t('spec_collector') + '</span><span class="structured-field__value">' + escHtml(s.collector) + '</span></div>';
-      if (s.collection_year) h += '<div class="structured-field"><span class="structured-field__label">採取年</span><span class="structured-field__value">' + escHtml(s.collection_year) + '</span></div>';
+      if (s.collection_year) h += '<div class="structured-field"><span class="structured-field__label">採集年</span><span class="structured-field__value">' + escHtml(s.collection_year) + '</span></div>';
       if (s.type_locality) h += '<div class="structured-field"><span class="structured-field__label">' + t('spec_locality') + '</span><span class="structured-field__value">' + escHtml(s.type_locality) + '</span></div>';
       h += '</div></div>';
     }
@@ -1025,7 +790,7 @@ function renderStructuredOrigin(s) {
     if (s.namer) h += '<div class="structured-field"><span class="structured-field__label">' + t('spec_namer') + '</span><span class="structured-field__value">' + escHtml(s.namer) + '</span></div>';
     if (s.naming_year) h += '<div class="structured-field"><span class="structured-field__label">名付けた年</span><span class="structured-field__value">' + escHtml(s.naming_year) + '</span></div>';
   } else if (s.origin_type === 'hybrid') {
-    if (s.breeder) h += '<div class="structured-field"><span class="structured-field__label">作出者</span><span class="structured-field__value"><a href="#" class="text-primary no-decoration breeder-link" data-breeder="' + escHtml(s.breeder) + '">' + escHtml(s.breeder) + '</a></span></div>';
+    if (s.breeder) h += '<div class="structured-field"><span class="structured-field__label">作出者</span><span class="structured-field__value">' + (window.aoLinkPeople ? window.aoLinkPeople(s.breeder) : escHtml(s.breeder)) + '</span></div>';
     if (s.naming_year) h += '<div class="structured-field"><span class="structured-field__label">名付けた年</span><span class="structured-field__value">' + escHtml(s.naming_year) + '</span></div>';
   } else if (s.origin_type === 'seedling') {
     if (s.breeder) h += '<div class="structured-field"><span class="structured-field__label">作出者</span><span class="structured-field__value"><a href="#" class="text-primary no-decoration breeder-link" data-breeder="' + escHtml(s.breeder) + '">' + escHtml(s.breeder) + '</a></span></div>';
@@ -1273,8 +1038,6 @@ function updateCultivarDetail(cultivarName, rowEl) {
   updateCultivarJsonLd(displayName, genusName, detectedType, metaDesc, jsonLdExtra);
   trackEvent('view_cultivar', { cultivar_name: displayName, genus: genusName, type: detectedType });
 
-  // Update favorite button
-  updateFavBtn(displayName);
 
   // Update badge
   var detailBadge = detailPage.querySelector('.badge');
@@ -1444,8 +1207,9 @@ function getFilteredItems(genusEl) {
     else if (filterType !== 'all' && item.meta.type !== filterType) return false;
     if (q) {
       var nameMatch = nameMatches(item, q);
-      var creatorMatch = item.entry._creatorName && item.entry._creatorName.toLowerCase().indexOf(q) !== -1;
-      var posterMatch = item.entry._posterName && item.entry._posterName.toLowerCase().indexOf(q) !== -1;
+      var fqName = foldName(q);
+      var creatorMatch = !!fqName && !!item.entry._creatorName && foldName(item.entry._creatorName).indexOf(fqName) !== -1;
+      var posterMatch = !!fqName && !!item.entry._posterName && foldName(item.entry._posterName).indexOf(fqName) !== -1;
       if (!nameMatch && !creatorMatch && !posterMatch) return false;
     }
     return true;
@@ -1757,6 +1521,8 @@ function globalSearch(query) {
     });
   });
   // nothing found: names spelled one letter differently (スペーズ / スペード, ビューム / ビウム)
+  var fqExact = foldName(q);
+  if (fqExact && cultivarResults.length > 1) cultivarResults.sort(function(a, b) { return (nameKeys(b).indexOf(fqExact) !== -1) - (nameKeys(a).indexOf(fqExact) !== -1); });
   var nearlyOnly = false;
   if (!cultivarResults.length) {
     cultivarResults = searchable.filter(function(item) { return nameNearly(item, q); });

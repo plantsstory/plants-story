@@ -229,6 +229,7 @@
       return '<a href="' + esc(base + 'people/' + encodeURIComponent(personSlug(key)) + '/') + '" data-nav="people" data-person="' + esc(personSlug(key)) + '">' + esc(part) + '</a>';
     }).join('');
   }
+  window.aoLinkPeople = linkPeople;
   function collectAll() {
     var vis = visibleSlugs();
     var out = [];
@@ -476,7 +477,8 @@
   window.renderExplorePage = function () {
     var page = document.getElementById('page-explore');
     if (!page) return;
-    waitForData(function () {
+    // people are counted the way the people index folds them, so the authority table comes first
+    waitForData(function () { loadAuthority(function () {
       var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
       var seen = {}, n = { species: 0, hybrid: 0 };
       var people = {}, places = {};
@@ -484,18 +486,20 @@
       Object.keys(store).forEach(function (k) {
         var e = store[k]; if (!e || seen[e._id || k]) return; seen[e._id || k] = true;
         var d; try { d = describe(k, e, e._type); } catch (er) { return; }
-        if (d.state !== 'ok' || d.isIndividual || d.type === 'seedling') return;
+        if (d.state !== 'ok' || d.isIndividual || d.type === 'seedling' || !shownGenus(d)) return;
         if (d.type === 'species') n.species++; else n.hybrid++;
         if (!thumbs[d.displayName]) wanted++;
-        [d.author, d.collector, d.breeder, d.namer].forEach(function (p) { if (p) people[String(p).trim()] = 1; });
+        peopleOf(d).forEach(function (p) { people[p] = 1; });
         if (d.country) places[d.country] = 1;
       });
       var set = function (key, v) { var el = page.querySelector('[data-count="' + key + '"]'); if (el) el.textContent = v ? String(v) : ''; };
       set('species', n.species); set('hybrid', n.hybrid); set('people', Object.keys(people).length); set('places', Object.keys(places).length); set('wanted', wanted);
       // the explore search box behaves like the top one
       var inp = page.querySelector('.search-bar__input');
-      if (inp && !inp._wired) { inp._wired = true; inp.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' && inp.value.trim() && typeof navigateTo === 'function') navigateTo('search', { q: inp.value.trim() }); }); }
-    });
+      var go = function (ev) { if (ev) ev.preventDefault(); if (inp.value.trim() && typeof globalSearch === 'function') globalSearch(inp.value.trim()); };
+      var btn = page.querySelector('.search-bar__btn');
+      if (inp && !inp._wired) { inp._wired = true; inp.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') go(ev); }); if (btn) btn.addEventListener('click', go); }
+    }); });
   };
   // 「交配をたどる」 lands on the genus list with the Hybrid chip chosen (?kind=hybrid)
   document.addEventListener('ao:page', function (e) {
@@ -591,6 +595,8 @@
     var w = document.getElementById('page-wanted'), g = document.getElementById('page-ig');
     if (w && w.classList.contains('active')) window.renderWantedPage();
     if (g && g.classList.contains('active')) window.renderIgPage();
+    var x = document.getElementById('page-explore');
+    if (x && x.classList.contains('active')) window.renderExplorePage();
   });
   window.entryCiteLine = function (fullName, entry, type) {
     try { return citeHtml(describe(fullName, entry, type)); } catch (e) { return ''; }

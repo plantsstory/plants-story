@@ -1829,7 +1829,7 @@ html.pv-home .masthead__desc { font-size: var(--fs-small); color: var(--color-mi
 @media (max-width: 640px) { html.pv-home #archive-index, html.pv-home #archive-timeline { display: none; } }
 /* tabs: icon + label; the current one filled */
 @media (max-width: 640px) {
-  html.pv-home.app-ui .appbar__item { flex-direction: column; gap: 2px; min-height: 56px; border-top: 0; font-size: var(--fs-label); }
+  html.pv-home.app-ui .appbar__item { flex-direction: column; gap: 2px; min-height: 56px; border-top: 0; font-size: var(--fs-small); line-height: 1.2; }
   html.pv-home.app-ui .appbar__item .ico { width: 20px; height: 20px; }
   html.pv-home.app-ui .appbar__item[aria-current="page"] { background: var(--color-primary); color: var(--color-paper-2); border-top-color: transparent; }
   html.pv-home.app-ui .appbar__post { background: none; color: var(--color-ink); font-weight: 700; }
@@ -1860,4 +1860,8 @@ body.menu-open .pwa-install-banner { display: none !important; }
   html.app-ui body.menu-open #appbar-more .i-menu, html.app-ui body.menu-open #appbar-more .appbar__label--new, html.app-ui body.menu-open #appbar-more .appbar__label--old { display: none !important; }
   html.app-ui body.menu-open #appbar-more .i-close { display: inline-block; }
   html.app-ui body.menu-open #appbar-more .appbar__label--close { display: inline; }
+}
+/* board 14 T172: the menu leaves out what the tabs already hold (トップ = 図鑑, 自分の株) */
+@media (max-width: 640px) {
+  html.app-ui .mobile-nav > a[data-nav="top"], html.app-ui #nav-mypost { display: none !important; }
 }
