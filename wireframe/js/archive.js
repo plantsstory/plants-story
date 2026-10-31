@@ -669,7 +669,7 @@
   });
 
   /* ---------- OFUSE (board 14 T185): text links only, switched off until the owner's page exists ---------- */
-  var OFUSE_URL = '';   // set to the owner's OFUSE page URL to turn the three links on
+  var OFUSE_URL = 'https://ofuse.me/ad4a1628';   // the owner's OFUSE page (11-01); '' turns the three links off
   window.aoDonateHtml = function (source) {
     if (!OFUSE_URL) return '';
     return '<a class="donate-link" href="' + esc(OFUSE_URL) + '" target="_blank" rel="noopener" data-donate="' + esc(source) + '">このサイトの運営費（サーバー・出典の調査）に充てる送金を OFUSE で受け付けています →</a>';
