@@ -723,10 +723,15 @@
       var decs = {}, keys = [];
       all.forEach(function (d) { var k = Math.floor(d.pubYear / 10) * 10; if (!decs[k]) { decs[k] = []; keys.push(k); } decs[k].push(d); });
       var minY = keys[0], maxY = Math.max(keys[keys.length - 1] + 10, new Date().getFullYear());
-      var W = 343, AX = 80, x = function (y) { return ((y - minY) / (maxY - minY) * W).toFixed(1); };
-      var svg = '<svg viewBox="0 0 ' + W + ' 104" role="img" aria-label="記載史の年表。年代ごとの原種の数"><line class="axis" x1="0" y1="' + AX + '" x2="' + W + '" y2="' + AX + '"/>';
+      var W = 343, AX = 92, x = function (y) { return ((y - minY) / (maxY - minY) * W).toFixed(1); };
+      var svg = '<svg viewBox="0 0 ' + W + ' 116" role="img" aria-label="記載史の年表。年代ごとの原種の数"><line class="axis" x1="0" y1="' + AX + '" x2="' + W + '" y2="' + AX + '"/>';
       [minY, Math.round((minY + maxY) / 20) * 10, maxY].forEach(function (y, i) { svg += '<line class="tick" x1="' + x(y) + '" y1="' + (AX - 4) + '" x2="' + x(y) + '" y2="' + (AX + 4) + '"/><text x="' + x(y) + '" y="' + (AX + 20) + '" text-anchor="' + (i === 0 ? 'start' : i === 2 ? 'end' : 'middle') + '">' + y + '</text>'; });
-      keys.forEach(function (k) { decs[k].forEach(function (d, i) { svg += '<circle class="dot" data-dec="' + k + '" cx="' + x(k + 5) + '" cy="' + (AX - 7 - i * 11) + '" r="4.5"/>'; }); });
+      // up to 7 dots; from 8 names on, six dots and the count in a circle on top (the column keeps one height)
+      keys.forEach(function (k) {
+        var n = decs[k].length, cx = x(k + 5), dots = n > 7 ? 6 : n, i;
+        for (i = 0; i < dots; i++) svg += '<circle class="dot" data-dec="' + k + '" cx="' + cx + '" cy="' + (AX - 7 - i * 11) + '" r="4.5"/>';
+        if (n > 7) svg += '<circle class="dot dot--n" data-dec="' + k + '" cx="' + cx + '" cy="' + (AX - 7 - 6 * 11 - 5) + '" r="9.5"/><text class="cnt" x="' + cx + '" y="' + (AX - 7 - 6 * 11 - 5 + 3.5) + '" text-anchor="middle"' + (n > 99 ? ' font-size="8"' : '') + '>' + n + '</text>';
+      });
       svg += '</svg>';
       var early = all.filter(function (d) { return d.pubYear < 1900; }).length, late = all.filter(function (d) { return d.pubYear >= 2000; }).length;
       host.innerHTML = '<h2 class="sec">記載の歴史 <small>' + minY + '年から</small></h2><p class="lede">原種が学名として発表された年。年表を押すと、その年代の名前が並びます。</p>' + svg
