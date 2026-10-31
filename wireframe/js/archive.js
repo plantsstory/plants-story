@@ -758,6 +758,8 @@
     waitForData(homeAll);
     document.addEventListener('ao:page', function (e) { if (e.detail === 'top') setTimeout(homeAll, 50); });
     document.addEventListener('ao:thumbs', function () { setTimeout(labelOnStory, 50); });
+    // the same-era rows draw their thumbnails once the photo list is in
+    document.addEventListener('ao:thumbs', function () { var p = document.getElementById('page-cultivar'); if (p && p.classList.contains('active') && window._labelLast) renderLabelExtras(window._labelLast.d, window._labelLast.all); });
     var storyBody = document.getElementById('story-body');
     if (storyBody && window.MutationObserver) new MutationObserver(function () { labelOnStory(); }).observe(storyBody, { childList: true });
     // the plant page opens with the original plate when there is one, before the photos
@@ -1836,7 +1838,7 @@
     setUnrecorded(false);
     var d = describe(key in store ? key : (store[displayName] ? displayName : (store[displayName + ' [Seedling]'] ? displayName + ' [Seedling]' : key)), entry, entry._type || _detailArgs[2]);
     renderSpecimen(d, all);
-    if (LABEL) renderLabelExtras(d, all);
+    if (LABEL) { window._labelLast = { d: d, all: all }; renderLabelExtras(d, all); }
     if (window.releaseStaticEntry) setTimeout(window.releaseStaticEntry, 0);
     _labelEntry = d.type === 'seedling' ? null : d;
     // 「この品種を親に実生を記録」: the seedling form opens with this name as the mother
