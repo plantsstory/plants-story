@@ -1925,27 +1925,23 @@ html.pv-photos .gallery__img { aspect-ratio: auto; max-height: none; background:
 html.pv-photos .gallery__img-full { width: 100%; height: auto; max-height: none; object-fit: contain; display: block; }
 html.pv-photos .gallery__overlay { position: static; display: block; opacity: 1; transform: none; background: none; color: var(--color-mid); font-size: var(--fs-small); padding: var(--s1) 0 0; }
 html.pv-photos .gallery__overlay-caption { color: var(--color-ink); }
-/* the jungle: Berg's 1854 lithograph of the Magdalena forest. On phones a band above the title; from tablet width it
-   takes the place of the plate figure beside the title; and it lies, very faint, under the whole home page */
+/* the jungle as the home's background (10-31): a real rainforest photograph (Ecuador, CC BY-SA), blurred, lying behind
+   the whole home and staying put while the page scrolls; what carries words sits on translucent paper */
 .pv-photos-only { display: none; }
-html.pv-photos .jungle { display: block; margin: 0 -16px var(--s2); }
-html.pv-photos .jungle img { display: block; width: 100%; height: 230px; object-fit: cover; object-position: center 38%; border-top: 1px solid var(--color-rule); border-bottom: 1px solid var(--color-rule); }
-html.pv-photos .jungle figcaption { padding: var(--s1) 16px 0; font-size: var(--fs-label); color: var(--color-mid); line-height: 1.5; }
-/* the masthead is one column up to 899px (grid-template-areas: none): the band sits in row 1, the title in row 2 */
-@media (min-width: 641px) and (max-width: 899px) {
-  html.pv-photos .masthead { grid-template-areas: none; grid-template-columns: 1fr; }
-  html.pv-photos .jungle { grid-area: auto; grid-column: 1; grid-row: 1; margin: 0; }
-  html.pv-photos .masthead__main { grid-area: auto; grid-column: 1; grid-row: 2; }
-  html.pv-photos .masthead__plate { display: none; }
-  html.pv-photos .jungle img { height: 280px; border: 1px solid var(--color-ink); }
-  html.pv-photos .jungle figcaption { padding: var(--s1) 0 0; }
-}
-/* desktop: the lithograph takes the plate figure's place beside the title */
-@media (min-width: 900px) {
-  html.pv-photos .masthead__plate { display: none; }
-  html.pv-photos .jungle { margin: 0; grid-column: 2; grid-row: 1 / span 2; max-width: 320px; }
-  html.pv-photos .jungle img { height: auto; aspect-ratio: 4 / 5; object-position: center 30%; border: 1px solid var(--color-ink); }
-  html.pv-photos .jungle figcaption { padding: var(--s1) 0 0; }
-}
 html.pv-photos #page-top { position: relative; isolation: isolate; }
-html.pv-photos #page-top::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: url("../images/plates/berg-1854-pl-22.jpg") center top / 100% auto repeat-y; opacity: .06; mix-blend-mode: multiply; }
+html.pv-photos #page-top::before { content: ""; position: fixed; inset: -40px; z-index: -1; pointer-events: none;
+  background: var(--color-paper) url("../images/bg/jungle-ecuador.jpg") center 45% / cover no-repeat;
+  filter: blur(11px) saturate(.85) brightness(1.04); opacity: .75; }
+html.pv-photos #page-top::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(244,241,234,.05) 0%, rgba(244,241,234,.25) 60%, rgba(244,241,234,.5) 100%); }
+html.pv-photos .masthead__plate { display: none !important; }
+html.pv-photos .bg-credit { display: block; margin: var(--s3) 0 0; font-size: var(--fs-label); color: var(--color-mid); line-height: 1.5; }
+/* paper under the words */
+html.pv-photos .masthead__main { background: rgba(244,241,234,.72); padding: var(--s3) 16px; margin: 0 -16px; }
+html.pv-photos .search-bar { background: var(--color-paper-2) !important; }
+html.pv-photos .way { background: rgba(251,249,244,.8); }
+html.pv-photos .story, html.pv-photos .index, html.pv-photos .front-new, html.pv-photos .timeline, html.pv-photos .colophon { background: rgba(244,241,234,.8); padding: var(--s3) 16px; margin: var(--s3) -16px 0; }
+@media (min-width: 641px) {
+  html.pv-photos .masthead__main { margin: 0; padding: var(--s3); }
+  html.pv-photos .story, html.pv-photos .index, html.pv-photos .front-new, html.pv-photos .timeline, html.pv-photos .colophon { margin-left: 0; margin-right: 0; padding: var(--s3); }
+}
