@@ -1911,3 +1911,57 @@ body.menu-open .pwa-install-banner { display: none !important; }
 .genus-content .sort-bar .filter-chips .chip.active { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-paper-2); }
 .genus-content .sort-bar .filter-chip[data-filter-type="cultivar"]:not(.active) { display: none; }
 .genus-content .filter-select { display: none !important; }
+/* ===== ?preview=dark (10-31): black ground, pictures first, no chrome — after aroidpictures.fr ===== */
+html.pv-dark { --color-paper: #000; --color-paper-2: #000; --color-ink: #F2EAD3; --color-rule: #262622; --color-rule-strong: #3A3A34; --color-primary: #FFF6D1; --color-primary-dark: #FFF6D1; --color-accent: #FFF6D1; --color-accent-warm: #D9C27A; --color-mid: #A3A192; --color-lighter: #141412; --color-gray-dark: #C9C4B4; --color-text-muted: #A3A192; }
+html.pv-dark body { background: #000; color: var(--color-ink); }
+html.pv-dark a { color: #FFF6D1; }
+html.pv-dark .masthead__tagline, html.pv-dark .masthead__plate, html.pv-dark .masthead__stats, html.pv-dark .masthead__meta { display: none !important; }
+html.pv-dark .masthead__title { color: #FFF6D1; }
+/* the strip of pictures at the top, like the reference's banner of crops */
+html.pv-dark .strip { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; margin: 0 -16px var(--s3); }
+html.pv-dark .strip[hidden] { display: none; }
+html.pv-dark .strip img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+@media (min-width: 641px) { html.pv-dark .strip { margin-left: 0; margin-right: 0; } }
+/* the search is a line, not a box */
+html.pv-dark .search-bar { background: none !important; border: 0 !important; border-bottom: 1px solid var(--color-rule-strong) !important; margin-left: 0 !important; margin-right: 0 !important; }
+html.pv-dark .search-bar__input { background: none; color: var(--color-ink); border: 0; }
+html.pv-dark .search-bar__btn { background: none; color: #FFF6D1; border: 0; }
+/* the four entrances are words, not tiles */
+html.pv-dark .ways { display: flex !important; flex-wrap: wrap; gap: var(--s2) var(--s4); margin: var(--s3) 0 0; border: 0 !important; }
+html.pv-dark .way { min-height: var(--tap); padding: 0; border: 0 !important; color: #FFF6D1; text-decoration: underline; text-underline-offset: .25em; text-decoration-thickness: 1px; display: inline-flex; align-items: center; }
+html.pv-dark .way .ico { display: none; }
+/* every name in plain view */
+html.pv-dark .names { margin-top: var(--s4); }
+html.pv-dark .names[hidden] { display: none; }
+html.pv-dark .names h2 { font-size: var(--fs-small); font-weight: 400; color: var(--color-mid); margin: var(--s3) 0 var(--s1); padding-bottom: 2px; border-bottom: 1px solid var(--color-rule); }
+html.pv-dark .names ul { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: var(--s3); }
+html.pv-dark .names li { break-inside: avoid; }
+html.pv-dark .names a { display: block; padding: 9px 0; line-height: 1.35; color: #FFF6D1; font-style: italic; text-decoration: none; overflow-wrap: anywhere; }
+html.pv-dark .names__more { margin: var(--s3) 0 0; font-size: var(--fs-small); }
+/* the story keeps only its picture and words */
+html.pv-dark .story, html.pv-dark .story__figure, html.pv-dark .story__body { background: none !important; border: 0 !important; box-shadow: none !important; }
+html.pv-dark .recent { display: none; }
+/* tabs: black, the current one marked by a line, nothing filled */
+@media (max-width: 640px) {
+  html.pv-dark.app-ui .appbar { background: #000; border-top: 1px solid var(--color-rule-strong); }
+  html.pv-dark.app-ui .appbar__item { color: var(--color-mid); }
+  html.pv-dark.pv-home.app-ui .appbar__item[aria-current="page"] { background: none; color: #FFF6D1; box-shadow: inset 0 2px 0 #FFF6D1; }
+  html.pv-dark.app-ui .appbar__post { color: #FFF6D1; }
+  html.pv-dark.app-ui body.menu-open #appbar-more { background: none; color: #FFF6D1; box-shadow: inset 0 2px 0 #FFF6D1; }
+}
+/* the plant page: the original plate first, then the photos; the label is rows of text, not a card */
+html.pv-dark .plate-hist { margin: var(--s3) 0 var(--s4); }
+html.pv-dark .plate-hist img { display: block; width: 100%; height: auto; }
+html.pv-dark .plate-hist figcaption { margin-top: var(--s2); font-size: var(--fs-small); color: var(--color-mid); line-height: 1.6; }
+html.pv-dark .specimen, html.pv-dark .specimen__cell, html.pv-dark .sheet, html.pv-dark .card, html.pv-dark .gallery-carousel, html.pv-dark .gallery__img { background: none !important; border-color: var(--color-rule) !important; box-shadow: none !important; }
+html.pv-dark .specimen__k { color: var(--color-mid); }
+html.pv-dark .badge { background: none; border: 1px solid var(--color-rule-strong); color: var(--color-ink); }
+html.pv-dark .btn--secondary { background: none; border-color: var(--color-rule-strong); color: var(--color-ink); }
+html.pv-dark .btn--primary { background: #FFF6D1; color: #000; border-color: #FFF6D1; }
+html.pv-dark .header, html.pv-dark .footer, html.pv-dark .mobile-nav { background: #000 !important; }
+html.pv-dark .chip { background: none; border-color: var(--color-rule-strong); color: var(--color-ink); }
+html.pv-dark .chip.active, html.pv-dark .filter-chip.active { background: #FFF6D1 !important; border-color: #FFF6D1 !important; color: #000 !important; }
+html.pv-dark .masthead__desc { white-space: normal; overflow: visible; max-width: none; }
+@media (max-width: 640px) { html.pv-dark .masthead__title { display: none; } }
+/* the site's name in the header: the display face, in its own case, not a tracked-out label */
+html.pv-dark .header__logo { font-family: var(--font-display); text-transform: none; letter-spacing: 0; font-size: 1.25rem; color: #FFF6D1; }

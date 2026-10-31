@@ -34,6 +34,12 @@
     if (/[?&]preview=plate-off(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-plate');
     if (localStorage.getItem('ao-preview-plate') === '1') document.documentElement.classList.add('pv-plate');
   } catch (e) {}
+  // 10-31: the black, picture-first try (after aroidpictures.fr) — ?preview=dark on this browser only
+  try {
+    if (/[?&]preview=dark(?:&|$)/.test(location.search)) localStorage.setItem('ao-preview-dark', '1');
+    if (/[?&]preview=dark-off(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-dark');
+    if (localStorage.getItem('ao-preview-dark') === '1') document.documentElement.classList.add('pv-dark');
+  } catch (e) {}
 })();
 (function () {
   'use strict';

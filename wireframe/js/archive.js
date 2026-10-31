@@ -680,6 +680,66 @@
     if (a && typeof gtag === 'function') gtag('event', 'donate_click', { source: a.getAttribute('data-donate') });
   });
 
+  /* ---------- ?preview=dark (10-31): the picture-first try after aroidpictures.fr ---------- */
+  var DARK = document.documentElement.classList.contains('pv-dark');
+  // the original published plates, all public domain (author died before 1900), as Wikimedia Commons holds them
+  var PLATES = {
+    'Anthurium warocqueanum': { src: 'images/plates/warocqueanum-ih392.jpg', file: "L'Illustration horticole (Plate 392).jpg", cite: "L'Illustration Horticole、図版 392（1880 年）。P. De Pannemaeker 画、J. Linden 刊" },
+    'Anthurium veitchii': { src: 'images/plates/veitchii-ih406.jpg', file: "L'Illustration horticole (Plate 406).jpg", cite: "L'Illustration Horticole、図版 406（1880 年）。P. De Pannemaeker 画、J. Linden 刊" },
+    'Anthurium splendidum': { src: 'images/plates/splendidum-ih510.jpg', file: "L'Illustration horticole (Plate 510).jpg", cite: "L'Illustration Horticole、図版 510（1884 年）。P. De Pannemaeker 画、J. Linden 刊" }
+  };
+  function plateUrl(file, w) { return 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(file) + '?width=' + (w || 900); }
+  function plateFor(name) {
+    var p = PLATES[name];
+    if (!p) return '';
+    return '<figure class="plate-hist"><img src="' + esc(base + p.src) + '" alt="' + esc(name) + ' の原記載の図版" loading="lazy" decoding="async">'
+      + '<figcaption>' + esc(p.cite) + '。公共財。<a href="https://commons.wikimedia.org/wiki/File:' + esc(encodeURIComponent(p.file.replace(/ /g, '_'))) + '" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure>';
+  }
+  if (DARK) {
+    // the name in the header reads as a name, not as a tracked-out label
+    var logo = document.querySelector('.header__logo');
+    if (logo) logo.textContent = 'Aroid Origins';
+    // the strip: five square crops of the site's own photos, the way the reference opens every page with pictures
+    var STRIP = ['Anthurium crystallinum', 'Anthurium warocqueanum', 'Anthurium veitchii', 'Anthurium magnificum', 'Anthurium splendidum'];
+    function drawStrip() {
+      var el = document.getElementById('dark-strip');
+      var map = window._thumbMap || {};
+      if (!el || !window._SUPABASE_URL) return;
+      var cells = STRIP.map(function (n) { return map[n]; }).filter(Boolean).map(function (p) {
+        return '<img src="' + esc(window._SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + p.split('/').map(encodeURIComponent).join('/') + '?width=360&height=360&resize=cover&quality=70') + '" alt="" loading="lazy" decoding="async">';
+      });
+      el.innerHTML = cells.join('');
+      el.hidden = cells.length < 3;
+    }
+    // every name in plain view: 原種, then Clone・Hybrid, two columns of links
+    function drawNames() {
+      var el = document.getElementById('dark-index');
+      if (!el) return;
+      var all = collectAll().filter(function (d) { return d.state === 'ok' && !d.isIndividual && d.type !== 'seedling' && shownGenus(d); });
+      var sp = all.filter(function (d) { return d.type === 'species'; }).sort(function (a, b) { return a.epithet.localeCompare(b.epithet); });
+      var cv = all.filter(function (d) { return d.type !== 'species'; }).sort(function (a, b) { return a.epithet.localeCompare(b.epithet); });
+      var col = function (list) { return '<ul>' + list.map(function (d) { return '<li>' + link(d, esc(d.shownName.replace(/^Anthurium\s+/, ''))) + '</li>'; }).join('') + '</ul>'; };
+      el.innerHTML = '<h2>原種　' + sp.length + '</h2>' + col(sp) + '<h2>Clone・Hybrid　' + cv.length + '</h2>' + col(cv)
+        + '<p class="names__more"><a href="' + esc(base) + 'people/" data-nav="people">人物索引</a>　<a href="' + esc(base) + 'locality/" data-nav="locality">産地索引</a>　<a href="' + esc(base) + 'glossary/" data-nav="glossary">用語集</a></p>';
+      el.hidden = false;
+    }
+    waitForData(function () { drawStrip(); drawNames(); loadAuthority(drawNames); });
+    document.addEventListener('ao:thumbs', drawStrip);
+    // the plant page opens with the original plate when there is one, before the photos
+    function drawPlate() {
+      var page = document.getElementById('page-cultivar');
+      if (!page || !page.classList.contains('active')) return;
+      var old = page.querySelector('.plate-hist'); if (old) old.remove();
+      var h = document.querySelector('#page-cultivar h1');
+      var name = h ? (window.h1Key ? window.h1Key(h) : h.textContent).replace(/\s+/g, ' ').trim() : '';
+      var html = plateFor(name);
+      var car = document.getElementById('gallery-carousel');
+      if (html && car) car.insertAdjacentHTML('beforebegin', html);
+    }
+    document.addEventListener('ao:page', function (e) { if (e.detail === 'cultivar') setTimeout(drawPlate, 0); });
+    setTimeout(drawPlate, 400);
+  }
+
   // 「交配をたどる」 lands on the genus list with the Hybrid chip chosen (?kind=hybrid)
   document.addEventListener('ao:page', function (e) {
     if (e.detail !== 'genus') return;
