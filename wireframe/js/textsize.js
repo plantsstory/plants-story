@@ -34,14 +34,17 @@
     if (/[?&]preview=plate-off(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-plate');
     if (localStorage.getItem('ao-preview-plate') === '1') document.documentElement.classList.add('pv-plate');
   } catch (e) {}
-  // 10-31 「名札の図鑑」 (the owner's approved design) — ?preview=label on this browser only, ?preview=label-off to leave.
+  // 10-31 「名札の図鑑」 (the owner's approved design) — on for everyone since 10-31 (owner: 「公開」);
+  // ?preview=label-off puts this browser back on the previous screen, ?preview=label undoes that.
   // The same day's tries (?preview=dark, ?preview=photos) are withdrawn: their flags are cleared wherever they were set.
+  var labelOff = false;
   try {
     localStorage.removeItem('ao-preview-dark'); localStorage.removeItem('ao-preview-photos');
-    if (/[?&]preview=label(?:&|$)/.test(location.search)) localStorage.setItem('ao-preview-label', '1');
-    if (/[?&]preview=label-off(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-label');
-    if (localStorage.getItem('ao-preview-label') === '1') document.documentElement.classList.add('pv-label');
+    if (/[?&]preview=label(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-label');
+    if (/[?&]preview=label-off(?:&|$)/.test(location.search)) localStorage.setItem('ao-preview-label', '0');
+    labelOff = localStorage.getItem('ao-preview-label') === '0';
   } catch (e) {}
+  if (!labelOff) document.documentElement.classList.add('pv-label');
 })();
 (function () {
   'use strict';
