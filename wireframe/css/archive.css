@@ -1912,11 +1912,6 @@ body.menu-open .pwa-install-banner { display: none !important; }
 .genus-content .sort-bar .filter-chip[data-filter-type="cultivar"]:not(.active) { display: none; }
 .genus-content .filter-select { display: none !important; }
 /* ===== ?preview=photos (10-31): photos first, the paper look unchanged ===== */
-/* a band of the site's own photos above the title, the way the reference opens with pictures */
-html.pv-photos .strip { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px; margin: 0 -16px var(--s3); }
-html.pv-photos .strip[hidden] { display: none; }
-html.pv-photos .strip img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
-@media (min-width: 641px) { html.pv-photos .strip { margin-left: 0; margin-right: 0; } }
 /* the original published plate, before the photos, with its citation */
 html.pv-photos .plate-hist { margin: var(--s3) 0 var(--s4); }
 html.pv-photos .plate-hist img { display: block; width: 100%; height: auto; border: 1px solid var(--color-rule); }
@@ -1930,3 +1925,27 @@ html.pv-photos .gallery__img { aspect-ratio: auto; max-height: none; background:
 html.pv-photos .gallery__img-full { width: 100%; height: auto; max-height: none; object-fit: contain; display: block; }
 html.pv-photos .gallery__overlay { position: static; display: block; opacity: 1; transform: none; background: none; color: var(--color-mid); font-size: var(--fs-small); padding: var(--s1) 0 0; }
 html.pv-photos .gallery__overlay-caption { color: var(--color-ink); }
+/* the jungle: Berg's 1854 lithograph of the Magdalena forest. On phones a band above the title; from tablet width it
+   takes the place of the plate figure beside the title; and it lies, very faint, under the whole home page */
+.pv-photos-only { display: none; }
+html.pv-photos .jungle { display: block; margin: 0 -16px var(--s2); }
+html.pv-photos .jungle img { display: block; width: 100%; height: 230px; object-fit: cover; object-position: center 38%; border-top: 1px solid var(--color-rule); border-bottom: 1px solid var(--color-rule); }
+html.pv-photos .jungle figcaption { padding: var(--s1) 16px 0; font-size: var(--fs-label); color: var(--color-mid); line-height: 1.5; }
+/* the masthead is one column up to 899px (grid-template-areas: none): the band sits in row 1, the title in row 2 */
+@media (min-width: 641px) and (max-width: 899px) {
+  html.pv-photos .masthead { grid-template-areas: none; grid-template-columns: 1fr; }
+  html.pv-photos .jungle { grid-area: auto; grid-column: 1; grid-row: 1; margin: 0; }
+  html.pv-photos .masthead__main { grid-area: auto; grid-column: 1; grid-row: 2; }
+  html.pv-photos .masthead__plate { display: none; }
+  html.pv-photos .jungle img { height: 280px; border: 1px solid var(--color-ink); }
+  html.pv-photos .jungle figcaption { padding: var(--s1) 0 0; }
+}
+/* desktop: the lithograph takes the plate figure's place beside the title */
+@media (min-width: 900px) {
+  html.pv-photos .masthead__plate { display: none; }
+  html.pv-photos .jungle { margin: 0; grid-column: 2; grid-row: 1 / span 2; max-width: 320px; }
+  html.pv-photos .jungle img { height: auto; aspect-ratio: 4 / 5; object-position: center 30%; border: 1px solid var(--color-ink); }
+  html.pv-photos .jungle figcaption { padding: var(--s1) 0 0; }
+}
+html.pv-photos #page-top { position: relative; isolation: isolate; }
+html.pv-photos #page-top::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: url("../images/plates/berg-1854-pl-22.jpg") center top / 100% auto repeat-y; opacity: .06; mix-blend-mode: multiply; }

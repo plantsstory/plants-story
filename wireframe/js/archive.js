@@ -696,20 +696,6 @@
       + '<figcaption>' + esc(p.cite) + '。公共財。<a href="https://commons.wikimedia.org/wiki/File:' + esc(encodeURIComponent(p.file.replace(/ /g, '_'))) + '" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure>';
   }
   if (PHOTOS) {
-    // the strip: five square crops of the site's own photos, the way the reference opens every page with pictures
-    var STRIP = ['Anthurium crystallinum', 'Anthurium warocqueanum', 'Anthurium veitchii', 'Anthurium magnificum', 'Anthurium splendidum'];
-    function drawStrip() {
-      var el = document.getElementById('photo-strip');
-      var map = window._thumbMap || {};
-      if (!el || !window._SUPABASE_URL) return;
-      var cells = STRIP.map(function (n) { return map[n]; }).filter(Boolean).map(function (p) {
-        return '<img src="' + esc(window._SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + p.split('/').map(encodeURIComponent).join('/') + '?width=360&height=360&resize=cover&quality=70') + '" alt="" loading="lazy" decoding="async">';
-      });
-      el.innerHTML = cells.join('');
-      el.hidden = cells.length < 3;
-    }
-    waitForData(drawStrip);
-    document.addEventListener('ao:thumbs', drawStrip);
     // the plant page opens with the original plate when there is one, before the photos
     function drawPlate() {
       var page = document.getElementById('page-cultivar');
