@@ -712,24 +712,46 @@
         : [esc(kindWord(d)), (d.breeder || d.namer || d.creator) ? esc(d.breeder || d.namer || d.creator) + ' 作出' : ''].filter(Boolean).join('。');
       fig.insertAdjacentHTML('beforeend', '<figcaption class="plate-label"><span class="plate-label__name">' + sciNameHtml(d.shownName) + '</span><span class="plate-label__by">' + by + '</span></figcaption>');
     }
-    // the timeline strip under 「名前を探す」: one dot per described species
+    // the timeline under 「名前を探す」: the species stack into one column per decade. A tap on the strip
+    // (or on ‹ ›) picks a decade and its names follow as label rows — one dot per name was too fine to tap.
     function timelineStrip() {
       var host = document.getElementById('label-timeline');
       if (!host || host.childElementCount) return;
       var all = collectAll().filter(function (d) { return d.type === 'species' && d.pubYear && d.state === 'ok' && shownGenus(d); })
         .sort(function (x, y) { return x.pubYear - y.pubYear; });
       if (all.length < 3) return;
-      var minY = all[0].pubYear, maxY = Math.max(all[all.length - 1].pubYear, new Date().getFullYear());
-      var W = 343, x = function (y) { return ((y - minY) / (maxY - minY) * W).toFixed(1); };
-      var ticks = [minY, Math.round((minY + maxY) / 2), maxY];
-      var svg = '<svg viewBox="0 0 ' + W + ' 70" aria-label="記載史の年表"><line class="axis" x1="0" y1="36" x2="' + W + '" y2="36"/>';
-      ticks.forEach(function (y, i) { svg += '<line class="tick" x1="' + x(y) + '" y1="32" x2="' + x(y) + '" y2="40"/><text x="' + x(y) + '" y="58" text-anchor="' + (i === 0 ? 'start' : i === 2 ? 'end' : 'middle') + '">' + y + '</text>'; });
-      all.forEach(function (d) { svg += '<a href="' + esc(d.href) + '" data-nav="cultivar" data-key="' + esc(d.fullName) + '"><circle class="dot" cx="' + x(d.pubYear) + '" cy="36" r="5"><title>' + esc(d.shownName) + '、' + d.pubYear + '</title></circle></a>'; });
+      var decs = {}, keys = [];
+      all.forEach(function (d) { var k = Math.floor(d.pubYear / 10) * 10; if (!decs[k]) { decs[k] = []; keys.push(k); } decs[k].push(d); });
+      var minY = keys[0], maxY = Math.max(keys[keys.length - 1] + 10, new Date().getFullYear());
+      var W = 343, AX = 80, x = function (y) { return ((y - minY) / (maxY - minY) * W).toFixed(1); };
+      var svg = '<svg viewBox="0 0 ' + W + ' 104" role="img" aria-label="記載史の年表。年代ごとの原種の数"><line class="axis" x1="0" y1="' + AX + '" x2="' + W + '" y2="' + AX + '"/>';
+      [minY, Math.round((minY + maxY) / 20) * 10, maxY].forEach(function (y, i) { svg += '<line class="tick" x1="' + x(y) + '" y1="' + (AX - 4) + '" x2="' + x(y) + '" y2="' + (AX + 4) + '"/><text x="' + x(y) + '" y="' + (AX + 20) + '" text-anchor="' + (i === 0 ? 'start' : i === 2 ? 'end' : 'middle') + '">' + y + '</text>'; });
+      keys.forEach(function (k) { decs[k].forEach(function (d, i) { svg += '<circle class="dot" data-dec="' + k + '" cx="' + x(k + 5) + '" cy="' + (AX - 7 - i * 11) + '" r="4.5"/>'; }); });
       svg += '</svg>';
       var early = all.filter(function (d) { return d.pubYear < 1900; }).length, late = all.filter(function (d) { return d.pubYear >= 2000; }).length;
-      host.innerHTML = '<h2 class="sec">記載の歴史 <small>' + minY + '年から</small></h2><p class="lede">原種が学名として発表された年。点を押すと、その名前が開きます。</p>' + svg
-        + '<p class="tl__note">19世紀に <b>' + early + '</b>、2000年以降に <b>' + late + '</b> の名前。</p>';
+      host.innerHTML = '<h2 class="sec">記載の歴史 <small>' + minY + '年から</small></h2><p class="lede">原種が学名として発表された年。年表を押すと、その年代の名前が並びます。</p>' + svg
+        + '<div class="tl__step"><button type="button" data-tl="-1" aria-label="前の年代">‹</button><p class="tl__cur"></p><button type="button" data-tl="1" aria-label="次の年代">›</button></div>'
+        + '<ol class="entries tl__list"></ol><p class="tl__note">19世紀に <b>' + early + '</b>、2000年以降に <b>' + late + '</b> の名前。</p>';
+      // the fullest decade opens first (the earliest on a tie)
+      var sel = keys.reduce(function (best, k) { return decs[k].length > decs[best].length ? k : best; }, keys[0]);
+      function draw() {
+        host.querySelectorAll('.dot').forEach(function (c) { c.classList.toggle('is-on', +c.getAttribute('data-dec') === sel); });
+        host.querySelector('.tl__cur').innerHTML = '<b>' + sel + '年代</b><span>' + decs[sel].length + ' つの名前</span>';
+        host.querySelector('.tl__list').innerHTML = decs[sel].map(function (d) { return window.entryLine(d, { thumb: thumbUrl(d.displayName, 160) }); }).join('');
+        host.querySelector('[data-tl="-1"]').disabled = keys.indexOf(sel) === 0;
+        host.querySelector('[data-tl="1"]').disabled = keys.indexOf(sel) === keys.length - 1;
+      }
+      draw();
+      host._tlDraw = draw;
+      host.querySelector('svg').addEventListener('click', function (e) {
+        var r = this.getBoundingClientRect(), yr = minY + (e.clientX - r.left) / r.width * (maxY - minY);
+        sel = keys.reduce(function (best, k) { return Math.abs(k + 5 - yr) < Math.abs(best + 5 - yr) ? k : best; }, keys[0]);
+        draw();
+      });
+      host.querySelectorAll('[data-tl]').forEach(function (b) { b.addEventListener('click', function () { var i = keys.indexOf(sel) + (+b.getAttribute('data-tl')); if (keys[i] !== undefined) { sel = keys[i]; draw(); } }); });
     }
+    // the decade's rows pick up their thumbnails once the photo list is in
+    document.addEventListener('ao:thumbs', function () { var h = document.getElementById('label-timeline'); if (h && h._tlDraw) h._tlDraw(); });
     // the home's order: hero → search → photo of the day → 名前を探す → timeline → new names → the rest
     function arrangeHome() {
       var main = document.querySelector('.masthead__main'), front = document.querySelector('.front'), story = document.getElementById('story-of-day');

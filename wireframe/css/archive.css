@@ -1968,7 +1968,16 @@ html.pv-label .label-ways .way .chev { color: var(--color-rule-strong); font-siz
 html.pv-label .label-tl svg { display: block; width: 100%; height: auto; overflow: visible; margin-top: var(--s2); }
 html.pv-label .label-tl .axis, html.pv-label .label-tl .tick { stroke: var(--color-rule-strong); stroke-width: 1; }
 html.pv-label .label-tl .dot { fill: var(--color-primary); }
-html.pv-label .label-tl a:hover .dot, html.pv-label .label-tl a:focus .dot { fill: var(--color-accent-warm); }
+html.pv-label .label-tl .dot.is-on { fill: var(--color-accent-warm); }
+html.pv-label .label-tl svg { cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+/* the decade stepper: two 48px buttons around the decade's name; the names follow as rows */
+html.pv-label .tl__step { display: grid; grid-template-columns: var(--tap) 1fr var(--tap); align-items: center; margin-top: var(--s2); border-top: 1px solid var(--color-rule); }
+html.pv-label .tl__step button { min-height: var(--tap); border: 0; background: none; color: var(--color-primary); font-size: var(--fs-h2); line-height: 1; cursor: pointer; padding: 0; }
+html.pv-label .tl__step button[disabled] { color: var(--color-rule); cursor: default; }
+html.pv-label .tl__cur { margin: 0; text-align: center; font-size: var(--fs-body); }
+html.pv-label .tl__cur b { font-weight: 700; }
+html.pv-label .tl__cur span { margin-left: var(--s2); font-size: var(--fs-label); color: var(--color-mid); }
+html.pv-label .tl__list { margin: 0; }
 html.pv-label .label-tl text { font-family: var(--font-primary); font-size: 11px; fill: var(--color-mid); }
 html.pv-label .label-tl .tl__note { font-size: var(--fs-label); color: var(--color-mid); margin: var(--s2) 0 0; }
 html.pv-label .label-tl .tl__note b { color: var(--color-ink); font-weight: 500; }
