@@ -1930,8 +1930,8 @@ html.pv-photos .gallery__overlay-caption { color: var(--color-ink); }
 .pv-photos-only { display: none; }
 html.pv-photos #page-top { position: relative; isolation: isolate; }
 html.pv-photos #page-top::before { content: ""; position: fixed; inset: -40px; z-index: -1; pointer-events: none;
-  background: var(--color-paper) url("../images/bg/jungle-ecuador.jpg") center 45% / cover no-repeat;
-  filter: blur(11px) saturate(.85) brightness(1.04); opacity: .75; }
+  background: var(--color-paper) url("../images/bg/jungle-tambopata.jpg") center 40% / cover no-repeat;
+  filter: blur(6px) saturate(.9) brightness(1.03); opacity: .78; }
 html.pv-photos #page-top::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background: linear-gradient(180deg, rgba(244,241,234,.05) 0%, rgba(244,241,234,.25) 60%, rgba(244,241,234,.5) 100%); }
 html.pv-photos .masthead__plate { display: none !important; }
