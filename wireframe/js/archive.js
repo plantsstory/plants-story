@@ -356,7 +356,7 @@
     else if (d.namingYear) parts.push('<span class="num">' + d.namingYear + '</span>');
     if (!opts.noCountry && species && d.country) parts.push(esc(countryLabel(d.country)));
     // each part kept whole on a line (no 'パ／ナマ'); the separators are where the line may break
-    return parts.map(function (x) { return '<span class="entry__seg">' + x + '</span>'; }).join(' · ');
+    return parts.map(function (x) { return '<span class="entry__seg">' + x + '</span>'; }).join(LABEL ? '、' : ' · ');
   }
   function entryStateHtml(d) {
     if (d.type === 'seedling') return '';
@@ -680,8 +680,8 @@
     if (a && typeof gtag === 'function') gtag('event', 'donate_click', { source: a.getAttribute('data-donate') });
   });
 
-  /* ---------- ?preview=photos (10-31): photos first, on the paper look (the owner's reference has many photos) ---------- */
-  var PHOTOS = document.documentElement.classList.contains('pv-photos');
+  /* ---------- ?preview=label (10-31): 「名札の図鑑」, the owner's approved design ---------- */
+  var LABEL = document.documentElement.classList.contains('pv-label');
   // the original published plates, all public domain (author died before 1900), as Wikimedia Commons holds them
   var PLATES = {
     'Anthurium warocqueanum': { src: 'images/plates/warocqueanum-ih392.jpg', file: "L'Illustration horticole (Plate 392).jpg", cite: "L'Illustration Horticole、図版 392（1880 年）。P. De Pannemaeker 画、J. Linden 刊" },
@@ -695,7 +695,71 @@
     return '<figure class="plate-hist"><img src="' + esc(base + p.src) + '" alt="' + esc(name) + ' の原記載の図版" loading="lazy" decoding="async">'
       + '<figcaption>' + esc(p.cite) + '。公共財。<a href="https://commons.wikimedia.org/wiki/File:' + esc(encodeURIComponent(p.file.replace(/ /g, '_'))) + '" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure>';
   }
-  if (PHOTOS) {
+  if (LABEL) {
+    // the label laid on the photo of the day: 学名 ／ 記載者、年。産地 — once the story is drawn
+    function labelOnStory() {
+      var fig = document.querySelector('#story-body .story__figure');
+      var title = document.querySelector('#story-body .story__title');
+      if (!fig || !title || fig.querySelector('.plate-label')) return;
+      var a0 = title.querySelector('a');
+      var key = a0 && a0.getAttribute('data-key');
+      var store = window.cultivarData || {};
+      var e = key && store[key];
+      if (!e) return;
+      var d; try { d = describe(key, e, e._type); } catch (er) { return; }
+      var by = d.type === 'species'
+        ? [d.author ? esc(d.author) + ' が記載' : '', d.pubYear ? '<span class="year">' + d.pubYear + '</span>年' : '', d.country ? esc(countryLabel(d.country)) : ''].filter(Boolean).join('、').replace('年、', '年。')
+        : [esc(kindWord(d)), (d.breeder || d.namer || d.creator) ? esc(d.breeder || d.namer || d.creator) + ' 作出' : ''].filter(Boolean).join('。');
+      fig.insertAdjacentHTML('beforeend', '<figcaption class="plate-label"><span class="plate-label__name">' + sciNameHtml(d.shownName) + '</span><span class="plate-label__by">' + by + '</span></figcaption>');
+    }
+    // the timeline strip under 「名前を探す」: one dot per described species
+    function timelineStrip() {
+      var host = document.getElementById('label-timeline');
+      if (!host || host.childElementCount) return;
+      var all = collectAll().filter(function (d) { return d.type === 'species' && d.pubYear && d.state === 'ok' && shownGenus(d); })
+        .sort(function (x, y) { return x.pubYear - y.pubYear; });
+      if (all.length < 3) return;
+      var minY = all[0].pubYear, maxY = Math.max(all[all.length - 1].pubYear, new Date().getFullYear());
+      var W = 343, x = function (y) { return ((y - minY) / (maxY - minY) * W).toFixed(1); };
+      var ticks = [minY, Math.round((minY + maxY) / 2), maxY];
+      var svg = '<svg viewBox="0 0 ' + W + ' 70" aria-label="記載史の年表"><line class="axis" x1="0" y1="36" x2="' + W + '" y2="36"/>';
+      ticks.forEach(function (y, i) { svg += '<line class="tick" x1="' + x(y) + '" y1="32" x2="' + x(y) + '" y2="40"/><text x="' + x(y) + '" y="58" text-anchor="' + (i === 0 ? 'start' : i === 2 ? 'end' : 'middle') + '">' + y + '</text>'; });
+      all.forEach(function (d) { svg += '<a href="' + esc(d.href) + '" data-nav="cultivar" data-key="' + esc(d.fullName) + '"><circle class="dot" cx="' + x(d.pubYear) + '" cy="36" r="5"><title>' + esc(d.shownName) + '、' + d.pubYear + '</title></circle></a>'; });
+      svg += '</svg>';
+      var early = all.filter(function (d) { return d.pubYear < 1900; }).length, late = all.filter(function (d) { return d.pubYear >= 2000; }).length;
+      host.innerHTML = '<h2 class="sec">記載の歴史 <small>' + minY + '年から</small></h2><p class="lede">原種が学名として発表された年。点を押すと、その名前が開きます。</p>' + svg
+        + '<p class="tl__note">19世紀に <b>' + early + '</b>、2000年以降に <b>' + late + '</b> の名前。</p>';
+    }
+    // the home's order: hero → search → photo of the day → 名前を探す → timeline → new names → the rest
+    function arrangeHome() {
+      var main = document.querySelector('.masthead__main'), front = document.querySelector('.front'), story = document.getElementById('story-of-day');
+      var ways = document.querySelector('.masthead .ways'), newSec = document.getElementById('front-new');
+      if (!main || !front || !story || !ways || document.getElementById('label-timeline')) return;
+      var container = front.parentNode;
+      // the search leaves the masthead body and sits right under the hero
+      var hero = document.getElementById('label-hero'), search = main.querySelector('.search-bar');
+      if (hero && search) hero.insertAdjacentElement('afterend', search);
+      // 名前を探す, then the timeline, after the photo of the day
+      var ways2 = document.createElement('section'); ways2.className = 'label-ways'; ways2.innerHTML = '<h2 class="sec">名前を探す</h2>';
+      ways2.appendChild(ways);
+      var tl = document.createElement('section'); tl.id = 'label-timeline'; tl.className = 'label-tl';
+      story.insertAdjacentElement('afterend', ways2); ways2.insertAdjacentElement('afterend', tl);
+      if (newSec) tl.insertAdjacentElement('afterend', newSec);
+      // the four ways read as rows with counts
+      ways.querySelectorAll('.way').forEach(function (w) { if (!w.querySelector('.n')) w.insertAdjacentHTML('beforeend', '<span class="n" data-wcount></span><span class="chev">›</span>'); });
+      var all = collectAll().filter(function (d) { return d.state === 'ok' && !d.isIndividual && d.type !== 'seedling' && shownGenus(d); });
+      var ppl = {}, plc = {};
+      all.forEach(function (d) { peopleOf(d).forEach(function (p) { ppl[p] = 1; }); if (d.country) plc[d.country] = 1; });
+      var sp = all.filter(function (d) { return d.type === 'species'; }).length;
+      var n = { species: sp, cultivar: all.length - sp, people: Object.keys(ppl).length, locality: Object.keys(plc).length };
+      ways.querySelectorAll('.way').forEach(function (w) { var k = w.getAttribute('data-kind') || (w.getAttribute('data-nav') === 'people' ? 'people' : 'locality'); var el = w.querySelector('[data-wcount]'); if (el && n[k]) el.textContent = n[k]; });
+    }
+    function homeAll() { arrangeHome(); loadAuthority(function () { arrangeHome(); timelineStrip(); }); labelOnStory(); }
+    waitForData(homeAll);
+    document.addEventListener('ao:page', function (e) { if (e.detail === 'top') setTimeout(homeAll, 50); });
+    document.addEventListener('ao:thumbs', function () { setTimeout(labelOnStory, 50); });
+    var storyBody = document.getElementById('story-body');
+    if (storyBody && window.MutationObserver) new MutationObserver(function () { labelOnStory(); }).observe(storyBody, { childList: true });
     // the plant page opens with the original plate when there is one, before the photos
     function drawPlate() {
       var page = document.getElementById('page-cultivar');

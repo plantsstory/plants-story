@@ -34,13 +34,13 @@
     if (/[?&]preview=plate-off(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-plate');
     if (localStorage.getItem('ao-preview-plate') === '1') document.documentElement.classList.add('pv-plate');
   } catch (e) {}
-  // 10-31: photos first (the owner's reference has many) on the paper look — ?preview=photos on this browser only.
-  // The black try of the same day (?preview=dark) is withdrawn: its flag is cleared wherever it was set.
+  // 10-31 「名札の図鑑」 (the owner's approved design) — ?preview=label on this browser only, ?preview=label-off to leave.
+  // The same day's tries (?preview=dark, ?preview=photos) are withdrawn: their flags are cleared wherever they were set.
   try {
-    localStorage.removeItem('ao-preview-dark');
-    if (/[?&]preview=photos(?:&|$)/.test(location.search)) localStorage.setItem('ao-preview-photos', '1');
-    if (/[?&]preview=photos-off(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-photos');
-    if (localStorage.getItem('ao-preview-photos') === '1') document.documentElement.classList.add('pv-photos');
+    localStorage.removeItem('ao-preview-dark'); localStorage.removeItem('ao-preview-photos');
+    if (/[?&]preview=label(?:&|$)/.test(location.search)) localStorage.setItem('ao-preview-label', '1');
+    if (/[?&]preview=label-off(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-label');
+    if (localStorage.getItem('ao-preview-label') === '1') document.documentElement.classList.add('pv-label');
   } catch (e) {}
 })();
 (function () {
