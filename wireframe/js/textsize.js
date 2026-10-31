@@ -34,11 +34,13 @@
     if (/[?&]preview=plate-off(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-plate');
     if (localStorage.getItem('ao-preview-plate') === '1') document.documentElement.classList.add('pv-plate');
   } catch (e) {}
-  // 10-31: the black, picture-first try (after aroidpictures.fr) — ?preview=dark on this browser only
+  // 10-31: photos first (the owner's reference has many) on the paper look — ?preview=photos on this browser only.
+  // The black try of the same day (?preview=dark) is withdrawn: its flag is cleared wherever it was set.
   try {
-    if (/[?&]preview=dark(?:&|$)/.test(location.search)) localStorage.setItem('ao-preview-dark', '1');
-    if (/[?&]preview=dark-off(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-dark');
-    if (localStorage.getItem('ao-preview-dark') === '1') document.documentElement.classList.add('pv-dark');
+    localStorage.removeItem('ao-preview-dark');
+    if (/[?&]preview=photos(?:&|$)/.test(location.search)) localStorage.setItem('ao-preview-photos', '1');
+    if (/[?&]preview=photos-off(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-photos');
+    if (localStorage.getItem('ao-preview-photos') === '1') document.documentElement.classList.add('pv-photos');
   } catch (e) {}
 })();
 (function () {
