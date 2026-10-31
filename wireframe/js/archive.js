@@ -1477,6 +1477,48 @@
     });
     return html + '</ul></div>';
   }
+  // 「名札の図鑑」: two parents meeting in one point; the people who described it; the names of the same decade
+  function renderLabelExtras(d, all) {
+    var host = document.getElementById('label-extras');
+    var spec = document.getElementById('specimen-label');
+    // after the photos, before 由来の記録 — the photo stays near the top of the page
+    if (!host) { host = document.createElement('div'); host.id = 'label-extras'; var car = document.getElementById('gallery-carousel'); var anchor = car && car.parentNode && car.parentNode.classList.contains('mb-lg') ? car.parentNode : spec; if (anchor) anchor.insertAdjacentElement('afterend', host); else return; }
+    var html = '';
+    if ((d.type === 'hybrid' || d.type === 'clone' || d.type === 'seedling') && d.parentA && d.parentB) {
+      var pa = findByEpithet(all, d.parentA), pb = findByEpithet(all, d.parentB);
+      var meta = function (p, role) { return role + (p ? '　' + (p.type === 'species' ? [esc(p.author), p.pubYear, p.country ? esc(countryLabel(p.country)) : ''].filter(Boolean).join('、') : esc(kindWord(p))) : ''); };
+      var nameOf = function (p, raw) { return p ? esc(p.epithet) : esc(String(raw).replace(/^Anthurium\s+/, '')); };
+      html += '<h2 class="sec">系統</h2><div class="lineage"><svg viewBox="0 0 343 150" aria-label="系統図">'
+        + '<path d="M86 48 C 86 95, 171 85, 171 118"/><path d="M257 48 C 257 95, 171 85, 171 118"/>'
+        + '<text class="node" x="86" y="20" text-anchor="middle">' + nameOf(pa, d.parentA) + '</text><text class="meta" x="86" y="36" text-anchor="middle">' + meta(pa, '母') + '</text>'
+        + '<text class="node" x="257" y="20" text-anchor="middle">' + nameOf(pb, d.parentB) + '</text><text class="meta" x="257" y="36" text-anchor="middle">' + meta(pb, '父') + '</text>'
+        + '<circle cx="171" cy="118" r="4" fill="#2F5D4A"/><text class="node node--cv" x="171" y="142" text-anchor="middle">' + esc(d.epithet) + '</text></svg></div>'
+        + '<p class="lede" style="margin-top:var(--s2)">親の名前は、品種同士が完全に一致するときだけ結びます。</p>';
+      if (pa) html = html.replace('<text class="node" x="86"', '<a href="' + esc(pa.href) + '" data-nav="cultivar" data-key="' + esc(pa.fullName) + '"><text class="node" x="86"').replace('</text><text class="meta" x="86"', '</text></a><text class="meta" x="86"');
+      if (pb) html = html.replace('<text class="node" x="257"', '<a href="' + esc(pb.href) + '" data-nav="cultivar" data-key="' + esc(pb.fullName) + '"><text class="node" x="257"').replace('</text><text class="meta" x="257"', '</text></a><text class="meta" x="257"');
+    }
+    if (d.type === 'species' && !d.isIndividual && d.author) {
+      var people = splitPeople(d.author);
+      if (people.length) {
+        html += '<h2 class="sec">記載した人</h2>';
+        people.forEach(function (key) {
+          var au = authorityOf(key) || {};
+          var cnt = all.filter(function (x) { return x.state === 'ok' && peopleOf(x).indexOf(key) !== -1; }).length;
+          html += '<a class="person" href="' + esc(base + 'people/' + encodeURIComponent(personSlug(key)) + '/') + '" data-nav="people" data-person="' + esc(personSlug(key)) + '"><div><b>' + esc(au.name || key) + (au.years ? '（' + esc(au.years) + '）' : '') + '</b><span>' + esc(au.note || '') + (cnt > 1 ? (au.note ? '。' : '') + 'このサイトで ' + cnt + ' つの名前に関わる' : '') + '</span></div><span class="chev">›</span></a>';
+        });
+      }
+      if (d.pubYear) {
+        var dec = Math.floor(d.pubYear / 10) * 10;
+        var era = all.filter(function (x) { return x.fullName !== d.fullName && x.type === 'species' && x.state === 'ok' && x.pubYear && Math.floor(x.pubYear / 10) * 10 === dec; }).sort(function (x, y) { return x.pubYear - y.pubYear; });
+        if (era.length) {
+          html += '<h2 class="sec">同じ時代に記載された名前 <small>' + dec + '年代</small></h2><ol class="entries">';
+          era.slice(0, 6).forEach(function (x) { html += window.entryLine(x, { thumb: thumbUrl(x.displayName, 160) }); });
+          html += '</ol>';
+        }
+      }
+    }
+    host.innerHTML = html;
+  }
   function renderRelated(d, all) {
     var section = document.getElementById('related-section');
     var el = document.getElementById('related-container');
@@ -1794,6 +1836,7 @@
     setUnrecorded(false);
     var d = describe(key in store ? key : (store[displayName] ? displayName : (store[displayName + ' [Seedling]'] ? displayName + ' [Seedling]' : key)), entry, entry._type || _detailArgs[2]);
     renderSpecimen(d, all);
+    if (LABEL) renderLabelExtras(d, all);
     if (window.releaseStaticEntry) setTimeout(window.releaseStaticEntry, 0);
     _labelEntry = d.type === 'seedling' ? null : d;
     // 「この品種を親に実生を記録」: the seedling form opens with this name as the mother
@@ -2637,10 +2680,11 @@
             var n = count[r.cultivar_name] || 0;
             var acts = (r.is_private ? '<span class="mypost-acts__note">非公開（写真もあなただけ）</span> ' : '')
               + '<button type="button" data-my="pick" data-key="' + esc(r.cultivar_name) + '">写真を追加</button>'
-                + (r.type === 'seedling' ? '' : ' · <button type="button" data-my="record" data-key="' + esc(r.cultivar_name) + '">記録を追加</button>');
+                + (r.type === 'seedling' ? '' : (LABEL ? ' ' : ' · ') + '<button type="button" data-my="record" data-key="' + esc(r.cultivar_name) + '">記録を追加</button>');
             // the last photo's day (撮影 when the photo carries it), else the day the plant was added
             var last = lastAt[r.cultivar_name];
-            var meta = n ? '写真 <span class="num">' + n + '</span> · ' + last.label + ' <span class="num">' + esc(day(last.day)) + '</span>' : '写真なし · 登録 <span class="num">' + esc(day(r.created_at)) + '</span>';
+            var sep = LABEL ? '、' : ' · ';
+            var meta = n ? '写真 <span class="num">' + n + '</span>' + sep + last.label + ' <span class="num">' + esc(day(last.day)) + '</span>' : '写真なし' + sep + '登録 <span class="num">' + esc(day(r.created_at)) + '</span>';
             line = line.replace(/<\/li>$/, '<p class="mypost-acts"><span class="mypost-acts__meta">' + meta + '</span>' + acts + '</p></li>');
             items.push({ r: r, n: n, name: d.shownName || shown(r.cultivar_name), fold: foldQ(shown(r.cultivar_name)), at: n ? String(last.day) : '', html: line });
           });
