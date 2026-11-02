@@ -1089,7 +1089,7 @@ document.addEventListener('click', function(e) {
       var title = $('contribute-page-title'), desc = $('contribute-page-desc');
       if (tgt) {
         $('ind-species').textContent = tgt.name;
-        $('ind-code').value = ''; $('ind-year').value = ''; $('ind-note').value = '';
+        $('ind-code').value = ''; $('ind-year').value = ''; $('ind-note').value = ''; $('ind-acq').value = ''; $('ind-from').value = ''; $('ind-region').value = '';
         $('ind-namer').value = (window._currentUser && ((window._profileCache && window._profileCache[window._currentUser.id]) || (window._currentUser.user_metadata && window._currentUser.user_metadata.full_name))) || '';
         if (title) title.textContent = t('individual_form_title');
         if (desc) desc.textContent = t('individual_form_desc');
@@ -1113,15 +1113,27 @@ document.addEventListener('click', function(e) {
       if (!window._currentUser) { if (window.requireLogin) window.requireLogin({ a: 'individual', target: target, path: (typeof _basePath !== 'undefined' ? _basePath : '/') + 'contribute' }); else showToast(t('individual_login'), true); return; }
       var code = $('ind-code').value.replace(/^['‘’"“”]+|['‘’"“”]+$/g, '').trim();
       if (!code) { showToast(t('individual_code_required'), true); $('ind-code').focus(); return; }
-      var fullName = target.name + " '" + code + "'";
-      if (cultivarData[fullName]) { showToast(t('individual_dup'), true); return; }
       var namer = $('ind-namer').value.trim(), year = parseInt($('ind-year').value, 10) || null, note = $('ind-note').value.trim();
+      if (!namer) { showToast(t('individual_namer_required'), true); $('ind-namer').focus(); return; }
+      var acq = $('ind-acq').value, from = $('ind-from').value.trim(), region = $('ind-region').value.trim();
+      // a number is someone's number: the same 'RA1' from another person is another plant, kept under its own name (11-03)
+      var fullName = target.name + " '" + code + "'";
+      var sameKeeper = function(e) {
+        var o = (e && e.origins && e.origins[0]) || {}, s = o.structured || {};
+        return String(s.namer || s.introduced_by || o.discoverer_or_breeder || '').trim().toLowerCase() === namer.toLowerCase();
+      };
+      if (cultivarData[fullName]) {
+        if (sameKeeper(cultivarData[fullName])) { showToast(t('individual_dup'), true); return; }
+        fullName = target.name + " '" + code + "' (" + namer + ")";
+        if (cultivarData[fullName]) { showToast(t('individual_dup'), true); return; }
+      }
       var today = new Date().toISOString().split('T')[0];
       var bodyJp = "'" + code + "' は " + (namer ? namer + ' が' : '') + (year ? year + ' 年に' : '') + (namer || year ? '命名した ' : '') + target.name + ' の個体。' + (note ? note : '');
       var bodyEn = "'" + code + "' is an individual plant of " + target.name + (namer ? ', named by ' + namer : '') + (year ? ' in ' + year : '') + '.' + (note ? ' ' + note : '');
       var origin = { body: bodyJp, body_en: bodyEn, trust: 30, trustClass: 'trust--low', source_type: 'manual', source_tier: null, source_name: '', source_url: '', source_language: 'ja',
         parentage: null, discovery_year: year, discoverer_or_breeder: namer || null, native_region: null, first_description: null,
-        structured: { origin_type: 'clone', namer: namer || null, naming_year: year, notes: note || '', citation_links: [] },
+        structured: { origin_type: 'clone', namer: namer || null, naming_year: year, notes: note || '', citation_links: [],
+          individual_code: code, acquisition: acq || null, acquired_from: from || null, origin_region: region || null },
         author: { isAI: false, name: 'User', date: today }, sources: [], votes: { agree: 0, disagree: 0 }, verified: false };
       var entry = { origins: [origin], _tags: ['individual'], _selectedFrom: parseInt(target.id, 10) || null, _type: 'clone', _created_at: new Date().toISOString() };
       var btn = this; btn.disabled = true;

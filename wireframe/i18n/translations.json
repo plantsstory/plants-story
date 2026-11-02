@@ -1609,8 +1609,8 @@
     "en": "no sources"
   },
   "individuals_title": {
-    "jp": "個体",
-    "en": "Individuals"
+    "jp": "個体（番号・名前のついた株）",
+    "en": "Individuals (numbered or named plants)"
   },
   "individuals_count": {
     "jp": "個体 {n}",
@@ -1621,8 +1621,8 @@
     "en": "+ Add an individual"
   },
   "individuals_empty": {
-    "jp": "この原種の個体（番号つきの株・名前つきの株）はまだ記録されていません。",
-    "en": "No numbered or named individuals of this species are recorded yet."
+    "jp": "この原種に番号や名前をつけて育てている株は、まだ記録されていません。",
+    "en": "No numbered or named plants of this species are recorded yet."
   },
   "type_individual": {
     "jp": "個体",
@@ -1649,11 +1649,11 @@
     "en": "Name or number"
   },
   "individual_namer": {
-    "jp": "命名者",
-    "en": "Named by"
+    "jp": "番号・名前をつけた人",
+    "en": "Numbered / named by"
   },
   "individual_year": {
-    "jp": "命名年",
+    "jp": "つけた年",
     "en": "Year"
   },
   "individual_note": {
@@ -1677,8 +1677,8 @@
     "en": "Enter a name or number"
   },
   "individual_dup": {
-    "jp": "その個体名はすでに登録されています",
-    "en": "That individual is already recorded"
+    "jp": "あなたがつけたその番号はすでに登録されています",
+    "en": "You have already recorded that number"
   },
   "individual_saved": {
     "jp": "個体を登録しました",
@@ -2471,5 +2471,49 @@
   "login_sheet_go": {
     "jp": "Google でログイン",
     "en": "Log in with Google"
+  },
+  "individuals_note": {
+    "jp": "番号は人ごとにつけられています。同じ番号でも、つけた人が違えば別の株です。",
+    "en": "Numbers belong to the person who gave them: the same number from two people is two different plants."
+  },
+  "individuals_who_unknown": {
+    "jp": "つけた人の記録なし",
+    "en": "Numbered by: not recorded"
+  },
+  "individual_namer_required": {
+    "jp": "番号・名前をつけた人を入力してください",
+    "en": "Enter who gave the number or name"
+  },
+  "individual_acquisition": {
+    "jp": "入手の経路",
+    "en": "How it was obtained"
+  },
+  "individual_from": {
+    "jp": "入手先（任意）",
+    "en": "Obtained from (optional)"
+  },
+  "individual_region": {
+    "jp": "産地（任意）",
+    "en": "Locality (optional)"
+  },
+  "acq_choose": {
+    "jp": "選んでください（任意）",
+    "en": "Choose (optional)"
+  },
+  "acq_wild": {
+    "jp": "野生由来の株",
+    "en": "Wild-origin plant"
+  },
+  "acq_seed": {
+    "jp": "実生",
+    "en": "Grown from seed"
+  },
+  "acq_unsure": {
+    "jp": "わからない",
+    "en": "Unknown"
+  },
+  "spec_acquired_from": {
+    "jp": "入手先",
+    "en": "Obtained from"
   }
 }

@@ -2064,3 +2064,11 @@ html.pv-label .mypost-acts__meta { flex-basis: 100%; color: var(--color-mid); }
 html.pv-label .mypost-acts button { color: var(--color-primary); text-decoration-thickness: 1px; }
 html.pv-label .mypost-counts { font-weight: 700; font-size: var(--fs-h3); }
 html.pv-label .mypost-next button { border-width: 1px; }
+/* individuals on the species page, grouped by the person who numbered them (11-03) */
+.individuals__note { color: var(--color-mid); font-size: var(--fs-label); line-height: 1.6; margin: 0 0 var(--space-md); }
+.individuals__group { margin-bottom: var(--space-lg); }
+.individuals__who { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); min-height: var(--tap); margin: 0; font-family: var(--font-primary); font-size: var(--fs-label); font-weight: 700; color: var(--color-ink); }
+.individuals__who a { color: inherit; }
+.individuals__who .num { color: var(--color-mid); font-weight: 400; }
+.individuals__code { font-family: var(--font-display); font-weight: 600; font-style: normal; font-variant-numeric: lining-nums; }
+.individuals__add { font-family: var(--font-primary); text-transform: none; letter-spacing: 0.02em; display: inline-flex; align-items: center; min-height: var(--tap); }

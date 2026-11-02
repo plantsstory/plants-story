@@ -139,6 +139,10 @@
     d.workingNameOrigin = clean(s.working_name_origin);
     d.tradeNames = Array.isArray(s.trade_names) ? s.trade_names.map(clean).filter(Boolean) : [];
     d.introducedBy = clean(s.introduced_by);
+    // an individual: its number as typed, how the plant came to its keeper, and from whom (11-03)
+    d.indCode = clean(s.individual_code);
+    d.acquisition = clean(s.acquisition);
+    d.acquiredFrom = clean(s.acquired_from);
     d.closestSpecies = clean(s.closest_species);
     d.qualifier = entry._qualifier || null;
     d.aliases = entry._aliases || [];
@@ -1189,7 +1193,7 @@
       if (parentSp) cells = cell(d.isIndividual ? 'spec_selected_from' : 'spec_selected_from_clone', link(parentSp, sciNameHtml(parentSp.shownName))) + cells;
     }
     // an individual: who brought it in and where it came from
-    if (d.isIndividual) cells += cell('spec_introduced_by', linkPeople(d.introducedBy)) + cell('spec_region', distributionHtml(d.originRegion || d.formLocality || d.locality || d.habitat));
+    if (d.isIndividual) cells += cell('spec_introduced_by', linkPeople(d.introducedBy)) + cell('individual_acquisition', d.acquisition ? esc(T('acq_' + d.acquisition)) : '') + cell('spec_acquired_from', esc(d.acquiredFrom)) + cell('spec_region', distributionHtml(d.originRegion || d.formLocality || d.locality || d.habitat));
     // on the label: at most three Latin-script names; katakana stays for search and JSON-LD
     // an alias with sp./aff./cf. on a Hybrid, Clone or individual contradicts the kind: kept for search, not shown
     var qualifierClash = function (a) { return d.type !== 'species' && /\b(sp|aff|cf)\./.test(a); };
@@ -1430,14 +1434,29 @@
     var robots = document.querySelector('meta[name="robots"]');
     if (robots) robots.setAttribute('content', (st === 'ok' && d.type !== 'seedling') ? 'index, follow' : 'noindex, follow');
   }
-  /* individuals of a species: numbered or named single plants ('HR1', 'Dark Star') */
+  /* individuals of a species: numbered or named single plants ('HR1', 'Dark Star').
+     Tied to the species by its id only: a number is someone's number, never matched by name (owner, 11-03) */
   function individualsOf(d, all) {
-    var self = normParent(d.epithet);
-    return all.filter(function (x) {
-      if (!x.isIndividual || x.fullName === d.fullName) return false;
-      if (d.id && x.selectedFrom === d.id) return true;
-      return !!self && normParent(x.epithet).indexOf(self + " '") === 0;
-    }).sort(function (a, b) { return a.displayName.localeCompare(b.displayName, undefined, { numeric: true, sensitivity: 'base' }); });
+    if (!d.id) return [];
+    return all.filter(function (x) { return x.isIndividual && x.fullName !== d.fullName && x.selectedFrom === d.id; });
+  }
+  // who numbered or named it; the same 'RA1' from two people is two plants
+  function individualKeeper(x) { return x.namer || x.breeder || x.introducedBy || ''; }
+  function individualCode(x, d) {
+    if (x.indCode) return x.indCode;
+    var c = x.epithet.indexOf(d.epithet) === 0 ? x.epithet.slice(d.epithet.length).trim() : x.epithet;
+    return c.replace(/\s+\([^)]*\)$/, '').replace(/^['‘’"“”]+|['‘’"“”]+$/g, '');
+  }
+  function individualLine(x, d) {
+    var t = thumbUrl(x.displayName, 160);
+    var img = t ? '<img src="' + esc(t) + '" alt="" width="48" height="48" loading="lazy" decoding="async">' : '';
+    var place = x.originRegion ? (countryLabel(countryOf(x.originRegion) || '') || x.originRegion) : '';
+    var sub = [x.namingYear ? '<span class="num">' + x.namingYear + '</span>' : '', x.acquisition && x.acquisition !== 'unsure' ? esc(T('acq_' + x.acquisition)) : '', esc(place)]
+      .filter(Boolean).map(function (s) { return '<span class="entry__seg">' + s + '</span>'; }).join(LABEL ? '、' : ' · ');
+    return '<li class="entry"><a class="entry__link" href="' + esc(x.href) + '" data-nav="cultivar" data-key="' + esc(x.fullName) + '">'
+      + '<span class="entry__thumb' + (img ? '' : ' entry__thumb--empty') + '" aria-hidden="true">' + img + '</span>'
+      + '<span class="entry__main"><span class="entry__name individuals__code">\u2018' + esc(individualCode(x, d)) + '\u2019</span>'
+      + (sub ? '<span class="entry__sub">' + sub + '</span>' : '') + '</span></a></li>';
   }
   function renderIndividuals(d, all) {
     var section = document.getElementById('individuals-section');
@@ -1452,17 +1471,22 @@
     }
     if (!isSpeciesPage) { section.classList.add('d-none'); return; }
     var list = individualsOf(d, all);
-    if (!list.length) { section.classList.add('d-none'); if (count) count.textContent = ''; return; }
-    var html = '';
-    if (list.length) {
-      html += '<ul class="individuals__list">';
-      list.forEach(function (x) {
-        var code = x.epithet.indexOf(d.epithet) === 0 ? x.epithet.slice(d.epithet.length).trim() : x.epithet;
-        var meta = joinParts([x.namer || x.breeder, x.year]);
-        html += '<li>' + link(x, esc(code)) + (meta ? '<span class="mono">' + esc(meta) + '</span>' : '') + '</li>';
-      });
-      html += '</ul>';
-    }
+    // every individual on the species page itself, grouped by the person who numbered it (owner, 11-03)
+    var groups = {}, order = [];
+    list.forEach(function (x) {
+      var k = individualKeeper(x), key = k.toLowerCase();
+      if (!groups[key]) { groups[key] = { who: k, items: [] }; order.push(key); }
+      groups[key].items.push(x);
+    });
+    order.sort(function (a, b) { return groups[b].items.length - groups[a].items.length || (groups[a].who ? 0 : 1) - (groups[b].who ? 0 : 1) || groups[a].who.localeCompare(groups[b].who); });
+    var html = '<p class="individuals__note">' + esc(T(list.length ? 'individuals_note' : 'individuals_empty')) + '</p>';
+    order.forEach(function (key) {
+      var g = groups[key];
+      g.items.sort(function (a, b) { return individualCode(a, d).localeCompare(individualCode(b, d), undefined, { numeric: true, sensitivity: 'base' }); });
+      html += '<div class="individuals__group"><h3 class="individuals__who">' + (g.who ? linkPeople(g.who) : esc(T('individuals_who_unknown')))
+        + '<span class="num">' + g.items.length + '</span></h3><ul class="entries">'
+        + g.items.map(function (x) { return individualLine(x, d); }).join('') + '</ul></div>';
+    });
     html += '<a href="' + esc(base + 'contribute') + '" class="individuals__add" data-nav="contribute" data-contribute-type="individual" data-species-id="' + esc(d.id || '') + '" data-species-name="' + esc(d.displayName) + '" data-genus="' + esc(d.genus) + '">' + esc(T('individuals_add')) + '</a>';
     if (count) count.textContent = list.length ? String(list.length) : '';
     el.innerHTML = html;
