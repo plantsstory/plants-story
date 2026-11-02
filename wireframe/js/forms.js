@@ -2128,7 +2128,7 @@ document.addEventListener('click', function(e) {
 
         // Trigger AI verification for CLONE/hybrid after origin is saved
         if ((cType === 'clone' || cType === 'hybrid') && descText && cData._id) {
-          triggerAIResearch(cData._id, cData._genus || '', cultivarName, cType, [], descText, originSources.slice());
+          if (typeof triggerAIResearch === 'function') triggerAIResearch(cData._id, cData._genus || '', cultivarName, cType, [], descText, originSources.slice());
         }
 
         // Reset form

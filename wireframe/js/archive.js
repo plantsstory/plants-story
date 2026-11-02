@@ -2258,6 +2258,8 @@
    ============================================================ */
 (function () {
   var root = document.documentElement;
+  // the 名札の図鑑 flag (the first block's LABEL is not in scope here; my plants failed without it, 11-03)
+  var LABEL = root.classList.contains('pv-label');
   function on() { return root.classList.contains('app-ui'); }
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
