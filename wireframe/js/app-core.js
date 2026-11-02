@@ -3076,7 +3076,7 @@ if (false) {
     thumbPromise.then(function(thumbMap) {
       // Archive layer renders these as a ledger table when present
       if (window.renderEntriesLedger && grid.id === 'recently-updated-grid') {
-        window.renderEntriesLedger(grid, items, thumbMap, { showDate: true });
+        window.renderEntriesLedger(grid, items, thumbMap, { showDate: true, max: 4 });
         return;
       }
       var html = '';

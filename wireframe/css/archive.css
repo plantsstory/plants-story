@@ -2072,3 +2072,10 @@ html.pv-label .mypost-next button { border-width: 1px; }
 .individuals__who .num { color: var(--color-mid); font-weight: 400; }
 .individuals__code { font-family: var(--font-display); font-weight: 600; font-style: normal; font-variant-numeric: lining-nums; }
 .individuals__add { font-family: var(--font-primary); text-transform: none; letter-spacing: 0.02em; display: inline-flex; align-items: center; min-height: var(--tap); }
+/* 記載の歴史 folded under 調べる › 読む (11-03) */
+.explore__tl summary { display: grid; grid-template-columns: 1fr auto; align-items: center; min-height: 48px; cursor: pointer; list-style: none; font-size: var(--fs-body); color: var(--color-ink); }
+.explore__tl summary::-webkit-details-marker { display: none; }
+.explore__tl summary .chev { color: var(--color-mid); transition: transform .15s; }
+.explore__tl[open] summary .chev { transform: rotate(90deg); }
+.explore__tl .label-tl { padding-bottom: var(--s3); }
+.explore__tl .lede { font-size: var(--fs-label); color: var(--color-mid); margin: 0; }

@@ -722,7 +722,7 @@
       });
       svg += '</svg>';
       var early = all.filter(function (d) { return d.pubYear < 1900; }).length, late = all.filter(function (d) { return d.pubYear >= 2000; }).length;
-      host.innerHTML = '<h2 class="sec">記載の歴史 <small>' + minY + '年から</small></h2><p class="lede">原種が学名として発表された年。年表を押すと、その年代の名前が並びます。</p>' + svg
+      host.innerHTML = '<p class="lede">' + minY + '年から。原種が学名として発表された年。年表を押すと、その年代の名前が並びます。</p>' + svg
         + '<div class="tl__step"><button type="button" data-tl="-1" aria-label="前の年代">‹</button><p class="tl__cur"></p><button type="button" data-tl="1" aria-label="次の年代">›</button></div>'
         + '<ol class="entries tl__list"></ol><p class="tl__note">19世紀に <b>' + early + '</b>、2000年以降に <b>' + late + '</b> の名前。</p>';
       // the fullest decade opens first (the earliest on a tie)
@@ -745,21 +745,21 @@
     }
     // the decade's rows pick up their thumbnails once the photo list is in
     document.addEventListener('ao:thumbs', function () { var h = document.getElementById('label-timeline'); if (h && h._tlDraw) h._tlDraw(); });
-    // the home's order: hero → search → photo of the day → 名前を探す → timeline → new names → the rest
+    // the home's order: hero → search → photo of the day → 名前を探す → new names → the rest.
+    // The timeline left the home for 調べる › 読む (owner, 11-03)
     function arrangeHome() {
       var main = document.querySelector('.masthead__main'), front = document.querySelector('.front'), story = document.getElementById('story-of-day');
       var ways = document.querySelector('.masthead .ways'), newSec = document.getElementById('front-new');
-      if (!main || !front || !story || !ways || document.getElementById('label-timeline')) return;
+      if (!main || !front || !story || !ways || document.querySelector('.label-ways')) return;
       var container = front.parentNode;
       // the search leaves the masthead body and sits right under the hero
       var hero = document.getElementById('label-hero'), search = main.querySelector('.search-bar');
       if (hero && search) hero.insertAdjacentElement('afterend', search);
-      // 名前を探す, then the timeline, after the photo of the day
+      // 名前を探す, then the new names, after the photo of the day
       var ways2 = document.createElement('section'); ways2.className = 'label-ways'; ways2.innerHTML = '<h2 class="sec">名前を探す</h2>';
       ways2.appendChild(ways);
-      var tl = document.createElement('section'); tl.id = 'label-timeline'; tl.className = 'label-tl';
-      story.insertAdjacentElement('afterend', ways2); ways2.insertAdjacentElement('afterend', tl);
-      if (newSec) tl.insertAdjacentElement('afterend', newSec);
+      story.insertAdjacentElement('afterend', ways2);
+      if (newSec) ways2.insertAdjacentElement('afterend', newSec);
       // the four ways read as rows with counts
       ways.querySelectorAll('.way').forEach(function (w) { if (!w.querySelector('.n')) w.insertAdjacentHTML('beforeend', '<span class="n" data-wcount></span><span class="chev">›</span>'); });
       var all = collectAll().filter(function (d) { return d.state === 'ok' && !d.isIndividual && d.type !== 'seedling' && shownGenus(d); });
@@ -1114,7 +1114,8 @@
       var countEl = document.getElementById('new-entries-count');
       if (countEl) countEl.textContent = week > 0 ? T('new_entries_week').replace('{n}', week) : '';
     }
-    var html = '<ol class="entries">', lastDay = '';
+    var html = '<ol class="entries">', lastDay = '', fetched = items;
+    if (opts.max) items = items.slice(0, opts.max);
     items.forEach(function (item) {
       var origins = (item.origins || []);
       var formula = null;
@@ -1130,7 +1131,7 @@
       var day = stamp ? fmtDate(stamp) : '';
       if (withDate && day && day !== lastDay) {
         lastDay = day;
-        var n = items.filter(function (it) { var st = it.created_at || it.updated_at || ''; return st && fmtDate(st) === day; }).length;
+        var n = fetched.filter(function (it) { var st = it.created_at || it.updated_at || ''; return st && fmtDate(st) === day; }).length;
         html += '<li class="entries__day"><span class="num">' + esc(day) + '</span> — ' + esc(T('entries_day_count').replace('{n}', n)) + '</li>';
       }
       html += window.entryLine(d, { thumb: thumb, date: '', noPerson: opts.noPerson, noCountry: opts.noCountry });
