@@ -1533,8 +1533,8 @@
     "en": "+{n} this week"
   },
   "colophon_cta": {
-    "jp": "あなたの交配を系統図に残す →",
-    "en": "Put your cross on the lineage tree →"
+    "jp": "あなたの交配を記録する →",
+    "en": "Record your cross →"
   },
   "lineage_add_parent": {
     "jp": "品種を追加 →",
@@ -2369,8 +2369,8 @@
     "en": "The archive is funded by membership fees, shop listings (PR) and affiliate links (PR). None of them affects the records or their verification."
   },
   "contribute_note": {
-    "jp": "投稿者名は人物索引と系統図に載ります。あなたの実生ページは、共有するとカードつきで表示されます。",
-    "en": "Your name appears in the people index and the lineage. Your seedling page shows a card when shared."
+    "jp": "投稿者名は人物索引に載ります。あなたの実生ページは、共有するとカードつきで表示されます。",
+    "en": "Your name appears in the people index. Your seedling page shows a card when shared."
   },
   "entries_day_count": {
     "jp": "{n} 品種",

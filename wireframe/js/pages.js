@@ -1577,7 +1577,7 @@ function globalSearch(query) {
     }
   }
 
-  // people, places and children of a named parent under the plants (board 14 T179)
+  // people and places under the plants (board 14 T179)
   var extrasEl = document.getElementById('search-extras');
   globalSearch._shown = query;
   if (extrasEl) {
@@ -1587,9 +1587,9 @@ function globalSearch(query) {
       extrasEl.innerHTML = window.aoExtrasHtml(r);
       var more = r.people.length + r.places.length;
       if (summaryEl && more) summaryEl.textContent += '・人物と産地 ' + more + '件';
-      // no plant by that name, but a person, a place or children: the empty sheet should not read as 「nothing」
+      // no plant by that name, but a person or a place: the empty sheet should not read as 「nothing」
       var emptyTitle = cultivarList && !cultivarResults.length && cultivarList.querySelector('.sheet__title');
-      if (emptyTitle && (more || r.children.length)) emptyTitle.textContent = '品種の名前では見つかりませんでした。下の人物・産地・交配をご覧ください。';
+      if (emptyTitle && more) emptyTitle.textContent = '品種の名前では見つかりませんでした。下の人物・産地をご覧ください。';
     });
   }
 

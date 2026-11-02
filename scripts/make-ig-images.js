@@ -109,21 +109,21 @@ function launchSvgs(byName) {
       <text x="80" y="380" font-family="Cormorant Garamond" font-weight="bold" font-style="italic" font-size="88" fill="${INK}">Anthurium crystallinum</text>
       ${big('Linden & André · 1873', 470, 44)}
       ${small(wrap(crRec ? String(crRec.body || '').replace(/\s+/g, ' ') : '', 26, 8), 600)}`),
-    frame(`<text x="80" y="104" font-family="IBM Plex Mono" font-size="26" letter-spacing="3" fill="${MID}">3 / 5 · 系統図</text>
-      ${big('親と子を、名前の完全一致だけで結ぶ。', 260, 44)}
+    frame(`<text x="80" y="104" font-family="IBM Plex Mono" font-size="26" letter-spacing="3" fill="${MID}">3 / 5 · 交配式</text>
+      ${big('親の名前は、書いたとおりに残す。', 260, 44)}
       ${box(80, 380, 420, 'warocqueanum', '原種 · 1878')}
       <text x="${W / 2}" y="460" text-anchor="middle" font-family="Cormorant Garamond" font-size="56" fill="${MID}">×</text>
       ${box(580, 380, 420, 'papillilaminum', '原種 · 1986')}
       <line x1="${W / 2}" y1="520" x2="${W / 2}" y2="640" stroke="${INK}" stroke-width="1"/>
       ${box(290, 640, 500, "'Dark Mama'", 'Hybrid', true)}
-      ${small(['名前の一部が同じでも別の植物です。', "crystallinum と 'Red Crystallinum' は結びません。"], 900)}`),
+      ${small(['同じ名前の親でも、株が違えば別の個体です。', 'ほかの品種のページとはつなげません。'], 900)}`),
     frame(`<text x="80" y="104" font-family="IBM Plex Mono" font-size="26" letter-spacing="3" fill="${MID}">4 / 5 · 説が分かれるとき</text>
       <text x="80" y="330" font-family="Cormorant Garamond" font-weight="bold" font-size="96" fill="${INK}">'Dark Mama'</text>
       ${big('親は 2 つの出典で一致。', 450, 46)}${big('作出者には異説あり。', 520, 46)}
       ${small(wrap(dmRec ? String(dmRec.body || '').replace(/\s+/g, ' ') : '', 26, 7), 640)}`),
     frame(`<text x="80" y="104" font-family="IBM Plex Mono" font-size="26" letter-spacing="3" fill="${MID}">5 / 5</text>
-      ${big('あなたの交配を、', 420, 76)}${big('系統図に。', 520, 76)}
-      ${small(['実生の交配式と播種日を記録すると、', '親の原種のページから系統図でつながります。', '', '閲覧は無料。投稿は Google でログインして。'], 700)}`)
+      ${big('あなたの交配を、', 420, 76)}${big('記録に。', 520, 76)}
+      ${small(['実生の交配式と播種日を記録すると、', 'あなたの実生のページに残ります。', '', '閲覧は無料。投稿は Google でログインして。'], 700)}`)
   ];
 }
 

@@ -522,25 +522,12 @@
     _sIdx = { all: all, people: people, places: places }; _sIdxN = n;
     return _sIdx;
   }
-  // children: the plant the query names in full (its name or an alias) is a parent, matched by the whole-name rule
-  // (normParent) — never by a part of a name
-  function childrenOf(fq, all) {
-    var store = window.cultivarData || {};
-    var parentKeys = all.filter(function (d) {
-      var e = store[d.fullName] || {};
-      return [d.displayName, d.epithet].concat(e._aliases || []).some(function (k) { return fold(k) === fq; });
-    }).map(function (d) { return normParent(d.epithet); }).filter(Boolean);
-    // a parent not recorded here ('Dorayaki') is found when the query is that whole name
-    return all.filter(function (d) {
-      return [d.parentA, d.parentB].some(function (p) { return !!p && (parentKeys.indexOf(normParent(p)) !== -1 || fold(p) === fq); });
-    });
-  }
   var TYPE_SHORT = { species: '原種', clone: 'Clone', hybrid: 'Hybrid', seedling: '実生' };
   window.aoSearchExtras = function (q, cb) {
     waitForData(function () { loadAuthority(function () {
       var fq = fold(q), ix = searchIndex();
       var hit = function (x) { return x.keys.some(function (k) { return k.indexOf(fq) !== -1; }); };
-      cb({ people: fq.length >= 2 ? ix.people.filter(hit) : [], places: fq.length >= 2 ? ix.places.filter(hit) : [], children: fq ? childrenOf(fq, ix.all) : [] });
+      cb({ people: fq.length >= 2 ? ix.people.filter(hit) : [], places: fq.length >= 2 ? ix.places.filter(hit) : [] });
     }); });
   };
   function extraRow(x, icon) {
@@ -551,10 +538,7 @@
   }
   window.aoExtrasHtml = function (r) {
     return extraGroup('人物', r.people.slice(0, 8).map(function (p) { return extraRow(p, 'i-person'); }))
-      + extraGroup('産地', r.places.slice(0, 6).map(function (p) { return extraRow(p, 'i-place'); }))
-      + extraGroup('この品種を親に持つ', r.children.slice(0, 12).map(function (d) {
-        return '<li>' + link(d, '<svg class="ico" aria-hidden="true"><use href="#i-cross"/></svg><span>' + esc(d.shownName) + '</span><span class="num">' + esc(TYPE_SHORT[d.type] || '') + '</span>') + '</li>';
-      }));
+      + extraGroup('産地', r.places.slice(0, 6).map(function (p) { return extraRow(p, 'i-place'); }));
   };
 
   /* ---------- suggestions while typing (board 14 T180): six lines at most, 48px each ---------- */
@@ -1156,20 +1140,9 @@
      ============================================================ */
   var _detailArgs = null;
   function cell(k, v) { return v ? '<div class="specimen__cell"><span class="specimen__k">' + esc(T(k)) + '</span><span class="specimen__v">' + v + '</span></div>' : ''; }
-  // a parent name found by the same whole-name rule as the children (normParent): genus, A., quotes and extra
-  // spaces aside, the names must be equal — 'Red Crystallinum' never finds crystallinum
-  function findByEpithet(all, name) {
-    var key = normParent(name);
-    if (!key) return null;
-    for (var i = 0; i < all.length; i++) {
-      if (normParent(all[i].epithet) === key || normParent(all[i].displayName) === key) return all[i];
-    }
-    return null;
-  }
-  function parentHtml(all, name) {
-    var d = findByEpithet(all, name);
-    return d ? link(d, sciNameHtml(name)) : sciNameHtml(name);
-  }
+  // a parent is written as recorded and never linked: the same name on two plants does not make them the same
+  // individual, so a cross is not tied to any entry by name (owner, 11-02)
+  function parentHtml(all, name) { return sciNameHtml(name); }
   // why a required field is empty: sine loc. / not applicable are facts; anything else is 記録なし (not yet checked)
   function absentHtml(d, field) {
     var v = d.absent[field];
@@ -1506,26 +1479,13 @@
     });
     return html + '</ul></div>';
   }
-  // 「名札の図鑑」: two parents meeting in one point; the people who described it; the names of the same decade
+  // 「名札の図鑑」: the people who described it; the names of the same decade
   function renderLabelExtras(d, all) {
     var host = document.getElementById('label-extras');
     var spec = document.getElementById('specimen-label');
     // after the photos, before 由来の記録 — the photo stays near the top of the page
     if (!host) { host = document.createElement('div'); host.id = 'label-extras'; var car = document.getElementById('gallery-carousel'); var anchor = car && car.parentNode && car.parentNode.classList.contains('mb-lg') ? car.parentNode : spec; if (anchor) anchor.insertAdjacentElement('afterend', host); else return; }
     var html = '';
-    if ((d.type === 'hybrid' || d.type === 'clone' || d.type === 'seedling') && d.parentA && d.parentB) {
-      var pa = findByEpithet(all, d.parentA), pb = findByEpithet(all, d.parentB);
-      var meta = function (p, role) { return role + (p ? '　' + (p.type === 'species' ? [esc(p.author), p.pubYear, p.country ? esc(countryLabel(p.country)) : ''].filter(Boolean).join('、') : esc(kindWord(p))) : ''); };
-      var nameOf = function (p, raw) { return p ? esc(p.epithet) : esc(String(raw).replace(/^Anthurium\s+/, '')); };
-      html += '<h2 class="sec">系統</h2><div class="lineage"><svg viewBox="0 0 343 150" aria-label="系統図">'
-        + '<path d="M86 48 C 86 95, 171 85, 171 118"/><path d="M257 48 C 257 95, 171 85, 171 118"/>'
-        + '<text class="node" x="86" y="20" text-anchor="middle">' + nameOf(pa, d.parentA) + '</text><text class="meta" x="86" y="36" text-anchor="middle">' + meta(pa, '母') + '</text>'
-        + '<text class="node" x="257" y="20" text-anchor="middle">' + nameOf(pb, d.parentB) + '</text><text class="meta" x="257" y="36" text-anchor="middle">' + meta(pb, '父') + '</text>'
-        + '<circle cx="171" cy="118" r="4" fill="#2F5D4A"/><text class="node node--cv" x="171" y="142" text-anchor="middle">' + esc(d.epithet) + '</text></svg></div>'
-        + '<p class="lede" style="margin-top:var(--s2)">親の名前は、品種同士が完全に一致するときだけ結びます。</p>';
-      if (pa) html = html.replace('<text class="node" x="86"', '<a href="' + esc(pa.href) + '" data-nav="cultivar" data-key="' + esc(pa.fullName) + '"><text class="node" x="86"').replace('</text><text class="meta" x="86"', '</text></a><text class="meta" x="86"');
-      if (pb) html = html.replace('<text class="node" x="257"', '<a href="' + esc(pb.href) + '" data-nav="cultivar" data-key="' + esc(pb.fullName) + '"><text class="node" x="257"').replace('</text><text class="meta" x="257"', '</text></a><text class="meta" x="257"');
-    }
     if (d.type === 'species' && !d.isIndividual && d.author) {
       var people = splitPeople(d.author);
       if (people.length) {
@@ -1553,30 +1513,10 @@
     var el = document.getElementById('related-container');
     if (!section || !el) return;
     var others = all.filter(function (x) { return x.fullName !== d.fullName; });
-    var self = normParent(d.epithet);
     var myPeople = peopleOf(d);
-    var myParents = [normParent(d.parentA), normParent(d.parentB)].filter(Boolean);
 
     var sameCountry = d.country ? others.filter(function (x) { return x.type === 'species' && x.country === d.country; }) : [];
     var samePerson = myPeople.length ? others.filter(function (x) { return peopleOf(x).some(function (p) { return myPeople.indexOf(p) !== -1; }); }) : [];
-    // children come from recorded parents or "selected from" only — a name mentioned in the text is not parentage.
-    // Individuals have their own block, so they are left out here.
-    var children = self.length >= 4 ? others.filter(function (x) {
-      if (x.type === 'species' || x.isIndividual) return false;
-      if (d.id && x.selectedFrom === d.id) return true;
-      var ps = [normParent(x.parentA), normParent(x.parentB)];
-      // the whole name must match: 'Red Crystallinum' is a different plant from crystallinum
-      return ps.indexOf(self) !== -1;
-    }) : [];
-    var siblings = myParents.length ? others.filter(function (x) {
-      var ps = [normParent(x.parentA), normParent(x.parentB)].filter(Boolean);
-      return ps.some(function (p) { return myParents.indexOf(p) !== -1; });
-    }) : [];
-    var parents = [];
-    if (d.type !== 'species' && (d.parentA || d.parentB)) {
-      [d.parentA, d.parentB].forEach(function (p) { var pd = findByEpithet(others, p); if (pd && parents.indexOf(pd) === -1) parents.push(pd); });
-    }
-
     // previous / next within the same genus and the same broad group
     // quotes and sp./aff./cf. do not decide the order (aff. besseae sits next to besseae)
     var sortKey = function (x) { return x.displayName.replace(/['"‘’“”]/g, '').replace(/\b(?:sp|aff|cf)\.\s*/g, ''); };
@@ -1588,11 +1528,10 @@
     var prev = idx > 0 ? group[idx - 1] : null;
     var next = idx >= 0 && idx < group.length - 1 ? group[idx + 1] : null;
 
-    var groups = relatedGroupHtml('related_siblings', siblings)
-      + relatedGroupHtml('related_same_locality', sameCountry, d.country ? '<a href="' + esc(base + 'locality/' + encodeURIComponent(countrySlug(d.country)) + '/') + '" data-nav="locality" data-place="' + esc(countrySlug(d.country)) + '">' + esc(T('related_same_locality_n').replace('{country}', countryLabel(d.country)).replace('{n}', sameCountry.length)) + ' →</a>' : '')
+    var groups = relatedGroupHtml('related_same_locality', sameCountry, d.country ? '<a href="' + esc(base + 'locality/' + encodeURIComponent(countrySlug(d.country)) + '/') + '" data-nav="locality" data-place="' + esc(countrySlug(d.country)) + '">' + esc(T('related_same_locality_n').replace('{country}', countryLabel(d.country)).replace('{n}', sameCountry.length)) + ' →</a>' : '')
       + relatedGroupHtml('related_same_person', samePerson);
     // no empty frame under the heading when there is nothing to list (board 11)
-    var html = lineageHtml(d, all, children) + (groups ? '<div class="related__grid">' + groups + '</div>' : '');
+    var html = groups ? '<div class="related__grid">' + groups + '</div>' : '';
     if (prev || next) {
       html += '<nav class="related__nav" aria-label="' + esc(T('related_title')) + '">';
       if (prev) html += link(prev, '<span class="mono">← ' + esc(T('related_prev')) + '</span><span class="related__nav-name">' + sciNameHtml(prev.shownName) + '</span>');
@@ -1606,41 +1545,6 @@
     el.innerHTML = html;
     section.classList.remove('d-none');
   }
-  /* lineage tree: parents (with their own parents when known) → this plant → offspring */
-  function lineageNode(all, name, extraClass) {
-    var d = typeof name === 'object' ? name : findByEpithet(all, name);
-    var label = d ? d.displayName : clean(name);
-    if (!label) label = T('lineage_unknown');
-    var inner = '<span class="lineage__name">' + sciNameHtml(label) + '</span>';
-    // A parent that is only a name: invite the reader to record it
-    if (!d && label !== T('lineage_unknown')) {
-      inner += '<span class="lineage__meta">' + esc(T('lineage_missing')) + '</span>'
-        + '<a class="lineage__add" href="' + esc(base + 'contribute') + '" data-nav="contribute" data-prefill="' + esc(label) + '">' + esc(T('lineage_add_parent')) + '</a>';
-    }
-    if (d) {
-      inner += '<span class="lineage__meta">' + esc(kindWord(d)) + '</span>';
-    }
-    var cls = 'lineage__node' + (extraClass ? ' ' + extraClass : '') + (d ? '' : ' lineage__node--text');
-    return d && !extraClass ? link(d, inner, cls) : '<div class="' + cls + '">' + inner + '</div>';
-  }
-  function lineageHtml(d, all, children) {
-    var hasParents = d.type !== 'species' && (d.parentA || d.parentB);
-    if (!hasParents && !children.length) return '';
-    var html = '<div class="lineage"><h3 class="lineage__title">' + esc(T('lineage_title')) + '</h3>';
-    if (hasParents) {
-      var unsure = d.tags.indexOf('parentage_unconfirmed') !== -1;
-      html += '<div class="lineage__row lineage__row--parents' + (unsure ? ' lineage__row--unconfirmed' : '') + '">' + lineageNode(all, d.parentA) + '<span class="lineage__x">×</span>' + lineageNode(all, d.parentB) + '</div>';
-      if (unsure) html += '<p class="lineage__note">' + esc(T('parentage_unconfirmed')) + '</p>';
-      html += '<div class="lineage__joint lineage__joint--down"></div>';
-    }
-    html += '<div class="lineage__row">' + lineageNode(all, d, 'lineage__node--self') + '</div>';
-    if (children.length) {
-      html += '<div class="lineage__joint lineage__joint--down"></div>';
-      html += '<div class="lineage__row lineage__row--children">' + children.slice(0, 8).map(function (c) { return lineageNode(all, c); }).join('') + '</div>';
-    }
-    return html + '</div>';
-  }
-
   /* ============================================================
      PEOPLE: /people/ index and /people/<slug>/ pages
      ============================================================ */

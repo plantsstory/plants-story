@@ -24,16 +24,16 @@
   <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1">
   <!-- Own scripts fetched in parallel (the meta CSP stops the browser's own look-ahead); they still run in order at
        the end of the body. gtag.js is loaded by gtag-init.js once the page is parsed (board 11 T156). -->
-  <link rel="preload" as="script" href="js/record-gate.js?v=20261101b">
-  <link rel="preload" as="script" href="js/app-core.js?v=20261101b">
-  <link rel="preload" as="script" href="js/pages.js?v=20261101b">
-  <link rel="preload" as="script" href="js/forms.js?v=20261101b">
-  <link rel="preload" as="script" href="js/entry-meta.js?v=20261101b">
-  <link rel="preload" as="script" href="js/archive.js?v=20261101b">
-  <link rel="preload" as="script" href="js/tool-gate.js?v=20261101b">
-  <link rel="preload" as="script" href="js/tools.js?v=20261101b">
-  <link rel="preload" as="script" href="js/dialogs.js?v=20261101b">
-  <script src="js/textsize.js?v=20261101b"></script>
+  <link rel="preload" as="script" href="js/record-gate.js?v=20261102a">
+  <link rel="preload" as="script" href="js/app-core.js?v=20261102a">
+  <link rel="preload" as="script" href="js/pages.js?v=20261102a">
+  <link rel="preload" as="script" href="js/forms.js?v=20261102a">
+  <link rel="preload" as="script" href="js/entry-meta.js?v=20261102a">
+  <link rel="preload" as="script" href="js/archive.js?v=20261102a">
+  <link rel="preload" as="script" href="js/tool-gate.js?v=20261102a">
+  <link rel="preload" as="script" href="js/tools.js?v=20261102a">
+  <link rel="preload" as="script" href="js/dialogs.js?v=20261102a">
+  <script src="js/textsize.js?v=20261102a"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -74,14 +74,14 @@
     "logo": "https://aroidorigins.com/icons/icon-512.svg"
   }
   </script>
-  <link rel="stylesheet" href="css/variables.css?v=20261101b">
-  <link rel="stylesheet" href="css/reset.css?v=20261101b">
-  <link rel="stylesheet" href="css/layout.css?v=20261101b">
-  <link rel="stylesheet" href="css/components.css?v=20261101b">
-  <link rel="stylesheet" href="css/pages.css?v=20261101b">
-  <link rel="stylesheet" href="css/utilities.css?v=20261101b">
-  <link rel="stylesheet" href="css/archive.css?v=20261101b">
-  <script src="js/gtag-init.js?v=20261101b"></script>
+  <link rel="stylesheet" href="css/variables.css?v=20261102a">
+  <link rel="stylesheet" href="css/reset.css?v=20261102a">
+  <link rel="stylesheet" href="css/layout.css?v=20261102a">
+  <link rel="stylesheet" href="css/components.css?v=20261102a">
+  <link rel="stylesheet" href="css/pages.css?v=20261102a">
+  <link rel="stylesheet" href="css/utilities.css?v=20261102a">
+  <link rel="stylesheet" href="css/archive.css?v=20261102a">
+  <script src="js/gtag-init.js?v=20261102a"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1"></script>
 </head>
@@ -236,7 +236,7 @@
             <dt data-i18n="colophon_k4">読み方</dt><dd><a href="/glossary/" data-nav="glossary" data-i18n="glossary_title">由来の用語集</a></dd>
           </dl>
           <div class="colophon__actions">
-            <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="colophon_cta">あなたの交配を系統図に残す →</a>
+            <a href="#" class="btn btn--primary" data-nav="contribute" data-i18n="colophon_cta">あなたの交配を記録する →</a>
             <a href="#" class="btn btn--secondary" data-nav="guide" data-i18n="footer_guide">使い方</a>
           </div>
         </div>
@@ -535,7 +535,7 @@
 
       <!-- Cultivar info -->
       <div class="card mb-lg">
-        <p class="contribute-note" data-i18n="contribute_note">投稿者名は人物索引と系統図に載ります。あなたの実生ページは、共有するとカードつきで表示されます。</p>
+        <p class="contribute-note" data-i18n="contribute_note">投稿者名は人物索引に載ります。あなたの実生ページは、共有するとカードつきで表示されます。</p>
         <h2 class="text-lg font-bold mb-md" data-i18n="cultivar_info">品種情報</h2>
 
         <div class="form-group">
@@ -1093,7 +1093,7 @@
         <li>原種の記載者・発表年・タイプ産地を、IPNI・POWO と原記載で照合して出典つきで記録</li>
         <li>管理者が出典と照合した記録に「✓ 検証済」を付け、照合した日を載せる</li>
         <li>AI の下書きは未検証として分け、出典のない記録には % を付けない</li>
-        <li>交配種・クローンは作出者・交配式・系統を、出典か投稿者の記録として分けて表示</li>
+        <li>交配種・クローンは作出者・交配式を、出典か投稿者の記録として分けて表示。親の名前は書いたとおりに載せ、同じ名前の別の株とはつなげない（同じ名前でも個体が違うため）</li>
         <li>写真は栽培者本人のものだけ。権利や内容の問題は「報告」からすぐに対応</li>
       </ul>
 
@@ -1156,7 +1156,7 @@
         <li>ヘッダーの「+ 投稿」から、属・区分・名前を入れます。原種は学名を入れると記載者・年・分布が自動で埋まります（IPNI / POWO / WCVP）。Clone は登録時に1回だけ、Web 検索つきの AI 調査が走ります。</li>
         <li>写真は栽培者本人が撮ったものだけを載せます。登録後、ページの「写真を追加」から何枚でも。</li>
         <li>既存のページには「記録を追加」で出典つきの記録を書き足せます。項目を分けて書くこともできます。</li>
-        <li>原種のページの「個体を追加」で、自分の株の番号や名前を記録できます。実生の親に指定すると系統図につながります。</li>
+        <li>原種のページの「個体を追加」で、自分の株の番号や名前を記録できます。</li>
         <li>内容に疑問があるときは「再調査を依頼」。管理者が承認すると AI 調査がもう一度走ります。</li>
       </ol>
 
@@ -1758,14 +1758,14 @@
   <!-- ========================================
        JS: Split into logical modules
        ======================================== -->
-  <script src="js/record-gate.js?v=20261101b"></script>
-  <script src="js/app-core.js?v=20261101b"></script>
-  <script src="js/pages.js?v=20261101b"></script>
-  <script src="js/forms.js?v=20261101b"></script>
-  <script src="js/entry-meta.js?v=20261101b"></script>
-  <script src="js/archive.js?v=20261101b"></script>
-  <script src="js/tool-gate.js?v=20261101b"></script>
-  <script src="js/tools.js?v=20261101b"></script>
+  <script src="js/record-gate.js?v=20261102a"></script>
+  <script src="js/app-core.js?v=20261102a"></script>
+  <script src="js/pages.js?v=20261102a"></script>
+  <script src="js/forms.js?v=20261102a"></script>
+  <script src="js/entry-meta.js?v=20261102a"></script>
+  <script src="js/archive.js?v=20261102a"></script>
+  <script src="js/tool-gate.js?v=20261102a"></script>
+  <script src="js/tools.js?v=20261102a"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1775,7 +1775,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261101b"></script>
+  <script src="js/dialogs.js?v=20261102a"></script>
 
   <!-- AI re-research request dialog -->
   <!-- Asked before anything is typed: posting, photos and records need a login (2026-10-08 app-ux) -->
@@ -1827,6 +1827,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261101b"></script>
+<script src="js/sw-register.js?v=20261102a"></script>
 </body>
 </html>
