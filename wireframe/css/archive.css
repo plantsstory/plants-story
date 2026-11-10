@@ -1951,7 +1951,7 @@ html.pv-label .story__figure { position: relative; margin: 0 -16px; background: 
 html.pv-label .story__figure img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; filter: none; }
 html.pv-label .story__figure::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 50%; background: linear-gradient(180deg, rgba(30,38,34,0), rgba(30,38,34,.86)); pointer-events: none; }
 html.pv-label .plate-label { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; padding: 0 16px var(--s4); display: grid; gap: 2px; color: var(--color-paper); }
-html.pv-label .plate-label__name { font-family: var(--font-display); font-style: italic; font-weight: 600; font-size: var(--fs-h2); line-height: 1.15; }
+html.pv-label .plate-label__name { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-h2); line-height: 1.15; }
 html.pv-label .plate-label__name .cultivar-quote, html.pv-label .plate-label__name .cv { font-style: normal; }
 html.pv-label .plate-label__by { font-size: var(--fs-small); color: rgba(244,241,234,.86); }
 html.pv-label .plate-label__by .year { color: #E2C27A; }
@@ -1990,13 +1990,13 @@ html.pv-label .entry__link { min-height: 80px; }
 html.pv-label .entry__thumb, html.pv-label .cultivar-row:has(.entry__sub) .cultivar-row__thumb { flex-basis: 64px; width: 64px; height: 64px; }
 html.pv-label .entry__thumb--empty { display: grid; place-items: center; font-size: var(--fs-label); color: var(--color-mid); border-style: solid !important; }
 html.pv-label .entry__thumb--empty::before { content: "写真なし"; }
-html.pv-label .entry__name { font-style: italic; font-size: var(--fs-h3); }
+html.pv-label .entry__name { font-size: var(--fs-h3); }
 html.pv-label .entry__name .cultivar-quote { font-style: normal; }
 html.pv-label .colophon { display: none; }
 /* ---- the plant page ---- */
 html.pv-label #page-cultivar .breadcrumb { display: none; }
 html.pv-label #page-cultivar .detail-head { margin: var(--s3) 0 0; }
-html.pv-label .detail-title { font-style: italic; font-size: var(--fs-h1); }
+html.pv-label .detail-title { font-size: var(--fs-h1); }
 html.pv-label .detail-title .cultivar-quote { font-style: normal; }
 html.pv-label .detail-badges .badge { background: none; border: 0; padding: 0; color: var(--color-mid); font-size: var(--fs-small); }
 /* the specimen table: a two-column list, one hairline per row */
@@ -2079,3 +2079,36 @@ html.pv-label .mypost-next button { border-width: 1px; }
 .explore__tl[open] summary .chev { transform: rotate(90deg); }
 .explore__tl .label-tl { padding-bottom: var(--s3); }
 .explore__tl .lede { font-size: var(--fs-label); color: var(--color-mid); margin: 0; }
+/* ---- board 15 (11-10), first batch ---- */
+.entry__name i, .detail-title i, .plate-label__name i, .related__group li a i { font-style: italic; }
+/* B1: 「その他」 opens as one column, one action to a 48px row */
+#page-cultivar .detail-more[open] { display: block; flex-basis: 100%; }
+#page-cultivar .detail-more__items { display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; padding: 0; border-top: 1px solid var(--color-rule); }
+#page-cultivar .detail-more__items .btn:not(.d-none), #page-cultivar .detail-more__items a.btn:not(.d-none) { display: flex; justify-content: flex-start; width: 100%; min-height: var(--tap); margin: 0; padding: 0; text-align: left; text-decoration: none; border: 0; border-bottom: 1px solid var(--color-rule); border-radius: 0; background: none; }
+#page-cultivar .detail-more__items > span:not(.d-none) { display: flex; align-items: center; min-height: var(--tap); border-bottom: 1px solid var(--color-rule); font-family: var(--font-primary); font-size: var(--fs-small); color: var(--color-mid); }
+/* B6: the ＋投稿 sheet */
+#post-sheet .dialog-actions { margin-top: var(--s4); }
+#post-sheet .dialog-actions .btn { width: 100%; min-height: var(--tap); }
+#post-sheet-name:focus { outline: none; }
+/* B9: search results read as the same list as everywhere else; the search can be repeated from the page */
+#page-search .search-bar--explore { margin: 0 0 var(--s3); }
+#page-search .pagination:empty { display: none; }
+/* B10: 自分の株 before a login */
+.mypost-login-msg { margin: 0 0 var(--s3); color: var(--color-ink); }
+.mypost-login .btn { width: 100%; min-height: var(--tap); }
+/* B13: 調べる — every row starts at the same left edge, with or without an icon */
+.explore__list a > span:first-child:not(.num) { grid-column: 1 / span 2; }
+/* B12/B15/B19 */
+.ig-today { margin-top: var(--s5, 40px); padding-top: var(--s3); border-top: 1px solid var(--color-rule); align-items: center; }
+.ig-today__k { flex-basis: 100%; font-size: var(--fs-small); color: var(--color-mid); }
+.front-new__wanted { margin: var(--s3) 0 0; }
+.front-new__wanted:empty { display: none; }
+.front-new__wanted a { display: inline-flex; align-items: center; min-height: var(--tap); color: var(--color-ink); font-size: var(--fs-small); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
+/* M1: one line to the catalogue, marked PR */
+.tool-context { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--color-rule); }
+.tool-context:empty, .tool-context.d-none { display: none; }
+.tool-context__line { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--s3); margin: 0; font-size: var(--fs-small); }
+.tool-context__h { flex-basis: 100%; color: var(--color-mid); font-size: var(--fs-label); }
+.tool-context__line a { display: inline-flex; align-items: center; min-height: var(--tap); color: var(--color-ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
+.n__sub { font-size: var(--fs-label); color: var(--color-mid); font-weight: 400; }
+#page-cultivar .detail-more__items .d-none { display: none !important; }

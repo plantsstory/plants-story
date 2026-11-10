@@ -2968,10 +2968,12 @@ if (false) {
     if (items.length === 0) { statsEl.style.display = 'none'; return; }
     var short = (_genusItems[slug] || []).filter(function(it) { return it.meta.type !== 'seedling' && !isIndividualItem(it) && recordStateOf(it.fullName, it.entry, it.meta) === 'unrecorded'; }).length;
 
-    var speciesCount = 0, hybridCount = 0, cloneCount = 0;
+    var speciesCount = 0, hybridCount = 0, cloneCount = 0, undescribedCount = 0;
     items.forEach(function(it) {
       var t = it.meta.type || '';
-      if (t === 'species') speciesCount++;
+      // sp. / aff. / unresolved names are listed, but not counted as species (board 15 T8)
+      if (t === 'species' && window.entryUndescribed && window.entryUndescribed(it.fullName, it.entry, 'species')) undescribedCount++;
+      else if (t === 'species') speciesCount++;
       else if (t === 'hybrid') hybridCount++;
       else if (t === 'clone') cloneCount++;
     });
@@ -2982,6 +2984,7 @@ if (false) {
       // one line: 収録 40 品種 · 原種 32 · Hybrid 3 · Clone 5 · 記録不足 1
       var html = '<span class="genus-stat-chip">' + (en ? 'Recorded ' : '収録 ') + '<b>' + items.length + '</b>' + (en ? '' : ' 品種') + '</span>';
       if (speciesCount > 0) html += '<span class="genus-stat-chip">' + (en ? 'Species ' : '原種 ') + speciesCount + '</span>';
+      if (undescribedCount > 0) html += '<span class="genus-stat-chip">' + (en ? 'Undescribed ' : '未記載 ') + undescribedCount + '</span>';
       if (hybridCount > 0) html += '<span class="genus-stat-chip">Hybrid ' + hybridCount + '</span>';
       if (cloneCount > 0) html += '<span class="genus-stat-chip">Clone ' + cloneCount + '</span>';
       if (short > 0) html += '<span class="genus-stat-chip">' + (en ? 'Short of a record ' : '記録不足 ') + short + '</span>';

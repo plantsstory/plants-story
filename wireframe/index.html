@@ -22,27 +22,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Stylesheets before the script preloads: they hold the first paint, the scripts run only at the end of the body (11-03) -->
-  <link rel="stylesheet" href="css/variables.css?v=20261103e">
-  <link rel="stylesheet" href="css/reset.css?v=20261103e">
-  <link rel="stylesheet" href="css/layout.css?v=20261103e">
-  <link rel="stylesheet" href="css/components.css?v=20261103e">
-  <link rel="stylesheet" href="css/pages.css?v=20261103e">
-  <link rel="stylesheet" href="css/utilities.css?v=20261103e">
-  <link rel="stylesheet" href="css/archive.css?v=20261103e">
+  <link rel="stylesheet" href="css/variables.css?v=20261110a">
+  <link rel="stylesheet" href="css/reset.css?v=20261110a">
+  <link rel="stylesheet" href="css/layout.css?v=20261110a">
+  <link rel="stylesheet" href="css/components.css?v=20261110a">
+  <link rel="stylesheet" href="css/pages.css?v=20261110a">
+  <link rel="stylesheet" href="css/utilities.css?v=20261110a">
+  <link rel="stylesheet" href="css/archive.css?v=20261110a">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1">
   <!-- Own scripts fetched in parallel (the meta CSP stops the browser's own look-ahead); they still run in order at
        the end of the body. gtag.js is loaded by gtag-init.js once the page is parsed (board 11 T156). -->
-  <link rel="preload" as="script" href="js/record-gate.js?v=20261103e">
-  <link rel="preload" as="script" href="js/app-core.js?v=20261103e">
-  <link rel="preload" as="script" href="js/pages.js?v=20261103e">
-  <link rel="preload" as="script" href="js/forms.js?v=20261103e">
-  <link rel="preload" as="script" href="js/entry-meta.js?v=20261103e">
-  <link rel="preload" as="script" href="js/archive.js?v=20261103e">
-  <link rel="preload" as="script" href="js/tool-gate.js?v=20261103e">
-  <link rel="preload" as="script" href="js/tools.js?v=20261103e">
-  <link rel="preload" as="script" href="js/dialogs.js?v=20261103e">
-  <script src="js/textsize.js?v=20261103e"></script>
+  <link rel="preload" as="script" href="js/record-gate.js?v=20261110a">
+  <link rel="preload" as="script" href="js/app-core.js?v=20261110a">
+  <link rel="preload" as="script" href="js/pages.js?v=20261110a">
+  <link rel="preload" as="script" href="js/forms.js?v=20261110a">
+  <link rel="preload" as="script" href="js/entry-meta.js?v=20261110a">
+  <link rel="preload" as="script" href="js/archive.js?v=20261110a">
+  <link rel="preload" as="script" href="js/tool-gate.js?v=20261110a">
+  <link rel="preload" as="script" href="js/tools.js?v=20261110a">
+  <link rel="preload" as="script" href="js/dialogs.js?v=20261110a">
+  <script src="js/textsize.js?v=20261110a"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -83,7 +83,7 @@
     "logo": "https://aroidorigins.com/icons/icon-512.svg"
   }
   </script>
-  <script src="js/gtag-init.js?v=20261103e"></script>
+  <script src="js/gtag-init.js?v=20261110a"></script>
 </head>
 <body>
 
@@ -211,6 +211,7 @@
       <section class="front-new" id="front-new">
         <h2 class="section-title" data-i18n="new_entries_title">新着の品種</h2>
         <div id="recently-updated-grid"><div class="loading-text p-xl">…</div></div>
+        <p class="front-new__wanted" id="front-wanted"></p>
         <p class="front-new__foot"><span id="new-entries-count"></span><a href="#" id="ledger-all-link" data-nav="genus" data-genus="anthurium" data-i18n="ledger_all">一覧をすべて見る →</a></p>
       </section>
 
@@ -314,7 +315,7 @@
             <div class="flex gap-sm flex-align-center" id="edit-key-section" style="display:none">
               <button class="btn btn--secondary btn--sm font-xs-btn" id="detail-edit-btn" data-i18n="detail_edit">編集</button>
             </div>
-            <button class="btn btn--sm cursor-pointer text-danger-border font-xs-btn" id="detail-delete-request-btn" data-i18n="detail_report">報告</button>
+            <button class="btn btn--sm cursor-pointer text-danger-border font-xs-btn" id="detail-delete-request-btn" data-i18n="detail_report">誤りを報告</button>
           </div>
         </details>
       </div>
@@ -791,7 +792,8 @@
       <h1 class="section-title" id="search-title">
         "crystallinum" の検索結果
       </h1>
-      <p class="text-muted mb-lg" id="search-summary">23件の結果</p>
+      <div class="search-bar search-bar--explore" id="search-again"><input type="search" enterkeyhint="search" class="search-bar__input" placeholder="学名・品種名・人名・産地" aria-label="もう一度検索"><button type="button" class="search-bar__btn" aria-label="検索"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg></button></div>
+      <p class="text-muted mb-lg" id="search-summary"></p>
 
       <!-- Cultivar Results -->
       <div id="search-cultivar-results">
@@ -801,14 +803,12 @@
           <button type="button" class="chip active" aria-pressed="true" data-genus="all" data-i18n="filter_all">すべて</button>
         </div>
 
-        <div id="search-cultivar-list" class="card card--no-pad"></div>
+        <div id="search-cultivar-list"></div>
       </div>
       <div id="search-extras"></div>
 
       <!-- Pagination -->
-      <div class="pagination">
-        <a class="page-link active">1</a>
-      </div>
+      <div class="pagination"></div>
 
     </div>
   </section>
@@ -1336,8 +1336,8 @@
         <dt id="g-formula">交配式</dt><dd>母親 × 父親 の形で書きます。母（種子親）を先に、× は前後に半角スペースを入れて書きます（例: <i>Anthurium forgetii</i> × <i>Anthurium</i> 'Titanium'）。</dd>
         <dt id="g-f1">F1 / F2 / self</dt><dd>F1 は交配で得られた第1世代、F2 は F1 同士を交配した第2世代、self は同じ株の自家受粉から得られた実生です。</dd>
         <dt id="g-original">オリジナル（原個体）・選抜個体</dt><dd>実生群の中から選ばれ、名前を付けられた1株。その名前はオリジナル個体を指し、オリジナルの実生（F 個体）は同じ名前で流通していてもオリジナルではありません。</dd>
-        <dt id="g-clone">クローン</dt><dd>1個体を株分け・挿し木・組織培養で増やしたもの。遺伝的に同一です。<a href="#" data-nav="guide">使い方ガイド</a>の区分の説明も参照してください。</dd>
-        <dt id="g-hybrid">ハイブリッド（交配種）</dt><dd>特定の交配式から得られた実生群に付けられた名前。同じ名前でも個体ごとに遺伝的に異なります。</dd>
+        <dt id="g-clone">Clone（クローン）</dt><dd>1個体を株分け・挿し木・組織培養で増やしたもの。遺伝的に同一です。<a href="#" data-nav="guide">使い方ガイド</a>の区分の説明も参照してください。</dd>
+        <dt id="g-hybrid">Hybrid（交配種）</dt><dd>特定の交配式から得られた実生群に付けられた名前。同じ名前でも個体ごとに遺伝的に異なります。</dd>
         <dt id="g-seedling">実生</dt><dd>種子から育てた株、およびその記録。このサイトでは趣味家の播種記録を「実生」として登録します。</dd>
         <dt id="g-tc">TC（組織培養）・ソマクローナル変異</dt><dd>組織の一部から無菌培養で増殖する方法（tissue culture）。培養中に生じる変異をソマクローナル変異と呼び、斑入り個体などがこの経路で生まれることがあります。</dd>
         <dt id="g-trade-name">流通名（商品名）</dt><dd>正式な学名や品種名とは別に、市場で付けられた名前（例: 'El Choco Red' = <i>Philodendron rubrijuvenile</i>）。正式名がわかったものは正式名を主表示にします。国際栽培植物命名規約は流通名を引用符で囲みませんが、このサイトは流通の書き方に合わせて ' ' で囲み、「流通名」と注記します。</dd>
@@ -1479,8 +1479,8 @@
     <div class="container">
       <h1 class="section-title">自分の株</h1>
       <p class="text-muted mb-lg" id="mypost-desc"><span class="appbar__label--old">あなたが記録した品種です。写真や記録はここから足せます。</span><span class="appbar__label--new">あなたが載せた株・写真・実生です。写真や記録はここから足せます。</span></p>
-      <div id="mypost-login-msg" class="d-none text-center p-xl" style="color:var(--color-gray);">
-        <p>ログインすると、自分の株の記録を見られます。</p>
+      <div id="mypost-login-msg" class="d-none mypost-login-msg">
+        <p>持っている株の写真と番号を、名前ごとに残せます。無料です。</p>
       </div>
       <div id="mypost-grid" class="card-grid"></div>
       <div id="mypost-empty" class="d-none text-center p-xl" style="color:var(--color-gray);">
@@ -1764,14 +1764,14 @@
        JS: Split into logical modules
        ======================================== -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1"></script>
-  <script src="js/record-gate.js?v=20261103e"></script>
-  <script src="js/app-core.js?v=20261103e"></script>
-  <script src="js/pages.js?v=20261103e"></script>
-  <script src="js/forms.js?v=20261103e"></script>
-  <script src="js/entry-meta.js?v=20261103e"></script>
-  <script src="js/archive.js?v=20261103e"></script>
-  <script src="js/tool-gate.js?v=20261103e"></script>
-  <script src="js/tools.js?v=20261103e"></script>
+  <script src="js/record-gate.js?v=20261110a"></script>
+  <script src="js/app-core.js?v=20261110a"></script>
+  <script src="js/pages.js?v=20261110a"></script>
+  <script src="js/forms.js?v=20261110a"></script>
+  <script src="js/entry-meta.js?v=20261110a"></script>
+  <script src="js/archive.js?v=20261110a"></script>
+  <script src="js/tool-gate.js?v=20261110a"></script>
+  <script src="js/tools.js?v=20261110a"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1781,7 +1781,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261103e"></script>
+  <script src="js/dialogs.js?v=20261110a"></script>
 
   <!-- AI re-research request dialog -->
   <!-- Asked before anything is typed: posting, photos and records need a login (2026-10-08 app-ux) -->
@@ -1833,6 +1833,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261103e"></script>
+<script src="js/sw-register.js?v=20261110a"></script>
 </body>
 </html>

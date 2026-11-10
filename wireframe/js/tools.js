@@ -293,6 +293,9 @@
   function refreshNavLinks() {
     var on = open();
     document.querySelectorAll('[data-tools-link]').forEach(function (a) { a.classList.toggle('d-none', !on); });
+    // the plant and locality pages draw their one line to the catalogue once it is known to be open (T96)
+    window._toolsOpen = on;
+    try { document.dispatchEvent(new CustomEvent('ao:tools-open')); } catch (e) {}
   }
   load().then(refreshNavLinks);
 
@@ -308,6 +311,8 @@
     if (!a || typeof gtag !== 'function') return;
     var slug = a.getAttribute('data-tool-slug') || _slug;
     var x = (_tools || []).filter(function (r) { return r.slug === slug; })[0] || {};
-    gtag('event', 'affiliate_click', { shop: a.getAttribute('data-tool-shop'), slug: slug, genre: x.genre || '', source: x.source || '', page: _slug ? 'tool' : 'tools' });
+    // pos: which card in the list it was (1 = the first one on the screen)
+    var cardEl = a.closest('.shop-card'), pos = cardEl && cardEl.parentNode ? Array.prototype.indexOf.call(cardEl.parentNode.querySelectorAll('.shop-card'), cardEl) + 1 : 0;
+    gtag('event', 'affiliate_click', { shop: a.getAttribute('data-tool-shop'), slug: slug, genre: x.genre || '', source: x.source || '', page: _slug ? 'tool' : 'tools', pos: pos });
   });
 })();

@@ -676,8 +676,8 @@ function renderTierBadge(tier, name, labelJp) {
 function renderVoteButtons(i, votes) {
   var agreeCount = votes ? votes.agree : 0;
   var disagreeCount = votes ? votes.disagree : 0;
-  var h = '<button class="vote-btn" data-origin-idx="' + i + '" data-vote="agree" aria-label="' + t('vote_agree') + ' (' + agreeCount + ')">' + escHtml(t('vote_word_agree')) + ' <span class="vote-btn__badge">' + agreeCount + '</span></button>';
-  h += '<button class="vote-btn vote-btn--down" data-origin-idx="' + i + '" data-vote="disagree" aria-label="' + t('vote_disagree') + ' (' + disagreeCount + ')">' + escHtml(t('vote_word_disagree')) + ' <span class="vote-btn__badge">' + disagreeCount + '</span></button>';
+  var h = '<button class="vote-btn" data-origin-idx="' + i + '" data-vote="agree" aria-label="' + t('vote_agree') + ' (' + agreeCount + ')">' + escHtml(t('vote_word_agree')) + (agreeCount > 0 ? ' <span class="vote-btn__badge">' + agreeCount + '</span>' : '') + '</button>';
+  h += '<button class="vote-btn vote-btn--down" data-origin-idx="' + i + '" data-vote="disagree" aria-label="' + t('vote_disagree') + ' (' + disagreeCount + ')">' + escHtml(t('vote_word_disagree')) + (disagreeCount > 0 ? ' <span class="vote-btn__badge">' + disagreeCount + '</span>' : '') + '</button>';
   return h;
 }
 
@@ -1596,10 +1596,11 @@ function globalSearch(query) {
   // Update pagination
   var searchPag = document.querySelector('#page-search .pagination');
   if (searchPag) {
-    searchPag.innerHTML = '<a class="page-link active">1</a>';
+    searchPag.innerHTML = '';
   }
 
   navigateTo('search', { q: query });
+  if (window.aoSearchAgainFill) window.aoSearchAgainFill(query);
 }
 
 // Breeder link click handler — search by breeder name

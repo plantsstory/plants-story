@@ -156,6 +156,8 @@
     // an individual (numbered or named plant of a species) is marked by its tag only (BOARD 09-07);
     // a Clone selected from another clone keeps its own page in the index
     d.isIndividual = d.tags.indexOf('individual') !== -1;
+    // an individual is numbered or named, never bred: the person who gave the number is its namer (board 15 T1)
+    if (d.isIndividual) { d.namer = d.namer || d.breeder; d.breeder = ''; }
     d.verifiedAt = entry._verifiedAt || null;
     d.verificationNote = clean(entry._verificationNote);
     d.nameStatus = entry._nameStatus || null;
@@ -272,7 +274,7 @@
     }
     var who = d.breeder || d.namer || d.creator;
     if (!who && !d.year) return '';
-    var label = d.type === 'clone' && !d.breeder && d.namer ? T('cite_namer') : T('cite_breeder');
+    var label = d.isIndividual ? T('cite_numbered') : d.type === 'clone' && !d.breeder && d.namer ? T('cite_namer') : T('cite_breeder');
     return joinParts([who ? (lang() === 'en' ? label + ' ' + esc(who) : label + ' ' + esc(who)) : '', yearSpan(d.year)]);
   }
   /* ---------- one list line for every list (BOARD 10-07 T62) ----------
@@ -338,7 +340,7 @@
   }
   function kindWord(d) {
     if (d.isIndividual) return T('kind_individual');
-    if (d.type === 'species') return isUndescribed(d) ? T('kind_undescribed') : T('kind_species');
+    if (d.type === 'species') return String(d.qualifier || '').toLowerCase().replace(/\./g, '') === 'cf' ? T('kind_cf') : isUndescribed(d) ? T('kind_undescribed') : T('kind_species');
     if (d.type === 'seedling') return T('kind_seedling');
     return d.type === 'hybrid' ? 'Hybrid' : d.type === 'clone' ? 'Clone' : String(d.type || '');
   }
@@ -347,13 +349,14 @@
     var parts = [];
     if (opts.date) parts.push('<span class="num">' + esc(opts.date) + '</span>');
     parts.push(esc(kindWord(d)));
+    if (d.nameStatus === 'trade' && d.type !== 'species') parts.push(esc(T('kind_trade_name')));
     var species = d.type === 'species' && !d.isIndividual;
     if (!opts.noPerson) {
       if (species) { if (d.author) parts.push(esc(d.author)); }
       else {
         var who = d.breeder || d.creator;
         if (who) parts.push(esc(T('cite_breeder')) + ' ' + esc(who));
-        else if (d.namer) parts.push(esc(T('cite_namer')) + ' ' + esc(d.namer));
+        else if (d.namer) parts.push(esc(T(d.isIndividual ? 'cite_numbered' : 'cite_namer')) + ' ' + esc(d.namer));
       }
     }
     if (species) { if (d.pubYear) parts.push(yearSpan(d.pubYear)); }
@@ -371,6 +374,13 @@
     return '';
   }
   // pieces for list rows drawn elsewhere (the genus list in app-core.js)
+  window.entryUndescribed = function (fullName, entry, type) {
+    try { var d = describe(fullName, entry || {}, type); return d.type === 'species' && !d.isIndividual && isUndescribed(d); } catch (e) { return false; }
+  };
+  // 「27、未記載 5」: the described species, and beside them the names still waiting for a description
+  function speciesCountHtml(described, undescribed) {
+    return String(described) + (undescribed ? '<span class="n__sub">、' + esc(T('kind_undescribed')) + ' ' + undescribed + '</span>' : '');
+  }
   window.entryKind = function (fullName, entry, type) {
     try { return kindWord(describe(fullName, entry || {}, type)); } catch (e) { return ''; }
   };
@@ -458,10 +468,13 @@
       var html = '<form class="ig-find" id="ig-find"><label for="ig-find-no">図版の番号</label><input type="number" inputmode="numeric" id="ig-find-no" min="1"><button type="submit" class="btn btn--primary">開く</button></form><ol class="ig-grid">';
       list.forEach(function (x) {
         var p = thumbs[x.d.displayName], src = p && window.galleryImg ? window.galleryImg(p, 360) : '';
-        html += '<li id="p' + x.no + '">' + link(x.d, '<span class="ig-grid__img">' + (src ? '<img src="' + esc(src) + '" alt="' + esc(x.d.shownName) + '" loading="lazy" decoding="async">' : '<span class="ig-grid__name">' + sciNameHtml(x.d.shownName) + '</span>') + '</span>'
+        html += '<li id="p' + x.no + '">' + link(x.d, '<span class="ig-grid__img">' + (src ? '<img src="' + esc(src) + '" alt="' + esc(x.d.shownName) + '" loading="lazy" decoding="async">' : '<span class="ig-grid__name"><span>' + sciNameHtml(x.d.shownName) + '</span></span>') + '</span>'
           + '<span class="ig-grid__no num">図版 ' + x.no + '</span>') + '</li>';
       });
-      body.innerHTML = html + '</ol>';
+      // the day's Instagram text and image, for whoever posts it (moved here from the home, board 15 B12)
+      var ig = window._storyIg;
+      body.innerHTML = html + '</ol>' + (ig ? '<p class="story__share ig-today"><span class="ig-today__k">今日の一葉（' + sciNameHtml(ig.name) + '）</span><button type="button" class="story__copy" data-story-copy>' + esc(T('story_copy')) + '</button>'
+        + '<a class="story__img" href="' + esc(ig.img) + '" download target="_blank" rel="noopener">' + esc(T('story_save_image')) + '</a></p>' : '');
       if (window.releaseStaticEntry) window.releaseStaticEntry();   // the stub's plates give way (T157)
       var form = document.getElementById('ig-find');
       if (form) form.addEventListener('submit', function (ev) {
@@ -484,20 +497,22 @@
     // people are counted the way the people index folds them, so the authority table comes first
     waitForData(function () { loadAuthority(function () {
       var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
-      var seen = {}, n = { species: 0, hybrid: 0 };
+      var seen = {}, n = { species: 0, hybrid: 0, undescribed: 0 };
       var people = {}, places = {};
       var thumbs = window._thumbMap || {}, wanted = 0;
       Object.keys(store).forEach(function (k) {
         var e = store[k]; if (!e || seen[e._id || k]) return; seen[e._id || k] = true;
         var d; try { d = describe(k, e, e._type); } catch (er) { return; }
         if (d.state !== 'ok' || d.isIndividual || d.type === 'seedling' || !shownGenus(d)) return;
-        if (d.type === 'species') n.species++; else n.hybrid++;
+        if (d.type === 'species') { if (isUndescribed(d)) n.undescribed++; else n.species++; } else n.hybrid++;
         if (!thumbs[d.displayName]) wanted++;
         peopleOf(d).forEach(function (p) { people[p] = 1; });
         if (d.country) places[d.country] = 1;
       });
       var set = function (key, v) { var el = page.querySelector('[data-count="' + key + '"]'); if (el) el.textContent = v ? String(v) : ''; };
-      set('species', n.species); set('hybrid', n.hybrid); set('people', Object.keys(people).length); set('places', Object.keys(places).length); set('wanted', wanted);
+      set('species', n.species); set('hybrid', n.hybrid);
+      var spEl = page.querySelector('[data-count="species"]');
+      if (spEl) spEl.innerHTML = speciesCountHtml(n.species, n.undescribed); set('people', Object.keys(people).length); set('places', Object.keys(places).length); set('wanted', wanted);
       // the explore search box behaves like the top one
       var inp = page.querySelector('.search-bar__input');
       var go = function (ev) { if (ev) ev.preventDefault(); if (inp.value.trim() && typeof globalSearch === 'function') globalSearch(inp.value.trim()); };
@@ -596,6 +611,21 @@
   if (colo && window.matchMedia && window.matchMedia('(min-width: 641px)').matches) colo.open = true;
   wireSuggest(document.querySelector('.masthead .search-bar__input'));
   wireSuggest(document.querySelector('#page-explore .search-bar__input'));
+  (function () {
+    var inp = document.querySelector('#search-again .search-bar__input'), btn = document.querySelector('#search-again .search-bar__btn');
+    if (!inp) return;
+    var go = function (ev) { if (ev) ev.preventDefault(); if (inp.value.trim() && typeof globalSearch === 'function') globalSearch(inp.value.trim()); };
+    inp.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') go(ev); });
+    if (btn) btn.addEventListener('click', go);
+    wireSuggest(inp);
+    // the box shows what was searched
+    document.addEventListener('ao:page', function (e) {
+      if (e.detail !== 'search') return;
+      var q = ''; try { q = new URLSearchParams(location.search).get('q') || ''; } catch (er) {}
+      if (q && document.activeElement !== inp) inp.value = q;
+    });
+    window.aoSearchAgainFill = function (q) { if (document.activeElement !== inp) inp.value = q || ''; };
+  })();
 
   /* ---------- 最近見た品種 (board 14 T182): five names on this device only, never sent anywhere ---------- */
   var RECENT_KEY = 'ao-recent';
@@ -663,6 +693,50 @@
     return '<a class="donate-link" href="' + esc(OFUSE_URL) + '" target="_blank" rel="noopener" data-donate="' + esc(source) + '">このサイトの運営費（サーバー・出典の調査）に充てる送金を OFUSE で受け付けています →</a>';
   };
   if (OFUSE_URL) document.querySelectorAll('[data-donate-slot]').forEach(function (p) { p.innerHTML = window.aoDonateHtml(p.getAttribute('data-donate-slot')); p.hidden = false; });
+  // measured, not guessed (board 15 M6): the donation line seen, the catalogue entered and from where, 「その他」 opened
+  if ('IntersectionObserver' in window) {
+    var _donSeen = {};
+    var _donIo = new IntersectionObserver(function (es) {
+      es.forEach(function (en) {
+        var s = en.target.getAttribute('data-donate');
+        if (!en.isIntersecting || _donSeen[s]) return;
+        _donSeen[s] = 1;
+        if (typeof gtag === 'function') gtag('event', 'donate_view', { source: s });
+      });
+    });
+    document.querySelectorAll('[data-donate]').forEach(function (a) { _donIo.observe(a); });
+  }
+  document.addEventListener('click', function (e) {
+    if (typeof gtag !== 'function' || !e.target.closest) return;
+    var c = e.target.closest('[data-tools-context]');
+    if (c) { gtag('event', 'tools_context_click', { genre: c.getAttribute('data-genre') || '', source: c.getAttribute('data-tools-context') }); return; }
+    var a = e.target.closest('a[data-nav="tools"]');
+    if (a && !a.closest('#page-tools')) gtag('event', 'tools_enter', { source: a.closest('#mobileNav') ? 'menu' : a.closest('footer') ? 'footer' : a.closest('#page-explore') ? 'explore' : 'other' });
+  });
+  document.addEventListener('toggle', function (e) {
+    if (e.target && e.target.classList && e.target.classList.contains('detail-more') && e.target.open && typeof gtag === 'function') gtag('event', 'more_open', {});
+  }, true);
+  /* 道具の目録 — PR: one genus-level line on recorded species and locality pages, only while the catalogue is open (T96) */
+  var _toolCtxD = null;
+  function toolContextHtml(src) {
+    var g = [['humidity', '湿度・送風'], ['heat', '温度'], ['soil', '用土・植込み材']];
+    return '<p class="tool-context__line"><span class="tool-context__h">道具の目録 — PR</span>' + g.map(function (x) {
+      return '<a href="' + esc(base + 'tools/?g=' + x[0]) + '" data-nav="tools" data-genre="' + x[0] + '" data-tools-context="' + src + '">' + esc(x[1]) + '</a>';
+    }).join('') + '</p>';
+  }
+  function renderToolContext(d) {
+    _toolCtxD = d;
+    var el = document.getElementById('tool-context');
+    if (!el) return;
+    var ok = !!window._toolsOpen && d && d.type === 'species' && !d.isIndividual && d.state === 'ok';
+    el.classList.toggle('d-none', !ok);
+    el.innerHTML = ok ? toolContextHtml('species') : '';
+  }
+  document.addEventListener('ao:tools-open', function () {
+    if (_toolCtxD) renderToolContext(_toolCtxD);
+    var lc = document.getElementById('locality-tools');
+    if (lc && window._toolsOpen) lc.innerHTML = toolContextHtml('locality');
+  });
   document.addEventListener('click', function (e) {
     var a = e.target.closest && e.target.closest('[data-donate]');
     if (a && typeof gtag === 'function') gtag('event', 'donate_click', { source: a.getAttribute('data-donate') });
@@ -766,8 +840,13 @@
       var ppl = {}, plc = {};
       all.forEach(function (d) { peopleOf(d).forEach(function (p) { ppl[p] = 1; }); if (d.country) plc[d.country] = 1; });
       var sp = all.filter(function (d) { return d.type === 'species'; }).length;
+      var und = all.filter(function (d) { return d.type === 'species' && isUndescribed(d); }).length;
       var n = { species: sp, cultivar: all.length - sp, people: Object.keys(ppl).length, locality: Object.keys(plc).length };
-      ways.querySelectorAll('.way').forEach(function (w) { var k = w.getAttribute('data-kind') || (w.getAttribute('data-nav') === 'people' ? 'people' : 'locality'); var el = w.querySelector('[data-wcount]'); if (el && n[k]) el.textContent = n[k]; });
+      ways.querySelectorAll('.way').forEach(function (w) {
+        var k = w.getAttribute('data-kind') || (w.getAttribute('data-nav') === 'people' ? 'people' : 'locality'); var el = w.querySelector('[data-wcount]');
+        if (!el || !n[k]) return;
+        if (k === 'species') el.innerHTML = speciesCountHtml(sp - und, und); else el.textContent = n[k];
+      });
     }
     function homeAll() { arrangeHome(); loadAuthority(function () { arrangeHome(); timelineStrip(); }); labelOnStory(); }
     waitForData(homeAll);
@@ -945,7 +1024,15 @@
     if (m > max * 0.5) return cut.slice(0, m + 1);
     return cut + '…';
   }
-  var _storyPost = '';
+  var _storyPost = '', _storyD = null;
+  document.addEventListener('click', function (e) {
+    var s = e.target.closest && e.target.closest('[data-story-share]');
+    if (!s || !_storyD || !window.shareTextFor) return;
+    var text = window.shareTextFor(_storyD);
+    var track = function (ch) { if (typeof gtag === 'function') gtag('event', 'share_click', { cultivar: _storyD.displayName, channel: ch, source: 'story' }); };
+    if (navigator.share) { navigator.share({ text: text }).then(function () { track('os'); }, function () {}); return; }
+    navigator.clipboard.writeText(text).then(function () { showToast(T('share_band_copied')); track('copy'); }, function () { showToast(T('story_copy_failed'), true); });
+  });
   document.addEventListener('click', function (e) {
     var c = e.target.closest && e.target.closest('[data-story-copy]');
     if (!c || !_storyPost) return;
@@ -983,8 +1070,8 @@
     html += link(d, esc(T('story_more')), 'story__more');
     // for the owner's Instagram post: the text to paste and the 1080×1350 image made in CI (T94)
     if (d.state === 'ok' && window.ogSlug) {
-      html += '<p class="story__share"><button type="button" class="story__copy" data-story-copy>' + esc(T('story_copy')) + '</button>'
-        + '<a class="story__img" href="' + esc(base + 'images/ig/' + window.ogSlug(d.genus, d.fullName) + '.png') + '" download target="_blank" rel="noopener">' + esc(T('story_save_image')) + '</a></p>';
+      html += '<p class="story__share"><button type="button" class="story__copy" data-story-share>' + esc(T('detail_share')) + '</button></p>';
+      _storyD = d;
       // Instagram does not link a URL in a caption: the profile link goes to /ig/, where the plate number leads on
       // (T147). Tags only from the registered name and its katakana alias, never guessed.
       var plate = window.igPlateNo ? window.igPlateNo(d.fullName) : '';
@@ -995,6 +1082,7 @@
       if (!/\b(sp|aff|cf)\./.test(d.fullName) && d.genus && d.epithet) tags.push('#' + (d.genus + d.epithet).toLowerCase().replace(/[^a-z0-9]/g, ''));
       tags.push('#AroidOrigins');
       _storyPost = [d.shownName + (citeHtml(d) ? ' — ' + citeHtml(d).replace(/<[^>]+>/g, '') : ''), excerpt(text, 120), plate ? 'プロフィールのリンク → 図版 ' + plate : (window.getShareUrl ? window.getShareUrl(d.fullName) : ''), tags.join(' ')].filter(Boolean).join('\n\n');
+      window._storyIg = { name: d.shownName, img: base + 'images/ig/' + window.ogSlug(d.genus, d.fullName) + '.png' };
     }
     body.innerHTML = html;
     if (window.linkGlossaryTerms) window.linkGlossaryTerms(body.querySelector('.story__body'), 3);
@@ -1115,6 +1203,24 @@
       if (countEl) countEl.textContent = week > 0 ? T('new_entries_week').replace('{n}', week) : '';
     }
     var html = '<ol class="entries">', lastDay = '', fetched = items;
+    if (withDate && grid.id === 'recently-updated-grid') {
+      var newest = items.reduce(function (m, it) { return Math.max(m, new Date(it.created_at || it.updated_at || 0).getTime()); }, 0);
+      var quiet = Date.now() - newest > 14 * 864e5;
+      var newH = document.querySelector('#front-new .section-title');
+      if (newH) newH.textContent = T(quiet ? 'new_entries_title_quiet' : 'new_entries_title');
+      if (quiet) withDate = false;
+      // the plates still waiting for a photo: the one thing a visitor can add today
+      var wantEl = document.getElementById('front-wanted');
+      if (wantEl && window._dataFullyLoaded) {
+        var store = window.cultivarData || {}, th = window._thumbMap || {}, seenW = {}, nW = 0;
+        Object.keys(store).forEach(function (k) {
+          var e = store[k]; if (!e || seenW[e._id || k] || e._type === 'seedling' || / \[Seedling\]$/.test(k)) return; seenW[e._id || k] = true;
+          var dw; try { dw = describe(k, e, e._type); } catch (er) { return; }
+          if (dw.state === 'ok' && !dw.isIndividual && !th[dw.displayName] && shownGenus(dw)) nW++;
+        });
+        wantEl.innerHTML = nW ? '<a href="' + esc(base + 'wanted/') + '" data-nav="wanted">' + esc(T('front_wanted').replace('{n}', nW)) + '</a>' : '';
+      }
+    }
     if (opts.max) items = items.slice(0, opts.max);
     items.forEach(function (item) {
       var origins = (item.origins || []);
@@ -1181,9 +1287,10 @@
         cells += cell('spec_habitat', distributionHtml(d.habitat) || absentHtml(d, 'known_habitats'));
       }
     } else {
-      if (d.type === 'clone' && !d.breeder && d.namer) cells += cell('spec_namer', linkPeople(d.namer));
+      if (d.isIndividual) cells += cell('individual_namer', linkPeople(d.namer));
+      else if (d.type === 'clone' && !d.breeder && d.namer) cells += cell('spec_namer', linkPeople(d.namer));
       else cells += cell('spec_breeder', linkPeople(d.breeder || d.namer || d.creator) || (d.type === 'seedling' || d.isIndividual ? '' : absentHtml(d, 'breeder')));
-      cells += cell(d.type === 'seedling' ? 'spec_sowing' : 'spec_year', d.type === 'seedling' ? esc(/^\d{4}-\d{2}-\d{2}/.test(d.sowing) ? fmtDate(d.sowing) : d.sowing) : ((d.namingYear || d.year) ? '<span class="num">' + (d.namingYear || d.year) + '</span>' : ''));
+      cells += cell(d.type === 'seedling' ? 'spec_sowing' : d.isIndividual ? 'individual_year' : 'spec_year', d.type === 'seedling' ? esc(/^\d{4}-\d{2}-\d{2}/.test(d.sowing) ? fmtDate(d.sowing) : d.sowing) : ((d.namingYear || d.year) ? '<span class="num">' + (d.namingYear || d.year) + '</span>' : ''));
       var unconfirmed = d.tags.indexOf('parentage_unconfirmed') !== -1;
       if (d.parentA || d.parentB) cells += cell('spec_parents', parentHtml(all, d.parentA || T('lineage_unknown')) + ' × ' + parentHtml(all, d.parentB || T('lineage_unknown')) + (unconfirmed ? ' <span class="absent">' + esc(T('parentage_unconfirmed')) + '</span>' : ''));
       else if (d.type === 'hybrid') cells += cell('spec_parents', d.formulaStatus === 'unknown' ? esc(T('lineage_unknown')) : absentHtml(d, 'formula'));
@@ -1354,7 +1461,32 @@
     try { flag = sessionStorage.getItem('just_recorded'); } catch (e) {}
     if (!flag || flag !== d.fullName) { el.classList.add('d-none'); el.innerHTML = ''; return; }
     try { sessionStorage.removeItem('just_recorded'); } catch (e) {}
+    drawShareBand(el, d, 'record');
+  }
+  // after a photo is sent: the same band, shorter (board 15 B15)
+  document.addEventListener('ao:photo-sent', function (e) {
+    var el = document.getElementById('share-band'), d = _labelEntry || (window._labelLast && window._labelLast.d);
+    var pg = document.getElementById('page-cultivar');
+    if (!el || !d || !pg || !pg.classList.contains('active') || (e.detail && String(e.detail).replace(' [Seedling]', '') !== d.displayName)) return;
+    drawShareBand(el, d, 'photo');
+  });
+  function drawShareBand(el, d, kind) {
     var text = window.shareTextFor(d);
+    if (kind === 'photo') {
+      el.innerHTML = '<p class="share-band__title">' + esc(T('share_band_photo_title')) + '</p>'
+        + '<p class="share-band__actions">'
+        + '<button type="button" class="share-band__btn share-band__btn--main" id="share-band-share">共有</button>'
+        + '<a class="share-band__btn" href="' + esc(base + 'mypost') + '" data-nav="mypost">自分の株を見る</a>'
+        + '<button type="button" class="share-band__close" id="share-band-close" aria-label="閉じる">×</button></p>';
+      el.classList.remove('d-none');
+      var trackP = function (ch) { if (typeof gtag === 'function') gtag('event', 'share_click', { cultivar: d.displayName, channel: ch, source: 'photo' }); };
+      document.getElementById('share-band-share').addEventListener('click', function () {
+        if (navigator.share) { navigator.share({ text: text }).then(function () { trackP('os'); }, function () {}); return; }
+        navigator.clipboard.writeText(text).then(function () { showToast(T('share_band_copied')); trackP('copy'); });
+      });
+      document.getElementById('share-band-close').addEventListener('click', function () { el.classList.add('d-none'); });
+      return;
+    }
     // four actions after recording (board 9 D6): share · add a photo · add a record · see my records
     var noPhoto = !document.querySelector('#page-cultivar .gallery__item[data-user-upload], #page-cultivar .plate img');
     el.innerHTML = '<p class="share-band__title">' + esc(T('share_band_title')) + '</p>'
@@ -1500,7 +1632,7 @@
     var html = '<div class="related__group"><h3>' + (headHtml || esc(T(titleKey))) + '</h3><ul>';
     list.slice(0, 6).forEach(function (d) {
       var meta = d.type === 'species' && !d.isIndividual ? (d.pubYear || '') : joinParts([kindWord(d), d.namingYear || d.year]);
-      html += '<li>' + link(d, sciNameHtml(d.shownName)) + (meta ? '<span class="num">' + esc(meta) + '</span>' : '') + '</li>';
+      html += '<li>' + link(d, '<span>' + sciNameHtml(d.shownName) + '</span>') + (meta ? '<span class="num">' + esc(meta) + '</span>' : '') + '</li>';
     });
     return html + '</ul></div>';
   }
@@ -1514,7 +1646,7 @@
     if (d.type === 'species' && !d.isIndividual && d.author) {
       var people = splitPeople(d.author);
       if (people.length) {
-        html += '<h2 class="sec">記載した人</h2>';
+        html += '<h2 class="sec">記載者</h2>';
         people.forEach(function (key) {
           var au = authorityOf(key) || {};
           var cnt = all.filter(function (x) { return x.state === 'ok' && peopleOf(x).indexOf(key) !== -1; }).length;
@@ -1557,6 +1689,8 @@
       + relatedGroupHtml('related_same_person', samePerson);
     // no empty frame under the heading when there is nothing to list (board 11)
     var html = groups ? '<div class="related__grid">' + groups + '</div>' : '';
+    var relH = section.querySelector('.section-title');
+    if (relH) relH.style.display = groups ? '' : 'none';
     if (prev || next) {
       html += '<nav class="related__nav" aria-label="' + esc(T('related_title')) + '">';
       if (prev) html += link(prev, '<span class="mono">← ' + esc(T('related_prev')) + '</span><span class="related__nav-name">' + sciNameHtml(prev.shownName) + '</span>');
@@ -1722,7 +1856,8 @@
     var byYear = function (list) { return list.slice().sort(function (a, b) { return (a.pubYear || 9999) - (b.pubYear || 9999) || a.displayName.localeCompare(b.displayName); }); };
     body.innerHTML = facts
       + (g.typeItems.length ? '<h2 class="section-title"><span>' + esc(T('locality_group_type')) + '</span></h2><div id="locality-ledger"></div>' : '')
-      + (g.rangeItems.length ? '<h2 class="section-title"><span>' + esc(T('locality_group_range')) + '</span></h2><div id="locality-ledger-range"></div>' : '');
+      + (g.rangeItems.length ? '<h2 class="section-title"><span>' + esc(T('locality_group_range')) + '</span></h2><div id="locality-ledger-range"></div>' : '')
+      + '<section class="tool-context" id="locality-tools" aria-label="道具">' + (window._toolsOpen ? toolContextHtml('locality') : '') + '</section>';
     if (typeof window.loadCultivarThumbnails === 'function') window.loadCultivarThumbnails();
     if (g.typeItems.length) window.renderEntriesLedger(document.getElementById('locality-ledger'), toLedgerItems(byYear(g.typeItems)), {}, { noCountry: true });
     if (g.rangeItems.length) window.renderEntriesLedger(document.getElementById('locality-ledger-range'), toLedgerItems(byYear(g.rangeItems)), {});
@@ -1799,7 +1934,12 @@
     _labelEntry = d.type === 'seedling' ? null : d;
     // 「この品種を親に実生を記録」: the seedling form opens with this name as the mother
     var sdl = document.getElementById('detail-add-seedling');
-    if (sdl) { sdl.setAttribute('data-prefill-parent', d.displayName); sdl.classList.toggle('d-none', d.type === 'seedling' || d.isIndividual); }
+    if (sdl) {
+      sdl.setAttribute('data-prefill-parent', d.isIndividual ? d.displayName.replace(/\s+\([^)]*\)$/, '') : d.displayName);
+      sdl.classList.toggle('d-none', d.type === 'seedling');
+      var sdlKey = d.isIndividual ? 'detail_add_seedling_plant' : (d.type === 'species' ? 'detail_add_seedling_species' : 'detail_add_seedling');
+      sdl.setAttribute('data-i18n', sdlKey); sdl.textContent = T(sdlKey);
+    }
     var plb = document.getElementById('detail-print-label');
     if (plb) plb.classList.toggle('d-none', d.type === 'seedling');
     renderRelated(d, all);
@@ -1810,6 +1950,7 @@
     renderShareBand(d, entry);
     renderColophonLine(d, entry);
     renderShops(d);
+    renderToolContext(d);
     if (window.refreshRerunButton) window.refreshRerunButton(entry);
     if (window.refreshPrivateButton) window.refreshPrivateButton(entry);
     var pnote = document.getElementById("detail-private-note");
@@ -2056,7 +2197,9 @@
       // can be requested (hybrids are no longer researched automatically).
       var id = cultivarId();
       var isSeedling = cData && cData._type === 'seedling';
-      if (!id || isSeedling || !sb()) { btn.classList.add('d-none'); status.classList.add('d-none'); return; }
+      // an individual has no literature of its own to research (§3)
+      var isInd = cData && (cData._tags || []).indexOf('individual') !== -1;
+      if (!id || isSeedling || isInd || !sb()) { btn.classList.add('d-none'); status.classList.add('d-none'); return; }
       sb().from('research_requests').select('status').eq('cultivar_id', id).in('status', ['pending', 'approved']).limit(1)
         .then(function (res) { setStatus(res.data && res.data[0] ? res.data[0].status : 'none'); })
         .catch(function () { setStatus('none'); });
@@ -2352,7 +2495,7 @@
     $('post-sheet-kind').textContent = _sheetOnEntry && std ? std.textContent.trim() : '';
     $('post-sheet-name').innerHTML = _sheetOnEntry && h1 ? h1.innerHTML : '何を記録しますか';
     $('post-sheet-photo-d').textContent = _sheetOnEntry ? 'この品種に、自分で撮った写真を' : '写真のない品種に、自分で撮った写真を';
-    $('post-sheet-seedling-d').textContent = _sheetOnEntry ? 'この品種を母に、交配式と播種日' : '自分で播いた株の交配式と播種日';
+    $('post-sheet-seedling-d').textContent = _sheetOnEntry ? '親の欄にこの名前を入れて、交配式と播種日' : '自分で播いた株の交配式と播種日';
     var ind = $('detail-add-individual'), sdl = $('detail-add-seedling'), rec = $('detail-add-record-btn'), ph = $('detail-add-photo-btn');
     $('post-sheet-entry-more').classList.toggle('d-none', !_sheetOnEntry);
     $('post-sheet-ind').classList.toggle('d-none', !_sheetOnEntry || !ind || ind.classList.contains('d-none'));
@@ -2361,6 +2504,7 @@
     dlg.querySelector('[data-post-act="photo"]').parentNode.classList.toggle('d-none', _sheetOnEntry && (!ph || ph.style.display === 'none'));
     dlg.querySelector('[data-post-act="seedling"]').parentNode.classList.toggle('d-none', _sheetOnEntry && (!sdl || sdl.classList.contains('d-none')));
     dlg.showModal();
+    var psName = $('post-sheet-name'); psName.setAttribute('tabindex', '-1'); psName.focus();
   }
   var ps = $('post-sheet');
   if (ps) ps.addEventListener('click', function (e) {
@@ -2432,7 +2576,10 @@
     bar.className = 'cstep-bar'; bar.id = 'cstep-bar';
     bar.innerHTML = '<button type="button" class="btn btn--secondary" id="cstep-back">戻る</button><button type="button" class="btn btn--primary" id="cstep-next">次へ</button>';
     p.appendChild(bar);
-    $('cstep-back').addEventListener('click', function () { if (step > 1) history.back(); });
+    $('cstep-back').addEventListener('click', function () {
+      if (step > 1 || history.length > 1) history.back();
+      else if (typeof navigateTo === 'function') navigateTo('top');
+    });
     $('cstep-next').addEventListener('click', function () {
       if (step === 5) { var sbtn = $('contribute-submit-btn'); if (sbtn) sbtn.click(); return; }
       if (check(step)) go(step + 1, true);
@@ -2525,7 +2672,7 @@
     $('cstep-count').textContent = n + ' / 5';
     $('cstep-name').textContent = STEPS[n - 1];
     Array.prototype.forEach.call($('cstep-head').querySelectorAll('li'), function (li, i) { li.classList.toggle('is-done', i < n); });
-    $('cstep-back').disabled = n === 1;
+    $('cstep-back').textContent = n === 1 ? 'やめる' : '戻る';
     // step 5: the bar's main button records (the form's own submit button is hidden while stepped)
     $('cstep-next').textContent = n === 5 ? 'この内容で記録する' : '次へ';
     if (n === 5) review();

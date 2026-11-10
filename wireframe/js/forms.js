@@ -1128,10 +1128,11 @@ document.addEventListener('click', function(e) {
         if (cultivarData[fullName]) { showToast(t('individual_dup'), true); return; }
       }
       var today = new Date().toISOString().split('T')[0];
-      var bodyJp = "'" + code + "' は " + (namer ? namer + ' が' : '') + (year ? year + ' 年に' : '') + (namer || year ? '命名した ' : '') + target.name + ' の個体。' + (note ? note : '');
-      var bodyEn = "'" + code + "' is an individual plant of " + target.name + (namer ? ', named by ' + namer : '') + (year ? ' in ' + year : '') + '.' + (note ? ' ' + note : '');
+      // a number is given, not bred or published: 「〜がつけた番号・名前」 (board 15 T1)
+      var bodyJp = "'" + code + "' は、" + namer + ' が' + (year ? ' ' + year + ' 年に' : '') + ' ' + target.name + ' の 1 株につけた番号・名前。' + (note ? note : '');
+      var bodyEn = "'" + code + "' is the number or name " + namer + ' gave to one plant of ' + target.name + (year ? ' in ' + year : '') + '.' + (note ? ' ' + note : '');
       var origin = { body: bodyJp, body_en: bodyEn, trust: 30, trustClass: 'trust--low', source_type: 'manual', source_tier: null, source_name: '', source_url: '', source_language: 'ja',
-        parentage: null, discovery_year: year, discoverer_or_breeder: namer || null, native_region: null, first_description: null,
+        parentage: null, discovery_year: year, discoverer_or_breeder: null, native_region: null, first_description: null,
         structured: { origin_type: 'clone', namer: namer || null, naming_year: year, notes: note || '', citation_links: [],
           individual_code: code, acquisition: acq || null, acquired_from: from || null, origin_region: region || null },
         author: { isAI: false, name: 'User', date: today }, sources: [], votes: { agree: 0, disagree: 0 }, verified: false };

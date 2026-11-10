@@ -12,6 +12,23 @@ if ('serviceWorker' in navigator) {
         return;
       }
       if (document.getElementById('sw-update-banner')) return;
+      // someone only reading gets the new version at the next page change, without being asked (board 15 B3);
+      // the bar is for a form in progress, and never while a login is coming back
+      var busy = function() {
+        var a = document.activeElement, pg = document.querySelector('.page.active');
+        return !!document.querySelector('dialog[open]') || (pg && pg.id === 'page-contribute') || (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.value);
+      };
+      var authReturn = /access_token=|[?&]code=|[?&]error=/.test(location.hash + location.search);
+      if (!busy() && !authReturn) {
+        var armed = true;
+        document.addEventListener('ao:page', function() {
+          if (!armed || busy()) return;
+          armed = false;
+          try { if (Date.now() - (+sessionStorage.getItem('sw-auto-reload') || 0) < 60000) return; sessionStorage.setItem('sw-auto-reload', String(Date.now())); } catch (err) {}
+          setTimeout(function() { window.location.reload(); }, 0);
+        });
+        return;
+      }
       var banner = document.createElement('div');
       banner.id = 'sw-update-banner';
       banner.setAttribute('role', 'status');

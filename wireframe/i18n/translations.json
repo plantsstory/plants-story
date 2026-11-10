@@ -1677,8 +1677,8 @@
     "en": "Enter a name or number"
   },
   "individual_dup": {
-    "jp": "あなたがつけたその番号はすでに登録されています",
-    "en": "You have already recorded that number"
+    "jp": "その人がつけた同じ番号は、すでに登録されています",
+    "en": "That number from that person is already recorded"
   },
   "individual_saved": {
     "jp": "個体を登録しました",
@@ -1853,8 +1853,8 @@
     "en": "Edit"
   },
   "detail_report": {
-    "jp": "報告",
-    "en": "Report"
+    "jp": "誤りを報告",
+    "en": "Report an error"
   },
   "record_add_link": {
     "jp": "記録を追加",
@@ -2449,8 +2449,8 @@
     "en": "Entries"
   },
   "login_sheet_title": {
-    "jp": "ログインしてから始めます",
-    "en": "Log in to start"
+    "jp": "Google でログインして続けます",
+    "en": "Log in with Google to continue"
   },
   "login_sheet_text": {
     "jp": "投稿・写真・記録の追加には Google のログインが要ります。ログインのあと、この続きから始められます。",
@@ -2515,5 +2515,37 @@
   "spec_acquired_from": {
     "jp": "入手先",
     "en": "Obtained from"
+  },
+  "cite_numbered": {
+    "jp": "つけた人",
+    "en": "Numbered by"
+  },
+  "kind_trade_name": {
+    "jp": "流通名",
+    "en": "trade name"
+  },
+  "detail_add_seedling_species": {
+    "jp": "この原種を親に実生を記録",
+    "en": "Record a seedling from this species"
+  },
+  "detail_add_seedling_plant": {
+    "jp": "この株を親に実生を記録",
+    "en": "Record a seedling from this plant"
+  },
+  "share_band_photo_title": {
+    "jp": "写真を載せました",
+    "en": "Photo added"
+  },
+  "new_entries_title_quiet": {
+    "jp": "最近加わった名前",
+    "en": "Recently added names"
+  },
+  "front_wanted": {
+    "jp": "写真を募集中 {n} 件 →",
+    "en": "Photos wanted: {n} →"
+  },
+  "kind_cf": {
+    "jp": "同定未確定",
+    "en": "Identification unsettled"
   }
 }
