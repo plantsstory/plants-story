@@ -49,7 +49,11 @@ function items(data: any): any[] {
   return list.map((x: any) => x?.Item || x);
 }
 
-let REFERRER = Deno.env.get("RAKUTEN_REFERRER") || "https://plantsstory.com/";
+// The Rakuten app is registered to one website, and the site moved (plantsstory.com → aroidorigins.com, 10-30).
+// Until the registration is changed Rakuten accepts the old address, afterwards the new one: on a refusal over the
+// referrer the other one is tried, so the owner can change the registration at any time without this breaking.
+const REFERRERS = [Deno.env.get("RAKUTEN_REFERRER") || "https://plantsstory.com/", "https://aroidorigins.com/", "https://plantsstory.com/"].filter((v, i, a) => a.indexOf(v) === i);
+let REFERRER = REFERRERS[0];
 async function rakuten(params: Record<string, string>) {
   const appId = Deno.env.get("RAKUTEN_APP_ID"), accessKey = Deno.env.get("RAKUTEN_ACCESS_KEY");
   if (!appId || !accessKey) throw new Error("RAKUTEN_APP_ID / RAKUTEN_ACCESS_KEY が設定されていません");
@@ -59,6 +63,10 @@ async function rakuten(params: Record<string, string>) {
     const r = await fetch(RAKUTEN_ENDPOINT + "?" + q.toString(), { headers: { accessKey, Referer: REFERRER, Origin: new URL(REFERRER).origin } });
     if (r.status === 429) { await sleep(2000 * (attempt + 1)); continue; }
     const data = await r.json();
+    if ((data?.errors || data?.error) && /referr?er/i.test(JSON.stringify(data))) {
+      const next = REFERRERS[REFERRERS.indexOf(REFERRER) + 1];
+      if (next) { REFERRER = next; attempt--; continue; }
+    }
     if (data?.errors || data?.error) throw new Error("楽天 API: " + (data.errors?.errorMessage || data.error_description || data.error || JSON.stringify(data.errors)));
     return items(data);
   }
