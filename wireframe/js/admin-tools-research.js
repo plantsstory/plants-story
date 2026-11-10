@@ -48,10 +48,9 @@
       + '<div style="display:flex;gap:var(--space-sm);flex-wrap:wrap;align-items:center;margin-top:var(--space-sm);">'
       + '<button class="btn btn-primary btn-sm" id="tr-all">全部門をリサーチ</button>'
       + '<button class="btn btn-outline btn-sm" id="tr-refresh">楽天の価格・在庫を更新</button>'
-      + '<label style="font-size:var(--font-size-sm);"><input type="checkbox" id="tr-publish"' + (publishNow() ? ' checked' : '') + '> 見つけた商品をすぐ公開する</label>'
+      + '<span style="font-size:var(--font-size-sm);color:var(--color-gray);">見つけた商品は上の「商品の精査」の候補に入り、承諾するまで公開されません。</span>'
       + '</div><div id="tr-log" style="display:none;margin-top:var(--space-sm);font-size:var(--font-size-xs);max-height:220px;overflow:auto;border-top:1px solid var(--color-light);padding-top:6px;"></div></div>';
     box.innerHTML = html;
-    document.getElementById('tr-publish').addEventListener('change', function (e) { try { localStorage.setItem('tools_publish_now', e.target.checked ? 'true' : 'false'); } catch (x) {} });
     box.querySelectorAll('[data-tr-run]').forEach(function (b) { b.addEventListener('click', function () { run([b.getAttribute('data-tr-run')]); }); });
     box.querySelectorAll('[data-tr-q]').forEach(function (b) { b.addEventListener('click', function () { queryEditor(b.getAttribute('data-tr-q')); }); });
     document.getElementById('tr-all').addEventListener('click', function () {
@@ -68,20 +67,20 @@
   async function run(slugs) {
     if (busy) { toast('いま実行中です'); return; }
     busy = true;
-    var publish = document.getElementById('tr-publish').checked, total = 0;
+    var total = 0;
     for (var i = 0; i < slugs.length; i++) {
       var g = (allToolGenres || []).filter(function (x) { return x.slug === slugs[i]; })[0];
       log((g ? g.label : slugs[i]) + ' を調べています…');
       try {
-        var d = await call({ genre: slugs[i], publish: publish });
+        var d = await call({ genre: slugs[i] });
         total += d.added || 0;
-        log('→ ' + (d.added || 0) + ' 件追加' + (d.note ? '（' + esc(d.note) + '）' : '') + (d.names && d.names.length ? ': ' + d.names.map(esc).join(' / ') : ''));
+        log('→ 候補に ' + (d.added || 0) + ' 件' + (d.note ? '（' + esc(d.note) + '）' : '') + (d.names && d.names.length ? ': ' + d.names.map(esc).join(' / ') : ''));
       } catch (e) {
         log('<span style="color:#a8712e;">→ エラー: ' + esc(e.message) + '</span>');
         if (/RAKUTEN_APP_ID|RAKUTEN_ACCESS_KEY/.test(e.message)) break;
       }
     }
-    log('<strong>合計 ' + total + ' 件追加しました</strong>');
+    log('<strong>合計 ' + total + ' 件を候補に入れました。上の「商品の精査」で承諾・拒否してください</strong>');
     busy = false;
     loadAffiliates();
   }

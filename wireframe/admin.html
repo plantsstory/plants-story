@@ -14,16 +14,17 @@
   <link rel="stylesheet" href="css/utilities.css">
   <link rel="stylesheet" href="css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/record-gate.js?v=20261110f"></script>
-  <script src="js/tool-gate.js?v=20261110f"></script>
-  <script src="js/admin-ledger.js?v=20261110f"></script>
-  <script src="js/admin-tools-research.js?v=20261110f"></script>
-  <script src="js/admin-verify.js?v=20261110f"></script>
-  <script src="js/admin-contact.js?v=20261110f"></script>
-  <script src="js/admin-checks.js?v=20261110f"></script>
-  <script src="js/admin-suggest.js?v=20261110f"></script>
-  <script src="js/admin-shops.js?v=20261110f"></script>
-  <script src="js/admin-articles.js?v=20261110f"></script>
+  <script src="js/record-gate.js?v=20261110g"></script>
+  <script src="js/tool-gate.js?v=20261110g"></script>
+  <script src="js/admin-ledger.js?v=20261110g"></script>
+  <script src="js/admin-tools-research.js?v=20261110g"></script>
+  <script src="js/admin-tool-candidates.js?v=20261110g"></script>
+  <script src="js/admin-verify.js?v=20261110g"></script>
+  <script src="js/admin-contact.js?v=20261110g"></script>
+  <script src="js/admin-checks.js?v=20261110g"></script>
+  <script src="js/admin-suggest.js?v=20261110g"></script>
+  <script src="js/admin-shops.js?v=20261110g"></script>
+  <script src="js/admin-articles.js?v=20261110g"></script>
 </head>
 <body>
 
@@ -360,6 +361,7 @@
           <button class="btn btn-primary" id="btn-add-affiliate">＋ 新規追加</button>
           <button class="btn btn-outline" id="btn-refresh-affiliates">更新</button>
         </div>
+        <div id="tool-candidates-panel" class="mt-md"></div>
         <div id="tools-research-panel" class="mt-md"></div>
         <div id="affiliate-list" class="d-grid gap-md mt-md"></div>
       </section>
@@ -2782,6 +2784,7 @@ function renderAffiliateList() {
   });
   container.innerHTML = html;
   if (window.renderToolsResearch) window.renderToolsResearch();
+  if (window.renderToolCandidates) window.renderToolCandidates();
 }
 
 async function markAffiliateChecked(id) {

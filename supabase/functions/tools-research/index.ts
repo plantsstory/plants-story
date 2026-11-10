@@ -15,6 +15,11 @@ const RAKUTEN_ENDPOINT = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/
 const RAKUTEN_AFFILIATE_ID = Deno.env.get("RAKUTEN_AFFILIATE_ID") || "51ddadd6.592101ce.51ddadd7.b054826c";
 const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-5-mini";
 const MIN_RATING = 4.0;
+// Rakuten marks postage as 0 = included, 1 = on top. Pots and bagged soil are only worth one order when it is included.
+const BULKY = ["soil", "pots"];
+const CHEAP_WITH_POSTAGE = 2000;
+// true = included, false = on top, null = the API did not say (then nothing is filtered on it)
+function postageIncluded(it: any): boolean | null { const f = it?.postageFlag; return f === 0 || f === "0" ? true : f === 1 || f === "1" ? false : null; }
 const BANNED = ["おすすめ", "オススメ", "最安", "ランキング", "効く", "効果", "改善", "治る", "No.1", "NO.1", "ナンバーワン"];
 const BANDS: [number, string][] = [[1000, "〜1,000円"], [2000, "1,000〜2,000円"], [3000, "2,000〜3,000円"], [5000, "3,000〜5,000円"], [10000, "5,000〜10,000円"], [20000, "10,000〜20,000円"]];
 
@@ -96,7 +101,12 @@ async function askModel(system: string, user: string) {
 
 const SYSTEM = `あなたは室内でアロイド（アンスリウムなど熱帯の観葉植物）を育てる人のための道具の目録を編集しています。
 楽天市場の検索結果から、指定の部門にはっきり当てはまる商品だけを選び、JSON 配列だけを返します。
-各要素: {"i": 候補番号, "name": "道具の名前（日本語、28字以内。【】・送料無料・ポイント・宣伝文句・型番の羅列を入れない。ブランド名と容量・サイズは入れてよい）", "maker": "メーカー名（分からなければ空文字）", "model": "型番（あれば）", "spec": "規格・容量・サイズ（あれば）", "summary": "どんな道具か（40字以内）", "description": "商品の説明（120〜200字）"}
+各要素: {"i": 候補番号, "name": "道具の名前（日本語、28字以内。【】・送料無料・ポイント・宣伝文句・型番の羅列を入れない。ブランド名と容量・サイズは入れてよい）", "maker": "メーカー名（分からなければ空文字）", "model": "型番（あれば）", "spec": "規格・容量・サイズ（あれば）", "summary": "どんな道具か（40字以内）", "description": "商品の説明（120〜200字）", "fit": "online か either か store", "note": "そう判断した理由（40字以内。掲載の可否を決める人だけが読む）"}
+fit の決め方（日本のホームセンターの園芸売り場を基準にする）:
+- online: ホームセンターではまず見かけない専門的な道具・資材。通販で買う理由がある。
+- either: ホームセンターにも通販にもあり、どちらで買っても値段や手間がほぼ変わらない。
+- store: ホームセンターで同じ物・同等品が安く手に入り、通販だと送料や手間で損をする（ふつうのプラ鉢 1 個、一般的な培養土、大袋の用土など）。store の商品は選ばない。
+候補の「送料」が「別」で値段が安い物、かさばる物・重い物は、1 つ買うと送料の割合が大きくなるので選ばない。online を優先し、either は品質や規格に選ぶ理由があるときだけ選ぶ。
 説明文のルール:
 - 事実だけを書く（素材、大きさ、容量、仕組み、どんな場面で使われる道具か）。
 - 「おすすめ」「最安」「ランキング」「効く」「効果」「改善」「治る」「No.1」は使わない。
@@ -159,6 +169,9 @@ serve(async (req) => {
       const found = await rakuten({ keyword: q.keyword, hits: "15", sort: "-reviewCount", availability: "1", imageFlag: "1", minPrice: "500" });
       await sleep(1100);
       found.filter((it) => !known.has(it.itemCode) && (it.reviewCount || 0) >= q.min_reviews && Number(it.reviewAverage || 0) >= MIN_RATING)
+        // shipping decides whether one item is worth ordering (owner, 11-10): bulky departments only with postage
+        // included; elsewhere a cheap item with postage on top is left out
+        .filter((it) => postageIncluded(it) !== false || (!BULKY.includes(genre) && Number(it.itemPrice || 0) >= CHEAP_WITH_POSTAGE))
         .slice(0, 6)
         .forEach((it) => pool.push({ q, it }));
       await db.from("tool_research_queries").update({ last_run_at: new Date().toISOString() }).eq("id", q.id);
@@ -166,7 +179,7 @@ serve(async (req) => {
     if (!pool.length) return json(req, { added: 0, note: "条件に合う商品が見つかりませんでした（レビュー数・評価の条件）" });
 
     // 2) the model picks and writes; candidates are numbered across keywords
-    const listing = pool.map((p, i) => `#${i} [キーワード: ${p.q.keyword} / max ${p.q.max_items}] ${p.it.itemName} ｜ ショップ: ${p.it.shopName} ｜ レビュー ${p.it.reviewCount}件 ★${p.it.reviewAverage} ｜ 説明: ${String(p.it.itemCaption || "").replace(/\s+/g, " ").slice(0, 260)}`).join("\n");
+    const listing = pool.map((p, i) => `#${i} [キーワード: ${p.q.keyword} / max ${p.q.max_items}] ${p.it.itemName} ｜ ショップ: ${p.it.shopName} ｜ ${p.it.itemPrice}円・送料${postageIncluded(p.it) === true ? "込" : postageIncluded(p.it) === false ? "別" : "不明"} ｜ レビュー ${p.it.reviewCount}件 ★${p.it.reviewAverage} ｜ 説明: ${String(p.it.itemCaption || "").replace(/\s+/g, " ").slice(0, 260)}`).join("\n");
     const prompt = `部門: ${g.label}\n既存の掲載品: ${(existing || []).map((x: any) => x.product_name).join(" / ") || "なし"}\n\n候補:\n${listing}`;
     const { picks, usage, provider, model } = await askModel(SYSTEM, prompt);
     db.from("ai_usage_log").insert({ provider, model, purpose: "tools_research:" + genre, input_tokens: usage?.input_tokens, output_tokens: usage?.output_tokens }).then(() => {}, () => {});
@@ -176,9 +189,11 @@ serve(async (req) => {
     const { data: maxRow } = await db.from("affiliates").select("sort_order").order("sort_order", { ascending: false }).limit(1);
     let order = (maxRow && maxRow[0] ? maxRow[0].sort_order : 0) + 1;
     const rows: any[] = [];
+    const reviews: Record<string, any> = {};
     for (const p of Array.isArray(picks) ? picks : []) {
       const c = pool[Number(p.i)];
       if (!c || known.has(c.it.itemCode)) continue;
+      if (p.fit === "store") continue;   // cheaper at a home centre: not a candidate
       const kw = c.q.keyword;
       if ((perKeyword[kw] || 0) >= c.q.max_items) continue;
       const name = clean(p.name).slice(0, 40), description = clean(p.description), summary = clean(p.summary).slice(0, 60);
@@ -192,13 +207,20 @@ serve(async (req) => {
         summary, description, image: firstImage(c.it.mediumImageUrls), rakuten: c.it.affiliateUrl,
         price: c.it.itemPrice, price_band: band(c.it.itemPrice), price_checked_at: new Date().toISOString(),
         shop_name: c.it.shopName, review_count: c.it.reviewCount, review_average: c.it.reviewAverage,
-        is_published: body.publish !== false, sort_order: order++, icon: "",
+        // nothing found here is published by itself: it waits as a candidate until the owner accepts it (11-10)
+        is_published: false, sort_order: order++, icon: "",
       });
+      reviews[c.it.itemCode] = {
+        status: "candidate", postage_included: postageIncluded(c.it),
+        store_fit: p.fit === "online" || p.fit === "either" ? p.fit : null, ai_note: String(p.note || "").slice(0, 80) || null,
+      };
     }
-    if (body.dryRun) return json(req, { dryRun: true, considered: pool.length, rows: rows.map((r) => ({ name: r.product_name, maker: r.maker, spec: r.spec, price: r.price, reviews: r.review_count, rating: r.review_average, image: r.image, summary: r.summary, description: r.description })) });
+    if (body.dryRun) return json(req, { dryRun: true, considered: pool.length, rows: rows.map((r) => ({ name: r.product_name, maker: r.maker, spec: r.spec, price: r.price, reviews: r.review_count, rating: r.review_average, image: r.image, summary: r.summary, description: r.description, review: reviews[r.ext_id] })) });
     if (rows.length) {
-      const { error } = await db.from("affiliates").insert(rows);
+      const { data: inserted, error } = await db.from("affiliates").insert(rows).select("id, ext_id");
       if (error) throw error;
+      const rv = (inserted || []).map((r: any) => ({ affiliate_id: r.id, ...reviews[r.ext_id] }));
+      if (rv.length) { const { error: e2 } = await db.from("tool_reviews").insert(rv); if (e2) throw e2; }
     }
     return json(req, { added: rows.length, considered: pool.length, names: rows.map((r) => r.product_name) });
   } catch (e) {
