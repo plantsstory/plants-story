@@ -2892,7 +2892,7 @@ if (false) {
     var thumbKey = isSeedling ? displayName : displayName;
     var thumbPath = _thumbMap[thumbKey];
     var thumbContent = thumbPath
-      ? '<img data-src="' + (window.galleryImg ? window.galleryImg(thumbPath, 160) : (window._SUPABASE_URL || '') + '/storage/v1/object/public/gallery-images/' + thumbPath) + '" class="thumb-img" alt="' + escHtml(displayName) + '" width="60" height="60" decoding="async">'
+      ? '<img data-src="' + (window.galleryImg ? window.galleryImg(thumbPath, 480) : (window._SUPABASE_URL || '') + '/storage/v1/object/public/gallery-images/' + thumbPath) + '" class="thumb-img" alt="' + escHtml(displayName) + '" width="60" height="60" decoding="async">'
       : '<span class="thumb-mono" aria-hidden="true">' + escHtml((displayName.split(' ').slice(1).join(' ').replace(/[^A-Za-z]/g, '').charAt(0) || displayName.charAt(0)).toLowerCase()) + '</span>';
     // Named entries use the shared list line (archive.js entryParts): name / kind · person · year · country, one state
     var parts = (!isSeedling && window.entryParts) ? window.entryParts(fullName, entry, meta.type) : null;

@@ -3163,3 +3163,22 @@
   var first = document.querySelector('.page.active');
   if (first) { show(first.id.replace(/^page-/, '')); trail.push(here()); }
 })();
+
+/* ---------- the list (owner's choice 11-10, 案B): names with a photo come first, as two columns of pictures;
+   the names without one follow as plain lines under 「写真のない名前 n」. The order is drawn by CSS (order), so the
+   sorting, the kind chips and the search keep working on the same rows. ---------- */
+(function () {
+  function split(container) {
+    if (!container || !document.documentElement.classList.contains('pv-label') || !container.closest('#page-genus')) return;
+    var old = container.querySelector('.list-split');
+    if (old) old.remove();
+    var rows = container.querySelectorAll('.cultivar-row').length;
+    var none = container.querySelectorAll('.cultivar-row .entry__thumb--empty').length;
+    if (!none || none === rows) return;   // all with a photo, or none: nothing to divide
+    var p = document.createElement('p');
+    p.className = 'list-split';
+    p.innerHTML = '写真のない名前<span class="num">' + none + '</span>';
+    container.appendChild(p);
+  }
+  window.aoListSplit = split;
+})();

@@ -1337,6 +1337,7 @@ function paginateGenusFromServer(genusEl, page) {
         html = '<div class="text-muted empty-state">' + t('no_results') + '</div>';
       }
       container.innerHTML = html;
+      if (window.aoListSplit) window.aoListSplit(container);
       observeLazyImages(container);
 
       // Attach click handlers for locked seedlings
@@ -1435,6 +1436,7 @@ function paginateGenusFromMemory(genusEl, page) {
       html = '<div class="text-muted empty-state">' + t('no_results') + '</div>';
     }
     container.innerHTML = html;
+    if (window.aoListSplit) window.aoListSplit(container);
     observeLazyImages(container);
 
     // Attach click handlers for locked seedlings

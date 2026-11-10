@@ -2177,3 +2177,23 @@ html.pv-label #page-cultivar #detail-actions > .btn:active, html.pv-label #page-
 /* paid membership paused (owner, 11-10): nothing on screen leads to a plan */
 html.member-paused #profile-sub-badge, html.member-paused #profile-subscription-section, html.member-paused #subscription-section,
 html.member-paused [data-action="show-paywall"], html.member-paused [data-action="open-paywall"], html.member-paused #paywall-modal { display: none !important; }
+/* ---- the owner's choice of 11-10: the home as 案A, the list as 案B ---- */
+/* home: the forest photo sharp and low, so the search and the day's leaf are on the first screen */
+html.pv-label .hero img { height: 260px; min-height: 0; max-height: none; object-position: center; filter: none; transform: none; }
+html.pv-label .hero::after { height: 72%; }
+html.pv-label .hero__title { font-size: 2.5rem; }
+html.pv-label .hero__credit { margin-top: var(--s1); }
+@keyframes lbl-settle { from { transform: scale(1.06); } to { transform: none; } }
+@media (min-width: 641px) { html.pv-label .hero img { height: 380px; } }
+/* list: names with a photo first, as pictures; the rest as plain lines */
+html.pv-label #page-genus .genus-content .card--no-pad:has(.entry__sub) { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--s4) 10px; padding-top: var(--s3); border-top: 0 !important; }
+html.pv-label #page-genus .genus-content .cultivar-row:has(.cultivar-row__thumb img) { order: 0; display: block; min-height: 0; padding: 0; border: 0; }
+html.pv-label #page-genus .genus-content .cultivar-row:has(.cultivar-row__thumb img) .cultivar-row__thumb { flex: none; width: 100%; height: auto; aspect-ratio: 1; border: 0; background: var(--color-lighter); }
+html.pv-label #page-genus .genus-content .cultivar-row:has(.cultivar-row__thumb img) .cultivar-row__thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+html.pv-label #page-genus .genus-content .cultivar-row:has(.cultivar-row__thumb img) .cultivar-row__info { display: block; margin-top: 6px; }
+html.pv-label #page-genus .genus-content .cultivar-row:has(.cultivar-row__thumb img) .entry__name { font-size: 1.0625rem; line-height: 1.25; }
+html.pv-label #page-genus .genus-content .cultivar-row:has(.cultivar-row__thumb img) .entry__sub { font-size: var(--fs-label); line-height: 1.5; }
+html.pv-label #page-genus .genus-content .cultivar-row:has(.entry__thumb--empty) { order: 2; grid-column: 1 / -1; min-height: 64px; }
+html.pv-label #page-genus .genus-content .cultivar-row:has(.entry__thumb--empty) .entry__thumb--empty { display: none; }
+.list-split { order: 1; grid-column: 1 / -1; margin: var(--s3) 0 0; padding: var(--s3) 0 var(--s1); border-top: 1px solid var(--color-ink); font-family: var(--font-primary); font-size: var(--fs-body); font-weight: 700; color: var(--color-ink); }
+.list-split .num { margin-left: 8px; font-weight: 400; color: var(--color-mid); }
