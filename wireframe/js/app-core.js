@@ -855,7 +855,7 @@ function navigateTo(page, options, pushHistory) {
       people: 'アロイド品種の記載者・採集者・作出者の索引。人物ごとに関連する品種をたどれます',
       locality: 'タイプ産地（国）ごとに原種をたどる索引。コロンビア、パナマ、ペルーなど',
       glossary: 'sp. / aff. / cf.、記載者、タイプ産地、交配式、F1、クローン、TC など由来を読むための用語集',
-      pricing: 'Aroid Origins の料金とサービス内容。閲覧は無料、実生の投稿は会員の受付まで20件まで無料。会員（月額500円・年額5,000円）は受付準備中'
+      pricing: 'Aroid Origins の料金とサービス内容。閲覧も投稿も実生ノートもすべて無料で、有料の会員はありません。事業者向けの取扱店の掲載について'
     };
     if (page === 'genus' && options.genus) {
       var gName = options.genus.charAt(0).toUpperCase() + options.genus.slice(1);
@@ -1457,6 +1457,10 @@ if (false) {
   // Before setting this to true: the Stripe Price secrets (STRIPE_PRICE_MONTHLY/ANNUAL) are still the old
   // 240/2,500 prices — create 500/5,000 Prices (or switch to PAY.JP plans) and update the secrets first.
   window._MEMBER_OPEN = false;
+  // 2026-11-10 (owner): paid membership is paused — everything is free, seedling notes without a cap. The plans,
+  // the card form and the subscription code stay in place behind this switch; nothing on screen leads to them.
+  window._MEMBER_PAUSED = true;
+  if (window._MEMBER_PAUSED) document.documentElement.classList.add('member-paused');
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
 
   // --- IP address helper (cached per session, global) ---
@@ -2216,6 +2220,7 @@ if (false) {
   }
   window.joinMemberNotify = joinMemberNotify;
   function showPaywallModal(source) {
+    if (window._MEMBER_PAUSED) return;   // nothing is on sale
     var modal = document.getElementById('paywall-modal');
     if (!modal) return;
     _paywallSource = source || 'unknown';

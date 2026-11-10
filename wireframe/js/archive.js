@@ -1523,7 +1523,7 @@
     // after the third seedling or later: the allowance left and the members' notice, one line (board 9 D9)
     if (d.type === 'seedling' && window._currentUser && typeof cultivarData !== 'undefined') {
       var mine = Object.keys(cultivarData).filter(function (k) { var e = cultivarData[k]; return e && e._type === 'seedling' && e._userId === window._currentUser.id && / \[Seedling\]$/.test(k); }).length;
-      if (mine >= 3) { el.innerHTML += '<p class="share-band__note">実生の無料枠 あと <span class="num">' + Math.max(0, 20 - mine) + '</span> 件 <span id="band-notify"></span></p>'; if (window.drawNotifyLink) window.drawNotifyLink(document.getElementById('band-notify'), 'seedling_done'); }
+      if (mine >= 3 && !window._MEMBER_PAUSED) { el.innerHTML += '<p class="share-band__note">実生の無料枠 あと <span class="num">' + Math.max(0, 20 - mine) + '</span> 件 <span id="band-notify"></span></p>'; if (window.drawNotifyLink) window.drawNotifyLink(document.getElementById('band-notify'), 'seedling_done'); }
     }
     el.classList.remove('d-none');
     var track = function (ch) { if (typeof gtag === 'function') gtag('event', 'share_click', { cultivar: d.displayName, channel: ch, source: 'submit' }); };
@@ -2843,7 +2843,7 @@
               + '<select class="form-input" id="mypost-sort" aria-label="並べ替え"><option value="new">新しい順</option><option value="name">名前順</option><option value="old-photo">写真が古い順</option></select></div></div>';
           }
           // the seedling allowance and the members' notice: only once the count gets near the free 20 (board 10: when it matters)
-          var foot = (seeds >= 15 ? '<p class="mypost-quota">実生 <span class="num">' + seeds + ' / 20</span>（無料） <span id="mypost-notify"></span></p>' : '')
+          var foot = (seeds >= 15 && !window._MEMBER_PAUSED ? '<p class="mypost-quota">実生 <span class="num">' + seeds + ' / 20</span>（無料） <span id="mypost-notify"></span></p>' : '')
             + '<p class="mypost-foot"><button type="button" class="mypost-notify-btn" data-my-export>記録を書き出す（CSV）</button></p>';
           grid.innerHTML = head + '<p class="mypost-filtered" hidden><span></span> <button type="button" class="mypost-notify-btn" data-my-filter="all">すべて表示</button></p><ol class="entries" id="mypost-entries"></ol>' + foot;
           function draw() {
@@ -2922,6 +2922,7 @@
   });
   // 「会員の受付開始を知らせる」 / 「登録済み · 取り消す」 (the list lives in member_interest; join/leave in app-core)
   function drawNotifyLink(el, source) {
+    if (window._MEMBER_PAUSED) { if (el) el.innerHTML = ''; return; }   // no sign-up to be told about
     if (!el || !window._currentUser || !window._supabaseClient) return;
     window._supabaseClient.from('member_interest').select('user_id').eq('user_id', window._currentUser.id).maybeSingle().then(function (r) {
       var joined = !!(r && r.data);

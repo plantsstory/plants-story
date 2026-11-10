@@ -513,8 +513,8 @@
     "en": "Terms of Service"
   },
   "terms_updated": {
-    "jp": "最終更新 2026.10.03",
-    "en": "Last updated 2026.10.03"
+    "jp": "最終更新 2026.11.10",
+    "en": "Last updated 2026.11.10"
   },
   "terms_1_title": {
     "jp": "第1条 適用範囲",
@@ -529,8 +529,8 @@
     "en": "Article 2: Service Description"
   },
   "terms_2_body": {
-    "jp": "本サービスは、植物の品種（原種・Hybrid・Clone・実生）の由来情報を収集・共有するプラットフォームです。主な機能は以下の通りです：",
-    "en": "The Service is a platform for collecting and sharing origin information about plant cultivars (species, hybrids, clones and seedlings). Key features include:"
+    "jp": "本サービスは、植物の品種（原種・Hybrid・Clone・実生）の由来情報を収集・共有するプラットフォームです。閲覧・投稿を含むすべての機能を無料で提供します。主な機能は以下の通りです：",
+    "en": "This service is a platform for collecting and sharing the origins of plant names (species, hybrids, clones and seedlings). Every feature, reading and contributing alike, is free. The main features are:"
   },
   "terms_2_list": {
     "jp": "品種由来情報の閲覧\n由来情報の投稿（要ログイン・ニックネーム表示）\n品種画像のアップロード\n投票による情報の信頼性評価\n関連商品へのアフィリエイトリンク",
@@ -597,8 +597,8 @@
     "en": "Article 9 Tools catalogue"
   },
   "terms_9_body": {
-    "jp": "道具の目録（/tools/）には、楽天市場・Yahoo!ショッピング・Amazon のアフィリエイトリンクを含む商品の紹介を掲載します。商品情報の一部は楽天ウェブサービスから取得しており、価格・在庫は各ストアの表示が最新です。本サービスは第三者の広告ネットワークによる広告を表示しません。",
-    "en": "The tools catalogue (/tools/) lists products with affiliate links to Rakuten, Yahoo! Shopping and Amazon. Some product data comes from Rakuten Web Service; prices and stock are as shown by each store. This service shows no third-party network ads."
+    "jp": "道具の目録（/tools/）には、楽天市場・Yahoo!ショッピング・Amazon のアフィリエイトリンクを含む商品の紹介を掲載します。商品情報の一部は楽天ウェブサービスから取得しており、価格・在庫は各ストアの表示が最新です。本サービスは現在、第三者の広告ネットワークによる広告を表示していません。表示を始める場合は、あらかじめ本規約とプライバシーポリシーを改定してお知らせします。",
+    "en": "The tool catalogue (/tools/) introduces products with affiliate links to Rakuten Ichiba, Yahoo! Shopping and Amazon. Part of the product information comes from Rakuten Web Service; prices and stock are as shown at each store. The service does not currently show advertising from third-party ad networks. Should it start to, these Terms and the Privacy Policy will be revised and announced beforehand."
   },
   "terms_10_title": {
     "jp": "第10条 禁止行為",
@@ -649,16 +649,16 @@
     "en": "Privacy Policy"
   },
   "privacy_updated": {
-    "jp": "最終更新 2026.10.03",
-    "en": "Last updated 2026.10.03"
+    "jp": "最終更新 2026.11.10",
+    "en": "Last updated 2026.11.10"
   },
   "privacy_1_title": {
     "jp": "1. はじめに",
     "en": "1. Introduction"
   },
   "privacy_1_body": {
-    "jp": "Aroid Origins（運営者）（運営責任者: 久恒 佑太）は、ユーザーのプライバシーを尊重します。本ポリシーでは、本サービスで収集する情報とその取り扱いについて説明します。閲覧はアカウント登録なしで利用できます。投稿にはGoogleアカウントによるログインが必要で、公開されるのはニックネーム等のプロフィール情報のみです。",
-    "en": "The Aroid Origins team (operated by Yuta Hisatsune) respects user privacy. This policy explains what information is collected and how it is handled. Browsing requires no account. Posting requires signing in with a Google account, and only profile information such as your nickname is shown publicly."
+    "jp": "Aroid Origins（運営者）（運営責任者: 久恒 佑太）は、ユーザーのプライバシーを尊重します。本ポリシーでは、本サービスで収集する情報とその取り扱いについて説明します。閲覧はアカウント登録なしで利用できます。投稿にはGoogleアカウントによるログインが必要で、公開されるのはニックネーム等のプロフィール情報のみです。本サービスに有料の会員制度はなく、決済情報は取り扱いません。",
+    "en": "Aroid Origins (operator: Yuta Hisatsune) respects your privacy. This policy explains what the service collects and how it is handled. Reading needs no account. Contributing needs a Google login, and only profile information such as a nickname is shown publicly. The service has no paid membership and handles no payment information."
   },
   "privacy_2_title": {
     "jp": "2. 収集する情報",
@@ -669,28 +669,28 @@
     "en": "The Service may collect the following information:"
   },
   "privacy_2_list": {
-    "jp": "ユーザーが任意で提供する情報: 品種名、由来説明、交配式、情報元URL、アップロード画像\nGoogleアカウント情報（OAuth認証利用時）: メールアドレス、表示名、プロフィール画像URL\n自動的に収集される情報: ブラウザの種類、言語設定、アクセスしたページ、IPアドレス（サーバーログおよび投稿時のデータベース記録。不正投稿防止のため最大180日間保存後、自動削除されます）\nブラウザに保存されるデータ: 言語設定、ユーザーが追加した品種データ（localStorageを使用、端末内のみ）",
-    "en": "Information you voluntarily provide: cultivar names, origin descriptions, breeding formulas, source URLs, uploaded images\nGoogle account information (when signing in with OAuth): email address, display name, profile image URL\nAutomatically collected information: browser type, language preference, pages visited, IP address (server logs and database records at time of submission, stored for up to 180 days for spam prevention, then automatically deleted)\nData stored in your browser: language preference, user-added cultivar data (via localStorage, stored locally only)"
+    "jp": "ユーザーが投稿する情報: 名前（品種名・個体の番号）、由来の説明、交配式、情報元URL、写真と撮影日、入手先や採集地などの任意の項目\nGoogleアカウント情報（ログイン時）: メールアドレス、表示名、プロフィール画像URL\nプロフィール情報（任意）: 表示名、ユーザー名、アイコン画像、自己紹介、Instagram・X のリンク\nお問い合わせフォームの内容: お名前、メールアドレス、メッセージ\n自動的に記録される情報: ブラウザの種類、言語設定、アクセスしたページ、IPアドレス（サーバーログ、および投稿・お問い合わせ時の記録。不正投稿防止のため最大180日間保存し、その後は自動で消去します）\n不具合の記録: 画面でエラーが起きたとき、エラーの内容、発生したページ、ブラウザの種類、ログイン中はアカウントの識別子を記録します（最大90日間保存し、その後は自動で消去します）\nブラウザに保存されるデータ: 言語・文字サイズなどの設定、投稿の下書き、最近見た名前、ログインの状態（localStorage を使用）",
+    "en": "What you contribute: names (cultivar names, individuals' numbers), origin text, crosses, source URLs, photos and their dates, and optional details such as where a plant was obtained or collected\nGoogle account information (on login): e-mail address, display name, profile image URL\nProfile information (optional): display name, user name, avatar image, a short introduction, Instagram and X links\nContact form: your name, e-mail address and message\nRecorded automatically: browser type, language setting, pages visited, IP address (server logs, and with each contribution or contact message; kept for at most 180 days against abuse, then erased automatically)\nError records: when a screen fails, the error, the page, the browser type and, if you are logged in, your account identifier (kept for at most 90 days, then erased automatically)\nStored in your browser: settings such as language and text size, drafts, recently viewed names, your login state (localStorage)"
   },
   "privacy_3_title": {
     "jp": "3. ブラウザへの保存（localStorage）",
     "en": "3. Browser storage (localStorage)"
   },
   "privacy_3_body": {
-    "jp": "本サービスはブラウザの localStorage に、言語設定・文字サイズ・表示の設定などをお使いの端末内に保存します。このデータはサーバーには送信されません。ブラウザの設定からいつでも削除できます。",
-    "en": "The site keeps your language, text size and display settings in your browser (localStorage). This data is not sent to our server and can be cleared from your browser settings at any time."
+    "jp": "本サービスはブラウザの localStorage に、言語設定・文字サイズ・表示の設定・投稿の下書き・最近見た名前を保存します。これらはお使いの端末内だけに保存され、サーバーには送信されません。ログインの状態を保つための情報も同じ場所に保存されます。ブラウザの設定からいつでも削除できます。",
+    "en": "The service stores your language, text size and display settings, drafts and recently viewed names in the browser's localStorage. These stay on your device and are not sent to the server. The information that keeps you logged in is stored in the same place. You can delete all of it from your browser settings."
   },
   "privacy_4_title": {
-    "jp": "4. Cookie とアクセス解析・外部送信",
-    "en": "4. Cookies, analytics and data sent to third parties"
+    "jp": "4. Cookie・アクセス解析・外部サービスへの送信",
+    "en": "4. Cookies, analytics and outside services"
   },
   "privacy_4_body": {
-    "jp": "本サービスは、利用状況を把握するために Google アナリティクス（GA4）を使用しています。GA4 は Cookie を使用して、閲覧したページ、端末の種類、おおよその地域などのアクセス情報を収集します（氏名など個人を特定する情報は含みません）。また、以下の外部サービスへ情報が送信される場合があります：",
-    "en": "We use Google Analytics (GA4) to understand how the site is used. GA4 uses cookies to collect visit data such as pages viewed, device type and approximate region (nothing that identifies you by name). Data may also be sent to the following services:"
+    "jp": "本サービスは、利用状況を把握するために Google アナリティクス（GA4）を使用しています。GA4 は Cookie を使用して、閲覧したページ、端末の種類、おおよその地域、押されたボタンなどのアクセス情報を収集します（氏名など個人を特定する情報は含みません）。また、サービスを提供するために、以下の外部サービスへ情報が送信されます：",
+    "en": "The service uses Google Analytics (GA4) to understand how it is used. GA4 uses cookies to collect pages viewed, device type, approximate region and buttons pressed (nothing that identifies you by name). To provide the service, information is also sent to the following outside services:"
   },
   "privacy_4_list": {
-    "jp": "Google アナリティクス: Google のプライバシーポリシー https://policies.google.com/privacy が適用されます。オプトアウトは https://tools.google.com/dlpage/gaoptout から行えます\nアフィリエイトリンク（楽天市場、Yahoo!ショッピング、もしもアフィリエイト経由の Amazon）: リンクをクリックした際に各社のトラッキング Cookie が設定されます。道具の目録の商品ページでは、もしもアフィリエイトの計測用画像が読み込まれます\n楽天ウェブサービス: 道具の目録の商品情報（商品名・価格・画像）は楽天ウェブサービスから取得し、画像は楽天のサーバーから読み込まれます",
-    "en": "Google Analytics: Google's privacy policy applies (https://policies.google.com/privacy); opt out at https://tools.google.com/dlpage/gaoptout\nAffiliate links (Rakuten, Yahoo! Shopping, Amazon through Moshimo Affiliate): clicking a link sets that company's tracking cookie; tool pages load Moshimo's measurement image\nRakuten Web Service: product names, prices and images in the tools catalogue come from Rakuten Web Service, and the images load from Rakuten's servers"
+    "jp": "Google アナリティクス: Google のプライバシーポリシー https://policies.google.com/privacy が適用されます。オプトアウトは https://tools.google.com/dlpage/gaoptout から行えます\nGoogle（ログイン）: ログインのときに Google の認証画面を経由し、メールアドレス・表示名・プロフィール画像URLを受け取ります\nSupabase（データベース・ログイン・写真の保存）: 投稿内容、アカウント情報、写真、お問い合わせの内容は Supabase のサーバーに保存されます\nGitHub Pages（サイトの配信）、Google Fonts・jsDelivr（書体とプログラムの配信）、Wikimedia Commons（一部の歴史的な図版）: ページを開くと、IPアドレスなどの接続情報が各社のサーバーに送信されます\nAI 調査（Anthropic の Claude）: 由来の調査のために、品種名、投稿された由来の本文、情報元URLを送信します。メールアドレスなどのアカウント情報は送信しません\nResend（メール送信）: お問い合わせの内容を運営者に通知するために使用します\nアフィリエイトリンク（楽天市場、Yahoo!ショッピング、もしもアフィリエイト経由の Amazon）: リンクをクリックした際に各社のトラッキング Cookie が設定されます。道具の目録の商品ページでは、もしもアフィリエイトの計測用画像が読み込まれます\n楽天ウェブサービス: 道具の目録の商品情報（商品名・価格・画像）は楽天ウェブサービスから取得し、画像は楽天のサーバーから読み込まれます\nOFUSE（任意の送金）: 送金と決済は OFUSE のサイトで行われ、OFUSE の利用規約とプライバシーポリシーが適用されます。カード情報は当サイトには届きません",
+    "en": "Google Analytics: Google's privacy policy applies (https://policies.google.com/privacy). Opt out at https://tools.google.com/dlpage/gaoptout\nGoogle (login): logging in passes through Google's sign-in screen, from which the service receives your e-mail address, display name and profile image URL\nSupabase (database, login, photo storage): contributions, account information, photos and contact messages are stored on Supabase's servers\nGitHub Pages (site delivery), Google Fonts and jsDelivr (fonts and scripts), Wikimedia Commons (some historical plates): opening a page sends connection information such as your IP address to their servers\nAI research (Anthropic's Claude): the name, the origin text contributed and source URLs are sent for research. Account information such as e-mail addresses is not sent\nResend (e-mail): used to notify the operator of contact messages\nAffiliate links (Rakuten Ichiba, Yahoo! Shopping, Amazon via Moshimo Affiliate): clicking one sets the store's tracking cookie. Product pages in the tool catalogue load Moshimo's measurement image\nRakuten Web Service: product information in the tool catalogue (name, price, image) comes from Rakuten Web Service, and images load from Rakuten's servers\nOFUSE (voluntary support): payment is made on OFUSE's site under OFUSE's terms and privacy policy. Card details never reach this site"
   },
   "privacy_5_title": {
     "jp": "5. 情報の利用目的",
@@ -701,60 +701,60 @@
     "en": "Collected information is used for the following purposes:"
   },
   "privacy_5_list": {
-    "jp": "品種由来情報の表示と維持管理\n記録の正確性の評価（「正確／疑問」の投票）\n不正投稿・荒らし行為の防止および対応（IPアドレスの一時的な記録）\nサービスおよびコンテンツの改善\nアフィリエイトリンクを通じた収益化\nサブスクリプションの契約管理および決済処理\nご希望いただいたお知らせ（会員受付の開始など）のメール送信（1 回のみ。宣伝には使いません）",
-    "en": "Displaying and maintaining cultivar origin records\nJudging the accuracy of records (the accurate / doubtful votes)\nPreventing spam and abuse (IP addresses kept for a limited time)\nImproving the service and its content\nRevenue through affiliate links\nManaging subscriptions and processing payments\nEmail notices you asked for (such as the opening of membership), sent once and never used for promotion"
+    "jp": "品種由来情報の表示と維持管理\n記録の正確性の評価（「正確／疑問」の投票）\n不正投稿・荒らし行為の防止および対応（IPアドレスの一時的な記録）\n不具合の調査と修正\nお問い合わせへの返信\nサービスおよびコンテンツの改善\nアフィリエイトリンクを通じた収益化",
+    "en": "Showing and maintaining origin records\nAssessing the accuracy of records (the accurate / doubtful votes)\nPreventing and responding to abuse (temporary IP records)\nFinding and fixing faults\nReplying to contact messages\nImproving the service and its content\nEarning through affiliate links"
   },
   "privacy_6_title": {
     "jp": "6. 情報の共有",
     "en": "6. Information Sharing"
   },
   "privacy_6_body": {
-    "jp": "ユーザーが投稿した品種情報は本サービス上で公開されます。運営者は個人情報を第三者に販売しません。法律に基づく要請（法執行機関からの開示要求等）があった場合にのみ、情報を開示する場合があります。",
-    "en": "User-submitted cultivar information is displayed publicly on the Service. The team does not sell personal information to third parties. Information may be disclosed only when required by law (such as law enforcement requests)."
+    "jp": "ユーザーが投稿した品種情報・写真・ニックネームは本サービス上で公開されます（非公開にした実生の記録を除く）。運営者は個人情報を第三者に販売しません。上記「4」の外部サービスへの送信を除き、法律に基づく要請（法執行機関からの開示要求等）があった場合にのみ、情報を開示する場合があります。",
+    "en": "The records, photos and nickname you contribute are public on the service (seedling records you set to private excepted). The operator does not sell personal information. Apart from the outside services listed under 4, information is disclosed only when the law requires it."
   },
   "privacy_7_title": {
     "jp": "7. 画像に関する注意",
     "en": "7. Image-Related Notices"
   },
   "privacy_7_body": {
-    "jp": "アップロードされた画像は本サービス上で公開されます。画像にはEXIF情報（撮影場所、端末情報等）が含まれている場合があります。プライバシーを保護するため、アップロード前にEXIF情報を削除することを推奨します。",
-    "en": "Uploaded images are publicly visible on the Service. Images may contain EXIF metadata (location, device information, etc.). To protect your privacy, we recommend removing EXIF data before uploading."
+    "jp": "アップロードされた写真は本サービス上で公開されます。写真はブラウザの中で縮小・再変換してから送信するため、撮影場所や端末情報などの EXIF 情報は保存されません。撮影日だけを読み取り、写真の撮影日として表示します。写真に写り込んだ住所や人物などにはご注意ください。",
+    "en": "Uploaded photos are public. Each photo is resized and re-encoded in your browser before it is sent, so EXIF data such as location and device is not stored. Only the date taken is read, and shown as the photo's date. Please mind addresses or people that appear in a photo."
   },
   "privacy_8_title": {
-    "jp": "8. 未成年のユーザー",
-    "en": "8. Minor Users"
+    "jp": "9. 未成年のユーザー",
+    "en": "9. Minors"
   },
   "privacy_8_body": {
     "jp": "本サービスでは年齢確認は行っていません。保護者の方には、未成年のインターネット利用を適切に監督していただくようお願いいたします。",
     "en": "Age verification is not performed on the Service. We encourage parents and guardians to supervise minors' internet usage."
   },
   "privacy_9_title": {
-    "jp": "9. 国際ユーザー",
-    "en": "9. International Users"
+    "jp": "10. 国際ユーザー",
+    "en": "10. International users"
   },
   "privacy_9_body": {
     "jp": "本サービスは日本から運営されており、日本法に基づいてデータを処理します。EU/EEA地域のユーザーは、ご自身が投稿したコンテンツの削除をお問い合わせページからリクエストできます。",
     "en": "The Service is operated from Japan and data is processed under Japanese law. EU/EEA users may request deletion of their submitted content via the Contact page."
   },
   "privacy_10_title": {
-    "jp": "10. セキュリティ",
-    "en": "10. Security"
+    "jp": "11. セキュリティ",
+    "en": "11. Security"
   },
   "privacy_10_body": {
     "jp": "運営者は送信されたデータを保護するために合理的な措置を講じています。ただし、インターネット上の送信方法は100%安全ではないため、完全なセキュリティを保証することはできません。",
     "en": "The team takes reasonable measures to protect submitted data. However, no method of internet transmission is 100% secure, and we cannot guarantee complete security."
   },
   "privacy_11_title": {
-    "jp": "11. ポリシーの変更",
-    "en": "11. Policy Changes"
+    "jp": "12. ポリシーの変更",
+    "en": "12. Changes to this policy"
   },
   "privacy_11_body": {
     "jp": "本ポリシーは随時更新される場合があります。変更があった場合は、本ページに更新日とともに掲載します。本サービスを継続して利用することにより、変更後のポリシーに同意したものとみなします。",
     "en": "This policy may be updated from time to time. Changes will be posted on this page with an updated date. Continued use of the Service constitutes acceptance of the updated policy."
   },
   "privacy_12_title": {
-    "jp": "12. お問い合わせ",
-    "en": "12. Contact"
+    "jp": "13. お問い合わせ",
+    "en": "13. Contact"
   },
   "privacy_12_body": {
     "jp": "プライバシーに関するお問い合わせは、お問い合わせページよりご連絡ください。\n運営名称: Aroid Origins（運営者）\n運営責任者: 久恒 佑太",
@@ -765,8 +765,8 @@
     "en": "Specified Commercial Transactions Act"
   },
   "tokushoho_updated": {
-    "jp": "最終更新 2026.10.03",
-    "en": "Last updated 2026.10.03"
+    "jp": "最終更新 2026.11.10",
+    "en": "Last updated 2026.11.10"
   },
   "tokushoho_seller_label": {
     "jp": "販売業者",
@@ -789,16 +789,16 @@
     "en": "Address"
   },
   "tokushoho_address_value": {
-    "jp": "個人事業のため省略しています。消費者からのご請求があった場合は遅滞なく開示します。plantsstory2026@gmail.com またはお問い合わせフォームからご請求ください（電子メールで開示します）",
-    "en": "Omitted as a sole proprietorship. Disclosed without delay upon request from a consumer — please ask via plantsstory2026@gmail.com or the contact form (disclosed by email)."
+    "jp": "個人事業のため省略しています。ご請求があった場合は遅滞なく開示します。plantsstory2026@gmail.com またはお問い合わせフォームからご請求ください（電子メールで開示します）",
+    "en": "Omitted as a sole proprietorship; disclosed without delay on request. Ask at plantsstory2026@gmail.com or through the contact form (disclosed by e-mail)."
   },
   "tokushoho_phone_label": {
     "jp": "電話番号",
     "en": "Phone"
   },
   "tokushoho_phone_value": {
-    "jp": "個人事業のため省略しています。消費者からのご請求があった場合は遅滞なく開示します。plantsstory2026@gmail.com またはお問い合わせフォームからご請求ください（電子メールで開示します）",
-    "en": "Omitted as a sole proprietorship. Disclosed without delay upon request from a consumer — please ask via plantsstory2026@gmail.com or the contact form (disclosed by email)."
+    "jp": "個人事業のため省略しています。ご請求があった場合は遅滞なく開示します。plantsstory2026@gmail.com またはお問い合わせフォームからご請求ください（電子メールで開示します）",
+    "en": "Omitted as a sole proprietorship; disclosed without delay on request. Ask at plantsstory2026@gmail.com or through the contact form (disclosed by e-mail)."
   },
   "tokushoho_email_label": {
     "jp": "メールアドレス",
@@ -813,40 +813,40 @@
     "en": "Price"
   },
   "tokushoho_price_value": {
-    "jp": "会員: 月額 500円（税込）／ 年額 5,000円（税込）。",
-    "en": "Membership: ¥500/month or ¥5,000/year (tax included). "
+    "jp": "取扱店の掲載: 月額 1,000円（税込）。初月無料。",
+    "en": "Shop listing: ¥1,000 per month (tax included). First month free. "
   },
   "tokushoho_payment_label": {
     "jp": "支払方法",
     "en": "Payment Method"
   },
   "tokushoho_payment_value": {
-    "jp": "クレジットカード・デビットカード（決済代行会社: PAY.JP または Stripe）",
-    "en": "Credit or debit card (payment provider: PAY.JP or Stripe)"
+    "jp": "銀行振込",
+    "en": "Bank transfer"
   },
   "tokushoho_timing_label": {
     "jp": "支払時期",
     "en": "Payment Timing"
   },
   "tokushoho_timing_value": {
-    "jp": "お申し込み時に初回決済。以後、契約期間終了時に自動更新されます",
-    "en": "First charge upon subscription. Automatically renewed at the end of each billing period"
+    "jp": "月末締め。翌月5日までに請求書をメールでお送りし、その月末までにお支払いください",
+    "en": "Billed at the end of each month: an invoice is e-mailed by the 5th of the following month, payable by the end of that month"
   },
   "tokushoho_delivery_label": {
-    "jp": "商品引渡時期",
-    "en": "Delivery"
+    "jp": "提供時期",
+    "en": "When the service starts"
   },
   "tokushoho_delivery_value": {
-    "jp": "決済完了後、直ちにサービスをご利用いただけます",
-    "en": "Service available immediately after payment"
+    "jp": "掲載内容を確認したあと、ご相談した日から掲載します",
+    "en": "From the date agreed, once the listing has been reviewed"
   },
   "tokushoho_cancel_label": {
-    "jp": "返品・キャンセル",
-    "en": "Cancellation"
+    "jp": "返金",
+    "en": "Refunds"
   },
   "tokushoho_cancel_value": {
-    "jp": "デジタルサービスのため返品はお受けできません。解約はプロフィール編集ページから随時可能です。解約後も現在の契約期間終了まではサービスをご利用いただけます",
-    "en": "No refunds as this is a digital service. Cancellation is available anytime from the profile edit page. Service remains accessible until the end of the current billing period"
+    "jp": "役務の性質上、掲載した月の掲載料は返金しません",
+    "en": "By the nature of the service, the fee for a month in which the listing ran is not refunded"
   },
   "tokushoho_env_label": {
     "jp": "動作環境",
@@ -1053,12 +1053,8 @@
     "en": " posts"
   },
   "about_plan_desc": {
-    "jp": "品種情報・実生の閲覧・検索はすべて無料です。実生の投稿は会員の受付を始めるまで20件（受付開始後は5件）まで無料です。会員（月額500円・年額5,000円）になると、次の2つが使えます。会員の受付は準備中です。",
-    "en": "Reading and searching are free, and seedling notes are free up to five. Members (¥500/month or ¥5,000/year) get the two items below. Membership sign-up is in preparation."
-  },
-  "about_plan_features": {
-    "jp": "実生の投稿 無制限（非公開の記録も含む）\nAI 再調査リクエストの優先審査（48時間以内に可否）",
-    "en": "Unlimited seedling notes (private ones included)\nPriority review of AI re-check requests (decided within 48 hours)"
+    "jp": "閲覧・検索・投稿・実生ノート・標本ラベルの印刷は、すべて無料です。有料の会員はありません。",
+    "en": "Reading, searching, contributing, seedling notes and specimen labels are all free. There is no paid membership."
   },
   "hero_desc": {
     "jp": "誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。",
@@ -2153,52 +2149,32 @@
     "en": "Doubtful"
   },
   "terms_9a_title": {
-    "jp": "第9条の2 有料サービス（会員）",
-    "en": "Article 9-2 Paid service (membership)"
+    "jp": "第9条の2 料金",
+    "en": "Article 9-2 Fees"
   },
   "terms_9a_body": {
-    "jp": "本サービスの一部機能（無料枠〔会員の受付を始めるまで20件、受付開始後は5件〕を超える実生の投稿、AI 再調査リクエストの優先審査）は、有料の会員契約で利用できます。会員の受付は現在準備中で、受付開始まで有料のお申込みはできません。",
-    "en": "Some features (seedling notes beyond five, priority review of AI re-check requests) come with a paid membership. Membership sign-up is in preparation; no paid sign-up is possible until it opens."
-  },
-  "terms_9a_list": {
-    "jp": "料金: 月額500円（税込）または年額5,000円（税込）\n決済は決済代行会社（PAY.JP または Stripe）の決済基盤を利用します\n閲覧は無料です。実生の投稿は1ユーザーにつき、会員の受付を始めるまで20件（受付開始後は5件）まで無料です。受付開始の30日前にサイトでお知らせします。それまでに記録したものは、その後も残ります\n原種・Hybrid・Clone の閲覧・投稿は無料です\n運営者の判断により、特定のユーザーに会員資格を無料で付与する場合があります。付与・取消は運営者の裁量によります",
-    "en": "Fee: ¥500 per month or ¥5,000 per year (tax included)\nPayments are processed by a payment provider (PAY.JP or Stripe)\nReading is free; seedling notes are free up to five per user\nReading and posting species, hybrids and clones is free\nThe operator may grant a free membership to particular users at its discretion"
-  },
-  "terms_9b_body": {
-    "jp": "会員契約の自動更新と解約について、以下の通り定めます：",
-    "en": "Renewal and cancellation of the membership:"
-  },
-  "privacy_4a_body": {
-    "jp": "会員の決済処理（受付開始後）について、以下の通り取り扱います：",
-    "en": "Payment handling for membership (once sign-up opens):"
-  },
-  "privacy_4a_list": {
-    "jp": "決済処理は決済代行会社（PAY.JP または Stripe）が行います\nクレジットカード情報は決済代行会社のフォームまたは決済ページで入力され、決済代行会社のサーバーに直接送信されます。当サイトのサーバーには一切保存されません\n決済代行会社による情報の取り扱いには、各社のプライバシーポリシーが適用されます\n当サイトが保持する決済関連情報は、決済代行会社の顧客IDと会員の契約状態（プラン、状態、契約期間）のみです",
-    "en": "Payments are processed by a payment provider (PAY.JP or Stripe)\nCard details are entered on the provider's form or page and sent directly to the provider; nothing is stored on our server\nThe provider's privacy policy applies to its handling of your data\nWe keep only the provider's customer ID and the membership status (plan, status, period)"
+    "jp": "本サービスの閲覧、投稿（原種・Hybrid・Clone・個体・実生）、写真の追加、標本ラベルの印刷、記録の書き出しは無料です。有料の会員制度はありません。将来、有料の機能を設ける場合は、開始の30日前までにサイトでお知らせします。それまでに記録したものは、その後も残ります。",
+    "en": "Reading, contributing (species, hybrids, clones, individuals and seedlings), adding photos, printing specimen labels and exporting your records are free. There is no paid membership. Should a paid feature be introduced, it will be announced on the site at least 30 days before it starts, and whatever you recorded before then stays."
   },
   "tokushoho_notice": {
-    "jp": "会員の受付は準備中です。現在、有料サービスの販売はありません。以下は受付開始後の条件です。",
-    "en": "Membership sign-up is in preparation; nothing is on sale now. The terms below apply once it opens."
+    "jp": "現在、一般の利用者向けの有料サービスはありません（閲覧・投稿はすべて無料です）。この表記は、事業者向けの「取扱店の掲載」について記載しています。",
+    "en": "Nothing is sold to general users: reading and contributing are free. This notice covers the shop listing offered to businesses."
   },
   "tokushoho_term_label": {
-    "jp": "契約期間・自動更新",
-    "en": "Term and renewal"
+    "jp": "契約期間",
+    "en": "Term"
   },
   "tokushoho_term_value": {
-    "jp": "月額は1か月、年額は1年。期間満了時に同じ条件で自動更新され、更新日に翌期間分が請求されます",
-    "en": "Monthly: one month; yearly: one year. Renews on the same terms at the end of each period, charged on the renewal date"
+    "jp": "1か月ごと。お申し出がなければ翌月も続きます",
+    "en": "Month by month; it continues unless you give notice"
   },
   "tokushoho_howcancel_label": {
     "jp": "解約方法",
     "en": "How to cancel"
   },
   "tokushoho_howcancel_value": {
-    "jp": "ログイン後、プロフィール編集ページからいつでも解約できます。解約後も現在の契約期間の満了日まで利用でき、以降の請求は発生しません",
-    "en": "Cancel any time from the profile edit page after logging in; the membership stays active until the end of the current period and nothing further is charged"
-  },
-  "about_plan_pricing": {
-    "jp": "月額 500円（税込）／ 年額 5,000円（税込）",
-    "en": "¥500 a month / ¥5,000 a year (tax included)"
+    "jp": "メールまたはお問い合わせフォームでお申し出ください。お申し出の翌月末で掲載を終えます",
+    "en": "Give notice by e-mail or through the contact form. The listing ends at the end of the following month"
   },
   "member_about_btn": {
     "jp": "会員について",
@@ -2245,12 +2221,12 @@
     "en": "Paid listings. They do not affect the records or their trust levels."
   },
   "terms_9d_title": {
-    "jp": "第9条の5 取扱店の掲載",
-    "en": "Article 9-5 Shop listings"
+    "jp": "第9条の3 取扱店の掲載",
+    "en": "Article 9-3 Shop listings"
   },
   "terms_9d_body": {
     "jp": "取扱店の掲載（事業者向け）は月額1,000円（税込）、初月無料です。月末締めで翌月末までに銀行振込でお支払いいただきます（振込手数料は掲載者の負担）。解約はお申し出の翌月末までです。掲載内容は運営者が審査し、掲載を断る・取りやめる場合があります。掲載欄には PR と表示し、掲載は品種の記録や信頼度に影響しません。当サイトは適格請求書発行事業者ではありません。",
-    "en": "Shop listings (for businesses) cost ¥1,000 a month (tax included), first month free, invoiced at month end and paid by bank transfer by the end of the following month (transfer fees borne by the shop). Cancellation takes effect at the end of the month after notice. The operator reviews listings and may decline or withdraw them. Listings are marked PR and never affect records or trust levels. This site is not a registered qualified-invoice issuer."
+    "en": "A shop listing (for businesses) is ¥1,000 per month (tax included), with the first month free. It is billed at the end of each month and paid by bank transfer by the end of the following month (the transfer fee is the lister's). A listing ends at the end of the month after notice is given. The operator reviews every listing and may decline or withdraw one. Listings are marked PR and never affect records or trust scores. The site is not a qualified invoice issuer."
   },
   "tokushoho_price_link": {
     "jp": "料金とサービス内容",
@@ -2360,13 +2336,9 @@
     "jp": "店名:\nURL（https）:\n一言（40字まで）:\n連絡先メール（請求書の送り先）:\n",
     "en": "Shop name:\nURL (https):\nOne line (up to 40 characters):\nEmail for invoices:\n"
   },
-  "about_plan_payment": {
-    "jp": "受付開始後、クレジットカード・デビットカードで支払えます（決済代行会社: PAY.JP または Stripe）。",
-    "en": "Once membership opens, payment is by credit or debit card (processor: PAY.JP or Stripe)."
-  },
   "about_funding": {
-    "jp": "この図鑑は会員の会費・取扱店の掲載料（PR）・アフィリエイト（PR）で運営しています。いずれも記録の内容や検証には影響しません。",
-    "en": "The archive is funded by membership fees, shop listings (PR) and affiliate links (PR). None of them affects the records or their verification."
+    "jp": "この図鑑は、取扱店の掲載料（PR）、アフィリエイト（PR）、OFUSE での任意の送金で運営しています。いずれも記録の内容や検証には影響しません。",
+    "en": "The archive runs on shop listing fees (PR), affiliate links (PR) and voluntary support through OFUSE. None of these affects what a record says or how it is checked."
   },
   "contribute_note": {
     "jp": "投稿者名は人物索引に載ります。あなたの実生ページは、共有するとカードつきで表示されます。",
@@ -2563,5 +2535,29 @@
   "btn_close": {
     "jp": "閉じる",
     "en": "Close"
+  },
+  "terms_9c_title": {
+    "jp": "第9条の4 任意の送金（OFUSE）",
+    "en": "Article 9-4 Voluntary support (OFUSE)"
+  },
+  "terms_9c_body": {
+    "jp": "運営費（サーバーと出典の調査）に充てる任意の送金を、外部サービス OFUSE で受け付けています。送金は任意で、送金の有無によって本サービスの機能や記録の扱いは変わりません。送金・決済・返金には OFUSE の利用規約が適用されます。",
+    "en": "Voluntary payments toward running costs (the server and the checking of sources) are accepted through OFUSE, an outside service. They are voluntary: nothing in the service or in how records are treated depends on them. Payment and refunds follow OFUSE's own terms."
+  },
+  "privacy_rights_title": {
+    "jp": "8. 開示・訂正・削除",
+    "en": "8. Access, correction and deletion"
+  },
+  "privacy_rights_body": {
+    "jp": "ご自身の投稿・写真・プロフィールは、ログインして各ページから編集・削除できます。アカウントと、それに結び付く情報の削除、保有する個人情報の開示・訂正のご請求は、お問い合わせページからご連絡ください。ご本人であることを確認したうえで対応します。",
+    "en": "You can edit or delete your own contributions, photos and profile from their pages while logged in. To have your account and the information tied to it deleted, or to ask what personal information is held or have it corrected, use the Contact page. Requests are handled after confirming they come from you."
+  },
+  "tokushoho_extra_fee_value": {
+    "jp": "銀行振込の手数料はご負担ください。そのほかの料金は発生しません",
+    "en": "The bank transfer fee is yours to pay. No other charges"
+  },
+  "about_plan_title": {
+    "jp": "料金",
+    "en": "Fees"
   }
 }

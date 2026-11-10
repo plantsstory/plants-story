@@ -1173,7 +1173,7 @@ document.addEventListener('click', function(e) {
           else showToast('実生の投稿にはログインが必要です', true);
           return;
         }
-        if (!window._isSubscribed && window._supabaseClient) {
+        if (!window._MEMBER_PAUSED && !window._isSubscribed && window._supabaseClient) {
           var self = this;
           showTypeFields('seedling');
           window._supabaseClient.rpc('get_seedling_quota').then(function(res) {
