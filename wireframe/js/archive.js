@@ -3122,6 +3122,12 @@
   if (!bar || !btn) return;
   var NO_BACK = { top: 1, explore: 1, mypost: 1, contribute: 1 };
   var trail = [], cur = '';
+  // the same page is written with and without its closing slash, encoded and not
+  function here() { var pth = location.pathname; try { pth = decodeURIComponent(pth); } catch (e) {} return (pth.replace(/\/+$/, '') || '/') + location.search; }
+  // while the app starts, the address settles in more than one step (a direct landing, a login coming back):
+  // until the reader has touched something, whatever is shown is the first page of the visit, not a step away from it
+  var touched = false;
+  ['pointerdown', 'keydown'].forEach(function (ev) { document.addEventListener(ev, function () { touched = true; }, true); });
   function show(pageId) {
     cur = pageId;
     bar.classList.toggle('is-on', pageId !== 'top');
@@ -3145,7 +3151,8 @@
     show(e.detail);
     // the address is written after the page is shown: read it a moment later
     setTimeout(function () {
-      var url = location.pathname + location.search;
+      var url = here();
+      if (!touched) { trail = [url]; return; }
       if (trail.length && trail[trail.length - 1] === url) return;                      // the same page drawn again
       if (trail.length > 1 && trail[trail.length - 2] === url) { trail.pop(); return; }  // went back
       trail.push(url);
@@ -3153,5 +3160,5 @@
     }, 0);
   });
   var first = document.querySelector('.page.active');
-  if (first) { show(first.id.replace(/^page-/, '')); trail.push(location.pathname + location.search); }
+  if (first) { show(first.id.replace(/^page-/, '')); trail.push(here()); }
 })();
