@@ -3113,3 +3113,45 @@
   function firstMark() { markBar(currentPage()); if (currentPage() === 'contribute') stepperInit(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', firstMark); else setTimeout(firstMark, 0);
 })();
+
+/* ---------- the phone's top bar (owner, 11-10): 戻る and the site's name on every page but the home ----------
+   戻る is left out on the tabs' own pages (調べる・自分の株) and on the posting steps (which have やめる／戻る).
+   It goes back through the pages opened in this visit; arrived at from outside, it goes up to the page's parent. */
+(function () {
+  var bar = document.getElementById('topbar'), btn = document.getElementById('page-back');
+  if (!bar || !btn) return;
+  var NO_BACK = { top: 1, explore: 1, mypost: 1, contribute: 1 };
+  var trail = [], cur = '';
+  function show(pageId) {
+    cur = pageId;
+    bar.classList.toggle('is-on', pageId !== 'top');
+    bar.classList.toggle('is-off', pageId === 'top');
+    btn.hidden = !!NO_BACK[pageId];
+  }
+  btn.addEventListener('click', function () {
+    if (typeof gtag === 'function') gtag('event', 'back_click', { page: cur, depth: trail.length });
+    if (trail.length > 1) { history.back(); return; }
+    // nothing behind it in this visit: up to the parent
+    var a = document.createElement('a'), sub = function (seg) { return new RegExp('/' + seg + '/.+').test(location.pathname); };
+    a.href = '#'; a.style.display = 'none';
+    if (cur === 'cultivar') {
+      var ex = document.querySelector('#page-cultivar .related__exit a[data-genus]');
+      a.setAttribute('data-nav', 'genus'); a.setAttribute('data-genus', ex ? ex.getAttribute('data-genus') : 'anthurium');
+    } else if ((cur === 'people' && sub('people')) || (cur === 'locality' && sub('locality')) || (cur === 'tools' && sub('tools'))) a.setAttribute('data-nav', cur);
+    else a.setAttribute('data-nav', { genus: 1, people: 1, locality: 1, search: 1, glossary: 1, names: 1, wanted: 1, ig: 1, tools: 1, reading: 1 }[cur] ? 'explore' : 'top');
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  document.addEventListener('ao:page', function (e) {
+    show(e.detail);
+    // the address is written after the page is shown: read it a moment later
+    setTimeout(function () {
+      var url = location.pathname + location.search;
+      if (trail.length && trail[trail.length - 1] === url) return;                      // the same page drawn again
+      if (trail.length > 1 && trail[trail.length - 2] === url) { trail.pop(); return; }  // went back
+      trail.push(url);
+      if (trail.length > 50) trail.shift();
+    }, 0);
+  });
+  var first = document.querySelector('.page.active');
+  if (first) { show(first.id.replace(/^page-/, '')); trail.push(location.pathname + location.search); }
+})();

@@ -2163,3 +2163,14 @@ html.pv-label #page-cultivar #detail-actions > .btn:active, html.pv-label #page-
   html.pv-label .contribute--stepped .cstep-bar #cstep-back { background: var(--color-paper-2); color: var(--color-ink); }
   html.pv-label .contribute--stepped .cstep-bar #cstep-next { background: var(--color-ink); color: var(--color-paper-2); font-weight: 700; }
 }
+/* the phone's top bar (owner, 11-10): 戻る and the site's name on every page but the home */
+.topbar { display: none; }
+@media (max-width: 640px) {
+  html.pv-label .topbar.is-on, html.pv-label[data-boot] .topbar:not(.is-off) { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: var(--tap); padding: 0 16px; background: var(--color-paper); border-bottom: 1px solid var(--color-rule); }
+  .topbar__back { grid-column: 1; justify-self: start; display: inline-flex; align-items: center; gap: 6px; min-height: var(--tap); margin: 0; padding: 0 var(--s3) 0 0; background: none; border: 0; border-radius: 0; font-family: var(--font-primary); font-size: 0.9375rem; font-weight: 500; line-height: 1; color: var(--color-ink); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .topbar__back[hidden] { display: none; }
+  .topbar__chev { font-size: 1.5rem; line-height: 1; margin-top: -3px; color: var(--color-mid); }
+  .topbar__back:active { color: var(--color-primary); }
+  .topbar__name { grid-column: 2; display: inline-flex; align-items: center; min-height: var(--tap); font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; letter-spacing: 0.01em; color: var(--color-ink); text-decoration: none; white-space: nowrap; }
+  body.kb-open .topbar, body.menu-open .topbar { display: none !important; }
+}
