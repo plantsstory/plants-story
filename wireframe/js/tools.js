@@ -50,7 +50,8 @@
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
   function fmtDate(iso) { return iso ? String(iso).slice(0, 10).replace(/-/g, '.') : ''; }
   var SHOP_NAME = { rakuten: '楽天市場', yahoo: 'Yahoo!ショッピング', amazon: 'Amazon' };
-  var SHOP_SHORT = { rakuten: '楽天', yahoo: 'Yahoo!', amazon: 'Amazon' };
+  // the same words as the product page's own buttons: the label says it leaves for the store (board 15 M2)
+  var SHOP_SHORT = { rakuten: '楽天で見る', yahoo: 'Yahoo!で見る', amazon: 'Amazonで見る' };
   var RAKUTEN_CREDIT = '<a href="https://developers.rakuten.com/" target="_blank">Supported by Rakuten Developers</a>';
 
   /* ---------- data ---------- */

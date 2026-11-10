@@ -1612,7 +1612,7 @@ if (false) {
       if (g.has_seedlings) {
         // Pattern 1: with seedlings tab
         html += '<div class="genus-tabs" id="genus-tabs-' + g.slug + '">';
-        html += '<button class="genus-tab active" data-tab="species-clones" data-i18n="tab_species_clones">品種</button>';
+        html += '<button class="genus-tab active" data-tab="species-clones" data-i18n="tab_species_clones">名前</button>';
         html += '<button class="genus-tab" data-tab="seedlings" data-i18n="tab_seedlings">実生ノート</button>';
         html += '</div>';
       }
@@ -1642,7 +1642,7 @@ if (false) {
       html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="hybrid" data-i18n="filter_hybrid">Hybrid</button>';
       html += '</div>';
       html += '<p class="kind-note" aria-live="polite" hidden></p>';
-      html += '<a href="#" class="genus-add-link" data-nav="contribute" data-genus="' + g.name + '" data-i18n="add_cultivar">品種を追加</a>';
+      html += '<a href="#" class="genus-add-link" data-nav="contribute" data-genus="' + g.name + '" data-i18n="add_cultivar">新しい名前を登録</a>';
       html += '</div>';
 
       html += '<div class="card card--no-pad"></div>';
@@ -2282,6 +2282,7 @@ if (false) {
       supabase.from('member_interest').delete().eq('user_id', window._currentUser.id).then(function(r) {
         if (r.error) { showToast('取り消せませんでした。時間をおいてお試しください', true); return; }
         showToast('お知らせの登録を取り消しました');
+        if (typeof gtag === 'function') gtag('event', 'member_notify_cancel', { source: 'paywall' });
         refreshMemberNotifyUI();
       });
     });
@@ -2982,7 +2983,7 @@ if (false) {
     if (chipsEl) {
       var en = currentLang === 'en';
       // one line: 収録 40 品種 · 原種 32 · Hybrid 3 · Clone 5 · 記録不足 1
-      var html = '<span class="genus-stat-chip">' + (en ? 'Recorded ' : '収録 ') + '<b>' + items.length + '</b>' + (en ? '' : ' 品種') + '</span>';
+      var html = '<span class="genus-stat-chip">' + (en ? 'Recorded ' : '収録 ') + '<b>' + items.length + '</b>' + (en ? '' : ' 件') + '</span>';
       if (speciesCount > 0) html += '<span class="genus-stat-chip">' + (en ? 'Species ' : '原種 ') + speciesCount + '</span>';
       if (undescribedCount > 0) html += '<span class="genus-stat-chip">' + (en ? 'Undescribed ' : '未記載 ') + undescribedCount + '</span>';
       if (hybridCount > 0) html += '<span class="genus-stat-chip">Hybrid ' + hybridCount + '</span>';

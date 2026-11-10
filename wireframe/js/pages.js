@@ -1547,7 +1547,7 @@ function globalSearch(query) {
         + '<p class="sheet__note mono">' + t('search_no_results_hint') + '</p>'
         + '<p class="sheet__actions">'
         + '<a href="#" class="sheet__cta" id="search-request-name" data-name="' + escHtml(query.trim()) + '">' + t('search_request_name').replace('{q}', escHtml(query.trim())) + '</a>'
-        + '<a href="#" class="sheet__cta" data-nav="contribute">' + t('add_cultivar') + '</a>'
+        + '<a href="#" class="sheet__cta" data-nav="contribute">' + t('add_this_name') + '</a>'
         + '<a href="/anthurium/" class="sheet__cta" data-nav="genus" data-genus="anthurium">一覧から探す →</a>'
         + '</p></div>';
       var reqLink = document.getElementById('search-request-name');

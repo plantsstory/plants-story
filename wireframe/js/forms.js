@@ -1090,6 +1090,7 @@ document.addEventListener('click', function(e) {
       if (tgt) {
         $('ind-species').textContent = tgt.name;
         $('ind-code').value = ''; $('ind-year').value = ''; $('ind-note').value = ''; $('ind-acq').value = ''; $('ind-from').value = ''; $('ind-region').value = '';
+        $('ind-region-group').classList.add('d-none');
         $('ind-namer').value = (window._currentUser && ((window._profileCache && window._profileCache[window._currentUser.id]) || (window._currentUser.user_metadata && window._currentUser.user_metadata.full_name))) || '';
         if (title) title.textContent = t('individual_form_title');
         if (desc) desc.textContent = t('individual_form_desc');
@@ -1103,6 +1104,8 @@ document.addEventListener('click', function(e) {
       var code = this.value.replace(/^['‘’"“”]+|['‘’"“”]+$/g, '').trim();
       $('ind-preview').textContent = target && code ? target.name + " '" + code + "'" : '';
     });
+    // a collecting locality belongs to a wild-collected plant only (board 15 T5)
+    $('ind-acq').addEventListener('change', function() { $('ind-region-group').classList.toggle('d-none', this.value !== 'wild'); });
     $('ind-cancel').addEventListener('click', function(e) {
       e.preventDefault();
       if (target && target.name) navigateTo('cultivar', { cultivar: target.name }); else navigateTo('top');
@@ -1115,7 +1118,7 @@ document.addEventListener('click', function(e) {
       if (!code) { showToast(t('individual_code_required'), true); $('ind-code').focus(); return; }
       var namer = $('ind-namer').value.trim(), year = parseInt($('ind-year').value, 10) || null, note = $('ind-note').value.trim();
       if (!namer) { showToast(t('individual_namer_required'), true); $('ind-namer').focus(); return; }
-      var acq = $('ind-acq').value, from = $('ind-from').value.trim(), region = $('ind-region').value.trim();
+      var acq = $('ind-acq').value, from = $('ind-from').value.trim(), region = acq === 'wild' ? $('ind-region').value.trim() : '';
       // a number is someone's number: the same 'RA1' from another person is another plant, kept under its own name (11-03)
       var fullName = target.name + " '" + code + "'";
       var sameKeeper = function(e) {

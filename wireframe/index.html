@@ -22,27 +22,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Stylesheets before the script preloads: they hold the first paint, the scripts run only at the end of the body (11-03) -->
-  <link rel="stylesheet" href="css/variables.css?v=20261110a">
-  <link rel="stylesheet" href="css/reset.css?v=20261110a">
-  <link rel="stylesheet" href="css/layout.css?v=20261110a">
-  <link rel="stylesheet" href="css/components.css?v=20261110a">
-  <link rel="stylesheet" href="css/pages.css?v=20261110a">
-  <link rel="stylesheet" href="css/utilities.css?v=20261110a">
-  <link rel="stylesheet" href="css/archive.css?v=20261110a">
+  <link rel="stylesheet" href="css/variables.css?v=20261110b">
+  <link rel="stylesheet" href="css/reset.css?v=20261110b">
+  <link rel="stylesheet" href="css/layout.css?v=20261110b">
+  <link rel="stylesheet" href="css/components.css?v=20261110b">
+  <link rel="stylesheet" href="css/pages.css?v=20261110b">
+  <link rel="stylesheet" href="css/utilities.css?v=20261110b">
+  <link rel="stylesheet" href="css/archive.css?v=20261110b">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1">
   <!-- Own scripts fetched in parallel (the meta CSP stops the browser's own look-ahead); they still run in order at
        the end of the body. gtag.js is loaded by gtag-init.js once the page is parsed (board 11 T156). -->
-  <link rel="preload" as="script" href="js/record-gate.js?v=20261110a">
-  <link rel="preload" as="script" href="js/app-core.js?v=20261110a">
-  <link rel="preload" as="script" href="js/pages.js?v=20261110a">
-  <link rel="preload" as="script" href="js/forms.js?v=20261110a">
-  <link rel="preload" as="script" href="js/entry-meta.js?v=20261110a">
-  <link rel="preload" as="script" href="js/archive.js?v=20261110a">
-  <link rel="preload" as="script" href="js/tool-gate.js?v=20261110a">
-  <link rel="preload" as="script" href="js/tools.js?v=20261110a">
-  <link rel="preload" as="script" href="js/dialogs.js?v=20261110a">
-  <script src="js/textsize.js?v=20261110a"></script>
+  <link rel="preload" as="script" href="js/record-gate.js?v=20261110b">
+  <link rel="preload" as="script" href="js/app-core.js?v=20261110b">
+  <link rel="preload" as="script" href="js/pages.js?v=20261110b">
+  <link rel="preload" as="script" href="js/forms.js?v=20261110b">
+  <link rel="preload" as="script" href="js/entry-meta.js?v=20261110b">
+  <link rel="preload" as="script" href="js/archive.js?v=20261110b">
+  <link rel="preload" as="script" href="js/tool-gate.js?v=20261110b">
+  <link rel="preload" as="script" href="js/tools.js?v=20261110b">
+  <link rel="preload" as="script" href="js/dialogs.js?v=20261110b">
+  <script src="js/textsize.js?v=20261110b"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -83,7 +83,7 @@
     "logo": "https://aroidorigins.com/icons/icon-512.svg"
   }
   </script>
-  <script src="js/gtag-init.js?v=20261110a"></script>
+  <script src="js/gtag-init.js?v=20261110b"></script>
 </head>
 <body>
 
@@ -116,18 +116,24 @@
   <!-- Mobile Nav -->
   <nav class="mobile-nav" id="mobileNav" aria-label="モバイルナビゲーション">
     <div class="mobile-nav__head"><span>メニュー</span><button type="button" class="mobile-nav__close" id="mobile-nav-close"><svg class="ico" aria-hidden="true"><use href="#i-close"/></svg>閉じる</button></div>
-    <a href="#" data-nav="top" data-i18n="nav_home">トップ</a>
-    <span id="mobile-nav-genera"></span>
-    <a href="/people/" data-nav="people" data-i18n="nav_people">人物索引</a>
-    <a href="/locality/" data-nav="locality" data-i18n="locality_title">産地索引</a>
-    <a href="/glossary/" data-nav="glossary" data-i18n="glossary_title">由来の用語集</a>
-    <a href="/reading/" data-nav="reading" class="pv-reading-link">読みもの</a>
-    <a href="/tools/" data-nav="tools" data-tools-link class="d-none" data-i18n="tools_nav">道具</a>
-    <a href="#" data-nav="contribute" data-i18n="nav_contribute_mobile">品種を投稿</a>
-    <a href="#" data-nav="mypost" id="nav-mypost" class="d-none">自分の株</a>
+    <!-- board 15 B8: login first, then what the tabs and 調べる do not hold; the rows marked nav-dup repeat the
+         tabs and are shown only where there is no bottom bar -->
+    <a href="#" id="nav-auth">ログイン</a>
     <a href="#" id="nav-profile" class="d-none" data-nav="profile">プロフィール</a>
+    <a href="#" data-nav="top" class="nav-dup" data-i18n="nav_home">トップ</a>
+    <span id="mobile-nav-genera" class="nav-dup"></span>
+    <a href="/people/" data-nav="people" class="nav-dup" data-i18n="nav_people">人物索引</a>
+    <a href="/locality/" data-nav="locality" class="nav-dup" data-i18n="locality_title">産地索引</a>
+    <a href="/glossary/" data-nav="glossary" class="nav-dup" data-i18n="glossary_title">由来の用語集</a>
+    <a href="/tools/" data-nav="tools" data-tools-link class="d-none" data-i18n="tools_nav">道具</a>
+    <a href="/reading/" data-nav="reading" class="pv-reading-link">読みもの</a>
+    <a href="#" data-nav="guide" data-i18n="footer_guide">使い方</a>
+    <a href="#" data-nav="about" data-i18n="footer_about">この図鑑について</a>
+    <a href="/pricing/" data-nav="pricing" data-i18n="pricing_title">料金とサービス内容</a>
+    <a href="#" data-nav="contact" data-i18n="footer_contact">お問い合わせ</a>
+    <a href="#" data-nav="contribute" class="nav-dup" data-i18n="nav_contribute_mobile">新しい名前を登録</a>
+    <a href="#" data-nav="mypost" id="nav-mypost" class="d-none nav-dup">自分の株</a>
     <div class="mt-sm mobile-nav__divider">
-      <a href="#" id="nav-auth">ログイン</a>
       <div class="textsize textsize--nav" role="group" aria-label="文字サイズ">
         <span class="textsize__label mono" data-i18n="textsize_label">文字サイズ</span>
         <button type="button" class="textsize__btn textsize__btn--1" data-size="normal" aria-pressed="true" title="標準"><span aria-hidden="true">A</span><span class="visually-hidden" data-i18n="textsize_normal">標準</span></button>
@@ -135,8 +141,8 @@
         <button type="button" class="textsize__btn textsize__btn--3" data-size="xlarge" aria-pressed="false" title="特大"><span aria-hidden="true">A</span><span class="visually-hidden" data-i18n="textsize_xlarge">特大</span></button>
       </div>
       <button class="header__lang mt-sm" data-i18n="lang_toggle">EN / JP</button>
-      <p class="donate-slot" data-donate-slot="menu" hidden></p>
     </div>
+    <p class="donate-slot" data-donate-slot="menu" hidden></p>
   </nav>
 
   <main id="app-main">
@@ -184,7 +190,7 @@
             <a class="way" href="/people/" data-nav="people"><svg class="ico" aria-hidden="true"><use href="#i-person"/></svg><span>人物をたどる</span></a>
             <a class="way" href="/locality/" data-nav="locality"><svg class="ico" aria-hidden="true"><use href="#i-place"/></svg><span>産地をたどる</span></a>
           </nav>
-          <section class="recent" id="recent-views" aria-label="最近見た品種" hidden></section>
+          <section class="recent" id="recent-views" aria-label="最近見た名前" hidden></section>
 
           <p class="masthead__stats" id="masthead-stats"></p>
           <div class="masthead__meta" id="masthead-genera"></div>
@@ -209,7 +215,7 @@
 
       <!-- New entries (one list line each) -->
       <section class="front-new" id="front-new">
-        <h2 class="section-title" data-i18n="new_entries_title">新着の品種</h2>
+        <h2 class="section-title" data-i18n="new_entries_title">新着の名前</h2>
         <div id="recently-updated-grid"><div class="loading-text p-xl">…</div></div>
         <p class="front-new__wanted" id="front-wanted"></p>
         <p class="front-new__foot"><span id="new-entries-count"></span><a href="#" id="ledger-all-link" data-nav="genus" data-genus="anthurium" data-i18n="ledger_all">一覧をすべて見る →</a></p>
@@ -306,6 +312,7 @@
         <details class="detail-more">
           <summary class="mono" data-i18n="detail_more">その他</summary>
           <div class="detail-more__items">
+            <p class="detail-more__title" data-i18n="detail_more">その他</p>
             <a href="#" class="btn btn--sm btn--secondary font-xs-btn d-none" id="detail-add-individual" data-nav="contribute" data-contribute-type="individual" data-i18n="detail_add_individual">個体を追加</a>
             <a href="/contribute" class="btn btn--sm btn--secondary font-xs-btn d-none" id="detail-add-seedling" data-nav="contribute" data-contribute-type="seedling" data-i18n="detail_add_seedling">この品種を親に実生を記録</a>
             <button type="button" class="btn btn--sm btn--secondary cursor-pointer font-xs-btn" id="detail-print-label" data-i18n="label_print">ラベルを印刷</button>
@@ -316,6 +323,7 @@
               <button class="btn btn--secondary btn--sm font-xs-btn" id="detail-edit-btn" data-i18n="detail_edit">編集</button>
             </div>
             <button class="btn btn--sm cursor-pointer text-danger-border font-xs-btn" id="detail-delete-request-btn" data-i18n="detail_report">誤りを報告</button>
+            <button type="button" class="detail-more__close" data-i18n="btn_close">閉じる</button>
           </div>
         </details>
       </div>
@@ -470,7 +478,7 @@
       </section>
 
       <section class="related d-none" id="related-section">
-        <h2 class="section-title"><span data-i18n="related_title">関連する品種</span></h2>
+        <h2 class="section-title"><span data-i18n="related_title">関連する名前</span></h2>
         <div id="related-container"></div>
       </section>
 
@@ -498,16 +506,14 @@
       <!-- Individuals: compact form shown instead of the full form ("+ 個体を追加" on a species page) -->
       <div id="individual-form" class="individual-form">
         <div class="individual-form__row"><span class="mono individual-form__k" data-i18n="individual_species">原種</span><span class="individual-form__species" id="ind-species"></span></div>
-        <div class="form-group"><label class="form-label" for="ind-code" data-i18n="individual_code">個体名・番号</label><input type="text" class="form-input" id="ind-code" placeholder="HR1 / Dark Star" autocomplete="off" maxlength="40"><p class="mono individual-form__preview" id="ind-preview"></p></div>
+        <div class="form-group"><label class="form-label" for="ind-code" data-i18n="individual_code">個体名・番号</label><input type="text" class="form-input" id="ind-code" placeholder="HR1 / Dark Star" autocomplete="off" maxlength="40"><p class="mono individual-form__preview" id="ind-preview"></p><p class="text-xs text-muted" data-i18n="individual_same_note">株分けや組織培養で増えた株は、同じ個体です。新しく登録せず、その個体のページに写真を追加してください。</p></div>
         <div class="individual-form__grid">
           <div class="form-group"><label class="form-label" for="ind-namer" data-i18n="individual_namer">番号・名前をつけた人</label><input type="text" class="form-input" id="ind-namer" autocomplete="off" maxlength="80"></div>
           <div class="form-group"><label class="form-label" for="ind-year" data-i18n="individual_year">つけた年</label><input type="number" class="form-input" id="ind-year" min="1900" max="2100" placeholder="2024"></div>
         </div>
-        <div class="form-group"><label class="form-label" for="ind-acq" data-i18n="individual_acquisition">入手の経路</label><select class="form-input" id="ind-acq"><option value="" data-i18n="acq_choose">選んでください（任意）</option><option value="wild" data-i18n="acq_wild">野生由来の株</option><option value="seed" data-i18n="acq_seed">実生</option><option value="unsure" data-i18n="acq_unsure">わからない</option></select></div>
-        <div class="individual-form__grid">
-          <div class="form-group"><label class="form-label" for="ind-from" data-i18n="individual_from">入手先（任意）</label><input type="text" class="form-input" id="ind-from" autocomplete="off" maxlength="80" placeholder="店名・人の名前など"></div>
-          <div class="form-group"><label class="form-label" for="ind-region" data-i18n="individual_region">産地（任意）</label><input type="text" class="form-input" id="ind-region" autocomplete="off" maxlength="80" placeholder="Colombia, Chocó など"></div>
-        </div>
+        <div class="form-group"><label class="form-label" for="ind-acq" data-i18n="individual_acquisition">株の由来</label><select class="form-input" id="ind-acq"><option value="" data-i18n="acq_choose">選んでください（任意）</option><option value="wild" data-i18n="acq_wild">野生採集の株</option><option value="seed" data-i18n="acq_seed">栽培下の実生</option><option value="unsure" data-i18n="acq_unsure">わからない</option></select></div>
+        <div class="form-group d-none" id="ind-region-group"><label class="form-label" for="ind-region" data-i18n="individual_region">採集地（国・県まで）</label><input type="text" class="form-input" id="ind-region" autocomplete="off" maxlength="80" placeholder="Colombia, Chocó"></div>
+        <div class="form-group"><label class="form-label" for="ind-from" data-i18n="individual_from">入手先（任意）</label><input type="text" class="form-input" id="ind-from" autocomplete="off" maxlength="80" placeholder="店名・人の名前など"></div>
         <div class="form-group"><label class="form-label" for="ind-note" data-i18n="individual_note">説明（任意）</label><textarea class="form-input" id="ind-note" rows="4" maxlength="1500" placeholder="入手元、選抜の経緯、親株との関係など"></textarea></div>
         <p class="text-xs text-muted" data-i18n="individual_photos_hint">写真は登録後、個体のページの「画像追加」から載せられます。</p>
         <div class="individual-form__actions">
@@ -797,7 +803,7 @@
 
       <!-- Cultivar Results -->
       <div id="search-cultivar-results">
-        <h2 class="section-heading">品種</h2>
+        <h2 class="section-heading">名前</h2>
         <!-- Filter chips -->
         <div class="chips mb-lg" id="search-chips">
           <button type="button" class="chip active" aria-pressed="true" data-genus="all" data-i18n="filter_all">すべて</button>
@@ -1110,6 +1116,7 @@
       </ul>
       <p class="text-sm text-muted mt-sm"><span data-i18n="about_plan_pricing">月額 500円（税込）／ 年額 5,000円（税込）</span><br><span data-i18n="about_plan_payment">受付開始後、クレジットカード・デビットカードで支払えます（決済代行会社: PAY.JP または Stripe）。</span></p>
       <p data-i18n="about_funding">この図鑑は会員の会費・取扱店の掲載料（PR）・アフィリエイト（PR）で運営しています。いずれも記録の内容や検証には影響しません。</p>
+      <p class="donate-slot" data-donate-slot="about" hidden></p>
 
       <h2 data-i18n="about_operator_title">運営情報</h2>
       <div class="legal-operator" data-i18n-html="about_operator_body">
@@ -1243,6 +1250,7 @@
       <h1 data-i18n="pricing_title">料金とサービス内容</h1>
       <p class="legal-date">最終更新 2026.10.03</p>
       <p class="pricing-summary">会員 月額 500円 ／ 年額 5,000円（税込）<br><strong>受付準備中</strong> · 閲覧は無料</p>
+      <div class="pricing-notify" id="pricing-notify"><button class="btn btn--primary" type="button" data-action="open-paywall">受付開始のお知らせを受け取る</button></div>
 
       <h2>無料でご利用いただけるもの</h2>
       <ul class="terms-list">
@@ -1269,7 +1277,6 @@
         <tr><th>お問い合わせ</th><td>plantsstory2026@gmail.com（<a href="#" data-nav="contact">お問い合わせフォーム</a>からも受け付けます。3営業日以内に返信します）</td></tr>
       </table>
       </details>
-      <div class="mt-lg"><button class="btn btn--primary" type="button" data-action="open-paywall">受付開始のお知らせを受け取る</button></div>
       <p class="text-sm text-muted mt-md">お申込み前に <a href="#" data-nav="tokushoho">特定商取引法に基づく表記</a> と <a href="#" data-nav="terms">利用規約</a> をご確認ください。</p>
 
       <h2 id="shops">取扱店の掲載（事業者向け）</h2>
@@ -1680,12 +1687,13 @@
     <p class="sheet-dialog__kind" id="post-sheet-kind"></p>
     <h3 class="dialog-title" id="post-sheet-name"></h3>
     <ul class="sheet-rows">
-      <li><button type="button" data-post-act="photo"><span><span class="sheet-rows__t">写真を足す</span><span class="sheet-rows__d" id="post-sheet-photo-d">写真のない品種に、自分で撮った写真を</span></span> <span aria-hidden="true">→</span></button></li>
+      <li><button type="button" data-post-act="photo"><span><span class="sheet-rows__t" id="post-sheet-photo-t">持っている株の写真を追加</span><span class="sheet-rows__d" id="post-sheet-photo-d">名前を選ぶと、写真の追加が開きます</span></span> <span aria-hidden="true">→</span></button></li>
+      <li id="post-sheet-ind-any"><button type="button" data-post-act="individual-any"><span><span class="sheet-rows__t">番号つきの個体を追加</span><span class="sheet-rows__d">原種を選んで、自分の株の番号や名前を残す</span></span> <span aria-hidden="true">→</span></button></li>
       <li><button type="button" data-post-act="seedling"><span><span class="sheet-rows__t">実生を記録</span><span class="sheet-rows__d" id="post-sheet-seedling-d">自分で播いた株の交配式と播種日</span></span> <span aria-hidden="true">→</span></button></li>
       <li><button type="button" data-post-act="new"><span><span class="sheet-rows__t">新しい名前を登録</span><span class="sheet-rows__d">まだ収録されていない原種・Clone・Hybrid</span></span> <span aria-hidden="true">→</span></button></li>
     </ul>
     <ul class="sheet-rows sheet-rows--more" id="post-sheet-entry-more">
-      <li><button type="button" data-post-act="record">この品種に記録を追加 <span aria-hidden="true">→</span></button></li>
+      <li><button type="button" data-post-act="record">この名前に記録を追加 <span aria-hidden="true">→</span></button></li>
       <li id="post-sheet-ind"><button type="button" data-post-act="individual">この原種の個体を追加 <span aria-hidden="true">→</span></button></li>
     </ul>
     <div class="dialog-actions"><button type="button" class="btn btn--secondary btn--sm" data-post-act="close">閉じる</button></div>
@@ -1764,14 +1772,14 @@
        JS: Split into logical modules
        ======================================== -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1"></script>
-  <script src="js/record-gate.js?v=20261110a"></script>
-  <script src="js/app-core.js?v=20261110a"></script>
-  <script src="js/pages.js?v=20261110a"></script>
-  <script src="js/forms.js?v=20261110a"></script>
-  <script src="js/entry-meta.js?v=20261110a"></script>
-  <script src="js/archive.js?v=20261110a"></script>
-  <script src="js/tool-gate.js?v=20261110a"></script>
-  <script src="js/tools.js?v=20261110a"></script>
+  <script src="js/record-gate.js?v=20261110b"></script>
+  <script src="js/app-core.js?v=20261110b"></script>
+  <script src="js/pages.js?v=20261110b"></script>
+  <script src="js/forms.js?v=20261110b"></script>
+  <script src="js/entry-meta.js?v=20261110b"></script>
+  <script src="js/archive.js?v=20261110b"></script>
+  <script src="js/tool-gate.js?v=20261110b"></script>
+  <script src="js/tools.js?v=20261110b"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1781,7 +1789,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261110a"></script>
+  <script src="js/dialogs.js?v=20261110b"></script>
 
   <!-- AI re-research request dialog -->
   <!-- Asked before anything is typed: posting, photos and records need a login (2026-10-08 app-ux) -->
@@ -1833,6 +1841,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261110a"></script>
+<script src="js/sw-register.js?v=20261110b"></script>
 </body>
 </html>

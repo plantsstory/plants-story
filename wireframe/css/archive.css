@@ -2082,10 +2082,10 @@ html.pv-label .mypost-next button { border-width: 1px; }
 /* ---- board 15 (11-10), first batch ---- */
 .entry__name i, .detail-title i, .plate-label__name i, .related__group li a i { font-style: italic; }
 /* B1: 「その他」 opens as one column, one action to a 48px row */
-#page-cultivar .detail-more[open] { display: block; flex-basis: 100%; }
-#page-cultivar .detail-more__items { display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; padding: 0; border-top: 1px solid var(--color-rule); }
-#page-cultivar .detail-more__items .btn:not(.d-none), #page-cultivar .detail-more__items a.btn:not(.d-none) { display: flex; justify-content: flex-start; width: 100%; min-height: var(--tap); margin: 0; padding: 0; text-align: left; text-decoration: none; border: 0; border-bottom: 1px solid var(--color-rule); border-radius: 0; background: none; }
-#page-cultivar .detail-more__items > span:not(.d-none) { display: flex; align-items: center; min-height: var(--tap); border-bottom: 1px solid var(--color-rule); font-family: var(--font-primary); font-size: var(--fs-small); color: var(--color-mid); }
+#page-cultivar #detail-actions .detail-more[open] { display: block; flex-basis: 100%; }
+#page-cultivar #detail-actions .detail-more__items { display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; padding: 0; border-top: 1px solid var(--color-rule); }
+#page-cultivar #detail-actions .detail-more__items .btn:not(.d-none), #page-cultivar #detail-actions .detail-more__items a.btn:not(.d-none) { display: flex; justify-content: flex-start; width: 100%; min-height: var(--tap); margin: 0; padding: 0; text-align: left; text-decoration: none; border: 0; border-bottom: 1px solid var(--color-rule); border-radius: 0; background: none; }
+#page-cultivar #detail-actions .detail-more__items > span:not(.d-none) { display: flex; align-items: center; min-height: var(--tap); border-bottom: 1px solid var(--color-rule); font-family: var(--font-primary); font-size: var(--fs-small); color: var(--color-mid); }
 /* B6: the ＋投稿 sheet */
 #post-sheet .dialog-actions { margin-top: var(--s4); }
 #post-sheet .dialog-actions .btn { width: 100%; min-height: var(--tap); }
@@ -2111,4 +2111,23 @@ html.pv-label .mypost-next button { border-width: 1px; }
 .tool-context__h { flex-basis: 100%; color: var(--color-mid); font-size: var(--fs-label); }
 .tool-context__line a { display: inline-flex; align-items: center; min-height: var(--tap); color: var(--color-ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
 .n__sub { font-size: var(--fs-label); color: var(--color-mid); font-weight: 400; }
-#page-cultivar .detail-more__items .d-none { display: none !important; }
+#page-cultivar #detail-actions .detail-more__items .d-none { display: none !important; }
+/* ---- board 15 (11-10), second batch ---- */
+/* B2: 「その他」 on a phone is a sheet from the bottom, the same sheet as ＋投稿 */
+.detail-more__title, .detail-more__close { display: none; }
+@media (max-width: 640px) {
+  #page-cultivar #detail-actions .detail-more[open] { display: inline-block; flex-basis: auto; }
+  #page-cultivar #detail-actions .detail-more[open]::before { content: ""; position: fixed; inset: 0; z-index: 200; background: rgba(30, 38, 34, 0.35); }
+  #page-cultivar #detail-actions .detail-more[open] > .detail-more__items { position: fixed; left: 0; right: 0; bottom: 0; z-index: 201; max-height: 85svh; overflow-y: auto; background: var(--color-paper-2); border-top: 1px solid var(--color-ink); padding: var(--s4) 16px calc(var(--s4) + env(safe-area-inset-bottom)); animation: sheet-up 180ms ease-out; }
+  #page-cultivar #detail-actions .detail-more[open] .detail-more__title { display: block; margin: 0 0 var(--s2); font-family: var(--font-primary); font-size: var(--fs-body); font-weight: 700; color: var(--color-ink); }
+  #page-cultivar #detail-actions .detail-more[open] .detail-more__close { display: block; width: 100%; min-height: var(--tap); margin-top: var(--s4); background: var(--color-paper-2); border: 1px solid var(--color-ink); border-radius: 0; font: inherit; font-size: var(--fs-body); color: var(--color-ink); cursor: pointer; }
+  #page-cultivar #detail-actions .detail-more[open] > .detail-more__items .btn:not(.d-none), #page-cultivar #detail-actions .detail-more[open] > .detail-more__items a.btn:not(.d-none) { font-size: var(--fs-body); font-weight: 400; }
+}
+@media (prefers-reduced-motion: reduce) { #page-cultivar #detail-actions .detail-more[open] > .detail-more__items { animation: none; } }
+/* B8: the menu — rows that repeat the tabs are left out where the bottom bar is shown; everything starts at 16px */
+@media (max-width: 640px) { html.app-ui .mobile-nav .nav-dup { display: none !important; } }
+.mobile-nav > .donate-slot { margin: var(--s3) 0 0; }
+/* M3 */
+.pricing-notify { margin: var(--s3) 0 var(--s4); }
+.pricing-notify .btn { min-height: var(--tap); }
+.pricing-notify__on { margin: 0; font-size: var(--fs-small); color: var(--color-mid); }

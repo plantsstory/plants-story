@@ -140,8 +140,8 @@
     "en": "Clone"
   },
   "add_cultivar": {
-    "jp": "品種を追加",
-    "en": "Add an entry"
+    "jp": "新しい名前を登録",
+    "en": "Register a new name"
   },
   "edit": {
     "jp": "✏️ 編集",
@@ -192,8 +192,8 @@
     "en": "Cancel"
   },
   "contribute_title": {
-    "jp": "新しい品種を登録",
-    "en": "Register New Cultivar"
+    "jp": "新しい名前を登録",
+    "en": "Register a new name"
   },
   "contribute_desc": {
     "jp": "既存品種に由来を追加する場合は、その品種のページから追加できます。",
@@ -385,7 +385,7 @@
     "en": "Search results for \"{q}\""
   },
   "results_count": {
-    "jp": "{n}件の品種が見つかりました",
+    "jp": "{n} 件の名前が見つかりました",
     "en": "{n} entries found"
   },
   "no_results": {
@@ -1069,8 +1069,8 @@
     "en": "+ Contribute"
   },
   "nav_contribute_mobile": {
-    "jp": "品種を投稿",
-    "en": "Contribute"
+    "jp": "新しい名前を登録",
+    "en": "Register a new name"
   },
   "mast_kicker": {
     "jp": "Anthurium — 品種の由来・記載史アーカイブ",
@@ -1197,8 +1197,8 @@
     "en": "From the source tier (S–D); records checked by the editor carry ✓ Verified"
   },
   "related_title": {
-    "jp": "関連する品種",
-    "en": "Related entries"
+    "jp": "関連する名前",
+    "en": "Related names"
   },
   "related_same_locality": {
     "jp": "同じ産地の原種",
@@ -1217,11 +1217,11 @@
     "en": "Sharing a parent"
   },
   "related_prev": {
-    "jp": "前の品種",
+    "jp": "前の名前",
     "en": "Previous"
   },
   "related_next": {
-    "jp": "次の品種",
+    "jp": "次の名前",
     "en": "Next"
   },
   "spec_author": {
@@ -1289,8 +1289,8 @@
     "en": "Parents"
   },
   "tab_species_clones": {
-    "jp": "品種",
-    "en": "Entries"
+    "jp": "名前",
+    "en": "Names"
   },
   "tab_seedlings": {
     "jp": "実生ノート",
@@ -1477,16 +1477,16 @@
     "en": "Request a re-check"
   },
   "rerun_title": {
-    "jp": "AI再調査をリクエスト",
-    "en": "Request AI re-research"
+    "jp": "再調査を依頼",
+    "en": "Request re-research"
   },
   "rerun_desc": {
     "jp": "管理者が内容を確認して承認すると、Web検索つきの AI 調査がもう一度実行されます。気になる点（誤り・追加してほしい出典など）があれば書いてください。",
     "en": "Once the admin approves, the AI research (with web search) runs again for this entry. Tell us what looks wrong or which sources to check."
   },
   "rerun_submit": {
-    "jp": "リクエストを送る",
-    "en": "Send request"
+    "jp": "依頼を送る",
+    "en": "Send the request"
   },
   "rerun_pending": {
     "jp": "再調査リクエスト受付中（承認待ち）",
@@ -1525,8 +1525,8 @@
     "en": "Researching"
   },
   "new_entries_title": {
-    "jp": "新着の品種",
-    "en": "New entries"
+    "jp": "新着の名前",
+    "en": "New names"
   },
   "new_entries_week": {
     "jp": "今週 +{n}",
@@ -2373,7 +2373,7 @@
     "en": "Your name appears in the people index. Your seedling page shows a card when shared."
   },
   "entries_day_count": {
-    "jp": "{n} 品種",
+    "jp": "{n} 件",
     "en": "{n} entries"
   },
   "label_print": {
@@ -2485,28 +2485,28 @@
     "en": "Enter who gave the number or name"
   },
   "individual_acquisition": {
-    "jp": "入手の経路",
-    "en": "How it was obtained"
+    "jp": "株の由来",
+    "en": "Origin of the plant"
   },
   "individual_from": {
     "jp": "入手先（任意）",
     "en": "Obtained from (optional)"
   },
   "individual_region": {
-    "jp": "産地（任意）",
-    "en": "Locality (optional)"
+    "jp": "採集地（国・県まで）",
+    "en": "Collecting locality (country, province)"
   },
   "acq_choose": {
     "jp": "選んでください（任意）",
     "en": "Choose (optional)"
   },
   "acq_wild": {
-    "jp": "野生由来の株",
-    "en": "Wild-origin plant"
+    "jp": "野生採集の株",
+    "en": "Wild-collected plant"
   },
   "acq_seed": {
-    "jp": "実生",
-    "en": "Grown from seed"
+    "jp": "栽培下の実生",
+    "en": "Seedling raised in cultivation"
   },
   "acq_unsure": {
     "jp": "わからない",
@@ -2547,5 +2547,21 @@
   "kind_cf": {
     "jp": "同定未確定",
     "en": "Identification unsettled"
+  },
+  "add_this_name": {
+    "jp": "この名前を登録 →",
+    "en": "Register this name →"
+  },
+  "post_intent_species_only": {
+    "jp": "個体は原種のページから追加します。原種を選んでください",
+    "en": "An individual is added from a species page. Choose a species"
+  },
+  "individual_same_note": {
+    "jp": "株分けや組織培養で増えた株は、同じ個体です。新しく登録せず、その個体のページに写真を追加してください。",
+    "en": "Divisions and tissue-cultured plants are the same individual: add a photo to its page instead of recording it again."
+  },
+  "btn_close": {
+    "jp": "閉じる",
+    "en": "Close"
   }
 }
