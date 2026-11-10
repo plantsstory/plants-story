@@ -729,7 +729,14 @@
     });
     document.addEventListener('ao:page', function () { dm.open = false; });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && dm.open) dm.open = false; });
+    // on a wide screen the list hangs under the strip: a click anywhere else puts it away
+    document.addEventListener('click', function (e) { if (dm.open && !dm.contains(e.target)) dm.open = false; });
   })();
+  // after the records: the same 写真を追加, for someone who has read to the end (board 15 B16)
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest || !e.target.closest('#read-end-photo')) return;
+    var pb = document.getElementById('detail-add-photo-btn'); if (pb) pb.click();
+  });
   /* 道具の目録 — PR: one genus-level line on recorded species and locality pages, only while the catalogue is open (T96) */
   var _toolCtxD = null;
   function toolContextHtml(src) {

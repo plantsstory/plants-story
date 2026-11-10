@@ -2131,3 +2131,35 @@ html.pv-label .mypost-next button { border-width: 1px; }
 .pricing-notify { margin: var(--s3) 0 var(--s4); }
 .pricing-notify .btn { min-height: var(--tap); }
 .pricing-notify__on { margin: 0; font-size: var(--fs-small); color: var(--color-mid); }
+/* ---- board 15: 案4「名札の裾」, the owner's choice (11-10) ---- */
+/* 共有 at the top right, beside the kind */
+#page-cultivar .detail-kindline { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); min-height: var(--tap); }
+#page-cultivar .detail-kindline .detail-standard { margin: 0; }
+#page-cultivar .detail-share { position: relative; margin-left: auto; }
+#page-cultivar .detail-share #share-btn { display: inline-flex; align-items: center; min-height: var(--tap); margin: 0; padding: 0 0 0 var(--s3); background: none; border: 0; border-radius: 0; font-family: var(--font-primary); font-size: 0.9375rem; font-weight: 500; color: var(--color-ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
+#page-cultivar .detail-share #share-btn:hover { color: var(--color-primary); }
+#page-cultivar .detail-share .share-menu-popup { top: 100%; right: 0; left: auto; white-space: nowrap; }
+/* the label's last row runs straight into the strip */
+html.pv-label #page-cultivar #specimen-label .specimen { margin-bottom: 0; border-bottom: 0; }
+html.pv-label #page-cultivar #specimen-label .specimen__cell:last-child { border-bottom: 0 !important; }
+html.pv-label #page-cultivar #detail-actions { display: flex; flex-wrap: nowrap; align-items: stretch; gap: 0; position: relative; min-height: 0; margin: 0 0 var(--s4); padding: 0; background: var(--color-paper-2); border: 0; border-top: 1px solid var(--color-ink); border-bottom: 2px solid var(--color-ink); }
+html.pv-label #page-cultivar #detail-actions > .btn, html.pv-label #page-cultivar #detail-actions > .detail-more, html.pv-label #page-cultivar #detail-actions > .detail-more[open] { display: flex; flex: 1 1 0; min-width: 0; }
+html.pv-label #page-cultivar #detail-actions > .btn, html.pv-label #page-cultivar #detail-actions > .detail-more > summary { align-items: center; justify-content: center; min-height: 54px; margin: 0; padding: 0 4px; background: none; border: 0; border-left: 1px solid var(--color-rule-strong); border-radius: 0; font-family: var(--font-primary); font-size: 0.9375rem; font-weight: 500; letter-spacing: 0; color: var(--color-ink); text-align: center; text-decoration: none; }
+html.pv-label #page-cultivar #detail-actions > .detail-more > summary { display: flex; flex: 1 1 auto; width: 100%; }
+html.pv-label #page-cultivar #detail-actions > .btn:first-child, html.pv-label #page-cultivar #detail-actions > .btn[style*="display: none"] + .btn, html.pv-label #page-cultivar #detail-actions > .btn[style*="display:none"] + .btn { border-left: 0; }
+html.pv-label #page-cultivar #detail-actions > .btn:hover, html.pv-label #page-cultivar #detail-actions > .detail-more > summary:hover { color: var(--color-primary); background: none; }
+html.pv-label #page-cultivar #detail-actions > .btn:active, html.pv-label #page-cultivar #detail-actions > .detail-more > summary:active { background: var(--color-lighter); }
+@media (min-width: 641px) {
+  html.pv-label #page-cultivar #detail-actions > .detail-more[open] > .detail-more__items { position: absolute; right: 0; top: calc(100% + 2px); z-index: 30; min-width: 300px; padding: 0 16px; background: var(--color-paper-2); border: 1px solid var(--color-ink); }
+}
+#page-cultivar > .container > .share-band { margin-bottom: var(--s4); }
+/* after the records: 記録を追加 and 写真を追加 side by side; no second 写真を追加 where the photo-less band already asks */
+#add-origin-toggle { display: flex; flex-wrap: wrap; gap: 0 var(--s4); }
+#page-cultivar:has(.sheet--inline) #read-end-photo, #page-cultivar:has(.sheet--plate) #read-end-photo { display: none; }
+/* the posting screen: the same two-part hem — やめる／戻る ｜ 次へ */
+@media (max-width: 640px) {
+  html.pv-label .contribute--stepped .cstep-bar { gap: 0; padding: 0 0 env(safe-area-inset-bottom); background: var(--color-paper-2); border-top: 1px solid var(--color-ink); }
+  html.pv-label .contribute--stepped .cstep-bar .btn { min-height: 56px; border: 0; border-radius: 0; }
+  html.pv-label .contribute--stepped .cstep-bar #cstep-back { background: var(--color-paper-2); color: var(--color-ink); }
+  html.pv-label .contribute--stepped .cstep-bar #cstep-next { background: var(--color-ink); color: var(--color-paper-2); font-weight: 700; }
+}

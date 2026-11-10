@@ -22,27 +22,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Stylesheets before the script preloads: they hold the first paint, the scripts run only at the end of the body (11-03) -->
-  <link rel="stylesheet" href="css/variables.css?v=20261110b">
-  <link rel="stylesheet" href="css/reset.css?v=20261110b">
-  <link rel="stylesheet" href="css/layout.css?v=20261110b">
-  <link rel="stylesheet" href="css/components.css?v=20261110b">
-  <link rel="stylesheet" href="css/pages.css?v=20261110b">
-  <link rel="stylesheet" href="css/utilities.css?v=20261110b">
-  <link rel="stylesheet" href="css/archive.css?v=20261110b">
+  <link rel="stylesheet" href="css/variables.css?v=20261110c">
+  <link rel="stylesheet" href="css/reset.css?v=20261110c">
+  <link rel="stylesheet" href="css/layout.css?v=20261110c">
+  <link rel="stylesheet" href="css/components.css?v=20261110c">
+  <link rel="stylesheet" href="css/pages.css?v=20261110c">
+  <link rel="stylesheet" href="css/utilities.css?v=20261110c">
+  <link rel="stylesheet" href="css/archive.css?v=20261110c">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1">
   <!-- Own scripts fetched in parallel (the meta CSP stops the browser's own look-ahead); they still run in order at
        the end of the body. gtag.js is loaded by gtag-init.js once the page is parsed (board 11 T156). -->
-  <link rel="preload" as="script" href="js/record-gate.js?v=20261110b">
-  <link rel="preload" as="script" href="js/app-core.js?v=20261110b">
-  <link rel="preload" as="script" href="js/pages.js?v=20261110b">
-  <link rel="preload" as="script" href="js/forms.js?v=20261110b">
-  <link rel="preload" as="script" href="js/entry-meta.js?v=20261110b">
-  <link rel="preload" as="script" href="js/archive.js?v=20261110b">
-  <link rel="preload" as="script" href="js/tool-gate.js?v=20261110b">
-  <link rel="preload" as="script" href="js/tools.js?v=20261110b">
-  <link rel="preload" as="script" href="js/dialogs.js?v=20261110b">
-  <script src="js/textsize.js?v=20261110b"></script>
+  <link rel="preload" as="script" href="js/record-gate.js?v=20261110c">
+  <link rel="preload" as="script" href="js/app-core.js?v=20261110c">
+  <link rel="preload" as="script" href="js/pages.js?v=20261110c">
+  <link rel="preload" as="script" href="js/forms.js?v=20261110c">
+  <link rel="preload" as="script" href="js/entry-meta.js?v=20261110c">
+  <link rel="preload" as="script" href="js/archive.js?v=20261110c">
+  <link rel="preload" as="script" href="js/tool-gate.js?v=20261110c">
+  <link rel="preload" as="script" href="js/tools.js?v=20261110c">
+  <link rel="preload" as="script" href="js/dialogs.js?v=20261110c">
+  <script src="js/textsize.js?v=20261110c"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -83,7 +83,7 @@
     "logo": "https://aroidorigins.com/icons/icon-512.svg"
   }
   </script>
-  <script src="js/gtag-init.js?v=20261110b"></script>
+  <script src="js/gtag-init.js?v=20261110c"></script>
 </head>
 <body>
 
@@ -285,7 +285,8 @@
       <!-- Cultivar Header -->
       <div class="mb-lg detail-head">
         <div>
-          <p class="mono detail-standard" id="detail-standard"></p>
+          <!-- 共有 sits at the top right, beside the kind (board 15, 案4) -->
+          <div class="detail-kindline"><p class="mono detail-standard" id="detail-standard"></p><span class="detail-share"><button id="share-btn" class="btn btn--sm btn--secondary cursor-pointer font-xs-btn whitespace-nowrap" title="共有" aria-label="この品種を共有" aria-expanded="false" aria-haspopup="true" data-i18n="detail_share">共有</button><span id="share-menu" class="hidden share-menu-popup"></span></span></div>
           <h1 class="detail-title"></h1>
           <p class="detail-aliases d-none" id="detail-aliases"></p>
           <div class="flex gap-sm mt-sm flex-align-center flex-wrap detail-badges">
@@ -301,12 +302,9 @@
       <div id="detail-unrecorded" class="d-none"></div>
       <p class="mono private-note d-none" id="detail-private-note" data-i18n="private_note_detail">非公開の記録です。ほかの人には表示されません。</p>
       <div id="specimen-label"></div>
-      <div id="share-band" class="share-band d-none"></div>
-
-      <!-- Actions come after the label: know what it is before you are asked to do something -->
+      <!-- Actions come after the label: know what it is before you are asked to do something.
+           The label ends in this strip (board 15, 案4「名札の裾」): 写真を追加 ｜ 記録を追加 ｜ その他 -->
       <div class="detail-actions flex gap-sm flex-align-center flex-wrap" id="detail-actions">
-        <button id="share-btn" class="btn btn--sm btn--secondary cursor-pointer font-xs-btn whitespace-nowrap" title="共有" aria-label="この品種を共有" aria-expanded="false" aria-haspopup="true" data-i18n="detail_share">共有</button>
-        <div id="share-menu" class="hidden share-menu-popup"></div>
         <button class="btn btn--sm btn--secondary cursor-pointer font-xs-btn" id="detail-add-photo-btn" data-i18n="detail_add_photo">写真を追加</button>
         <button type="button" class="btn btn--sm btn--secondary cursor-pointer font-xs-btn" id="detail-add-record-btn" data-i18n="detail_add_record">記録を追加</button>
         <details class="detail-more">
@@ -327,6 +325,7 @@
           </div>
         </details>
       </div>
+      <div id="share-band" class="share-band d-none"></div>
 
       <!-- Image Gallery (Carousel) -->
       <div class="mb-lg">
@@ -362,6 +361,7 @@
 
           <div id="add-origin-toggle">
             <button type="button" id="btn-add-origin" class="record-add mono" data-i18n="record_add_link">記録を追加</button>
+            <button type="button" id="read-end-photo" class="record-add mono" data-i18n="detail_add_photo">写真を追加</button>
           </div>
 
           <!-- Inline origin form (hidden by default) -->
@@ -1772,14 +1772,14 @@
        JS: Split into logical modules
        ======================================== -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1"></script>
-  <script src="js/record-gate.js?v=20261110b"></script>
-  <script src="js/app-core.js?v=20261110b"></script>
-  <script src="js/pages.js?v=20261110b"></script>
-  <script src="js/forms.js?v=20261110b"></script>
-  <script src="js/entry-meta.js?v=20261110b"></script>
-  <script src="js/archive.js?v=20261110b"></script>
-  <script src="js/tool-gate.js?v=20261110b"></script>
-  <script src="js/tools.js?v=20261110b"></script>
+  <script src="js/record-gate.js?v=20261110c"></script>
+  <script src="js/app-core.js?v=20261110c"></script>
+  <script src="js/pages.js?v=20261110c"></script>
+  <script src="js/forms.js?v=20261110c"></script>
+  <script src="js/entry-meta.js?v=20261110c"></script>
+  <script src="js/archive.js?v=20261110c"></script>
+  <script src="js/tool-gate.js?v=20261110c"></script>
+  <script src="js/tools.js?v=20261110c"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1789,7 +1789,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261110b"></script>
+  <script src="js/dialogs.js?v=20261110c"></script>
 
   <!-- AI re-research request dialog -->
   <!-- Asked before anything is typed: posting, photos and records need a login (2026-10-08 app-ux) -->
@@ -1841,6 +1841,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261110b"></script>
+<script src="js/sw-register.js?v=20261110c"></script>
 </body>
 </html>
