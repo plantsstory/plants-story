@@ -3220,3 +3220,55 @@
     });
   });
 })();
+
+/* ---------- photos on a plant page (owner's choice 11-13, 案B): one photo large in a 3:4 frame, the others as a row
+   of small ones under it; a tap on a small one puts it in the frame, a tap on the frame opens the photo whole ---------- */
+(function () {
+  if (!document.documentElement.classList.contains('pv-label')) return;
+  var gal = document.querySelector('#gallery-carousel .gallery');
+  if (!gal || !window.MutationObserver) return;
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  var strip = document.createElement('div'); strip.className = 'gallery-thumbs'; strip.hidden = true;
+  var count = document.createElement('p'); count.className = 'gallery-count'; count.hidden = true;
+  gal.insertAdjacentElement('afterend', strip); strip.insertAdjacentElement('afterend', count);
+  var shown = '', timer = null;
+  function keyOf(it) { var im = it.querySelector('img'); return it.getAttribute('data-image-id') || it.getAttribute('data-storage-path') || (im ? im.getAttribute('src') : ''); }
+  function layout() {
+    var items = [].slice.call(gal.querySelectorAll('.gallery__item[data-user-upload]'));
+    gal.classList.toggle('gallery--b', items.length > 0);
+    if (!items.length) { strip.hidden = true; strip.innerHTML = ''; count.hidden = true; return; }
+    var cur = items.filter(function (it) { return keyOf(it) === shown; })[0] || items[0];
+    shown = keyOf(cur);
+    items.forEach(function (it) { it.classList.toggle('is-shown', it === cur); });
+    var many = items.length > 1;
+    strip.hidden = !many; count.hidden = !many;
+    strip.innerHTML = many ? items.map(function (it, i) {
+      var im = it.querySelector('img');
+      return '<button type="button" data-k="' + esc(keyOf(it)) + '" aria-pressed="' + (it === cur) + '" aria-label="写真 ' + (i + 1) + '"><img src="' + esc(im ? im.getAttribute('src') : '') + '" alt="" decoding="async"></button>';
+    }).join('') : '';
+    count.textContent = many ? '写真 ' + items.length + ' 枚' : '';
+  }
+  new MutationObserver(function () { clearTimeout(timer); timer = setTimeout(layout, 30); }).observe(gal, { childList: true });
+  strip.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-k]'); if (!b) return;
+    shown = b.getAttribute('data-k'); layout();
+    if (typeof gtag === 'function') gtag('event', 'photo_thumb', {});
+  });
+  // the photo whole, on black; any tap puts it away
+  var zoom = null;
+  gal.addEventListener('click', function (e) {
+    var im = e.target.closest && e.target.closest('.gallery--b .gallery__item.is-shown .gallery__img img');
+    if (!im || e.target.closest('a')) return;
+    if (!zoom) {
+      zoom = document.createElement('dialog'); zoom.className = 'photo-zoom';
+      zoom.innerHTML = '<img alt=""><button type="button" aria-label="閉じる">閉じる</button>';
+      document.body.appendChild(zoom);
+      zoom.addEventListener('click', function () { zoom.close(); });
+    }
+    if (typeof zoom.showModal !== 'function') return;
+    var it = im.closest('.gallery__item'), path = it && it.getAttribute('data-storage-path');
+    zoom.querySelector('img').src = path && window.galleryImg ? window.galleryImg(path, 1600) : im.getAttribute('src');
+    zoom.showModal();
+  });
+  layout();
+})();

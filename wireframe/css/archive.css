@@ -2232,3 +2232,30 @@ html.pv-label .label-ways .way__sub { font-family: var(--font-display); font-sty
 /* G12 */
 .people__list .num { margin-left: auto; padding-left: var(--s3); }
 html.pv-label #page-genus .genus-content .cultivar-row:has(.entry__sub) .entry__sub .entry__state--pct { margin-left: 4px; }
+/* ---- photos, the owner's choice of 11-13: 案B on the plant page, a 3:4 frame when a photo is added ---- */
+html.pv-label .gallery.gallery--b .gallery__item[data-user-upload]:not(.is-shown) { display: none !important; }
+html.pv-label .gallery.gallery--b .gallery__img { aspect-ratio: 3 / 4; background: #000; cursor: zoom-in; }
+html.pv-label .gallery.gallery--b .gallery__img-full { width: 100%; height: 100%; object-fit: contain; }
+.gallery-thumbs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 4px; }
+.gallery-thumbs[hidden], .gallery-count[hidden] { display: none; }
+.gallery-thumbs button { padding: 0; border: 0; background: #000; aspect-ratio: 1; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.gallery-thumbs button[aria-pressed="true"] { outline: 2px solid var(--color-ink); outline-offset: 1px; }
+.gallery-thumbs img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.gallery-count { margin: var(--s2) 0 0; font-family: var(--font-primary); font-size: var(--fs-label); color: var(--color-mid); }
+@media (min-width: 641px) { html.pv-label .gallery.gallery--b, .gallery-thumbs { max-width: 480px; } }
+.photo-zoom { width: 100vw; height: 100svh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: #000; }
+.photo-zoom::backdrop { background: #000; }
+.photo-zoom img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.photo-zoom button { position: absolute; right: 12px; top: calc(12px + env(safe-area-inset-top)); min-height: var(--tap); padding: 0 var(--s4); background: rgba(0, 0, 0, .55); color: #fff; border: 1px solid rgba(255, 255, 255, .6); border-radius: 0; font: inherit; font-size: var(--fs-small); cursor: pointer; }
+/* the frame in the photo sheet */
+.photo-sheet__plates { flex-direction: column; align-items: center; gap: var(--s3); }
+.photo-sheet__plates figure.framer-fig { flex: none; width: min(100%, 264px); aspect-ratio: auto; display: block; border: 0; background: none; overflow: visible; }
+.framer { position: relative; width: 100%; aspect-ratio: 3 / 4; background: #000; overflow: hidden; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.framer:active { cursor: grabbing; }
+.photo-sheet__plates .framer img { position: absolute; left: 0; top: 0; max-width: none; max-height: none; object-fit: fill; transform-origin: 0 0; pointer-events: none; -webkit-user-drag: none; }
+.framer__tools { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+.framer__tools button { min-height: var(--tap); padding: 0 4px; background: var(--color-paper-2); border: 1px solid var(--color-rule-strong); border-radius: 0; font: inherit; font-size: var(--fs-small); color: var(--color-ink); cursor: pointer; }
+.framer__tools button[aria-pressed="true"] { border-color: var(--color-ink); font-weight: 700; }
+.framer__zoom { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: var(--s2); min-height: var(--tap); font-size: var(--fs-label); color: var(--color-mid); }
+.framer__zoom input { width: 100%; accent-color: var(--color-ink); }
+.photo-sheet__frame-hint { margin: 0 0 var(--s3); font-size: var(--fs-label); line-height: 1.6; color: var(--color-mid); }

@@ -2432,12 +2432,10 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     var single = files.length === 1;
     var dateGroup = document.getElementById('photo-sheet-date').closest('.form-group');
     if (dateGroup) dateGroup.classList.toggle('d-none', !single);
+    _sheetFrames = [];
     files.forEach(function(f, i) {
       var fig = document.createElement('figure');
-      var img = document.createElement('img');
-      img.alt = ''; img.src = URL.createObjectURL(f);
-      img.onload = function() { URL.revokeObjectURL(img.src); };
-      fig.appendChild(img);
+      _sheetFrames[i] = makeFramer(fig, f);
       if (!single) { var cap = document.createElement('figcaption'); cap.className = 'photo-sheet__date'; cap.textContent = '…'; fig.appendChild(cap); }
       plates.appendChild(fig);
     });
@@ -2496,14 +2494,114 @@ updateCultivarDetail = function(cultivarName, rowEl) {
           specimen_kind: kindIn ? kindIn.value : 'unknown'
         };
         dlg.close();
-        if (typeof gtag === 'function') gtag('event', 'photo_sheet_send', { count: _sheetFiles.length });
-        sendPhotos(_sheetName, _sheetFiles.slice(), captions, link, extra);
+        if (typeof gtag === 'function') gtag('event', 'photo_sheet_send', { count: _sheetFiles.length, framed: _sheetFrames.filter(function(fr) { return fr && fr.touched; }).length });
+        // every photo goes up in the frame's shape, as it was placed (a photo that could not be read goes up as it is)
+        var name = _sheetName, originals = _sheetFiles.slice();
+        Promise.all(originals.map(function(f, i) { return exportFramed(_sheetFrames[i], f); }))
+          .then(function(framed) { sendPhotos(name, framed, captions, link, extra); }, function() { sendPhotos(name, originals, captions, link, extra); });
       });
     }
     if (typeof gtag === 'function') gtag('event', 'photo_sheet_open', { count: files.length });
     dlg.showModal();
   };
-  var _sheetDates = [];
+  var _sheetDates = [], _sheetFrames = [];
+  /* ---- the frame (owner, 11-13): every photo is shown 3 wide to 4 tall. In the sheet the photo sits in that
+     frame; a finger moves it, two fingers or the slider change its size. Where the photo does not reach, the
+     frame is black, and that is what is uploaded. ---- */
+  var FRAME_W = 3, FRAME_H = 4, FRAME_OUT_W = 1500, FRAME_OUT_H = 2000;
+  function makeFramer(fig, file) {
+    fig.className = 'framer-fig';
+    var box = document.createElement('div'); box.className = 'framer';
+    var img = document.createElement('img'); img.alt = ''; img.draggable = false;
+    box.appendChild(img);
+    var tools = document.createElement('div'); tools.className = 'framer__tools';
+    tools.innerHTML = '<button type="button" data-fit="cover" aria-pressed="true">枠いっぱい</button><button type="button" data-fit="contain" aria-pressed="false">全体を入れる</button>'
+      + '<label class="framer__zoom"><span>大きさ</span><input type="range" min="0" max="100" step="1" value="0"></label>';
+    fig.appendChild(box); fig.appendChild(tools);
+    var range = tools.querySelector('input'), btns = tools.querySelectorAll('[data-fit]');
+    var st = { img: img, s: 1, x: 0, y: 0, W: 0, H: 0, min: 1, cover: 1, max: 1, ready: false, touched: false };
+    function nw() { return img.naturalWidth || 1; } function nh() { return img.naturalHeight || 1; }
+    function measure() {
+      st.W = box.clientWidth; st.H = box.clientHeight;
+      if (!st.W || !st.H) return false;
+      st.min = Math.min(st.W / nw(), st.H / nh()); st.cover = Math.max(st.W / nw(), st.H / nh()); st.max = st.cover * 4;
+      return true;
+    }
+    function clamp() {
+      var w = nw() * st.s, h = nh() * st.s;
+      st.x = w <= st.W + 0.5 ? (st.W - w) / 2 : Math.min(0, Math.max(st.W - w, st.x));
+      st.y = h <= st.H + 0.5 ? (st.H - h) / 2 : Math.min(0, Math.max(st.H - h, st.y));
+    }
+    function draw() {
+      clamp();
+      img.style.width = nw() + 'px'; img.style.height = nh() + 'px';
+      img.style.transform = 'translate(' + st.x + 'px,' + st.y + 'px) scale(' + st.s + ')';
+      range.value = String(Math.round(100 * Math.log(st.s / st.min) / Math.log(st.max / st.min)));
+      btns[0].setAttribute('aria-pressed', Math.abs(st.s - st.cover) < 1e-4 ? 'true' : 'false');
+      btns[1].setAttribute('aria-pressed', Math.abs(st.s - st.min) < 1e-4 ? 'true' : 'false');
+    }
+    function zoomTo(s, cx, cy) {   // the point (cx, cy) of the frame stays where it is
+      s = Math.min(st.max, Math.max(st.min, s));
+      var k = s / st.s;
+      st.x = cx - (cx - st.x) * k; st.y = cy - (cy - st.y) * k; st.s = s;
+      draw();
+    }
+    function fit(mode) { st.s = mode === 'contain' ? st.min : st.cover; st.x = (st.W - nw() * st.s) / 2; st.y = (st.H - nh() * st.s) / 2; draw(); }
+    function start() { if (st.ready || !img.naturalWidth || !measure()) return; st.ready = true; fit('cover'); }
+    img.onload = function() { URL.revokeObjectURL(img.src); start(); if (!st.ready) setTimeout(start, 120); };
+    img.src = URL.createObjectURL(file);
+    st.start = start;
+    btns.forEach(function(b) { b.addEventListener('click', function() { if (!st.ready) return; st.touched = true; fit(b.getAttribute('data-fit')); }); });
+    range.addEventListener('input', function() {
+      if (!st.ready) return;
+      st.touched = true;
+      zoomTo(st.min * Math.pow(st.max / st.min, range.value / 100), st.W / 2, st.H / 2);
+    });
+    // one finger moves, two fingers change the size
+    var pts = {}, lastDist = 0;
+    function ids() { return Object.keys(pts); }
+    box.addEventListener('pointerdown', function(e) {
+      if (!st.ready) return;
+      pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+      try { box.setPointerCapture(e.pointerId); } catch (er) {}
+      if (ids().length === 2) { var a = pts[ids()[0]], b = pts[ids()[1]]; lastDist = Math.hypot(a.x - b.x, a.y - b.y); }
+      e.preventDefault();
+    });
+    box.addEventListener('pointermove', function(e) {
+      var p = pts[e.pointerId];
+      if (!p || !st.ready) return;
+      var n = ids().length;
+      if (n === 1) { st.x += e.clientX - p.x; st.y += e.clientY - p.y; st.touched = true; draw(); }
+      pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+      if (n === 2) {
+        var a = pts[ids()[0]], b = pts[ids()[1]], d = Math.hypot(a.x - b.x, a.y - b.y), r = box.getBoundingClientRect();
+        if (lastDist > 0 && d > 0) { st.touched = true; zoomTo(st.s * d / lastDist, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top); }
+        lastDist = d;
+      }
+    });
+    ['pointerup', 'pointercancel'].forEach(function(ev) { box.addEventListener(ev, function(e) { delete pts[e.pointerId]; lastDist = 0; }); });
+    return st;
+  }
+  // the photo as it sits in its frame → a 3:4 JPEG, black where the photo does not reach
+  function exportFramed(st, file) {
+    return new Promise(function(resolve) {
+      try {
+        if (st && !st.ready && st.start) st.start();
+        if (!st || !st.ready || !st.W) { resolve(file); return; }
+        var c = document.createElement('canvas');
+        c.width = FRAME_OUT_W; c.height = FRAME_OUT_H;
+        var ctx = c.getContext('2d'), k = FRAME_OUT_W / st.W;
+        ctx.fillStyle = '#000'; ctx.fillRect(0, 0, c.width, c.height);
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(st.img, st.x * k, st.y * k, st.img.naturalWidth * st.s * k, st.img.naturalHeight * st.s * k);
+        c.toBlob(function(b) {
+          if (!b) { resolve(file); return; }
+          resolve(new File([b], String(file.name || 'photo').replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' }));
+        }, 'image/jpeg', 0.92);
+      } catch (e) { resolve(file); }
+    });
+  }
+  window._aoFrame = { make: makeFramer, out: exportFramed, ratio: [FRAME_W, FRAME_H] };   // for the checks
   function sendPhotos(cultivarName, files, captions, link, extra) {
     var total = files.length, done = 0;
     captions = captions.slice();
