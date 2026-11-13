@@ -119,6 +119,8 @@
     d.locality = clean(s.type_locality);
     d.habitat = clean(s.known_habitats) || clean(o && o.native_region);
     d.country = countryOf(d.locality) || countryOf(d.habitat);
+    // no type locality and a range of several countries: the one shown is only the first of them (board 16 T6)
+    d.countryMore = !countryOf(d.locality) && countriesOf(d.habitat).length > 1;
     d.breeder = clean(s.breeder) || clean(o && o.discoverer_or_breeder);
     d.namer = clean(s.namer);
     d.namingYear = yearOf(s.naming_year);
@@ -158,6 +160,9 @@
     d.isIndividual = d.tags.indexOf('individual') !== -1;
     // an individual is numbered or named, never bred: the person who gave the number is its namer (board 15 T1)
     if (d.isIndividual) { d.namer = d.namer || d.breeder; d.breeder = ''; }
+    // tag breeder_unconfirmed: the record says 「〜に由来するとされる」, not that the person bred it. The name stays on
+    // the label with that reservation, and is left out of the list line, the share text and the people index (T3)
+    if (d.tags.indexOf('breeder_unconfirmed') !== -1) { d.breederSaid = d.breeder; d.breeder = ''; }
     d.verifiedAt = entry._verifiedAt || null;
     d.verificationNote = clean(entry._verificationNote);
     d.nameStatus = entry._nameStatus || null;
@@ -288,7 +293,7 @@
     'French Guiana': 'フランス領ギアナ', 'Suriname': 'スリナム', 'Argentina': 'アルゼンチン', 'Paraguay': 'パラグアイ', 'Cuba': 'キューバ',
     'Jamaica': 'ジャマイカ', 'Trinidad and Tobago': 'トリニダード・トバゴ', 'Dominican Republic': 'ドミニカ共和国', 'Puerto Rico': 'プエルトリコ',
     'Indonesia': 'インドネシア', 'Malaysia': 'マレーシア', 'Thailand': 'タイ', 'Vietnam': 'ベトナム', 'Philippines': 'フィリピン',
-    'Papua New Guinea': 'パプアニューギニア', 'Australia': 'オーストラリア', 'Japan': '日本', 'Taiwan': '台湾', 'China': '中国' };
+    'Papua New Guinea': 'パプアニューギニア', 'Trinidad': 'トリニダード', 'Australia': 'オーストラリア', 'Japan': '日本', 'Taiwan': '台湾', 'China': '中国' };
   // WCVP level-3 region names as they appear in the distribution field (BOARD 10-07 T71)
   var REGION_JA = { 'Angola': 'アンゴラ', 'Assam': 'アッサム', 'Bangladesh': 'バングラデシュ', 'Benin': 'ベナン',
     'Bismarck Archipelago': 'ビスマルク諸島', 'Borneo': 'ボルネオ', 'Brazil North': 'ブラジル北部', 'Brazil Northeast': 'ブラジル北東部',
@@ -364,7 +369,7 @@
     }
     if (species) { if (d.pubYear) parts.push(yearSpan(d.pubYear)); }
     else if (d.namingYear) parts.push('<span class="num">' + d.namingYear + '</span>');
-    if (!opts.noCountry && species && d.country) parts.push(esc(countryLabel(d.country)));
+    if (!opts.noCountry && species && d.country) parts.push(esc(countryLabel(d.country)) + (d.countryMore ? esc(T('country_more')) : ''));
     // each part kept whole on a line (no 'パ／ナマ'); the separators are where the line may break
     return parts.map(function (x) { return '<span class="entry__seg">' + x + '</span>'; }).join(LABEL ? '、' : ' · ');
   }
@@ -406,29 +411,50 @@
   var WANTED_FIRST = ['Anthurium clarinervium', 'Anthurium luxurians', 'Anthurium regale', "Anthurium 'Dark Mama'", 'Anthurium antolakii'];
   // only the genera the site shows (Anthurium for now): hidden genera stay out of /wanted/ and /ig/ (board 11)
   var shownGenus = function (d) { var gs = window._generaData || []; return !gs.length || gs.some(function (g) { return g.name === d.genus; }); };
+  // the recorded names still without a photo, the ones most people are likely to own first
+  function wantedList() {
+    var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
+    var thumbs = window._thumbMap || {};
+    var seen = {}, list = [];
+    Object.keys(store).forEach(function (k) {
+      var e = store[k];
+      if (!e || seen[e._id || k] || e._type === 'seedling' || / \[Seedling\]$/.test(k)) return;
+      seen[e._id || k] = true;
+      var d;
+      try { d = describe(k, e, e._type); } catch (er) { return; }
+      if (d.state !== 'ok' || d.isIndividual || thumbs[d.displayName] || !shownGenus(d)) return;
+      list.push(d);
+    });
+    list.sort(function (a, b) {
+      var ia = WANTED_FIRST.indexOf(a.fullName), ib = WANTED_FIRST.indexOf(b.fullName);
+      if (ia !== ib) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+      return a.displayName.localeCompare(b.displayName);
+    });
+    return list;
+  }
+  // on the home: one more row of 「名前を探す」 — 写真を募集中, the first three names, the count (board 16 C6 / G3)
+  function drawWantedRow() {
+    var ways = document.querySelector('.label-ways .ways');
+    if (!ways || !window._dataFullyLoaded || !window._photoTimes) return;   // not before the photo list is in
+    var list = wantedList(), row = ways.querySelector('.way--wanted');
+    if (!list.length) { if (row) row.remove(); return; }
+    if (!row) {
+      row = document.createElement('a');
+      row.className = 'way way--wanted'; row.href = base + 'wanted/'; row.setAttribute('data-nav', 'wanted');
+      ways.appendChild(row);
+    }
+    var names = list.slice(0, 3).map(function (d) { return d.shownName.replace(/^\S+\s+/, ''); }).join('、');
+    row.innerHTML = '<span>' + esc(T('front_wanted_row')) + '<small class="way__sub">' + esc(names) + (list.length > 3 ? ' ' + esc(T('country_more').trim()) : '') + '</small></span><span class="n">' + list.length + '</span><span class="chev">›</span>';
+  }
+  document.addEventListener('ao:thumbs', function () { setTimeout(drawWantedRow, 0); });
+  document.addEventListener('ao:page', function (e) { if (e.detail === 'top') setTimeout(drawWantedRow, 120); });
   window.renderWantedPage = function () {
     var body = document.getElementById('wanted-body');
     if (!body) return;
     waitForData(function () {
-      var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
-      var thumbs = window._thumbMap || {};
-      var seen = {}, list = [];
-      Object.keys(store).forEach(function (k) {
-        var e = store[k];
-        if (!e || seen[e._id || k] || e._type === 'seedling' || / \[Seedling\]$/.test(k)) return;
-        seen[e._id || k] = true;
-        var d;
-        try { d = describe(k, e, e._type); } catch (er) { return; }
-        if (d.state !== 'ok' || d.isIndividual || thumbs[d.displayName] || !shownGenus(d)) return;
-        list.push(d);
-      });
-      list.sort(function (a, b) {
-        var ia = WANTED_FIRST.indexOf(a.fullName), ib = WANTED_FIRST.indexOf(b.fullName);
-        if (ia !== ib) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
-        return a.displayName.localeCompare(b.displayName);
-      });
-      if (!list.length) { body.innerHTML = '<p class="people__intro">いまは写真のない品種はありません。</p>'; return; }
-      var html = '<p class="mypost-counts">写真を募集中 <span class="num">' + list.length + '</span> 品種</p><ol class="entries">';
+      var list = wantedList();
+      if (!list.length) { body.innerHTML = '<p class="people__intro">いまは写真のない名前はありません。</p>'; return; }
+      var html = '<p class="mypost-counts">写真を募集中 <span class="num">' + list.length + '</span> 件</p><ol class="entries">';
       list.forEach(function (d) {
         var line = window.entryLine(d, { noPerson: true });
         line = line.replace(/<\/li>$/, '<p class="mypost-acts"><button type="button" data-wanted-pick="' + esc(d.fullName) + '">写真を追加</button></p></li>');
@@ -497,6 +523,11 @@
   window.renderExplorePage = function () {
     var page = document.getElementById('page-explore');
     if (!page) return;
+    if (window._openTimeline) {
+      window._openTimeline = false;
+      var tlf = page.querySelector('.explore__tl');
+      if (tlf) { tlf.open = true; setTimeout(function () { tlf.scrollIntoView({ block: 'start' }); }, 400); }
+    }
     // people are counted the way the people index folds them, so the authority table comes first
     waitForData(function () { loadAuthority(function () {
       var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
@@ -1230,17 +1261,6 @@
       var newH = document.querySelector('#front-new .section-title');
       if (newH) newH.textContent = T(quiet ? 'new_entries_title_quiet' : 'new_entries_title');
       if (quiet) withDate = false;
-      // the plates still waiting for a photo: the one thing a visitor can add today
-      var wantEl = document.getElementById('front-wanted');
-      if (wantEl && window._dataFullyLoaded) {
-        var store = window.cultivarData || {}, th = window._thumbMap || {}, seenW = {}, nW = 0;
-        Object.keys(store).forEach(function (k) {
-          var e = store[k]; if (!e || seenW[e._id || k] || e._type === 'seedling' || / \[Seedling\]$/.test(k)) return; seenW[e._id || k] = true;
-          var dw; try { dw = describe(k, e, e._type); } catch (er) { return; }
-          if (dw.state === 'ok' && !dw.isIndividual && !th[dw.displayName] && shownGenus(dw)) nW++;
-        });
-        wantEl.innerHTML = nW ? '<a href="' + esc(base + 'wanted/') + '" data-nav="wanted">' + esc(T('front_wanted').replace('{n}', nW)) + '</a>' : '';
-      }
     }
     if (opts.max) items = items.slice(0, opts.max);
     items.forEach(function (item) {
@@ -1310,6 +1330,7 @@
     } else {
       if (d.isIndividual) cells += cell('individual_namer', linkPeople(d.namer));
       else if (d.type === 'clone' && !d.breeder && d.namer) cells += cell('spec_namer', linkPeople(d.namer));
+      else if (d.breederSaid) cells += cell('spec_breeder', esc(d.breederSaid) + ' <span class="absent">' + esc(T('parentage_unconfirmed')) + '</span>');
       else cells += cell('spec_breeder', linkPeople(d.breeder || d.namer || d.creator) || (d.type === 'seedling' || d.isIndividual ? '' : absentHtml(d, 'breeder')));
       cells += cell(d.type === 'seedling' ? 'spec_sowing' : d.isIndividual ? 'individual_year' : 'spec_year', d.type === 'seedling' ? esc(/^\d{4}-\d{2}-\d{2}/.test(d.sowing) ? fmtDate(d.sowing) : d.sowing) : ((d.namingYear || d.year) ? '<span class="num">' + (d.namingYear || d.year) + '</span>' : ''));
       var unconfirmed = d.tags.indexOf('parentage_unconfirmed') !== -1;
@@ -1323,7 +1344,7 @@
         + (d.tags.indexOf('selection_unconfirmed') !== -1 ? ' <span class="absent">' + esc(T('parentage_unconfirmed')) + '</span>' : '')) + cells;
     }
     // an individual: who brought it in and where it came from
-    if (d.isIndividual) cells += cell('spec_introduced_by', linkPeople(d.introducedBy)) + cell('individual_acquisition', d.acquisition ? esc(T('acq_' + d.acquisition)) : '') + cell('spec_acquired_from', esc(d.acquiredFrom)) + cell('spec_region', distributionHtml(d.originRegion || d.formLocality || d.locality || d.habitat));
+    if (d.isIndividual) cells += cell('spec_introduced_by', linkPeople(d.introducedBy)) + cell('individual_acquisition', d.acquisition ? esc(T('acq_' + d.acquisition)) : '') + cell('spec_acquired_from', esc(d.acquiredFrom)) + cell(d.acquisition === 'wild' ? 'spec_collected_at' : 'spec_region', distributionHtml(d.originRegion || d.formLocality || d.locality || d.habitat));
     // on the label: at most three Latin-script names; katakana stays for search and JSON-LD
     // an alias with sp./aff./cf. on a Hybrid, Clone or individual contradicts the kind: kept for search, not shown
     var qualifierClash = function (a) { return d.type !== 'species' && /\b(sp|aff|cf)\./.test(a); };
@@ -1610,7 +1631,7 @@
       .filter(Boolean).map(function (s) { return '<span class="entry__seg">' + s + '</span>'; }).join(LABEL ? '、' : ' · ');
     return '<li class="entry"><a class="entry__link" href="' + esc(x.href) + '" data-nav="cultivar" data-key="' + esc(x.fullName) + '">'
       + '<span class="entry__thumb' + (img ? '' : ' entry__thumb--empty') + '" aria-hidden="true">' + img + '</span>'
-      + '<span class="entry__main"><span class="entry__name individuals__code">\u2018' + esc(individualCode(x, d)) + '\u2019</span>'
+      + '<span class="entry__main"><span class="entry__name individuals__code">&#39;' + esc(individualCode(x, d)) + '&#39;</span>'
       + (sub ? '<span class="entry__sub">' + sub + '</span>' : '') + '</span></a></li>';
   }
   function renderIndividuals(d, all) {
@@ -1675,15 +1696,6 @@
           html += '<a class="person" href="' + esc(base + 'people/' + encodeURIComponent(personSlug(key)) + '/') + '" data-nav="people" data-person="' + esc(personSlug(key)) + '"><div><b>' + esc(au.name || key) + (au.years ? '（' + esc(au.years) + '）' : '') + '</b><span>' + esc(au.note || '') + (cnt > 1 ? (au.note ? '。' : '') + 'このサイトで ' + cnt + ' つの名前に関わる' : '') + '</span></div><span class="chev">›</span></a>';
         });
       }
-      if (d.pubYear) {
-        var dec = Math.floor(d.pubYear / 10) * 10;
-        var era = all.filter(function (x) { return x.fullName !== d.fullName && x.type === 'species' && x.state === 'ok' && x.pubYear && Math.floor(x.pubYear / 10) * 10 === dec; }).sort(function (x, y) { return x.pubYear - y.pubYear; });
-        if (era.length) {
-          html += '<h2 class="sec">同じ時代に記載された名前 <small>' + dec + '年代</small></h2><ol class="entries">';
-          era.slice(0, 6).forEach(function (x) { html += window.entryLine(x, { thumb: thumbUrl(x.displayName, 160) }); });
-          html += '</ol>';
-        }
-      }
     }
     host.innerHTML = html;
   }
@@ -1709,6 +1721,21 @@
 
     var groups = relatedGroupHtml('related_same_locality', sameCountry, d.country ? '<a href="' + esc(base + 'locality/' + encodeURIComponent(countrySlug(d.country)) + '/') + '" data-nav="locality" data-place="' + esc(countrySlug(d.country)) + '">' + esc(T('related_same_locality_n').replace('{country}', countryLabel(d.country)).replace('{n}', sameCountry.length)) + ' →</a>' : '')
       + relatedGroupHtml('related_same_person', samePerson);
+    // the names described in the same decade (moved here from under the photos, board 16 G7)
+    if (d.type === 'species' && !d.isIndividual && d.pubYear) {
+      var dec = Math.floor(d.pubYear / 10) * 10;
+      var era = others.filter(function (x) { return x.type === 'species' && !x.isIndividual && x.state === 'ok' && x.pubYear && Math.floor(x.pubYear / 10) * 10 === dec; }).sort(function (x, y) { return x.pubYear - y.pubYear; });
+      groups += relatedGroupHtml('related_same_era', era, esc(T('related_same_era').replace('{dec}', dec)));
+    }
+    // a Clone or Hybrid ends with the people in its record: their pages are the next thing to read (board 16 C5;
+    // never the parents — a parent's name is not a link, T192)
+    if (d.type !== 'species' && d.type !== 'seedling' && !d.isIndividual && myPeople.length) {
+      groups += '<div class="related__group"><h3>' + esc(T('related_people')) + '</h3><ul>' + myPeople.map(function (key) {
+        var au = authorityOf(key) || {};
+        var cnt = all.filter(function (x) { return x.state === 'ok' && peopleOf(x).indexOf(key) !== -1; }).length;
+        return '<li><a href="' + esc(base + 'people/' + encodeURIComponent(personSlug(key)) + '/') + '" data-nav="people" data-person="' + esc(personSlug(key)) + '"><span>' + esc(au.name || key) + '</span></a><span class="num">' + cnt + '</span></li>';
+      }).join('') + '</ul></div>';
+    }
     // no empty frame under the heading when there is nothing to list (board 11)
     var html = groups ? '<div class="related__grid">' + groups + '</div>' : '';
     var relH = section.querySelector('.section-title');
@@ -1781,7 +1808,7 @@
         html += '<div class="people__group"><h2 class="mono">' + esc(T(ROLE_KEYS[r])) + '</h2><ul class="people__list">';
         groups[r].forEach(function (p) {
           var a = authorityOf(p.key);
-          html += '<li><a href="' + esc(base + 'people/' + encodeURIComponent(p.slug) + '/') + '" data-nav="people" data-person="' + esc(p.slug) + '">' + esc(personLabel(p)) + (a && a.name && a.name !== p.key ? ' <span class="people__abbr mono">' + esc(p.key) + '</span>' : '') + '</a><span class="mono">' + rolesLine(p) + '</span></li>';
+          html += '<li><a href="' + esc(base + 'people/' + encodeURIComponent(p.slug) + '/') + '" data-nav="people" data-person="' + esc(p.slug) + '">' + esc(personLabel(p)) + (a && a.name && a.name !== p.key ? ' <span class="people__abbr mono">' + esc(p.key) + '</span>' : '') + '</a><span class="num">' + p.entries.length + '</span></li>';
         });
         html += '</ul></div>';
       });
@@ -3181,4 +3208,15 @@
     container.appendChild(p);
   }
   window.aoListSplit = split;
+  // the search results are drawn once; a search opened directly is drawn before the photo list arrives (board 16 G9)
+  document.addEventListener('ao:thumbs', function () {
+    var map = window._thumbMap || {};
+    document.querySelectorAll('#search-cultivar-list .cultivar-row').forEach(function (row) {
+      var th = row.querySelector('.entry__thumb--empty'), nm = row.querySelector('[data-key]');
+      var path = th && nm && map[String(nm.getAttribute('data-key')).replace(' [Seedling]', '')];
+      if (!path || !window.galleryImg) return;
+      th.classList.remove('entry__thumb--empty');
+      th.innerHTML = '<img src="' + window.galleryImg(path, 160).replace(/"/g, '&quot;') + '" class="thumb-img" alt="" width="60" height="60" decoding="async">';
+    });
+  });
 })();

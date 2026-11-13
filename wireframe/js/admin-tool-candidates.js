@@ -51,7 +51,7 @@
       + '<p class="tc-meta">' + esc([genreLabel(a.genre), a.maker, a.spec].filter(Boolean).join(' ／ ')) + '</p>'
       + '<p class="tc-price">' + (a.price ? '¥' + Number(a.price).toLocaleString('ja-JP') : esc(a.price_band || '価格不明')) + post + '</p>'
       + '<p class="tc-meta">' + esc([a.shop_name, a.review_count ? 'レビュー ' + a.review_count + ' 件' : '', a.review_average ? '★' + a.review_average : ''].filter(Boolean).join(' ／ ')) + '</p>'
-      + (note ? '<p class="tc-note">AI の見立て: ' + esc(note) + '</p>' : '')
+      + (note ? '<p class="tc-note"' + (/^外す候補/.test(r.ai_note || '') ? ' style="border-left-color:#A63A3A;"' : '') + '>' + (/^(外す候補|迷う)/.test(r.ai_note || '') ? 'ボードの見立て — ' : 'AI の見立て: ') + esc(note) + '</p>' : '')
       + (st === 'rejected' && r.reject_reason ? '<p class="tc-meta">拒否の理由: ' + esc(r.reject_reason) + '</p>' : '')
       + '</div><div class="tc-acts">';
     if (st === 'candidate') {
@@ -74,6 +74,10 @@
     var all = items(), n = { candidate: 0, approved: 0, rejected: 0 };
     all.forEach(function (a) { n[statusOf(a)]++; });
     var shown = all.filter(function (a) { return statusOf(a) === tab && (!genre || a.genre === genre); });
+    // the board's doubts first (board 16 M1): 外す候補, then 迷う, then the rest in catalogue order
+    var rank = function (a) { var n = (reviews[a.id] || {}).ai_note || ''; return n.indexOf('外す候補') === 0 ? 0 : n.indexOf('迷う') === 0 ? 1 : 2; };
+    if (tab === 'approved') shown = shown.map(function (a, i) { return [a, i]; }).sort(function (x, y) { return rank(x[0]) - rank(y[0]) || x[1] - y[1]; }).map(function (x) { return x[0]; });
+    var out = shown.filter(function (a) { return rank(a) === 0; }).length, unsure = shown.filter(function (a) { return rank(a) === 1; }).length;
     var used = {};
     all.forEach(function (a) { if (statusOf(a) === tab) used[a.genre] = (used[a.genre] || 0) + 1; });
     var tabs = [['candidate', '候補'], ['approved', '公開中'], ['rejected', '拒否した商品']];
@@ -82,6 +86,7 @@
       + '<div class="tc-tabs">' + tabs.map(function (t) { return '<button type="button" data-tc-tab="' + t[0] + '" aria-pressed="' + (tab === t[0]) + '">' + t[1] + ' ' + n[t[0]] + '</button>'; }).join('') + '</div>'
       + '<label style="font-size:var(--font-size-sm);">部門 <select id="tc-genre" style="min-height:44px;"><option value="">すべて</option>'
       + genres().filter(function (g) { return used[g.slug]; }).map(function (g) { return '<option value="' + esc(g.slug) + '"' + (genre === g.slug ? ' selected' : '') + '>' + esc(g.label) + ' ' + used[g.slug] + '</option>'; }).join('') + '</select></label>'
+      + (tab === 'approved' && (out || unsure) ? '<p class="tc-meta" style="margin-top:8px;">ボードの見立てで「外す候補」' + out + ' 件、「迷う」' + unsure + ' 件を先に並べています。理由は各カードにあります。残すなら何もしなくて構いません。</p>' : '')
       + (shown.length ? '<div class="tc-list">' + shown.map(card).join('') + '</div>'
         : '<p class="tc-empty">' + (tab === 'candidate' ? '候補はありません。下の「部門と自動リサーチ」で探すと、ここに並びます。' : 'ありません。') + '</p>')
       + '</div>';

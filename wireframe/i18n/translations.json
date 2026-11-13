@@ -377,7 +377,7 @@
     "en": "cultivars registered"
   },
   "search_hit": {
-    "jp": "{n} 件ヒット（全 {total} 品種中）",
+    "jp": "{n} 件ヒット（全 {total} 件中）",
     "en": "{n} hits (out of {total} cultivars)"
   },
   "search_title_tpl": {
@@ -389,7 +389,7 @@
     "en": "{n} entries found"
   },
   "no_results": {
-    "jp": "該当する品種が見つかりませんでした",
+    "jp": "該当する名前が見つかりませんでした",
     "en": "No matching cultivars found"
   },
   "no_origin_data": {
@@ -1077,7 +1077,7 @@
     "en": "Plate I — venation"
   },
   "ledger_entries": {
-    "jp": "収録品種",
+    "jp": "収録した名前",
     "en": "Entries"
   },
   "ledger_years": {
@@ -1105,7 +1105,7 @@
     "en": "Index"
   },
   "index_hint": {
-    "jp": "項目を開くと品種が並びます",
+    "jp": "項目を開くと名前が並びます",
     "en": "Open an item to list its entries"
   },
   "index_localities": {
@@ -1201,7 +1201,7 @@
     "en": "Species from the same country"
   },
   "related_same_person": {
-    "jp": "同じ人物による品種",
+    "jp": "同じ人物による名前",
     "en": "By the same person"
   },
   "related_children": {
@@ -1273,7 +1273,7 @@
     "en": "named by"
   },
   "entries_unit": {
-    "jp": "品種",
+    "jp": "件",
     "en": "entries"
   },
   "countries_unit": {
@@ -1301,7 +1301,7 @@
     "en": "People"
   },
   "people_intro": {
-    "jp": "原種を記載・採集した植物学者と、交配種・クローンを作出・命名した人物の索引です。名前を開くと関連する品種が並びます。",
+    "jp": "原種を記載・採集した植物学者と、交配種・クローンを作出・命名した人物の索引です。人物を開くと関連する名前が並びます。",
     "en": "Botanists who described or collected the species, and the breeders and namers behind hybrids and clones. Open a name to see their entries."
   },
   "role_author": {
@@ -1321,7 +1321,7 @@
     "en": "Namer"
   },
   "people_entries": {
-    "jp": "関連する品種",
+    "jp": "関連する名前",
     "en": "Entries"
   },
   "people_none": {
@@ -1393,7 +1393,7 @@
     "en": "Glossary"
   },
   "glossary_intro": {
-    "jp": "品種の由来ページに出てくる言葉を、このサイトでの使い方に沿って説明します。",
+    "jp": "由来のページに出てくる言葉を、このサイトでの使い方に沿って説明します。",
     "en": "Terms used on origin pages, as this site uses them."
   },
   "colophon_k4": {
@@ -2413,11 +2413,11 @@
     "en": "Record a seedling from this plant"
   },
   "profile_post_count": {
-    "jp": "記録した品種",
+    "jp": "記録した名前",
     "en": "Entries"
   },
   "profile_entries_title": {
-    "jp": "記録した品種",
+    "jp": "記録した名前",
     "en": "Entries"
   },
   "login_sheet_title": {
@@ -2512,10 +2512,6 @@
     "jp": "最近加わった名前",
     "en": "Recently added names"
   },
-  "front_wanted": {
-    "jp": "写真を募集中 {n} 件 →",
-    "en": "Photos wanted: {n} →"
-  },
   "kind_cf": {
     "jp": "同定未確定",
     "en": "Identification unsettled"
@@ -2559,5 +2555,25 @@
   "about_plan_title": {
     "jp": "料金",
     "en": "Fees"
+  },
+  "country_more": {
+    "jp": " ほか",
+    "en": " and others"
+  },
+  "spec_collected_at": {
+    "jp": "採集地",
+    "en": "Collected at"
+  },
+  "related_same_era": {
+    "jp": "{dec}年代に記載された名前",
+    "en": "Names described in the {dec}s"
+  },
+  "related_people": {
+    "jp": "この名前に関わる人",
+    "en": "People in this record"
+  },
+  "front_wanted_row": {
+    "jp": "写真を募集中",
+    "en": "Photos wanted"
   }
 }

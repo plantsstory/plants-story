@@ -235,6 +235,7 @@ async function main() {
     { dir: 'reading', noindex: true, title: '読みもの — アンスリウムの分類・交配・現地の記事 | Aroid Origins', description: '分類・交配・現地・栽培について、経験のある人が書いた記事の索引。紹介文は編集部、本文は各サイトで。' },
     // 調べる (board 13, direction B): noindex until the owner's OK
     { dir: 'explore', title: '調べる — 原種・交配・人物・産地から | Aroid Origins', description: '原種の一覧、交配と系統、人物索引、産地索引、記載史年表、名前の違い、用語集。アンスリウムの由来へのすべての入口。' },
+    { dir: 'timeline', noindex: true, title: '記載の歴史 | Aroid Origins', description: 'アンスリウムの原種が学名として発表された年を、年代ごとに並べた年表。' },
     { dir: 'ig', noindex: true, title: 'Instagram の図版 | Aroid Origins', description: 'Instagram の投稿の「図版」の番号から、その植物の由来のページへ。' },
     { dir: 'guide', title: '使い方ガイド | Aroid Origins', description: '品種の検索・由来の閲覧・投稿・画像アップロードなど、Aroid Originsの使い方を解説します。' },
     { dir: 'terms', title: '利用規約 | Aroid Origins', description: 'Aroid Originsの利用規約。投稿コンテンツの取り扱い、料金（すべて無料）、道具の目録とアフィリエイト、取扱店の掲載、禁止行為について定めています。' },

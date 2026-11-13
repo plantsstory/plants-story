@@ -2206,3 +2206,29 @@ html.pv-label #page-genus .genus-content .cultivar-row .entry__thumb--empty::aft
   html.pv-label .topbar { position: sticky; top: 0; z-index: 90; padding-top: env(safe-area-inset-top); }
   html.pv-label #page-cultivar, html.pv-label .page h1, html.pv-label .page h2[id], html.pv-label .glossary dt { scroll-margin-top: 64px; }
 }
+/* ---- board 16 (11-13), first batch ---- */
+/* G1: この図鑑について — the opening lines are a paragraph, the operator's details are ruled rows */
+.about-mission { background: none; border-radius: 0; padding: 0; margin-bottom: var(--s4); color: var(--color-ink); }
+.about-mission p { color: var(--color-ink); font-size: var(--fs-body); line-height: var(--lh-body); }
+.legal-page .legal-operator { background: none; border-radius: 0; padding: 0; border-top: 1px solid var(--color-rule); }
+.legal-page .legal-operator p { margin: 0; padding: var(--s2) 0; border-bottom: 1px solid var(--color-rule); }
+/* G4: list tiles — every name keeps two lines, so the second lines sit on one level; the state stays in the line */
+html.pv-label #page-genus .genus-content .cultivar-row:has(.entry__sub) .entry__name { min-height: 2.5em; }
+html.pv-label #page-genus .genus-content .cultivar-row:has(.entry__sub) .entry__sub .entry__state { margin-left: 0; white-space: normal; text-align: left; }
+html.pv-label #page-genus .genus-content .cultivar-row:has(.entry__sub) .entry__sub .entry__state:not(.entry__state--pct) { display: block; }
+/* G6: phones have the top bar; the breadcrumb under it says the same thing once more */
+@media (max-width: 640px) { html.pv-label .page:not(#page-top) .breadcrumb { display: none; } }
+/* G11: the menu open — the tab is marked by its line only, and the one 閉じる is at the top */
+@media (max-width: 640px) {
+  html.app-ui body.menu-open #appbar-more { background: none; color: var(--color-primary); font-weight: 700; box-shadow: inset 0 2px 0 var(--color-primary); }
+  html.app-ui body.menu-open #appbar-more .i-menu { display: inline-block !important; }
+  html.app-ui body.menu-open #appbar-more .i-close { display: none; }
+  html.app-ui body.menu-open #appbar-more .appbar__label--new { display: inline !important; }
+  html.app-ui body.menu-open #appbar-more .appbar__label--close { display: none; }
+}
+/* C6 / G3: 写真を募集中 as a row of 名前を探す */
+html.pv-label .label-ways .way--wanted > span:first-child { display: flex; flex-direction: column; gap: 2px; padding: 6px 0; min-width: 0; }
+html.pv-label .label-ways .way__sub { font-family: var(--font-display); font-style: italic; font-size: var(--fs-small); font-weight: 400; color: var(--color-mid); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 62vw; }
+/* G12 */
+.people__list .num { margin-left: auto; padding-left: var(--s3); }
+html.pv-label #page-genus .genus-content .cultivar-row:has(.entry__sub) .entry__sub .entry__state--pct { margin-left: 4px; }

@@ -2169,7 +2169,7 @@ paginateGenus = function(genusEl, page) {
   if (countEl) {
     var slug = genusEl.id.replace('genus-', '');
     var allItems = _genusItems[slug] || [];
-    if (allItems.length === 0 && !_dataFullyLoaded) return; // server path writes its own count
+    if (allItems.length === 0 && !window._dataFullyLoaded) return; // server path writes its own count
     var scope = getActiveView(genusEl);
     var isSeedling = scope.getAttribute('data-genus-view') === 'seedlings';
     var totalCount = allItems.filter(function(it) { return isSeedling ? it.meta.type === 'seedling' : it.meta.type !== 'seedling'; }).length;
@@ -2184,7 +2184,7 @@ paginateGenus = function(genusEl, page) {
 };
 
 // Override globalSearch to use t() — delegates to _origGlobalSearch for full logic
-var _origGlobalSearch = globalSearch;
+var _origGlobalSearch = typeof globalSearch === 'function' ? globalSearch : function() {};   // pages.js did not arrive (a crawler that skips a script): the rest of this file still runs
 globalSearch = function(query) {
   _origGlobalSearch(query);
   // Apply translated title after original function sets it

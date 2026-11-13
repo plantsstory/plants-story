@@ -726,6 +726,12 @@ function parseRoute() {
     return { page: 'genus', genus: first };
   }
 
+  // the timeline lives under 調べる since 11-03; old links to /timeline/ arrive there with it open (board 16 C9)
+  if (first === 'timeline') {
+    window._openTimeline = true;
+    try { history.replaceState(null, '', _basePath + 'explore'); } catch (e) {}
+    return { page: 'explore' };
+  }
   // People index / person page
   if (first === 'people') {
     return segments[1] ? { page: 'people', person: segments[1] } : { page: 'people' };
