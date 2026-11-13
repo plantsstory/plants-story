@@ -2201,3 +2201,8 @@ html.pv-label #page-genus .genus-content .cultivar-row .entry__thumb--empty::aft
 .list-split .num { margin-left: 8px; font-weight: 400; color: var(--color-mid); }
 /* the list scrolls whole: the search, the order and the kind chips stay at the top of the list, not of the screen (owner, 11-13) */
 @media (max-width: 640px) { html.pv-label .genus-content .sort-bar { position: static; } }
+/* the top bar stays on the screen while the page scrolls, so 戻る is always at hand (owner, 11-13) */
+@media (max-width: 640px) {
+  html.pv-label .topbar { position: sticky; top: 0; z-index: 90; padding-top: env(safe-area-inset-top); }
+  html.pv-label #page-cultivar, html.pv-label .page h1, html.pv-label .page h2[id], html.pv-label .glossary dt { scroll-margin-top: 64px; }
+}
