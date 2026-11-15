@@ -99,7 +99,8 @@ function getTrustClass(pct) { return pct >= 70 ? 'trust--high' : pct >= 40 ? 'tr
 // quotes, and × stay roman. Returns escaped HTML.
 function sciNameHtml(name) {
   var e = function (x) { return String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
-  var parts = String(name == null ? '' : name).match(/'[^']*'|"[^"]*"|‘[^’]*’|“[^”]*”|\s+|[^\s'"‘“]+/g) || [];
+  // 'Ree garden's': an apostrophe inside the quotes belongs to the epithet; a quote left over is kept, not dropped
+  var parts = String(name == null ? '' : name).match(/'[^']*'(?:[A-Za-z]+')?|"[^"]*"|‘[^’]*’|“[^”]*”|\s+|[^\s'"‘“’”]+|['"‘“’”]/g) || [];
   var html = '', run = '';
   var flush = function () { if (run) { html += '<i>' + run + '</i>'; run = ''; } };
   parts.forEach(function (p) {

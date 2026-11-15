@@ -2365,6 +2365,11 @@ updateCultivarDetail = function(cultivarName, rowEl) {
         if (extra && extra.specimen_kind && extra.specimen_kind !== 'unknown') row.specimen_kind = extra.specimen_kind;
         return sb.from('cultivar_images').insert(row).select().then(function(dbRes) {
           if (dbRes.error) throw dbRes.error;
+          // the photo list is read once a visit: a photo added now joins it, so the list, the new names and the
+          // photo counts show it without a reload (11-15: a new entry with a photo read 「No image」)
+          var tm = window._thumbMap;
+          if (tm && !priv && !tm[cultivarName]) tm[cultivarName] = row.storage_path;
+          if (window._photoTimes) window._photoTimes.push(new Date().toISOString());
           return dbRes.data[0];
         });
       });

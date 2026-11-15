@@ -534,6 +534,9 @@ function loadCultivarThumbnails() {
       var section = document.getElementById('genus-' + gObj.slug);
       if (section) paginateGenus(section);
     });
+    // a photo added in this visit is already in the map: the pages that draw from it draw again
+    document.dispatchEvent(new CustomEvent('ao:thumbs'));
+    if (typeof window.refreshEntriesLedger === 'function') window.refreshEntriesLedger();
     return;
   }
   sb.from('cultivar_images')
