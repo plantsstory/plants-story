@@ -3242,11 +3242,19 @@
     items.forEach(function (it) { it.classList.toggle('is-shown', it === cur); });
     var many = items.length > 1;
     strip.hidden = !many; count.hidden = !many;
+    strip.classList.toggle('is-many', items.length > 5);
+    var left = strip.scrollLeft;   // drawing the row again would send it back to the start
     strip.innerHTML = many ? items.map(function (it, i) {
       var im = it.querySelector('img');
       return '<button type="button" data-k="' + esc(keyOf(it)) + '" aria-pressed="' + (it === cur) + '" aria-label="写真 ' + (i + 1) + '"><img src="' + esc(im ? im.getAttribute('src') : '') + '" alt="" decoding="async"></button>';
     }).join('') : '';
-    count.textContent = many ? '写真 ' + items.length + ' 枚' : '';
+    strip.scrollLeft = left;
+    var on = strip.querySelector('[aria-pressed="true"]');
+    if (on) {
+      var x = on.getBoundingClientRect().left - strip.getBoundingClientRect().left + strip.scrollLeft;
+      if (x < strip.scrollLeft || x + on.offsetWidth > strip.scrollLeft + strip.clientWidth) strip.scrollLeft = x - (strip.clientWidth - on.offsetWidth) / 2;
+    }
+    count.textContent = many ? '写真 ' + items.length + ' 枚' + (items.length > 5 ? '（小さな写真は横にずらせます）' : '') : '';
   }
   new MutationObserver(function () { clearTimeout(timer); timer = setTimeout(layout, 30); }).observe(gal, { childList: true });
   strip.addEventListener('click', function (e) {

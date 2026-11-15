@@ -2236,7 +2236,11 @@ html.pv-label #page-genus .genus-content .cultivar-row:has(.entry__sub) .entry__
 html.pv-label .gallery.gallery--b .gallery__item[data-user-upload]:not(.is-shown) { display: none !important; }
 html.pv-label .gallery.gallery--b .gallery__img { aspect-ratio: 3 / 4; background: #000; cursor: zoom-in; }
 html.pv-label .gallery.gallery--b .gallery__img-full { width: 100%; height: 100%; object-fit: contain; }
-.gallery-thumbs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 4px; }
+/* one row that slides sideways: 5 fit the width; with 6 or more the next one peeks out at the edge */
+.gallery-thumbs { display: flex; gap: 4px; margin-top: 4px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.gallery-thumbs::-webkit-scrollbar { display: none; }
+.gallery-thumbs button { flex: 0 0 calc((100% - 16px) / 5); scroll-snap-align: start; }
+.gallery-thumbs.is-many button { flex-basis: calc((100% - 20px) / 5.4); }
 .gallery-thumbs[hidden], .gallery-count[hidden] { display: none; }
 .gallery-thumbs button { padding: 0; border: 0; background: #000; aspect-ratio: 1; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .gallery-thumbs button[aria-pressed="true"] { outline: 2px solid var(--color-ink); outline-offset: 1px; }
