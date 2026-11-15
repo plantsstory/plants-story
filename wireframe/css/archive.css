@@ -2310,3 +2310,4 @@ html.pv-label .gallery.gallery--b .gallery__img-full { width: 100%; height: 100%
 .record-head-note__label { font-weight: 700; margin-right: 4px; }
 .record-head-note__src, .record-head-note__src a { color: var(--color-mid); }
 .record-head-note--synonym { padding: var(--s2) var(--s3); background: var(--color-paper-2); border-left: 2px solid var(--color-ink); }
+.record-head-note--synonym a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; }
