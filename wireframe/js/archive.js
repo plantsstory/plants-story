@@ -1486,6 +1486,29 @@
     loadQr(function () { printLabels(d); });
   });
 
+  // 「名前・番号・URL をコピー」: a few lines for a hand-over or a listing (board 16 C7)
+  window.individualCopyText = function (d) {
+    var url = window.getShareUrl ? window.getShareUrl(d.fullName) : 'https://aroidorigins.com' + d.href;
+    var sp = (d.selectedFrom && typeof cultivarData !== 'undefined') ? Object.keys(cultivarData).filter(function (k) { return cultivarData[k] && cultivarData[k]._id === d.selectedFrom; })[0] : '';
+    var code = d.indCode || (String(d.shownName || '').match(/'[^']*'(?:[A-Za-z]+')?/) || [''])[0];
+    return [d.shownName, sp ? '種: ' + sp : '', code ? '番号・名前: ' + code : '', d.namer ? 'つけた人: ' + d.namer : '', url].filter(Boolean).join('\n');
+  };
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('#detail-copy-individual');
+    if (!b || !_labelEntry) return;
+    e.preventDefault();
+    var text = window.individualCopyText(_labelEntry);
+    var done = function () { showToast('コピーしました'); };
+    var fallback = function () {
+      var ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (er) { showToast('コピーできませんでした', true); }
+      ta.remove();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
+    if (typeof gtag === 'function') gtag('event', 'individual_copy', {});
+  });
+
   /* share text: {name} — {describer or breeder} {year}、{type locality or parentage}｜Aroid Origins {URL} */
   window.shareTextFor = function (d) {
     var who = d.type === 'species' ? d.author : (d.breeder || d.namer || d.creator);
@@ -1689,7 +1712,7 @@
     if (d.type === 'species' && !d.isIndividual && d.author) {
       var people = splitPeople(d.author);
       if (people.length) {
-        html += '<h2 class="sec">記載者</h2>';
+        html += '<h2 class="section-title">記載者</h2>';
         people.forEach(function (key) {
           var au = authorityOf(key) || {};
           var cnt = all.filter(function (x) { return x.state === 'ok' && peopleOf(x).indexOf(key) !== -1; }).length;
@@ -1991,6 +2014,8 @@
     }
     var plb = document.getElementById('detail-print-label');
     if (plb) plb.classList.toggle('d-none', d.type === 'seedling');
+    var cpi = document.getElementById('detail-copy-individual');
+    if (cpi) cpi.classList.toggle('d-none', !d.isIndividual);
     renderRelated(d, all);
     renderNameNote(d);
     renderArticlesFor(d);
@@ -2805,17 +2830,31 @@
       if (emptyMsg) emptyMsg.style.display = 'none';
       var lb = $('mypost-login-btn');
       if (lb) lb.addEventListener('click', function () { if (window.requireLogin) window.requireLogin({ a: 'mypost', path: (typeof _basePath !== 'undefined' ? _basePath : '/') + 'mypost' }); });
+      drawMineExample(grid);
       return;
     }
     if (loginMsg) loginMsg.style.display = 'none';
     var sbc = window._supabaseClient;
     if (!sbc) return;
     grid.innerHTML = '<p class="text-muted">読み込み中…</p>';
-    sbc.from('cultivars').select('id, genus, cultivar_name, type, created_at, origins, tags, is_private')
-      .eq('user_id', window._currentUser.id).order('created_at', { ascending: false }).limit(200)
-      .then(function (res) {
+    var meId = window._currentUser.id;
+    Promise.all([
+      sbc.from('cultivars').select('id, genus, cultivar_name, type, created_at, origins, tags, is_private')
+        .eq('user_id', meId).order('created_at', { ascending: false }).limit(200),
+      // the names the person put photos on, also when someone else recorded the name (T199 B14)
+      sbc.from('cultivar_images').select('cultivar_name, created_at').eq('user_id', meId).order('created_at', { ascending: false }).limit(300)
+    ]).then(function (both) {
+        var res = both[0], mine = both[1];
         if (res.error) { grid.innerHTML = '<p class="error-text">読み込めませんでした。もう一度開いてください</p>'; return; }
         var rows = res.data || [];
+        var have = {};
+        rows.forEach(function (r) { have[String(r.cultivar_name || '').replace(' [Seedling]', '')] = 1; });
+        ((mine && mine.data) || []).forEach(function (i) {
+          var n = i.cultivar_name, c = (typeof cultivarData !== 'undefined') && cultivarData[n];
+          if (!n || have[n] || !c) return;
+          have[n] = 1;
+          rows.push({ id: c._id, genus: n.split(' ')[0], cultivar_name: n, type: c._type || 'species', created_at: i.created_at, origins: c.origins || [], tags: c._tags || [], is_private: false, _photoOnly: true });
+        });
         if (!rows.length) {
           // nothing yet: just the way to start (the allowance shows once it matters, board 14 T181)
           grid.innerHTML = '';
@@ -2848,6 +2887,7 @@
             var line = window.entryLine(d, { thumb: thumb, noPerson: true });
             var n = count[r.cultivar_name] || 0;
             var acts = (r.is_private ? '<span class="mypost-acts__note">非公開（写真もあなただけ）</span> ' : '')
+              + (r._photoOnly ? '<span class="mypost-acts__note">写真を載せた名前</span> ' : '')
               + '<button type="button" data-my="pick" data-key="' + esc(r.cultivar_name) + '">写真を追加</button>'
                 + (r.type === 'seedling' ? '' : (LABEL ? ' ' : ' · ') + '<button type="button" data-my="record" data-key="' + esc(r.cultivar_name) + '">記録を追加</button>');
             // the last photo's day (撮影 when the photo carries it), else the day the plant was added
@@ -2905,6 +2945,38 @@
           if (window.drawMyUpdates) window.drawMyUpdates($('mypost-updates'));
         });
       });
+  }
+  // logged out: what the page becomes, with three of the operator's public plants that have photos (board 16 G10)
+  var MINE_EXAMPLE_USER = '629508da-9fdd-4d3a-9ec6-22fd3bdb7346';
+  function drawMineExample(grid) {
+    var sbc = window._supabaseClient;
+    if (!sbc || !window.entryLine || !window._describeEntry) return;
+    sbc.from('cultivars').select('id, cultivar_name, type, origins, tags').eq('user_id', MINE_EXAMPLE_USER).eq('is_private', false).limit(100).then(function (res) {
+      var rows = (res && res.data) || [];
+      if (!rows.length) return;
+      var shown = function (n) { return String(n || '').replace(' [Seedling]', ''); };
+      return sbc.from('cultivar_images').select('cultivar_name, storage_path, created_at').in('cultivar_name', rows.map(function (r) { return shown(r.cultivar_name); })).order('created_at', { ascending: false }).then(function (ir) {
+        var count = {}, first = {};
+        ((ir && ir.data) || []).forEach(function (i) {
+          if (/^pv:/.test(i.storage_path || '')) return;
+          count[i.cultivar_name] = (count[i.cultivar_name] || 0) + 1;
+          if (!first[i.cultivar_name]) first[i.cultivar_name] = i;
+        });
+        var pick = rows.filter(function (r) { return count[shown(r.cultivar_name)]; })
+          .sort(function (a, b) { return String(first[shown(b.cultivar_name)].created_at).localeCompare(String(first[shown(a.cultivar_name)].created_at)); }).slice(0, 3);
+        if (!pick.length || window._currentUser || !grid.isConnected) return;
+        var day = function (t) { return t ? String(t).slice(0, 10).replace(/-/g, '.') : ''; };
+        var html = pick.map(function (r) {
+          var n = shown(r.cultivar_name), cached = (typeof cultivarData !== 'undefined' && cultivarData[r.cultivar_name]) || null;
+          var d = window._describeEntry(r.cultivar_name, cached || { origins: r.origins || [], _type: r.type, _id: r.id, tags: r.tags }, r.type);
+          var thumb = window.galleryImg ? window.galleryImg(first[n].storage_path, 120) : '';
+          var line = window.entryLine(d, { thumb: thumb, noPerson: true });
+          return line.replace(/<\/li>$/, '<p class="mypost-acts"><span class="mypost-acts__meta">写真 <span class="num">' + count[n] + '</span>、写真 <span class="num">' + esc(day(first[n].created_at)) + '</span></span></p></li>');
+        }).join('');
+        var old = document.getElementById('mypost-example'); if (old) old.remove();
+        grid.insertAdjacentHTML('beforeend', '<section class="mypost-example" id="mypost-example"><h2 class="mypost-example__head">たとえば、こう並びます</h2><p class="mypost-example__note">運営者の株から 3 件。ログインすると、あなたの株がこの形で並び、写真や記録をここから足せます。</p><ol class="entries">' + html + '</ol></section>');
+      });
+    });
   }
   // 「書き出す（CSV）」: the person's own entries and photos, private ones included; free, also after membership ends (T132)
   document.addEventListener('click', function (e) {

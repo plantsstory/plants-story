@@ -59,7 +59,8 @@
         grid.innerHTML = '<p class="error-text">エラー: ' + escHtml(res.error.message) + '</p>';
         return;
       }
-      var rows = res.data || [];
+      // a private entry is never on a public page, also not on the person's own (that is 自分の株, board 16 C3)
+      var rows = (res.data || []).filter(function(r) { return !r.is_private; });
       var countEl = document.getElementById('profile-post-count');
       if (countEl) countEl.textContent = rows.length;
       if (rows.length === 0) {
@@ -68,8 +69,20 @@
       }
       if (emptyMsg) emptyMsg.style.display = 'none';
       if (window.renderEntriesLedger) {
-        // the same two-line rows as every other list (BOARD 10-07 T62)
-        window.renderEntriesLedger(grid, rows.map(function(r) { return { cultivar_name: r.cultivar_name, origins: r.origins || [], type: r.type, id: r.id, created_at: r.created_at }; }), (typeof _thumbMap !== 'undefined' ? _thumbMap : {}), { noPerson: true });
+        // the same two-line rows as every other list (BOARD 10-07 T62), in three groups: 個体 · 実生 · 名前 (board 16 C3)
+        var isInd = function(r) { return (r.tags || []).indexOf('individual') !== -1; };
+        var groups = [
+          { id: 'profile-grid-ind', title: '個体', rows: rows.filter(isInd) },
+          { id: 'profile-grid-seed', title: '実生', rows: rows.filter(function(r) { return r.type === 'seedling'; }) },
+          { id: 'profile-grid-names', title: '名前', rows: rows.filter(function(r) { return r.type !== 'seedling' && !isInd(r); }) }
+        ].filter(function(g) { return g.rows.length; });
+        var one = groups.length === 1;
+        grid.innerHTML = groups.map(function(g) {
+          return (one ? '' : '<h3 class="profile-group">' + g.title + ' <span class="num">' + g.rows.length + '</span></h3>') + '<div id="' + g.id + '"></div>';
+        }).join('');
+        groups.forEach(function(g) {
+          window.renderEntriesLedger(document.getElementById(g.id), g.rows.map(function(r) { return { cultivar_name: r.cultivar_name, origins: r.origins || [], type: r.type, id: r.id, created_at: r.created_at }; }), (typeof _thumbMap !== 'undefined' ? _thumbMap : {}), { noPerson: true });
+        });
         return;
       }
 
@@ -234,7 +247,44 @@
 
     // Load seedling posts
     loadProfilePosts(userId, '');
+    loadProfilePhotos(userId);
   };
+
+  // the person's public photos, newest first; a tap opens the plant (board 16 C3)
+  function loadProfilePhotos(userId) {
+    var sb = window._supabaseClient, sec = document.getElementById('profile-photos-section'), box = document.getElementById('profile-photos');
+    var wrap = document.getElementById('profile-photo-count-wrap');
+    if (!sb || !sec || !box) return;
+    sec.hidden = true; box.innerHTML = ''; if (wrap) wrap.hidden = true;
+    sb.from('cultivar_images').select('cultivar_name, storage_path, created_at').eq('user_id', userId).not('storage_path', 'like', 'pv:%')
+      .order('created_at', { ascending: false }).limit(60).then(function(res) {
+        if (_currentProfileUserId !== userId) return;
+        var rows = ((res && res.data) || []).filter(function(r) { return typeof cultivarData === 'undefined' || !window._dataFullyLoaded || cultivarData[r.cultivar_name] || cultivarData[r.cultivar_name + ' [Seedling]']; });
+        if (!rows.length) return;
+        var cnt = document.getElementById('profile-photo-count');
+        if (cnt) cnt.textContent = rows.length;
+        if (wrap) wrap.hidden = false;
+        box.innerHTML = rows.map(function(r) {
+          var src = window.galleryImg ? window.galleryImg(r.storage_path, 240) : '';
+          var key = (typeof cultivarData !== 'undefined' && !cultivarData[r.cultivar_name] && cultivarData[r.cultivar_name + ' [Seedling]']) ? r.cultivar_name + ' [Seedling]' : r.cultivar_name;
+          return '<a href="#" data-nav="cultivar" data-key="' + escHtml(key) + '" title="' + escHtml(r.cultivar_name) + '"><img src="' + escHtml(src) + '" alt="' + escHtml(r.cultivar_name) + '" loading="lazy" decoding="async"></a>';
+        }).join('');
+        sec.hidden = false;
+      });
+  }
+  document.addEventListener('click', function(e) {
+    var b = e.target.closest && e.target.closest('#profile-copy-link');
+    if (!b) return;
+    var url = 'https://aroidorigins.com' + location.pathname;
+    var done = function() { showToast('リンクをコピーしました'); };
+    var fallback = function() {
+      var ta = document.createElement('textarea'); ta.value = url; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (er) { showToast(url, false); }
+      ta.remove();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, fallback); else fallback();
+  });
 
   // Load profile edit page
   window.loadProfileEditPage = function() {

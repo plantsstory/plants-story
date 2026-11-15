@@ -1614,7 +1614,6 @@ if (false) {
       html += '<h1 class="section-title">' + g.name + '</h1>';
       html += '<p class="genus-lead">' + escHtml(t('genus_lead').replace('{genus}', g.name)) + '</p>';
       // where the genus name comes from (sourced; only genera with a checked line)
-      if (t('genus_origin_' + g.slug) !== 'genus_origin_' + g.slug) html += '<p class="genus-origin">' + escHtml(t('genus_origin_' + g.slug)) + ' <a href="https://www.ipni.org/n/' + escHtml(t('genus_ipni_' + g.slug)) + '" target="_blank" rel="noopener">IPNI</a></p>';
       html += '<div class="genus-stats" id="genus-stats-' + g.slug + '" style="display:none;">';
       html += '<div class="genus-stats__chips"></div>';
       html += '</div>';
@@ -1658,6 +1657,9 @@ if (false) {
 
       html += '<div class="card card--no-pad"></div>';
       html += '<div class="pagination"></div>';
+      // where the genus name comes from (sourced; only genera with a checked line) — under the list, so the first
+      // photos come up sooner (board 16 G5)
+      if (t('genus_origin_' + g.slug) !== 'genus_origin_' + g.slug) html += '<p class="genus-origin genus-origin--foot">' + escHtml(t('genus_origin_' + g.slug)) + ' <a href="https://www.ipni.org/n/' + escHtml(t('genus_ipni_' + g.slug)) + '" target="_blank" rel="noopener">IPNI</a></p>';
 
       if (g.has_seedlings) html += '</div>';
 

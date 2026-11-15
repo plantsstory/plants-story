@@ -813,8 +813,8 @@
     "en": "Price"
   },
   "tokushoho_price_value": {
-    "jp": "取扱店の掲載: 月額 1,000円（税込）。初月無料。",
-    "en": "Shop listing: ¥1,000 per month (tax included). First month free. "
+    "jp": "取扱店の掲載: 月額 1,000円（税込）。2027年3月末までは無料。",
+    "en": "Shop listing: ¥1,000 per month (tax included). Free until the end of March 2027. "
   },
   "tokushoho_payment_label": {
     "jp": "支払方法",
@@ -2225,8 +2225,8 @@
     "en": "Article 9-3 Shop listings"
   },
   "terms_9d_body": {
-    "jp": "取扱店の掲載（事業者向け）は月額1,000円（税込）、初月無料です。月末締めで翌月末までに銀行振込でお支払いいただきます（振込手数料は掲載者の負担）。解約はお申し出の翌月末までです。掲載内容は運営者が審査し、掲載を断る・取りやめる場合があります。掲載欄には PR と表示し、掲載は品種の記録や信頼度に影響しません。当サイトは適格請求書発行事業者ではありません。",
-    "en": "A shop listing (for businesses) is ¥1,000 per month (tax included), with the first month free. It is billed at the end of each month and paid by bank transfer by the end of the following month (the transfer fee is the lister's). A listing ends at the end of the month after notice is given. The operator reviews every listing and may decline or withdraw one. Listings are marked PR and never affect records or trust scores. The site is not a qualified invoice issuer."
+    "jp": "取扱店の掲載（事業者向け）は月額1,000円（税込）です。2027年3月末までの掲載は無料です。月末締めで翌月末までに銀行振込でお支払いいただきます（振込手数料は掲載者の負担）。解約はお申し出の翌月末までです。掲載内容は運営者が審査し、掲載を断る・取りやめる場合があります。掲載欄には PR と表示し、掲載は品種の記録や信頼度に影響しません。当サイトは適格請求書発行事業者ではありません。",
+    "en": "A shop listing (for businesses) is ¥1,000 per month (tax included). Listings are free until the end of March 2027. It is billed at the end of each month and paid by bank transfer by the end of the following month (the transfer fee is the lister's). A listing ends at the end of the month after notice is given. The operator reviews every listing and may decline or withdraw one. Listings are marked PR and never affect records or trust scores. The site is not a qualified invoice issuer."
   },
   "tokushoho_price_link": {
     "jp": "料金とサービス内容",

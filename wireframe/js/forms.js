@@ -2714,12 +2714,18 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       if (caption) overlayHtml += '<div class="gallery__overlay-caption">' + escHtml(caption) + '</div>';
       if (linkUrl) {
         var displayLink = linkUrl.replace(/^https?:\/\//, '').substring(0, 40);
-        overlayHtml += '<div class="gallery__overlay-link"><a href="' + escHtml(linkUrl) + '" target="_blank" rel="noopener">🔗 ' + escHtml(displayLink) + '</a></div>';
+        overlayHtml += '<div class="gallery__overlay-link"><a href="' + escHtml(linkUrl) + '" target="_blank" rel="noopener">' + escHtml(displayLink) + '</a></div>';
       }
       overlayHtml += '</div>';
     }
+    // who put the photo here and when (board 16 G2): a photo without a name gets no line
+    var creditHtml = '';
+    if (opts.creditName || opts.ownerId) {
+      creditHtml = '<p class="gallery__credit" data-uid="' + escHtml(opts.ownerId || '') + '" data-ym="' + escHtml(opts.creditYm || '') + '"' + (opts.creditName ? '' : ' hidden') + '>'
+        + (opts.creditName ? '写真: ' + escHtml(opts.creditName) + (opts.creditYm ? '、' + escHtml(opts.creditYm) : '') : '') + '</p>';
+    }
     item.innerHTML =
-      '<div class="gallery__img"><img src="' + src + '" class="gallery__img-full" loading="lazy" decoding="async" sizes="(max-width: 768px) 100vw, 600px">' + overlayHtml + '</div>' +
+      '<div class="gallery__img"><img src="' + src + '" class="gallery__img-full" loading="lazy" decoding="async" sizes="(max-width: 768px) 100vw, 600px">' + overlayHtml + '</div>' + creditHtml +
       '<div class="gallery__actions">' +
         (canRequestImageDelete(opts) ? '<a class="gallery__delete">' + t('request_delete') + '</a>' : '') +
       '</div>';
@@ -2782,9 +2788,12 @@ updateCultivarDetail = function(cultivarName, rowEl) {
             realVotes: img.real_votes,
             fakeVotes: img.fake_votes,
             // who took it and which plant it shows (board 9): only what the uploader confirmed is shown
-            caption: [img.caption, img.specimen_kind === 'original' ? 'オリジナル由来' : img.specimen_kind === 'f_seedling' ? '実生（F 個体）' : '', img.credit ? '撮影: ' + img.credit : ''].filter(Boolean).join(' · '),
+            caption: [img.caption, img.specimen_kind === 'original' ? 'オリジナル由来' : img.specimen_kind === 'f_seedling' ? '実生（F 個体）' : ''].filter(Boolean).join(' · '),
             linkUrl: img.link_url,
-            ownerId: img.user_id
+            ownerId: img.user_id,
+            // the photographer the uploader named, else the uploader's display name (filled in below)
+            creditName: img.credit || '',
+            creditYm: String(img.taken_on || img.created_at || '').slice(0, 7).replace('-', '.')
           });
           if (standIn) item.style.display = 'none';
           fresh.push(url);
@@ -2797,6 +2806,22 @@ updateCultivarDetail = function(cultivarName, rowEl) {
             });
           }
         });
+        // the uploaders' display names, for the photos whose line has no name yet
+        var uids = images.filter(function(i) { return !i.credit && i.user_id; }).map(function(i) { return i.user_id; })
+          .filter(function(u, k, a) { return a.indexOf(u) === k; });
+        if (uids.length) {
+          getSupabase().from('profiles').select('id, display_name').in('id', uids).then(function(pr) {
+            ((pr && pr.data) || []).forEach(function(p) {
+              if (!p.display_name) return;
+              gallery.querySelectorAll('.gallery__credit[data-uid="' + p.id + '"]').forEach(function(el) {
+                if (!el.hidden) return;
+                var ym = el.getAttribute('data-ym');
+                el.textContent = '写真: ' + p.display_name + (ym ? '、' + ym : '');
+                el.hidden = false;
+              });
+            });
+          });
+        }
         // the stand-in leaves only once the first new photo can be shown (4 s at most): no empty plate between them
         var swapped = false;
         var swap = function() {
