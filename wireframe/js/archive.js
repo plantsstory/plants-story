@@ -158,6 +158,10 @@
     // an individual (numbered or named plant of a species) is marked by its tag only (BOARD 09-07);
     // a Clone selected from another clone keeps its own page in the index
     d.isIndividual = d.tags.indexOf('individual') !== -1;
+    // a synonym (board 16 T1): listed under its own name, counted apart from the species, and pointing to the
+    // accepted name by the id in its tag
+    d.isSynonym = d.type === 'species' && d.tags.indexOf('synonym') !== -1;
+    d.synonymOf = (d.tags.filter(function (t) { return /^synonym_of:\d+$/.test(t); })[0] || '').replace('synonym_of:', '') || null;
     // an individual is numbered or named, never bred: the person who gave the number is its namer (board 15 T1)
     if (d.isIndividual) { d.namer = d.namer || d.breeder; d.breeder = ''; }
     // tag breeder_unconfirmed: the record says 「〜に由来するとされる」, not that the person bred it. The name stays on
@@ -348,6 +352,7 @@
   }
   function kindWord(d) {
     if (d.isIndividual) return T('kind_individual');
+    if (d.isSynonym) return T('kind_synonym');
     if (d.type === 'species') return String(d.qualifier || '').toLowerCase().replace(/\./g, '') === 'cf' ? T('kind_cf') : isUndescribed(d) ? T('kind_undescribed') : T('kind_species');
     if (d.type === 'seedling') return T('kind_seedling');
     return d.type === 'hybrid' ? 'Hybrid' : d.type === 'clone' ? 'Clone' : String(d.type || '');
@@ -538,6 +543,7 @@
         var e = store[k]; if (!e || seen[e._id || k]) return; seen[e._id || k] = true;
         var d; try { d = describe(k, e, e._type); } catch (er) { return; }
         if (d.state !== 'ok' || d.isIndividual || d.type === 'seedling' || !shownGenus(d)) return;
+        if (d.isSynonym) return;
         if (d.type === 'species') { if (isUndescribed(d)) n.undescribed++; else n.species++; } else n.hybrid++;
         if (!thumbs[d.displayName]) wanted++;
         peopleOf(d).forEach(function (p) { people[p] = 1; });
@@ -1415,6 +1421,40 @@
     });
   };
   // on an entry a names page covers: one line pointing to it
+  // the meaning of the species epithet (board 16 C2): only what a botanical publication or IPNI states in so many
+  // words, with that source; no translation worked out from a dictionary. Checked 2026-11-16.
+  var EPITHETS = {
+    carlablackiae: { jp: 'パナマ・チリキ州の園芸家 Carla Black さんにちなむ。', en: 'Named after Carla Black, a horticulturist in Chiriquí, Panama.', src: 'Ortiz et al. 2020, Phytotaxa 467(1): 10', url: 'https://www.ipni.org/n/77212524-1' },
+    debile: { jp: '栽培すると近縁の A. luxurians より弱く育つことから（debilis は「弱い」）。', en: 'From its weaker growth in cultivation than its relative A. luxurians (debilis, "weak").', src: 'Croat & Cirino 2005, Aroideana 28', url: 'https://www.aroid.org/gallery/croat/0280007.pdf' },
+    dressleri: { jp: 'この種を再発見して栽培に導いた Robert Dressler 博士（スミソニアン熱帯研究所）にちなむ。', en: 'Named after Dr. Robert Dressler (Smithsonian Tropical Research Institute), who rediscovered it and brought it into cultivation.', src: 'Croat 1978, Aroideana 1: 54', url: 'https://www.aroid.org/gallery/croat/0010202.pdf' },
+    faustomirandae: { jp: 'メキシコで活動したスペイン出身の植物学者 Faustino Miranda（1905–1964）にちなむ。この種を最初に採集し、栽培に導いた人。', en: 'Named after Faustino Miranda (1905–1964), the Spanish botanist who worked in Mexico, first collected this species and brought it into cultivation.', src: 'Pérez-Farrera & Croat 2001, Novon 11: 88', url: 'https://archive.org/download/biostor-64456/biostor-64456.pdf' },
+    forgetii: { jp: 'Sander 商会の採集人 Forget にちなむ。', en: 'Named after Forget, a collector for Sander.', src: 'IPNI', url: 'https://www.ipni.org/n/15285-2' },
+    kunayalense: { jp: 'パナマのクナ・ヤラ（旧サン・ブラス）地方に結びつく種であることから。', en: 'From its association with Kuna Yala (formerly San Blas), Panama.', src: 'Croat & Vannini 2010, Aroideana 33: 162', url: 'https://www.aroid.org/gallery/croat/0330004.pdf' },
+    luxurians: { jp: '科の中でも特に美しい観賞植物であることから（luxurians は「豪華な」）。', en: 'From its being one of the most beautiful ornamentals in the family (luxurians, "luxuriant").', src: 'Croat & Cirino 2005, Aroideana 28', url: 'https://www.aroid.org/gallery/croat/0280007.pdf' },
+    veitchii: { jp: 'この植物を導入した Veitch 商会にちなむ。採集人 Wallis の依頼で名づけられた。', en: 'Named after Messrs. Veitch, who introduced it, at the request of the collector Wallis.', src: 'Gard. Chron. n.s. 6 (1876)', url: 'https://archive.org/details/gardenerschronic61876lond' },
+    warocqueanum: { jp: 'ベルギーの著名な愛好家 M. Warocqué に献名。', en: 'Dedicated to M. Warocqué, an eminent Belgian amateur.', src: 'T. Moore, Florist & Pomologist 1878: 101', url: 'https://archive.org/details/floristandpomol03hogggoog' },
+    besseae: { jp: 'セルビー植物園の長年の後援者で、タイプ標本の元株を採集した Libby Besse さんにちなむ。', en: 'Named after Libby Besse, a long-time supporter of Selby Botanical Gardens, who collected the plant the type came from.', src: 'Croat & Acebey 2005, Novon 15: 84', url: 'https://www.missouribotanicalgarden.org/Portals/0/staff/PDFs/croat/NewSpeciesBolivia_Croat-Acebey_Novon-15-01-80.pdf' }
+  };
+  function renderRecordHeadNotes(d, all) {
+    var el = document.getElementById('record-head-notes');
+    if (!el) return;
+    var en = typeof currentLang !== 'undefined' && currentLang === 'en';
+    var html = '';
+    var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
+    var byId = function (id) { var k = Object.keys(store).filter(function (n) { return store[n] && String(store[n]._id) === String(id); })[0]; return k || null; };
+    var link = function (key) { var e = store[key] || {}; var dd; try { dd = describe(key, e, e._type); } catch (er) { return esc(key); } return '<a href="' + esc(dd.href) + '" data-nav="cultivar" data-key="' + esc(key) + '">' + sciNameHtml(dd.shownName || key) + '</a>'; };
+    if (d.isSynonym && d.synonymOf) {
+      var acc = byId(d.synonymOf);
+      if (acc) html += '<p class="record-head-note record-head-note--synonym">' + esc(T('synonym_of_note')) + ' ' + link(acc) + '</p>';
+    }
+    if (d.type === 'species' && !d.isIndividual && d.id != null) {
+      var syn = Object.keys(store).filter(function (n) { var t = (store[n] && store[n]._tags) || []; return t.indexOf('synonym_of:' + d.id) !== -1; });
+      if (syn.length) html += '<p class="record-head-note record-head-note--synonym">' + esc(T('synonyms_note')) + ' ' + syn.map(link).join('・') + '</p>';
+    }
+    var ep = d.type === 'species' && !d.isIndividual && !d.qualifier && EPITHETS[String(d.epithet || '').toLowerCase()];
+    if (ep) html += '<p class="record-head-note record-head-note--epithet"><span class="record-head-note__label">' + esc(T('epithet_meaning')) + '</span> ' + esc(en ? ep.en : ep.jp) + ' <span class="record-head-note__src">（' + esc(T('source_word')) + ': <a href="' + esc(ep.url) + '" target="_blank" rel="noopener">' + esc(ep.src) + '</a>）</span></p>';
+    el.innerHTML = html;
+  }
   function renderNameNote(d) {
     var el = document.getElementById('names-note');
     if (!el) return;
@@ -2018,6 +2058,7 @@
     if (cpi) cpi.classList.toggle('d-none', !d.isIndividual);
     renderRelated(d, all);
     renderNameNote(d);
+    renderRecordHeadNotes(d, all);
     renderArticlesFor(d);
     renderIndividuals(d, all);
     renderGateNote(d);

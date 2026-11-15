@@ -2983,9 +2983,11 @@ if (false) {
     if (items.length === 0) { statsEl.style.display = 'none'; return; }
     var short = (_genusItems[slug] || []).filter(function(it) { return it.meta.type !== 'seedling' && !isIndividualItem(it) && recordStateOf(it.fullName, it.entry, it.meta) === 'unrecorded'; }).length;
 
-    var speciesCount = 0, hybridCount = 0, cloneCount = 0, undescribedCount = 0;
+    var speciesCount = 0, hybridCount = 0, cloneCount = 0, undescribedCount = 0, synonymCount = 0;
     items.forEach(function(it) {
       var t = it.meta.type || '';
+      // a synonym is listed under its own name but is not one more species (board 16 T1)
+      if (t === 'species' && it.entry && (it.entry._tags || []).indexOf('synonym') !== -1) { synonymCount++; return; }
       // sp. / aff. / unresolved names are listed, but not counted as species (board 15 T8)
       if (t === 'species' && window.entryUndescribed && window.entryUndescribed(it.fullName, it.entry, 'species')) undescribedCount++;
       else if (t === 'species') speciesCount++;
@@ -3000,6 +3002,7 @@ if (false) {
       var html = '<span class="genus-stat-chip">' + (en ? 'Recorded ' : '収録 ') + '<b>' + items.length + '</b>' + (en ? '' : ' 件') + '</span>';
       if (speciesCount > 0) html += '<span class="genus-stat-chip">' + (en ? 'Species ' : '原種 ') + speciesCount + '</span>';
       if (undescribedCount > 0) html += '<span class="genus-stat-chip">' + (en ? 'Undescribed ' : '未記載 ') + undescribedCount + '</span>';
+      if (synonymCount > 0) html += '<span class="genus-stat-chip">' + (en ? 'Synonyms ' : '異名 ') + synonymCount + '</span>';
       if (hybridCount > 0) html += '<span class="genus-stat-chip">Hybrid ' + hybridCount + '</span>';
       if (cloneCount > 0) html += '<span class="genus-stat-chip">Clone ' + cloneCount + '</span>';
       if (short > 0) html += '<span class="genus-stat-chip">' + (en ? 'Short of a record ' : '記録不足 ') + short + '</span>';

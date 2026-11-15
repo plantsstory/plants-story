@@ -2303,3 +2303,10 @@ html.pv-label .gallery.gallery--b .gallery__img-full { width: 100%; height: 100%
   .shop-dept, .shop-dept:hover { white-space: nowrap; gap: 6px; padding: 0 12px !important; border: 1px solid var(--color-rule) !important; }
   .shop-dept.is-current { border-color: var(--color-ink) !important; background: var(--color-paper-2) !important; }
 }
+/* T1 · C2: the notes at the head of 由来の記録 (a synonym, the meaning of the epithet) */
+#record-head-notes:empty { display: none; }
+#record-head-notes { margin: 0 0 var(--s3); }
+.record-head-note { margin: 0 0 var(--s2); font-size: var(--fs-small); line-height: var(--lh-body); color: var(--color-ink); }
+.record-head-note__label { font-weight: 700; margin-right: 4px; }
+.record-head-note__src, .record-head-note__src a { color: var(--color-mid); }
+.record-head-note--synonym { padding: var(--s2) var(--s3); background: var(--color-paper-2); border-left: 2px solid var(--color-ink); }

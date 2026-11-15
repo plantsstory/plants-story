@@ -2240,6 +2240,26 @@
     "jp": "未記載",
     "en": "Undescribed"
   },
+  "kind_synonym": {
+    "jp": "異名",
+    "en": "Synonym"
+  },
+  "synonym_of_note": {
+    "jp": "この名前は異名です（WCVP・POWO）。いま使われる名前（受理名）は",
+    "en": "This name is a synonym (WCVP, POWO). The accepted name is"
+  },
+  "synonyms_note": {
+    "jp": "異名（同じ種を指す別の名前）:",
+    "en": "Synonyms (other names for this species):"
+  },
+  "epithet_meaning": {
+    "jp": "種小名の意味",
+    "en": "The epithet"
+  },
+  "source_word": {
+    "jp": "出典",
+    "en": "source"
+  },
   "kind_individual": {
     "jp": "個体",
     "en": "Individual"
