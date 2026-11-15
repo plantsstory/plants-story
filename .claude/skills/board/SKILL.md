@@ -13,6 +13,7 @@ description: Aroid Origins の常設ボード会議を開く。収益・分類�
    - `content-strategist`（集客・コンテンツ）
    - `design-director`（デザイン・UX）
    各エージェントには議題・現状・BOARD.md の要約・実データの取り方（`wireframe/js/app-core.js` の anon key で Supabase REST を curl）を渡す。
+   モデルは定義ファイルの `model:` のとおり（2026-11-16 決定）: taxonomy-editor と product-owner は **fable**（正確さと最終判断）、design-director と content-strategist は **opus**、monetization-lead は **sonnet**。`general-purpose` で代役を立てるときは、Agent ツールの `model` に同じ値を渡す。
 4. 4 者の報告を `product-owner` に渡し、決定事項・却下・オーナー依頼・BOARD.md 差分を得る。
 5. `docs/board/YYYY-MM-DD.md` に会議録（各報告の要約 + 決定）を保存し、`BOARD.md` を差分どおり更新する。
 6. 決定のうち Claude Code が実装できるものは **その場で実装に着手**する（デザイン変更はプレビュー確認を挟む）。

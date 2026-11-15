@@ -73,8 +73,9 @@ async function rakuten(params: Record<string, string>) {
   throw new Error("楽天 API: アクセスが集中しています（429）");
 }
 
-// the engine of the origin research (Secret AI_MODEL): a Claude model id, or "openai"
-const AI_MODEL = Deno.env.get("AI_MODEL") || "openai";
+// the engine: Secret TOOLS_AI_MODEL (11-16: Sonnet 5.5 — the picks are reviewed by the owner one by one, so the
+// origin research keeps the stronger model and the budget), else the origin research's AI_MODEL; a Claude id or "openai"
+const AI_MODEL = Deno.env.get("TOOLS_AI_MODEL") || Deno.env.get("AI_MODEL") || "openai";
 
 async function askModel(system: string, user: string) {
   if (AI_MODEL !== "openai") {
