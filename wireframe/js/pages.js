@@ -923,9 +923,13 @@ function renderOriginsInner(cultivarName, container) {
     return String(text || '').split(/\n\s*\n/).map(function(p) { return p.trim(); }).filter(Boolean)
       .map(function(p) { return '<p>' + italicizeSciNames(escHtml(p)).replace(/\n/g, '<br>') + '</p>'; }).join('');
   }
+  var seenBodies = {};
   origins.forEach(function(origin, i) {
     // the cross formula is drawn above; a record with no words, fields or sources is not drawn (board 11)
     if (!origin || origin._type === 'formula') return;
+    var bodyKey = String(origin.body || '').replace(/\s+/g, ' ').trim();
+    var dupOfEarlier = bodyKey.length > 20 && seenBodies[bodyKey];
+    if (bodyKey.length > 20) seenBodies[bodyKey] = true;
     if (!String(origin.body || '').trim() && !String(origin.body_en || '').trim() && !origin.structured && !(origin.sources || []).length) return;
     var rh = '';
     var trustNum = Math.max(0, Math.min(100, parseInt(origin.trust, 10) || 0));
@@ -967,8 +971,10 @@ function renderOriginsInner(cultivarName, container) {
       rh += '<button class="verification-toggle mono" onclick="document.getElementById(\'' + vid + '\').classList.toggle(\'d-none\');">' + (currentLang === 'en' ? 'Verification' : '検証詳細') + '</button>';
       rh += '<div id="' + vid + '" class="variation-detail d-none">';
       if (v.summary_jp) rh += '<div class="text-sm variation-summary">' + escHtml(v.summary_jp) + '</div>';
-      if (v.claims && v.claims.length > 0) {
-        v.claims.forEach(function(c) {
+      // a claim backed only by the model's own knowledge (no URL) is not shown as checked (board 17 T224)
+      var claimsWithUrl = (v.claims || []).filter(function(c) { return c && /https?:\/\//.test(String(c.source || '')); });
+      if (claimsWithUrl.length > 0) {
+        claimsWithUrl.forEach(function(c) {
           var si = '?', sc = 'claim--unverifiable';
           if (c.status === 'verified') { si = '\u2713'; sc = 'claim--verified'; }
           else if (c.status === 'partially_verified') { si = '~'; sc = 'claim--partial'; }
@@ -1001,7 +1007,9 @@ function renderOriginsInner(cultivarName, container) {
     rh += '<span class="vote-group">' + renderVoteButtons(i, origin.votes) + '</span></footer>';
     rh += '</article>';
     // AI text without a citable source and low trust is a draft: folded, not a record
-    if (window.RecordGate && window.RecordGate.isDraft(origin) && !(data && data._verifiedAt)) {
+    if (dupOfEarlier) {
+      html += '<details class="record record--draft"><summary class="mono">' + (currentLang === 'en' ? 'The same text once more (folded)' : '同じ本文の記録がもう 1 件あります（畳んでいます）') + '</summary>' + rh.replace('class="record"', 'class="record record__inner"') + '</details>';
+    } else if (window.RecordGate && window.RecordGate.isDraft(origin) && !(data && data._verifiedAt)) {
       html += '<details class="record record--draft"><summary class="mono">' + t('draft_label').replace('{n}', trustNum) + '</summary>' + rh.replace('class="record"', 'class="record record__inner"') + '</details>';
     } else {
       html += rh;
@@ -1482,8 +1490,16 @@ function paginateGenusFromMemory(genusEl, page) {
         folded = true;
         html += '<details class="genus-short"' + (searching || firstShort === 0 ? ' open' : '') + '><summary>' + escHtml(t('genus_short').replace('{n}', shortTotal)) + '</summary>';
       }
+      if (isSeedlingView && window.entryLine && window._describeEntry) {
+        // the same two-line rows as every other list (board 17 T223)
+        var sk = filtered[i].fullName, sd = window._describeEntry(sk, filtered[i].entry, 'seedling');
+        var stp = (typeof _thumbMap !== 'undefined' && _thumbMap[sk.replace(' [Seedling]', '')]) || '';
+        html += window.entryLine(sd, { thumb: stp && window.galleryImg ? window.galleryImg(stp, 120) : '' });
+        continue;
+      }
       html += buildRowHtml(filtered[i].fullName, filtered[i].entry, filtered[i].meta);
     }
+    if (isSeedlingView && window.entryLine && end > start) html = '<ol class="entries">' + html + '</ol>';
     if (folded) html += '</details>';
     if (filtered.length === 0) {
       html = '<div class="text-muted empty-state">' + t('no_results') + '</div>';

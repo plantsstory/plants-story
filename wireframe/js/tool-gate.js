@@ -22,7 +22,8 @@
     var u = clean(t && t[shop]);
     if (!/^https:\/\//i.test(u)) return '';
     var h = host(u);
-    if (shop === 'amazon') return h === 'af.moshimo.com' ? u : '';          // old amzn.to links are not drawn
+    // Amazon only through Moshimo, and only with its impression image beside it (BOARD §2; board 17 T225)
+    if (shop === 'amazon') { var im = clean(t && t.amazon_imp); return h === 'af.moshimo.com' && host(im) === 'i.moshimo.com' && /^https:\/\//i.test(im) ? u : ''; }
     if (shop === 'rakuten') return /(^|\.)rakuten\.co\.jp$/.test(h) ? u : '';
     if (shop === 'yahoo') return (h === 'yahoo.jp' || /(^|\.)valuecommerce\.com$/.test(h) || /(^|\.)shopping\.yahoo\.co\.jp$/.test(h)) ? u : '';
     return '';

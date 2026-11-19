@@ -14,17 +14,17 @@
   <link rel="stylesheet" href="css/utilities.css">
   <link rel="stylesheet" href="css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/record-gate.js?v=20261116d"></script>
-  <script src="js/tool-gate.js?v=20261116d"></script>
-  <script src="js/admin-ledger.js?v=20261116d"></script>
-  <script src="js/admin-tools-research.js?v=20261116d"></script>
-  <script src="js/admin-tool-candidates.js?v=20261116d"></script>
-  <script src="js/admin-verify.js?v=20261116d"></script>
-  <script src="js/admin-contact.js?v=20261116d"></script>
-  <script src="js/admin-checks.js?v=20261116d"></script>
-  <script src="js/admin-suggest.js?v=20261116d"></script>
-  <script src="js/admin-shops.js?v=20261116d"></script>
-  <script src="js/admin-articles.js?v=20261116d"></script>
+  <script src="js/record-gate.js?v=20261119a"></script>
+  <script src="js/tool-gate.js?v=20261119a"></script>
+  <script src="js/admin-ledger.js?v=20261119a"></script>
+  <script src="js/admin-tools-research.js?v=20261119a"></script>
+  <script src="js/admin-tool-candidates.js?v=20261119a"></script>
+  <script src="js/admin-verify.js?v=20261119a"></script>
+  <script src="js/admin-contact.js?v=20261119a"></script>
+  <script src="js/admin-checks.js?v=20261119a"></script>
+  <script src="js/admin-suggest.js?v=20261119a"></script>
+  <script src="js/admin-shops.js?v=20261119a"></script>
+  <script src="js/admin-articles.js?v=20261119a"></script>
 </head>
 <body>
 
@@ -93,6 +93,7 @@
       <!-- ---- DASHBOARD ---- -->
       <section id="sec-dashboard">
         <h2 class="section-title">ダッシュボード</h2>
+        <p class="goal-line" id="stat-goals">第17回の指標を読み込み中…</p>
         <div class="stat-grid">
           <div class="stat-card">
             <div class="stat-value" id="stat-cultivars">-</div>
@@ -1019,6 +1020,25 @@ async function loadDashboard() {
   var data = result.data || [];
 
   document.getElementById('stat-cultivars').textContent = data.length;
+  // board 17 (BOARD §1): people who put photos up in 30 days (not the owner), names with a photo, people back in 2+ months
+  (async function () {
+    var OWNER = '629508da-9fdd-4d3a-9ec6-22fd3bdb7346';
+    var im = await sb.from('cultivar_images').select('cultivar_name, user_id, created_at, storage_path');
+    var rows = (im && im.data) || [];
+    var since = new Date(Date.now() - 30 * 864e5).toISOString();
+    var people30 = {}, months = {};
+    rows.forEach(function (r) {
+      if (!r.user_id || r.user_id === OWNER) return;
+      if (r.created_at > since) people30[r.user_id] = 1;
+      (months[r.user_id] = months[r.user_id] || {})[String(r.created_at).slice(0, 7)] = 1;
+    });
+    var back = Object.keys(months).filter(function (u) { return Object.keys(months[u]).length >= 2; }).length;
+    var shown = data.filter(function (c) { return c.genus === 'Anthurium' && !c.is_private && c.type !== 'seedling' && !(c.tags || []).includes('individual'); });
+    var withPhoto = {}; rows.forEach(function (r) { if (!/^pv:/.test(r.storage_path || '')) withPhoto[r.cultivar_name] = 1; });
+    var nPhoto = shown.filter(function (c) { return withPhoto[c.cultivar_name]; }).length;
+    var el = document.getElementById('stat-goals');
+    if (el) el.textContent = '30 日に写真を載せた人（オーナー以外）' + Object.keys(people30).length + ' 人（12 月末の目標 3 人） · 写真のある名前 ' + nPhoto + ' / ' + shown.length + ' · 2 か月以上載せた人 ' + back + ' 人';
+  })();
 
   var totalOrigins = 0;
   var totalTrust = 0;

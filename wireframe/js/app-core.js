@@ -3127,7 +3127,7 @@ if (false) {
         html += '</div>';
       });
       grid.innerHTML = html;
-      observeLazyImages(grid);
+      if (typeof observeLazyImages === 'function') observeLazyImages(grid);
     });
   }
 
@@ -3189,7 +3189,7 @@ if (false) {
             html += '</div>';
           });
           grid.innerHTML = html;
-          observeLazyImages(grid);
+          if (typeof observeLazyImages === 'function') observeLazyImages(grid);
         });
       });
   }

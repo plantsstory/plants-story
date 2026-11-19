@@ -1445,7 +1445,7 @@
     "en": "Species epithet"
   },
   "nb_epithet_optional": {
-    "jp": "種小名（単一の原種由来なら入力）",
+    "jp": "種小名（1 つの原種から選んだ株のときだけ。任意）",
     "en": "Species epithet (if derived from one species)"
   },
   "nb_extra_locality": {
@@ -1641,7 +1641,7 @@
     "en": "Species"
   },
   "individual_code": {
-    "jp": "個体名・番号",
+    "jp": "番号・名前",
     "en": "Name or number"
   },
   "individual_namer": {
@@ -1657,11 +1657,11 @@
     "en": "Notes (optional)"
   },
   "individual_photos_hint": {
-    "jp": "写真は登録後、個体のページの「画像追加」から載せられます。",
+    "jp": "写真は登録のあと、個体のページの「写真を追加」から載せられます。",
     "en": "Photos can be added from the individual's page after saving."
   },
   "individual_submit": {
-    "jp": "個体を登録",
+    "jp": "登録する",
     "en": "Save individual"
   },
   "individual_login": {
@@ -2239,6 +2239,14 @@
   "kind_undescribed": {
     "jp": "未記載",
     "en": "Undescribed"
+  },
+  "individuals_siblings_title": {
+    "jp": "同じ原種のほかの個体",
+    "en": "Other individuals of the same species"
+  },
+  "individuals_siblings_none": {
+    "jp": "この原種のほかの個体は、まだ記録されていません。",
+    "en": "No other individual of this species is recorded yet."
   },
   "kind_synonym": {
     "jp": "異名",

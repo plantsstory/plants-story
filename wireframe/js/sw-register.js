@@ -52,8 +52,12 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault();
     deferredPrompt = e;
+    document.dispatchEvent(new CustomEvent('ao:installable'));
 
   });
+  // the line at the end of 自分の株 (board 17 T222) asks the same prompt
+  window.aoCanInstall = function() { return !!deferredPrompt; };
+  window.aoInstall = function() { if (!deferredPrompt) return; deferredPrompt.prompt(); deferredPrompt.userChoice.then(function() { deferredPrompt = null; }); };
   // offered once something has been posted (a record, a photo, an entry) — not on a timer
   window.offerInstall = function() {
     try { if (localStorage.getItem(DISMISSED_KEY)) return; } catch (e) { return; }

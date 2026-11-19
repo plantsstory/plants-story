@@ -2311,3 +2311,62 @@ html.pv-label .gallery.gallery--b .gallery__img-full { width: 100%; height: 100%
 .record-head-note__src, .record-head-note__src a { color: var(--color-mid); }
 .record-head-note--synonym { padding: var(--s2) var(--s3); background: var(--color-paper-2); border-left: 2px solid var(--color-ink); }
 .record-head-note--synonym a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; }
+/* ---- board 17 (11-19), first batch ---- */
+/* T213: the clone's / hybrid's own name comes first; the epithet is the optional one below it */
+#page-contribute .name-builder__grid { display: flex; flex-direction: column; gap: var(--s3); }
+#page-contribute[data-ctype="clone"] #nb-cultivar-row { order: -1; }
+#page-contribute .field-error { color: var(--color-danger, #9b2c2c); font-size: var(--fs-small); margin-top: 4px; display: none; }
+#page-contribute .field-error.visible { display: block; }
+/* T218: what the chosen chip means */
+.subcat-help { margin: var(--s2) 0 0; font-size: var(--fs-small); color: var(--color-mid); line-height: var(--lh-body); }
+.subcat-help:empty { display: none; }
+/* T215: the body first, optional, three ways to begin */
+.origin-words__hint { margin: 0 0 var(--s2); }
+.origin-words__ex { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 var(--s2); font-size: var(--fs-small); color: var(--color-mid); }
+.origin-words__ex button { min-height: 36px; padding: 0 10px; border: 1px solid var(--color-rule-strong, var(--color-rule)); background: var(--color-paper-2); color: var(--color-ink); font: inherit; font-size: var(--fs-small); cursor: pointer; }
+/* T216: the login line on step 1; while stepping, the page's heading is one small line and the footer is away */
+.cstep-login { margin: 0 0 var(--s3); padding: var(--s2) var(--s3); background: var(--color-paper-2); border-left: 2px solid var(--color-ink); font-size: var(--fs-small); }
+.cstep-login[hidden] { display: none; }
+#page-contribute.contribute--stepped #contribute-page-title { font-size: var(--fs-h3); margin: 0 0 var(--s1); }
+#page-contribute.contribute--stepped:not([data-cstep-now="1"]) #contribute-page-desc { display: none; }
+body.cstep-on footer, body.cstep-on .site-footer { display: none !important; }
+.cstep-suggest { margin: var(--s3) 0 0; padding: var(--s2) var(--s3); border: 1px solid var(--color-rule); font-size: var(--fs-small); }
+.cstep-suggest__btn { min-height: 36px; padding: 0 10px; border: 1px solid var(--color-ink); background: none; font: inherit; cursor: pointer; }
+/* T217: the individual form — no step heading outside the steps, the foot in two halves */
+#page-contribute:not(.contribute--stepped) .cstep-head, #page-contribute:not(.contribute--stepped) .cstep-bar { display: none !important; }
+.individual-form__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.individual-form__actions .btn { width: 100%; min-height: var(--tap); }
+/* T214: choosing a name for a photo */
+.intent-band { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); padding: 8px max(16px, env(safe-area-inset-left, 0px)); background: var(--color-ink); color: var(--color-paper); font-size: var(--fs-small); }
+.intent-band[hidden] { display: none; }
+.intent-band button { min-height: 36px; padding: 0 12px; border: 1px solid currentColor; background: none; color: inherit; font: inherit; cursor: pointer; }
+.photo-sheet__frame-hint:has(+ .photo-sheet__plates:empty) { display: none; }
+/* T219 */
+.share-band__next { margin: var(--s1) 0 0; font-size: var(--fs-small); }
+/* T220: the home's own line, the dot on 自分の株 */
+.mine-line { margin: 0 0 var(--s3); padding: var(--s2) 0; border-bottom: 1px solid var(--color-rule); }
+.mine-line__row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px var(--s3); margin: 0; font-size: var(--fs-small); }
+.mine-line__row a { color: var(--color-ink); font-weight: 700; }
+.mine-line__seg { color: var(--color-mid); }
+.mine-line__btn { margin-left: auto; min-height: 36px; padding: 0 12px; border: 1px solid var(--color-ink); background: none; font: inherit; font-size: var(--fs-small); cursor: pointer; }
+.mine-line__news { margin: var(--s2) 0 0; padding-left: 1.1em; font-size: var(--fs-small); }
+.appbar__item { position: relative; }
+.appbar__item.has-dot::after { content: ""; position: absolute; top: 8px; left: calc(50% + 10px); width: 7px; height: 7px; border-radius: 50%; background: var(--color-ink); }
+/* T221 */
+.story__yesterday { margin: var(--s2) 0 0; font-size: var(--fs-small); color: var(--color-mid); }
+.story__yesterday a { color: var(--color-ink); }
+.story__tomorrow { display: block; margin-top: 2px; font-size: var(--fs-label); }
+/* T222 */
+.a2hs-line { margin: var(--s4) 0 0; padding-top: var(--s3); border-top: 1px solid var(--color-rule); font-size: var(--fs-small); color: var(--color-mid); }
+/* T223: a tile not yet loaded shows its frame; the login sheet's foot in halves; the menu does not leave 図鑑 lit;
+   an individual page's way back to its species */
+html.pv-label #page-genus .genus-content .cultivar-row .entry__thumb:has(img[data-src]) { border: 1px solid var(--color-rule); }
+.login-sheet .dialog-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: var(--s4); }
+.login-sheet .dialog-actions > .d-none { display: none !important; }
+.login-sheet .dialog-actions .btn { width: 100%; min-height: var(--tap); }
+html.pv-label.app-ui body.menu-open .appbar__item[aria-current="page"] { box-shadow: none !important; color: var(--color-mid) !important; font-weight: 400 !important; background: none !important; }
+.individuals__back { margin: var(--s3) 0 0; font-size: var(--fs-small); }
+.goal-line { margin: 0 0 12px; font-size: 14px; }
+.topbar > .intent-band { grid-column: 1 / -1; margin: 0 -16px; }
+.intent-band span { min-width: 0; flex: 1 1 auto; }
+.intent-band button { flex: 0 0 auto; }

@@ -38,7 +38,7 @@ document.addEventListener('click', function(e) {
     v.style.display = v.getAttribute('data-genus-view') === view ? '' : 'none';
   });
   // Reset search, type filter, and re-paginate for the newly active view
-  var activeView = getActiveView(genusContent);
+  var activeView = typeof getActiveView === 'function' ? getActiveView(genusContent) : genusContent;
   var searchInput = activeView.querySelector('.search-bar__input');
   if (searchInput) searchInput.value = '';
   var filterChips = activeView.querySelectorAll('.filter-chip');
@@ -327,7 +327,8 @@ var translations = {};
 // Default language: Japanese only for ja* browsers; every other locale starts in English
 // crawlers read the Japanese archive (the English version is frozen and has no URL of its own)
 var _isCrawler = /bot|crawl|spider|slurp|Google-InspectionTool|Lighthouse/i.test(navigator.userAgent || '');
-var currentLang = localStorage.getItem('plants-story-lang') || (_isCrawler || String(navigator.language || '').toLowerCase().indexOf('ja') === 0 ? 'jp' : 'en');
+// a browser with site storage turned off has no localStorage (11-18: this line stopped the whole file)
+var currentLang = (function() { try { return localStorage.getItem('plants-story-lang'); } catch (e) { return null; } })() || (_isCrawler || String(navigator.language || '').toLowerCase().indexOf('ja') === 0 ? 'jp' : 'en');
 
 // Load translations asynchronously (non-blocking)
 var _translationsReady = fetch('i18n/translations.json')
@@ -1061,7 +1062,7 @@ document.addEventListener('click', function(e) {
       // Hybrids are researched only on request; seedlings never are.
       if (type === 'species') { originAiHint.textContent = '「AI自動記入」で学名データベースから記載者・発表年・産地を取得できます'; originAiHint.classList.remove('d-none'); }
       else if (type === 'clone') { originAiHint.textContent = '由来を記入すると、投稿後にAIが内容を検証し信頼度を算出します'; originAiHint.classList.remove('d-none'); }
-      else if (type === 'hybrid') { originAiHint.textContent = 'ハイブリッドはご記入いただいた内容をそのまま掲載します。AI調査が必要な場合は、投稿後に品種ページから「AI再調査をリクエスト」してください'; originAiHint.classList.remove('d-none'); }
+      else if (type === 'hybrid') { originAiHint.textContent = 'Hybrid は書いた内容のまま載ります。AI の調査が要るときは、登録のあと名前のページの「その他」から「再調査を依頼」できます'; originAiHint.classList.remove('d-none'); }
       else { originAiHint.classList.add('d-none'); }
     }
     // Show/hide parent photos section for seedlings
@@ -1485,6 +1486,10 @@ document.addEventListener('click', function(e) {
             var pA = f.a.value.trim(), pB = f.b.value.trim();
             if (pA && pB) s.formula = { parentA: pA, parentB: pB };
           }
+          // no blank cross: the parents, or what the person knows about them (board 17 T215)
+          var fu = document.getElementById('hybrid-formula-unknown'), fc = document.getElementById('hybrid-formula-complex');
+          if (!s.formula && fc && fc.checked) s.formula_status = 'complex';
+          else if (!s.formula && fu && fu.checked) s.formula_status = 'unknown';
         } else if (type === 'seedling') {
           var v;
           v = document.getElementById('creator-name-input'); if (v) s.breeder = v.value.trim();
@@ -2170,7 +2175,8 @@ paginateGenus = function(genusEl, page) {
     var slug = genusEl.id.replace('genus-', '');
     var allItems = _genusItems[slug] || [];
     if (allItems.length === 0 && !window._dataFullyLoaded) return; // server path writes its own count
-    var scope = getActiveView(genusEl);
+    // pages.js may not have run (a crawler that skipped it): the genus section itself is the view
+    var scope = typeof getActiveView === 'function' ? getActiveView(genusEl) : genusEl;
     var isSeedling = scope.getAttribute('data-genus-view') === 'seedlings';
     var totalCount = allItems.filter(function(it) { return isSeedling ? it.meta.type === 'seedling' : it.meta.type !== 'seedling'; }).length;
     var filtered = getFilteredItems(genusEl);

@@ -22,27 +22,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Stylesheets before the script preloads: they hold the first paint, the scripts run only at the end of the body (11-03) -->
-  <link rel="stylesheet" href="css/variables.css?v=20261116d">
-  <link rel="stylesheet" href="css/reset.css?v=20261116d">
-  <link rel="stylesheet" href="css/layout.css?v=20261116d">
-  <link rel="stylesheet" href="css/components.css?v=20261116d">
-  <link rel="stylesheet" href="css/pages.css?v=20261116d">
-  <link rel="stylesheet" href="css/utilities.css?v=20261116d">
-  <link rel="stylesheet" href="css/archive.css?v=20261116d">
+  <link rel="stylesheet" href="css/variables.css?v=20261119a">
+  <link rel="stylesheet" href="css/reset.css?v=20261119a">
+  <link rel="stylesheet" href="css/layout.css?v=20261119a">
+  <link rel="stylesheet" href="css/components.css?v=20261119a">
+  <link rel="stylesheet" href="css/pages.css?v=20261119a">
+  <link rel="stylesheet" href="css/utilities.css?v=20261119a">
+  <link rel="stylesheet" href="css/archive.css?v=20261119a">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1">
   <!-- Own scripts fetched in parallel (the meta CSP stops the browser's own look-ahead); they still run in order at
        the end of the body. gtag.js is loaded by gtag-init.js once the page is parsed (board 11 T156). -->
-  <link rel="preload" as="script" href="js/record-gate.js?v=20261116d">
-  <link rel="preload" as="script" href="js/app-core.js?v=20261116d">
-  <link rel="preload" as="script" href="js/pages.js?v=20261116d">
-  <link rel="preload" as="script" href="js/forms.js?v=20261116d">
-  <link rel="preload" as="script" href="js/entry-meta.js?v=20261116d">
-  <link rel="preload" as="script" href="js/archive.js?v=20261116d">
-  <link rel="preload" as="script" href="js/tool-gate.js?v=20261116d">
-  <link rel="preload" as="script" href="js/tools.js?v=20261116d">
-  <link rel="preload" as="script" href="js/dialogs.js?v=20261116d">
-  <script src="js/textsize.js?v=20261116d"></script>
+  <link rel="preload" as="script" href="js/record-gate.js?v=20261119a">
+  <link rel="preload" as="script" href="js/app-core.js?v=20261119a">
+  <link rel="preload" as="script" href="js/pages.js?v=20261119a">
+  <link rel="preload" as="script" href="js/forms.js?v=20261119a">
+  <link rel="preload" as="script" href="js/entry-meta.js?v=20261119a">
+  <link rel="preload" as="script" href="js/archive.js?v=20261119a">
+  <link rel="preload" as="script" href="js/tool-gate.js?v=20261119a">
+  <link rel="preload" as="script" href="js/tools.js?v=20261119a">
+  <link rel="preload" as="script" href="js/dialogs.js?v=20261119a">
+  <script src="js/textsize.js?v=20261119a"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -83,7 +83,7 @@
     "logo": "https://aroidorigins.com/icons/icon-512.svg"
   }
   </script>
-  <script src="js/gtag-init.js?v=20261116d"></script>
+  <script src="js/gtag-init.js?v=20261119a"></script>
 </head>
 <body>
 
@@ -521,7 +521,7 @@
         <div class="form-group"><label class="form-label" for="ind-note" data-i18n="individual_note">説明（任意）</label><textarea class="form-input" id="ind-note" rows="4" maxlength="1500" placeholder="入手元、選抜の経緯、親株との関係など"></textarea></div>
         <p class="text-xs text-muted" data-i18n="individual_photos_hint">写真は登録後、個体のページの「画像追加」から載せられます。</p>
         <div class="individual-form__actions">
-          <button type="button" class="btn btn--secondary" id="ind-cancel" data-i18n="btn_cancel">キャンセル</button>
+          <button type="button" class="btn btn--secondary" id="ind-cancel" data-i18n="login_sheet_cancel">やめる</button>
           <button type="button" class="btn btn--primary" id="ind-submit" data-i18n="individual_submit">個体を登録</button>
         </div>
       </div>
@@ -569,12 +569,13 @@
             <label class="form-label text-sm mb-xs">分類</label>
             <div class="chips">
               <button type="button" class="chip active" aria-pressed="true" data-subcategory="species">記載種</button>
-              <button type="button" class="chip" aria-pressed="false" data-subcategory="sp">sp.（未同定）</button>
-              <button type="button" class="chip" aria-pressed="false" data-subcategory="aff">aff.（近縁）</button>
-              <button type="button" class="chip" aria-pressed="false" data-subcategory="cf">cf.（要確認）</button>
-              <button type="button" class="chip" aria-pressed="false" data-subcategory="ssp">ssp.</button>
-              <button type="button" class="chip" aria-pressed="false" data-subcategory="var">var.</button>
+              <button type="button" class="chip" aria-pressed="false" data-subcategory="sp">sp.（種が未確定）</button>
+              <button type="button" class="chip" aria-pressed="false" data-subcategory="aff">aff.（近いが別の種）</button>
+              <button type="button" class="chip" aria-pressed="false" data-subcategory="cf">cf.（その種らしいが未確定）</button>
+              <button type="button" class="chip" aria-pressed="false" data-subcategory="ssp">ssp.（亜種）</button>
+              <button type="button" class="chip" aria-pressed="false" data-subcategory="var">var.（変種）</button>
             </div>
+            <p class="subcat-help" id="subcat-help"></p>
           </div>
           <div class="name-builder__grid">
             <div class="name-builder__field" data-for="species clone" id="nb-epithet-row">
@@ -651,6 +652,18 @@
         <h2 class="text-lg font-bold mb-md" data-i18n="origin_story">由来</h2>
         <p class="form-hint d-none" id="origin-ai-hint"></p>
 
+        <!-- Shared: the record's own words (all types), first in 由来 (board 17 T215) -->
+        <div class="form-group origin-words">
+          <label class="form-label" for="sf-notes">由来の本文</label>
+          <p class="form-hint origin-words__hint">すべて任意です。分かることだけ書いてください。わからない欄は空のままで大丈夫です。</p>
+          <p class="origin-words__ex" aria-label="書き方の例"><span>書き方の例:</span>
+            <button type="button" data-words-ex="入手した年と、入手先（店や人の名前）。例: 2024 年に〇〇から入手した。">入手元と時期</button>
+            <button type="button" data-words-ex="入手したときのラベルに書いてあったこと。例: ラベルには「〇〇」と書かれていた。">ラベルの文字</button>
+            <button type="button" data-words-ex="作出者や名付けた人から聞いたこと（いつ・どこで聞いたか）。例: 作出者の〇〇さんによると、〇〇 × 〇〇 の交配から選んだ株。">作出者から聞いたこと</button>
+          </p>
+          <textarea id="sf-notes" class="form-textarea" placeholder="この名前について知っていること（入手の経緯、ラベル、作出者の説明など）"></textarea>
+        </div>
+
         <!-- AI auto-fill button (shown for species when name is entered) -->
         <div id="ai-autofill-container" class="d-none mb-md">
           <button class="btn btn--secondary" id="ai-autofill-btn" type="button">AI自動記入</button>
@@ -663,7 +676,7 @@
             <div class="structured-fieldset__legend">記載情報</div>
             <div class="structured-form-grid">
               <div class="form-group"><label class="form-label">記載者</label><input type="text" id="sf-author-name" class="form-input" placeholder="例: Engl."></div>
-              <div class="form-group"><label class="form-label">発表年 (Year)</label><input type="number" id="sf-publication-year" class="form-input" placeholder="例: 1898" min="1700" max="2100"></div>
+              <div class="form-group"><label class="form-label">発表年</label><input type="number" id="sf-publication-year" class="form-input" placeholder="例: 1898" min="1700" max="2100"></div>
             </div>
           </div>
           <div class="structured-fieldset">
@@ -691,9 +704,9 @@
               <span data-i18n="formula_unknown">交配式が不明</span>
             </label>
             <div class="formula-box" id="formula-inputs">
-              <input type="text" class="form-input flex-1" placeholder="Parent A">
+              <input type="text" class="form-input flex-1" placeholder="母（種子親）">
               <span class="formula-operator">&times;</span>
-              <input type="text" class="form-input flex-1" placeholder="Parent B">
+              <input type="text" class="form-input flex-1" placeholder="父（花粉親）">
             </div>
           </div>
         </div>
@@ -705,12 +718,14 @@
             <div class="form-group"><label class="form-label">名付けた年</label><input type="number" id="sf-hybrid-naming-year" class="form-input" placeholder="例: 2022" min="1900" max="2100"></div>
           </div>
           <div class="form-group">
-            <label class="form-label">交配式 <span class="text-xs text-required">※必須</span></label>
+            <label class="form-label">交配式</label>
             <div class="formula-box" id="hybrid-formula-inputs">
-              <input type="text" class="form-input flex-1" placeholder="Parent A (母)">
+              <input type="text" class="form-input flex-1" placeholder="母（種子親）">
               <span class="formula-operator">&times;</span>
-              <input type="text" class="form-input flex-1" placeholder="Parent B (父)">
+              <input type="text" class="form-input flex-1" placeholder="父（花粉親）">
             </div>
+            <label class="form-radio mt-xs"><input type="checkbox" id="hybrid-formula-unknown"><span>親が不明</span></label>
+            <label class="form-radio"><input type="checkbox" id="hybrid-formula-complex"><span>複合交配（親が 3 つ以上で、2 つに書けない）</span></label>
           </div>
         </div>
 
@@ -724,7 +739,7 @@
             <p class="text-xs text-muted mt-xs" data-i18n="private_hint">非公開の記録は一覧・検索・共有リンク・検索エンジンのいずれにも出ません。あなたがログインしているときだけ表示されます。あとから公開に切り替えられます。</p>
           </div>
           <div class="structured-form-grid">
-            <div class="form-group"><label class="form-label">作出者 (Creator/Breeder)</label><input type="text" id="creator-name-input" class="form-input" placeholder="例: 山田太郎"></div>
+            <div class="form-group"><label class="form-label">作出者</label><input type="text" id="creator-name-input" class="form-input" placeholder="例: 山田太郎"></div>
             <div class="form-group"><label class="form-label">播種した日付</label><input type="date" id="sf-sowing-date" class="form-input"></div>
           </div>
           <div class="form-group">
@@ -734,9 +749,9 @@
               <span>交配式が不明</span>
             </label>
             <div class="formula-box" id="seedling-formula-inputs">
-              <input type="text" class="form-input flex-1" placeholder="Parent A (母)">
+              <input type="text" class="form-input flex-1" placeholder="母（種子親）">
               <span class="formula-operator">&times;</span>
-              <input type="text" class="form-input flex-1" placeholder="Parent B (父)">
+              <input type="text" class="form-input flex-1" placeholder="父（花粉親）">
             </div>
           </div>
           <!-- Parent photos -->
@@ -744,7 +759,7 @@
             <label class="form-label">交配親の写真</label>
             <div class="d-flex gap-lg items-start">
               <div class="flex-1 text-center">
-                <div class="text-sm font-bold mb-sm">Mother (母)</div>
+                <div class="text-sm font-bold mb-sm">母株</div>
                 <div class="upload-area upload-area--small" id="mother-upload">
                   <input type="file" id="mother-photo-input" accept="image/jpeg,image/png,image/webp" class="d-none" aria-label="母株の写真をアップロード">
                   <div class="upload-area__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
@@ -756,7 +771,7 @@
                 <span class="formula-operator" style="font-size:1.5rem">&times;</span>
               </div>
               <div class="flex-1 text-center">
-                <div class="text-sm font-bold mb-sm">Father (父)</div>
+                <div class="text-sm font-bold mb-sm">父株</div>
                 <div class="upload-area upload-area--small" id="father-upload">
                   <input type="file" id="father-photo-input" accept="image/jpeg,image/png,image/webp" class="d-none" aria-label="父株の写真をアップロード">
                   <div class="upload-area__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
@@ -768,11 +783,6 @@
           </div>
         </div>
 
-        <!-- Shared: 補足欄 (all types) -->
-        <div class="form-group">
-          <label class="form-label">補足欄</label>
-          <textarea id="sf-notes" class="form-textarea" placeholder="補足情報があれば記入してください..."></textarea>
-        </div>
 
         <!-- Shared: 引用リンク (all types) -->
         <div class="form-group">
@@ -1667,10 +1677,10 @@
     <p class="sheet-dialog__kind" id="post-sheet-kind"></p>
     <h3 class="dialog-title" id="post-sheet-name"></h3>
     <ul class="sheet-rows">
-      <li><button type="button" data-post-act="photo"><span><span class="sheet-rows__t" id="post-sheet-photo-t">持っている株の写真を追加</span><span class="sheet-rows__d" id="post-sheet-photo-d">名前を選ぶと、写真の追加が開きます</span></span> <span aria-hidden="true">→</span></button></li>
-      <li id="post-sheet-ind-any"><button type="button" data-post-act="individual-any"><span><span class="sheet-rows__t">番号つきの個体を追加</span><span class="sheet-rows__d">原種を選んで、自分の株の番号や名前を残す</span></span> <span aria-hidden="true">→</span></button></li>
-      <li><button type="button" data-post-act="seedling"><span><span class="sheet-rows__t">実生を記録</span><span class="sheet-rows__d" id="post-sheet-seedling-d">自分で播いた株の交配式と播種日</span></span> <span aria-hidden="true">→</span></button></li>
-      <li><button type="button" data-post-act="new"><span><span class="sheet-rows__t">新しい名前を登録</span><span class="sheet-rows__d">まだ収録されていない原種・Clone・Hybrid</span></span> <span aria-hidden="true">→</span></button></li>
+      <li><button type="button" data-post-act="photo"><span><span class="sheet-rows__t" id="post-sheet-photo-t">写真を足す（約 30 秒）</span><span class="sheet-rows__d" id="post-sheet-photo-d">名前を選んで、自分で撮った写真を 1〜3 枚</span></span> <span aria-hidden="true">→</span></button></li>
+      <li id="post-sheet-ind-any"><button type="button" data-post-act="individual-any"><span><span class="sheet-rows__t">自分の株を記録する</span><span class="sheet-rows__d">原種を選んで、自分の株の番号や名前を残す（個体）</span></span> <span aria-hidden="true">→</span></button></li>
+      <li><button type="button" data-post-act="seedling"><span><span class="sheet-rows__t">自分で播いた実生を記録する</span><span class="sheet-rows__d" id="post-sheet-seedling-d">自分で播いた株の交配式と播種日</span></span> <span aria-hidden="true">→</span></button></li>
+      <li><button type="button" data-post-act="new"><span><span class="sheet-rows__t">図鑑にない名前を登録する</span><span class="sheet-rows__d">まだ収録されていない原種・Clone・Hybrid。5 つの手順で、分かることだけ</span></span> <span aria-hidden="true">→</span></button></li>
     </ul>
     <ul class="sheet-rows sheet-rows--more" id="post-sheet-entry-more">
       <li><button type="button" data-post-act="record">この名前に記録を追加 <span aria-hidden="true">→</span></button></li>
@@ -1688,7 +1698,7 @@
 
   <!-- Photo sheet: replaces the two prompt() questions (BOARD 10-08 §4-3) -->
   <dialog id="photo-sheet" class="dialog-clean sheet-dialog" aria-labelledby="photo-sheet-title">
-    <h3 class="dialog-title" id="photo-sheet-title" tabindex="-1" autofocus>写真を載せる</h3>
+    <h3 class="dialog-title" id="photo-sheet-title" tabindex="-1" autofocus>写真を追加</h3>
     <p class="sheet-dialog__kind" id="photo-sheet-name"></p>
     <p class="photo-sheet__frame-hint">写真は縦 4：横 3 の枠で載ります。指で動かして位置を、2 本の指か「大きさ」で大きさを合わせられます。写真が届かない部分は黒になります。</p>
     <div class="photo-sheet__plates" id="photo-sheet-plates"></div>
@@ -1714,7 +1724,7 @@
     <p class="photo-sheet__note">自分で撮った写真だけを載せてください。載せた写真はあとから自分で消せます。</p>
     <div class="dialog-actions">
       <button type="button" class="btn btn--secondary btn--sm" id="photo-sheet-cancel">やめる</button>
-      <button type="button" class="btn btn--primary btn--sm" id="photo-sheet-send">載せる</button>
+      <button type="button" class="btn btn--primary btn--sm" id="photo-sheet-send">追加する</button>
     </div>
   </dialog>
   <input type="file" id="sheet-pick-input" accept="image/jpeg,image/png,image/webp" multiple class="d-none" aria-label="写真を選ぶ">
@@ -1753,14 +1763,14 @@
        JS: Split into logical modules
        ======================================== -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1"></script>
-  <script src="js/record-gate.js?v=20261116d"></script>
-  <script src="js/app-core.js?v=20261116d"></script>
-  <script src="js/pages.js?v=20261116d"></script>
-  <script src="js/forms.js?v=20261116d"></script>
-  <script src="js/entry-meta.js?v=20261116d"></script>
-  <script src="js/archive.js?v=20261116d"></script>
-  <script src="js/tool-gate.js?v=20261116d"></script>
-  <script src="js/tools.js?v=20261116d"></script>
+  <script src="js/record-gate.js?v=20261119a"></script>
+  <script src="js/app-core.js?v=20261119a"></script>
+  <script src="js/pages.js?v=20261119a"></script>
+  <script src="js/forms.js?v=20261119a"></script>
+  <script src="js/entry-meta.js?v=20261119a"></script>
+  <script src="js/archive.js?v=20261119a"></script>
+  <script src="js/tool-gate.js?v=20261119a"></script>
+  <script src="js/tools.js?v=20261119a"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1770,7 +1780,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261116d"></script>
+  <script src="js/dialogs.js?v=20261119a"></script>
 
   <!-- AI re-research request dialog -->
   <!-- Asked before anything is typed: posting, photos and records need a login (2026-10-08 app-ux) -->
@@ -1822,6 +1832,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261116d"></script>
+<script src="js/sw-register.js?v=20261119a"></script>
 </body>
 </html>
