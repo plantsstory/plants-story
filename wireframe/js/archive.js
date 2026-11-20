@@ -2688,11 +2688,11 @@
     var h1 = document.querySelector('#page-cultivar h1');
     $('post-sheet-kind').textContent = _sheetOnEntry && std ? std.textContent.trim() : '';
     $('post-sheet-name').innerHTML = _sheetOnEntry && h1 ? h1.innerHTML : '何を記録しますか';
-    $('post-sheet-photo-t').textContent = _sheetOnEntry ? '写真を追加' : '写真を載せる';
-    $('post-sheet-photo-d').textContent = _sheetOnEntry ? 'このページの名前に、自分で撮った写真を' : '図鑑にある名前を選んで、撮った写真を足すだけ（約 30 秒）';
+    $('post-sheet-photo-t').textContent = _sheetOnEntry ? '写真を追加' : '図鑑にある種・品種に写真を載せる';
+    $('post-sheet-photo-d').textContent = _sheetOnEntry ? 'このページの名前に、自分で撮った写真を' : '名前を選んで、写真を足すだけ（約 30 秒）';
     // off a plant page the individual row leads to choosing a species; on one, the row below does it
     $('post-sheet-ind-any').classList.toggle('d-none', _sheetOnEntry);
-    $('post-sheet-seedling-d').textContent = _sheetOnEntry ? '親の欄にこの名前を入れて、交配式と播種日' : '自分で種を播いた株。交配式と播種日を残す';
+    $('post-sheet-seedling-d').textContent = _sheetOnEntry ? '親の欄にこの名前を入れて、交配式と播種日' : '自分で種を播いた株の交配式と播種日';
     var ind = $('detail-add-individual'), sdl = $('detail-add-seedling'), rec = $('detail-add-record-btn'), ph = $('detail-add-photo-btn');
     $('post-sheet-entry-more').classList.toggle('d-none', !_sheetOnEntry);
     $('post-sheet-ind').classList.toggle('d-none', !_sheetOnEntry || !ind || ind.classList.contains('d-none'));
@@ -2968,7 +2968,7 @@
     $('cstep-back').textContent = n === first ? 'やめる' : '戻る';
     // the last step: the bar's main button records (the form's own submit button is hidden while stepped)
     $('cstep-next').textContent = n === LAST ? 'この内容で記録する' : '次へ';
-    var ttl = $('contribute-page-title'); if (ttl) ttl.textContent = seed ? '実生を記録' : '図鑑にない名前を登録';
+    var ttl = $('contribute-page-title'); if (ttl) ttl.textContent = seed ? '実生を記録' : '新しい種・品種を登録';
     if (n === LAST) review();
     p.setAttribute('data-cstep-now', String(n === first ? 1 : n));
     var ln = $('cstep-login'); if (ln) ln.hidden = !!window._currentUser;

@@ -140,7 +140,7 @@
     "en": "Clone"
   },
   "add_cultivar": {
-    "jp": "新しい名前を登録",
+    "jp": "新しい種・品種を登録",
     "en": "Register a new name"
   },
   "edit": {
@@ -192,7 +192,7 @@
     "en": "Cancel"
   },
   "contribute_title": {
-    "jp": "新しい名前を登録",
+    "jp": "新しい種・品種を登録",
     "en": "Register a new name"
   },
   "contribute_desc": {
@@ -1065,7 +1065,7 @@
     "en": "+ Contribute"
   },
   "nav_contribute_mobile": {
-    "jp": "新しい名前を登録",
+    "jp": "新しい種・品種を登録",
     "en": "Register a new name"
   },
   "mast_kicker": {

@@ -1652,7 +1652,7 @@ if (false) {
       html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="hybrid" data-i18n="filter_hybrid">Hybrid</button>';
       html += '</div>';
       html += '<p class="kind-note" aria-live="polite" hidden></p>';
-      html += '<a href="#" class="genus-add-link" data-nav="contribute" data-genus="' + g.name + '" data-i18n="add_cultivar">新しい名前を登録</a>';
+      html += '<a href="#" class="genus-add-link" data-nav="contribute" data-genus="' + g.name + '" data-i18n="add_cultivar">新しい種・品種を登録</a>';
       html += '</div>';
 
       html += '<div class="card card--no-pad"></div>';
