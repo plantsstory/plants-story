@@ -2688,11 +2688,11 @@
     var h1 = document.querySelector('#page-cultivar h1');
     $('post-sheet-kind').textContent = _sheetOnEntry && std ? std.textContent.trim() : '';
     $('post-sheet-name').innerHTML = _sheetOnEntry && h1 ? h1.innerHTML : '何を記録しますか';
-    $('post-sheet-photo-t').textContent = _sheetOnEntry ? '写真を追加' : '写真を足す（約 30 秒）';
-    $('post-sheet-photo-d').textContent = _sheetOnEntry ? 'このページの名前に、自分で撮った写真を' : '名前を選んで、自分で撮った写真を 1〜3 枚';
+    $('post-sheet-photo-t').textContent = _sheetOnEntry ? '写真を追加' : '写真を載せる';
+    $('post-sheet-photo-d').textContent = _sheetOnEntry ? 'このページの名前に、自分で撮った写真を' : '図鑑にある名前を選んで、撮った写真を足すだけ（約 30 秒）';
     // off a plant page the individual row leads to choosing a species; on one, the row below does it
     $('post-sheet-ind-any').classList.toggle('d-none', _sheetOnEntry);
-    $('post-sheet-seedling-d').textContent = _sheetOnEntry ? '親の欄にこの名前を入れて、交配式と播種日' : '自分で播いた株の交配式と播種日';
+    $('post-sheet-seedling-d').textContent = _sheetOnEntry ? '親の欄にこの名前を入れて、交配式と播種日' : '自分で種を播いた株。交配式と播種日を残す';
     var ind = $('detail-add-individual'), sdl = $('detail-add-seedling'), rec = $('detail-add-record-btn'), ph = $('detail-add-photo-btn');
     $('post-sheet-entry-more').classList.toggle('d-none', !_sheetOnEntry);
     $('post-sheet-ind').classList.toggle('d-none', !_sheetOnEntry || !ind || ind.classList.contains('d-none'));
@@ -2743,8 +2743,11 @@
     l.style.display = 'none'; document.body.appendChild(l); l.click(); l.remove();
   });
 
-  // ---- posting in five steps (§4-4): 区分 → 名前 → 由来 → 写真 → 確認 ----
-  var STEPS = ['区分', '名前', '由来', '写真', '確認'];
+  // ---- posting in three steps (owner, 11-21; it was five): 名前（どんな名前か＋名前）→ 由来と写真 → 確認.
+  //      A seedling is chosen before the form opens, so it starts at the second step: 記録 → 確認 ----
+  var STEPS = ['名前', '由来と写真', '確認'];
+  var LAST = 3;
+  function isSeedling() { return ((document.querySelector('#page-contribute input[name="cultivar-type"]:checked') || {}).value) === 'seedling'; }
   var step = 1, built = false;
   function page() { return $('page-contribute'); }
   function stepped() { var p = page(); return p && p.classList.contains('contribute--stepped'); }
@@ -2767,16 +2770,18 @@
     // the kind first, then the name: move the kind's group to the top of its card (ids unchanged)
     infoCard.insertBefore(typeGroup, infoCard.firstChild);
     typeGroup.setAttribute('data-cstep', '1');
-    genusGroup.setAttribute('data-cstep', '2'); nameGroup.setAttribute('data-cstep', '2');
-    infoCard.setAttribute('data-cstep', '1 2');
-    Array.prototype.forEach.call(infoCard.children, function (c) { if (!c.hasAttribute('data-cstep')) c.setAttribute('data-cstep', '2'); });
-    originCard.setAttribute('data-cstep', '3');
-    imgCard.setAttribute('data-cstep', '4');
-    // step 5: a label of what will be recorded, then the existing submit button
+    genusGroup.setAttribute('data-cstep', '1'); nameGroup.setAttribute('data-cstep', '1');
+    infoCard.setAttribute('data-cstep', '1');
+    Array.prototype.forEach.call(infoCard.children, function (c) { if (!c.hasAttribute('data-cstep')) c.setAttribute('data-cstep', '1'); });
+    // the second step: what is known first (the words, the fields), then the photos
+    originCard.setAttribute('data-cstep', '2');
+    originCard.insertAdjacentElement('afterend', imgCard);
+    imgCard.setAttribute('data-cstep', '2');
+    // the last step: a label of what will be recorded, then the existing submit button
     var review = document.createElement('div');
-    review.className = 'cstep-review'; review.id = 'cstep-review'; review.setAttribute('data-cstep', '5');
+    review.className = 'cstep-review'; review.id = 'cstep-review'; review.setAttribute('data-cstep', '3');
     submit.parentNode.insertBefore(review, submit);
-    submit.setAttribute('data-cstep', '5');
+    submit.setAttribute('data-cstep', '3');
     // heading line and bottom bar
     var head = document.createElement('div');
     head.className = 'cstep-head'; head.id = 'cstep-head';
@@ -2791,16 +2796,22 @@
       else if (typeof navigateTo === 'function') navigateTo('top');
     });
     $('cstep-next').addEventListener('click', function () {
-      if (step === 5) { var sbtn = $('contribute-submit-btn'); if (sbtn) sbtn.click(); return; }
+      if (step === LAST) { var sbtn = $('contribute-submit-btn'); if (sbtn) sbtn.click(); return; }
       if (check(step)) go(step + 1, true);
     });
-    // choosing the kind moves on by itself (unless the choice was undone, e.g. a seedling needing a login)
+    // the kind and the name share the first step: choosing a kind only changes the name's fields below it.
+    // A seedling has no first step (its name comes from the cross on the second)
     p.querySelectorAll('input[name="cultivar-type"]').forEach(function (r) {
-      r.addEventListener('change', function (ev) {
-        var me = this;
-        if (!ev.isTrusted || !stepped() || step !== 1) return;   // a tap, not the form resetting itself
-        setTimeout(function () { if (me.checked && step === 1) go(2, true); }, 250);
+      r.addEventListener('change', function () {
+        if (!stepped()) return;
+        setTimeout(function () { if (isSeedling() ? step === 1 : false) go(2, false); else go(step, false); }, 60);
       });
+    });
+    p.addEventListener('click', function (e) {
+      var o = e.target.closest && e.target.closest('[data-type-other]');
+      if (!o) return;
+      if (o.getAttribute('data-type-other') === 'individual') { if (window.aoStartPick) window.aoStartPick('individual'); return; }
+      var sr = p.querySelector('input[name="cultivar-type"][value="seedling"]'); if (sr) sr.click();
     });
     // step 1 says the login comes at the end and nothing typed is lost (board 17 T216)
     var login = document.createElement('p');
@@ -2820,9 +2831,14 @@
     return false;
   }
   function ctype() { return (document.querySelector('#page-contribute input[name="cultivar-type"]:checked') || {}).value || 'species'; }
+  // the line under a field goes as soon as the person types in it again
+  document.addEventListener('input', function (e) {
+    var t = e.target;
+    if (t && t.classList && t.classList.contains('form-input--invalid') && t.closest('#page-contribute') && typeof clearFieldError === 'function') clearFieldError(t);
+  });
   function check(n) {
     if (typeof clearAllFieldErrors === 'function') clearAllFieldErrors(page());
-    if (n === 2) {
+    if (n === 1 || (n === 2 && isSeedling())) {
       var sel = $('contribute-genus-select');
       if (sel && !sel.value) return fieldError(sel, '属を選んでください');
       var type = ctype();
@@ -2839,7 +2855,7 @@
       var dup = $('duplicate-alert');
       if (dup && dup.getAttribute('data-kind') === 'exact' && dup.offsetParent) return fieldError(nm, 'この名前はもう収録されています。写真や記録はその名前のページから足せます');
     }
-    if (n === 3 && ctype() === 'hybrid') {
+    if (n === 2 && ctype() === 'hybrid') {
       var hb = document.querySelectorAll('#hybrid-formula-inputs input');
       var known = hb.length >= 2 && hb[0].value.trim() && hb[1].value.trim();
       var fu = $('hybrid-formula-unknown'), fc = $('hybrid-formula-complex');
@@ -2910,13 +2926,13 @@
     var hf = $('hybrid-formula-unknown'), hc = $('hybrid-formula-complex');
     var crossText = cross || (type === 'hybrid' && hc && hc.checked ? '複合交配（2 つに書けない）' : type === 'hybrid' && hf && hf.checked ? '親が不明' : '');
     var rows = [
-      ['登録名', sciHtml(full.replace(' [Seedling]', '')), 2],
+      ['登録名', sciHtml(full.replace(' [Seedling]', '')), 1],
       ['区分', esc(kindLine), 1],
-      ['本文', words ? '<span class="cstep-words">' + esc(words) + '</span><span class="cstep-note">あなたの文のまま載ります。編集部と AI は書き換えません</span>' : '<span class="absent">（本文なし。項目から 1 行を作ります）</span>', 3]
+      ['本文', words ? '<span class="cstep-words">' + esc(words) + '</span><span class="cstep-note">あなたの文のまま載ります。編集部と AI は書き換えません</span>' : '<span class="absent">（本文なし。項目から 1 行を作ります）</span>', 2]
     ];
     // only the rows that belong to this kind (board 17 T216)
-    if (type !== 'species') rows.push(['交配式', crossText ? (cross ? crossText : esc(crossText)) : '<span class="absent">（なし）</span>', 3]);
-    if (aiFields.length) rows.push(['AI 下書き', esc(aiFields.map(function (f) { return FIELD[f] || f; }).join('・')) + ' <span class="cstep-tag">確かめてください</span>', 3]);
+    if (type !== 'species') rows.push(['交配式', crossText ? (cross ? crossText : esc(crossText)) : '<span class="absent">（なし）</span>', 2]);
+    if (aiFields.length) rows.push(['AI 下書き', esc(aiFields.map(function (f) { return FIELD[f] || f; }).join('・')) + ' <span class="cstep-tag">確かめてください</span>', 2]);
     rows.push(['公開の範囲', esc(scope), 1]);
     var photos = document.querySelectorAll('#contribute-preview img').length;
     var html = '<div class="specimen">' + rows.map(function (r) {
@@ -2936,20 +2952,25 @@
     setTimeout(review, 50);
   });
   function go(n, push) {
-    n = Math.max(1, Math.min(5, n));
+    var seed = isSeedling(), first = seed ? 2 : 1;
+    n = Math.max(first, Math.min(LAST, n));
     step = n;
     var p = page();
     p.querySelectorAll('[data-cstep]').forEach(function (el) {
-      el.classList.toggle('cstep-off', el.getAttribute('data-cstep').split(' ').indexOf(String(n)) === -1);
+      var at = el.getAttribute('data-cstep').split(' ');
+      // a seedling's name (label, registered name) sits with its cross on the one recording step
+      var show = at.indexOf(String(n)) !== -1 || (seed && n === 2 && at.indexOf('1') !== -1);
+      el.classList.toggle('cstep-off', !show);
     });
-    $('cstep-count').textContent = n + ' / 5';
-    $('cstep-name').textContent = STEPS[n - 1];
-    Array.prototype.forEach.call($('cstep-head').querySelectorAll('li'), function (li, i) { li.classList.toggle('is-done', i < n); });
-    $('cstep-back').textContent = n === 1 ? 'やめる' : '戻る';
-    // step 5: the bar's main button records (the form's own submit button is hidden while stepped)
-    $('cstep-next').textContent = n === 5 ? 'この内容で記録する' : '次へ';
-    if (n === 5) review();
-    p.setAttribute('data-cstep-now', String(n));
+    $('cstep-count').textContent = (n - first + 1) + ' / ' + (LAST - first + 1);
+    $('cstep-name').textContent = seed && n === 2 ? '記録' : STEPS[n - 1];
+    Array.prototype.forEach.call($('cstep-head').querySelectorAll('li'), function (li, i) { li.classList.toggle('is-done', i < n); li.hidden = seed && i === 0; });
+    $('cstep-back').textContent = n === first ? 'やめる' : '戻る';
+    // the last step: the bar's main button records (the form's own submit button is hidden while stepped)
+    $('cstep-next').textContent = n === LAST ? 'この内容で記録する' : '次へ';
+    var ttl = $('contribute-page-title'); if (ttl) ttl.textContent = seed ? '実生を記録' : '図鑑にない名前を登録';
+    if (n === LAST) review();
+    p.setAttribute('data-cstep-now', String(n === first ? 1 : n));
     var ln = $('cstep-login'); if (ln) ln.hidden = !!window._currentUser;
     // a name-check notice from the previous step is not left on screen (R8)
     document.querySelectorAll('#toast-container .toast-error').forEach(function (t) { t.remove(); });

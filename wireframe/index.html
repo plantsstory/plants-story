@@ -22,27 +22,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Stylesheets before the script preloads: they hold the first paint, the scripts run only at the end of the body (11-03) -->
-  <link rel="stylesheet" href="css/variables.css?v=20261119a">
-  <link rel="stylesheet" href="css/reset.css?v=20261119a">
-  <link rel="stylesheet" href="css/layout.css?v=20261119a">
-  <link rel="stylesheet" href="css/components.css?v=20261119a">
-  <link rel="stylesheet" href="css/pages.css?v=20261119a">
-  <link rel="stylesheet" href="css/utilities.css?v=20261119a">
-  <link rel="stylesheet" href="css/archive.css?v=20261119a">
+  <link rel="stylesheet" href="css/variables.css?v=20261121a">
+  <link rel="stylesheet" href="css/reset.css?v=20261121a">
+  <link rel="stylesheet" href="css/layout.css?v=20261121a">
+  <link rel="stylesheet" href="css/components.css?v=20261121a">
+  <link rel="stylesheet" href="css/pages.css?v=20261121a">
+  <link rel="stylesheet" href="css/utilities.css?v=20261121a">
+  <link rel="stylesheet" href="css/archive.css?v=20261121a">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1">
   <!-- Own scripts fetched in parallel (the meta CSP stops the browser's own look-ahead); they still run in order at
        the end of the body. gtag.js is loaded by gtag-init.js once the page is parsed (board 11 T156). -->
-  <link rel="preload" as="script" href="js/record-gate.js?v=20261119a">
-  <link rel="preload" as="script" href="js/app-core.js?v=20261119a">
-  <link rel="preload" as="script" href="js/pages.js?v=20261119a">
-  <link rel="preload" as="script" href="js/forms.js?v=20261119a">
-  <link rel="preload" as="script" href="js/entry-meta.js?v=20261119a">
-  <link rel="preload" as="script" href="js/archive.js?v=20261119a">
-  <link rel="preload" as="script" href="js/tool-gate.js?v=20261119a">
-  <link rel="preload" as="script" href="js/tools.js?v=20261119a">
-  <link rel="preload" as="script" href="js/dialogs.js?v=20261119a">
-  <script src="js/textsize.js?v=20261119a"></script>
+  <link rel="preload" as="script" href="js/record-gate.js?v=20261121a">
+  <link rel="preload" as="script" href="js/app-core.js?v=20261121a">
+  <link rel="preload" as="script" href="js/pages.js?v=20261121a">
+  <link rel="preload" as="script" href="js/forms.js?v=20261121a">
+  <link rel="preload" as="script" href="js/entry-meta.js?v=20261121a">
+  <link rel="preload" as="script" href="js/archive.js?v=20261121a">
+  <link rel="preload" as="script" href="js/tool-gate.js?v=20261121a">
+  <link rel="preload" as="script" href="js/tools.js?v=20261121a">
+  <link rel="preload" as="script" href="js/dialogs.js?v=20261121a">
+  <script src="js/textsize.js?v=20261121a"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -83,7 +83,7 @@
     "logo": "https://aroidorigins.com/icons/icon-512.svg"
   }
   </script>
-  <script src="js/gtag-init.js?v=20261119a"></script>
+  <script src="js/gtag-init.js?v=20261121a"></script>
 </head>
 <body>
 
@@ -504,7 +504,7 @@
     <div class="container container--narrow">
 
       <h1 class="section-title" id="contribute-page-title" data-i18n="contribute_title">新しい品種を登録</h1>
-      <p class="text-muted mb-md" id="contribute-page-desc" data-i18n="contribute_desc">既存品種に由来を追加する場合は、その品種のページから追加できます。</p>
+      <p class="text-muted mb-md" id="contribute-page-desc" data-i18n="contribute_desc">図鑑にもうある名前に写真や記録を足すときは、その名前のページから足せます。</p>
 
       <!-- Login benefits card -->
       <!-- Individuals: compact form shown instead of the full form ("+ 個体を追加" on a species page) -->
@@ -563,7 +563,7 @@
         </div>
 
         <div class="form-group name-builder" id="name-builder">
-          <label class="form-label" data-i18n="label_name">品種名</label>
+          <label class="form-label" data-i18n="label_name">名前</label>
           <!-- Species qualifier chips (ids kept: forms.js reads them). Shown only for species -->
           <div id="species-subcategory" class="species-subcategory d-none">
             <label class="form-label text-sm mb-xs">分類</label>
@@ -607,22 +607,22 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" data-i18n="label_type">区分</label>
+          <label class="form-label type-q">どんな名前ですか</label>
           <div class="form-radio-group">
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="species" checked>
-              <span data-i18n="type_species">原種</span>
-              <span class="type-def">学名が発表されている種。sp. / aff. / cf. の未記載もここ</span>
-            </label>
-            <label class="form-radio">
-              <input type="radio" name="cultivar-type" value="hybrid">
-              <span data-i18n="type_hybrid">Hybrid</span>
-              <span class="type-def">同じ交配から生まれた複数の株に付く名前（選んだ株が複数ある場合も）</span>
+              <span class="type-head"><span class="type-lead">野生の種の名前</span><span class="type-term" data-i18n="type_species">原種</span></span>
+              <span class="type-def">学名のある種。学名がまだない株（sp. / aff. / cf.）もここです。例: crystallinum</span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="clone">
-              <span data-i18n="type_clone">Clone</span>
-              <span class="type-def">1 株（オリジナル個体）と、その株分け・組織培養株だけが名乗る名前。実生（F 個体）は別の株</span>
+              <span class="type-head"><span class="type-lead">1 株だけの名前</span><span class="type-term" data-i18n="type_clone">Clone</span></span>
+              <span class="type-def">1 株と、その株分け・組織培養で増えた株だけが名乗る名前。例: 'Ace of Spades'</span>
+            </label>
+            <label class="form-radio">
+              <input type="radio" name="cultivar-type" value="hybrid">
+              <span class="type-head"><span class="type-lead">同じ交配の株たちの名前</span><span class="type-term" data-i18n="type_hybrid">Hybrid</span></span>
+              <span class="type-def">同じ交配から生まれた複数の株が、まとめて名乗る名前。例: 'Dark Mama'</span>
             </label>
             <label class="form-radio">
               <input type="radio" name="cultivar-type" value="seedling">
@@ -630,7 +630,8 @@
               <span class="type-def">自分で播いた記録（交配式・播種日・作出者）。名前を付けて配ったら Hybrid か Clone として別に登録</span>
             </label>
           </div>
-          <p class="type-def type-def--hint">迷ったら、作出者や配った人の説明に従ってください。説明がなければ Clone（名前は 1 株のオリジナル個体を指します）。</p>
+          <p class="type-def type-def--hint">迷ったら「1 株だけの名前」を選んでください。作出者や配った人の説明があれば、それに合わせます。あとから直せます。</p>
+          <p class="type-other" id="type-other">原種の 1 株に番号や名前をつけた株は<button type="button" data-type-other="individual">個体として記録</button>、自分で播いた株は<button type="button" data-type-other="seedling">実生として記録</button>します。</p>
         </div>
       </div>
 
@@ -1677,10 +1678,10 @@
     <p class="sheet-dialog__kind" id="post-sheet-kind"></p>
     <h3 class="dialog-title" id="post-sheet-name"></h3>
     <ul class="sheet-rows">
-      <li><button type="button" data-post-act="photo"><span><span class="sheet-rows__t" id="post-sheet-photo-t">写真を足す（約 30 秒）</span><span class="sheet-rows__d" id="post-sheet-photo-d">名前を選んで、自分で撮った写真を 1〜3 枚</span></span> <span aria-hidden="true">→</span></button></li>
-      <li id="post-sheet-ind-any"><button type="button" data-post-act="individual-any"><span><span class="sheet-rows__t">自分の株を記録する</span><span class="sheet-rows__d">原種を選んで、自分の株の番号や名前を残す（個体）</span></span> <span aria-hidden="true">→</span></button></li>
-      <li><button type="button" data-post-act="seedling"><span><span class="sheet-rows__t">自分で播いた実生を記録する</span><span class="sheet-rows__d" id="post-sheet-seedling-d">自分で播いた株の交配式と播種日</span></span> <span aria-hidden="true">→</span></button></li>
-      <li><button type="button" data-post-act="new"><span><span class="sheet-rows__t">図鑑にない名前を登録する</span><span class="sheet-rows__d">まだ収録されていない原種・Clone・Hybrid。5 つの手順で、分かることだけ</span></span> <span aria-hidden="true">→</span></button></li>
+      <li><button type="button" data-post-act="photo"><span><span class="sheet-rows__t" id="post-sheet-photo-t">写真を載せる</span><span class="sheet-rows__d" id="post-sheet-photo-d">図鑑にある名前を選んで、撮った写真を足すだけ（約 30 秒）</span></span> <span aria-hidden="true">→</span></button></li>
+      <li><button type="button" data-post-act="new"><span><span class="sheet-rows__t" id="post-sheet-new-t">図鑑にない名前を登録する</span><span class="sheet-rows__d">探しても出てこない名前を足す。名前・由来・確認の 3 手順</span></span> <span aria-hidden="true">→</span></button></li>
+      <li id="post-sheet-ind-any"><button type="button" data-post-act="individual-any"><span><span class="sheet-rows__t">番号つきの株を記録する</span><span class="sheet-rows__d">原種の 1 株に番号や名前がついているとき（例: 'Fort Sherman'）</span></span> <span aria-hidden="true">→</span></button></li>
+      <li><button type="button" data-post-act="seedling"><span><span class="sheet-rows__t">実生を記録する</span><span class="sheet-rows__d" id="post-sheet-seedling-d">自分で種を播いた株。交配式と播種日を残す</span></span> <span aria-hidden="true">→</span></button></li>
     </ul>
     <ul class="sheet-rows sheet-rows--more" id="post-sheet-entry-more">
       <li><button type="button" data-post-act="record">この名前に記録を追加 <span aria-hidden="true">→</span></button></li>
@@ -1763,14 +1764,14 @@
        JS: Split into logical modules
        ======================================== -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1"></script>
-  <script src="js/record-gate.js?v=20261119a"></script>
-  <script src="js/app-core.js?v=20261119a"></script>
-  <script src="js/pages.js?v=20261119a"></script>
-  <script src="js/forms.js?v=20261119a"></script>
-  <script src="js/entry-meta.js?v=20261119a"></script>
-  <script src="js/archive.js?v=20261119a"></script>
-  <script src="js/tool-gate.js?v=20261119a"></script>
-  <script src="js/tools.js?v=20261119a"></script>
+  <script src="js/record-gate.js?v=20261121a"></script>
+  <script src="js/app-core.js?v=20261121a"></script>
+  <script src="js/pages.js?v=20261121a"></script>
+  <script src="js/forms.js?v=20261121a"></script>
+  <script src="js/entry-meta.js?v=20261121a"></script>
+  <script src="js/archive.js?v=20261121a"></script>
+  <script src="js/tool-gate.js?v=20261121a"></script>
+  <script src="js/tools.js?v=20261121a"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1780,7 +1781,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261119a"></script>
+  <script src="js/dialogs.js?v=20261121a"></script>
 
   <!-- AI re-research request dialog -->
   <!-- Asked before anything is typed: posting, photos and records need a login (2026-10-08 app-ux) -->
@@ -1832,6 +1833,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261119a"></script>
+<script src="js/sw-register.js?v=20261121a"></script>
 </body>
 </html>

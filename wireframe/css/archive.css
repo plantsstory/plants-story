@@ -2370,3 +2370,24 @@ html.pv-label.app-ui body.menu-open .appbar__item[aria-current="page"] { box-sha
 .topbar > .intent-band { grid-column: 1 / -1; margin: 0 -16px; }
 .intent-band span { min-width: 0; flex: 1 1 auto; }
 .intent-band button { flex: 0 0 auto; }
+/* ---- T238 (owner, 11-21): posting in three steps; the kinds in plain words ---- */
+#page-contribute .type-q { font-size: var(--fs-body); font-weight: 700; margin-bottom: var(--s1); }
+#page-contribute .type-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+#page-contribute .type-lead { font-weight: 700; color: var(--color-ink); }
+#page-contribute .type-term { font-size: var(--fs-small); color: var(--color-mid); }
+#page-contribute .form-radio:has(input:checked) { background: var(--color-paper-2); box-shadow: inset 2px 0 0 var(--color-ink); padding-left: var(--s2); padding-right: var(--s2); }
+.type-other { margin: var(--s3) 0 0; font-size: var(--fs-small); color: var(--color-mid); line-height: 1.9; }
+.type-other button { margin: 0 2px; padding: 0; border: 0; background: none; color: var(--color-ink); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+#page-contribute:not(.contribute--stepped) .type-other { display: none; }
+/* a seedling is chosen before the form opens: its kind is not asked again, and it is not one of the three */
+#page-contribute.contribute--stepped:not([data-ctype="seedling"]) .form-radio:has(input[value="seedling"]) { display: none !important; }
+#page-contribute.contribute--stepped[data-ctype="seedling"] .type-q,
+#page-contribute.contribute--stepped[data-ctype="seedling"] .form-radio-group,
+#page-contribute.contribute--stepped[data-ctype="seedling"] .type-def--hint,
+#page-contribute.contribute--stepped[data-ctype="seedling"] .type-other { display: none !important; }
+/* the name sits right under the kind on the first step */
+#page-contribute.contribute--stepped #name-builder { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--color-rule); }
+.cstep-head__ticks li[hidden] { display: none; }
+/* T238: the first step carries only what it needs */
+#page-contribute.contribute--stepped #contribute-page-desc, #page-contribute.contribute--stepped .genus-request-link { display: none !important; }
+#page-contribute.contribute--stepped .cstep-login { margin-bottom: var(--s2); }

@@ -196,7 +196,7 @@
     "en": "Register a new name"
   },
   "contribute_desc": {
-    "jp": "既存品種に由来を追加する場合は、その品種のページから追加できます。",
+    "jp": "図鑑にもうある名前に写真や記録を足すときは、その名前のページから足せます。",
     "en": "To add origins to an existing cultivar, go to that cultivar's page."
   },
   "edit_title": {
@@ -240,7 +240,7 @@
     "en": "Genus"
   },
   "label_name": {
-    "jp": "品種名",
+    "jp": "名前",
     "en": "Cultivar Name"
   },
   "label_type": {
