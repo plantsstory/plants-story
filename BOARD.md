@@ -176,6 +176,7 @@
 - 'Queen of Hearts'(8) の selected_from_id と tag を外す（10-07b の決定の適用もれ）。antolakii(59) の列は 127・138 と同じ形に（URL 不変）。
 - 142 'Ree garden's' は個体のまま（11-15 オーナー判断）。1 株の名前か総称かをオーナーに確認中。重複した記録は削除せず表示で畳む。
 - **11-23 オーナー決定（下の 11-19 の裁定を上書き）: 144 は種小名なしの Anthurium 'Michelle'、区分は Clone。** 旧表記 magnificum 'Michelle' は別名に残す。
+- **11-24 オーナー: 144 の交配式「Anthurium magnificum × Anthurium magnificum」は間違い → 外した**（親の欄と structured.formula を空に。代わりの式は入れない）。登録簿の「もとになった種は A. magnificum」は 2 つの親を言う文ではないので、今後も交配式に写さない。本文は変えていない。
 - 144 magnificum 'Michelle' は Hybrid のまま。'BLOCANTMIC' を別ページに分けない。異名と注記は、特許公報を読めた事実だけを「〈出典〉は…としている」で書く。name_status=trade は公報で品種名を確認できたときだけ。
 - **原種は検証待ちの棚（非公開）に置き、オーナーが IPNI を見て検証した時点で公開する**（T232）。143 dolichostachyum は 11-26 までに検証がなければ棚へ。
 - AI の検証欄で出典 URL のない根拠は検証に数えず、表示もしない。
