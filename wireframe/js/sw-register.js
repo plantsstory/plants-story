@@ -16,6 +16,9 @@ if ('serviceWorker' in navigator) {
       // the bar is for a form in progress, and never while a login is coming back
       var busy = function() {
         var a = document.activeElement, pg = document.querySelector('.page.active');
+        // a name being chosen for a photo or an individual (＋投稿) is work in progress too: a reload at the
+        // page change dropped it, and the photo sheet then never opened (11-24)
+        if (window._postIntent || (window._aoHoldReload || 0) > Date.now()) return true;
         return !!document.querySelector('dialog[open]') || (pg && pg.id === 'page-contribute') || (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.value);
       };
       var authReturn = /access_token=|[?&]code=|[?&]error=/.test(location.hash + location.search);

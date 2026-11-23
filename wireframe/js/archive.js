@@ -2116,6 +2116,7 @@
     var pi = window._postIntent;
     if (pi && Date.now() - pi.at < 5 * 60000) {
       window._postIntent = null;
+      window._aoHoldReload = Date.now() + 3000; // no version reload until the sheet below has opened (sw-register.js)
       setTimeout(function () {
         if (pi.act === 'photo') { var pb = document.getElementById('detail-add-photo-btn'); if (pb && pb.style.display !== 'none') pb.click(); }
         else if (d.type === 'species' && !d.isIndividual) { var ib = document.getElementById('detail-add-individual'); if (ib) ib.click(); }
