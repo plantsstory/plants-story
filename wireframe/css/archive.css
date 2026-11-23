@@ -2401,3 +2401,69 @@ html.pv-label.app-ui body.menu-open .appbar__item[aria-current="page"] { box-sha
 /* the "choose a name" band on wide screens: under the header, its line and 「やめる」 together in the middle */
 .header > .intent-band { justify-content: center; gap: var(--s4); }
 .header > .intent-band span { flex: 0 1 auto; }
+
+/* ==== PC LAYER START (11-24) ==== */
+/* Owner, 11-24: 「PC の上のバーのロゴの配置、＋投稿・ログインのデザイン、メニューの配置がバラバラ。全部見てほしい」
+   Everything in this layer is for screens wider than a phone (641px and up). Phones are not touched.
+   The rules: one centre line and one button size in the top bar; two page widths only (wide for grids and
+   two-column pages, narrow for lists and reading); what sits side by side starts on the same line. */
+@media (min-width: 641px) {
+  /* -- 1. top bar -- */
+  /* the logo and the three lines are column flex boxes: their contents sat at the top of a 48px box */
+  .header__logo { justify-content: center; }
+  .header__hamburger { justify-content: center; align-items: center; margin-right: -14px; } /* its lines end on the page's right edge */
+  .header__actions { gap: var(--s2); }
+  /* ＋投稿 / ログイン / プロフィール: one height, one type size, one padding */
+  .header__actions .header__btn, .header__actions .header__contribute { box-sizing: border-box; height: 40px; min-height: 40px; padding: 0 var(--s3); font-family: var(--font-primary); font-size: var(--fs-small); font-weight: 500; letter-spacing: 0.02em; line-height: 38px; }
+  .header__actions a.header__btn:not(.d-none) { display: inline-block; text-decoration: none; }
+
+  /* the same order logged in or out: ＋投稿, then ログイン or プロフィール, then the menu (they swapped places at login) */
+  .header__actions .header__contribute { order: 1; }
+  .header__actions #header-auth-btn, .header__actions #header-profile-btn { order: 2; }
+  .header__actions .header__hamburger { order: 3; }
+
+  /* -- 2. the list of names: kinds on the left, order on the right, one row; ＋投稿 is in the top bar now -- */
+  .genus-content .sort-bar { align-items: center; }
+  .genus-content .sort-bar .filter-chips { order: 1; flex: 1 1 auto; }
+  .genus-content .sort-bar .sort-selects { order: 2; flex: 0 0 auto; margin-left: auto; }
+  .genus-content .sort-bar .genus-add-link { display: none; }
+
+  /* -- 3. a name's page: the three lists under 関連する名前 start on one line (the first heading holds a link
+        with a tap height, the others did not) -- */
+  .related__group h3 { display: flex; align-items: flex-end; min-height: var(--tap); }
+  .related__group h3 > a { min-height: 0; }
+
+  /* -- 7. page heads: breadcrumb, then the title under one rule, at the same height on every page.
+        There were four patterns (with / without a breadcrumb, with / without the rule). -- */
+  .page .breadcrumb, .legal-page .breadcrumb { margin: 0 0 var(--s4); }
+  .legal-page { padding-top: 0; }
+  .legal-page h1 { border-top: 1px solid var(--color-ink); padding-top: var(--s2); margin-bottom: var(--s4); letter-spacing: 0.005em !important; }
+  .legal-page h1:has(+ .legal-date) { margin-bottom: var(--s2); }
+
+  /* -- 8. tools: the count line was tracked out wider than any other line on the site -- */
+  .shop-count { letter-spacing: 0; }
+
+  /* -- 9. the search box fills the narrow column (it stopped 36px short of the rule above it) -- */
+  .container--narrow .search-bar { max-width: none; }
+
+  /* -- 4. footer: language and text size on one line -- */
+  .footer__lang { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s2) var(--s4); }
+  .footer__lang .textsize { margin-top: 0; }
+}
+@media (min-width: 900px) {
+  /* -- 5. home: 今日の一葉 on the left; 名前を探す and 新着の名前 stacked on the right (the right column was
+        empty under 名前を探す, and 新着 began a hundred pixels below the left column) -- */
+  #page-top .front { grid-template-rows: auto 1fr; row-gap: 0; }
+  #page-top .front > .story { grid-column: 1; grid-row: 1 / span 2; }
+  #page-top .front > .label-ways { grid-column: 2; grid-row: 1; }
+  #page-top .front > .front-new { grid-column: 2; grid-row: 2; margin-top: var(--s5); }
+
+  /* -- 10. the menu does not repeat what the top bar already shows at this width (トップ, the genera, 人物索引,
+        産地, ＋投稿); ログイン / ログアウト stays, it is the only place to log out -- */
+  .mobile-nav > a.nav-dup[data-nav="top"], .mobile-nav > #mobile-nav-genera, .mobile-nav > a.nav-dup[data-nav="people"],
+  .mobile-nav > a.nav-dup[data-nav="locality"], .mobile-nav > a.nav-dup[data-nav="contribute"] { display: none !important; }
+
+  /* -- 6. tools: the departments are one list down the side (they were two cramped columns) -- */
+  .shop-depts ul { grid-template-columns: 1fr; }
+}
+/* ==== PC LAYER END ==== */

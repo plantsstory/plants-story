@@ -1060,6 +1060,10 @@
     "jp": "誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。",
     "en": "Who named it, when, and where — a sourced archive of aroid origins."
   },
+  "search_crumb": {
+    "jp": "検索",
+    "en": "Search"
+  },
   "nav_contribute": {
     "jp": "＋投稿",
     "en": "+ Contribute"

@@ -1735,7 +1735,7 @@ if (false) {
         headerAuthBtn.title = window._currentUser.email || '';
         headerAuthBtn.classList.add('d-none');
       }
-      if (navAuth) { navAuth.innerHTML = '&#x1F6AA; ログアウト'; navAuth.classList.remove('d-none'); }
+      if (navAuth) { navAuth.textContent = 'ログアウト'; navAuth.classList.remove('d-none'); }
       if (navProfile) { navProfile.classList.remove('d-none'); navProfile.href = profileUrl; navProfile.setAttribute('data-nav', 'profile'); navProfile.setAttribute('data-userid', window._currentUser.id); }
     } else {
       // Logged out: show login button in header, hide profile
