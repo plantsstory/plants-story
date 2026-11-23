@@ -2618,6 +2618,12 @@
     if (typeof gtag === 'function') gtag('event', 'appbar_click', { item: 'post' });
     openPostSheet();
   });
+  // wide screens have no bottom bar: the header's ＋投稿 opens the same sheet (owner, 11-24)
+  var hpost = $('header-post');
+  if (hpost) hpost.addEventListener('click', function () {
+    if (typeof gtag === 'function') gtag('event', 'appbar_click', { item: 'post_header' });
+    openPostSheet();
+  });
   document.addEventListener('click', function (e) {
     var a = e.target.closest && e.target.closest('.appbar [data-appbar]');
     if (a && typeof gtag === 'function') gtag('event', 'appbar_click', { item: a.getAttribute('data-appbar') });
@@ -2708,9 +2714,13 @@
   window.aoStartPick = function (act) {
     window._postIntent = { act: act, at: Date.now() };
     if (typeof navigateTo === 'function') navigateTo('explore', {});
-    var bar = $('topbar') || document.body;
+    // phones: under the top bar; wide screens have no top bar (it is display:none), so under the header (11-24)
+    var tb = $('topbar'), hd = document.querySelector('.header');
+    var shown = function (el) { return !!el && getComputedStyle(el).display !== 'none'; };
+    var bar = shown(tb) ? tb : (shown(hd) ? hd : (tb || document.body));
     var band = $('intent-band');
-    if (!band) { band = document.createElement('div'); band.id = 'intent-band'; band.className = 'intent-band'; bar.appendChild(band); }
+    if (!band) { band = document.createElement('div'); band.id = 'intent-band'; band.className = 'intent-band'; }
+    if (band.parentNode !== bar) bar.appendChild(band);
     band.innerHTML = '<span>' + (act === 'photo' ? '写真を追加する名前を選んでください' : '個体を追加する原種を選んでください') + '</span><button type="button" id="intent-band-stop">やめる</button>';
     band.hidden = false;
     setTimeout(function () { var si = document.querySelector('#page-explore .search-bar__input'); if (si) si.focus(); }, 350);

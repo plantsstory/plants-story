@@ -2391,3 +2391,13 @@ html.pv-label.app-ui body.menu-open .appbar__item[aria-current="page"] { box-sha
 /* T238: the first step carries only what it needs */
 #page-contribute.contribute--stepped #contribute-page-desc, #page-contribute.contribute--stepped .genus-request-link { display: none !important; }
 #page-contribute.contribute--stepped .cstep-login { margin-bottom: var(--s2); }
+
+/* 11-24 (owner): wide screens have no bottom bar, so ＋投稿 sits in the header, left of ログイン, and opens the
+   same four-choice sheet. Phones keep the bottom bar and do not show this one. */
+@media (min-width: 641px) {
+  .header__actions .header__contribute { display: inline-flex; align-items: center; justify-content: center; min-height: var(--tap); padding: 0 var(--s4); background: var(--color-ink); color: var(--color-paper); border-color: var(--color-ink); cursor: pointer; }
+  .header__actions .header__contribute:hover { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-paper); }
+}
+/* the "choose a name" band on wide screens: under the header, its line and 「やめる」 together in the middle */
+.header > .intent-band { justify-content: center; gap: var(--s4); }
+.header > .intent-band span { flex: 0 1 auto; }
