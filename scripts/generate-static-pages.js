@@ -233,6 +233,8 @@ async function main() {
     { dir: 'wanted', title: '写真を募集中 — 写真のないアンスリウム | Aroid Origins', description: '由来は記録されているのに、写真がまだない品種の一覧です。自分で撮った写真を 1 枚から載せられます。' },
     // 読みもの (board 12): noindex until the owner's OK
     { dir: 'reading', noindex: true, title: '読みもの — アンスリウムの分類・交配・現地の記事 | Aroid Origins', description: '分類・交配・現地・栽培について、経験のある人が書いた記事の索引。紹介文は編集部、本文は各サイトで。' },
+    // ナーセリー (owner, 11-25): 「近日公開」, noindex until it opens
+    { dir: 'nurseries', noindex: true, title: 'ナーセリー — アンスリウムの販売サイト一覧 | Aroid Origins', description: 'アンスリウムを扱うナーセリー（株を育てて販売している園芸店）の販売サイトの一覧。' },
     // 調べる (board 13, direction B): noindex until the owner's OK
     { dir: 'explore', title: '調べる — 原種・交配・人物・産地から | Aroid Origins', description: '原種の一覧、交配と系統、人物索引、産地索引、記載史年表、名前の違い、用語集。アンスリウムの由来へのすべての入口。' },
     { dir: 'timeline', noindex: true, title: '記載の歴史 | Aroid Origins', description: 'アンスリウムの原種が学名として発表された年を、年代ごとに並べた年表。' },

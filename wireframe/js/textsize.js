@@ -28,6 +28,12 @@
     if (/[?&]preview=reading-off(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-reading');
     if (localStorage.getItem('ao-preview-reading') === '1') document.documentElement.classList.add('pv-reading');
   } catch (e) {}
+  // 11-25: the nurseries list, shown only with ?preview=nurseries until the owner opens it (others see 「近日公開」)
+  try {
+    if (/[?&]preview=nurseries(?:&|$)/.test(location.search)) localStorage.setItem('ao-preview-nurseries', '1');
+    if (/[?&]preview=nurseries-off(?:&|$)/.test(location.search)) localStorage.removeItem('ao-preview-nurseries');
+    if (localStorage.getItem('ao-preview-nurseries') === '1') document.documentElement.classList.add('pv-nurseries');
+  } catch (e) {}
   // board 11 T148: the empty plate as a specimen label, shown only to whoever opens ?preview=plate until approved
   try {
     if (/[?&]preview=plate(?:&|$)/.test(location.search)) localStorage.setItem('ao-preview-plate', '1');

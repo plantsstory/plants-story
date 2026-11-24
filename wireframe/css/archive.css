@@ -1790,7 +1790,8 @@ html.pv-plate .gallery__empty .sheet--plate { padding: var(--s3) 0 !important; d
 .ig-find .btn { min-height: var(--tap); }
 
 /* board 12: 読みもの — until the owner's OK the links and the plant-page section show with ?preview=reading only */
-html:not(.pv-reading) .pv-reading-link, html:not(.pv-reading) #reading-for-section { display: none !important; }
+/* 11-25: the 読みもの links show for everyone (the page says 「近日公開」); the plant-page section waits for the opening */
+html:not(.pv-reading) #reading-for-section { display: none !important; }
 .reading-list .entry__main { display: block; }
 .reading-item { padding: var(--s3) 0; }
 .reading-item__title { display: inline; font-size: var(--fs-body); }
@@ -2401,6 +2402,12 @@ html.pv-label.app-ui body.menu-open .appbar__item[aria-current="page"] { box-sha
 /* the "choose a name" band on wide screens: under the header, its line and 「やめる」 together in the middle */
 .header > .intent-band { justify-content: center; gap: var(--s4); }
 .header > .intent-band span { flex: 0 1 auto; }
+
+/* 「近日公開」 (11-25): the reading list and the nurseries list before they open */
+.soon { margin: var(--s3) 0 var(--s5); padding: var(--s4) 0; border-top: 1px solid var(--color-ink); border-bottom: 1px solid var(--color-rule); }
+.soon__label { margin: 0 0 var(--s2); font-weight: 700; font-size: var(--fs-h3); color: var(--color-ink); }
+.soon p:not(.soon__label) { margin: 0; color: var(--color-mid); line-height: 1.9; }
+html:not(.pv-reading) #page-reading .pr-line { display: none; } /* the note about the editors' summaries waits for the list */
 
 /* ==== PC LAYER START (11-24) ==== */
 /* Owner, 11-24: 「PC の上のバーのロゴの配置、＋投稿・ログインのデザイン、メニューの配置がバラバラ。全部見てほしい」

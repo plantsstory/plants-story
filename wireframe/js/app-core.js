@@ -651,7 +651,7 @@ function showGenus(genusName) {
 
 // ---- Path-based routing (History API) ----
 // Known simple pages (no sub-parameters)
-var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'mypost', 'guide', 'glossary', 'pricing', 'wanted', 'ig', 'reading', 'explore'];
+var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'mypost', 'guide', 'glossary', 'pricing', 'wanted', 'ig', 'reading', 'nurseries', 'explore'];
 // Known genus names for URL mapping
 var knownGenera = []; // Populated dynamically from genera table
 // Base path: '/' on custom domain, '/plants-story/' on GitHub Pages
@@ -782,6 +782,7 @@ function navigateTo(page, options, pushHistory) {
   if (page === 'wanted' && typeof window.renderWantedPage === 'function') window.renderWantedPage();
   if (page === 'ig' && typeof window.renderIgPage === 'function') window.renderIgPage();
   if (page === 'reading' && typeof window.renderReadingPage === 'function') window.renderReadingPage();
+  if (page === 'nurseries' && typeof window.renderNurseriesPage === 'function') window.renderNurseriesPage();
   if (page === 'explore' && typeof window.renderExplorePage === 'function') window.renderExplorePage();
   if (page === 'tools' && typeof window.renderToolsPage === 'function') window.renderToolsPage(options.tool || '', options.genre || '');
   if (page === 'genus' && options.genus) showGenus(options.genus);
@@ -834,6 +835,7 @@ function navigateTo(page, options, pushHistory) {
       wanted: '写真を募集中 — 写真のないアンスリウム | Aroid Origins',
       ig: 'Instagram の図版 | Aroid Origins',
       reading: '読みもの — アンスリウムの分類・交配・現地の記事 | Aroid Origins',
+      nurseries: 'ナーセリー — アンスリウムの販売サイト一覧 | Aroid Origins',
       explore: '調べる — 原種・交配・人物・産地から | Aroid Origins',
       people: '人物索引 - ' + _defaultTitle,
       locality: '産地索引 - ' + _defaultTitle,
@@ -857,6 +859,7 @@ function navigateTo(page, options, pushHistory) {
       mypost: 'あなたが記録した品種',
       wanted: '由来は記録されているのに、写真がまだない品種の一覧です。自分で撮った写真を 1 枚から載せられます。',
       ig: 'Instagram の投稿の「図版」の番号から、その植物の由来のページへ。',
+      nurseries: 'アンスリウムを扱うナーセリー（株を育てて販売している園芸店）の販売サイトの一覧。',
       reading: '分類・交配・現地・栽培について、経験のある人が書いた記事の索引。紹介文は編集部、本文は各サイトで。',
       explore: '原種の一覧、交配と系統、人物索引、産地索引、記載史年表、名前の違い、用語集。アンスリウムの由来へのすべての入口。',
       people: 'アロイド品種の記載者・採集者・作出者の索引。人物ごとに関連する品種をたどれます',
@@ -891,7 +894,7 @@ function navigateTo(page, options, pushHistory) {
           return;
         }
       }
-      var noindexPages = { search: true, contribute: true, mypost: true, favorites: true, profile: true, 'profile-edit': true, notfound: true, ig: true, explore: false, reading: !document.documentElement.classList.contains('pv-reading-open') };
+      var noindexPages = { search: true, contribute: true, mypost: true, favorites: true, profile: true, 'profile-edit': true, notfound: true, ig: true, explore: false, nurseries: !document.documentElement.classList.contains('pv-nurseries-open'), reading: !document.documentElement.classList.contains('pv-reading-open') };
       updateMeta({ title: pageTitles[page] || _defaultTitle, description: pageDescriptions[page] || _defaultDesc, path: page === 'top' ? '' : page, noindex: !!noindexPages[page] });
       // Remove genus JSON-LD on non-genus pages
       var gjld = document.getElementById('genus-jsonld');

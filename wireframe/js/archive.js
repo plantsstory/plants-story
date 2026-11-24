@@ -994,9 +994,12 @@
     if (!e) return null;
     try { return describe(n, e, e._type); } catch (er) { return null; }
   };
+  // 11-25 owner: both lists are 「近日公開」 for everyone; ?preview=reading / ?preview=nurseries shows what is ready
+  function soonBlock(text) { return '<div class="soon"><p class="soon__label">近日公開</p><p>' + esc(text) + '</p></div>'; }
   window.renderReadingPage = function () {
     var body = document.getElementById('reading-body');
     if (!body) return;
+    if (!document.documentElement.classList.contains('pv-reading')) { body.innerHTML = soonBlock('ブログや note などに書かれた、アンスリウムに詳しい人の記事を一覧にします。準備ができしだい公開します。'); return; }
     waitForData(function () {
       loadArticles(function (rows) {
         if (!rows.length) { body.innerHTML = '<p class="people__intro">準備中です。</p>'; return; }
@@ -1025,6 +1028,26 @@
         });
       });
     });
+  };
+  /* ---------- ナーセリー (owner, 11-25): nurseries' own sales sites ---------- */
+  window.renderNurseriesPage = function () {
+    var body = document.getElementById('nurseries-body');
+    if (!body) return;
+    var soon = soonBlock('国内外のナーセリーの販売サイトを一覧にします。準備ができしだい公開します。');
+    if (!document.documentElement.classList.contains('pv-nurseries')) { body.innerHTML = soon; return; }
+    var sbc = window._supabaseClient;
+    if (!sbc) { body.innerHTML = soon; return; }
+    sbc.from('nurseries').select('id, name, url, country, instagram, note').order('sort_order').order('name').limit(500).then(function (r) {
+      var rows = r && !r.error ? r.data || [] : [];
+      if (!rows.length) { body.innerHTML = soon; return; }
+      var html = '<p class="mypost-counts">ナーセリー <span class="num">' + rows.length + '</span> 件</p><ol class="entries nursery-list">';
+      rows.forEach(function (a) {
+        var sub = [esc(a.country), a.instagram ? '<a href="' + esc(a.instagram) + '" target="_blank" rel="noopener noreferrer">Instagram</a>' : ''].filter(Boolean).join(' · ');
+        html += '<li class="entry"><div class="entry__main">' + extLink(a, esc(a.name), 'entry__name') + '<span class="entry__sub">' + sub + '</span>'
+          + (a.note ? '<p class="people__note">' + esc(a.note) + '</p>' : '') + '</div></li>';
+      });
+      body.innerHTML = html + '</ol>';
+    }, function () { body.innerHTML = soon; });
   };
   // 「この植物についての記事」 on a plant page: topics match the entry's name exactly (never a partial match)
   function renderArticlesFor(d) {
@@ -3533,7 +3556,7 @@
       var ex = document.querySelector('#page-cultivar .related__exit a[data-genus]');
       a.setAttribute('data-nav', 'genus'); a.setAttribute('data-genus', ex ? ex.getAttribute('data-genus') : 'anthurium');
     } else if ((cur === 'people' && sub('people')) || (cur === 'locality' && sub('locality')) || (cur === 'tools' && sub('tools'))) a.setAttribute('data-nav', cur);
-    else a.setAttribute('data-nav', { genus: 1, people: 1, locality: 1, search: 1, glossary: 1, names: 1, wanted: 1, ig: 1, tools: 1, reading: 1 }[cur] ? 'explore' : 'top');
+    else a.setAttribute('data-nav', { genus: 1, people: 1, locality: 1, search: 1, glossary: 1, names: 1, wanted: 1, ig: 1, tools: 1, reading: 1, nurseries: 1 }[cur] ? 'explore' : 'top');
     document.body.appendChild(a); a.click(); a.remove();
   });
   document.addEventListener('ao:page', function (e) {
