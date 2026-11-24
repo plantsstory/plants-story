@@ -36,6 +36,15 @@
     var u = clean(t && t.amazon_imp);
     return host(u) === 'i.moshimo.com' && /^https:\/\//i.test(u) && shopUrl(t, 'amazon') ? u : '';
   }
+  // ValueCommerce (Yahoo! Shopping through MyLink): the 1×1 image its link code carries, from the link's own sid and pid
+  function vcImpUrl(t) {
+    var u = shopUrl(t, 'yahoo');
+    if (host(u) !== 'ck.jp.ap.valuecommerce.com') return '';
+    try {
+      var q = new URL(u).searchParams, sid = q.get('sid') || '', pid = q.get('pid') || '';
+      return /^\d+$/.test(sid) && /^\d+$/.test(pid) ? 'https://ad.jp.ap.valuecommerce.com/servlet/gifbanner?sid=' + sid + '&pid=' + pid : '';
+    } catch (e) { return ''; }
+  }
   function bannedIn(text) {
     return BANNED.filter(function (w) { return text.indexOf(w) !== -1; });
   }
@@ -81,5 +90,5 @@
     return today >= OPEN_FROM && pub.length >= OPEN_MIN_ITEMS && Object.keys(genres).length >= OPEN_MIN_GENRES;
   }
 
-  return { catalogueOpen: catalogueOpen, OPEN_FROM: OPEN_FROM, gate: gate, shops: shops, shopUrl: shopUrl, impUrl: impUrl, bannedIn: bannedIn, label: label, slugify: slugify, HABITATS: HABITATS, MIN_RECORD: MIN_RECORD };
+  return { catalogueOpen: catalogueOpen, OPEN_FROM: OPEN_FROM, gate: gate, shops: shops, shopUrl: shopUrl, impUrl: impUrl, vcImpUrl: vcImpUrl, bannedIn: bannedIn, label: label, slugify: slugify, HABITATS: HABITATS, MIN_RECORD: MIN_RECORD };
 });

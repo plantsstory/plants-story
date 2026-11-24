@@ -12,7 +12,7 @@
   <meta name="color-scheme" content="only light">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://commons.wikimedia.org https://upload.wikimedia.org data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.yahoo.co.jp https://i.moshimo.com; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-76jR9wqBDzVMki7NEqIYX8darWdkn+k4FBBOWJSynLM=' https://cdn.jsdelivr.net https://www.googletagmanager.com https://js.pay.jp; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://commons.wikimedia.org https://upload.wikimedia.org data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://*.rakuten.co.jp https://*.yahoo.co.jp https://i.moshimo.com https://ad.jp.ap.valuecommerce.com https://i.imgvc.com; connect-src 'self' https://jpgbehsrglsiwijglhjo.supabase.co https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://api.pay.jp; frame-src https://js.pay.jp;">
   <!-- Connections and the data library first (board 11 T162): the meta CSP stops the browser looking ahead, so the
        hints that sat after the stylesheets were found late. The library is a plain script (no CORS), so its host is
        warmed without crossorigin; the data host twice, for the API (CORS) and the photos (no CORS). -->
@@ -22,27 +22,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Stylesheets before the script preloads: they hold the first paint, the scripts run only at the end of the body (11-03) -->
-  <link rel="stylesheet" href="css/variables.css?v=20261124c">
-  <link rel="stylesheet" href="css/reset.css?v=20261124c">
-  <link rel="stylesheet" href="css/layout.css?v=20261124c">
-  <link rel="stylesheet" href="css/components.css?v=20261124c">
-  <link rel="stylesheet" href="css/pages.css?v=20261124c">
-  <link rel="stylesheet" href="css/utilities.css?v=20261124c">
-  <link rel="stylesheet" href="css/archive.css?v=20261124c">
+  <link rel="stylesheet" href="css/variables.css?v=20261124d">
+  <link rel="stylesheet" href="css/reset.css?v=20261124d">
+  <link rel="stylesheet" href="css/layout.css?v=20261124d">
+  <link rel="stylesheet" href="css/components.css?v=20261124d">
+  <link rel="stylesheet" href="css/pages.css?v=20261124d">
+  <link rel="stylesheet" href="css/utilities.css?v=20261124d">
+  <link rel="stylesheet" href="css/archive.css?v=20261124d">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1">
   <!-- Own scripts fetched in parallel (the meta CSP stops the browser's own look-ahead); they still run in order at
        the end of the body. gtag.js is loaded by gtag-init.js once the page is parsed (board 11 T156). -->
-  <link rel="preload" as="script" href="js/record-gate.js?v=20261124c">
-  <link rel="preload" as="script" href="js/app-core.js?v=20261124c">
-  <link rel="preload" as="script" href="js/pages.js?v=20261124c">
-  <link rel="preload" as="script" href="js/forms.js?v=20261124c">
-  <link rel="preload" as="script" href="js/entry-meta.js?v=20261124c">
-  <link rel="preload" as="script" href="js/archive.js?v=20261124c">
-  <link rel="preload" as="script" href="js/tool-gate.js?v=20261124c">
-  <link rel="preload" as="script" href="js/tools.js?v=20261124c">
-  <link rel="preload" as="script" href="js/dialogs.js?v=20261124c">
-  <script src="js/textsize.js?v=20261124c"></script>
+  <link rel="preload" as="script" href="js/record-gate.js?v=20261124d">
+  <link rel="preload" as="script" href="js/app-core.js?v=20261124d">
+  <link rel="preload" as="script" href="js/pages.js?v=20261124d">
+  <link rel="preload" as="script" href="js/forms.js?v=20261124d">
+  <link rel="preload" as="script" href="js/entry-meta.js?v=20261124d">
+  <link rel="preload" as="script" href="js/archive.js?v=20261124d">
+  <link rel="preload" as="script" href="js/tool-gate.js?v=20261124d">
+  <link rel="preload" as="script" href="js/tools.js?v=20261124d">
+  <link rel="preload" as="script" href="js/dialogs.js?v=20261124d">
+  <script src="js/textsize.js?v=20261124d"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -83,7 +83,7 @@
     "logo": "https://aroidorigins.com/icons/icon-512.svg"
   }
   </script>
-  <script src="js/gtag-init.js?v=20261124c"></script>
+  <script src="js/gtag-init.js?v=20261124d"></script>
 </head>
 <body>
 
@@ -845,7 +845,7 @@
     <div class="container container--narrow legal-page">
       <nav class="breadcrumb" aria-label="パンくずリスト"><a href="/" data-nav="top">トップ</a><span class="breadcrumb__sep">/</span><span data-i18n="terms_title">利用規約</span></nav>
       <h1 data-i18n="terms_title">利用規約</h1>
-      <p class="legal-date" data-i18n="terms_updated">最終更新 2026.11.10</p>
+      <p class="legal-date" data-i18n="terms_updated">最終更新 2026.11.24</p>
 
       <h2 data-i18n="terms_1_title">第1条 適用範囲</h2>
       <p data-i18n="terms_1_body">本規約は、Aroid Origins（以下「本サービス」）を利用するすべてのユーザーに適用されます。本サービスを利用した時点で、本規約に同意したものとみなします。閲覧はアカウント登録なしで利用でき、投稿などの一部機能にはGoogleアカウントによるログインが必要です。</p>
@@ -888,7 +888,7 @@
       <p data-i18n="terms_7_body">本サービスで提供される植物情報は参考情報であり、専門的な植物学・園芸・農業の助言ではありません。信頼度スコアはアルゴリズムによる推定値であり、情報の正確性を保証するものではありません。植物の栽培・購入・取引等に関する判断は、ご自身の責任で行ってください。</p>
 
       <h2 data-i18n="terms_8_title">第8条 アフィリエイトリンク</h2>
-      <p data-i18n="terms_8_body">本サービスには楽天市場、Yahoo!ショッピング、Amazon（もしもアフィリエイト経由）へのアフィリエイトリンクが含まれています。ユーザーがこれらのリンクを通じて商品を購入した場合、運営者に紹介報酬が発生します。アフィリエイト関係は品種情報や信頼度に一切影響を与えません。表示は各アフィリエイトプログラムの規約および Amazon アソシエイト・プログラム運営規約に従います。</p>
+      <p data-i18n="terms_8_body">本サービスには楽天市場、Yahoo!ショッピング（バリューコマース経由）、Amazon（もしもアフィリエイト経由）へのアフィリエイトリンクが含まれています。ユーザーがこれらのリンクを通じて商品を購入した場合、運営者に紹介報酬が発生します。アフィリエイト関係は品種情報や信頼度に一切影響を与えません。表示は各アフィリエイトプログラムの規約および Amazon アソシエイト・プログラム運営規約に従います。</p>
 
       <h2 data-i18n="terms_9_title">第9条 道具の目録</h2>
       <p data-i18n="terms_9_body">道具の目録（/tools/）には、楽天市場・Yahoo!ショッピング・Amazon のアフィリエイトリンクを含む商品の紹介を掲載します。商品情報の一部は楽天ウェブサービスから取得しており、価格・在庫は各ストアの表示が最新です。本サービスは現在、第三者の広告ネットワークによる広告を表示していません。表示を始める場合は、あらかじめ本規約とプライバシーポリシーを改定してお知らせします。</p>
@@ -938,7 +938,7 @@
     <div class="container container--narrow legal-page">
       <nav class="breadcrumb" aria-label="パンくずリスト"><a href="/" data-nav="top">トップ</a><span class="breadcrumb__sep">/</span><span data-i18n="privacy_title">プライバシーポリシー</span></nav>
       <h1 data-i18n="privacy_title">プライバシーポリシー</h1>
-      <p class="legal-date" data-i18n="privacy_updated">最終更新 2026.11.10</p>
+      <p class="legal-date" data-i18n="privacy_updated">最終更新 2026.11.24</p>
 
       <h2 data-i18n="privacy_1_title">1. はじめに</h2>
       <p data-i18n="privacy_1_body">Aroid Origins（運営者）（運営責任者: 久恒 佑太）は、ユーザーのプライバシーを尊重します。本ポリシーでは、本サービスで収集する情報とその取り扱いについて説明します。閲覧はアカウント登録なしで利用できます。投稿にはGoogleアカウントによるログインが必要で、公開されるのはニックネーム等のプロフィール情報のみです。本サービスに有料の会員制度はなく、決済情報は取り扱いません。</p>
@@ -967,7 +967,7 @@
         <li>GitHub Pages（サイトの配信）、Google Fonts・jsDelivr（書体とプログラムの配信）、Wikimedia Commons（一部の歴史的な図版）: ページを開くと、IPアドレスなどの接続情報が各社のサーバーに送信されます</li>
         <li>AI 調査（Anthropic の Claude）: 由来の調査のために、品種名、投稿された由来の本文、情報元URLを送信します。メールアドレスなどのアカウント情報は送信しません</li>
         <li>Resend（メール送信）: お問い合わせの内容を運営者に通知するために使用します</li>
-        <li>アフィリエイトリンク（楽天市場、Yahoo!ショッピング、もしもアフィリエイト経由の Amazon）: リンクをクリックした際に各社のトラッキング Cookie が設定されます。道具の目録の商品ページでは、もしもアフィリエイトの計測用画像が読み込まれます</li>
+        <li>アフィリエイトリンク（楽天市場、バリューコマース経由の Yahoo!ショッピング、もしもアフィリエイト経由の Amazon）: リンクをクリックした際に各社のトラッキング Cookie が設定されます。道具の目録では、リンクが表示されたことを数えるために、バリューコマースともしもアフィリエイトの計測用画像が読み込まれます（IPアドレスなどの接続情報が各社のサーバーに送信されます）</li>
         <li>楽天ウェブサービス: 道具の目録の商品情報（商品名・価格・画像）は楽天ウェブサービスから取得し、画像は楽天のサーバーから読み込まれます</li>
         <li>OFUSE（任意の送金）: 送金と決済は OFUSE のサイトで行われ、OFUSE の利用規約とプライバシーポリシーが適用されます。カード情報は当サイトには届きません</li>
       </ul>
@@ -1770,14 +1770,14 @@
        JS: Split into logical modules
        ======================================== -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1"></script>
-  <script src="js/record-gate.js?v=20261124c"></script>
-  <script src="js/app-core.js?v=20261124c"></script>
-  <script src="js/pages.js?v=20261124c"></script>
-  <script src="js/forms.js?v=20261124c"></script>
-  <script src="js/entry-meta.js?v=20261124c"></script>
-  <script src="js/archive.js?v=20261124c"></script>
-  <script src="js/tool-gate.js?v=20261124c"></script>
-  <script src="js/tools.js?v=20261124c"></script>
+  <script src="js/record-gate.js?v=20261124d"></script>
+  <script src="js/app-core.js?v=20261124d"></script>
+  <script src="js/pages.js?v=20261124d"></script>
+  <script src="js/forms.js?v=20261124d"></script>
+  <script src="js/entry-meta.js?v=20261124d"></script>
+  <script src="js/archive.js?v=20261124d"></script>
+  <script src="js/tool-gate.js?v=20261124d"></script>
+  <script src="js/tools.js?v=20261124d"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1787,7 +1787,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261124c"></script>
+  <script src="js/dialogs.js?v=20261124d"></script>
 
   <!-- AI re-research request dialog -->
   <!-- Asked before anything is typed: posting, photos and records need a login (2026-10-08 app-ux) -->
@@ -1839,6 +1839,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261124c"></script>
+<script src="js/sw-register.js?v=20261124d"></script>
 </body>
 </html>

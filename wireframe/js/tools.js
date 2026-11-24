@@ -111,6 +111,12 @@
   }
   function meta(opts) { setTimeout(function () { if (typeof updateMeta === 'function') updateMeta(opts); }, 0); }
 
+  // ValueCommerce's link code carries a 1×1 image inside the link: it counts that the link was shown (11-24)
+  function vcPixel(x, s) {
+    var u = s.shop === 'yahoo' && Gate && Gate.vcImpUrl ? Gate.vcImpUrl(x) : '';
+    return u ? '<img class="tool-imp" src="' + esc(u) + '" width="1" height="1" alt="" referrerpolicy="no-referrer-when-downgrade">' : '';
+  }
+
   /* ---------- a product card ---------- */
   function card(x) {
     var href = base + 'tools/' + encodeURIComponent(x.slug) + '/';
@@ -125,7 +131,7 @@
       + ((x.maker || x.spec || x.owner_used) ? '<p class="shop-card__maker">' + (x.owner_used ? '<span class="badge">' + esc(T('tools_used')) + '</span> ' : '') + esc([x.maker, x.spec].filter(Boolean).join(' · ')) + '</p>' : '')
       + (priceText(x) ? '<p class="shop-card__price">' + esc(priceText(x)) + '</p>' : '')
       + '<p class="shop-card__shops">' + shops.map(function (s) {
-        return '<a href="' + esc(s.url) + '" target="_blank" rel="nofollow sponsored noopener" data-tool-shop="' + s.shop + '" data-tool-slug="' + esc(x.slug) + '">' + esc(SHOP_SHORT[s.shop]) + '</a>';
+        return '<a href="' + esc(s.url) + '" target="_blank" rel="nofollow sponsored noopener" data-tool-shop="' + s.shop + '" data-tool-slug="' + esc(x.slug) + '">' + vcPixel(x, s) + esc(SHOP_SHORT[s.shop]) + '</a>';
       }).join('') + '</p>'
       + '</div></article>';
   }
@@ -244,7 +250,7 @@
     if (shops.length) {
       html += '<p class="pr-line mono">' + esc(T('tools_pr_buy')) + (shops.some(function (s) { return s.shop === 'amazon'; }) ? '<br>' + esc(T('tools_pr_amazon')) : '') + '</p>';
       html += '<div class="shop-buttons">' + shops.map(function (s, i) {
-        return '<a class="shop-btn' + (i === 0 ? ' shop-btn--primary' : '') + '" href="' + esc(s.url) + '" target="_blank" rel="nofollow sponsored noopener" data-tool-shop="' + s.shop + '" data-tool-slug="' + esc(x.slug) + '">' + esc(T('tools_view').replace('{shop}', SHOP_NAME[s.shop])) + '</a>';
+        return '<a class="shop-btn' + (i === 0 ? ' shop-btn--primary' : '') + '" href="' + esc(s.url) + '" target="_blank" rel="nofollow sponsored noopener" data-tool-shop="' + s.shop + '" data-tool-slug="' + esc(x.slug) + '">' + vcPixel(x, s) + esc(T('tools_view').replace('{shop}', SHOP_NAME[s.shop])) + '</a>';
       }).join('') + '</div>';
       var imp = Gate.impUrl(x);
       if (imp) html += '<img class="tool-imp" src="' + esc(imp) + '" width="1" height="1" alt="" referrerpolicy="no-referrer-when-downgrade">';

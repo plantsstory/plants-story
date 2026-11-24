@@ -513,8 +513,8 @@
     "en": "Terms of Service"
   },
   "terms_updated": {
-    "jp": "最終更新 2026.11.10",
-    "en": "Last updated 2026.11.10"
+    "jp": "最終更新 2026.11.24",
+    "en": "Last updated 2026.11.24"
   },
   "terms_1_title": {
     "jp": "第1条 適用範囲",
@@ -589,8 +589,8 @@
     "en": "Article 8: Affiliate Links"
   },
   "terms_8_body": {
-    "jp": "本サービスには楽天市場、Yahoo!ショッピング、Amazon（もしもアフィリエイト経由）へのアフィリエイトリンクが含まれています。ユーザーがこれらのリンクを通じて商品を購入した場合、運営者に紹介報酬が発生します。アフィリエイト関係は品種情報や信頼度に一切影響を与えません。表示は各アフィリエイトプログラムの規約および Amazon アソシエイト・プログラム運営規約に従います。",
-    "en": "This service contains affiliate links to Rakuten, Yahoo! Shopping and Amazon (through Moshimo Affiliate). Purchases through them pay the operator a referral fee. Affiliate relationships never affect the records or their trust levels. Disclosures follow each affiliate programme's terms and the Amazon Associates Program Operating Agreement."
+    "jp": "本サービスには楽天市場、Yahoo!ショッピング（バリューコマース経由）、Amazon（もしもアフィリエイト経由）へのアフィリエイトリンクが含まれています。ユーザーがこれらのリンクを通じて商品を購入した場合、運営者に紹介報酬が発生します。アフィリエイト関係は品種情報や信頼度に一切影響を与えません。表示は各アフィリエイトプログラムの規約および Amazon アソシエイト・プログラム運営規約に従います。",
+    "en": "This service contains affiliate links to Rakuten, Yahoo! Shopping (through ValueCommerce) and Amazon (through Moshimo Affiliate). Purchases through them pay the operator a referral fee. Affiliate relationships never affect the records or their trust levels. Disclosures follow each affiliate programme's terms and the Amazon Associates Program Operating Agreement."
   },
   "terms_9_title": {
     "jp": "第9条 道具の目録",
@@ -649,8 +649,8 @@
     "en": "Privacy Policy"
   },
   "privacy_updated": {
-    "jp": "最終更新 2026.11.10",
-    "en": "Last updated 2026.11.10"
+    "jp": "最終更新 2026.11.24",
+    "en": "Last updated 2026.11.24"
   },
   "privacy_1_title": {
     "jp": "1. はじめに",
@@ -689,8 +689,8 @@
     "en": "The service uses Google Analytics (GA4) to understand how it is used. GA4 uses cookies to collect pages viewed, device type, approximate region and buttons pressed (nothing that identifies you by name). To provide the service, information is also sent to the following outside services:"
   },
   "privacy_4_list": {
-    "jp": "Google アナリティクス: Google のプライバシーポリシー https://policies.google.com/privacy が適用されます。オプトアウトは https://tools.google.com/dlpage/gaoptout から行えます\nGoogle（ログイン）: ログインのときに Google の認証画面を経由し、メールアドレス・表示名・プロフィール画像URLを受け取ります\nSupabase（データベース・ログイン・写真の保存）: 投稿内容、アカウント情報、写真、お問い合わせの内容は Supabase のサーバーに保存されます\nGitHub Pages（サイトの配信）、Google Fonts・jsDelivr（書体とプログラムの配信）、Wikimedia Commons（一部の歴史的な図版）: ページを開くと、IPアドレスなどの接続情報が各社のサーバーに送信されます\nAI 調査（Anthropic の Claude）: 由来の調査のために、品種名、投稿された由来の本文、情報元URLを送信します。メールアドレスなどのアカウント情報は送信しません\nResend（メール送信）: お問い合わせの内容を運営者に通知するために使用します\nアフィリエイトリンク（楽天市場、Yahoo!ショッピング、もしもアフィリエイト経由の Amazon）: リンクをクリックした際に各社のトラッキング Cookie が設定されます。道具の目録の商品ページでは、もしもアフィリエイトの計測用画像が読み込まれます\n楽天ウェブサービス: 道具の目録の商品情報（商品名・価格・画像）は楽天ウェブサービスから取得し、画像は楽天のサーバーから読み込まれます\nOFUSE（任意の送金）: 送金と決済は OFUSE のサイトで行われ、OFUSE の利用規約とプライバシーポリシーが適用されます。カード情報は当サイトには届きません",
-    "en": "Google Analytics: Google's privacy policy applies (https://policies.google.com/privacy). Opt out at https://tools.google.com/dlpage/gaoptout\nGoogle (login): logging in passes through Google's sign-in screen, from which the service receives your e-mail address, display name and profile image URL\nSupabase (database, login, photo storage): contributions, account information, photos and contact messages are stored on Supabase's servers\nGitHub Pages (site delivery), Google Fonts and jsDelivr (fonts and scripts), Wikimedia Commons (some historical plates): opening a page sends connection information such as your IP address to their servers\nAI research (Anthropic's Claude): the name, the origin text contributed and source URLs are sent for research. Account information such as e-mail addresses is not sent\nResend (e-mail): used to notify the operator of contact messages\nAffiliate links (Rakuten Ichiba, Yahoo! Shopping, Amazon via Moshimo Affiliate): clicking one sets the store's tracking cookie. Product pages in the tool catalogue load Moshimo's measurement image\nRakuten Web Service: product information in the tool catalogue (name, price, image) comes from Rakuten Web Service, and images load from Rakuten's servers\nOFUSE (voluntary support): payment is made on OFUSE's site under OFUSE's terms and privacy policy. Card details never reach this site"
+    "jp": "Google アナリティクス: Google のプライバシーポリシー https://policies.google.com/privacy が適用されます。オプトアウトは https://tools.google.com/dlpage/gaoptout から行えます\nGoogle（ログイン）: ログインのときに Google の認証画面を経由し、メールアドレス・表示名・プロフィール画像URLを受け取ります\nSupabase（データベース・ログイン・写真の保存）: 投稿内容、アカウント情報、写真、お問い合わせの内容は Supabase のサーバーに保存されます\nGitHub Pages（サイトの配信）、Google Fonts・jsDelivr（書体とプログラムの配信）、Wikimedia Commons（一部の歴史的な図版）: ページを開くと、IPアドレスなどの接続情報が各社のサーバーに送信されます\nAI 調査（Anthropic の Claude）: 由来の調査のために、品種名、投稿された由来の本文、情報元URLを送信します。メールアドレスなどのアカウント情報は送信しません\nResend（メール送信）: お問い合わせの内容を運営者に通知するために使用します\nアフィリエイトリンク（楽天市場、バリューコマース経由の Yahoo!ショッピング、もしもアフィリエイト経由の Amazon）: リンクをクリックした際に各社のトラッキング Cookie が設定されます。道具の目録では、リンクが表示されたことを数えるために、バリューコマースともしもアフィリエイトの計測用画像が読み込まれます（IPアドレスなどの接続情報が各社のサーバーに送信されます）\n楽天ウェブサービス: 道具の目録の商品情報（商品名・価格・画像）は楽天ウェブサービスから取得し、画像は楽天のサーバーから読み込まれます\nOFUSE（任意の送金）: 送金と決済は OFUSE のサイトで行われ、OFUSE の利用規約とプライバシーポリシーが適用されます。カード情報は当サイトには届きません",
+    "en": "Google Analytics: Google's privacy policy applies (https://policies.google.com/privacy). Opt out at https://tools.google.com/dlpage/gaoptout\nGoogle (login): logging in passes through Google's sign-in screen, from which the service receives your e-mail address, display name and profile image URL\nSupabase (database, login, photo storage): contributions, account information, photos and contact messages are stored on Supabase's servers\nGitHub Pages (site delivery), Google Fonts and jsDelivr (fonts and scripts), Wikimedia Commons (some historical plates): opening a page sends connection information such as your IP address to their servers\nAI research (Anthropic's Claude): the name, the origin text contributed and source URLs are sent for research. Account information such as e-mail addresses is not sent\nResend (e-mail): used to notify the operator of contact messages\nAffiliate links (Rakuten Ichiba, Yahoo! Shopping via ValueCommerce, Amazon via Moshimo Affiliate): clicking one sets the store's tracking cookie. The tool catalogue loads ValueCommerce's and Moshimo's measurement images, which count that a link was shown (connection data such as your IP address goes to their servers)\nRakuten Web Service: product information in the tool catalogue (name, price, image) comes from Rakuten Web Service, and images load from Rakuten's servers\nOFUSE (voluntary support): payment is made on OFUSE's site under OFUSE's terms and privacy policy. Card details never reach this site"
   },
   "privacy_5_title": {
     "jp": "5. 情報の利用目的",
