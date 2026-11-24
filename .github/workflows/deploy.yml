@@ -69,6 +69,11 @@ jobs:
         if: steps.changed.outputs.run == 'true'
         with:
           path: wireframe
+      # 11-24/25: deploy-pages sometimes asks for the artifact before GitHub lists it ("No artifacts named
+      # github-pages were found"); a short wait before the deploy step avoids that race
+      - name: Wait for the artifact to be listed
+        if: steps.changed.outputs.run == 'true'
+        run: sleep 20
       - id: deployment
         if: steps.changed.outputs.run == 'true'
         uses: actions/deploy-pages@v4
