@@ -1,3 +1,6 @@
+-- RUN 2026-11-24: the owner reported that ValueCommerce passed its review of the site. The site draws the 1x1 image
+-- inside each link (tools.js vcPixel), and the terms, the privacy policy (4) and the CSP name ValueCommerce (8dad10a).
+-- The link was tested from outside: it sets the ValueCommerce cookie and resolves to the Yahoo! Shopping page.
 -- 11-21: Yahoo! links through ValueCommerce (MyLink), prepared — NOT RUN YET.
 -- Run only after ValueCommerce finishes its review of the site "Aroid Origins" (sid 3789153): until then the
 -- dashboard says ads are not counted correctly. The program Yahoo!ショッピング(ヤフーショッピング) (2025875, 2%) is
@@ -18,3 +21,5 @@ from (values
   (7, 'https%3A%2F%2Fstore.shopping.yahoo.co.jp%2Fmiipas%2Fex00001s.html')              -- was https://yahoo.jp/wvAcFPy
 ) as v(id, enc)
 where public.affiliates.id = v.id;
+
+select id, product_name, yahoo from public.affiliates where id between 1 and 7 order by id;
