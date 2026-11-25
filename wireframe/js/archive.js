@@ -929,7 +929,18 @@
       if (newSec) ways2.insertAdjacentElement('afterend', newSec);
       // the four ways read as rows with counts
       ways.querySelectorAll('.way').forEach(function (w) { if (!w.querySelector('.n')) w.insertAdjacentHTML('beforeend', '<span class="n" data-wcount></span><span class="chev">›</span>'); });
+      // 写真を募集中 keeps its place from the start (it was added once the photos were in and pushed the rest down, 11-26);
+      // drawWantedRow fills it, or takes it away when every name has a photo
+      if (!ways.querySelector('.way--wanted')) {
+        var lbl = T('front_wanted_row'); if (!lbl || lbl === 'front_wanted_row') lbl = '写真を募集中';
+        var row = document.createElement('a');
+        row.className = 'way way--wanted'; row.href = base + 'wanted/'; row.setAttribute('data-nav', 'wanted');
+        row.innerHTML = '<span>' + esc(lbl) + '<small class="way__sub">&nbsp;</small></span><span class="n"></span><span class="chev">›</span>';
+        ways.appendChild(row);
+      }
     }
+    // the home takes its final order at once, not when the records are in (it changed under the reader, 11-26)
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arrangeHome); else arrangeHome();
     // the counts are drawn every time (also after the authority table, which folds people: board 17 T212)
     function homeCounts() {
       var ways = document.querySelector('.label-ways .ways');
@@ -938,6 +949,8 @@
       ways.querySelectorAll('.way').forEach(function (w) {
         var k = w.getAttribute('data-kind') || (w.getAttribute('data-nav') === 'people' ? 'people' : 'locality'); var el = w.querySelector('[data-wcount]');
         if (!el || !n[k]) return;
+        // people are counted the way the people index folds them: not before the authority table (37 → 36, 11-26)
+        if (k === 'people' && !_authority) return;
         if (k === 'species') el.innerHTML = speciesCountHtml(sp - und, und); else el.textContent = n[k];
       });
     }
@@ -1185,6 +1198,22 @@
     navigator.clipboard.writeText(_storyPost).then(function () { showToast(T('story_copied')); }, function () { showToast(T('story_copy_failed'), true); });
     if (typeof gtag === 'function') gtag('event', 'share_click', { channel: 'instagram_copy', source: 'story' });
   });
+  // The leaf of the day turns at 0 時 in Japan (it turned at 9 時, on the UTC day, until 11-26)
+  function storyDay() { return Math.floor((Date.now() + 9 * 36e5) / 864e5); }
+  // The leaf waits for every record (several seconds on a phone): a reader who has been here today sees the copy
+  // kept on their phone at once, and it is drawn again when the records are in (11-26)
+  var STORY_KEY = 'ao-story';
+  window.aoPaintStoryCopy = function () {
+    var body = document.getElementById('story-body');
+    if (!body || !body.querySelector('.loading-text')) return;
+    try {
+      var o = JSON.parse(localStorage.getItem(STORY_KEY) || 'null');
+      if (!o || o.day !== storyDay() || o.lang !== lang() || !o.html) return;
+      body.innerHTML = o.html;
+      var dateEl = document.getElementById('story-date');
+      if (dateEl && o.date) dateEl.textContent = o.date;
+    } catch (er) {}
+  };
   function renderStory(all) {
     var body = document.getElementById('story-body');
     var dateEl = document.getElementById('story-date');
@@ -1202,7 +1231,8 @@
     for (ti = 0; ti < tiers.length && !pool.length; ti++) pool = tiers[ti];
     if (!pool.length) { body.innerHTML = ''; return; }
     pool.sort(function (a, b) { return a.displayName.localeCompare(b.displayName); });
-    var d = pool[Math.floor(Date.now() / 864e5) % pool.length];
+    var day = storyDay();
+    var d = pool[day % pool.length];
     var thumb = thumbUrl(d.displayName);
     var text = lang() === 'en' ? d.textEn : d.text;
     var html = '';
@@ -1215,7 +1245,7 @@
     html += '<p class="story__body">' + (window.italicizeSciNames ? window.italicizeSciNames(esc(ex)) : esc(ex)) + '</p>';
     html += link(d, esc(T('story_more')), 'story__more');
     // the leaf changes every day: yesterday's is one tap away (board 17 T221; no streak counts)
-    var yd = pool.length > 1 ? pool[(Math.floor(Date.now() / 864e5) - 1 + pool.length) % pool.length] : null;
+    var yd = pool.length > 1 ? pool[(day - 1 + pool.length) % pool.length] : null;
     if (yd && yd !== d && lang() !== 'en') html += '<p class="story__yesterday">昨日の一葉: ' + link(yd, sciNameHtml(yd.shownName)) + '<span class="story__tomorrow">次の一葉は 0 時に替わります</span></p>';
     // for the owner's Instagram post: the text to paste and the 1080×1350 image made in CI (T94)
     if (d.state === 'ok' && window.ogSlug) {
@@ -1235,6 +1265,7 @@
     }
     body.innerHTML = html;
     if (window.linkGlossaryTerms) window.linkGlossaryTerms(body.querySelector('.story__body'), 3);
+    try { localStorage.setItem(STORY_KEY, JSON.stringify({ day: day, lang: lang(), html: body.innerHTML, date: dateEl ? dateEl.textContent : '' })); } catch (er) {}
   }
 
   function groupBy(list, keyFn) {
@@ -2606,6 +2637,7 @@
 
   /* boot */
   function boot() {
+    window.aoPaintStoryCopy();
     waitForData(function () {
       // thumbnails arrive shortly after the full fetch; give them a moment
       var tries = 0;

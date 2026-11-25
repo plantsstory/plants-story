@@ -1487,6 +1487,8 @@ div:has(> .gallery-carousel .gallery__empty) > .plate-policy { display: none; } 
 .genus-content .card--no-pad:empty, #people-body:has(> .loading-text), #locality-body:has(> .loading-text) { min-height: 70vh; }
 #recently-updated-grid:has(> .loading-text) { min-height: 560px; }
 #story-body:has(> .loading-text) { min-height: 520px; }
+/* the leaf on a phone: the 4:5 photo (full width, at most 390px wide) and about 308px of words below it (11-26: 名前を探す dropped ~250px when it came) */
+@media (max-width: 640px) { html.pv-label #story-body:has(> .loading-text) { min-height: calc(min(100vw, 390px) * 1.25 + 308px); } }
 #archive-index-body:has(> .loading-text) { min-height: 360px; }
 #detail-actions { min-height: var(--tap); }
 .loading-text { color: transparent; }
