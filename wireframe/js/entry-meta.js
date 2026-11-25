@@ -62,11 +62,20 @@
     var head = k ? (gk ? gk + '・' : '') + k + '（' + name + '）' : name;
     return head + what + (tail ? ' — ' + tail : '') + ' · Aroid Origins';
   }
+  /* Cut at the last sentence end (。．.!?！？) inside the limit, else at the last 、，, space or closing bracket,
+     so a description never stops in the middle of a word (site check 2026-11-25: 「…パ…」). Only when no break
+     falls in the second half of the limit is the text cut hard. */
+  function cutText(text, max) {
+    var head = text.slice(0, max - 1), floor = Math.floor(max / 2), i, ch;
+    for (i = head.length - 1; i >= floor; i--) { if ('。．!?！？'.indexOf(head.charAt(i)) !== -1 || (head.charAt(i) === '.' && /\s/.test(text.charAt(i + 1) || ' '))) return head.slice(0, i + 1); }
+    for (i = head.length - 1; i >= floor; i--) { ch = head.charAt(i); if ('、，,）)」』'.indexOf(ch) !== -1) return head.slice(0, i + 1) + '…'; if (/\s/.test(ch)) return head.slice(0, i) + '…'; }
+    return head + '…';
+  }
   function description(rec) {
     var name = displayName(rec);
     var o = records(rec)[0] || {}, s = o.structured || {};
     var text = clean(o.body) || clean(s.notes);
-    if (text.length > DESC_LEN) text = text.slice(0, DESC_LEN - 1) + '…';
+    if (text.length > DESC_LEN) text = cutText(text, DESC_LEN);
     if (!text) {
       var type = rec && rec.type && rec.type !== 'species' ? kind(rec) : (TYPE_JP[(rec && rec.type) || s.origin_type] || '');
       text = name + (type ? '（' + type + '）' : '') + 'の由来。誰が、いつ、どこで名付けたかを出典つきで記録しています。';

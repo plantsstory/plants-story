@@ -32,6 +32,9 @@
     if (!iso) return '';
     var d = new Date(iso);
     if (isNaN(d.getTime())) return '';
+    // the day in Japan, as the static pages print it: a reader abroad saw 2026.10.02 where the stub said 2026.10.03
+    // (site check 2026-11-25)
+    try { return d.toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' }).replace(/-/g, '.'); } catch (e) {}
     return d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0');
   }
   function visibleSlugs() {
