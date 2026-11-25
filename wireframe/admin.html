@@ -14,18 +14,19 @@
   <link rel="stylesheet" href="css/utilities.css">
   <link rel="stylesheet" href="css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/record-gate.js?v=20261125b"></script>
-  <script src="js/tool-gate.js?v=20261125b"></script>
-  <script src="js/admin-ledger.js?v=20261125b"></script>
-  <script src="js/admin-tools-research.js?v=20261125b"></script>
-  <script src="js/admin-tool-candidates.js?v=20261125b"></script>
-  <script src="js/admin-verify.js?v=20261125b"></script>
-  <script src="js/admin-contact.js?v=20261125b"></script>
-  <script src="js/admin-checks.js?v=20261125b"></script>
-  <script src="js/admin-suggest.js?v=20261125b"></script>
-  <script src="js/admin-shops.js?v=20261125b"></script>
-  <script src="js/admin-articles.js?v=20261125b"></script>
-  <script src="js/admin-nurseries.js?v=20261125b"></script>
+  <script src="js/record-gate.js?v=20261125c"></script>
+  <script src="js/entry-meta.js?v=20261125c"></script>
+  <script src="js/tool-gate.js?v=20261125c"></script>
+  <script src="js/admin-ledger.js?v=20261125c"></script>
+  <script src="js/admin-tools-research.js?v=20261125c"></script>
+  <script src="js/admin-tool-candidates.js?v=20261125c"></script>
+  <script src="js/admin-verify.js?v=20261125c"></script>
+  <script src="js/admin-contact.js?v=20261125c"></script>
+  <script src="js/admin-checks.js?v=20261125c"></script>
+  <script src="js/admin-suggest.js?v=20261125c"></script>
+  <script src="js/admin-shops.js?v=20261125c"></script>
+  <script src="js/admin-articles.js?v=20261125c"></script>
+  <script src="js/admin-nurseries.js?v=20261125c"></script>
 </head>
 <body>
 
@@ -1229,7 +1230,7 @@ function renderCultivarTable() {
     html += '<td>' + c.id + '</td>';
     html += '<td><strong>' + escapeHtml(c.cultivar_name) + '</strong></td>';
     html += '<td>' + escapeHtml(c.genus) + '</td>';
-    html += '<td>' + escapeHtml(c.type) + '</td>';
+    html += '<td>' + escapeHtml(window.EntryMeta ? window.EntryMeta.kind(c) : c.type) + '</td>';
     html += '<td>' + originCount + '</td>';
     html += '<td><span class="badge ' + statusClass + '">' + escapeHtml(c.ai_status || '-') + '</span></td>';
     html += '<td style="font-size:0.75rem;color:var(--color-gray);font-family:monospace;">' + escapeHtml(c.created_ip || '-') + '</td>';
@@ -1266,11 +1267,15 @@ function editCultivar(id) {
     html += '<option value="' + gObj.name + '"' + (c.genus === gObj.name ? ' selected' : '') + '>' + gObj.name + '</option>';
   });
   html += '</select>';
-  html += '<label>タイプ</label><select id="edit-type">';
-  ['species', 'hybrid', 'clone', 'seedling'].forEach(function(t) {
-    html += '<option value="' + t + '"' + (c.type === t ? ' selected' : '') + '>' + t + '</option>';
+  // the kind in two parts (11-25): 原種 / Hybrid / 不明 (or 実生), and Clone as a tick — kept as type + tag parentage:X
+  var par = c.type === 'seedling' ? 'seedling' : (window.EntryMeta ? window.EntryMeta.parentage(c) : (c.type === 'hybrid' ? 'hybrid' : c.type === 'species' ? 'species' : 'unknown'));
+  html += '<label>区分（何から来た株か）</label><select id="edit-parentage">';
+  [['species', '原種'], ['hybrid', 'Hybrid'], ['unknown', '不明'], ['seedling', '実生']].forEach(function(o) {
+    html += '<option value="' + o[0] + '"' + (par === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
   });
   html += '</select>';
+  html += '<label style="display:flex;gap:8px;align-items:center;margin-top:var(--space-sm);"><input type="checkbox" id="edit-clone"' + (c.type === 'clone' ? ' checked' : '') + '> 1 株だけの名前（Clone）</label>';
+  html += '<p style="font-size:0.8rem;color:var(--color-gray);margin:4px 0 0;">表示は「Hybrid・Clone」のように並びます。不明＝野生か交配か確かめられる出典がない。実生のときは Clone は使いません。</p>';
   if (isSeedling) {
     html += '<hr style="margin:var(--space-md) 0;">';
     html += '<h3 style="font-size:1rem;margin-bottom:var(--space-sm);">交配情報</h3>';
@@ -1305,7 +1310,8 @@ function editCultivar(id) {
 async function saveCultivar(id) {
   var name = document.getElementById('edit-name').value.trim();
   var genus = document.getElementById('edit-genus').value;
-  var type = document.getElementById('edit-type').value;
+  var parSel = document.getElementById('edit-parentage').value, isClone = document.getElementById('edit-clone').checked;
+  var type = parSel === 'seedling' ? 'seedling' : isClone ? 'clone' : (parSel === 'species' ? 'species' : 'hybrid');
   if (!name) { toast('品種名を入力してください'); return; }
 
   // Handle seedling formula fields and parent photo uploads
@@ -1381,6 +1387,10 @@ async function saveCultivar(id) {
   var updateData = {
     cultivar_name: name, genus: genus, type: type, updated_at: new Date().toISOString()
   };
+  // the parentage tag goes on Hybrid and Clone rows only; the other tags stay as they are
+  var keptTags = ((c && c.tags) || []).filter(function(t) { return !/^parentage:/.test(t); });
+  if (type === 'hybrid' || type === 'clone') keptTags.push('parentage:' + parSel);
+  updateData.tags = keptTags.length ? keptTags : null;
   if (updatedOrigins) updateData.origins = updatedOrigins;
 
   var result = await sb.from('cultivars').update(updateData).eq('id', id);
