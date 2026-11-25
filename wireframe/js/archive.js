@@ -442,14 +442,21 @@
   function siteCounts() {
     var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
     var thumbs = window._thumbMap || {};
-    var seen = {}, n = { species: 0, undescribed: 0, synonyms: 0, cultivar: 0, wanted: 0 }, people = {}, places = {};
+    var seen = {}, n = { species: 0, undescribed: 0, synonyms: 0, cultivar: 0, hybrid: 0, unknown: 0, clone: 0, wanted: 0 }, people = {}, places = {};
     Object.keys(store).forEach(function (k) {
       var e = store[k]; if (!e || seen[e._id || k] || / \[Seedling\]$/.test(k)) return; seen[e._id || k] = true;
       var d; try { d = describe(k, e, e._type); } catch (er) { return; }
       if (d.state !== 'ok' || d.type === 'seedling' || !shownGenus(d)) return;
       if (!d.isIndividual) { peopleOf(d).forEach(function (p) { people[p] = 1; }); if (d.country) places[d.country] = 1; }
       if (d.isSynonym) { n.synonyms++; return; }
-      if (d.type === 'species') { if (isUndescribed(d)) n.undescribed++; else n.species++; } else n.cultivar++;
+      if (d.type === 'species') { if (isUndescribed(d)) n.undescribed++; else n.species++; }
+      else {
+        // 「Hybrid を探す」 counts Hybrid with its Clones, 「Clone を探す」 every Clone (they overlap, like the list chips)
+        n.cultivar++;
+        var par = window.EntryMeta ? window.EntryMeta.parentage({ type: d.type, tags: d.tags }) : (d.type === 'hybrid' ? 'hybrid' : 'unknown');
+        if (par === 'hybrid') n.hybrid++; else if (par === 'unknown') n.unknown++;
+        if (d.type === 'clone') n.clone++;
+      }
       if (!thumbs[d.displayName] && !d.isIndividual) n.wanted++;
     });
     n.people = Object.keys(people).length; n.locality = Object.keys(places).length;
@@ -577,7 +584,7 @@
     waitForData(function () { loadAuthority(function () {
       var n = siteCounts();
       var set = function (key, v) { var el = page.querySelector('[data-count="' + key + '"]'); if (el) el.textContent = v ? String(v) : ''; };
-      set('hybrid', n.cultivar);
+      set('hybrid', n.hybrid); set('clone', n.clone);
       var spEl = page.querySelector('[data-count="species"]');
       if (spEl) spEl.innerHTML = speciesCountHtml(n.species, n.undescribed); set('people', n.people); set('places', n.locality); set('wanted', n.wanted);
       // the explore search box behaves like the top one
@@ -957,20 +964,50 @@
     setTimeout(drawPlate, 400);
   }
 
-  // 「交配をたどる」 lands on the genus list with the Hybrid chip chosen (?kind=hybrid)
+  // An entry (原種を探す / Hybrid を探す / Clone を探す / ?kind=…) lands on the genus list with that kind chosen.
+  // The kind is also kept for a few seconds in this tab: on a first visit a new version reloads the page at the
+  // first page change, and the kind was lost then (11-25). The list can be drawn again after the first moment
+  // (its chips start over at すべて), so it is chosen once more at each of these times; a kind the reader picks
+  // afterwards is theirs and is left alone.
+  var KIND_KEY = 'ao-kind';
+  function storedKind() {
+    try { var o = JSON.parse(sessionStorage.getItem(KIND_KEY) || 'null'); return o && Date.now() - o.t < 15000 ? o.k : ''; } catch (er) { return ''; }
+  }
+  function forgetKind() { try { sessionStorage.removeItem(KIND_KEY); } catch (er) {} }
   document.addEventListener('ao:page', function (e) {
     if (e.detail !== 'genus') return;
-    var kind = new URLSearchParams(location.search).get('kind') || (window._pendingKind || '');
+    var kind = new URLSearchParams(location.search).get('kind') || window._pendingKind || storedKind();
     window._pendingKind = '';
     if (!kind) return;
-    setTimeout(function () {
-      var chip = document.querySelector('#page-genus .filter-chip[data-filter-type="' + kind + '"], .page.active .filter-chip[data-filter-type="' + kind + '"]');
-      if (chip && !chip.classList.contains('active')) chip.click();
-    }, 80);
+    window._kindTouched = false;
+    [80, 500, 1200, 2500].forEach(function (ms) {
+      setTimeout(function () {
+        var pg = document.getElementById('page-genus');
+        if (!pg || !pg.classList.contains('active') || window._kindTouched) return;
+        var chip = document.querySelector('#page-genus .filter-chip[data-filter-type="' + kind + '"], .page.active .filter-chip[data-filter-type="' + kind + '"]');
+        if (chip && !chip.classList.contains('active')) chip.click();
+      }, ms);
+    });
+    setTimeout(forgetKind, 3000);
+  });
+  function readerChose() { window._kindTouched = true; forgetKind(); }
+  document.addEventListener('click', function (e) {
+    var c = e.target.closest && e.target.closest('.filter-chip[data-filter-type]');
+    if (!c) return;
+    if (e.isTrusted) readerChose();
+    // phones show the kind as a select: it says the chosen kind too (it stayed on すべて, 11-25)
+    var bar = c.closest('.sort-bar'), sel = bar && bar.querySelector('.filter-select');
+    var v = c.getAttribute('data-filter-type');
+    if (sel && [].some.call(sel.options, function (o) { return o.value === v; })) sel.value = v;
+  });
+  document.addEventListener('change', function (e) {
+    if (e.target && e.target.matches && e.target.matches('.filter-select') && e.isTrusted) readerChose();
   });
   document.addEventListener('click', function (e) {
     var a = e.target.closest && e.target.closest('a[data-kind]');
-    if (a) window._pendingKind = a.getAttribute('data-kind');
+    if (!a) return;
+    window._pendingKind = a.getAttribute('data-kind');
+    try { sessionStorage.setItem(KIND_KEY, JSON.stringify({ k: window._pendingKind, t: Date.now() })); } catch (er) {}
   }, true);
 
   /* ---------- 読みもの (board 12): articles by people who know these plants ---------- */
