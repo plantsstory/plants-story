@@ -8,6 +8,7 @@ const path = require('path');
 const { Resvg } = require('@resvg/resvg-js');
 const { ogSlug } = require('./lib/og-slug');
 const RecordGate = require('../wireframe/js/record-gate');
+const EntryMeta = require('../wireframe/js/entry-meta');
 
 const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
@@ -64,7 +65,7 @@ function cardSvg(c, photoDataUri) {
   const state = RecordGate.state(c);
   const n = RecordGate.visibleCount(c);
   const no = 'NO. ' + String(c.id || 0).padStart(3, '0');
-  const kind = isIndividual ? 'INDIVIDUAL' : (TYPE_EN[type] || type.toUpperCase());
+  const kind = type === 'species' && !isIndividual ? 'SPECIES' : type === 'seedling' ? 'SEEDLING' : EntryMeta.kind(isIndividual ? { type: 'clone', tags: ['individual'] } : c, true).toUpperCase().replace(' · ', ' ');
 
   // cite line and the two mono rows
   let cite, row1k, row1v, row2k, row2v;

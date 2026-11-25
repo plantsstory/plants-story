@@ -69,7 +69,8 @@ function staticEntryHtml(c, ctx) {
   const q = String(c.species_qualifier || '').toLowerCase().replace(/\./g, '');
   const undescribed = type === 'species' && (q === 'sp' || q === 'aff' || q === 'cf' || (s.species_status && s.species_status !== 'described'));
   const individual = (c.tags || []).indexOf('individual') !== -1;
-  const kind = individual ? '個体' : undescribed ? '未記載' : (TYPE_JP[type] || '');
+  // the kind in two parts (owner, 11-25): 原種 / Hybrid / 不明, ・Clone for a one-plant name
+  const kind = individual ? EntryMeta.kind({ type: 'clone', tags: ['individual'] }) : undescribed ? '未記載' : type === 'species' ? '原種' : (EntryMeta.kind(c) || TYPE_JP[type] || '');
   const name = EntryMeta.name(c);
   const yearOf = v => (String(v || '').match(/\b(1[6-9]\d{2}|20\d{2})\b/) || [''])[0];
   const absent = s.absent || {};
@@ -220,7 +221,7 @@ async function main() {
 
   const countByGenus = {};
   for (const c of publicCultivars) {
-    if ((c.tags || []).includes('individual') || RecordGate.state(c) !== 'ok') continue; // recorded entries only
+    if (RecordGate.state(c) !== 'ok') continue; // recorded entries only (individuals count since 11-25)
     const g = c.genus || 'Anthurium';
     countByGenus[g] = (countByGenus[g] || 0) + 1;
   }
@@ -284,7 +285,7 @@ async function main() {
   const listKey = n => String(n).replace(/^\S+\s+/, '').replace(/['"‘’“”]/g, '').replace(/^(sp|aff|cf)\.\s*/i, '').toLowerCase();
   const entryOrder = {};
   for (const c of publicCultivars) {
-    if ((c.tags || []).includes('individual') || RecordGate.state(c) !== 'ok') continue;
+    if (RecordGate.state(c) !== 'ok') continue;
     (entryOrder[c.genus || 'Anthurium'] = entryOrder[c.genus || 'Anthurium'] || []).push(c);
   }
   for (const k of Object.keys(entryOrder)) entryOrder[k].sort((a, b) => ((KIND_RANK[a.type] || 0) - (KIND_RANK[b.type] || 0)) || listKey(a.cultivar_name).localeCompare(listKey(b.cultivar_name)));

@@ -181,7 +181,8 @@ function nameNearly(item, query) {
 window.foldName = foldName; window.nameMatches = nameMatches; window.nameNearly = nameNearly;
 function getBadgeInfo(type, name) { return { cls: 'badge--' + (type || 'species'), txt: type || 'species' }; }
 function paginateGenus(genusEl, page) {}
-// An "individual" is a numbered/named single plant of a species ('HR1'); it lives on the species page, not in lists
+// An "individual" is a numbered/named single plant of a species ('HR1'): 原種・Clone. Since 11-25 it is in the lists
+// (under Clone) and still on its species page
 function isIndividualItem(it) { var tg = it && it.entry && it.entry._tags; return !!(tg && tg.indexOf('individual') !== -1); }
 window.isIndividualItem = isIndividualItem;
 // Row-like object for the shared record gate (wireframe/js/record-gate.js)
@@ -1645,14 +1646,15 @@ if (false) {
       // phones: the two rows of chips become two selects on one line (the chips stay as the state the list reads)
       html += '<div class="sort-selects">';
       html += '<select class="sort-select" aria-label="' + escHtml(t('sort_label')) + '"><option value="name" data-i18n="sort_name">名前順</option><option value="trust" data-i18n="sort_trust">信頼度順</option><option value="newest" data-i18n="sort_newest">新着順</option></select>';
-      html += '<select class="filter-select" aria-label="' + escHtml(t('filter_label')) + '"><option value="all" data-i18n="filter_all_type">すべて</option><option value="species" data-i18n="filter_species">原種</option><option value="hybrid" data-i18n="filter_hybrid">Hybrid</option><option value="clone" data-i18n="filter_clone">Clone</option></select>';
+      html += '<select class="filter-select" aria-label="' + escHtml(t('filter_label')) + '"><option value="all" data-i18n="filter_all_type">すべて</option><option value="species" data-i18n="filter_species">原種</option><option value="hybrid" data-i18n="filter_hybrid">Hybrid</option><option value="unknown" data-i18n="filter_unknown">不明</option><option value="clone" data-i18n="filter_clone">Clone</option></select>';
       html += '</div>';
       html += '<div class="chips filter-chips">';
       html += '<button type="button" class="chip filter-chip active" aria-pressed="true" data-filter-type="all" data-i18n="filter_all_type">すべて</button>';
       html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="species" data-i18n="filter_species">原種</button>';
       html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="cultivar" data-i18n="filter_cultivar">Clone・Hybrid</button>';
-      html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="clone" data-i18n="filter_clone">Clone</button>';
       html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="hybrid" data-i18n="filter_hybrid">Hybrid</button>';
+      html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="unknown" data-i18n="filter_unknown">不明</button>';
+      html += '<button type="button" class="chip filter-chip" aria-pressed="false" data-filter-type="clone" data-i18n="filter_clone">Clone</button>';
       html += '</div>';
       html += '<p class="kind-note" aria-live="polite" hidden></p>';
       html += '<a href="#" class="genus-add-link" data-nav="contribute" data-genus="' + g.name + '" data-i18n="add_cultivar">新しい種・品種を登録</a>';
@@ -2969,7 +2971,7 @@ if (false) {
         var countEl = card.querySelector('.genus-card__count');
         if (countEl) {
           // genus cards count recorded entries only (BOARD gate)
-          var total = (_genusItems[g] || []).filter(function(it) { return it.meta.type !== 'seedling' && !isIndividualItem(it) && recordStateOf(it.fullName, it.entry, it.meta) === 'ok'; }).length;
+          var total = (_genusItems[g] || []).filter(function(it) { return it.meta.type !== 'seedling' && recordStateOf(it.fullName, it.entry, it.meta) === 'ok'; }).length;
           countEl.textContent = total + (currentLang === 'en' ? ' Cultivars' : ' 品種');
         }
       }
@@ -2981,12 +2983,12 @@ if (false) {
   function refreshGenusStats(slug) {
     var statsEl = document.getElementById('genus-stats-' + slug);
     if (!statsEl) return;
-    // same count as the top page: 収録 = recorded entries, no seedlings, no individuals
-    var items = (_genusItems[slug] || []).filter(function(it) { return it.meta.type !== 'seedling' && !isIndividualItem(it) && recordStateOf(it.fullName, it.entry, it.meta) === 'ok'; });
+    // same count as the top page: 収録 = recorded entries, no seedlings (individuals count since 11-25)
+    var items = (_genusItems[slug] || []).filter(function(it) { return it.meta.type !== 'seedling' && recordStateOf(it.fullName, it.entry, it.meta) === 'ok'; });
     if (items.length === 0) { statsEl.style.display = 'none'; return; }
-    var short = (_genusItems[slug] || []).filter(function(it) { return it.meta.type !== 'seedling' && !isIndividualItem(it) && recordStateOf(it.fullName, it.entry, it.meta) === 'unrecorded'; }).length;
+    var short = (_genusItems[slug] || []).filter(function(it) { return it.meta.type !== 'seedling' && recordStateOf(it.fullName, it.entry, it.meta) === 'unrecorded'; }).length;
 
-    var speciesCount = 0, hybridCount = 0, cloneCount = 0, undescribedCount = 0, synonymCount = 0;
+    var speciesCount = 0, hybridCount = 0, cloneCount = 0, undescribedCount = 0, synonymCount = 0, unknownCount = 0;
     items.forEach(function(it) {
       var t = it.meta.type || '';
       // a synonym is listed under its own name but is not one more species (board 16 T1)
@@ -2994,19 +2996,24 @@ if (false) {
       // sp. / aff. / unresolved names are listed, but not counted as species (board 15 T8)
       if (t === 'species' && window.entryUndescribed && window.entryUndescribed(it.fullName, it.entry, 'species')) undescribedCount++;
       else if (t === 'species') speciesCount++;
-      else if (t === 'hybrid') hybridCount++;
-      else if (t === 'clone') cloneCount++;
+      else {
+        // the two parts of the kind (11-25): Hybrid / 不明 by origin, and every Clone besides
+        var par = window.EntryMeta ? window.EntryMeta.parentage({ type: t, tags: (it.entry && it.entry._tags) || [] }) : (t === 'hybrid' ? 'hybrid' : 'unknown');
+        if (par === 'hybrid') hybridCount++; else if (par === 'unknown') unknownCount++;
+        if (t === 'clone') cloneCount++;
+      }
     });
 
     var chipsEl = statsEl.querySelector('.genus-stats__chips');
     if (chipsEl) {
       var en = currentLang === 'en';
-      // one line: 収録 40 品種 · 原種 32 · Hybrid 3 · Clone 5 · 記録不足 1
+      // one line: 収録 45 件 · 原種 27 · Hybrid 7 · 不明 4 · Clone 8 · 記録不足 1 (Clone overlaps the others)
       var html = '<span class="genus-stat-chip">' + (en ? 'Recorded ' : '収録 ') + '<b>' + items.length + '</b>' + (en ? '' : ' 件') + '</span>';
       if (speciesCount > 0) html += '<span class="genus-stat-chip">' + (en ? 'Species ' : '原種 ') + speciesCount + '</span>';
       if (undescribedCount > 0) html += '<span class="genus-stat-chip">' + (en ? 'Undescribed ' : '未記載 ') + undescribedCount + '</span>';
       if (synonymCount > 0) html += '<span class="genus-stat-chip">' + (en ? 'Synonyms ' : '異名 ') + synonymCount + '</span>';
       if (hybridCount > 0) html += '<span class="genus-stat-chip">Hybrid ' + hybridCount + '</span>';
+      if (unknownCount > 0) html += '<span class="genus-stat-chip">' + (en ? 'Unknown origin ' : '不明 ') + unknownCount + '</span>';
       if (cloneCount > 0) html += '<span class="genus-stat-chip">Clone ' + cloneCount + '</span>';
       if (short > 0) html += '<span class="genus-stat-chip">' + (en ? 'Short of a record ' : '記録不足 ') + short + '</span>';
       chipsEl.innerHTML = html;

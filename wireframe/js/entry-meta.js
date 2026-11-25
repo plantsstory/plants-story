@@ -68,12 +68,39 @@
     var text = clean(o.body) || clean(s.notes);
     if (text.length > DESC_LEN) text = text.slice(0, DESC_LEN - 1) + '…';
     if (!text) {
-      var type = TYPE_JP[(rec && rec.type) || s.origin_type] || '';
+      var type = rec && rec.type && rec.type !== 'species' ? kind(rec) : (TYPE_JP[(rec && rec.type) || s.origin_type] || '');
       text = name + (type ? '（' + type + '）' : '') + 'の由来。誰が、いつ、どこで名付けたかを出典つきで記録しています。';
     }
     var aliases = ((rec && rec.aliases) || []).map(clean).filter(function (a, i, arr) { return a && a !== name && arr.indexOf(a) === i; }).slice(0, 3);
     return text + (aliases.length ? ' 別名: ' + aliases.join('、') : '');
   }
 
-  return { title: title, description: description, kana: kana, name: displayName };
+  /* The kind in two parts (owner, 11-25): what the plant comes from — 原種 / Hybrid / 不明 — and whether the
+     name covers one plant only (Clone). Stored as the row's type (species / hybrid / clone / seedling) plus a tag
+     parentage:species|hybrid|unknown on Hybrid and Clone rows. Without the tag: an individual is 原種, a Hybrid
+     row is Hybrid, a Clone row is 不明 (never guessed as Hybrid). */
+  var PARENTAGE_JP = { species: '原種', hybrid: 'Hybrid', unknown: '不明' };
+  var PARENTAGE_EN = { species: 'Species', hybrid: 'Hybrid', unknown: 'Unknown origin' };
+  function parentage(rec) {
+    var type = String((rec && rec.type) || 'species');
+    if (type === 'species') return 'species';
+    if (type === 'seedling') return '';
+    var tags = (rec && rec.tags) || [];
+    for (var i = 0; i < tags.length; i++) {
+      var m = /^parentage:(species|hybrid|unknown)$/.exec(tags[i]);
+      if (m) return m[1];
+    }
+    if (tags.indexOf('individual') !== -1) return 'species';
+    return type === 'hybrid' ? 'hybrid' : 'unknown';
+  }
+  function isClone(rec) { return String((rec && rec.type) || '') === 'clone'; }
+  // 「Hybrid・Clone」「原種・Clone」「不明」… ; a species row is just 原種 (the caller adds 未記載・異名)
+  function kind(rec, en) {
+    var type = String((rec && rec.type) || 'species');
+    if (type === 'seedling') return en ? 'Seedling' : '実生';
+    var p = parentage(rec), word = (en ? PARENTAGE_EN : PARENTAGE_JP)[p] || '';
+    return isClone(rec) ? word + (en ? ' · Clone' : '・Clone') : word;
+  }
+
+  return { title: title, description: description, kana: kana, name: displayName, parentage: parentage, isClone: isClone, kind: kind };
 });

@@ -135,6 +135,10 @@
     "jp": "Hybrid",
     "en": "Hybrid"
   },
+  "filter_unknown": {
+    "jp": "不明",
+    "en": "Unknown origin"
+  },
   "filter_clone": {
     "jp": "Clone",
     "en": "Clone"
@@ -513,8 +517,8 @@
     "en": "Terms of Service"
   },
   "terms_updated": {
-    "jp": "最終更新 2026.11.24",
-    "en": "Last updated 2026.11.24"
+    "jp": "最終更新 2026.11.25",
+    "en": "Last updated 2026.11.25"
   },
   "terms_1_title": {
     "jp": "第1条 適用範囲",
@@ -529,7 +533,7 @@
     "en": "Article 2: Service Description"
   },
   "terms_2_body": {
-    "jp": "本サービスは、植物の品種（原種・Hybrid・Clone・実生）の由来情報を収集・共有するプラットフォームです。閲覧・投稿を含むすべての機能を無料で提供します。主な機能は以下の通りです：",
+    "jp": "本サービスは、植物の品種（原種・Hybrid・不明・Clone・実生）の由来情報を収集・共有するプラットフォームです。閲覧・投稿を含むすべての機能を無料で提供します。主な機能は以下の通りです：",
     "en": "This service is a platform for collecting and sharing the origins of plant names (species, hybrids, clones and seedlings). Every feature, reading and contributing alike, is free. The main features are:"
   },
   "terms_2_list": {
@@ -553,7 +557,7 @@
     "en": "Article 4: AI-Generated Content"
   },
   "terms_4_body": {
-    "jp": "原種およびクローンについては、AIが公開情報および学名データベースに基づいて由来情報を自動生成・検証する場合があります。ハイブリッドは投稿内容をそのまま掲載し、AI調査は運営が承認したリクエストに対してのみ実行します。実生にAI調査は行いません。AIが関与した記録には「AI」の表示と出典・信頼度を併記します。運営者はAI生成コンテンツの正確性を保証しません。重要な判断に利用する場合は、独自に情報を検証してください。",
+    "jp": "原種およびクローンについては、AIが公開情報および学名データベースに基づいて由来情報を自動生成・検証する場合があります。Clone の印のない Hybrid と不明は投稿内容をそのまま掲載し、AI調査は運営が承認したリクエストに対してのみ実行します。実生にAI調査は行いません。AIが関与した記録には「AI」の表示と出典・信頼度を併記します。運営者はAI生成コンテンツの正確性を保証しません。重要な判断に利用する場合は、独自に情報を検証してください。",
     "en": "For species and clones, AI may draft or verify origin records from public information and botanical name databases. Hybrid entries are published as submitted; AI research runs only on requests approved by the operator. No AI research is performed on seedling records. Records involving AI are labelled and shown with their sources and trust score. The operator does not guarantee the accuracy of AI-generated content; verify independently before relying on it."
   },
   "terms_5_title": {
@@ -1625,8 +1629,8 @@
     "en": "No numbered or named plants of this species are recorded yet."
   },
   "type_individual": {
-    "jp": "個体",
-    "en": "Individual"
+    "jp": "原種・Clone",
+    "en": "Species · Clone"
   },
   "spec_selected_from": {
     "jp": "種",
@@ -2157,7 +2161,7 @@
     "en": "Article 9-2 Fees"
   },
   "terms_9a_body": {
-    "jp": "本サービスの閲覧、投稿（原種・Hybrid・Clone・個体・実生）、写真の追加、標本ラベルの印刷、記録の書き出しは無料です。有料の会員制度はありません。将来、有料の機能を設ける場合は、開始の30日前までにサイトでお知らせします。それまでに記録したものは、その後も残ります。",
+    "jp": "本サービスの閲覧、投稿（原種・Hybrid・不明・Clone・ナンバリング個体・実生）、写真の追加、標本ラベルの印刷、記録の書き出しは無料です。有料の会員制度はありません。将来、有料の機能を設ける場合は、開始の30日前までにサイトでお知らせします。それまでに記録したものは、その後も残ります。",
     "en": "Reading, contributing (species, hybrids, clones, individuals and seedlings), adding photos, printing specimen labels and exporting your records are free. There is no paid membership. Should a paid feature be introduced, it will be announced on the site at least 30 days before it starts, and whatever you recorded before then stays."
   },
   "tokushoho_notice": {
@@ -2273,8 +2277,8 @@
     "en": "source"
   },
   "kind_individual": {
-    "jp": "個体",
-    "en": "Individual"
+    "jp": "原種・Clone",
+    "en": "Species · Clone"
   },
   "kind_seedling": {
     "jp": "実生",

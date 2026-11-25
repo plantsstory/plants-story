@@ -1264,9 +1264,15 @@ function getFilteredItems(genusEl) {
     var isSeedling = item.meta.type === 'seedling';
     if (isSeedlingView && !isSeedling) return false;
     if (!isSeedlingView && isSeedling) return false;
-    if (!isSeedlingView && isIndividualItem(item)) return false; // folded under the species row
-    if (filterType === 'cultivar') { if (item.meta.type !== 'clone' && item.meta.type !== 'hybrid') return false; }
-    else if (filterType !== 'all' && item.meta.type !== filterType) return false;
+    // the kind in two parts (11-25): 原種 = the species themselves; Hybrid / 不明 by origin (with their Clones);
+    // Clone = every Clone, the individuals (原種・Clone) included
+    var t = item.meta.type;
+    var par = window.EntryMeta ? window.EntryMeta.parentage({ type: t, tags: item.entry._tags || [] }) : (t === 'hybrid' ? 'hybrid' : t === 'species' ? 'species' : 'unknown');
+    if (filterType === 'cultivar') { if (t !== 'clone' && t !== 'hybrid') return false; }
+    else if (filterType === 'species') { if (t !== 'species') return false; }
+    else if (filterType === 'clone') { if (t !== 'clone') return false; }
+    else if (filterType === 'hybrid' || filterType === 'unknown') { if (t === 'species' || par !== filterType) return false; }
+    else if (filterType !== 'all' && t !== filterType) return false;
     if (q) {
       var nameMatch = nameMatches(item, q);
       var fqName = foldName(q);
@@ -1339,7 +1345,8 @@ function paginateGenusFromServer(genusEl, page) {
   var isSeedlingView = scope.getAttribute('data-genus-view') === 'seedlings';
   var activeFilterChip = scope.querySelector('.filter-chip.active');
   var filterType = activeFilterChip ? activeFilterChip.getAttribute('data-filter-type') : 'all';
-  var typeFilter = isSeedlingView ? 'seedling' : filterType;
+  // the server's filter knows the stored types only; 不明 waits for the full list (a moment later)
+  var typeFilter = isSeedlingView ? 'seedling' : (filterType === 'unknown' ? 'all' : filterType);
 
   var searchInput = scope.querySelector('.search-bar__input');
   var searchQuery = (searchInput ? searchInput.value.trim() : '') || null;

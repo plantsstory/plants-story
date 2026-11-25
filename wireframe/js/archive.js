@@ -350,11 +350,14 @@
     var q = String(d.qualifier || '').toLowerCase().replace(/\./g, '');
     return q === 'sp' || q === 'aff' || q === 'cf' || (!!d.speciesStatus && d.speciesStatus !== 'described');
   }
+  // 原種 / Hybrid / 不明, with ・Clone when the name covers one plant only (owner, 11-25; EntryMeta.kind)
   function kindWord(d) {
-    if (d.isIndividual) return T('kind_individual');
+    var en = typeof currentLang !== 'undefined' && currentLang === 'en';
+    if (d.isIndividual) return window.EntryMeta ? window.EntryMeta.kind({ type: 'clone', tags: ['individual'] }, en) : T('kind_individual');
     if (d.isSynonym) return T('kind_synonym');
     if (d.type === 'species') return String(d.qualifier || '').toLowerCase().replace(/\./g, '') === 'cf' ? T('kind_cf') : isUndescribed(d) ? T('kind_undescribed') : T('kind_species');
     if (d.type === 'seedling') return T('kind_seedling');
+    if (window.EntryMeta) return window.EntryMeta.kind({ type: d.type, tags: d.tags }, en);
     return d.type === 'hybrid' ? 'Hybrid' : d.type === 'clone' ? 'Clone' : String(d.type || '');
   }
   function entrySubHtml(d, opts) {
@@ -434,7 +437,7 @@
   // only the genera the site shows (Anthurium for now): hidden genera stay out of /wanted/ and /ig/ (board 11)
   var shownGenus = function (d) { var gs = window._generaData || []; return !gs.length || gs.some(function (g) { return g.name === d.genus; }); };
   // the site's counts, the same on every screen (board 17 T212): recorded entries of the shown genera, without
-  // individuals and seedlings. A synonym is not one more species and asks for no photo (its photos go to the
+  // seedlings. Individuals (原種・Clone) are counted since 11-25, but add no people or places and ask for no photo. A synonym is not one more species and asks for no photo (its photos go to the
   // accepted name); its people and places are those of the accepted name anyway.
   function siteCounts() {
     var store = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
@@ -443,12 +446,11 @@
     Object.keys(store).forEach(function (k) {
       var e = store[k]; if (!e || seen[e._id || k] || / \[Seedling\]$/.test(k)) return; seen[e._id || k] = true;
       var d; try { d = describe(k, e, e._type); } catch (er) { return; }
-      if (d.state !== 'ok' || d.isIndividual || d.type === 'seedling' || !shownGenus(d)) return;
-      peopleOf(d).forEach(function (p) { people[p] = 1; });
-      if (d.country) places[d.country] = 1;
+      if (d.state !== 'ok' || d.type === 'seedling' || !shownGenus(d)) return;
+      if (!d.isIndividual) { peopleOf(d).forEach(function (p) { people[p] = 1; }); if (d.country) places[d.country] = 1; }
       if (d.isSynonym) { n.synonyms++; return; }
       if (d.type === 'species') { if (isUndescribed(d)) n.undescribed++; else n.species++; } else n.cultivar++;
-      if (!thumbs[d.displayName]) n.wanted++;
+      if (!thumbs[d.displayName] && !d.isIndividual) n.wanted++;
     });
     n.people = Object.keys(people).length; n.locality = Object.keys(places).length;
     return n;
@@ -630,7 +632,7 @@
     var fq = fold(q);
     if (fq.length < 2 || !window._dataFullyLoaded) return [];
     var ix = searchIndex(), store = window.cultivarData || {};
-    var plants = ix.all.filter(function (d) { return !d.isIndividual && d.type !== 'seedling'; }).map(function (d) {
+    var plants = ix.all.filter(function (d) { return d.type !== 'seedling'; }).map(function (d) {
       var keys = [d.displayName, d.epithet].concat((store[d.fullName] || {})._aliases || []).map(fold).filter(Boolean);
       var rank = keys.indexOf(fq) !== -1 ? 0 : keys.some(function (k) { return k.indexOf(fq) === 0; }) ? 1 : keys.some(function (k) { return k.indexOf(fq) !== -1; }) ? 2 : 9;
       return { d: d, rank: rank };
@@ -730,10 +732,11 @@
 
   /* ---------- the kind chips say what the kind is, in one line (board 14 T183) ---------- */
   var KIND_NOTE = {
-    species: '原種＝自然に生えている種。学名が発表されたものと、まだ名前のないもの（sp.）を含みます。',
-    cultivar: '品種＝人が選んで名前を付けた株。Clone と Hybrid をまとめて表示しています。',
-    hybrid: 'Hybrid＝交配で生まれた兄弟株に付けた名前。同じ名前でも株ごとに姿が少しずつ違います。',
-    clone: 'Clone＝1株から株分けなどで増やした株の名前。もとの1株と同じ性質です。'
+    species: '原種＝自然に生えている種。学名が発表されたものと、まだ名前のないもの（sp.）を含みます。原種の 1 株につけた名前は Clone に並びます。',
+    cultivar: '品種＝人が選んで名前を付けた株。Hybrid・不明・Clone をまとめて表示しています。',
+    hybrid: 'Hybrid＝交配でできた株の名前。1 株だけの名前（Hybrid・Clone）も含みます。',
+    unknown: '不明＝野生の種か交配か、確かめられる出典がない名前。推測で Hybrid にはしません。',
+    clone: 'Clone＝1 株と、その株分け・組織培養で増えた株だけが名乗る名前。原種・Hybrid・不明のどれにもあります。'
   };
   function showKindNote(scope, kind) {
     var p = scope && scope.querySelector('.kind-note');
@@ -1101,7 +1104,7 @@
   }
 
   function renderLedgerStats(all) {
-    var entries = all.filter(function (d) { return d.type !== 'seedling' && !d.isIndividual && d.state === 'ok'; });
+    var entries = all.filter(function (d) { return d.type !== 'seedling' && d.state === 'ok'; });
     var years = entries.map(function (d) { return d.type === 'species' ? d.pubYear : null; }).filter(Boolean);
     var countries = {};
     entries.forEach(function (d) { if (d.country) countries[d.country] = 1; });
@@ -1280,7 +1283,7 @@
     if (!document.getElementById('story-body')) return;
     var all = collectAll();
     _front = all;
-    var pub = all.filter(function (d) { return !d.isIndividual; }); // individuals are not separate entries
+    var pub = all; // individuals (原種・Clone) are names in the lists since 11-25
     renderMastheadGenera(pub);
     renderLedgerStats(pub);
     renderStory(all);
@@ -2940,7 +2943,7 @@
     var sciHtml = function (t) { return typeof italicizeSciNames === 'function' ? italicizeSciNames(esc(t)) : esc(t); };
     var sub = (document.querySelector('#species-subcategory input:checked') || {}).value || '';
     var kinds = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: '実生' };
-    var kindLine = kinds[type] + (type === 'species' && sub && sub !== 'species' ? '（未記載 ' + esc(sub) + '.）' : '');
+    var kindLine = (type !== 'seedling' && window.aoKindChoice ? window.aoKindChoice().label : kinds[type]) + (type === 'species' && sub && sub !== 'species' ? '（未記載 ' + esc(sub) + '.）' : '');
     var words = val('sf-notes');
     var pair = function (sel) { var ins = document.querySelectorAll(sel + ' input'); return ins.length >= 2 ? [ins[0].value.trim(), ins[1].value.trim()] : ['', '']; };
     var pp = type === 'clone' ? pair('#formula-inputs') : type === 'hybrid' ? pair('#hybrid-formula-inputs') : type === 'seedling' ? pair('#seedling-formula-inputs') : ['', ''];

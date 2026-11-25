@@ -85,7 +85,7 @@ function entrySvg(c, photo) {
   const y0 = photo ? plateY + plateH + 90 : 300;
   const size = [...rest].length <= 14 ? 84 : [...rest].length <= 22 ? 64 : 50;
   return frame(`
-  <text x="80" y="104" font-family="BIZ UDMincho" font-size="28" fill="${MID}">${esc(genus)} · ${esc(KIND_JP[type] || type)}</text>
+  <text x="80" y="104" font-family="BIZ UDMincho" font-size="28" fill="${MID}">${esc(genus)} · ${esc(type === 'species' ? '原種' : (EntryMeta.kind(c) || KIND_JP[type] || type))}</text>
   ${plate}
   <text x="80" y="${y0}" font-family="Cormorant Garamond" font-weight="bold" font-style="${species ? 'italic' : 'normal'}" font-size="${size}" fill="${INK}">${esc(rest)}</text>
   <text x="80" y="${y0 + 62}" font-family="BIZ UDMincho" font-size="32" fill="${INK}">${esc([who, year, place].filter(Boolean).join(' · '))}</text>

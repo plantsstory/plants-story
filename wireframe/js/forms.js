@@ -651,6 +651,7 @@ document.addEventListener('click', function(e) {
       typeRadio.checked = true;
       typeRadio.dispatchEvent(new Event('change'));
     }
+    if (window.aoSetKind && window.EntryMeta) window.aoSetKind(window.EntryMeta.parentage({ type: type, tags: (data && data._tags) || [] }), type === 'clone');
 
     // Pre-fill structured fields from first non-formula origin
     var editStructured = null;
@@ -843,12 +844,12 @@ document.addEventListener('click', function(e) {
     if (contributeGenus) contributeGenus.disabled = true;
     if (contributeName) contributeName.disabled = true;
     // Disable type radios
-    document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(r) { r.disabled = true; });
+    document.querySelectorAll('#page-contribute input[name="cultivar-type"], #page-contribute input[name="cultivar-parentage"], #kind-clone').forEach(function(r) { r.disabled = true; });
 
     // Unlock genus, name, type fields
     if (contributeGenus) contributeGenus.disabled = false;
     if (contributeName) contributeName.disabled = false;
-    document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(r) { r.disabled = false; });
+    document.querySelectorAll('#page-contribute input[name="cultivar-type"], #page-contribute input[name="cultivar-parentage"], #kind-clone').forEach(function(r) { r.disabled = false; });
 
     // Show delete button in edit mode
     var editDeleteBtn = document.getElementById('edit-delete-btn');
@@ -869,7 +870,7 @@ document.addEventListener('click', function(e) {
     // Re-enable fields
     if (contributeGenus) contributeGenus.disabled = false;
     if (contributeName) contributeName.disabled = false;
-    document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function(r) { r.disabled = false; });
+    document.querySelectorAll('#page-contribute input[name="cultivar-type"], #page-contribute input[name="cultivar-parentage"], #kind-clone').forEach(function(r) { r.disabled = false; });
 
     // Reset form
     if (contributeName) contributeName.value = '';
@@ -1075,6 +1076,7 @@ document.addEventListener('click', function(e) {
     radio.checked = false;
     var speciesRadio = document.querySelector('#page-contribute input[name="cultivar-type"][value="species"]');
     if (speciesRadio) { speciesRadio.checked = true; }
+    if (window.aoSetKind) window.aoSetKind('species', false); // the two kind controls follow (11-25)
     showTypeFields('species');
   }
 
@@ -1198,6 +1200,52 @@ document.addEventListener('click', function(e) {
   // Initialize: show species fields by default
   var activeType = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
   showTypeFields(activeType ? activeType.value : 'species');
+
+  // ---- the kind in two parts (owner, 11-25): 原種 / Hybrid / 不明, and Clone as a tick. The hidden type radios stay
+  //      the form's state (species / hybrid / clone / seedling) for every other part of the form; these two set them,
+  //      and follow them when something else sets them (the post sheet, an edit, a reset) ----
+  (function kindAxes() {
+    var page = document.getElementById('page-contribute');
+    var cloneBox = document.getElementById('kind-clone');
+    if (!page || !cloneBox) return;
+    var syncing = false;
+    var radio = function (name, v) { return page.querySelector('input[name="' + name + '"][value="' + v + '"]'); };
+    function choice() { return { parentage: (page.querySelector('input[name="cultivar-parentage"]:checked') || {}).value || 'species', clone: !!cloneBox.checked }; }
+    function typeFor(c) { return c.clone ? 'clone' : (c.parentage === 'species' ? 'species' : 'hybrid'); }
+    function setParentage(p) { var r = radio('cultivar-parentage', p); if (r) r.checked = true; page.setAttribute('data-parentage', p); }
+    function apply() {
+      if (syncing) return;
+      var c = choice(), r = radio('cultivar-type', typeFor(c));
+      page.setAttribute('data-parentage', c.parentage);
+      if (r && !r.checked) { syncing = true; r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); syncing = false; }
+      // 不明 without Clone: its parents are unknown by definition (ticked here, and unticked again on leaving 不明)
+      var hu = document.getElementById('hybrid-formula-unknown');
+      if (hu && c.parentage === 'unknown' && !c.clone && !hu.checked) { hu.checked = true; autoHu = true; }
+      else if (hu && autoHu && (c.parentage !== 'unknown' || c.clone)) { hu.checked = false; autoHu = false; }
+    }
+    var autoHu = false;
+    page.querySelectorAll('input[name="cultivar-parentage"]').forEach(function (r) { r.addEventListener('change', apply); });
+    cloneBox.addEventListener('change', apply);
+    page.querySelectorAll('input[name="cultivar-type"]').forEach(function (r) {
+      r.addEventListener('change', function () {
+        if (syncing || !r.checked) return;
+        if (r.value === 'species') { setParentage('species'); cloneBox.checked = false; }
+        else if (r.value === 'hybrid') { if (choice().parentage === 'species') setParentage('hybrid'); cloneBox.checked = false; }
+        else if (r.value === 'clone') cloneBox.checked = true;
+      });
+    });
+    // what the review shows, and the tag the record keeps
+    window.aoKindChoice = function () {
+      var c = choice(), t = typeFor(c);
+      c.type = t;
+      c.label = window.EntryMeta ? window.EntryMeta.kind({ type: t, tags: t === 'species' ? [] : ['parentage:' + c.parentage] }) : t;
+      return c;
+    };
+    window.aoKindTags = function (type) { return type === 'clone' || type === 'hybrid' ? ['parentage:' + choice().parentage] : []; };
+    // an edit shows the stored kind (the controls are locked then, like the type radios)
+    window.aoSetKind = function (parentage, clone) { setParentage(parentage || 'species'); cloneBox.checked = !!clone; };
+    setParentage(choice().parentage);
+  })();
 
   // Helper: get selected species subcategory
   function getSelectedSubcategory() {
@@ -1733,6 +1781,9 @@ document.addEventListener('click', function(e) {
       var newEntry = { origins: [] };
       var isSeedling = type === 'seedling';
       newEntry._type = type;
+      // 原種 / Hybrid / 不明 is kept as a tag on Hybrid and Clone rows (11-25)
+      var kindTags = window.aoKindTags ? window.aoKindTags(type) : [];
+      if (kindTags.length) newEntry._tags = kindTags;
       var autoBody = generateBodyFromStructured(structured);
       // Check if structured has any meaningful content
       var hasStructuredContent = autoBody || structured.notes || (structured.formula && structured.formula.parentA);
@@ -1938,7 +1989,7 @@ document.addEventListener('click', function(e) {
       // After parent photos are ready, save to DB, upload gallery images, then update UI
       photoUploadPromise.then(function() {
         var _privEl = document.getElementById('seedling-private');
-        return addUserCultivar(fullName, newEntry, { genus: genus, type: type, is_private: type === 'seedling' && _privEl ? !!_privEl.checked : false });
+        return addUserCultivar(fullName, newEntry, { genus: genus, type: type, is_private: type === 'seedling' && _privEl ? !!_privEl.checked : false, meta: newEntry._tags ? { tags: newEntry._tags } : null });
       }).then(function() {
         // Upload gallery images after DB record exists
         if (galleryFiles.length > 0 && typeof window.uploadGalleryImage === 'function') {
