@@ -22,27 +22,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Stylesheets before the script preloads: they hold the first paint, the scripts run only at the end of the body (11-03) -->
-  <link rel="stylesheet" href="css/variables.css?v=20261125d">
-  <link rel="stylesheet" href="css/reset.css?v=20261125d">
-  <link rel="stylesheet" href="css/layout.css?v=20261125d">
-  <link rel="stylesheet" href="css/components.css?v=20261125d">
-  <link rel="stylesheet" href="css/pages.css?v=20261125d">
-  <link rel="stylesheet" href="css/utilities.css?v=20261125d">
-  <link rel="stylesheet" href="css/archive.css?v=20261125d">
+  <link rel="stylesheet" href="css/variables.css?v=20261126a">
+  <link rel="stylesheet" href="css/reset.css?v=20261126a">
+  <link rel="stylesheet" href="css/layout.css?v=20261126a">
+  <link rel="stylesheet" href="css/components.css?v=20261126a">
+  <link rel="stylesheet" href="css/pages.css?v=20261126a">
+  <link rel="stylesheet" href="css/utilities.css?v=20261126a">
+  <link rel="stylesheet" href="css/archive.css?v=20261126a">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1">
   <!-- Own scripts fetched in parallel (the meta CSP stops the browser's own look-ahead); they still run in order at
        the end of the body. gtag.js is loaded by gtag-init.js once the page is parsed (board 11 T156). -->
-  <link rel="preload" as="script" href="js/record-gate.js?v=20261125d">
-  <link rel="preload" as="script" href="js/app-core.js?v=20261125d">
-  <link rel="preload" as="script" href="js/pages.js?v=20261125d">
-  <link rel="preload" as="script" href="js/forms.js?v=20261125d">
-  <link rel="preload" as="script" href="js/entry-meta.js?v=20261125d">
-  <link rel="preload" as="script" href="js/archive.js?v=20261125d">
-  <link rel="preload" as="script" href="js/tool-gate.js?v=20261125d">
-  <link rel="preload" as="script" href="js/tools.js?v=20261125d">
-  <link rel="preload" as="script" href="js/dialogs.js?v=20261125d">
-  <script src="js/textsize.js?v=20261125d"></script>
+  <link rel="preload" as="script" href="js/record-gate.js?v=20261126a">
+  <link rel="preload" as="script" href="js/app-core.js?v=20261126a">
+  <link rel="preload" as="script" href="js/pages.js?v=20261126a">
+  <link rel="preload" as="script" href="js/forms.js?v=20261126a">
+  <link rel="preload" as="script" href="js/entry-meta.js?v=20261126a">
+  <link rel="preload" as="script" href="js/archive.js?v=20261126a">
+  <link rel="preload" as="script" href="js/tool-gate.js?v=20261126a">
+  <link rel="preload" as="script" href="js/tools.js?v=20261126a">
+  <link rel="preload" as="script" href="js/dialogs.js?v=20261126a">
+  <script src="js/textsize.js?v=20261126a"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -83,7 +83,7 @@
     "logo": "https://aroidorigins.com/icons/icon-512.svg"
   }
   </script>
-  <script src="js/gtag-init.js?v=20261125d"></script>
+  <script src="js/gtag-init.js?v=20261126a"></script>
 </head>
 <body>
 
@@ -1171,7 +1171,7 @@
         <dt>原種</dt><dd>学名として正式に発表された種。IPNI・POWO で記載者・発表年・出版物を確かめ、タイプ産地と分布を記録します。異名（シノニム）なら受理名もラベルに出します。例: <i>Anthurium warocqueanum</i> T.Moore（1878）、<i>Anthurium sagittatum</i> (Sims) G.Don（組み替えでできた名前）。</dd>
         <dt>未記載</dt><dd>学名の発表がない、または同定できていない株。sp.（種が未特定）、aff.（既知の種に近いが別とみる）、cf.（その種らしいが要確認）を付け、仮の名前は " " で囲みます。名前を推測して作りません。例: <i>Anthurium</i> sp. "Peru"、<i>Anthurium</i> aff. <i>besseae</i>、<i>Anthurium</i> sp. "antolakii"（未発表名）。</dd>
         <dt>Hybrid</dt><dd>交配でできた株の名前。交配式を書き、親が不明・複合ならそう書きます。Clone の印がなければ、同じ交配から生まれた<strong>何株もの株</strong>がまとめて名乗る名前です。例: 'Dark Mama'（warocqueanum × papillilaminum の単純交配はすべてこの名前）、'BVIT'（親の違う株に付く流通ラベル。作出者は該当なし）。</dd>
-        <dt>不明</dt><dd>野生の種か交配か、確かめられる出典がない名前。推測で Hybrid にはしません。出典が見つかれば直します。例: 'Red Crystallinum'（交配由来と考えられているが、親も確証もない）。</dd>
+        <dt>不明</dt><dd>野生の種か交配か、確かめられる出典がない名前。推測で Hybrid にはしません。出典が見つかれば直します。例: 'Ace of Spades'（不明・Clone）。</dd>
         <dt>Clone</dt><dd><strong>1 株</strong>（オリジナル個体）と、その株分け・組織培養で増えた株だけが名乗る名前に付ける印。原種・Hybrid・不明のどれにも付きます。実生（F 個体）は別の株です。F 個体が同名で流通していれば「系統」の印を付けます。例: 'Mystique A88'（Hybrid・Clone）、'King of Spades'（不明・Clone。オリジナルは Haji Ulih の 1 株、流通株は F 個体）。</dd>
         <dt>原種・Clone</dt><dd>原種の 1 株に付けた番号や名前（ナンバリング個体）。種小名を付けて書くのが基本ですが、種がわからなければ空欄でも載せられます。一覧では Clone に並び、その原種のページの「個体」欄にもまとまります。例: <i>A. papillilaminum</i> 'Fort Sherman'、<i>A. carlablackiae</i> 'HR1'。</dd>
         <dt>実生</dt><dd>自分で播いた記録。交配式・播種日・作出者で見分けます。名前を付けて配った時点で、Hybrid（1 株だけの名前なら Hybrid・Clone）として別に登録します。ログインすれば何件でも無料で残せ、非公開にもできます。</dd>
@@ -1812,14 +1812,14 @@
        JS: Split into logical modules
        ======================================== -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1"></script>
-  <script src="js/record-gate.js?v=20261125d"></script>
-  <script src="js/app-core.js?v=20261125d"></script>
-  <script src="js/pages.js?v=20261125d"></script>
-  <script src="js/forms.js?v=20261125d"></script>
-  <script src="js/entry-meta.js?v=20261125d"></script>
-  <script src="js/archive.js?v=20261125d"></script>
-  <script src="js/tool-gate.js?v=20261125d"></script>
-  <script src="js/tools.js?v=20261125d"></script>
+  <script src="js/record-gate.js?v=20261126a"></script>
+  <script src="js/app-core.js?v=20261126a"></script>
+  <script src="js/pages.js?v=20261126a"></script>
+  <script src="js/forms.js?v=20261126a"></script>
+  <script src="js/entry-meta.js?v=20261126a"></script>
+  <script src="js/archive.js?v=20261126a"></script>
+  <script src="js/tool-gate.js?v=20261126a"></script>
+  <script src="js/tools.js?v=20261126a"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1829,7 +1829,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261125d"></script>
+  <script src="js/dialogs.js?v=20261126a"></script>
 
   <!-- AI re-research request dialog -->
   <!-- Asked before anything is typed: posting, photos and records need a login (2026-10-08 app-ux) -->
@@ -1881,6 +1881,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261125d"></script>
+<script src="js/sw-register.js?v=20261126a"></script>
 </body>
 </html>
