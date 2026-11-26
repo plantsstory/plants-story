@@ -45,6 +45,15 @@ function psExport(name, val) { window.PlantStory[name] = val; window[name] = val
     });
   }
 
+  // the reader is told only about errors in this site's own scripts: a browser that blocks trackers (Brave),
+  // an extension or the browser itself raises errors of its own, which broke nothing here (Brave on a phone
+  // showed the toast on every scroll up, 11-26). Every error is still logged.
+  var OWN_JS = /(?:aroidorigins\.com|plantsstory\.github\.io|localhost)(?::\d+)?\/(?:[^\s)]*\/)?js\//;
+  function ownError(message, source, stack) {
+    if (/ResizeObserver loop|^Script error\.?$/i.test(String(message || ''))) return false;
+    return OWN_JS.test(String(source || '')) || OWN_JS.test(String(stack || ''));
+  }
+
   // Throttled user-facing error notification
   var _lastUserErrorToast = 0;
   function notifyUser() {
@@ -66,7 +75,7 @@ function psExport(name, val) { window.PlantStory[name] = val; window[name] = val
       url: location.href,
       userAgent: navigator.userAgent
     });
-    notifyUser();
+    if (ownError(message, source, error && error.stack)) notifyUser();
   };
 
   window.addEventListener('unhandledrejection', function(event) {
@@ -84,7 +93,7 @@ function psExport(name, val) { window.PlantStory[name] = val; window[name] = val
       url: location.href,
       userAgent: navigator.userAgent
     });
-    notifyUser();
+    if (ownError(message, '', stack)) notifyUser();
   });
 
   psExport('_flushErrorLogs', flushErrors);
