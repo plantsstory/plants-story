@@ -18,7 +18,8 @@
 
   // the photo rows and reporter names a list of requests needs
   async function annotate(reqs) {
-    var imgIds = reqs.filter(function (r) { return r.target_type === 'image'; }).map(function (r) { return Number(r.target_id); }).filter(function (n) { return n > 0; });
+    // photo ids are uuids, so keep them as text (Number() turned every one into NaN and the photo never showed)
+    var imgIds = reqs.filter(function (r) { return r.target_type === 'image' && r.target_id; }).map(function (r) { return String(r.target_id); });
     var imgs = {};
     if (imgIds.length) {
       var q = await sb.from('cultivar_images').select('*').in('id', imgIds);
@@ -26,7 +27,7 @@
     }
     await loadPeopleNames(reqs.map(function (r) { return r.user_id; }).concat(Object.keys(imgs).map(function (k) { return imgs[k].user_id; })));
     reqs.forEach(function (r) {
-      if (r.target_type === 'image') r._img = imgs[Number(r.target_id)] || null;
+      if (r.target_type === 'image') r._img = imgs[String(r.target_id)] || null;
       else r._entry = allCultivars.find(function (c) { return String(c.id) === String(r.target_id); }) || null;
     });
     return reqs;
