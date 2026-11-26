@@ -1543,6 +1543,13 @@ html[data-boot="entry"] #page-cultivar { display: none !important; }
 .static-entry__plate { max-width: none; width: 100%; max-height: 70svh; aspect-ratio: auto; border: 1px solid var(--color-rule); }
 .static-entry__plate img { width: auto; max-width: 100%; max-height: 70svh; }
 .static-entry__links { font-size: var(--fs-small); color: var(--color-mid); margin-top: var(--s4); }
+/* phone: the stub's photo and top bar take the plant page's own places from the first paint, so the swap moves nothing
+   (CLS, 11-26: the photo had no height until it loaded, and the top bar came in only once the app started) */
+@media (max-width: 640px) {
+  html.pv-label .static-entry__plate { aspect-ratio: 3 / 4; max-height: none; border: 0; background: #000; }
+  html.pv-label .static-entry__plate img { width: 100%; height: 100%; max-height: none; object-fit: contain; }
+  html.pv-label body.stub-entry-page .topbar:not(.is-off) { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: var(--tap); padding: 0 16px; background: var(--color-paper); border-bottom: 1px solid var(--color-rule); }
+}
 #genus-sections-container:has(> .text-center), #page-genus .genus-content:not(:has(.cultivar-row)) { min-height: 100vh; }
 
 /* -- 2026-10-08 app-ux deploy 1: notices, login sheet, draft line -- */
