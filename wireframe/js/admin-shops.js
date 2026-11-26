@@ -31,7 +31,7 @@
       html += '<div style="overflow-x:auto;"><table class="data-table" style="min-width:720px;"><thead><tr><th>店名</th><th>一言</th><th>状態</th><th>開始</th><th>連絡先</th><th></th></tr></thead><tbody>';
       shops.forEach(function (s) {
         html += '<tr><td><a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.name) + '</a></td><td style="font-size:var(--font-size-xs);">' + esc(s.blurb || '') + '</td><td style="font-size:var(--font-size-xs);">' + esc(state(s)) + '</td><td>' + esc(s.starts_on) + '</td><td style="font-size:var(--font-size-xs);">' + esc(s.contact_email || '') + '</td>'
-          + '<td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" data-sh="edit" data-id="' + s.id + '">編集</button> <button class="btn btn-outline btn-sm" data-sh="invoice" data-id="' + s.id + '">請求書</button> <button class="btn btn-outline btn-sm" data-sh="paid" data-id="' + s.id + '">入金を記帳</button></td></tr>';
+          + '<td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" data-sh="edit" data-id="' + s.id + '">編集</button> <button class="btn btn-outline btn-sm" data-sh="invoice" data-id="' + s.id + '">請求書</button></td></tr>';
       });
       html += '</tbody></table></div>';
     }
@@ -40,7 +40,7 @@
     root.querySelectorAll('[data-sh]').forEach(function (b) {
       b.addEventListener('click', function () {
         var s = shops.filter(function (x) { return x.id === +b.getAttribute('data-id'); })[0], a = b.getAttribute('data-sh');
-        if (a === 'edit') form(s); if (a === 'invoice') invoice(s); if (a === 'paid') paid(s);
+        if (a === 'edit') form(s); if (a === 'invoice') invoice(s);
       });
     });
   };
@@ -92,15 +92,5 @@
     var w = window.open('', '_blank');
     if (!w) { toast('ポップアップを許可してください'); return; }
     w.document.write(html); w.document.close();
-  }
-
-  async function paid(s) {
-    var month = prompt(s.name + ' の何月分の入金ですか？（YYYY-MM）', lastMonth());
-    if (!month || !/^\d{4}-\d{2}$/.test(month)) return;
-    var amount = parseInt(prompt('入金額（円）', String(s.fee || 1000)), 10);
-    if (!amount || amount <= 0) return;
-    var r = await sb.from('ledger_entries').insert({ entry_date: today(), debit: '普通預金', credit: '売上高', amount: amount, description: '取扱店の掲載料 ' + month + ' 分', partner: s.name, source: 'template', source_ref: 'shop-' + s.id + '-' + month });
-    if (r.error) { toast(/duplicate|unique/i.test(r.error.message) ? 'この月の入金はすでに記帳されています' : '記帳エラー: ' + r.error.message); return; }
-    toast('帳簿に記帳しました');
   }
 })();
