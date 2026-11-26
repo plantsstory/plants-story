@@ -3690,7 +3690,7 @@
   var strip = document.createElement('div'); strip.className = 'gallery-thumbs'; strip.hidden = true;
   var count = document.createElement('p'); count.className = 'gallery-count'; count.hidden = true;
   gal.insertAdjacentElement('afterend', strip); strip.insertAdjacentElement('afterend', count);
-  var shown = '', timer = null;
+  var shown = '';
   function keyOf(it) { var im = it.querySelector('img'); return it.getAttribute('data-image-id') || it.getAttribute('data-storage-path') || (im ? im.getAttribute('src') : ''); }
   function layout() {
     var items = [].slice.call(gal.querySelectorAll('.gallery__item[data-user-upload]'));
@@ -3715,7 +3715,8 @@
     }
     count.textContent = many ? '写真 ' + items.length + ' 枚' + (items.length > 5 ? '（小さな写真は横にずらせます）' : '') : '';
   }
-  new MutationObserver(function () { clearTimeout(timer); timer = setTimeout(layout, 30); }).observe(gal, { childList: true });
+  // at once, before the next paint: a 30 ms wait let every photo show at full height for a frame and push the page down (CLS, 11-26)
+  new MutationObserver(function () { layout(); }).observe(gal, { childList: true });
   strip.addEventListener('click', function (e) {
     var b = e.target.closest('button[data-k]'); if (!b) return;
     shown = b.getAttribute('data-k'); layout();
