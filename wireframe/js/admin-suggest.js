@@ -1,44 +1,53 @@
 /* Admin: AI suggestions waiting for the owner (2026-10-08, the Opus re-research of the species records).
    Each row is one field of one entry: 空欄を埋める / 産地を詳しく / 記録と食い違い. Nothing changes until 採用;
    採用 writes the value and its sources into the entry's leading record (RPC decide_ai_suggestion), 見送る drops it.
-   Uses admin.html globals: sb, toast, escapeHtml. */
+   Admin reorganisation 2026-11-26: the list has its own page (AI の提案) instead of a card at the foot of the
+   dashboard, each row links to its entry, and the same rows show on the entry's page.
+   Uses admin.html globals: sb, toast, escapeHtml, allCultivars. */
 (function () {
   'use strict';
   var FIELD = { type_locality: 'タイプ産地', collector: '採集者', collection_year: '採集年', known_habitats: '分布', author_name: '記載者', publication_year: '発表年' };
   var KIND = { fill: '空欄を埋める', refine: '産地を詳しく', conflict: '記録と食い違い' };
   function esc(s) { return escapeHtml(String(s == null ? '' : s)); }
-  function host() {
-    var dash = document.getElementById('sec-dashboard');
-    if (!dash) return null;
-    var h = document.getElementById('ai-suggest-card');
-    if (!h) { h = document.createElement('div'); h.id = 'ai-suggest-card'; h.className = 'stat-card'; h.style.marginTop = 'var(--space-sm)'; dash.appendChild(h); }
-    return h;
-  }
-  window.loadAiSuggestions = async function () {
-    var h = host();
-    if (!h) return;
-    var r = await sb.from('ai_suggestions').select('*').eq('status', 'pending').order('cultivar_name').order('field').limit(300);
-    if (r.error) { h.textContent = 'AI の提案: 読み込めませんでした（' + r.error.message + '）'; return; }
-    var rows = r.data || [];
-    if (!rows.length) { h.innerHTML = '<strong>AI の提案</strong> — 確認待ちはありません'; return; }
-    var html = '<strong>AI の提案</strong> — 確認待ち ' + rows.length + ' 件'
-      + ' <span style="font-size:var(--font-size-xs);color:var(--color-gray);">（Claude Opus が出典つきで調べた値。「採用」でその品種の記録に入ります）</span>'
-      + '<details open style="margin-top:6px;"><summary style="cursor:pointer;">一覧</summary><div style="margin-top:6px;">';
-    rows.forEach(function (s) {
-      var links = (s.sources || []).slice(0, 4).map(function (l) { return '<a href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc((l.label || l.url).slice(0, 40)) + '</a>'; }).join(' · ');
-      html += '<div class="ai-sug" data-id="' + s.id + '" style="border-top:1px solid var(--color-light,#ddd);padding:8px 0;">'
-        + '<div><em>' + esc(s.cultivar_name) + '</em> — <strong>' + esc(FIELD[s.field] || s.field) + '</strong>'
-        + ' <span style="font-size:var(--font-size-xs);color:var(--color-gray);">' + esc(KIND[s.kind] || s.kind) + '</span></div>'
-        + '<div style="font-size:var(--font-size-sm);margin:2px 0;">今: ' + (s.current_value ? esc(s.current_value) : '<span style="color:var(--color-gray);">（空欄）</span>')
-        + '<br>提案: <strong>' + esc(s.suggested_value) + '</strong></div>'
-        + '<div style="font-size:var(--font-size-xs);">' + (links || '<span style="color:var(--color-gray);">出典なし（採用しないでください）</span>') + '</div>'
-        + '<div style="margin-top:4px;display:flex;gap:8px;">'
-        + '<button type="button" class="btn btn-primary btn-sm" data-ai-decide="1">採用</button>'
-        + '<button type="button" class="btn btn-secondary btn-sm" data-ai-decide="0">見送る</button></div></div>';
-    });
-    html += '</div></details>';
-    h.innerHTML = html;
+  function safeUrl(u) { return /^https?:\/\//i.test(String(u || '')) ? String(u) : ''; }
+
+  window.aiSuggestionRowHtml = function (s) {
+    var links = (s.sources || []).slice(0, 4).map(function (l) {
+      var u = safeUrl(l && l.url);
+      return u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(String(l.label || u).slice(0, 40)) + '</a>' : '';
+    }).filter(Boolean).join(' · ');
+    var entry = (window.allCultivars || []).find(function (c) { return c.id === s.cultivar_id; });
+    return '<div class="ai-sug" data-id="' + s.id + '" style="border-top:1px solid var(--color-light,#ddd);padding:8px 0;">'
+      + '<div>' + (entry ? '<a href="#" data-open-entry="' + entry.id + '"><em>' + esc(s.cultivar_name) + '</em></a>' : '<em>' + esc(s.cultivar_name) + '</em>')
+      + ' — <strong>' + esc(FIELD[s.field] || s.field) + '</strong>'
+      + ' <span style="font-size:var(--font-size-xs);color:var(--color-gray);">' + esc(KIND[s.kind] || s.kind) + '</span></div>'
+      + '<div style="font-size:var(--font-size-sm);margin:2px 0;">今: ' + (s.current_value ? esc(s.current_value) : '<span style="color:var(--color-gray);">（空欄）</span>')
+      + '<br>提案: <strong>' + esc(s.suggested_value) + '</strong></div>'
+      + '<div style="font-size:var(--font-size-xs);">' + (links || '<span style="color:var(--color-gray);">出典なし（採用しないでください）</span>') + '</div>'
+      + '<div style="margin-top:4px;display:flex;gap:8px;">'
+      + '<button type="button" class="btn btn-primary btn-sm" data-ai-decide="1">採用</button>'
+      + '<button type="button" class="btn btn-outline btn-sm" data-ai-decide="0">見送る</button></div></div>';
   };
+
+  function badge(n) {
+    var b = document.getElementById('ais-badge');
+    if (!b) return;
+    b.textContent = n ? String(n) : '';
+    b.classList.toggle('d-none', !n);
+  }
+
+  window.loadAiSuggestions = async function () {
+    var h = document.getElementById('ai-suggest-root');
+    if (!h) return;
+    h.innerHTML = '<p class="desc-text">読み込み中...</p>';
+    var r = await sb.from('ai_suggestions').select('*').eq('status', 'pending').order('cultivar_name').order('field').limit(300);
+    if (r.error) { h.innerHTML = '<p class="desc-text">読み込めませんでした（' + esc(r.error.message) + '）</p>'; return; }
+    var rows = r.data || [];
+    badge(rows.length);
+    if (!rows.length) { h.innerHTML = '<p class="desc-text">確認待ちの提案はありません。</p>'; return; }
+    h.innerHTML = '<div class="stat-card"><strong>確認待ち ' + rows.length + ' 件</strong>' + rows.map(window.aiSuggestionRowHtml).join('') + '</div>';
+  };
+
   document.addEventListener('click', async function (e) {
     var b = e.target.closest && e.target.closest('[data-ai-decide]');
     if (!b) return;
@@ -53,12 +62,14 @@
     }
     toast(accept ? '採用しました（サイトの静的ページは次のデプロイで更新）' : '見送りました');
     row.remove();
+    if (accept && window.loadAllCultivars) window.loadAllCultivars();
+    if (window.refreshInbox) window.refreshInbox();
   });
-  document.addEventListener('DOMContentLoaded', function () { setTimeout(function () { if (window.loadAiSuggestions) window.loadAiSuggestions(); }, 1400); });
 })();
 
-/* Admin: recent changes to the origin records (board 9, T110). Every change is kept in origin_history;
-   「取り消す」 puts the record back as it was before that change (RPC revert_origin_change). */
+/* Admin: changes to the origin records (board 9, T110). Every change is kept in origin_history;
+   「取り消す」 puts the record back as it was before that change (RPC revert_origin_change).
+   loadOriginHistory({ host, cultivarId, limit, open }) draws into host: all records (the 由来 tab) or one (the entry page). */
 (function () {
   'use strict';
   function esc(s) { return escapeHtml(String(s == null ? '' : s)); }
@@ -68,24 +79,30 @@
       return (PROV[o.provenance] || '?') + (o.provenance === 'contributor' ? '［鍵］' : '') + ' ' + String(o.body || '').slice(0, 40);
     }).join(' / ');
   }
-  window.loadOriginHistory = async function () {
-    var dash = document.getElementById('sec-dashboard');
-    if (!dash) return;
-    var h = document.getElementById('origin-history-card');
-    if (!h) { h = document.createElement('div'); h.id = 'origin-history-card'; h.className = 'stat-card'; h.style.marginTop = 'var(--space-sm)'; dash.appendChild(h); }
-    var r = await sb.from('origin_history').select('id, cultivar_id, changed_at, changed_by, old_origins, new_origins').order('changed_at', { ascending: false }).limit(20);
-    if (r.error) { h.textContent = '由来の変更履歴: 読み込めませんでした（' + r.error.message + '）'; return; }
-    var ids = Array.from(new Set((r.data || []).map(function (x) { return x.cultivar_id; })));
+  var last = null;
+  window.loadOriginHistory = async function (opts) {
+    opts = opts || last;
+    if (!opts || !opts.host) return;
+    last = opts;
+    var h = opts.host, limit = opts.limit || 20;
+    var q = sb.from('origin_history').select('id, cultivar_id, changed_at, changed_by, old_origins, new_origins').order('changed_at', { ascending: false }).limit(limit);
+    if (opts.cultivarId) q = q.eq('cultivar_id', opts.cultivarId);
+    var r = await q;
+    if (r.error) { h.textContent = '変更の履歴: 読み込めませんでした（' + r.error.message + '）'; return; }
+    var rows = r.data || [];
+    if (!rows.length) { h.innerHTML = '<span class="desc-text">変更の記録はまだありません。</span>'; return; }
     var names = {};
-    if (ids.length) { var c = await sb.from('cultivars').select('id, cultivar_name').in('id', ids); (c.data || []).forEach(function (x) { names[x.id] = x.cultivar_name; }); }
-    var html = '<strong>由来の変更履歴</strong> <span style="font-size:var(--font-size-xs);color:var(--color-gray);">（新しい順 20 件。［鍵］は人が書いた本文で、本人以外は書き換えられません）</span>'
-      + '<details style="margin-top:6px;"><summary style="cursor:pointer;">一覧を開く</summary>';
-    (r.data || []).forEach(function (x) {
+    (window.allCultivars || []).forEach(function (c) { names[c.id] = c.cultivar_name; });
+    var html = '<span style="font-size:var(--font-size-xs);color:var(--color-gray);">新しい順 ' + rows.length + ' 件。［鍵］は人が書いた本文で、本人以外は書き換えられません。</span>'
+      + '<details' + (opts.open ? ' open' : '') + ' style="margin-top:6px;"><summary style="cursor:pointer;">一覧</summary>';
+    rows.forEach(function (x) {
+      var name = names[x.cultivar_id];
       html += '<div class="oh-row" data-id="' + x.id + '" style="border-top:1px solid var(--color-light,#ddd);padding:6px 0;font-size:var(--font-size-xs);">'
-        + '<div><em>' + esc(names[x.cultivar_id] || ('#' + x.cultivar_id)) + '</em> — ' + esc(String(x.changed_at).slice(0, 16).replace('T', ' ')) + '</div>'
+        + '<div>' + (opts.cultivarId ? '' : (name ? '<a href="#" data-open-entry="' + x.cultivar_id + '"><em>' + esc(name) + '</em></a> — ' : '<em>#' + esc(x.cultivar_id) + '</em> — '))
+        + esc(String(x.changed_at).slice(0, 16).replace('T', ' ')) + '</div>'
         + '<div style="color:var(--color-gray);">前: ' + esc(brief(x.old_origins)) + '</div>'
         + '<div>後: ' + esc(brief(x.new_origins)) + '</div>'
-        + '<button type="button" class="btn btn-secondary btn-sm" data-oh-revert style="margin-top:4px;">この変更を取り消す</button></div>';
+        + '<button type="button" class="btn btn-outline btn-sm" data-oh-revert style="margin-top:4px;">この変更を取り消す</button></div>';
     });
     h.innerHTML = html + '</details>';
   };
@@ -98,7 +115,8 @@
     var r = await sb.rpc('revert_origin_change', { p_history_id: Number(row.getAttribute('data-id')) });
     if (r.error || !r.data || r.data.success === false) { toast('戻せませんでした: ' + ((r.error && r.error.message) || (r.data && r.data.error) || '')); b.disabled = false; return; }
     toast('元に戻しました');
+    if (window.loadAllCultivars) await window.loadAllCultivars();
+    if (!document.getElementById('sec-entry').classList.contains('hidden') && window.renderEntry) return;   // renderEntry redraws the history
     window.loadOriginHistory();
   });
-  document.addEventListener('DOMContentLoaded', function () { setTimeout(function () { if (window.loadOriginHistory) window.loadOriginHistory(); }, 1600); });
 })();

@@ -157,6 +157,10 @@
   },
   "request_delete": {
     "jp": "削除依頼",
+    "en": "Request removal"
+  },
+  "report_photo": {
+    "jp": "報告",
     "en": "Report"
   },
   "upload_image": {

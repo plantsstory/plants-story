@@ -12,21 +12,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/utilities.css">
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/admin.css?v=20261127b">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/record-gate.js?v=20261126x"></script>
-  <script src="js/entry-meta.js?v=20261126x"></script>
-  <script src="js/tool-gate.js?v=20261126x"></script>
-  <script src="js/admin-ledger.js?v=20261126x"></script>
-  <script src="js/admin-tools-research.js?v=20261126x"></script>
-  <script src="js/admin-tool-candidates.js?v=20261126x"></script>
-  <script src="js/admin-verify.js?v=20261126x"></script>
-  <script src="js/admin-contact.js?v=20261126x"></script>
-  <script src="js/admin-checks.js?v=20261126x"></script>
-  <script src="js/admin-suggest.js?v=20261126x"></script>
-  <script src="js/admin-shops.js?v=20261126x"></script>
-  <script src="js/admin-articles.js?v=20261126x"></script>
-  <script src="js/admin-nurseries.js?v=20261126x"></script>
+  <script src="js/record-gate.js?v=20261127b"></script>
+  <script src="js/entry-meta.js?v=20261127b"></script>
+  <script src="js/tool-gate.js?v=20261127b"></script>
+  <script src="js/admin-tools-research.js?v=20261127b"></script>
+  <script src="js/admin-tool-candidates.js?v=20261127b"></script>
+  <script src="js/admin-verify.js?v=20261127b"></script>
+  <script src="js/admin-contact.js?v=20261127b"></script>
+  <script src="js/admin-checks.js?v=20261127b"></script>
+  <script src="js/admin-suggest.js?v=20261127b"></script>
+  <script src="js/admin-shops.js?v=20261127b"></script>
+  <script src="js/admin-articles.js?v=20261127b"></script>
+  <script src="js/admin-nurseries.js?v=20261127b"></script>
 </head>
 <body>
 
@@ -67,35 +66,86 @@
   </header>
   <div class="admin-body">
     <nav class="admin-nav">
-      <a href="#" data-section="dashboard" class="active">ダッシュボード</a>
-      <a href="#" data-section="genera">属管理</a>
-      <a href="#" data-section="cultivars">品種管理</a>
-      <a href="#" data-section="origins">由来管理</a>
-      <a href="#" data-section="images">画像管理</a>
-      <a href="#" data-section="delete-requests">削除依頼</a>
-      <a href="#" data-section="research-requests">再調査リクエスト <span id="rr-badge" class="d-none" style="background:#A8712E;color:#fff;border-radius:10px;padding:0 6px;font-size:0.7rem;"></span></a>
-      <a href="#" data-section="genus-requests">属の追加依頼</a>
-      <a href="#" data-section="gate">未収録一覧</a>
-      <a href="#" data-section="verify">検証</a>
-      <a href="#" data-section="affiliates">道具（アフィリエイト）</a>
-      <a href="#" data-section="contact">お問い合わせ <span id="contact-badge" class="d-none" style="background:#A8712E;color:#fff;border-radius:10px;padding:0 6px;font-size:0.7rem;"></span></a>
-      <a href="#" data-section="shops">取扱店</a>
+      <div class="nav-group">要対応</div>
+      <a href="#" data-section="inbox" class="active">まとめ <span class="nav-badge d-none" id="inbox-badge"></span></a>
+      <a href="#" data-section="delete-requests">報告 <span class="nav-badge d-none" id="dr-badge"></span></a>
+      <a href="#" data-section="contact">お問い合わせ <span class="nav-badge d-none" id="contact-badge"></span></a>
+      <a href="#" data-section="ai-suggest">AI の提案 <span class="nav-badge d-none" id="ais-badge"></span></a>
+      <a href="#" data-section="research-requests">再調査の依頼 <span class="nav-badge d-none" id="rr-badge"></span></a>
+      <a href="#" data-section="genus-requests">収録の依頼 <span class="nav-badge d-none" id="gr-badge"></span></a>
+      <a href="#" data-section="new-posts">新しい投稿 <span class="nav-badge d-none" id="new-badge"></span></a>
+      <div class="nav-group">記録</div>
+      <a href="#" data-section="cultivars">記録の一覧</a>
+      <a href="#" data-section="gate">未収録</a>
+      <a href="#" data-section="verify">検証 <span class="nav-badge d-none" id="vq-badge"></span></a>
+      <a href="#" data-section="name-checks">データ点検</a>
+      <div class="nav-group">写真</div>
+      <a href="#" data-section="images">写真</a>
+      <div class="nav-group">AI</div>
+      <a href="#" data-section="ai-usage">AI の利用と費用</a>
+      <a href="#" data-section="keyword-research">キーワードリサーチ</a>
+      <div class="nav-group">掲載</div>
+      <a href="#" data-section="genera">属</a>
       <a href="#" data-section="articles">読みもの</a>
       <a href="#" data-section="nurseries">ナーセリー</a>
-      <a href="#" data-section="ledger">帳簿</a>
-      <a href="#" data-section="plants">株台帳</a>
-      <a href="#" data-section="users">ユーザー管理</a>
-      <a href="#" data-section="bulk">一括操作</a>
-      <a href="#" data-section="error-logs">エラーログ</a>
-      <a href="#" data-section="external">外部サービス</a>
-      <a href="#" data-section="keyword-research">キーワードリサーチ</a>
+      <a href="#" data-section="shops">取扱店</a>
+      <a href="#" data-section="affiliates">道具</a>
+      <div class="nav-group">運営</div>
+      <a href="#" data-section="dashboard">サイトの状況</a>
+      <a href="#" data-section="users">ユーザー</a>
+      <a href="#" data-section="error-logs">エラー</a>
+      <a href="#" data-section="external">リンク集</a>
+      <a href="#" data-section="bulk">書き出し</a>
     </nav>
     <div class="nav-overlay" id="nav-overlay"></div>
     <main class="admin-content">
 
+      <!-- ---- 要対応 INBOX ---- -->
+      <section id="sec-inbox">
+        <h2 class="section-title">要対応</h2>
+        <p class="desc-text">あなたの判断を待っているものです。数字はログインしたときと、各画面で処理したときに更新されます。</p>
+        <div class="toolbar"><button class="btn btn-outline btn-sm" id="btn-refresh-inbox">更新</button> <span class="desc-text" id="inbox-updated"></span></div>
+        <div id="inbox-grid" class="inbox-grid"></div>
+      </section>
+
+      <!-- ---- AI SUGGESTIONS ---- -->
+      <section id="sec-ai-suggest" class="hidden">
+        <h2 class="section-title">AI の提案</h2>
+        <p class="desc-text">AI が出典つきで調べた値です。「採用」でその記録に入り、「見送る」で消えます。出典のない提案は採用しないでください。</p>
+        <div id="ai-suggest-root"></div>
+      </section>
+
+      <!-- ---- NEW POSTS ---- -->
+      <section id="sec-new-posts" class="hidden">
+        <h2 class="section-title">新しい投稿</h2>
+        <p class="desc-text">ほかの人が足した記録と写真です（運営の投稿は含みません）。この画面を開くと「新しい」の数は 0 に戻ります。</p>
+        <div class="toolbar">
+          <select id="new-posts-range">
+            <option value="7">7 日</option>
+            <option value="30">30 日</option>
+            <option value="90">90 日</option>
+          </select>
+          <button class="btn btn-outline btn-sm" id="btn-refresh-new-posts">更新</button>
+        </div>
+        <div id="new-posts-list" class="d-grid gap-md"></div>
+      </section>
+
+      <!-- ---- NAME CHECKS ---- -->
+      <section id="sec-name-checks" class="hidden">
+        <h2 class="section-title">データ点検</h2>
+        <p class="desc-text">名前と本文の自動点検です。デプロイのたびに作り直されます。ここでは何も書き換えません。</p>
+        <div id="name-check-card" class="stat-card"></div>
+      </section>
+
+      <!-- ---- ONE ENTRY ---- -->
+      <section id="sec-entry" class="hidden">
+        <div class="toolbar"><button class="btn btn-outline btn-sm" id="btn-entry-back">← 一覧に戻る</button></div>
+        <div id="entry-root"></div>
+      </section>
+
       <!-- ---- DASHBOARD ---- -->
-      <section id="sec-dashboard">
-        <h2 class="section-title">ダッシュボード</h2>
+      <section id="sec-dashboard" class="hidden">
+        <h2 class="section-title">サイトの状況</h2>
         <p class="goal-line" id="stat-goals">第17回の指標を読み込み中…</p>
         <div class="stat-grid">
           <div class="stat-card">
@@ -124,15 +174,15 @@
           </div>
           <div class="stat-card">
             <div class="stat-value" id="stat-images">-</div>
-            <div class="stat-label">画像数</div>
+            <div class="stat-label">写真の数</div>
           </div>
           <div class="stat-card">
             <div class="stat-value" id="stat-storage">-</div>
-            <div class="stat-label">Storage使用量</div>
+            <div class="stat-label" id="stat-storage-label">写真の保存容量</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value" id="stat-subscribers">-</div>
-            <div class="stat-label">有料サブスク</div>
+            <div class="stat-value" id="stat-member-interest">-</div>
+            <div class="stat-label">受付開始のお知らせ名簿</div>
           </div>
         </div>
         <div class="stat-grid" style="margin-top:var(--space-md);">
@@ -143,12 +193,21 @@
           </div>
         </div>
 
-        <!-- AI usage / estimated OpenAI spend -->
-        <h3 class="section-heading">🤖 AI利用状況（今月）</h3>
+
+        <h3 class="section-heading">Tier分布</h3>
+        <div id="tier-distribution" class="d-flex gap-sm mb-xl flex-wrap"></div>
+        <h3 class="section-heading">属別品種数</h3>
+        <div id="genus-distribution" class="d-flex gap-sm flex-wrap"></div>
+        <div id="member-interest-count" class="stat-card" style="margin-top:var(--space-lg);"></div>
+      </section>
+
+      <!-- ---- AI USAGE ---- -->
+      <section id="sec-ai-usage" class="hidden">
+        <h2 class="section-title">AI の利用と費用（今月）</h2>
         <div class="stat-grid">
           <div class="stat-card">
             <div class="stat-value" id="stat-ai-calls">-</div>
-            <div class="stat-label">AI調査回数（今月）</div>
+            <div class="stat-label">AI 呼び出し回数（今月）</div>
           </div>
           <div class="stat-card">
             <div class="stat-value" id="stat-ai-tokens">-</div>
@@ -160,23 +219,18 @@
           </div>
           <div class="stat-card">
             <div class="stat-value" id="stat-ai-cost">-</div>
-            <div class="stat-label">OpenAI概算コスト（今月）</div>
+            <div class="stat-label">AI 概算コスト（今月）</div>
           </div>
         </div>
         <div class="stat-grid" style="margin-top:var(--space-md);">
           <div class="stat-card" style="grid-column:1/-1;">
             <div id="ai-usage-breakdown" style="font-size:var(--font-size-sm);"></div>
             <p style="font-size:var(--font-size-xs);color:var(--color-gray);margin:var(--space-sm) 0 0;">
-              ※ 概算はサイト側で記録したトークン数×公開単価から算出（gpt-5-mini: 入力$0.25/100万・出力$2.00/100万・Web検索$10/1000回で計算）。正確な請求額はOpenAIのダッシュボードで確認してください。
+              ※ 概算はサイト側で記録したトークン数×モデルごとの公開単価から算出（Web検索は1回 $0.01）。今月は毎月12日（UTC）から数えます。正確な請求額は各社のダッシュボードで確認してください。
             </p>
-            <a href="https://platform.openai.com/usage" target="_blank" rel="noopener" class="btn btn-primary btn-sm" style="margin-top:var(--space-sm);">OpenAI Usageを開く →</a>
+            <a href="https://platform.openai.com/usage" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="margin-top:var(--space-sm);">OpenAI の利用状況 →</a>
           </div>
         </div>
-
-        <h3 class="section-heading">Tier分布</h3>
-        <div id="tier-distribution" class="d-flex gap-sm mb-xl flex-wrap"></div>
-        <h3 class="section-heading">属別品種数</h3>
-        <div id="genus-distribution" class="d-flex gap-sm flex-wrap"></div>
       </section>
 
       <!-- ---- GENERA ---- -->
@@ -206,64 +260,85 @@
 
       <!-- ---- CULTIVARS ---- -->
       <section id="sec-cultivars" class="hidden">
-        <h2 class="section-title">品種管理</h2>
-        <div class="toolbar">
-          <input type="text" id="cultivar-search" placeholder="品種名で検索...">
-          <select id="cultivar-genus-filter">
-            <option value="">全属</option>
-          </select>
-          <button class="btn btn-primary btn-sm" id="btn-refresh-cultivars">更新</button>
+        <h2 class="section-title">記録の一覧</h2>
+        <div class="tab-bar">
+          <button class="btn btn-sm rec-tab tab-btn active" data-rec-tab="list">名前で見る</button>
+          <button class="btn btn-sm rec-tab tab-btn" data-rec-tab="origins">由来で探す</button>
         </div>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>品種名</th>
-              <th>属</th>
-              <th>タイプ</th>
-              <th>由来数</th>
-              <th>AI状態</th>
-              <th>投稿IP</th>
-              <th>由来追加IP</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="cultivar-tbody"></tbody>
-        </table>
-      </section>
-
-      <!-- ---- ORIGINS ---- -->
-      <section id="sec-origins" class="hidden">
-        <h2 class="section-title">由来管理</h2>
-        <div class="toolbar flex-wrap gap-xs">
-          <select id="origin-cultivar-select" style="width:350px;">
-            <option value="">すべての品種</option>
-          </select>
-          <select id="origin-type-filter" style="width:160px;">
-            <option value="">すべてのタイプ</option>
-            <option value="species">原種 (Species)</option>
-            <option value="clone">クローン (Clone)</option>
-            <option value="hybrid">交配種 (Hybrid)</option>
-            <option value="seedling">実生 (Seedling)</option>
-          </select>
-          <input type="text" id="origin-search" placeholder="検索..." style="width:200px;">
+        <div id="rec-list-content">
+          <div class="toolbar flex-wrap gap-xs">
+            <input type="text" id="cultivar-search" placeholder="名前で検索...">
+            <select id="cultivar-genus-filter">
+              <option value="">全属</option>
+            </select>
+            <select id="cultivar-state-filter">
+              <option value="">すべて</option>
+              <option value="others">ほかの人の投稿</option>
+              <option value="unrecorded">未収録・記録なし</option>
+              <option value="unverified">未検証</option>
+              <option value="private">非公開</option>
+              <option value="nophoto">写真なし</option>
+            </select>
+            <button class="btn btn-primary btn-sm" id="btn-refresh-cultivars">更新</button>
+            <span class="desc-text" id="cultivar-count"></span>
+          </div>
+          <div style="overflow-x:auto;">
+          <table class="data-table" style="min-width:900px;">
+            <thead>
+              <tr>
+                <th>名前</th>
+                <th>区分</th>
+                <th>由来</th>
+                <th>写真</th>
+                <th>収録</th>
+                <th>検証</th>
+                <th>公開</th>
+                <th>投稿者</th>
+                <th>登録日</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="cultivar-tbody"></tbody>
+          </table>
+          </div>
         </div>
-        <div id="origins-list"></div>
+        <div id="rec-origins-content" class="d-none">
+          <div class="toolbar flex-wrap gap-xs">
+            <select id="origin-cultivar-select" style="width:350px;">
+              <option value="">すべての品種</option>
+            </select>
+            <select id="origin-type-filter" style="width:160px;">
+              <option value="">すべてのタイプ</option>
+              <option value="species">原種 (Species)</option>
+              <option value="clone">クローン (Clone)</option>
+              <option value="hybrid">交配種 (Hybrid)</option>
+              <option value="seedling">実生 (Seedling)</option>
+            </select>
+            <input type="text" id="origin-search" placeholder="本文・人名で検索..." style="width:200px;">
+          </div>
+          <div id="origins-list"></div>
+          <h3 class="mt-lg" style="font-size:var(--font-size-md);">最近の変更（すべての記録）</h3>
+          <div id="origin-history-card" class="stat-card"></div>
+        </div>
       </section>
 
       <!-- ---- IMAGES ---- -->
       <section id="sec-images" class="hidden">
-        <h2 class="section-title">画像管理</h2>
+        <h2 class="section-title">写真</h2>
         <div class="tab-bar">
-          <button class="btn btn-sm image-tab tab-btn active" data-image-tab="gallery">ギャラリー画像</button>
-          <button class="btn btn-sm image-tab tab-btn" data-image-tab="formula">交配式画像（母/父）</button>
+          <button class="btn btn-sm image-tab tab-btn active" data-image-tab="gallery">記録の写真</button>
+          <button class="btn btn-sm image-tab tab-btn" data-image-tab="formula">親株の写真（実生）</button>
+          <button class="btn btn-sm image-tab tab-btn" data-image-tab="compress">一括圧縮</button>
         </div>
         <div id="gallery-tab-content">
-          <div class="toolbar">
-            <input type="text" id="image-search" placeholder="品種名で検索...">
-            <label class="d-flex items-center gap-xs text-sm cursor-pointer">
-              <input type="checkbox" id="image-flag-filter"> Fake票が多い画像のみ
-            </label>
+          <div class="toolbar flex-wrap gap-xs">
+            <input type="text" id="image-search" placeholder="名前・クレジットで検索...">
+            <select id="image-filter">
+              <option value="">すべて</option>
+              <option value="others">ほかの人の写真</option>
+              <option value="private">非公開（自分だけ）</option>
+              <option value="nocredit">クレジットなし</option>
+            </select>
             <button class="btn btn-primary btn-sm" id="btn-refresh-images">更新</button>
           </div>
           <div id="image-stats" class="desc-text mb-md"></div>
@@ -277,22 +352,51 @@
           <div id="formula-image-stats" class="desc-text mb-md"></div>
           <div id="formula-image-grid" class="card-grid-sm"></div>
         </div>
+        <div id="compress-tab-content" class="d-none">
+          <!-- Bulk Image Compression -->
+          <div class="stat-card">
+            <h3 class="mb-md">画像一括圧縮</h3>
+            <p class="desc-text mb-md">
+              既存画像をCanvas APIで再圧縮します。長辺2048px超はリサイズ、JPEG品質0.9で再エンコード。<br>
+              <strong>スキップ条件:</strong> 長辺2048px以下 かつ 500KB未満の画像はスキップします。
+            </p>
+            <div class="toolbar mb-md">
+              <select id="compress-target">
+                <option value="gallery">ギャラリー画像</option>
+                <option value="parent">親写真（母/父）</option>
+                <option value="all">すべて</option>
+              </select>
+              <button class="btn btn-warning" id="btn-bulk-compress">圧縮実行</button>
+            </div>
+            <div id="compress-progress" class="hidden">
+              <div class="progress-bar"><div class="progress-fill" id="compress-progress-fill" style="width:0%"></div></div>
+              <div id="compress-progress-text" class="desc-text"></div>
+              <div id="compress-log" class="log-box"></div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- ---- DELETION REQUESTS ---- -->
       <section id="sec-delete-requests" class="hidden">
-        <h2 class="section-title">削除依頼</h2>
+        <h2 class="section-title">報告</h2>
+        <p class="desc-text">サイトの「誤りを報告」と写真の「報告」「削除依頼」から届いたものです。直したら「直した」、消すなら削除、問題がなければ「却下」を押してください。</p>
         <div class="tab-bar">
-          <button class="btn btn-sm dr-tab tab-btn active" data-dr-tab="cultivar">品種</button>
-          <button class="btn btn-sm dr-tab tab-btn" data-dr-tab="image">画像</button>
+          <button class="btn btn-sm dr-tab tab-btn active" data-dr-tab="cultivar">記録 <span id="dr-n-cultivar"></span></button>
+          <button class="btn btn-sm dr-tab tab-btn" data-dr-tab="image">写真 <span id="dr-n-image"></span></button>
+          <button class="btn btn-sm dr-tab tab-btn" data-dr-tab="done">処理済み</button>
         </div>
         <div id="dr-cultivar-content">
           <div id="dr-cultivar-list" class="d-grid gap-md"></div>
-          <p id="dr-cultivar-empty" class="desc-text">品種の削除依頼はありません</p>
+          <p id="dr-cultivar-empty" class="desc-text">記録への報告はありません</p>
         </div>
         <div id="dr-image-content" class="d-none">
           <div id="dr-image-list" class="d-grid gap-md"></div>
-          <p id="dr-image-empty" class="desc-text">画像の削除依頼はありません</p>
+          <p id="dr-image-empty" class="desc-text">写真への報告はありません</p>
+        </div>
+        <div id="dr-done-content" class="d-none">
+          <div id="dr-done-list" class="d-grid gap-md"></div>
+          <p id="dr-done-empty" class="desc-text">処理済みのものはまだありません</p>
         </div>
       </section>
 
@@ -352,18 +456,6 @@
         <div id="nurseries-root"></div>
       </section>
 
-      <!-- ---- LEDGER (帳簿) ---- -->
-      <section id="sec-ledger" class="hidden">
-        <h2 class="section-title">帳簿</h2>
-        <div id="ledger-root"></div>
-      </section>
-
-      <!-- ---- PLANT STOCK (株台帳) ---- -->
-      <section id="sec-plants" class="hidden">
-        <h2 class="section-title">株台帳</h2>
-        <div id="plants-root"></div>
-      </section>
-
       <!-- ---- AFFILIATES ---- -->
       <section id="sec-affiliates" class="hidden">
         <h2 class="section-title">道具の目録（アフィリエイト）</h2>
@@ -378,16 +470,10 @@
 
       <!-- ---- USER MANAGEMENT ---- -->
       <section id="sec-users" class="hidden">
-        <h2 class="section-title">ユーザー管理</h2>
+        <h2 class="section-title">ユーザー</h2>
+        <p class="desc-text">登録している人の一覧です。会員の受付は止めているため、プランの操作はありません。</p>
         <div class="toolbar">
           <input type="text" class="form-input" id="user-search" placeholder="ユーザー名・表示名で検索..." style="flex:1;max-width:300px;">
-          <select class="form-select" id="user-filter-status" style="width:auto;">
-            <option value="">全てのステータス</option>
-            <option value="active">Active</option>
-            <option value="granted">無料付与</option>
-            <option value="canceled">解約済み</option>
-            <option value="none">未登録</option>
-          </select>
           <button class="btn btn-outline btn-sm" id="btn-refresh-users">更新</button>
         </div>
         <div id="users-table-wrap" class="mt-md">
@@ -396,9 +482,9 @@
               <tr>
                 <th>ユーザー</th>
                 <th>ユーザー名</th>
-                <th>サブスク</th>
-                <th>期限</th>
-                <th>操作</th>
+                <th>登録日</th>
+                <th>記録</th>
+                <th>写真</th>
               </tr>
             </thead>
             <tbody id="users-tbody"></tbody>
@@ -409,52 +495,14 @@
 
       <!-- ---- BULK OPERATIONS ---- -->
       <section id="sec-bulk" class="hidden">
-        <h2 class="section-title">一括操作</h2>
+        <h2 class="section-title">書き出し</h2>
 
         <div class="d-grid gap-lg">
-          <!-- Bulk Image Compression -->
-          <div class="stat-card">
-            <h3 class="mb-md">画像一括圧縮</h3>
-            <p class="desc-text mb-md">
-              既存画像をCanvas APIで再圧縮します。長辺2048px超はリサイズ、JPEG品質0.9で再エンコード。<br>
-              <strong>スキップ条件:</strong> 長辺2048px以下 かつ 500KB未満の画像はスキップします。
-            </p>
-            <div class="toolbar mb-md">
-              <select id="compress-target">
-                <option value="gallery">ギャラリー画像</option>
-                <option value="parent">親写真（母/父）</option>
-                <option value="all">すべて</option>
-              </select>
-              <button class="btn btn-warning" id="btn-bulk-compress">圧縮実行</button>
-            </div>
-            <div id="compress-progress" class="hidden">
-              <div class="progress-bar"><div class="progress-fill" id="compress-progress-fill" style="width:0%"></div></div>
-              <div id="compress-progress-text" class="desc-text"></div>
-              <div id="compress-log" class="log-box"></div>
-            </div>
-          </div>
-
-          <!-- Bulk Origin Migration -->
-          <div class="stat-card">
-            <h3 class="mb-md">由来データ構造化移行</h3>
-            <p class="desc-text mb-md">
-              既存の由来データ（bodyテキスト）を構造化フィールド（structured.notes）に移行します。<br>
-              <strong>対象:</strong> structuredフィールドが未設定の由来のみ。既に構造化済みの由来はスキップします。<br>
-              また、レガシーフィールド（discoverer_or_breeder, native_region, discovery_year）も対応するstructuredフィールドに移行します。
-            </p>
-            <button class="btn btn-warning" id="btn-bulk-migrate">移行実行</button>
-            <div id="migrate-progress" class="hidden mt-md">
-              <div class="progress-bar"><div class="progress-fill" id="migrate-progress-fill" style="width:0%"></div></div>
-              <div id="migrate-progress-text" class="desc-text"></div>
-              <div id="migrate-log" class="log-box"></div>
-            </div>
-          </div>
-
           <!-- Data Export -->
           <div class="stat-card">
             <h3 class="mb-md">データエクスポート</h3>
             <p class="desc-text mb-md">
-              全品種データをJSON形式でダウンロードします。
+              全品種データを JSON 形式でダウンロードします（控えとして）。
             </p>
             <button class="btn btn-primary" id="btn-export">JSONエクスポート</button>
           </div>
@@ -463,20 +511,21 @@
 
       <!-- ---- ERROR LOGS ---- -->
       <section id="sec-error-logs" class="hidden">
-        <h2 class="section-title">エラーログ</h2>
-        <p class="text-muted mb-lg">フロントエンドで発生したJavaScriptエラーの一覧です。</p>
-        <div class="toolbar">
+        <h2 class="section-title">エラー</h2>
+        <p class="text-muted mb-lg">サイトで起きた JavaScript のエラーを、同じ内容ごとにまとめて新しい順に並べます（最新 500 件から）。</p>
+        <div class="toolbar flex-wrap gap-xs">
           <button class="btn btn-primary" id="btn-load-errors">最新を読み込む</button>
+          <label class="d-flex items-center gap-xs text-sm cursor-pointer"><input type="checkbox" id="error-hide-noise" checked> ブラウザ拡張などサイト外のエラーを隠す</label>
           <button class="btn" id="btn-clear-errors">30日以前を削除</button>
           <span class="text-muted" id="error-count"></span>
         </div>
         <table class="data-table">
           <thead>
             <tr>
-              <th style="width:140px;">日時</th>
+              <th style="width:140px;">最後に起きた日時</th>
+              <th style="width:60px;">回数</th>
               <th>メッセージ</th>
-              <th style="width:120px;">ソース</th>
-              <th style="width:60px;">行</th>
+              <th style="width:160px;">場所</th>
             </tr>
           </thead>
           <tbody id="error-logs-body">
@@ -487,26 +536,10 @@
 
       <!-- ---- EXTERNAL SERVICES ---- -->
       <section id="sec-external" class="hidden">
-        <h2 class="section-title">外部サービス管理</h2>
+        <h2 class="section-title">リンク集</h2>
         <p class="text-muted mb-lg">関連する外部サービスへのクイックリンク集です。</p>
 
         <div class="card-grid">
-
-          <!-- PAY.JP -->
-          <div class="stat-card">
-            <div class="svc-card-header">
-              <span class="adm-icon">💳</span>
-              <h3 class="adm-m-0">PAY.JP</h3>
-            </div>
-            <p class="svc-card-desc">決済・サブスクリプション管理</p>
-            <div class="svc-card-links">
-              <a href="https://pay.jp/d/" target="_blank" rel="noopener" class="btn btn-primary btn-link">ダッシュボード</a>
-              <a href="https://pay.jp/d/plans" target="_blank" rel="noopener" class="btn btn-link">プラン一覧</a>
-              <a href="https://pay.jp/d/subscriptions" target="_blank" rel="noopener" class="btn btn-link">定期課金一覧</a>
-              <a href="https://pay.jp/d/customers" target="_blank" rel="noopener" class="btn btn-link">顧客一覧</a>
-              <a href="https://pay.jp/d/settings" target="_blank" rel="noopener" class="btn btn-link">APIキー・Webhook設定</a>
-            </div>
-          </div>
 
           <!-- Supabase -->
           <div class="stat-card">
@@ -588,30 +621,6 @@
             </div>
           </div>
 
-          <!-- Groq -->
-          <div class="stat-card">
-            <div class="svc-card-header">
-              <span class="adm-icon">⚡</span>
-              <h3 class="adm-m-0">Groq</h3>
-            </div>
-            <p class="svc-card-desc">LLM API（フォールバック用）</p>
-            <div class="svc-card-links">
-              <a href="https://console.groq.com/keys" target="_blank" rel="noopener" class="btn btn-primary btn-link">APIキー管理</a>
-            </div>
-          </div>
-
-          <!-- ChatGPT -->
-          <div class="stat-card">
-            <div class="svc-card-header">
-              <span class="adm-icon">🤖</span>
-              <h3 class="adm-m-0">ChatGPT</h3>
-            </div>
-            <p class="svc-card-desc">AI アシスタント</p>
-            <div class="svc-card-links">
-              <a href="https://chatgpt.com/" target="_blank" rel="noopener" class="btn btn-primary btn-link">ChatGPT</a>
-            </div>
-          </div>
-
           <!-- Resend -->
           <div class="stat-card">
             <div class="svc-card-header">
@@ -655,22 +664,6 @@
 
         </div>
 
-        <!-- ログイン情報メモ -->
-        <h3 class="section-title mt-lg" style="margin-top:var(--space-2xl);">ログイン情報メモ</h3>
-        <p class="text-muted mb-lg">各サービスへのクイックアクセス一覧です。</p>
-        <table class="adm-table" style="max-width:700px;">
-          <thead><tr><th>サービス</th><th>URL</th></tr></thead>
-          <tbody>
-            <tr><td>PAY.JP</td><td><a href="https://pay.jp/d/" target="_blank" rel="noopener">pay.jp/d</a></td></tr>
-            <tr><td>Supabase</td><td><a href="https://supabase.com/dashboard/project/jpgbehsrglsiwijglhjo" target="_blank" rel="noopener">supabase.com/dashboard</a></td></tr>
-            <tr><td>GitHub</td><td><a href="https://github.com/plantsstory/plants-story" target="_blank" rel="noopener">github.com/plantsstory</a></td></tr>
-            <tr><td>Google Cloud</td><td><a href="https://console.cloud.google.com/" target="_blank" rel="noopener">console.cloud.google.com</a></td></tr>
-            <tr><td>Google Analytics</td><td><a href="https://analytics.google.com/" target="_blank" rel="noopener">analytics.google.com</a></td></tr>
-            <tr><td>Search Console</td><td><a href="https://search.google.com/search-console" target="_blank" rel="noopener">search.google.com/search-console</a></td></tr>
-            <tr><td>Resend</td><td><a href="https://resend.com/overview" target="_blank" rel="noopener">resend.com</a></td></tr>
-            <tr><td>Cloudflare</td><td><a href="https://dash.cloudflare.com/f9b9935722e242f65c12bd29503c8b84/aroidorigins.com" target="_blank" rel="noopener">dash.cloudflare.com</a></td></tr>
-          </tbody>
-        </table>
       </section>
 
       <!-- ---- KEYWORD RESEARCH ---- -->
@@ -965,10 +958,10 @@ function enterAdmin(user) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-app').classList.remove('hidden');
   document.getElementById('admin-email').textContent = user.email;
-  loadDashboard();
-  loadAllCultivars();
-  // Cleanup IPs older than 180 days on admin login
-  sb.rpc('cleanup_old_ips');
+  window._adminUser = user;
+  // the records first (the inbox and the lists read them), then what waits for the owner
+  loadAllCultivars().then(function() { if (window.refreshInbox) window.refreshInbox(); });
+  showSection('inbox');
 }
 
 // ========================================
@@ -983,43 +976,131 @@ function openNav() { navEl.classList.add('open'); overlayEl.classList.add('show'
 hamburgerEl.addEventListener('click', function() { navEl.classList.contains('open') ? closeNav() : openNav(); });
 overlayEl.addEventListener('click', closeNav);
 
+// what each page loads when it opens (one place, so a page never shows stale or empty data)
+var SECTION_LOADERS = {
+  'inbox': function() { if (window.refreshInbox) window.refreshInbox(); },
+  'delete-requests': function() { loadDeletionRequests(); },
+  'contact': function() { if (window.loadContactMessages) window.loadContactMessages(); },
+  'ai-suggest': function() { if (window.loadAiSuggestions) window.loadAiSuggestions(); },
+  'research-requests': function() { loadResearchRequests(); },
+  'genus-requests': function() { loadGenusRequests().then(function() { if (window.markInboxSeen) window.markInboxSeen('genus'); }); },
+  'new-posts': function() { if (window.loadNewPosts) window.loadNewPosts(); },
+  'cultivars': function() { renderCultivarTable(); },
+  'gate': function() { loadGateList(); },
+  'verify': function() { if (window.loadVerify) window.loadVerify(); },
+  'name-checks': function() { if (window.loadNameChecks) window.loadNameChecks(); },
+  'images': function() { loadImages(); },
+  'ai-usage': function() { loadAiUsage(); },
+  'keyword-research': function() { populateKRSelect(); },
+  'genera': function() { loadAdminGenera(); },
+  'articles': function() { if (window.loadArticlesAdmin) window.loadArticlesAdmin(); },
+  'nurseries': function() { if (window.loadNurseriesAdmin) window.loadNurseriesAdmin(); },
+  'shops': function() { if (window.loadShops) window.loadShops(); },
+  'affiliates': function() { loadAffiliates(); },
+  'dashboard': function() { loadDashboard(); if (window.loadMemberInterestCount) window.loadMemberInterestCount(); },
+  'users': function() { usersPage = 0; loadUsers(); },
+  'error-logs': function() { loadErrorLogs(); }
+};
+
+// open one page; navKey is the menu item to mark (an entry's page keeps 記録の一覧 marked)
+function showSection(section, navKey) {
+  var el = document.getElementById('sec-' + section);
+  if (!el) return;
+  var key = navKey || section;
+  document.querySelectorAll('.admin-nav a').forEach(function(a) { a.classList.toggle('active', a.getAttribute('data-section') === key); });
+  document.querySelectorAll('.admin-content > section').forEach(function(s) { s.classList.add('hidden'); });
+  el.classList.remove('hidden');
+  if (SECTION_LOADERS[section]) SECTION_LOADERS[section]();
+  window.scrollTo(0, 0);
+  closeNav();
+}
+window.showSection = showSection;
+
 document.querySelectorAll('.admin-nav a').forEach(function(link) {
   link.addEventListener('click', function(e) {
     e.preventDefault();
-    var section = this.getAttribute('data-section');
-    document.querySelectorAll('.admin-nav a').forEach(function(a) { a.classList.remove('active'); });
-    this.classList.add('active');
-    document.querySelectorAll('.admin-content > section').forEach(function(s) { s.classList.add('hidden'); });
-    document.getElementById('sec-' + section).classList.remove('hidden');
-    if (section === 'genera') loadAdminGenera();
-    if (section === 'origins') loadOrigins();
-    if (section === 'affiliates') loadAffiliates();
-    if (section === 'ledger' && window.loadLedger) window.loadLedger();
-    if (section === 'verify' && window.loadVerify) window.loadVerify();
-    if (section === 'shops' && window.loadShops) window.loadShops();
-    if (section === 'articles' && window.loadArticlesAdmin) window.loadArticlesAdmin();
-    if (section === 'nurseries' && window.loadNurseriesAdmin) window.loadNurseriesAdmin();
-    if (section === 'contact' && window.loadContactMessages) window.loadContactMessages();
-    if (section === 'dashboard' && window.loadMemberInterestCount) window.loadMemberInterestCount();
-    if (section === 'dashboard' && window.loadNameChecks) window.loadNameChecks();
-    if (section === 'dashboard' && window.loadAiSuggestions) window.loadAiSuggestions();
-    if (section === 'plants' && window.loadPlants) window.loadPlants();
-    if (section === 'keyword-research') populateKRSelect();
-    closeNav();
+    showSection(this.getAttribute('data-section'));
   });
+});
+// any [data-goto="section"] button elsewhere (the inbox cards) opens that page
+document.addEventListener('click', function(e) {
+  var g = e.target.closest && e.target.closest('[data-goto]');
+  if (!g) return;
+  e.preventDefault();
+  showSection(g.getAttribute('data-goto'));
 });
 
 // ========================================
 // Load All Cultivars (shared data)
 // ========================================
+var allImageRows = [];      // every photo row, small columns (counts and the entry page)
+var peopleNames = {};       // user id -> display name
+var OWNER_ID = '629508da-9fdd-4d3a-9ec6-22fd3bdb7346';
+
+// every row of a query: the API returns at most 1000 rows per call, so read in pages
+async function fetchAllRows(make) {
+  var out = [], from = 0;
+  for (;;) {
+    var r = await make().range(from, from + 999);
+    if (r.error) return { data: out, error: r.error };
+    out = out.concat(r.data || []);
+    if (!r.data || r.data.length < 1000) return { data: out, error: null };
+    from += 1000;
+  }
+}
+
 async function loadAllCultivars() {
-  var result = await sb.from('cultivars').select('*').order('id');
-  if (result.error) { toast('データ取得エラー'); return; }
+  var result = await fetchAllRows(function() { return sb.from('cultivars').select('*').order('created_at', { ascending: false }).order('id'); });
+  if (result.error) { toast('データ取得エラー: ' + result.error.message); return; }
   allCultivars = result.data || [];
+  var im = await fetchAllRows(function() { return sb.from('cultivar_images').select('id, cultivar_id, cultivar_name, storage_path, user_id, created_at, credit').order('created_at', { ascending: false }).order('id'); });
+  if (im.error) toast('写真の一覧を読めませんでした: ' + im.error.message);
+  allImageRows = im.data || [];
+  await loadPeopleNames(allCultivars.map(function(c) { return c.user_id; }).concat(allImageRows.map(function(r) { return r.user_id; })));
   renderCultivarTable();
   populateOriginSelect();
   loadOrigins();
+  // an open entry page follows the new data (after an edit, a delete or a re-research)
+  var ent = document.getElementById('sec-entry');
+  if (ent && !ent.classList.contains('hidden') && window.renderEntry) window.renderEntry();
 }
+
+// display names for a set of user ids, kept in peopleNames (profiles are readable by the admin)
+async function loadPeopleNames(ids) {
+  var want = [];
+  (ids || []).forEach(function(id) { if (id && !peopleNames[id] && want.indexOf(id) === -1) want.push(id); });
+  for (var i = 0; i < want.length; i += 100) {
+    var r = await sb.from('profiles').select('id, display_name, username').in('id', want.slice(i, i + 100));
+    ((r && r.data) || []).forEach(function(p) { peopleNames[p.id] = p.display_name || (p.username ? '@' + p.username : p.id.slice(0, 8)); });
+  }
+}
+window.loadPeopleNames = loadPeopleNames;
+function personName(id) {
+  if (!id) return '（なし）';
+  if (id === OWNER_ID) return '運営';
+  return peopleNames[id] || id.slice(0, 8);
+}
+window.personName = personName;
+// the public page of an entry (relative to admin.html, which sits at the site root)
+function entryUrl(name) {
+  return window.EntryMeta ? window.EntryMeta.path(name) : '#';
+}
+window.entryUrl = entryUrl;
+function photosOf(c) {
+  return allImageRows.filter(function(r) { return r.cultivar_id === c.id || (!r.cultivar_id && r.cultivar_name === c.cultivar_name); });
+}
+window.photosOf = photosOf;
+function gateState(c) {
+  if (!window.RecordGate) return '';
+  var st = RecordGate.state(c);
+  if ((c.ai_status === 'pending' || c.ai_status === 'researching') && st === 'none') return 'failed';
+  return st;
+}
+window.gateState = gateState;
+var GATE_LABEL = { ok: '収録', unrecorded: '未収録', none: '記録なし', researching: '調査中', failed: '調査失敗' };
+window.GATE_LABEL = GATE_LABEL;
+function fmtDate(d) { if (!d) return ''; d = new Date(d); return d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0'); }
+window.fmtDate = fmtDate;
 
 // ========================================
 // DASHBOARD
@@ -1095,9 +1176,8 @@ async function loadDashboard() {
   });
   document.getElementById('genus-distribution').innerHTML = genusHtml;
 
-  // Load site stats (users, images, storage, subscribers)
+  // users, photos, storage
   loadSiteStats();
-  loadAiUsage();
 }
 
 // AI usage summary: this month's token spend from ai_usage_log
@@ -1196,18 +1276,24 @@ async function loadSiteStats() {
     document.getElementById('stat-images').textContent = imgRes.count !== null ? imgRes.count : '-';
   } catch(e) { document.getElementById('stat-images').textContent = '-'; }
 
-  // Storage usage estimate (count images * avg size)
+  // Storage: the real size from storage (admin_storage_usage); an estimate until that function exists
+  var storageEl = document.getElementById('stat-storage');
+  var storageLabel = document.getElementById('stat-storage-label');
+  function mb(bytes) { var m = bytes / 1048576; return m < 1000 ? m.toFixed(m < 10 ? 1 : 0) + 'MB' : (m / 1024).toFixed(2) + 'GB'; }
   try {
+    var su = await sb.rpc('admin_storage_usage');
+    if (su.error) throw su.error;
+    var rows = su.data || [];
+    var total = rows.reduce(function(n, r) { return n + Number(r.bytes || 0); }, 0);
+    storageEl.textContent = mb(total);
+    storageEl.title = rows.map(function(r) { return r.bucket_id + ': ' + mb(Number(r.bytes || 0)) + '（' + r.files + '件）'; }).join('\n');
+    if (storageLabel) storageLabel.textContent = '写真の保存容量';
+  } catch(e) {
     var imgCount = parseInt(document.getElementById('stat-images').textContent, 10) || 0;
-    var estMB = Math.round(imgCount * 0.25); // ~250KB avg per image
-    document.getElementById('stat-storage').textContent = estMB < 1000 ? '~' + estMB + 'MB' : '~' + (estMB / 1000).toFixed(1) + 'GB';
-  } catch(e) { document.getElementById('stat-storage').textContent = '-'; }
-
-  // Active subscribers
-  try {
-    var subRes = await sb.from('subscriptions').select('id', { count: 'exact', head: true }).in('status', ['active', 'trialing']);
-    document.getElementById('stat-subscribers').textContent = subRes.count !== null ? subRes.count : '0';
-  } catch(e) { document.getElementById('stat-subscribers').textContent = '-'; }
+    var estMB = Math.round(imgCount * 0.25);
+    storageEl.textContent = estMB < 1000 ? '~' + estMB + 'MB' : '~' + (estMB / 1000).toFixed(1) + 'GB';
+    if (storageLabel) storageLabel.textContent = '写真の保存容量（推定）';
+  }
 }
 
 // ========================================
@@ -1216,36 +1302,56 @@ async function loadSiteStats() {
 function renderCultivarTable() {
   var search = (document.getElementById('cultivar-search').value || '').toLowerCase();
   var genusFilter = document.getElementById('cultivar-genus-filter').value;
+  var stateFilter = document.getElementById('cultivar-state-filter').value;
   var filtered = allCultivars.filter(function(c) {
-    if (search && c.cultivar_name.toLowerCase().indexOf(search) === -1) return false;
+    if (search && c.cultivar_name.toLowerCase().indexOf(search) === -1 && !(c.aliases || []).some(function(a) { return String(a).toLowerCase().indexOf(search) !== -1; })) return false;
     if (genusFilter && c.genus !== genusFilter) return false;
+    if (stateFilter === 'others' && (!c.user_id || c.user_id === OWNER_ID)) return false;
+    if (stateFilter === 'unrecorded' && ['unrecorded', 'none', 'failed'].indexOf(gateState(c)) === -1) return false;
+    if (stateFilter === 'unverified' && (c.verified_at || c.type === 'seedling')) return false;
+    if (stateFilter === 'private' && !c.is_private) return false;
+    if (stateFilter === 'nophoto' && photosOf(c).length) return false;
     return true;
   });
+  document.getElementById('cultivar-count').textContent = filtered.length + ' / ' + allCultivars.length + ' 件（新しい順）';
 
   var html = '';
   filtered.forEach(function(c) {
-    var originCount = (c.origins || []).length;
-    var statusClass = c.ai_status === 'completed' ? 'badge-completed' : (c.ai_status === 'failed' ? 'badge-failed' : 'badge-pending');
+    var originCount = (c.origins || []).filter(function(o) { return o && !o._type; }).length;
+    var st = gateState(c);
+    var reCheck = String(c.verification_note || '').indexOf('[要再確認]') === 0;
     html += '<tr>';
-    html += '<td>' + c.id + '</td>';
-    html += '<td><strong>' + escapeHtml(c.cultivar_name) + '</strong></td>';
-    html += '<td>' + escapeHtml(c.genus) + '</td>';
+    html += '<td><a href="#" data-open-entry="' + c.id + '"><strong>' + escapeHtml(c.cultivar_name) + '</strong></a>'
+      + (c.is_private ? '' : ' <a href="' + escapeHtml(entryUrl(c.cultivar_name)) + '" target="_blank" rel="noopener" title="公開ページ" style="font-size:0.75rem;">↗</a>') + '</td>';
     html += '<td>' + escapeHtml(window.EntryMeta ? window.EntryMeta.kind(c) : c.type) + '</td>';
     html += '<td>' + originCount + '</td>';
-    html += '<td><span class="badge ' + statusClass + '">' + escapeHtml(c.ai_status || '-') + '</span></td>';
-    html += '<td style="font-size:0.75rem;color:var(--color-gray);font-family:monospace;">' + escapeHtml(c.created_ip || '-') + '</td>';
-    html += '<td style="font-size:0.75rem;color:var(--color-gray);font-family:monospace;">' + escapeHtml(c.origin_added_ip || '-') + '</td>';
-    html += '<td class="actions">';
-    html += '<button class="btn btn-outline btn-sm" onclick="editCultivar(' + c.id + ')">編集</button> ';
-    html += '<button class="btn btn-danger btn-sm" onclick="deleteCultivar(' + c.id + ',\'' + escapeHtml(c.cultivar_name).replace(/'/g,"\\'") + '\')">削除</button>';
+    html += '<td>' + photosOf(c).length + '</td>';
+    html += '<td>' + (st && st !== 'ok' ? '<span style="color:#a8712e;">' + escapeHtml(GATE_LABEL[st] || st) + '</span>' : escapeHtml(GATE_LABEL[st] || '')) + '</td>';
+    html += '<td>' + (c.type === 'seedling' ? '<span class="text-muted">—</span>' : reCheck ? '<span style="color:#a8712e;">要再確認</span>' : c.verified_at ? '✓' : '<span class="text-muted">未</span>') + '</td>';
+    html += '<td>' + (c.is_private ? '非公開' : '公開') + '</td>';
+    html += '<td style="font-size:var(--font-size-xs);">' + escapeHtml(personName(c.user_id)) + '</td>';
+    html += '<td style="font-size:var(--font-size-xs);white-space:nowrap;">' + escapeHtml(fmtDate(c.created_at)) + '</td>';
+    html += '<td class="actions" style="white-space:nowrap;">';
+    html += '<button class="btn btn-primary btn-sm" data-open-entry="' + c.id + '">開く</button> ';
+    html += '<button class="btn btn-outline btn-sm" onclick="editCultivar(' + c.id + ')">編集</button>';
     html += '</td>';
     html += '</tr>';
   });
-  document.getElementById('cultivar-tbody').innerHTML = html || '<tr><td colspan="9" class="adm-text-center-gray">データなし</td></tr>';
+  document.getElementById('cultivar-tbody').innerHTML = html || '<tr><td colspan="10" class="adm-text-center-gray">データなし</td></tr>';
 }
 
 document.getElementById('cultivar-search').addEventListener('input', renderCultivarTable);
 document.getElementById('cultivar-genus-filter').addEventListener('change', renderCultivarTable);
+document.getElementById('cultivar-state-filter').addEventListener('change', renderCultivarTable);
+document.querySelectorAll('.rec-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.rec-tab').forEach(function(t) { t.classList.toggle('active', t === tab); });
+    var which = tab.getAttribute('data-rec-tab');
+    document.getElementById('rec-list-content').classList.toggle('d-none', which !== 'list');
+    document.getElementById('rec-origins-content').classList.toggle('d-none', which !== 'origins');
+    if (which === 'origins') { loadOrigins(); if (window.loadOriginHistory) window.loadOriginHistory({ host: document.getElementById('origin-history-card'), limit: 20, open: true }); }
+  });
+});
 document.getElementById('btn-refresh-cultivars').addEventListener('click', function() {
   loadAllCultivars();
   toast('データを更新しました');
@@ -1402,13 +1508,18 @@ async function saveCultivar(id) {
   loadDashboard();
 }
 
+// the whole entry goes: its photo rows and files, its parent photos, then the row (admin-entry.js does the work)
 async function deleteCultivar(id, name) {
-  if (!confirm('「' + name + '」を削除しますか？この操作は取り消せません。')) return;
-  var result = await sb.from('cultivars').delete().eq('id', id);
-  if (result.error) { toast('削除エラー: ' + result.error.message); return; }
-  toast('品種を削除しました');
-  loadAllCultivars();
-  loadDashboard();
+  var c = allCultivars.find(function(x) { return x.id === id; });
+  if (!c) return false;
+  var n = photosOf(c).length;
+  if (!confirm('「' + name + '」を記録ごと削除しますか？\n由来・写真 ' + n + ' 枚・親株の写真もすべて消え、取り消せません。')) return false;
+  var res = await window.deleteCultivarFully(c);
+  if (!res.ok) { toast('削除エラー: ' + res.error); return false; }
+  toast('「' + name + '」を削除しました' + (res.fileErrors ? '（ファイル ' + res.fileErrors + ' 件は消せませんでした）' : ''));
+  await loadAllCultivars();
+  if (window.refreshInbox) window.refreshInbox();
+  return true;
 }
 
 async function reresearchCultivar(id) {
@@ -1418,8 +1529,8 @@ async function reresearchCultivar(id) {
   if (!confirm('「' + c.cultivar_name + '」の' + actionLabel + 'を再実行しますか？\n（Web検索を行うため30〜90秒かかります）')) return;
 
   // Show progress on the button — the research takes 30-90s with web search
-  var btn = document.getElementById('rr-btn-' + id);
-  if (btn) { btn.disabled = true; btn.textContent = '調査中…'; }
+  var btns = document.querySelectorAll('[id="rr-btn-' + id + '"]');
+  btns.forEach(function(b) { b.disabled = true; b.textContent = '調査中…'; });
   toast(actionLabel + 'を開始しました（30〜90秒お待ちください）');
   // For CLONE/hybrid, extract user text from existing origins for re-verification
   var payload = { cultivar_id: c.id, cultivar_name: c.cultivar_name, genus: c.genus, type: c.type };
@@ -1449,7 +1560,7 @@ async function reresearchCultivar(id) {
   } catch (e) {
     toast('エラー: ' + e.message);
   }
-  if (btn) { btn.disabled = false; btn.textContent = 'AI再調査'; }
+  btns.forEach(function(b) { b.disabled = false; b.textContent = 'AI再調査'; });
   await loadAllCultivars();
   loadDashboard();
 }
@@ -1560,11 +1671,12 @@ function loadOrigins() {
     return true;
   });
 
-  if (!targets.length) {
-    document.getElementById('origins-list').innerHTML = '<p style="color:var(--color-gray);margin-top:var(--space-md);">由来データなし</p>';
-    return;
-  }
+  document.getElementById('origins-list').innerHTML = originsTableHtml(targets);
+}
 
+// the origins of the given entries as one table (the 由来で探す tab and an entry's own page)
+function originsTableHtml(targets) {
+  if (!targets.length) return '<p style="color:var(--color-gray);margin-top:var(--space-md);">由来データなし</p>';
   var totalOrigins = targets.reduce(function(s, c) { return s + (c.origins || []).length; }, 0);
   var html = '<p style="color:var(--color-gray);font-size:var(--font-size-sm);margin:var(--space-sm) 0;">' + targets.length + ' 品種 / ' + totalOrigins + ' 件の由来</p>';
   html += '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table class="data-table" style="margin-top:var(--space-sm);min-width:1000px;">';
@@ -1633,7 +1745,7 @@ function loadOrigins() {
   });
 
   html += '</tbody></table></div>';
-  document.getElementById('origins-list').innerHTML = html;
+  return html;
 }
 
 function editOrigin(cultivarId, originIndex) {
@@ -1843,121 +1955,8 @@ async function deleteOrigin(cultivarId, originIndex) {
 }
 
 // ========================================
-// BULK OPERATIONS
+// EXPORT
 // ========================================
-// ========================================
-// BULK ORIGIN MIGRATION
-// ========================================
-document.getElementById('btn-bulk-migrate').addEventListener('click', async function() {
-  var btn = this;
-  if (!confirm('既存の由来データを構造化フィールドに移行しますか？\nstructured未設定の由来のみが対象です。')) return;
-
-  btn.disabled = true;
-  var progressEl = document.getElementById('migrate-progress');
-  var fillEl = document.getElementById('migrate-progress-fill');
-  var textEl = document.getElementById('migrate-progress-text');
-  var logEl = document.getElementById('migrate-log');
-  progressEl.classList.remove('hidden');
-  fillEl.style.width = '0%';
-  logEl.innerHTML = '';
-  var stats = { total: 0, migrated: 0, skipped: 0, error: 0 };
-
-  function log(msg) {
-    logEl.innerHTML += msg + '<br>';
-    logEl.scrollTop = logEl.scrollHeight;
-  }
-
-  var res = await sb.from('cultivars').select('id, cultivar_name, type, origins');
-  if (res.error) {
-    log('[ERROR] データ取得失敗: ' + res.error.message);
-    btn.disabled = false;
-    return;
-  }
-
-  var cultivars = res.data.filter(function(c) { return c.origins && c.origins.length > 0; });
-  log('対象品種: ' + cultivars.length + '件');
-
-  for (var i = 0; i < cultivars.length; i++) {
-    var c = cultivars[i];
-    var pct = Math.round(((i + 1) / cultivars.length) * 100);
-    fillEl.style.width = pct + '%';
-    textEl.textContent = (i + 1) + ' / ' + cultivars.length + ' (' + pct + '%)';
-
-    var origins = JSON.parse(JSON.stringify(c.origins));
-    var changed = false;
-    var cType = c.type || 'species';
-
-    for (var j = 0; j < origins.length; j++) {
-      var o = origins[j];
-      stats.total++;
-
-      // Skip formula-type origins and already-structured origins
-      if (o._type === 'formula') { stats.skipped++; continue; }
-      if (o.structured) { stats.skipped++; continue; }
-
-      // Build structured from legacy fields
-      var s = { origin_type: cType };
-
-      if (cType === 'species') {
-        if (o.discoverer_or_breeder) s.collector = o.discoverer_or_breeder;
-        if (o.discovery_year) s.collection_year = o.discovery_year;
-        if (o.native_region) s.known_habitats = o.native_region;
-      } else if (cType === 'clone') {
-        if (o.discoverer_or_breeder) s.namer = o.discoverer_or_breeder;
-        if (o.discovery_year) s.naming_year = o.discovery_year;
-      } else if (cType === 'hybrid') {
-        if (o.discoverer_or_breeder) s.breeder = o.discoverer_or_breeder;
-        if (o.discovery_year) s.naming_year = o.discovery_year;
-      } else if (cType === 'seedling') {
-        if (o.discoverer_or_breeder) s.breeder = o.discoverer_or_breeder;
-      }
-
-      // Move body to notes
-      if (o.body) s.notes = o.body;
-
-      // Extract formula from formula-type origins in same cultivar
-      var formulaOrigin = origins.find(function(fo) { return fo._type === 'formula' && fo.formula; });
-      if (formulaOrigin && formulaOrigin.formula) {
-        s.formula = {
-          parentA: formulaOrigin.formula.parentA || '',
-          parentB: formulaOrigin.formula.parentB || ''
-        };
-      }
-
-      // Extract citation links from sources
-      if (o.sources && o.sources.length > 0) {
-        s.citation_links = o.sources.filter(function(src) { return src.url; }).map(function(src) { return { url: src.url, label: src.name || '' }; });
-      }
-
-      o.structured = s;
-      changed = true;
-      stats.migrated++;
-    }
-
-    if (changed) {
-      var upd = await sb.from('cultivars').update({
-        origins: origins, updated_at: new Date().toISOString()
-      }).eq('id', c.id);
-
-      if (upd.error) {
-        log('[ERROR] ' + c.cultivar_name + ': ' + upd.error.message);
-        stats.error++;
-      } else {
-        log('[OK] ' + c.cultivar_name + ' (' + cType + ')');
-      }
-    } else {
-      log('[SKIP] ' + c.cultivar_name + ' (全て構造化済み)');
-    }
-  }
-
-  log('---');
-  log('完了: 移行=' + stats.migrated + ', スキップ=' + stats.skipped + ', エラー=' + stats.error + ' / 合計=' + stats.total);
-  textEl.textContent = '完了 — 移行: ' + stats.migrated + '件, スキップ: ' + stats.skipped + '件';
-  btn.disabled = false;
-  await loadAllCultivars();
-  loadOrigins();
-});
-
 document.getElementById('btn-export').addEventListener('click', async function() {
   var result = await sb.from('cultivars').select('*').order('id');
   if (result.error) { toast('エクスポートエラー'); return; }
@@ -2083,126 +2082,123 @@ document.getElementById('btn-bulk-compress').addEventListener('click', async fun
 // IMAGE MANAGEMENT
 // ========================================
 var allImages = [];
+var imageUrlCache = {};   // storage path -> url (signed urls for private photos last an hour)
 
 async function loadImages() {
   var result = await sb.from('cultivar_images').select('*').order('created_at', { ascending: false });
   if (result.error) { toast('画像取得エラー'); return; }
   allImages = result.data || [];
+  await loadPeopleNames(allImages.map(function(r) { return r.user_id; }));
   renderImageGrid();
 }
 
+// a photo's address: public photos from gallery-images, private ones (pv:) by a signed url from private-images
 function getImageUrl(storagePath) {
+  if (/^pv:/.test(storagePath || '')) return imageUrlCache[storagePath] || '';
   return SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + storagePath;
 }
+window.getImageUrl = getImageUrl;
+async function fillPrivateImages(root) {
+  var imgs = (root || document).querySelectorAll('img[data-pv-path]');
+  for (var i = 0; i < imgs.length; i++) {
+    var path = imgs[i].getAttribute('data-pv-path');
+    if (!imageUrlCache[path]) {
+      var r = await sb.storage.from('private-images').createSignedUrl(path.slice(3), 3600);
+      if (r && r.data && r.data.signedUrl) imageUrlCache[path] = r.data.signedUrl;
+    }
+    if (imageUrlCache[path]) imgs[i].src = imageUrlCache[path];
+  }
+}
+window.fillPrivateImages = fillPrivateImages;
+var SPECIMEN_LABEL = { original: 'オリジナル由来', f_seedling: '実生（F 個体）', unknown: '不明' };
+function imgTag(path, cls) {
+  var pv = /^pv:/.test(path || '');
+  return '<img ' + (pv ? 'data-pv-path="' + escapeHtml(path) + '" src=""' : 'src="' + escapeHtml(getImageUrl(path)) + '" loading="lazy"') + ' class="' + (cls || 'adm-img-cover') + '" alt="">';
+}
+window.imgTag = imgTag;
+// one photo as a card: who put it up, the credit and when it was taken, the entry it belongs to
+function photoCardHtml(img, opts) {
+  opts = opts || {};
+  var c = allCultivars.find(function(x) { return (img.cultivar_id && x.id === img.cultivar_id) || x.cultivar_name === img.cultivar_name; });
+  var pv = /^pv:/.test(img.storage_path || '');
+  var h = '<div class="photo-card" data-photo-id="' + img.id + '">'
+    + '<div style="position:relative;">' + imgTag(img.storage_path) + (pv ? '<span class="photo-flag">非公開</span>' : '') + '</div>'
+    + '<div class="photo-body">';
+  if (!opts.noEntry) {
+    h += '<div class="adm-text-truncate" title="' + escapeHtml(img.cultivar_name || '') + '">'
+      + (c ? '<a href="#" data-open-entry="' + c.id + '">' + escapeHtml(img.cultivar_name) + '</a>' : escapeHtml(img.cultivar_name || '不明') + ' <span style="color:#a8712e;">（記録なし）</span>') + '</div>';
+  }
+  h += '<div class="item-meta">投稿: ' + escapeHtml(personName(img.user_id)) + ' · ' + escapeHtml(fmtDate(img.created_at)) + '</div>'
+    + '<div class="item-meta">クレジット: ' + (img.credit ? escapeHtml(img.credit) : '<span style="color:#a8712e;">なし</span>')
+    + (img.specimen_kind ? ' · ' + escapeHtml(SPECIMEN_LABEL[img.specimen_kind] || img.specimen_kind) : '')
+    + (img.taken_on ? ' · 撮影 ' + escapeHtml(img.taken_on) : '') + '</div>'
+    + '<input type="text" placeholder="補足（日付等）" value="' + escapeHtml(img.caption || '') + '" data-img-field="caption" data-img-id="' + img.id + '" class="adm-input-sm">'
+    + '<input type="url" placeholder="リンクURL（https://…）" value="' + escapeHtml(img.link_url || '') + '" data-img-field="link_url" data-img-id="' + img.id + '" class="adm-input-sm">'
+    + '<div><button class="btn btn-sm btn-danger" data-delete-image="' + img.id + '">削除</button></div>'
+    + '</div></div>';
+  return h;
+}
+window.photoCardHtml = photoCardHtml;
 
 function renderImageGrid() {
   var grid = document.getElementById('image-grid');
   var statsEl = document.getElementById('image-stats');
   var search = (document.getElementById('image-search').value || '').toLowerCase().trim();
-  var flagOnly = document.getElementById('image-flag-filter').checked;
+  var filter = document.getElementById('image-filter').value;
 
   var filtered = allImages.filter(function(img) {
-    if (search && !(img.cultivar_name || '').toLowerCase().includes(search)) return false;
-    if (flagOnly && (img.fake_votes || 0) <= (img.real_votes || 0)) return false;
+    if (search && !((img.cultivar_name || '').toLowerCase().includes(search) || (img.credit || '').toLowerCase().includes(search))) return false;
+    if (filter === 'others' && (!img.user_id || img.user_id === OWNER_ID)) return false;
+    if (filter === 'private' && !/^pv:/.test(img.storage_path || '')) return false;
+    if (filter === 'nocredit' && img.credit) return false;
     return true;
   });
 
-  statsEl.textContent = filtered.length + ' / ' + allImages.length + ' 画像';
-  grid.innerHTML = '';
-
-  filtered.forEach(function(img) {
-    var card = document.createElement('div');
-    card.style.cssText = 'background:var(--color-white);border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--color-light);';
-    var fakeHigh = (img.fake_votes || 0) > (img.real_votes || 0);
-    card.innerHTML =
-      '<div style="position:relative;">' +
-        '<img src="' + getImageUrl(img.storage_path) + '" class="adm-img-cover" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22160%22><rect fill=%22%23eee%22 width=%22200%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23999%22>Error</text></svg>\'">' +
-        (fakeHigh ? '<span style="position:absolute;top:4px;right:4px;background:#c62828;color:#fff;font-size:0.7rem;padding:2px 6px;border-radius:4px;">Fake多</span>' : '') +
-      '</div>' +
-      '<div style="padding:8px;font-size:var(--font-size-sm);">' +
-        '<div class="adm-text-truncate" title="' + escapeHtml(img.cultivar_name || '') + '">' + escapeHtml(img.cultivar_name || '不明') + '</div>' +
-        '<div style="display:flex;gap:8px;margin:4px 0;color:var(--color-gray);">' +
-          '<span>Real: ' + (img.real_votes || 0) + '</span>' +
-          '<span>Fake: ' + (img.fake_votes || 0) + '</span>' +
-        '</div>' +
-        '<div style="margin:4px 0;">' +
-          '<input type="text" placeholder="補足（日付等）" value="' + escapeHtml(img.caption || '') + '" data-img-field="caption" data-img-id="' + img.id + '" class="adm-input-sm">' +
-        '</div>' +
-        '<div style="margin:4px 0;">' +
-          '<input type="url" placeholder="リンクURL" value="' + escapeHtml(img.link_url || '') + '" data-img-field="link_url" data-img-id="' + img.id + '" class="adm-input-sm">' +
-        '</div>' +
-        '<div style="color:var(--color-gray);font-size:0.75rem;">' + (img.created_at ? new Date(img.created_at).toLocaleDateString('ja') : '') + '</div>' +
-        '<div style="color:var(--color-gray);font-size:0.7rem;font-family:monospace;">IP: ' + escapeHtml(img.created_ip || '-') + '</div>' +
-        '<button class="btn btn-sm" class="adm-btn-delete" data-delete-image="' + img.id + '" data-storage-path="' + escapeHtml(img.storage_path) + '">削除</button>' +
-      '</div>';
-    grid.appendChild(card);
-  });
+  statsEl.textContent = filtered.length + ' / ' + allImages.length + ' 枚（新しい順）';
+  grid.innerHTML = filtered.map(function(img) { return photoCardHtml(img); }).join('') || '<p class="desc-text">該当する写真はありません</p>';
+  fillPrivateImages(grid);
 }
 
 document.getElementById('btn-refresh-images').addEventListener('click', loadImages);
 document.getElementById('image-search').addEventListener('input', renderImageGrid);
-document.getElementById('image-flag-filter').addEventListener('change', renderImageGrid);
+document.getElementById('image-filter').addEventListener('change', renderImageGrid);
 
-// Delete image handler
-document.getElementById('image-grid').addEventListener('click', async function(e) {
-  var btn = e.target.closest('[data-delete-image]');
+// a photo row and its file go together; the file is in private-images when the path starts with pv:
+async function deletePhotoById(imageId) {
+  var r = await sb.from('cultivar_images').select('id, storage_path').eq('id', imageId).limit(1);
+  if (r.error) return { ok: false, error: r.error.message };
+  var row = (r.data || [])[0];
+  if (!row) return { ok: true, gone: true };
+  return window.deletePhotoFully(row);
+}
+window.deletePhotoById = deletePhotoById;
+
+// delete and caption edits work on any photo card on any page (photos, an entry, new posts, reports)
+document.addEventListener('click', async function(e) {
+  var btn = e.target.closest && e.target.closest('[data-delete-image]');
   if (!btn) return;
   var imageId = btn.getAttribute('data-delete-image');
-  var storagePath = btn.getAttribute('data-storage-path');
-  if (!confirm('この画像を削除しますか？')) return;
-
+  if (!confirm('この写真を削除しますか？ファイルも消え、取り消せません。')) return;
   btn.disabled = true;
   btn.textContent = '削除中...';
-  try {
-    // Try storage deletion (non-critical if fails)
-    var storageRes = await sb.storage.from('gallery-images').remove([storagePath]);
-    if (storageRes.error) console.warn('Storage delete warning:', storageRes.error.message);
-
-    // DB deletion via Supabase client
-    var dbRes = await sb.from('cultivar_images').delete().eq('id', imageId);
-    if (dbRes.error) {
-      console.warn('Client delete failed:', dbRes.error.message, '- trying REST API...');
-      // Fallback: REST API with return=representation to check if rows were deleted
-      var fetchRes = await fetch(SUPABASE_URL + '/rest/v1/cultivar_images?id=eq.' + imageId, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-          'Prefer': 'return=representation'
-        }
-      });
-      if (!fetchRes.ok) {
-        var errText = await fetchRes.text();
-        throw new Error('削除失敗 (' + fetchRes.status + '): ' + errText);
-      }
-      var deleted = await fetchRes.json();
-      if (!deleted || deleted.length === 0) {
-        throw new Error('RLSポリシーにより削除が拒否されました。Supabaseダッシュボードでcultvar_imagesテーブルのDELETEポリシーを追加してください。');
-      }
-    }
-    allImages = allImages.filter(function(img) { return String(img.id) !== String(imageId); });
-    renderImageGrid();
-    toast('画像を削除しました');
-  } catch (err) {
-    console.error('Image delete error:', err);
-    toast('削除エラー: ' + (err.message || err));
-    btn.disabled = false;
-    btn.textContent = '削除';
-  }
+  var res = await deletePhotoById(imageId);
+  if (!res.ok) { toast('削除エラー: ' + res.error); btn.disabled = false; btn.textContent = '削除'; return; }
+  allImages = allImages.filter(function(img) { return String(img.id) !== String(imageId); });
+  allImageRows = allImageRows.filter(function(img) { return String(img.id) !== String(imageId); });
+  var card = btn.closest('.photo-card');
+  if (card) card.remove();
+  toast('写真を削除しました' + (res.fileError ? '（ファイルは消せませんでした: ' + res.fileError + '）' : ''));
 });
 
-// Save caption/link_url on blur
-document.getElementById('image-grid').addEventListener('focusout', async function(e) {
-  var inp = e.target.closest('[data-img-field]');
+document.addEventListener('focusout', async function(e) {
+  var inp = e.target.closest && e.target.closest('[data-img-field]');
   if (!inp) return;
   var field = inp.getAttribute('data-img-field');
   var imageId = inp.getAttribute('data-img-id');
   var val = inp.value.trim() || null;
-  // Update local data
+  if (field === 'link_url' && val && !/^https?:\/\//i.test(val)) { toast('リンクは http:// か https:// で始めてください'); inp.style.borderColor = '#c62828'; return; }
   var imgObj = allImages.find(function(i) { return String(i.id) === String(imageId); });
   if (imgObj && imgObj[field] === val) return; // no change
-  if (imgObj) imgObj[field] = val;
   var updates = {};
   updates[field] = val;
   var res = await sb.from('cultivar_images').update(updates).eq('id', imageId);
@@ -2210,6 +2206,7 @@ document.getElementById('image-grid').addEventListener('focusout', async functio
     toast(field + ' 保存エラー: ' + res.error.message);
     inp.style.borderColor = '#c62828';
   } else {
+    if (imgObj) imgObj[field] = val;
     inp.style.borderColor = '#4caf50';
     setTimeout(function() { inp.style.borderColor = ''; }, 1500);
   }
@@ -2220,22 +2217,12 @@ document.getElementById('image-grid').addEventListener('focusout', async functio
 // ========================================
 document.querySelectorAll('.image-tab').forEach(function(tab) {
   tab.addEventListener('click', function() {
-    document.querySelectorAll('.image-tab').forEach(function(t) {
-      t.classList.remove('active');
-      t.style.borderBottom = 'none';
-      t.style.opacity = '0.6';
-      t.style.fontWeight = 'normal';
-    });
-    this.classList.add('active');
-    this.style.borderBottom = '2px solid var(--color-primary)';
-    this.style.opacity = '1';
-    this.style.fontWeight = '600';
+    document.querySelectorAll('.image-tab').forEach(function(t) { t.classList.toggle('active', t === tab); });
     var which = this.getAttribute('data-image-tab');
-    var galleryTab = document.getElementById('gallery-tab-content');
-    var formulaTab = document.getElementById('formula-tab-content');
-    galleryTab.classList.toggle('d-none', which !== 'gallery');
-    formulaTab.classList.toggle('d-none', which !== 'formula');
-    if (which === 'formula' && allFormulaImages.length === 0) loadFormulaImages();
+    document.getElementById('gallery-tab-content').classList.toggle('d-none', which !== 'gallery');
+    document.getElementById('formula-tab-content').classList.toggle('d-none', which !== 'formula');
+    document.getElementById('compress-tab-content').classList.toggle('d-none', which !== 'compress');
+    if (which === 'formula') loadFormulaImages();
   });
 });
 
@@ -2294,7 +2281,7 @@ function renderFormulaImageGrid() {
       '<div style="padding:8px;font-size:var(--font-size-sm);">' +
         '<div class="adm-text-truncate" title="' + escapeHtml(img.cultivarName || '') + '">' + escapeHtml(img.cultivarName || '不明') + '</div>' +
         '<div style="color:var(--color-gray);font-size:0.75rem;margin:4px 0;">Storage: ' + escapeHtml(img.storagePath.split('/').pop()) + '</div>' +
-        '<button class="btn btn-sm" class="adm-btn-delete" data-delete-formula-image data-cultivar-id="' + img.cultivarId + '" data-role="' + img.role + '" data-storage-path="' + escapeHtml(img.storagePath) + '">削除</button>' +
+        '<button class="btn btn-sm btn-danger" data-delete-formula-image data-cultivar-id="' + img.cultivarId + '" data-role="' + img.role + '" data-storage-path="' + escapeHtml(img.storagePath) + '">削除</button>' +
       '</div>';
     grid.appendChild(card);
   });
@@ -2343,18 +2330,6 @@ document.getElementById('formula-image-grid').addEventListener('click', async fu
     btn.disabled = false;
     btn.textContent = '削除';
   }
-});
-
-// Load images/users when section is shown
-document.querySelectorAll('.admin-nav a').forEach(function(link) {
-  link.addEventListener('click', function() {
-    if (this.getAttribute('data-section') === 'images') loadImages();
-    if (this.getAttribute('data-section') === 'delete-requests') loadDeletionRequests();
-    if (this.getAttribute('data-section') === 'research-requests') loadResearchRequests();
-    if (this.getAttribute('data-section') === 'genus-requests') loadGenusRequests();
-    if (this.getAttribute('data-section') === 'gate') loadGateList();
-    if (this.getAttribute('data-section') === 'users') loadUsers();
-  });
 });
 
 // ========================================
@@ -2470,77 +2445,45 @@ document.getElementById('sec-research-requests').addEventListener('click', async
 async function adminUid() { try { var s = (await sb.auth.getSession()).data.session; return s && s.user ? s.user.id : null; } catch (e) { return null; } }
 
 // ========================================
-// User Management
+// Users (a list of who signed up; membership is not open, so no plan controls)
 // ========================================
 var usersPage = 0;
-var usersPerPage = 20;
+var usersPerPage = 30;
 
 function loadUsers() {
   var search = document.getElementById('user-search').value.trim();
-  var filterStatus = document.getElementById('user-filter-status').value;
   var tbody = document.getElementById('users-tbody');
   tbody.innerHTML = '<tr><td colspan="5" class="adm-text-center-gray">読み込み中...</td></tr>';
-
   sb.rpc('admin_list_users', {
     p_search: search || null,
-    p_filter_status: filterStatus || null,
+    p_filter_status: null,
     p_limit: usersPerPage,
     p_offset: usersPage * usersPerPage
   }).then(function(res) {
-    if (res.error) {
-      tbody.innerHTML = '<tr><td colspan="5" style="color:red;">' + res.error.message + '</td></tr>';
-      return;
-    }
-    var data = res.data;
-    if (!data.success) {
-      tbody.innerHTML = '<tr><td colspan="5" style="color:red;">' + (data.error || 'Error') + '</td></tr>';
-      return;
-    }
+    if (res.error) { tbody.innerHTML = '<tr><td colspan="5" style="color:red;">' + escapeHtml(res.error.message) + '</td></tr>'; return; }
+    var data = res.data || {};
+    if (!data.success) { tbody.innerHTML = '<tr><td colspan="5" style="color:red;">' + escapeHtml(data.error || 'Error') + '</td></tr>'; return; }
     var users = data.users || [];
     var total = data.total || 0;
-
-    if (users.length === 0) {
+    if (!users.length) {
       tbody.innerHTML = '<tr><td colspan="5" class="adm-text-center-gray">ユーザーが見つかりません</td></tr>';
       renderUsersPagination(total);
       return;
     }
-
-    var html = '';
-    users.forEach(function(u) {
-      var planLabel = u.subscription_plan === 'granted' ? '<span style="color:#8b5cf6;font-weight:600;">無料付与</span>' :
-        u.subscription_plan === 'seedling_monthly' ? '月額' :
-        u.subscription_plan === 'seedling_annual' ? '年額' : 'Free';
-      var statusBadge = '';
-      if (u.subscription_status === 'active') statusBadge = '<span class="badge-sm badge-green">Active</span>';
-      else if (u.subscription_status === 'past_due') statusBadge = '<span class="badge-sm badge-yellow">Past Due</span>';
-      else if (u.subscription_status === 'canceled') statusBadge = '<span class="badge-sm badge-red">Canceled</span>';
-      else statusBadge = '<span class="badge-sm badge-gray">-</span>';
-
-      var endDate = u.current_period_end ? new Date(u.current_period_end).toLocaleDateString('ja-JP') : '-';
-      if (u.cancel_at_period_end) endDate += ' (解約予定)';
-
-      var actions = '';
-      if (u.subscription_plan === 'granted') {
-        actions = '<button class="btn btn-sm btn-danger" data-action="revoke" data-uid="' + u.id + '">付与取消</button>';
-      } else if (u.subscription_status !== 'active') {
-        actions = '<button class="btn btn-sm btn-primary" data-action="grant" data-uid="' + u.id + '">無料付与</button>';
-      } else {
-        actions = '<span class="text-sm text-muted">PAY.JP管理</span> <button class="btn btn-sm btn-outline" data-action="grant" data-uid="' + u.id + '">無期限付与</button>';
-      }
-
-      html += '<tr>';
-      html += '<td>' +
-        '<div style="display:flex;align-items:center;gap:8px;">' +
-        (u.avatar_url ? '<img src="' + u.avatar_url + '" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">' : '<span style="width:28px;height:28px;border-radius:50%;background:var(--color-light);display:inline-block;"></span>') +
-        '<span>' + (u.display_name || '(未設定)') + '</span>' +
-        '</div></td>';
-      html += '<td>' + (u.username ? '@' + u.username : '<span class="text-muted">-</span>') + '</td>';
-      html += '<td>' + planLabel + ' ' + statusBadge + '</td>';
-      html += '<td style="font-size:var(--font-size-xs);">' + endDate + '</td>';
-      html += '<td>' + actions + '</td>';
-      html += '</tr>';
-    });
-    tbody.innerHTML = html;
+    tbody.innerHTML = users.map(function(u) {
+      var recs = allCultivars.filter(function(c) { return c.user_id === u.id; }).length;
+      var pics = allImageRows.filter(function(r) { return r.user_id === u.id; }).length;
+      var avatar = /^https:\/\//.test(u.avatar_url || '')
+        ? '<img src="' + escapeHtml(u.avatar_url) + '" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">'
+        : '<span style="width:28px;height:28px;border-radius:50%;background:var(--color-light);display:inline-block;"></span>';
+      return '<tr>'
+        + '<td><div style="display:flex;align-items:center;gap:8px;">' + avatar + '<span>' + escapeHtml(u.display_name || '(未設定)') + (u.id === OWNER_ID ? ' <span class="text-muted">（運営）</span>' : '') + '</span></div></td>'
+        + '<td>' + (u.username ? '@' + escapeHtml(u.username) : '<span class="text-muted">-</span>') + '</td>'
+        + '<td style="font-size:var(--font-size-xs);">' + escapeHtml(fmtDate(u.created_at)) + '</td>'
+        + '<td>' + recs + '</td>'
+        + '<td>' + pics + '</td>'
+        + '</tr>';
+    }).join('');
     renderUsersPagination(total);
   });
 }
@@ -2548,207 +2491,24 @@ function loadUsers() {
 function renderUsersPagination(total) {
   var el = document.getElementById('users-pagination');
   var totalPages = Math.ceil(total / usersPerPage);
-  if (totalPages <= 1) { el.innerHTML = ''; return; }
-  var html = '<span class="text-sm text-muted">' + total + '件中 ' + (usersPage * usersPerPage + 1) + '-' + Math.min((usersPage + 1) * usersPerPage, total) + '</span>';
+  if (totalPages <= 1) { el.innerHTML = total ? '<span class="text-sm text-muted">' + total + '人</span>' : ''; return; }
+  var html = '<span class="text-sm text-muted">' + total + '人中 ' + (usersPage * usersPerPage + 1) + '-' + Math.min((usersPage + 1) * usersPerPage, total) + '</span>';
   if (usersPage > 0) html += '<button class="btn btn-sm btn-outline" onclick="usersPage--;loadUsers();">&lt; 前</button>';
   if (usersPage < totalPages - 1) html += '<button class="btn btn-sm btn-outline" onclick="usersPage++;loadUsers();">次 &gt;</button>';
   el.innerHTML = html;
 }
 
-// Event delegation for grant/revoke buttons
-document.getElementById('users-tbody').addEventListener('click', function(e) {
-  var btn = e.target.closest('[data-action]');
-  if (!btn) return;
-  var action = btn.getAttribute('data-action');
-  var userId = btn.getAttribute('data-uid');
-  if (!userId) return;
-  btn.disabled = true;
-  if (action === 'grant') {
-    toast('付与処理中...');
-    sb.rpc('admin_grant_subscription', { p_user_id: userId }).then(function(res) {
-      if (res.error) { toast('エラー: ' + res.error.message); btn.disabled = false; return; }
-      toast('サブスクリプションを付与しました');
-      loadUsers();
-    }).catch(function(e) {
-      toast('エラー: ' + e.message);
-      btn.disabled = false;
-    });
-  } else if (action === 'revoke') {
-    toast('取消処理中...');
-    sb.rpc('admin_revoke_subscription', { p_user_id: userId }).then(function(res) {
-      if (res.error) { toast('エラー: ' + res.error.message); btn.disabled = false; return; }
-      toast('付与を取り消しました');
-      loadUsers();
-    }).catch(function(e) {
-      toast('エラー: ' + e.message);
-      btn.disabled = false;
-    });
-  }
-});
-
-// User search & filter
 document.getElementById('user-search').addEventListener('input', function() {
   usersPage = 0;
   clearTimeout(this._timer);
   this._timer = setTimeout(loadUsers, 300);
-});
-document.getElementById('user-filter-status').addEventListener('change', function() {
-  usersPage = 0;
-  loadUsers();
 });
 document.getElementById('btn-refresh-users').addEventListener('click', function() {
   usersPage = 0;
   loadUsers();
 });
 
-// ========================================
-// Deletion Requests
-// ========================================
-var reasonLabels = {
-  duplicate: '重複している品種',
-  wrong_info: '誤った情報',
-  created_by_mistake: '間違えて作成した',
-  spam: 'スパム・不適切な内容',
-  irrelevant: '無関係な画像',
-  inappropriate: '不適切な画像',
-  copyright: '著作権侵害の可能性',
-  uploaded_by_mistake: '間違えてアップロードした',
-  other: 'その他'
-};
-
-// Tab switching
-document.querySelectorAll('.dr-tab').forEach(function(tab) {
-  tab.addEventListener('click', function() {
-    document.querySelectorAll('.dr-tab').forEach(function(t) {
-      t.classList.remove('active');
-      t.style.borderBottom = 'none';
-      t.style.fontWeight = 'normal';
-      t.style.opacity = '0.6';
-    });
-    this.classList.add('active');
-    this.style.borderBottom = '2px solid var(--color-primary)';
-    this.style.fontWeight = '600';
-    this.style.opacity = '1';
-    var tabName = this.getAttribute('data-dr-tab');
-    document.getElementById('dr-cultivar-content').style.display = tabName === 'cultivar' ? '' : 'none';
-    document.getElementById('dr-image-content').style.display = tabName === 'image' ? '' : 'none';
-  });
-});
-
-async function loadDeletionRequests() {
-  var result = await sb.from('deletion_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false });
-  if (result.error) { toast('削除依頼の取得エラー: ' + result.error.message); return; }
-  var requests = result.data || [];
-
-  var cultivarRequests = requests.filter(function(r) { return r.target_type === 'cultivar'; });
-  var imageRequests = requests.filter(function(r) { return r.target_type === 'image'; });
-
-  renderDeletionList('dr-cultivar-list', 'dr-cultivar-empty', cultivarRequests, 'cultivar');
-  renderDeletionList('dr-image-list', 'dr-image-empty', imageRequests, 'image');
-}
-
-function renderDeletionList(listId, emptyId, requests, type) {
-  var listEl = document.getElementById(listId);
-  var emptyEl = document.getElementById(emptyId);
-  listEl.innerHTML = '';
-  emptyEl.style.display = requests.length === 0 ? '' : 'none';
-
-  requests.forEach(function(req) {
-    var card = document.createElement('div');
-    card.style.cssText = 'background:var(--color-white);border:1px solid var(--color-light);border-radius:var(--radius-md);padding:var(--space-md);';
-    var reasonText = reasonLabels[req.reason] || req.reason;
-    if (req.reason === 'other' && req.reason_detail) {
-      reasonText += ': ' + req.reason_detail;
-    }
-    var dateStr = new Date(req.created_at).toLocaleString('ja-JP');
-
-    var html = '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-md);">';
-    html += '<div>';
-    html += '<div style="font-weight:600;margin-bottom:4px;">' + escapeHtml(req.target_name || 'ID: ' + req.target_id) + '</div>';
-    html += '<div style="font-size:var(--font-size-sm);color:var(--color-gray);margin-bottom:4px;">理由: ' + escapeHtml(reasonText) + '</div>';
-    html += '<div style="font-size:var(--font-size-xs);color:var(--color-gray);">' + dateStr + '</div>';
-    html += '</div>';
-    html += '<div style="display:flex;gap:var(--space-sm);flex-shrink:0;">';
-    html += '<button class="btn btn-sm" style="background:#dc3545;color:#fff;border:none;" data-dr-approve="' + req.id + '" data-dr-type="' + type + '" data-dr-target="' + req.target_id + '" data-dr-name="' + escapeHtml(req.target_name || '') + '">承認(削除)</button>';
-    html += '<button class="btn btn-sm" style="background:var(--color-gray);color:#fff;border:none;" data-dr-reject="' + req.id + '">却下</button>';
-    html += '</div></div>';
-    card.innerHTML = html;
-    listEl.appendChild(card);
-  });
-}
-
-// Handle approve/reject clicks
-document.getElementById('sec-delete-requests').addEventListener('click', async function(e) {
-  var approveBtn = e.target.closest('[data-dr-approve]');
-  var rejectBtn = e.target.closest('[data-dr-reject]');
-
-  if (approveBtn) {
-    var reqId = parseInt(approveBtn.getAttribute('data-dr-approve'));
-    var drType = approveBtn.getAttribute('data-dr-type');
-    var targetId = approveBtn.getAttribute('data-dr-target');
-    var targetName = approveBtn.getAttribute('data-dr-name');
-
-    if (!confirm('「' + (targetName || 'ID:' + targetId) + '」を削除しますか？')) return;
-
-    approveBtn.disabled = true;
-    approveBtn.textContent = '処理中...';
-
-    try {
-      // Delete the target
-      if (drType === 'cultivar') {
-        var delResult = await sb.from('cultivars').delete().eq('id', targetId);
-        if (delResult.error) throw new Error(delResult.error.message);
-      } else if (drType === 'image') {
-        // Get image info first for storage path
-        var imgResult = await sb.from('cultivar_images').select('storage_path').eq('id', targetId).limit(1);
-        if (imgResult.data && imgResult.data.length > 0 && imgResult.data[0].storage_path) {
-          await sb.storage.from('gallery-images').remove([imgResult.data[0].storage_path]);
-        }
-        var delResult = await sb.from('cultivar_images').delete().eq('id', targetId);
-        if (delResult.error) {
-          // Fallback: REST API delete (same as existing image delete handler)
-          var fetchRes = await fetch(SUPABASE_URL + '/rest/v1/cultivar_images?id=eq.' + targetId, {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-              'apikey': SUPABASE_ANON_KEY,
-              'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-              'Prefer': 'return=representation'
-            }
-          });
-          if (!fetchRes.ok) {
-            var errText = await fetchRes.text();
-            throw new Error('画像削除失敗 (' + fetchRes.status + '): ' + errText);
-          }
-        }
-      }
-
-      // Update request status
-      await sb.from('deletion_requests').update({ status: 'approved', resolved_at: new Date().toISOString() }).eq('id', reqId);
-      toast('削除しました');
-      loadDeletionRequests();
-    } catch (err) {
-      toast('エラー: ' + err.message);
-      approveBtn.disabled = false;
-      approveBtn.textContent = '承認(削除)';
-    }
-  }
-
-  if (rejectBtn) {
-    var reqId = parseInt(rejectBtn.getAttribute('data-dr-reject'));
-    rejectBtn.disabled = true;
-    rejectBtn.textContent = '処理中...';
-    try {
-      await sb.from('deletion_requests').update({ status: 'rejected', resolved_at: new Date().toISOString() }).eq('id', reqId);
-      toast('却下しました');
-      loadDeletionRequests();
-    } catch (err) {
-      toast('エラー: ' + err.message);
-      rejectBtn.disabled = false;
-      rejectBtn.textContent = '却下';
-    }
-  }
-});
+// Reports (誤りの報告・写真の報告・削除依頼) live in js/admin-reports.js.
 
 // ========================================
 // AFFILIATES MANAGEMENT
@@ -3123,6 +2883,16 @@ function renderGeneraTable() {
   tbody.innerHTML = html;
 }
 
+// Genus card images are files in the site's images folder (images/anthurium.png …), not uploads:
+// there is no storage bucket for them, so the field takes a file name. Returns null (no image),
+// the name, or false when the name is not a plain image file name.
+function readGenusImagePath() {
+  var v = (document.getElementById('genus-image-path').value || '').trim().replace(/^images\//, '');
+  if (!v) return null;
+  if (!/^[A-Za-z0-9._-]+\.(png|jpe?g|webp)$/i.test(v)) { toast('ファイル名は「alocasia.png」のように書いてください'); return false; }
+  return v;
+}
+
 function openAddGenusModal() {
   var html = '<h2>新しい属を追加</h2>';
   html += '<label>属名 <small style="color:var(--color-gray);">(例: Alocasia)</small></label>';
@@ -3135,8 +2905,9 @@ function openAddGenusModal() {
   html += '<label style="display:flex;align-items:center;gap:8px;margin-top:var(--space-sm);cursor:pointer;">';
   html += '<input type="checkbox" id="genus-seedlings" style="width:auto;margin:0;"> My Seedlingsタブを有効にする（パターン1）';
   html += '</label>';
-  html += '<label style="margin-top:var(--space-md);">カード画像</label>';
-  html += '<input type="file" id="genus-image" accept="image/jpeg,image/png">';
+  html += '<label style="margin-top:var(--space-md);">カード画像のファイル名</label>';
+  html += '<input type="text" id="genus-image-path" placeholder="例: alocasia.png" value="' + escapeHtml('') + '">';
+  html += '<small style="color:var(--color-gray);">カード画像はサイトの images フォルダに置いたファイルです。ファイル名だけを書きます（空なら画像なし）。新しい画像はファイルをリポジトリに追加してから名前を書いてください。</small>';
   html += '<div class="modal-actions">';
   html += '<button class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
   html += '<button class="btn btn-primary" onclick="saveNewGenus()">追加</button>';
@@ -3154,22 +2925,14 @@ async function saveNewGenus() {
   var slug = document.getElementById('genus-slug').value.trim().toLowerCase();
   var order = parseInt(document.getElementById('genus-order').value) || 1;
   var hasSeedlings = document.getElementById('genus-seedlings').checked;
-  var imageFile = document.getElementById('genus-image').files[0];
+  var cardImagePath = readGenusImagePath();
+  if (cardImagePath === false) return;
 
   if (!name) { toast('属名を入力してください'); return; }
   if (!slug) { toast('スラッグを入力してください'); return; }
 
   // Capitalize first letter of name
   name = name.charAt(0).toUpperCase() + name.slice(1);
-
-  var cardImagePath = null;
-  if (imageFile) {
-    var compressed = await compressImage(imageFile, 600, 0.85);
-    var storagePath = slug + '.png';
-    var uploadResult = await sb.storage.from('genus-cards').upload(storagePath, compressed, { upsert: true });
-    if (uploadResult.error) { toast('画像アップロードエラー: ' + uploadResult.error.message); return; }
-    cardImagePath = storagePath;
-  }
 
   var insertData = {
     name: name,
@@ -3204,12 +2967,12 @@ function openEditGenusModal(id) {
   html += '<label style="display:flex;align-items:center;gap:8px;margin-top:var(--space-sm);cursor:pointer;">';
   html += '<input type="checkbox" id="genus-seedlings" style="width:auto;margin:0;"' + (g.has_seedlings ? ' checked' : '') + '> My Seedlingsタブを有効にする（パターン1）';
   html += '</label>';
-  html += '<label style="margin-top:var(--space-md);">カード画像</label>';
+  html += '<label style="margin-top:var(--space-md);">カード画像のファイル名</label>';
   if (g.card_image_path) {
     html += '<div style="margin-bottom:var(--space-sm);"><img src="images/' + g.card_image_path + '" class="adm-img-thumb"></div>';
   }
-  html += '<input type="file" id="genus-image" accept="image/jpeg,image/png">';
-  html += '<small style="color:var(--color-gray);">新しい画像を選択すると差し替えられます</small>';
+  html += '<input type="text" id="genus-image-path" placeholder="例: alocasia.png" value="' + escapeHtml(g.card_image_path || '') + '">';
+  html += '<small style="color:var(--color-gray);">カード画像はサイトの images フォルダに置いたファイルです。ファイル名だけを書きます（空なら画像なし）。新しい画像はファイルをリポジトリに追加してから名前を書いてください。</small>';
   html += '<div class="modal-actions">';
   html += '<button class="btn btn-outline" onclick="closeModal()">キャンセル</button>';
   html += '<button class="btn btn-primary" onclick="saveEditGenus(' + id + ')">保存</button>';
@@ -3221,7 +2984,8 @@ async function saveEditGenus(id) {
   var name = document.getElementById('genus-name').value.trim();
   var order = parseInt(document.getElementById('genus-order').value) || 1;
   var hasSeedlings = document.getElementById('genus-seedlings').checked;
-  var imageFile = document.getElementById('genus-image').files[0];
+  var cardImagePath = readGenusImagePath();
+  if (cardImagePath === false) return;
 
   if (!name) { toast('属名を入力してください'); return; }
   name = name.charAt(0).toUpperCase() + name.slice(1);
@@ -3231,16 +2995,9 @@ async function saveEditGenus(id) {
     name: name,
     display_order: order,
     has_seedlings: hasSeedlings,
+    card_image_path: cardImagePath,
     updated_at: new Date().toISOString()
   };
-
-  if (imageFile) {
-    var compressed = await compressImage(imageFile, 600, 0.85);
-    var storagePath = g.slug + '.png';
-    var uploadResult = await sb.storage.from('genus-cards').upload(storagePath, compressed, { upsert: true });
-    if (uploadResult.error) { toast('画像アップロードエラー: ' + uploadResult.error.message); return; }
-    updateData.card_image_path = storagePath;
-  }
 
   var result = await sb.from('genera').update(updateData).eq('id', id);
   if (result.error) {
@@ -3308,38 +3065,54 @@ document.getElementById('btn-refresh-genera').addEventListener('click', function
 document.getElementById('btn-load-errors').addEventListener('click', loadErrorLogs);
 document.getElementById('btn-clear-errors').addEventListener('click', clearOldErrors);
 
-document.querySelectorAll('.admin-nav a').forEach(function(link) {
-  link.addEventListener('click', function() {
-    if (this.getAttribute('data-section') === 'error-logs') loadErrorLogs();
-  });
-});
+
+// errors from the site, grouped: the same message from the same file is one row with a count.
+// Errors from browser extensions or wallets, and the browser's opaque "Script error.", are not the site's.
+var errorRowsCache = [];
+var ERROR_NOISE = [/^Script error\.?$/i, /ethereum|metamask|web3|solana|tronweb/i, /(chrome|moz|safari(-web)?)-extension:\/\//i];
+function isNoiseError(r) {
+  var text = (r.message || '') + ' ' + (r.source || '') + ' ' + (r.stack || '');
+  return ERROR_NOISE.some(function(re) { return re.test(text); });
+}
+document.getElementById('error-hide-noise').addEventListener('change', renderErrorLogs);
 
 async function loadErrorLogs() {
   var tbody = document.getElementById('error-logs-body');
   tbody.innerHTML = '<tr><td colspan="4">読み込み中...</td></tr>';
   try {
-    var res = await sb.from('error_logs').select('*').order('created_at', { ascending: false }).limit(100);
+    var res = await sb.from('error_logs').select('*').order('created_at', { ascending: false }).limit(500);
     if (res.error) throw res.error;
-    var rows = res.data || [];
-    document.getElementById('error-count').textContent = rows.length + '件';
-    if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="4" class="text-muted">エラーログはありません</td></tr>';
-      return;
-    }
-    tbody.innerHTML = rows.map(function(r) {
-      var d = new Date(r.created_at);
-      var ts = d.toLocaleDateString('ja-JP') + ' ' + d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-      var src = (r.source || '').replace(/.*\//, '');
-      return '<tr>' +
-        '<td style="white-space:nowrap;font-size:var(--font-size-sm);">' + escHtml(ts) + '</td>' +
-        '<td title="' + escHtml(r.stack || '') + '" style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml((r.message || '').substring(0, 200)) + '</td>' +
-        '<td style="font-size:var(--font-size-sm);">' + escHtml(src) + '</td>' +
-        '<td>' + (r.lineno || '') + '</td>' +
-        '</tr>';
-    }).join('');
+    errorRowsCache = res.data || [];
+    renderErrorLogs();
   } catch (e) {
     tbody.innerHTML = '<tr><td colspan="4" class="text-muted">読み込みエラー: ' + escHtml(e.message || String(e)) + '</td></tr>';
   }
+}
+
+function renderErrorLogs() {
+  var tbody = document.getElementById('error-logs-body');
+  var hide = document.getElementById('error-hide-noise').checked;
+  var rows = errorRowsCache.filter(function(r) { return !hide || !isNoiseError(r); });
+  var groups = {}, order = [];
+  rows.forEach(function(r) {
+    var src = (r.source || '').replace(/[?#].*$/, '').replace(/.*\//, '');
+    var key = (r.message || '') + '|' + src;
+    if (!groups[key]) { groups[key] = { first: r, src: src, n: 0, line: r.lineno }; order.push(key); }
+    groups[key].n++;
+  });
+  var hidden = errorRowsCache.length - rows.length;
+  document.getElementById('error-count').textContent = order.length + '種類・' + rows.length + '件（直近' + errorRowsCache.length + '件のうち）' + (hidden ? ' · 隠した ' + hidden + '件' : '');
+  if (!order.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-muted">エラーはありません</td></tr>'; return; }
+  tbody.innerHTML = order.map(function(k) {
+    var g = groups[k], r = g.first, d = new Date(r.created_at);
+    var ts = d.toLocaleDateString('ja-JP') + ' ' + d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    return '<tr>' +
+      '<td style="white-space:nowrap;font-size:var(--font-size-sm);">' + escHtml(ts) + '</td>' +
+      '<td style="text-align:right;">' + g.n + '</td>' +
+      '<td title="' + escHtml(r.stack || '') + '" style="max-width:420px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml((r.message || '').substring(0, 200)) + '</td>' +
+      '<td style="font-size:var(--font-size-sm);">' + escHtml(g.src) + (g.line ? ':' + g.line : '') + '</td>' +
+      '</tr>';
+  }).join('');
 }
 
 async function clearOldErrors() {
@@ -3643,5 +3416,8 @@ document.getElementById('btn-kr-reject').addEventListener('click', function() {
   toast('リサーチ結果を破棄しました');
 });
 </script>
+<script src="js/admin-entry.js?v=20261127b"></script>
+<script src="js/admin-reports.js?v=20261127b"></script>
+<script src="js/admin-inbox.js?v=20261127b"></script>
 </body>
 </html>
