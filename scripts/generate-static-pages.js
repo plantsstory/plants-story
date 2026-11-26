@@ -460,8 +460,11 @@ async function main() {
     if (at > 0) ctx.prev = { name: EntryMeta.name(order[at - 1]), url: entryUrl(order[at - 1]) };
     if (at >= 0 && at < order.length - 1) ctx.next = { name: EntryMeta.name(order[at + 1]), url: entryUrl(order[at + 1]) };
     // the entry's photo is asked for first; the front page's plate (hidden here) is not fetched at all (T156)
+    // after the viewport, referrer and CSP metas, not straight after the charset: a preload asked for before the
+    // referrer meta is not the same request as the <img>, so phones fetched the photo twice (PSI 11-26)
+    const preloadAt = (/<meta http-equiv="Content-Security-Policy"[^>]*>/.exec(html) || [])[0] || '<meta charset="UTF-8">';
     const htmlFast = photo
-      ? html.replace('<meta charset="UTF-8">', '<meta charset="UTF-8">\n  <link rel="preload" as="image" href="' + escAttr(photo) + '" imagesrcset="' + escAttr(photoSet) + '" imagesizes="' + PHOTO_SIZES + '" fetchpriority="high">').replace('<img src="images/anthurium.png"', '<img loading="lazy" src="images/anthurium.png"')
+      ? html.replace(preloadAt, preloadAt + '\n  <link rel="preload" as="image" href="' + escAttr(photo) + '" imagesrcset="' + escAttr(photoSet) + '" imagesizes="' + PHOTO_SIZES + '" fetchpriority="high">').replace('<img src="images/anthurium.png"', '<img loading="lazy" src="images/anthurium.png"')
       : html.replace('<img src="images/anthurium.png"', '<img loading="lazy" src="images/anthurium.png"');
     const htmlWithEntry = RecordGate.state(c) === 'ok' ? htmlFast.replace(/(<main[^>]*>)/, '$1\n' + staticEntryHtml(c, ctx)).replace(/<body([^>]*)>/, (m, at) => /class="/.test(at) ? m.replace('class="', 'class="stub-entry-page ') : '<body' + at + ' class="stub-entry-page">') : htmlFast;
 
