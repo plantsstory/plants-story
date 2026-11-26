@@ -79,7 +79,9 @@
     var path = location.pathname.replace(/\/(index\.html)?$/, '').replace(/^\/plants-story/, '');
     if (path || /[?&]spa_path=/.test(location.search)) {
       root.setAttribute('data-boot', 'deep');
-      setTimeout(function () { root.removeAttribute('data-boot'); }, 8000);
+      // only its own 'deep' flag: by 8 s a plant page may hold 'entry' while it draws, and clearing that showed the
+      // page under the stub's first screen, which then jumped up when the stub left (a 0.94 shift, 11-26)
+      setTimeout(function () { if (root.getAttribute('data-boot') === 'deep') root.removeAttribute('data-boot'); }, 8000);
     }
   } catch (e) {}
 
