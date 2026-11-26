@@ -17,7 +17,8 @@ async function latest(table, col) {
 }
 (async () => {
   const [c, i, n] = await Promise.all([
-    latest('cultivars', 'updated_at'),
+    // changed_at moves on every edit (origins, votes, verification); updated_at until that column exists
+    latest('cultivars', 'changed_at').catch(() => latest('cultivars', 'updated_at')),
     latest('cultivar_images', 'created_at'),
     fetch(SUPABASE_URL + '/rest/v1/cultivars?select=id', { method: 'HEAD', headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY, Prefer: 'count=exact' } })
       .then(r => (r.headers.get('content-range') || '').split('/')[1] || ''),
