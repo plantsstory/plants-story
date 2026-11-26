@@ -111,5 +111,33 @@
     return isClone(rec) ? word + (en ? ' · Clone' : '・Clone') : word;
   }
 
-  return { title: title, description: description, kana: kana, name: displayName, parentage: parentage, isClone: isClone, kind: kind };
+  // The address of an entry (site check 2026-11-26, item 8): the part after the genus is the stored name in plain
+  // lower-case words joined by hyphens, so it carries no quotes, spaces or dots:  'Ace of Spades' -> ace-of-spades,
+  // sp. "Peru" -> sp-peru. A plain species name (wendlingeri) is already in that form and keeps its address.
+  // A name with letters outside plain Latin (×, kana, kanji) keeps the old form, the name itself, so no two
+  // entries can end up at one address by losing those letters.
+  function slug(rest) {
+    var s = String(rest == null ? '' : rest).trim();
+    if (s.normalize) s = s.normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+    if (!s || /[^\x20-\x7e]/.test(s)) return null;
+    var out = s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return out || null;
+  }
+  // the URL segment for the part of a name after the genus (already percent-safe)
+  function segment(rest) { return slug(rest) || encodeURIComponent(String(rest == null ? '' : rest)); }
+  // 'Anthurium papillilaminum' -> 'anthurium/papillilaminum' (no leading or trailing slash)
+  function path(fullName) {
+    var n = String(fullName || '').replace(' [Seedling]', '').trim();
+    var g = n.split(' ')[0];
+    return g.toLowerCase() + '/' + segment(n.slice(g.length + 1));
+  }
+  // the address form a name had before 11-26 (genus/encoded name); old links and search results still use it
+  function legacyPath(fullName) {
+    var n = String(fullName || '').replace(' [Seedling]', '').trim();
+    var g = n.split(' ')[0];
+    return g.toLowerCase() + '/' + encodeURIComponent(n.slice(g.length + 1));
+  }
+
+  return { title: title, description: description, kana: kana, name: displayName, parentage: parentage, isClone: isClone, kind: kind,
+    slug: slug, segment: segment, path: path, legacyPath: legacyPath };
 });

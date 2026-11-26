@@ -622,7 +622,9 @@ function getShareUrl(cultivarName) {
   var genus = display.split(' ')[0].toLowerCase();
   var rest = display.replace(/^\S+\s*/, '');
   var enc = function(s) { return encodeURIComponent(s).replace(/'/g, '%27'); };
-  return 'https://aroidorigins.com/' + enc(genus) + '/' + enc(rest) + '/';
+  // the new address form has no quotes at all (item 8, 11-26); a name outside plain Latin keeps the encoded form
+  var seg = window.EntryMeta && window.EntryMeta.slug ? window.EntryMeta.slug(rest) : null;
+  return 'https://aroidorigins.com/' + enc(genus) + '/' + (seg || enc(rest)) + '/';
 }
 window.getShareUrl = getShareUrl;
 
@@ -1085,7 +1087,7 @@ function updateCultivarDetail(cultivarName, rowEl) {
   updateMeta({
     title: (_metaRec && window.EntryMeta) ? window.EntryMeta.title(_metaRec) : displayName + 'の由来 · Aroid Origins',
     description: metaDesc,
-    path: genusKey + '/' + encodeURIComponent(displayName.replace(genusName + ' ', '')),
+    path: window.entryPathOf ? window.entryPathOf(cultivarName) : genusKey + '/' + encodeURIComponent(displayName.replace(genusName + ' ', '')),
     image: ogImageUrl,
     noindex: detectedType === 'seedling' || (typeof window.recordStateOf === 'function' && cData && window.recordStateOf(cultivarName, cData, { type: detectedType }) !== 'ok')
   });

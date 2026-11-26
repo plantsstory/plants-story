@@ -275,7 +275,7 @@
       var store = window.cultivarData || {};
       html += '<p class="tool-species mono"><span>' + esc(T('tools_species')) + '</span> ' + sp.map(function (n) {
         var parts = n.split(' ');
-        return store[n] ? '<a href="' + esc(base + parts[0].toLowerCase() + '/' + encodeURIComponent(parts.slice(1).join(' '))) + '" data-nav="cultivar" data-key="' + esc(n) + '"><i>' + esc(n) + '</i></a>' : '<i>' + esc(n) + '</i>';
+        return store[n] ? '<a href="' + esc(base + (window.entryPathOf ? window.entryPathOf(n) + '/' : parts[0].toLowerCase() + '/' + encodeURIComponent(parts.slice(1).join(' ')))) + '" data-nav="cultivar" data-key="' + esc(n) + '"><i>' + esc(n) + '</i></a>' : '<i>' + esc(n) + '</i>';
       }).join('<span class="related__exit-sep">·</span>') + '</p>';
     }
     var related = (_tools || []).filter(function (r) { return r.genre === x.genre && r.id !== x.id; }).slice(0, 4);

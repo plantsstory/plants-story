@@ -8,6 +8,8 @@ const people = require('./lib/people');
 const newest = (rows, today) => { const d = rows.map(r => r.updated_at || '').sort().pop(); return d ? new Date(d).toISOString().split('T')[0] : today; };
 const geo = require('./lib/geo');
 const RecordGate = require('../wireframe/js/record-gate');
+const EntryMeta = require('../wireframe/js/entry-meta');
+const Addresses = require('./lib/entry-addresses');
 
 const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
@@ -71,6 +73,7 @@ async function main() {
   }
 
   // Cultivar pages
+  const ADDR = Addresses.assign(cultivars);
   for (const c of cultivars) {
     // Individuals are listed on their species page; unrecorded entries (seedlings included) are noindex.
     // Public seedlings are free to read and get their own page (BOARD 10-07b T85).
@@ -80,7 +83,8 @@ async function main() {
     const genus = c.genus || 'Anthurium';
     const genusSlug = genus.toLowerCase();
     const rest = c.cultivar_name.replace(' [Seedling]', '').replace(genus + ' ', '');
-    const encodedRest = encodeURIComponent(rest);
+    // the entry's address (item 8, 11-26): ace-of-spades, not 'Ace%20of%20Spades' (the same as its static page)
+    const encodedRest = ADDR.get(Addresses.fullNameOf(c.cultivar_name, genus)) || EntryMeta.segment(rest);
     const lastmod = c.updated_at ? new Date(c.updated_at).toISOString().split('T')[0] : today;
 
     xml += `  <url>\n    <loc>${SITE}/${genusSlug}/${encodedRest}/</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;

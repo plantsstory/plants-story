@@ -175,7 +175,7 @@
     d.nameStatus = entry._nameStatus || null;
     d.formLocality = clean(entry._locality);
     d.creator = clean(d.formula && d.formula.creatorName);
-    d.href = base + genus.toLowerCase() + '/' + encodeURIComponent(epithet) + '/';   // the canonical form (no 301)
+    d.href = base + (window.entryPathOf ? window.entryPathOf(genus + ' ' + epithet) : genus.toLowerCase() + '/' + encodeURIComponent(epithet)) + '/';   // the canonical form (no 301)
     // the name readers see (T69: undescribed species stored without sp.); displayName stays the stored key
     d.shownName = window.EntryMeta ? window.EntryMeta.name({ cultivar_name: displayName, type: type, origins: entry.origins || [], species_qualifier: entry._qualifier }) : displayName;
     // the same number from a second person is stored as 「… 'RA1' (name)」: the bracket is a storage key, and the

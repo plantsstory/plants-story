@@ -14,19 +14,19 @@
   <link rel="stylesheet" href="css/utilities.css">
   <link rel="stylesheet" href="css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/record-gate.js?v=20261126m"></script>
-  <script src="js/entry-meta.js?v=20261126m"></script>
-  <script src="js/tool-gate.js?v=20261126m"></script>
-  <script src="js/admin-ledger.js?v=20261126m"></script>
-  <script src="js/admin-tools-research.js?v=20261126m"></script>
-  <script src="js/admin-tool-candidates.js?v=20261126m"></script>
-  <script src="js/admin-verify.js?v=20261126m"></script>
-  <script src="js/admin-contact.js?v=20261126m"></script>
-  <script src="js/admin-checks.js?v=20261126m"></script>
-  <script src="js/admin-suggest.js?v=20261126m"></script>
-  <script src="js/admin-shops.js?v=20261126m"></script>
-  <script src="js/admin-articles.js?v=20261126m"></script>
-  <script src="js/admin-nurseries.js?v=20261126m"></script>
+  <script src="js/record-gate.js?v=20261126n"></script>
+  <script src="js/entry-meta.js?v=20261126n"></script>
+  <script src="js/tool-gate.js?v=20261126n"></script>
+  <script src="js/admin-ledger.js?v=20261126n"></script>
+  <script src="js/admin-tools-research.js?v=20261126n"></script>
+  <script src="js/admin-tool-candidates.js?v=20261126n"></script>
+  <script src="js/admin-verify.js?v=20261126n"></script>
+  <script src="js/admin-contact.js?v=20261126n"></script>
+  <script src="js/admin-checks.js?v=20261126n"></script>
+  <script src="js/admin-suggest.js?v=20261126n"></script>
+  <script src="js/admin-shops.js?v=20261126n"></script>
+  <script src="js/admin-articles.js?v=20261126n"></script>
+  <script src="js/admin-nurseries.js?v=20261126n"></script>
 </head>
 <body>
 
@@ -2377,7 +2377,7 @@ async function loadGateList() {
     var c = document.createElement('div');
     c.style.cssText = 'background:var(--color-white);border:1px solid var(--color-light);border-radius:var(--radius-md);padding:var(--space-md);display:flex;justify-content:space-between;gap:var(--space-md);flex-wrap:wrap;align-items:baseline;';
     var rest = String(x.r.cultivar_name).replace(x.r.genus + ' ', '').replace(' [Seedling]', '');
-    c.innerHTML = '<div><a href="/' + x.r.genus.toLowerCase() + '/' + encodeURIComponent(rest) + '" target="_blank" style="font-weight:600;">' + escapeHtml(x.r.cultivar_name) + '</a> <span style="font-size:0.75rem;color:var(--color-gray);">#' + x.r.id + ' · ' + x.r.genus + ' · ' + x.r.type + '</span>'
+    c.innerHTML = '<div><a href="/' + x.r.genus.toLowerCase() + '/' + (window.EntryMeta ? EntryMeta.segment(rest) + '/' : encodeURIComponent(rest)) + '" target="_blank" style="font-weight:600;">' + escapeHtml(x.r.cultivar_name) + '</a> <span style="font-size:0.75rem;color:var(--color-gray);">#' + x.r.id + ' · ' + x.r.genus + ' · ' + x.r.type + '</span>'
       + (x.missing.length ? '<div style="font-size:var(--font-size-sm);margin-top:4px;">不足: ' + x.missing.map(function(k) { return MISS[k] || k; }).join(' · ') + '</div>' : '') + '</div>'
       + '<span style="font-size:0.75rem;padding:2px 8px;border:1px solid var(--color-light);border-radius:10px;">' + LABEL[x.st] + '</span>';
     listEl.appendChild(c);
