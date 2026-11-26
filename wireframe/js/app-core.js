@@ -652,6 +652,7 @@ function showGenus(genusName) {
 
 // ---- Path-based routing (History API) ----
 // Known simple pages (no sub-parameters)
+var noStubPages = ['search', 'contribute', 'mypost'];   // no static stub, so no trailing slash
 var simplePages = ['search', 'contribute', 'about', 'terms', 'privacy', 'contact', 'tokushoho', 'mypost', 'guide', 'glossary', 'pricing', 'wanted', 'ig', 'reading', 'nurseries', 'explore'];
 // Known genus names for URL mapping
 var knownGenera = []; // Populated dynamically from genera table
@@ -670,20 +671,22 @@ function buildPath(page, options) {
   if (page === 'profile' && options.username) return _basePath + 'profile/@' + options.username;
   if (page === 'profile' && options.userId) return _basePath + 'profile/' + options.userId;
   if (page === 'profile-edit') return _basePath + 'profile/edit';
-  if (page === 'genus' && options.genus) return _basePath + options.genus.toLowerCase();
+  // Trailing slash everywhere a static stub exists: the stubs, canonical and sitemap use /slug/, and a path
+  // without it made the address bar disagree with the canonical (site check 2026-11-25)
+  if (page === 'genus' && options.genus) return _basePath + options.genus.toLowerCase() + '/';
   if (page === 'cultivar' && options.cultivar) {
     var parts = options.cultivar.split(' ');
     var g = parts[0].toLowerCase();
     var rest = parts.slice(1).join(' ');
-    return _basePath + g + '/' + encodeURIComponent(rest);
+    return _basePath + g + '/' + encodeURIComponent(rest) + '/';
   }
   if (page === 'search' && options.q) return _basePath + 'search?q=' + encodeURIComponent(options.q);
-  if (page === 'people') return _basePath + 'people' + (options.person ? '/' + encodeURIComponent(options.person) : '');
-  if (page === 'locality') return _basePath + 'locality' + (options.place ? '/' + encodeURIComponent(options.place) : '');
+  if (page === 'people') return _basePath + 'people/' + (options.person ? encodeURIComponent(options.person) + '/' : '');
+  if (page === 'locality') return _basePath + 'locality/' + (options.place ? encodeURIComponent(options.place) + '/' : '');
   if (page === 'names') return _basePath + 'names/' + (options.nameSlug ? encodeURIComponent(options.nameSlug) + '/' : '');
   if (page === 'tools') return _basePath + 'tools/' + (options.tool ? encodeURIComponent(options.tool) + '/' : (options.genre ? '?g=' + encodeURIComponent(options.genre) : ''));
   if (page === 'glossary' && options.term) return _basePath + 'glossary/' + options.term + '/';
-  if (simplePages.indexOf(page) !== -1) return _basePath + page;
+  if (simplePages.indexOf(page) !== -1) return _basePath + page + (noStubPages.indexOf(page) === -1 ? '/' : '');
   return _basePath;
 }
 // Keep buildHash as alias for backward compatibility in case any external code references it
@@ -906,7 +909,7 @@ function navigateTo(page, options, pushHistory) {
       } else {
         updateBreadcrumbJsonLd([
           { name: 'Home', url: _siteBase },
-          { name: pageTitles[page] ? pageTitles[page].split(' - ')[0] : page, url: _siteBase + page }
+          { name: pageTitles[page] ? pageTitles[page].split(' - ')[0] : page, url: _siteBase + page + '/' }
         ]);
       }
     }
@@ -2539,7 +2542,7 @@ if (false) {
         var dispKey = key.replace(' [Seedling]', '');
         if (dispKey !== key) cultivarData[dispKey] = entry;
       }
-      history.pushState({ page: 'cultivar', genus: genus.toLowerCase(), cultivar: genus + ' ' + displayName }, '', _basePath + genus.toLowerCase() + '/' + encodeURIComponent(displayName));
+      history.pushState({ page: 'cultivar', genus: genus.toLowerCase(), cultivar: genus + ' ' + displayName }, '', _basePath + genus.toLowerCase() + '/' + encodeURIComponent(displayName) + '/');
       navigateTo('cultivar', { genus: genus.toLowerCase(), cultivar: genus + ' ' + displayName }, false);
     });
   };

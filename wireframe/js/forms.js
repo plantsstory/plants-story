@@ -2781,8 +2781,12 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       creditHtml = '<p class="gallery__credit" data-uid="' + escHtml(opts.ownerId || '') + '" data-ym="' + escHtml(opts.creditYm || '') + '"' + (opts.creditName ? '' : ' hidden') + '>'
         + (opts.creditName ? '写真: ' + escHtml(opts.creditName) + (opts.creditYm ? '、' + escHtml(opts.creditYm) : '') : '') + '</p>';
     }
+    // the plant's name as the alt text, and the first photo loads at once: it is the page's largest picture
+    // (site check 2026-11-25: no alt, and loading=lazy on the LCP image)
+    var _gu = document.getElementById('gallery-upload');
+    var altText = opts.alt || (_gu && _gu.parentNode && _gu.parentNode.getAttribute('data-for')) || '';
     item.innerHTML =
-      '<div class="gallery__img"><img src="' + src + '" class="gallery__img-full" loading="lazy" decoding="async" sizes="(max-width: 768px) 100vw, 600px">' + overlayHtml + '</div>' + creditHtml +
+      '<div class="gallery__img"><img src="' + src + '" class="gallery__img-full" alt="' + escHtml(altText) + '"' + (opts.eager ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"') + ' decoding="async" sizes="(max-width: 768px) 100vw, 600px">' + overlayHtml + '</div>' + creditHtml +
       '<div class="gallery__actions">' +
         (canRequestImageDelete(opts) ? '<a class="gallery__delete">' + t('request_delete') + '</a>' : '') +
       '</div>';
@@ -2822,7 +2826,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       var standSrc = tp && window.galleryImg ? window.galleryImg(tp, 1200)
         : (stubImg && stubImg.getAttribute('alt') === cultivarName ? (stubImg.currentSrc || stubImg.src) : '');
       if (standSrc) {
-        standIn = createGalleryItem(standSrc, {});
+        standIn = createGalleryItem(standSrc, { alt: cultivarName, eager: true });
         standIn.classList.add('gallery__item--standin');
         gallery.insertBefore(standIn, galleryUpload);
         galleryCarouselIdx = 0;
@@ -2837,9 +2841,11 @@ updateCultivarDetail = function(cultivarName, rowEl) {
         if (samePlant) clearOld();
         var fresh = [];
 
-        images.forEach(function(img) {
+        images.forEach(function(img, imgIdx) {
           var url = getPublicUrl(img.storage_path);
           var item = createGalleryItem(url, {
+            alt: cultivarName,
+            eager: imgIdx === 0,
             imageId: img.id,
             storagePath: img.storage_path,
             realVotes: img.real_votes,
