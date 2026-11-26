@@ -51,6 +51,9 @@ jobs:
       - name: Generate sitemap from Supabase
         if: steps.changed.outputs.run == 'true'
         run: node scripts/generate-sitemap.js
+      - name: Make the photo copies served from Pages
+        if: steps.changed.outputs.run == 'true'
+        run: node scripts/build-photos.js
       - name: Render share cards
         if: steps.changed.outputs.run == 'true'
         run: node scripts/make-og-cards.js

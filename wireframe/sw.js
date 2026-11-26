@@ -1,8 +1,8 @@
 // Service Worker for Aroid Origins PWA
-var CACHE_VERSION = 'aroid-origins-v197';
+var CACHE_VERSION = 'aroid-origins-v198';
 // Must match the ?v= cache buster in index.html — otherwise the precache
 // URLs never match real requests and every asset downloads twice.
-var ASSET_VERSION = '20261126w';
+var ASSET_VERSION = '20261126x';
 var OFFLINE_PAGE = './offline.html';
 var STATIC_ASSETS = [
   './',
@@ -77,6 +77,8 @@ self.addEventListener('fetch', function(event) {
   // Skip admin.html and static legal pages — always fetch from network, never SPA fallback
   if (url.pathname.indexOf('admin') !== -1) return;
   if (url.pathname.indexOf('/tokushoho') !== -1) return;
+  // photo copies (/p/…webp): the browser's own cache keeps them; storing every photo seen here would grow without limit
+  if (url.pathname.indexOf('/p/') === 0) return;
 
   // SPA navigation requests: serve index.html for client-side routing
   if (event.request.mode === 'navigate') {

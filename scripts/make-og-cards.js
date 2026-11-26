@@ -142,8 +142,23 @@ async function fetchPhoto(storagePath) {
   }
   return null;
 }
+// the deploy-time copy (scripts/build-photos.js) when there is one: no Supabase traffic at all. resvg reads JPEG
+// for certain, so the WebP copy is turned into a JPEG here
+const Photos = require('./lib/photos');
+let photoManifest = null;
+async function localPhotoDataUri(storagePath) {
+  if (!photoManifest) photoManifest = Photos.loadManifest();
+  const file = Photos.localFile(photoManifest, storagePath, 1080);
+  if (!file || !fs.existsSync(file)) return '';
+  try {
+    const jpg = await require('sharp')(file).jpeg({ quality: 85 }).toBuffer();
+    return 'data:image/jpeg;base64,' + jpg.toString('base64');
+  } catch (e) { return ''; }
+}
 async function photoDataUri(storagePath) {
   if (!storagePath) return '';
+  const local = await localPhotoDataUri(storagePath);
+  if (local) return local;
   try {
     const r = await fetchPhoto(storagePath);
     if (!r) return '';

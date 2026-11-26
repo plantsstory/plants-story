@@ -1515,6 +1515,32 @@ if (false) {
   // limits count per account. Callers still get a promise, now of null.
   window.getUserIp = function() { return Promise.resolve(null); };
 
+  // --- Deploy-time photo copies (data/photos.js sets window._localPhotos = {storage path: hash}) ---
+  function localPhotoUrl(path, w, photos, sizes) {
+    photos = photos || window._localPhotos;
+    sizes = sizes || window._localPhotoSizes;
+    var h = photos && Object.prototype.hasOwnProperty.call(photos, path) ? photos[path] : null;
+    if (!h || !sizes || !sizes.length) return '';
+    w = w || 640;
+    for (var i = 0; i < sizes.length; i++) if (sizes[i] >= w) return '/p/' + h + '-' + sizes[i] + '.webp';
+    return '';   // larger than every copy: the caller asks Supabase
+  }
+  var _localPhotoByHash = null, _localPhotoByHashOf = null;
+  function localPhotoSource(src, photos) {
+    var m = /\/p\/([0-9a-f]{16})-(\d+)\.webp(?:$|[?#])/.exec(String(src || ''));
+    if (!m) return null;
+    photos = photos || window._localPhotos || {};
+    if (_localPhotoByHashOf !== photos) {
+      _localPhotoByHash = {};
+      Object.keys(photos).forEach(function (p) { _localPhotoByHash[photos[p]] = p; });
+      _localPhotoByHashOf = photos;
+    }
+    var path = _localPhotoByHash[m[1]];
+    return path ? { path: path, width: +m[2] } : null;
+  }
+  window.localPhotoUrl = localPhotoUrl;
+  window.localPhotoSource = localPhotoSource;
+
   var supabase = null;
   try {
     if (window.supabase && window.supabase.createClient) {
@@ -1527,15 +1553,33 @@ if (false) {
       window._SUPABASE_URL = SUPABASE_URL;
       // Photos at the width they are shown: originals are 1.5–5 MB phone photos.
       // galleryImg(path, w) → resized copy; if the resize service fails, the <img> falls back to the original once.
+      // A copy made at deploy and served by GitHub Pages comes first (data/photos.js, scripts/build-photos.js):
+      // the Supabase Free plan allows 5 GB of photo traffic a month. A photo newer than the last deploy, or a size
+      // above the largest copy, still comes from Supabase.
       window.galleryImg = function (path, w) {
         if (!path || /^pv:/.test(path)) return '';   // private photos are never public URLs (T125)
+        var local = window.localPhotoUrl(path, w);
+        if (local) return local;
+        return window.supabasePhotoUrl(path, w);
+      };
+      window.supabasePhotoUrl = function (path, w) {
         var p = String(path).split('/').map(encodeURIComponent).join('/');
         return SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + p + '?width=' + (w || 640) + '&height=' + ((w || 640) * 2) + '&resize=contain&quality=72';   // fit inside w × 2w, keeping the shape
       };
       window.galleryOriginal = function (path) { return path ? SUPABASE_URL + '/storage/v1/object/public/gallery-images/' + path : ''; };
       document.addEventListener('error', function (e) {
         var img = e.target;
-        if (!img || img.tagName !== 'IMG' || img.dataset.resizeFallback) return;
+        if (!img || img.tagName !== 'IMG') return;
+        // a deploy-time copy that failed (removed by a newer deploy, or offline from Pages) → the Supabase copy,
+        // which can itself fall back to the original below
+        var local = window.localPhotoSource(img.currentSrc || img.src || '');
+        if (local && !img.dataset.localFallback) {
+          img.dataset.localFallback = '1';
+          if (img.srcset) img.removeAttribute('srcset');
+          img.src = window.supabasePhotoUrl(local.path, local.width);
+          return;
+        }
+        if (img.dataset.resizeFallback) return;
         var src = img.currentSrc || img.src || '';
         if (src.indexOf('/storage/v1/render/image/public/') === -1) return;
         img.dataset.resizeFallback = '1';

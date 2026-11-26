@@ -48,3 +48,8 @@ wireframe/reading/
 wireframe/explore/
 wireframe/data/build-stamp.txt
 wireframe/data/cultivars.json
+
+# photo copies served from Pages (scripts/build-photos.js)
+wireframe/p/
+wireframe/data/photos.json
+wireframe/data/photos.js
