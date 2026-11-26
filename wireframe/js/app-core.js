@@ -118,10 +118,6 @@ window.sciNameHtml = sciNameHtml;
 // the plant page has drawn: the stub's first screen gives way without moving the screen
 window.releaseStaticEntry = function() {
   var se = document.getElementById('static-entry');
-  // the stub's photo is kept: dropped while still downloading, the browser cancelled it and the gallery then
-  // asked for the same photo a second time (PSI 11-26). The gallery's stand-in takes this very <img>.
-  var ph = se && se.querySelector('.static-entry__plate img');
-  if (ph) window._stubPhoto = ph;
   if (se) se.remove();
   if (document.documentElement.getAttribute('data-boot') === 'entry') document.documentElement.removeAttribute('data-boot');
   clearTimeout(window._staticEntryTimer);
