@@ -2,7 +2,7 @@
 var CACHE_VERSION = 'aroid-origins-v192';
 // Must match the ?v= cache buster in index.html — otherwise the precache
 // URLs never match real requests and every asset downloads twice.
-var ASSET_VERSION = '20261126p';
+var ASSET_VERSION = '20261126r';
 var OFFLINE_PAGE = './offline.html';
 var STATIC_ASSETS = [
   './',
