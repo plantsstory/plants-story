@@ -102,7 +102,7 @@ function cardSvg(c, photoDataUri) {
   }
   if (!summary) summary = state === 'ok' ? '' : '記録不足 · 記録を募集中';
   const status = state === 'ok' ? ('記録 ' + n + ' · ' + (o && o.source_type === 'ipni_powo' ? 'IPNI / POWO' : '投稿者の記録')) : '記録不足';
-  const url = 'aroidorigins.com/' + genus.toLowerCase() + '/' + rest;
+  const url = 'aroidorigins.com/' + genus.toLowerCase() + '/' + decodeURIComponent(EntryMeta.segment(rest));   // the page's address (11-26)
 
   const size = titleSize(rest);
   const plate = photoDataUri

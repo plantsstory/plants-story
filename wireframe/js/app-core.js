@@ -474,7 +474,7 @@ function updateCultivarJsonLd(name, genus, type, description, extraData) {
     document.head.appendChild(el);
   }
   extraData = extraData || {};
-  var cultivarUrl = _siteBase + genus.toLowerCase() + '/' + encodeURIComponent(name.replace(genus + ' ', '')) + '/';
+  var cultivarUrl = _siteBase + entryPathOf(name) + '/';
   var data = {
     '@context': 'https://schema.org',
     '@type': 'Thing',
@@ -504,8 +504,8 @@ function updateCultivarJsonLd(name, genus, type, description, extraData) {
   // Breadcrumb: Home > Genus > Cultivar
   updateBreadcrumbJsonLd([
     { name: 'Home', url: _siteBase },
-    { name: genus, url: _siteBase + genus.toLowerCase() },
-    { name: name, url: _siteBase + genus.toLowerCase() + '/' + encodeURIComponent(name.replace(genus + ' ', '')) }
+    { name: genus, url: _siteBase + genus.toLowerCase() + '/' },
+    { name: name, url: _siteBase + entryPathOf(name) + '/' }
   ]);
 }
 
@@ -556,7 +556,7 @@ function updateGenusJsonLd(genusName, cultivarNames) {
         '@type': 'ListItem',
         'position': i + 1,
         'name': name,
-        'url': _siteBase + genusName.toLowerCase() + '/' + encodeURIComponent(name.replace(genusName + ' ', ''))
+        'url': _siteBase + entryPathOf(name) + '/'
       };
     })
   };
@@ -665,6 +665,35 @@ var _basePath = _isCustomDomain ? '/' : '/plants-story/';
   if (adminLink) adminLink.href = _basePath + 'admin.html';
 })();
 
+// An entry's address (site check 11-26, item 8): genus/plain-words, e.g. anthurium/ace-of-spades (EntryMeta.path).
+// Old addresses (anthurium/'Ace%20of%20Spades') still open the entry and are rewritten to the new one.
+function entryPathOf(name) {
+  if (window.EntryMeta && window.EntryMeta.path) return window.EntryMeta.path(name);
+  var n = String(name || '').replace(' [Seedling]', ''), g = n.split(' ')[0];
+  return g.toLowerCase() + '/' + encodeURIComponent(n.slice(g.length + 1));
+}
+window.entryPathOf = entryPathOf;
+// the stored name for the part of an address after the genus: the static page's own entry, then the records in
+// memory; an old-style address is the name itself. Returns '' when the records are needed and not in yet.
+function entryNameFromSegment(genusSlug, seg) {
+  var E = window.EntryMeta, genusProper = genusSlug.charAt(0).toUpperCase() + genusSlug.slice(1);
+  var restOf = function(k) { k = String(k).replace(' [Seedling]', ''); return k.slice(k.split(' ')[0].length + 1); };
+  var matches = function(k) {
+    if (String(k).split(' ')[0].toLowerCase() !== genusSlug) return false;
+    var r = restOf(k);
+    return r === seg || (E && E.segment(r) === seg);
+  };
+  var meta = document.querySelector('meta[name="ao-entry"]');
+  if (meta && matches(meta.getAttribute('content'))) return meta.getAttribute('content');
+  var keys = Object.keys(typeof cultivarData === 'object' && cultivarData ? cultivarData : {});
+  for (var i = 0; i < keys.length; i++) if (matches(keys[i])) return keys[i].replace(' [Seedling]', '');
+  // not in the new form (capitals, spaces, quotes, dots): an old address, which is the name itself
+  if (!E || E.slug(seg) !== seg) return genusProper + ' ' + seg;
+  // in the new form: a plain species name reads the same; anything else is matched once the records are in
+  if (!window._dataFullyLoaded) window._entrySegPending = { genus: genusSlug, seg: seg };
+  return genusProper + ' ' + seg;
+}
+
 function buildPath(page, options) {
   options = options || {};
   if (page === 'top') return _basePath;
@@ -674,12 +703,7 @@ function buildPath(page, options) {
   // Trailing slash everywhere a static stub exists: the stubs, canonical and sitemap use /slug/, and a path
   // without it made the address bar disagree with the canonical (site check 2026-11-25)
   if (page === 'genus' && options.genus) return _basePath + options.genus.toLowerCase() + '/';
-  if (page === 'cultivar' && options.cultivar) {
-    var parts = options.cultivar.split(' ');
-    var g = parts[0].toLowerCase();
-    var rest = parts.slice(1).join(' ');
-    return _basePath + g + '/' + encodeURIComponent(rest) + '/';
-  }
+  if (page === 'cultivar' && options.cultivar) return _basePath + entryPathOf(options.cultivar) + '/';
   if (page === 'search' && options.q) return _basePath + 'search?q=' + encodeURIComponent(options.q);
   if (page === 'people') return _basePath + 'people/' + (options.person ? encodeURIComponent(options.person) + '/' : '');
   if (page === 'locality') return _basePath + 'locality/' + (options.place ? encodeURIComponent(options.place) + '/' : '');
@@ -725,8 +749,7 @@ function parseRoute() {
   // Check if it's a genus
   if (knownGenera.indexOf(first) !== -1) {
     if (segments.length > 1 && segments[1]) {
-      var genusProper = first.charAt(0).toUpperCase() + first.slice(1);
-      return { page: 'cultivar', genus: first, cultivar: genusProper + ' ' + segments[1] };
+      return { page: 'cultivar', genus: first, cultivar: entryNameFromSegment(first, segments[1]) };
     }
     return { page: 'genus', genus: first };
   }
@@ -2542,7 +2565,7 @@ if (false) {
         var dispKey = key.replace(' [Seedling]', '');
         if (dispKey !== key) cultivarData[dispKey] = entry;
       }
-      history.pushState({ page: 'cultivar', genus: genus.toLowerCase(), cultivar: genus + ' ' + displayName }, '', _basePath + genus.toLowerCase() + '/' + encodeURIComponent(displayName) + '/');
+      history.pushState({ page: 'cultivar', genus: genus.toLowerCase(), cultivar: genus + ' ' + displayName }, '', _basePath + entryPathOf(genus + ' ' + displayName) + '/');
       navigateTo('cultivar', { genus: genus.toLowerCase(), cultivar: genus + ' ' + displayName }, false);
     });
   };
@@ -3280,7 +3303,14 @@ if (false) {
         // Landing directly on a cultivar URL renders the detail before this
         // fetch resolves, so type/badge/meta fall back to 'species'. Re-render
         // now that the real record is in memory.
-        if (_currentPageId === 'cultivar' && typeof updateCultivarDetail === 'function') {
+        var _segPending = window._entrySegPending; window._entrySegPending = null;
+        var _segName = _segPending && _currentPageId === 'cultivar' ? entryNameFromSegment(_segPending.genus, _segPending.seg) : '';
+        if (_segName && cultivarData[_segName] === undefined && cultivarData[_segName + ' [Seedling]'] === undefined) _segName = '';
+        if (_segName) {
+          // a new-form address with no static page (an entry added since the last publish): open the entry it names
+          updateCultivarDetail(_segName, null);
+          try { history.replaceState({ page: 'cultivar', genus: _segPending.genus, cultivar: _segName }, '', buildPath('cultivar', { cultivar: _segName })); } catch (e) {}
+        } else if (_currentPageId === 'cultivar' && typeof updateCultivarDetail === 'function') {
           var _detailPage = document.getElementById('page-cultivar');
           var _detailH1 = _detailPage ? _detailPage.querySelector('h1') : null;
           var _detailName = _detailH1 ? h1Key(_detailH1).trim() : '';

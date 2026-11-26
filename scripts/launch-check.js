@@ -9,6 +9,7 @@
 'use strict';
 const RecordGate = require('../wireframe/js/record-gate');
 const ToolGate = require('../wireframe/js/tool-gate');
+const EntryMeta = require('../wireframe/js/entry-meta');
 
 const SITE = 'https://aroidorigins.com';
 const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
@@ -48,7 +49,7 @@ const entryUrl = c => {
   const g = c.genus || 'Anthurium';
   const rest = String(c.cultivar_name).replace(' [Seedling]', '');
   const r2 = rest.startsWith(g + ' ') ? rest.slice(g.length + 1) : rest;
-  return SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(r2) + '/';
+  return SITE + '/' + g.toLowerCase() + '/' + EntryMeta.segment(r2) + '/';
 };
 const metaOf = (html, re) => { const m = html.match(re); return m ? m[1].replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&') : ''; };
 

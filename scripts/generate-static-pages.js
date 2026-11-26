@@ -24,6 +24,16 @@ const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
 const SITE = 'https://aroidorigins.com';
 const WIREFRAME = path.join(__dirname, '..', 'wireframe');
+// an entry's address (item 8, 11-26): /anthurium/ace-of-spades/ rather than /anthurium/'Ace%20of%20Spades'/
+const Addresses = require('./lib/entry-addresses');
+const fullNameOf = Addresses.fullNameOf;
+// name -> the URL segment it was given (scripts/lib/entry-addresses.js); a name not in it takes the plain rule
+let ADDR = new Map();
+const restOfFull = Addresses.restOf;
+const entryHref = (name, genus) => {
+  const full = fullNameOf(name, genus);
+  return SITE + '/' + full.split(' ')[0].toLowerCase() + '/' + (ADDR.has(full) ? ADDR.get(full) : EntryMeta.segment(restOfFull(full))) + '/';
+};
 
 function fetchJSON(urlPath) {
   return new Promise((resolve, reject) => {
@@ -135,6 +145,16 @@ function escAttr(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+// the page left at an entry's old address: the canonical names the new one and the browser goes there at once
+// (Google reads a 0-second refresh as a permanent move). No app, no styles: nothing else to load.
+function movedPage(to, name) {
+  const u = escAttr(to);
+  return '<!DOCTYPE html>\n<html lang="ja">\n<head>\n<meta charset="UTF-8">\n<title>' + escAttr(name) + ' · Aroid Origins</title>\n'
+    + '<link rel="canonical" href="' + u + '">\n<meta http-equiv="refresh" content="0; url=' + u + '">\n'
+    + '<script>location.replace(' + JSON.stringify(to).replace(/</g, '\\u003c') + ' + location.search + location.hash);</script>\n'
+    + '</head>\n<body>\n<p><a href="' + u + '">' + escAttr(name) + '</a> のページは新しいアドレスに移りました。</p>\n</body>\n</html>\n';
+}
+
 function jsonLd(obj) {
   // </script> injection-safe JSON-LD
   return JSON.stringify(obj).replace(/</g, '\\u003c');
@@ -167,6 +187,8 @@ function buildStub(template, meta) {
     '<img src="images/bg/jungle-tambopata-800.webp" alt="" width="801" height="556" decoding="async" loading="lazy">');
   html = html.replace(/<title>[^<]*<\/title>/, '<title>' + escAttr(meta.title) + '</title>');
   if (meta.noindex) html = html.replace('</head>', '<meta name="robots" content="noindex, follow">\n</head>');
+  // the stored name of the entry this page is for: the app reads it to open the right entry from its address
+  if (meta.entryKey) html = html.replace('</head>', '<meta name="ao-entry" content="' + escAttr(meta.entryKey) + '">\n</head>');
   html = html.replace(/(<meta name="description" content=")[^"]*(">)/, '$1' + escAttr(meta.description) + '$2');
   html = html.replace(/(<meta property="og:title" content=")[^"]*(">)/, '$1' + escAttr(meta.title) + '$2');
   html = html.replace(/(<meta property="og:description" content=")[^"]*(">)/, '$1' + escAttr(meta.description) + '$2');
@@ -220,6 +242,7 @@ async function main() {
 
   const publicCultivars = cultivars.filter(c =>
     c.type !== 'seedling' && !String(c.cultivar_name).includes('[Seedling]'));
+  ADDR = Addresses.assign(cultivars, m => console.warn(m));
 
   // Generated directories only: clear them so renamed or removed entries leave no stale stub behind
   for (const g of genera) { if (safeDirName(g.slug)) fs.rmSync(path.join(WIREFRAME, g.slug), { recursive: true, force: true }); }
@@ -262,8 +285,7 @@ async function main() {
       .sort((a, b) => (!!b.p - !!a.p) || (b.c.id - a.c.id));
     const li = plates.map(({ c, p }) => {
       const g = c.genus || 'Anthurium';
-      const rest = String(c.cultivar_name).startsWith(g + ' ') ? String(c.cultivar_name).slice(g.length + 1) : String(c.cultivar_name);
-      const href = SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(rest) + '/';
+      const href = entryHref(c.cultivar_name, g);
       const src = p ? SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + p.split('/').map(encodeURIComponent).join('/') + '?width=360&height=720&resize=contain&quality=72' : '';
       return '<li id="p' + c.id + '"><a href="' + escAttr(href) + '"><span class="ig-grid__img">' + (src ? '<img src="' + escAttr(src) + '" alt="' + escAttr(EntryMeta.name(c)) + '" loading="lazy" decoding="async">' : '<span class="ig-grid__name">' + sciHtml(EntryMeta.name(c)) + '</span>') + '</span><span class="ig-grid__no num">図版 ' + c.id + '</span></a></li>';
     }).join('');
@@ -306,12 +328,7 @@ async function main() {
     // Crawlable link list to every cultivar page (the SPA removes #static-seo-links on boot)
     const genusLinks = publicCultivars
       .filter(c => (c.genus || 'Anthurium') === g.name)
-      .map(c => {
-        const rest = String(c.cultivar_name).startsWith(g.name + ' ')
-          ? String(c.cultivar_name).slice(g.name.length + 1)
-          : String(c.cultivar_name);
-        return '<li><a href="' + SITE + '/' + slug + '/' + encodeURIComponent(rest) + '/">' + escAttr(c.cultivar_name) + '</a></li>';
-      }).join('');
+      .map(c => '<li><a href="' + escAttr(entryHref(c.cultivar_name, g.name)) + '">' + escAttr(c.cultivar_name) + '</a></li>').join('');
     const html = buildStub(template, {
       title: (g.name === 'Anthurium' ? 'アンスリウム' : g.name) + 'の原種・品種一覧（' + count + '品種）— 記載者・発表年・原産国 | Aroid Origins',
       description: g.name + 'の収録 ' + count + ' 件。誰が、いつ、どこで名付けたか — 原種・Hybrid・Clone の由来を出典つきで記録する図鑑。',
@@ -342,11 +359,7 @@ async function main() {
   for (const c of publicCultivars) if (RecordGate.state(c) === 'ok') linkable.set(c.id, c);
   const byExactName = new Map(); for (const c of linkable.values()) byExactName.set(c.cultivar_name, c);
   const parentOf = (id, text) => (id && linkable.get(id)) || (text && byExactName.get(String(text).trim())) || null;
-  const relUrl = x => {
-    const g2 = x.genus || 'Anthurium';
-    const r2 = String(x.cultivar_name).startsWith(g2 + ' ') ? String(x.cultivar_name).slice(g2.length + 1) : String(x.cultivar_name);
-    return SITE + '/' + g2.toLowerCase() + '/' + encodeURIComponent(r2) + '/';
-  };
+  const relUrl = x => entryHref(x.cultivar_name, x.genus || 'Anthurium');
   const childrenOf = new Map(), selectionsOf = new Map();
   for (const k of linkable.values()) {
     for (const p of [parentOf(k.parent_a_id, k.parent_a_text), parentOf(k.parent_b_id, k.parent_b_text)]) {
@@ -359,15 +372,24 @@ async function main() {
   // ---- Cultivar pages ----
   // entry stubs: named entries and the public seedlings (a shared seedling page shows a card, BOARD 10-07b T85)
   const seedlingRows = cultivars.filter(c => c.type === 'seedling' || String(c.cultivar_name).includes('[Seedling]'));
+  const usedDirs = new Set();
+  const movedFrom = [];   // [old dir, new url, name]: written after every new page, so a new page always wins a clash
   for (const c of publicCultivars.concat(seedlingRows)) {
     const genus = c.genus || 'Anthurium';
     const slug = genus.toLowerCase();
     const shown = String(c.cultivar_name).replace(' [Seedling]', '');
     const rest = shown.startsWith(genus + ' ') ? shown.slice(genus.length + 1) : shown;
-    const restDir = safeDirName(rest);
-    if (!restDir || !safeDirName(slug)) { skipped++; continue; }
+    // the page lives at the new address; the old one (the name itself) gets a page that sends readers and
+    // crawlers on to it (GitHub Pages cannot answer 301, so: canonical + an immediate refresh)
+    const full = fullNameOf(c.cultivar_name, genus);
+    if (!ADDR.has(full)) { skipped++; continue; }
+    const seg = ADDR.get(full);
+    const restDir = safeDirName(decodeURIComponent(seg));
+    if (!restDir || !safeDirName(slug) || usedDirs.has(slug + '/' + restDir)) { skipped++; continue; }
+    usedDirs.add(slug + '/' + restDir);
+    const oldDir = rest !== restDir ? safeDirName(rest) : null;
 
-    const url = SITE + '/' + slug + '/' + encodeURIComponent(rest) + '/';
+    const url = SITE + '/' + slug + '/' + seg + '/';
     const desc = RecordGate.state(c) !== 'ok'
       ? c.cultivar_name + ' — 記録なし · 出典募集中 | Aroid Origins'
       : EntryMeta.description(c);
@@ -376,6 +398,7 @@ async function main() {
 
     const html = buildStub(template, {
       noindex: RecordGate.state(c) !== 'ok',
+      entryKey: fullNameOf(c.cultivar_name, genus),
       title: EntryMeta.title(c),
       description: desc,
       url: url,
@@ -433,11 +456,7 @@ async function main() {
     }
     const order = entryOrder[c.genus || 'Anthurium'] || [];
     const at = order.indexOf(c);
-    const entryUrl = x => {
-      const g2 = x.genus || 'Anthurium';
-      const r2 = String(x.cultivar_name).startsWith(g2 + ' ') ? String(x.cultivar_name).slice(g2.length + 1) : String(x.cultivar_name);
-      return SITE + '/' + g2.toLowerCase() + '/' + encodeURIComponent(r2) + '/';
-    };
+    const entryUrl = x => entryHref(x.cultivar_name, x.genus || 'Anthurium');
     if (at > 0) ctx.prev = { name: EntryMeta.name(order[at - 1]), url: entryUrl(order[at - 1]) };
     if (at >= 0 && at < order.length - 1) ctx.next = { name: EntryMeta.name(order[at + 1]), url: entryUrl(order[at + 1]) };
     // the entry's photo is asked for first; the front page's plate (hidden here) is not fetched at all (T156)
@@ -456,7 +475,18 @@ async function main() {
       console.warn('skip ' + c.cultivar_name + ': ' + e.code);
       skipped++;
     }
+    if (oldDir) movedFrom.push([slug + '/' + oldDir, url, EntryMeta.name(c)]);
   }
+  let moved = 0;
+  for (const [rel, to, name] of movedFrom) {
+    if (usedDirs.has(rel)) continue;   // another entry's new page is there
+    try {
+      fs.mkdirSync(path.join(WIREFRAME, rel), { recursive: true });
+      fs.writeFileSync(path.join(WIREFRAME, rel, 'index.html'), movedPage(to, name), 'utf8');
+      moved++;
+    } catch (e) { console.warn('skip old address of ' + name + ': ' + e.code); }
+  }
+  console.log('old entry addresses forwarded: ' + moved);
 
   // ---- People pages (/people/ and /people/<slug>/) ----
   const ROLE_JP = { author: '記載者', collector: '採集者', breeder: '作出者', namer: '命名者', introducer: '導入者' };
@@ -483,9 +513,7 @@ async function main() {
     const roles = Object.keys(ROLE_JP).filter(r => p.roles[r]).map(r => ROLE_JP[r] + ' ' + p.roles[r] + '種').join('・');
     const names = p.rows.map(r => r.cultivar_name);
     const links = p.rows.map(r => {
-      const g = r.genus || 'Anthurium';
-      const rest = String(r.cultivar_name).startsWith(g + ' ') ? String(r.cultivar_name).slice(g.length + 1) : String(r.cultivar_name);
-      return '<li><a href="' + SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(rest) + '/">' + escAttr(r.cultivar_name) + '</a></li>';
+      return '<li><a href="' + escAttr(entryHref(r.cultivar_name, r.genus || 'Anthurium')) + '">' + escAttr(r.cultivar_name) + '</a></li>';
     }).join('');
     const full = (AUTHORITY[p.key] && AUTHORITY[p.key].name) || p.key;
     let ph = buildStub(template, {
@@ -509,7 +537,7 @@ async function main() {
   {
     const NAMES = JSON.parse(fs.readFileSync(path.join(WIREFRAME, 'data', 'names.json'), 'utf8')).pages || [];
     fs.rmSync(path.join(WIREFRAME, 'names'), { recursive: true, force: true });
-    const entryUrl = n => { const g = n.split(' ')[0]; const r = n.slice(g.length + 1); return SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(r) + '/'; };
+    const entryUrl = n => entryHref(n);
     let ih = buildStub(template, { title: '名前の違い — 似た名前の別の植物 | Aroid Origins', description: NAMES.map(x => x.title).join('、'), url: SITE + '/names/', ogType: 'website' });
     ih = ih.replace(/(<main[^>]*>)/, '$1\n<nav id="static-seo-links" aria-label="名前の違い"><ul>' + NAMES.map(x => '<li><a href="' + SITE + '/names/' + x.slug + '/">' + namesTitle(x.title) + '</a></li>').join('') + '</ul></nav>');
     fs.mkdirSync(path.join(WIREFRAME, 'names'), { recursive: true });
@@ -577,9 +605,7 @@ async function main() {
     const url = localityUrl + encodeURIComponent(l.slug) + '/';
     const names = l.rows.map(r => EntryMeta.name(r));
     const linkOf = r => {
-      const g = r.genus || 'Anthurium';
-      const rest = String(r.cultivar_name).startsWith(g + ' ') ? String(r.cultivar_name).slice(g.length + 1) : String(r.cultivar_name);
-      return '<li><a href="' + SITE + '/' + g.toLowerCase() + '/' + encodeURIComponent(rest) + '/">' + escAttr(EntryMeta.name(r)) + '</a></li>';
+      return '<li><a href="' + escAttr(entryHref(r.cultivar_name, r.genus || 'Anthurium')) + '">' + escAttr(EntryMeta.name(r)) + '</a></li>';
     };
     const links = (l.typeRows.length ? '<li>タイプ産地が' + escAttr(l.ja) + '</li>' + l.typeRows.map(linkOf).join('') : '')
       + (l.rangeRows.length ? '<li>分布に' + escAttr(l.ja) + 'を含む</li>' + l.rangeRows.map(linkOf).join('') : '');
