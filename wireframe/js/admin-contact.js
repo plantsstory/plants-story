@@ -37,32 +37,25 @@
         var u = await sb.from('contact_messages').update({ status: b.getAttribute('data-resolved') === '1' ? 'new' : 'done' }).eq('id', b.getAttribute('data-cm'));
         if (u.error) { toast('更新エラー: ' + u.error.message); return; }
         window.loadContactMessages();
+        if (window.refreshInbox) window.refreshInbox();
       });
     });
   };
-  // the unread count shows on the menu as soon as the admin page opens
-  document.addEventListener('DOMContentLoaded', function () { setTimeout(function () { if (window.sb) window.loadContactMessages(); }, 1500); });
+  // the unread count on the menu comes from refreshInbox (js/admin-inbox.js) after sign-in
 })();
 
 /* Member-interest list (BOARD 10-07b T86): the count on the dashboard. Sending is member-launch-notify, which refuses
    until the owner approves (Secrets MEMBER_NOTIFY_ENABLED). */
 window.loadMemberInterestCount = async function () {
   var host = document.getElementById('member-interest-count');
-  if (!host) {
-    var dash = document.getElementById('sec-dashboard');
-    if (!dash) return;
-    host = document.createElement('div');
-    host.id = 'member-interest-count';
-    host.className = 'stat-card';
-    host.style.marginTop = 'var(--space-sm)';
-    dash.appendChild(host);
-  }
+  var stat = document.getElementById('stat-member-interest');
+  if (!host) return;
   var r = await sb.from('member_interest').select('source, created_at, notified_at');
-  if (r.error) { host.textContent = '受付開始のお知らせ名簿: 読み込みエラー'; return; }
+  if (r.error) { host.textContent = '受付開始のお知らせ名簿: 読み込みエラー'; if (stat) stat.textContent = '-'; return; }
   var rows = r.data || [], by = {};
+  if (stat) stat.textContent = String(rows.length);
   rows.forEach(function (x) { by[x.source || 'unknown'] = (by[x.source || 'unknown'] || 0) + 1; });
   host.innerHTML = '<strong>受付開始のお知らせ名簿 ' + rows.length + ' 人</strong>（未送信 ' + rows.filter(function (x) { return !x.notified_at; }).length + '）<br><span style="font-size:var(--font-size-xs);color:var(--color-gray);">'
     + Object.keys(by).map(function (k) { return k + ' ' + by[k]; }).join(' · ')
     + ' — 一斉送信はオーナーの承認後（Secrets MEMBER_NOTIFY_ENABLED）にだけ動きます。</span>';
 };
-document.addEventListener('DOMContentLoaded', function () { setTimeout(function () { if (window.sb && window.loadMemberInterestCount) window.loadMemberInterestCount(); }, 1800); });

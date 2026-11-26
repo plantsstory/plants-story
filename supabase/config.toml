@@ -18,6 +18,10 @@ verify_jwt = false
 [functions.stripe-webhook]
 verify_jwt = false
 
+# Daily admin digest: called by pg_cron, authenticated by the vault token (x-cron-token), not a user JWT
+[functions.admin-digest]
+verify_jwt = false
+
 [api]
 enabled = true
 # Port to use for the API URL.

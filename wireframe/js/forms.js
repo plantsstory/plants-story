@@ -2377,12 +2377,19 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     return getVotedImages()[imageId] || null;
   }
 
-  // a photo's delete request is offered to the person who uploaded it and to admins; everyone else uses 報告
+  // a photo's delete request is offered to the person who uploaded it and to admins; every other signed-in
+  // visitor gets 報告 (the same form, without 間違えてアップロードした), so a wrong or unfit photo can reach the admin
   function canRequestImageDelete(opts) {
     var u = window._currentUser;
     if (!u) return false;
     if (u.app_metadata && u.app_metadata.role === 'admin') return true;
     return !!(opts && opts.ownerId && opts.ownerId === u.id);
+  }
+  function imageReportLink(opts) {
+    if (!(opts && opts.imageId) || !window._currentUser) return '';
+    return canRequestImageDelete(opts)
+      ? '<a class="gallery__delete" data-mine="1">' + t('request_delete') + '</a>'
+      : '<a class="gallery__delete">' + t('report_photo') + '</a>';
   }
 
   // --- Supabase Storage helpers ---
@@ -2793,7 +2800,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     item.innerHTML =
       '<div class="gallery__img"><img' + (opts.reuseImg ? ' data-reuse-slot' : ' src="' + src + '"') + ' class="gallery__img-full" alt="' + escHtml(altText) + '"' + (opts.eager ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"') + ' decoding="async" sizes="(max-width: 768px) 100vw, 600px">' + overlayHtml + '</div>' + creditHtml +
       '<div class="gallery__actions">' +
-        (canRequestImageDelete(opts) ? '<a class="gallery__delete">' + t('request_delete') + '</a>' : '') +
+        imageReportLink(opts) +
       '</div>';
     // the same photo already on the page (the stand-in, or this plant's earlier list): that very <img> moves in,
     // so the photo is not asked for again (PSI 11-26: the 1200 photo was downloaded twice)

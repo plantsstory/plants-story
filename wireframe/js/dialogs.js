@@ -45,7 +45,7 @@
   // ---- Deletion Request System ----
   (function() {
     var currentRequest = null; // { targetType, targetId, targetName }
-    var _dialog, _targetEl, _optionsEl, _detailEl, _submitBtn, _cancelBtn;
+    var _dialog, _targetEl, _optionsEl, _detailEl, _submitBtn, _cancelBtn, _titleEl;
     var _bound = false;
 
     function getEls() {
@@ -55,6 +55,7 @@
       _detailEl = document.getElementById('delete-reason-detail');
       _submitBtn = document.getElementById('delete-request-submit');
       _cancelBtn = document.getElementById('delete-request-cancel');
+      _titleEl = document.getElementById('delete-dialog-title');
       return !!_dialog;
     }
 
@@ -64,7 +65,9 @@
 
       _optionsEl.addEventListener('change', function(e) {
         if (e.target.name === 'delete-reason') {
-          _detailEl.style.display = e.target.value === 'other' ? '' : 'none';
+          // the textarea starts with the d-none class; style.display alone could never show it
+          _detailEl.classList.toggle('d-none', e.target.value !== 'other');
+          if (e.target.value === 'other') _detailEl.focus();
         }
       });
 
@@ -102,9 +105,10 @@
           if (res.error) throw new Error(res.error.message);
           var result = res.data;
           if (result && !result.success) throw new Error(result.error || 'Failed');
+          var wasMine = currentRequest && currentRequest.mine;
           _dialog.close();
           currentRequest = null;
-          showToast('削除依頼を送信しました');
+          showToast(wasMine ? '削除依頼を送信しました' : '報告を送信しました');
         }).catch(function(err) {
           _submitBtn.disabled = false;
           _submitBtn.textContent = '送信';
@@ -129,12 +133,15 @@
       { value: 'other', label: 'その他' }
     ];
 
-    function openDialog(targetType, targetId, targetName) {
+    // mine: the photo is the visitor's own (or they are an admin), so 間違えてアップロードした and the 削除依頼 wording apply
+    function openDialog(targetType, targetId, targetName, mine) {
       if (!getEls()) return;
       bindOnce();
-      currentRequest = { targetType: targetType, targetId: targetId, targetName: targetName };
+      currentRequest = { targetType: targetType, targetId: targetId, targetName: targetName, mine: !!mine };
       _targetEl.textContent = targetName || '';
-      var reasons = targetType === 'cultivar' ? cultivarReasons : imageReasons;
+      if (_titleEl) _titleEl.textContent = targetType === 'cultivar' ? '誤りを報告' : (mine ? '写真の削除依頼' : '写真を報告');
+      var reasons = targetType === 'cultivar' ? cultivarReasons
+        : imageReasons.filter(function(r) { return mine || r.value !== 'uploaded_by_mistake'; });
       _optionsEl.innerHTML = '';
       reasons.forEach(function(r) {
         var label = document.createElement('label');
@@ -147,7 +154,8 @@
         label.appendChild(document.createTextNode(r.label));
         _optionsEl.appendChild(label);
       });
-      _detailEl.style.display = 'none';
+      _detailEl.classList.add('d-none');
+      _detailEl.style.display = '';
       _detailEl.value = '';
       _dialog.showModal();
     }
@@ -195,6 +203,6 @@
 
       var h1 = document.querySelector('#page-cultivar h1');
       var cultivarName = h1 ? h1Key(h1) : '';
-      openDialog('image', imageId, cultivarName);
+      openDialog('image', imageId, cultivarName, deleteLink.getAttribute('data-mine') === '1');
     });
   })();
