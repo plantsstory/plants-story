@@ -2786,10 +2786,20 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     var _gu = document.getElementById('gallery-upload');
     var altText = opts.alt || (_gu && _gu.parentNode && _gu.parentNode.getAttribute('data-for')) || '';
     item.innerHTML =
-      '<div class="gallery__img"><img src="' + src + '" class="gallery__img-full" alt="' + escHtml(altText) + '"' + (opts.eager ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"') + ' decoding="async" sizes="(max-width: 768px) 100vw, 600px">' + overlayHtml + '</div>' + creditHtml +
+      '<div class="gallery__img"><img' + (opts.reuseImg ? ' data-reuse-slot' : ' src="' + src + '"') + ' class="gallery__img-full" alt="' + escHtml(altText) + '"' + (opts.eager ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"') + ' decoding="async" sizes="(max-width: 768px) 100vw, 600px">' + overlayHtml + '</div>' + creditHtml +
       '<div class="gallery__actions">' +
         (canRequestImageDelete(opts) ? '<a class="gallery__delete">' + t('request_delete') + '</a>' : '') +
       '</div>';
+    // the same photo already on the page (the stand-in, or this plant's earlier list): that very <img> moves in,
+    // so the photo is not asked for again (PSI 11-26: the 1200 photo was downloaded twice)
+    if (opts.reuseImg) {
+      var slot = item.querySelector('img[data-reuse-slot]'), r = opts.reuseImg;
+      ['class', 'alt', 'loading', 'fetchpriority', 'decoding', 'sizes'].forEach(function(n) {
+        var v = slot.getAttribute(n);
+        if (v == null) r.removeAttribute(n); else r.setAttribute(n, v);
+      });
+      slot.parentNode.replaceChild(r, slot);
+    }
     // Tap to toggle overlay
     if (hasOverlay) {
       var imgDiv = item.querySelector('.gallery__img');
@@ -2846,12 +2856,28 @@ updateCultivarDetail = function(cultivarName, rowEl) {
         var detailPage = document.getElementById('page-cultivar');
         var h1 = detailPage ? detailPage.querySelector('h1') : null;
         if (!h1 || h1Key(h1) !== cultivarName) { if (standIn) standIn.remove(); return; }
-        if (samePlant) clearOld();
+        // photos already drawn here, by their address: a new item takes the drawn <img> instead of a new one
+        var reuse = {};
+        var keep = function(el) { var u = el && el.getAttribute('src'); if (u && !reuse[u]) reuse[u] = el; };
+        if (samePlant) {
+          gallery.querySelectorAll('.gallery__item[data-user-upload] img.gallery__img-full').forEach(keep);
+          clearOld();
+        }
+        // the stand-in shows the first photo already: it hands its <img> over and leaves at once
+        var standImg = standIn && standIn.querySelector('img.gallery__img-full');
+        if (standImg && images[0] && getPublicUrl(images[0].storage_path) === standImg.getAttribute('src')) {
+          keep(standImg);
+          standIn.remove();
+          standIn = null;
+        }
         var fresh = [];
 
         images.forEach(function(img, imgIdx) {
           var url = getPublicUrl(img.storage_path);
+          var again = url && reuse[url];
+          if (again) delete reuse[url];
           var item = createGalleryItem(url, {
+            reuseImg: again || null,
             alt: cultivarName,
             eager: imgIdx === 0,
             imageId: img.id,
