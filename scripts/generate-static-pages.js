@@ -60,6 +60,8 @@ function sciText(text) {
     .replace(new RegExp('\\b(' + G + ')(?=\\s+(?:sp|aff|cf)\\.)', 'g'), '<i>$1</i>');
 }
 function namesTitle(t) { return sciText(t).replace(/(^|[\s・（(])([a-z][a-z-]{3,})(?=[\s・）)]|$)/g, '$1<i>$2</i>'); }
+// the stub photo's shown width: a phone's full width, else the 720 px it has always been drawn at
+const PHOTO_SIZES = '(max-width: 768px) 100vw, 720px';
 function staticEntryHtml(c, ctx) {
   // laid out like the plant page (same classes), so the page does not move when the app takes over (BOARD 10-07b T98)
   const os = (c.origins || []).filter(o => o && !o._type).sort((a, b) => (parseInt(b.trust, 10) || 0) - (parseInt(a.trust, 10) || 0));
@@ -109,7 +111,7 @@ function staticEntryHtml(c, ctx) {
   if (aliases.length) h += '<p class="detail-aliases">別名・旧綴り: ' + escAttr(aliases.join(' / ')) + '</p>';
   if (cells) h += '<div class="specimen">' + cells + '</div>';
   h += '<div class="static-entry__actions" aria-hidden="true"></div>';
-  if (ctx.photo) h += '<figure class="static-entry__plate"><img src="' + escAttr(ctx.photo) + '" alt="' + escAttr(c.cultivar_name) + '" width="720" decoding="async" fetchpriority="high"></figure>';
+  if (ctx.photo) h += '<figure class="static-entry__plate"><img src="' + escAttr(ctx.photo) + '"' + (ctx.photoSet ? ' srcset="' + escAttr(ctx.photoSet) + '" sizes="' + PHOTO_SIZES + '"' : '') + ' alt="' + escAttr(c.cultivar_name) + '" width="720" decoding="async" fetchpriority="high"></figure>';
   if (text) h += '<h2 class="section-title">由来の記録</h2><div class="record__body"><p>' + sciText(text) + '</p></div>';
   // links a crawler can follow from every entry (BOARD 10-07b T84): people, place, neighbours, the genus list
   const lk = (x, sci) => '<a href="' + escAttr(x.url) + '">' + (sci ? sciHtml(x.name) : escAttr(x.name)) + '</a>';
@@ -406,9 +408,13 @@ async function main() {
 
     // first screen in plain HTML
     const photoPath = imageMap[c.cultivar_name];
-    const photo = photoPath ? SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + photoPath.split('/').map(encodeURIComponent).join('/') + '?width=720&height=1440&resize=contain&quality=72' : '';
+    const photoAt = w => SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + photoPath.split('/').map(encodeURIComponent).join('/') + '?width=' + w + '&height=' + (w * 2) + '&resize=contain&quality=72';
+    const photo = photoPath ? photoAt(720) : '';
+    // phones took the 720 copy here and then the plant page's own 1200 copy (window.galleryImg(path, 1200), the same
+    // address byte for byte): a phone now picks the 1200 copy at once and the page reuses it (11-26)
+    const photoSet = photoPath ? photo + ' 720w, ' + photoAt(1200) + ' 1200w' : '';
     // people, place (same country rule as the site), neighbours in the genus-list order, the list
-    const ctx = { photo, people: [], place: null, prev: null, next: null, genusList: { name: (c.genus || 'Anthurium') + ' の一覧', url: SITE + '/' + (c.genus || 'Anthurium').toLowerCase() + '/' } };
+    const ctx = { photo, photoSet, people: [], place: null, prev: null, next: null, genusList: { name: (c.genus || 'Anthurium') + ' の一覧', url: SITE + '/' + (c.genus || 'Anthurium').toLowerCase() + '/' } };
     ctx.people = people.peopleOfRow(c).slice(0, 3).map(pp => ({ name: (AUTHORITY[pp.key] && AUTHORITY[pp.key].name) || pp.key, url: SITE + '/people/' + encodeURIComponent(people.personSlug(pp.key)) + '/' }));
     {
       const st = (((c.origins || []).filter(o => o && !o._type)[0]) || {}).structured || {};
@@ -436,7 +442,7 @@ async function main() {
     if (at >= 0 && at < order.length - 1) ctx.next = { name: EntryMeta.name(order[at + 1]), url: entryUrl(order[at + 1]) };
     // the entry's photo is asked for first; the front page's plate (hidden here) is not fetched at all (T156)
     const htmlFast = photo
-      ? html.replace('<meta charset="UTF-8">', '<meta charset="UTF-8">\n  <link rel="preload" as="image" href="' + escAttr(photo) + '" fetchpriority="high">').replace('<img src="images/anthurium.png"', '<img loading="lazy" src="images/anthurium.png"')
+      ? html.replace('<meta charset="UTF-8">', '<meta charset="UTF-8">\n  <link rel="preload" as="image" href="' + escAttr(photo) + '" imagesrcset="' + escAttr(photoSet) + '" imagesizes="' + PHOTO_SIZES + '" fetchpriority="high">').replace('<img src="images/anthurium.png"', '<img loading="lazy" src="images/anthurium.png"')
       : html.replace('<img src="images/anthurium.png"', '<img loading="lazy" src="images/anthurium.png"');
     const htmlWithEntry = RecordGate.state(c) === 'ok' ? htmlFast.replace(/(<main[^>]*>)/, '$1\n' + staticEntryHtml(c, ctx)).replace(/<body([^>]*)>/, (m, at) => /class="/.test(at) ? m.replace('class="', 'class="stub-entry-page ') : '<body' + at + ' class="stub-entry-page">') : htmlFast;
 
