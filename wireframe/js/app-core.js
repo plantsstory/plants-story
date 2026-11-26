@@ -3257,6 +3257,62 @@ if (false) {
   }
   window.fetchAllRows = fetchAllRows;
 
+  // keep in step with COLUMNS in scripts/build-cultivars-json.js
+  var ARCHIVE_COLUMNS = 'id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, verified_at, verification_note, parent_a_text, parent_b_text, parent_a_id, parent_b_id, is_private, ai_status, selected_from_id, updated_at, formula_status';
+
+  // The list as it is now, from the file built at deploy plus what changed since: rows of the file whose changed_at
+  // still matches stay, rows that changed or are new come from fresh, rows no longer listed (deleted, made
+  // private, not visible to this reader) drop out. Order follows the manifest.
+  function mergeArchiveRows(fileRows, manifest, fresh) {
+    var byId = {}, freshById = {}, out = [];
+    (fileRows || []).forEach(function(r) { byId[r.id] = r; });
+    (fresh || []).forEach(function(r) { freshById[r.id] = r; });
+    manifest.forEach(function(m) {
+      var row = freshById[m.id] || byId[m.id];
+      if (row) out.push(row);
+    });
+    return out;
+  }
+
+  // Which manifest rows the file does not have as they are now
+  function staleArchiveIds(fileRows, manifest) {
+    var byId = {};
+    (fileRows || []).forEach(function(r) { byId[r.id] = r.changed_at; });
+    return manifest.filter(function(m) { return !(m.id in byId) || byId[m.id] !== m.changed_at; }).map(function(m) { return m.id; });
+  }
+
+  // Every entry this reader may see, resolving { data, error } like a select. Starts from data/cultivars.json
+  // (built at deploy, served by Pages) and asks Supabase only for each entry's id and changed_at, then the new or
+  // changed entries in full: about 50 KB instead of the whole list (1–2 MB at 1,000 entries). Falls back to reading
+  // the whole list from Supabase when the file or the changed_at column is missing.
+  function loadArchiveRows() {
+    function wholeList() {
+      return fetchAllRows(function() { return supabase.from('cultivars').select(ARCHIVE_COLUMNS).order('id'); });
+    }
+    if (typeof fetch !== 'function') return wholeList();
+    return fetch('/data/cultivars.json').then(function(r) {
+      return r.ok ? r.json() : null;
+    }).catch(function() { return null; }).then(function(file) {
+      if (!file || !Array.isArray(file.rows)) return wholeList();
+      return fetchAllRows(function() { return supabase.from('cultivars').select('id, changed_at').order('id'); }).then(function(man) {
+        if (man.error || !man.data) return wholeList();
+        var ids = staleArchiveIds(file.rows, man.data);
+        var batches = [];
+        for (var i = 0; i < ids.length; i += 100) {
+          batches.push(supabase.from('cultivars').select(ARCHIVE_COLUMNS).in('id', ids.slice(i, i + 100)));
+        }
+        return Promise.all(batches).then(function(results) {
+          var fresh = [];
+          for (var j = 0; j < results.length; j++) {
+            if (results[j].error || !results[j].data) return wholeList();
+            fresh = fresh.concat(results[j].data);
+          }
+          return { data: mergeArchiveRows(file.rows, man.data, fresh), error: null };
+        });
+      });
+    });
+  }
+
   // Restore cultivars from Supabase first, then localStorage as fallback
   function restoreUserCultivars() {
     // Always load localStorage first (instant)
@@ -3281,9 +3337,7 @@ if (false) {
     // Then load from Supabase (async, authoritative source)
     // Fetch only needed columns to reduce payload size
     if (supabase) {
-      fetchAllRows(function() {
-        return supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, verified_at, verification_note, parent_a_text, parent_b_text, parent_a_id, parent_b_id, is_private, ai_status, selected_from_id, updated_at, formula_status').order('id');
-      }).then(function(res) {
+      loadArchiveRows().then(function(res) {
         if (res.error || !res.data) {
           // the archive could not be read (no signal, a blip): say so instead of 「読み込み中…」 for ever (T127)
           showToast(navigator.onLine === false ? '電波がありません' : '読み込めませんでした', true, { sticky: true, action: { label: 'もう一度', fn: function() { location.reload(); } } });

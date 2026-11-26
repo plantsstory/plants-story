@@ -60,6 +60,9 @@ jobs:
       - name: Record the build stamp
         if: steps.changed.outputs.run == 'true'
         run: node scripts/build-stamp.js --write
+      - name: Write the list file the app starts from
+        if: steps.changed.outputs.run == 'true'
+        run: node scripts/build-cultivars-json.js
       - name: Generate static SEO stub pages
         if: steps.changed.outputs.run == 'true'
         run: node scripts/generate-static-pages.js
