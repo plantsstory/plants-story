@@ -459,10 +459,10 @@ async function main() {
     const entryUrl = x => entryHref(x.cultivar_name, x.genus || 'Anthurium');
     if (at > 0) ctx.prev = { name: EntryMeta.name(order[at - 1]), url: entryUrl(order[at - 1]) };
     if (at >= 0 && at < order.length - 1) ctx.next = { name: EntryMeta.name(order[at + 1]), url: entryUrl(order[at + 1]) };
-    // the entry's photo is asked for first; the front page's plate (hidden here) is not fetched at all (T156)
-    const htmlFast = photo
-      ? html.replace('<meta charset="UTF-8">', '<meta charset="UTF-8">\n  <link rel="preload" as="image" href="' + escAttr(photo) + '" imagesrcset="' + escAttr(photoSet) + '" imagesizes="' + PHOTO_SIZES + '" fetchpriority="high">').replace('<img src="images/anthurium.png"', '<img loading="lazy" src="images/anthurium.png"')
-      : html.replace('<img src="images/anthurium.png"', '<img loading="lazy" src="images/anthurium.png"');
+    // the entry's photo is the plate's own <img fetchpriority="high"> in the plain HTML, so the browser asks for it at
+    // once; a <link rel="preload"> for it as well was fetched a second time by page-speed tests (11-26).
+    // The front page's plate (hidden here) is not fetched at all (T156)
+    const htmlFast = html.replace('<img src="images/anthurium.png"', '<img loading="lazy" src="images/anthurium.png"');
     const htmlWithEntry = RecordGate.state(c) === 'ok' ? htmlFast.replace(/(<main[^>]*>)/, '$1\n' + staticEntryHtml(c, ctx)).replace(/<body([^>]*)>/, (m, at) => /class="/.test(at) ? m.replace('class="', 'class="stub-entry-page ') : '<body' + at + ' class="stub-entry-page">') : htmlFast;
 
     const dir = path.join(WIREFRAME, slug, restDir);
