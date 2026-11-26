@@ -118,10 +118,6 @@ window.sciNameHtml = sciNameHtml;
 // the plant page has drawn: the stub's first screen gives way without moving the screen
 window.releaseStaticEntry = function() {
   var se = document.getElementById('static-entry');
-  // the stub's photo is held a little longer, so the gallery's copy of it is served from the page's own memory
-  // instead of a second download (PSI 11-26: the same 230 KB photo was fetched twice)
-  var ph = se && se.querySelector('.static-entry__plate img');
-  if (ph) { window._stubPhoto = ph; setTimeout(function () { window._stubPhoto = null; }, 30000); }
   if (se) se.remove();
   if (document.documentElement.getAttribute('data-boot') === 'entry') document.documentElement.removeAttribute('data-boot');
   clearTimeout(window._staticEntryTimer);
