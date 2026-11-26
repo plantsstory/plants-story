@@ -2794,6 +2794,13 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     // so the photo is not asked for again (PSI 11-26: the 1200 photo was downloaded twice)
     if (opts.reuseImg) {
       var slot = item.querySelector('img[data-reuse-slot]'), r = opts.reuseImg;
+      // the stub's photo picked its copy from a srcset: it keeps exactly that copy, so nothing is fetched anew
+      if (r.hasAttribute('srcset') && r.currentSrc) {
+        r.setAttribute('src', r.currentSrc);
+        r.removeAttribute('srcset');
+      }
+      r.removeAttribute('width');
+      r.removeAttribute('height');
       ['class', 'alt', 'loading', 'fetchpriority', 'decoding', 'sizes'].forEach(function(n) {
         var v = slot.getAttribute(n);
         if (v == null) r.removeAttribute(n); else r.setAttribute(n, v);
@@ -2832,13 +2839,16 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       // the list's thumbnail stands in until the photos arrive (T128): no empty frame while they load
       var standIn = null, tp = !samePlant && window._thumbMap && window._thumbMap[cultivarName];
       // on a page opened from a shared link the list's thumbnails are not in yet: the stub's own photo stands in (T164b)
-      var stubImg = !samePlant && document.querySelector('#static-entry .static-entry__plate img');
+      var stubImg = !samePlant && (document.querySelector('#static-entry .static-entry__plate img') || window._stubPhoto);
       var standSrc = tp && window.galleryImg ? window.galleryImg(tp, 1200)
         : (stubImg && stubImg.getAttribute('alt') === cultivarName ? (stubImg.currentSrc || stubImg.src) : '');
       var settled = false;
       var addStandIn = function(src) {
         if (settled || standIn || !src) return;
-        standIn = createGalleryItem(src, { alt: cultivarName, eager: true });
+        // the first screen already gave its photo up: that same <img> becomes the stand-in
+        var own = !tp && stubImg && !stubImg.isConnected && (stubImg.currentSrc || stubImg.src) === src ? stubImg : null;
+        if (own) window._stubPhoto = null;
+        standIn = createGalleryItem(src, { alt: cultivarName, eager: true, reuseImg: own });
         standIn.classList.add('gallery__item--standin');
         gallery.insertBefore(standIn, galleryUpload);
         galleryCarouselIdx = 0;
