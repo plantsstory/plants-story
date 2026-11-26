@@ -1918,6 +1918,35 @@ serve(async (req: Request) => {
       }
     }
 
+    // ── A run with cultivar_id rewrites that record's AI origins, so a non-admin may start one only
+    //    for a record that is theirs (registration), or one they added an origin to within the last
+    //    hour (the add-an-origin → AI check flow), and only under the record's own name. ──
+    if (cultivar_id && !preview && !isAdmin) {
+      const forbid = async (message: string) => {
+        if (logRow?.id) await serviceClient.from("research_origin_requests").delete().eq("id", logRow.id);
+        return new Response(JSON.stringify({ error: message }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      };
+      const { data: target } = await serviceClient
+        .from("cultivars")
+        .select("user_id, cultivar_name")
+        .eq("id", cultivar_id)
+        .maybeSingle();
+      if (!target || target.cultivar_name !== cultivar_name) {
+        return await forbid("Permission denied: cultivar_id and cultivar_name do not match");
+      }
+      if (!target.user_id || target.user_id !== authUser.id) {
+        const { count: appended } = await serviceClient
+          .from("origin_append_log")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", authUser.id)
+          .eq("cultivar_id", cultivar_id)
+          .gte("created_at", oneHourAgo);
+        if (!appended) {
+          return await forbid("Permission denied: only the cultivar owner, or someone who just added an origin, can start AI research");
+        }
+      }
+    }
+
     // Skip AI research for seedlings
     if (type === "seedling") {
       return new Response(
