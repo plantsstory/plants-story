@@ -79,9 +79,7 @@ async function main() {
   let rows;
   if (process.argv[2]) rows = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
   else {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/cultivars?select=id,cultivar_name,genus,type,origins,aliases,parent_a_text,parent_b_text,parent_a_id,parent_b_id,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status,updated_at&is_private=eq.false',
-      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY } });
-    rows = await r.json();
+    rows = await require('./lib/rest').getAll('/rest/v1/cultivars?select=id,cultivar_name,genus,type,origins,aliases,parent_a_text,parent_b_text,parent_a_id,parent_b_id,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status,updated_at&is_private=eq.false&order=id');
   }
   const issues = check(rows);
   const recorded = rows.filter(r => r.type !== 'seedling' && !(r.tags || []).includes('individual') && RecordGate.state(r) === 'ok').map(r => r.cultivar_name).sort();

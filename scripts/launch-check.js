@@ -10,6 +10,7 @@
 const RecordGate = require('../wireframe/js/record-gate');
 const ToolGate = require('../wireframe/js/tool-gate');
 const EntryMeta = require('../wireframe/js/entry-meta');
+const { getAll } = require('./lib/rest');
 
 const SITE = 'https://aroidorigins.com';
 const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
@@ -57,7 +58,7 @@ async function main() {
   console.log('Aroid Origins launch check — ' + new Date().toISOString());
   const genera = await getJSON('/rest/v1/genera?select=name,is_visible');
   const visible = new Set(genera.filter(g => g.is_visible !== false).map(g => g.name));
-  const rows = (await getJSON('/rest/v1/cultivars?select=id,cultivar_name,genus,type,origins,aliases,updated_at,verified_at,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false'))
+  const rows = (await getAll('/rest/v1/cultivars?select=id,cultivar_name,genus,type,origins,aliases,updated_at,verified_at,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=id'))
     .filter(c => visible.has(c.genus || 'Anthurium'));
   const recorded = rows.filter(c => c.type !== 'seedling' && !(c.tags || []).includes('individual') && RecordGate.state(c) === 'ok');
 

@@ -26,6 +26,7 @@ const SITE = 'https://aroidorigins.com';
 const WIREFRAME = path.join(__dirname, '..', 'wireframe');
 // an entry's address (item 8, 11-26): /anthurium/ace-of-spades/ rather than /anthurium/'Ace%20of%20Spades'/
 const Addresses = require('./lib/entry-addresses');
+const { getAll } = require('./lib/rest');
 const fullNameOf = Addresses.fullNameOf;
 // name -> the URL segment it was given (scripts/lib/entry-addresses.js); a name not in it takes the plain rule
 let ADDR = new Map();
@@ -227,11 +228,11 @@ async function main() {
     genera = await fetchJSON('/rest/v1/genera?select=slug,name&order=display_order');
   }
   const visibleGenusNames = new Set(genera.map(g => g.name));
-  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=id,cultivar_name,genus,type,origins,aliases,updated_at,verified_at,parent_a_id,parent_b_id,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=genus,cultivar_name');
+  const allCultivars = await getAll('/rest/v1/cultivars?select=id,cultivar_name,genus,type,origins,aliases,updated_at,verified_at,parent_a_id,parent_b_id,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=genus,cultivar_name,id');
   const cultivars = allCultivars.filter(c => visibleGenusNames.has(c.genus || 'Anthurium'));
-  const images = await fetchJSON('/rest/v1/cultivar_images?select=cultivar_name,storage_path&order=display_order');
+  const images = await getAll('/rest/v1/cultivar_images?select=cultivar_name,storage_path&order=display_order,id');
   const firstByDate = {};
-  for (const img of await fetchJSON('/rest/v1/cultivar_images?select=cultivar_name,storage_path&order=created_at')) {
+  for (const img of await getAll('/rest/v1/cultivar_images?select=cultivar_name,storage_path&order=created_at,id')) {
     if (!firstByDate[img.cultivar_name] && !/^pv:/.test(img.storage_path || '')) firstByDate[img.cultivar_name] = img.storage_path;
   }
 

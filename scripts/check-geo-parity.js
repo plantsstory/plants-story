@@ -36,8 +36,7 @@ async function main() {
     // the public anon key, as in generate-static-pages.js (readable data only)
     const url = process.env.SUPABASE_URL || 'https://jpgbehsrglsiwijglhjo.supabase.co';
     const key = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
-    const r = await fetch(url + '/rest/v1/cultivars?select=cultivar_name,type,origins&type=eq.species&is_private=eq.false', { headers: { apikey: key, Authorization: 'Bearer ' + key } });
-    rows = await r.json();
+    rows = await require('./lib/rest').getAll('/rest/v1/cultivars?select=cultivar_name,type,origins&type=eq.species&is_private=eq.false&order=id', { url, key });
   }
   const site = archiveCountryOf();
   const diffs = [];
