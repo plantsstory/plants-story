@@ -2836,9 +2836,12 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       var standSrc = tp && window.galleryImg ? window.galleryImg(tp, 1200)
         : (stubImg && stubImg.getAttribute('alt') === cultivarName ? (stubImg.currentSrc || stubImg.src) : '');
       var settled = false;
-      var addStandIn = function(src) {
+      var addStandIn = function(src, fromStub) {
         if (settled || standIn || !src) return;
-        standIn = createGalleryItem(src, { alt: cultivarName, eager: true });
+        // the stub has given way already: its own loaded <img> moves in, so the photo is not asked for again
+        // (page-speed tests fetched it a second time for a new <img>, 11-26). A stub still on screen keeps its <img>.
+        var own = fromStub && stubImg && !document.contains(stubImg) && stubImg.complete && stubImg.naturalWidth ? stubImg : null;
+        standIn = createGalleryItem(src, { alt: cultivarName, eager: true, reuseImg: own });
         standIn.classList.add('gallery__item--standin');
         gallery.insertBefore(standIn, galleryUpload);
         galleryCarouselIdx = 0;
@@ -2847,7 +2850,10 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       // the stub's photo still on its way: the stand-in waits for that same download, so the photo is not
       // asked for a second time while the first is still coming (PSI 11-26: the stub photo was fetched twice)
       if (standSrc && !tp && stubImg && !(stubImg.complete && stubImg.naturalWidth)) {
-        stubImg.addEventListener('load', function() { addStandIn(stubImg.currentSrc || stubImg.src); }, { once: true });
+        stubImg.addEventListener('load', function() { setTimeout(function() { addStandIn(stubImg.currentSrc || stubImg.src, true); }, 0); }, { once: true });
+      } else if (standSrc && !tp) {
+        // the plant page lets the stub go on the next turn (releaseStaticEntry): the stand-in comes just after it
+        setTimeout(function() { addStandIn(standSrc, true); }, 0);
       } else addStandIn(standSrc);
       // Fetch from Supabase
       fetchImagesFromSupabase(cultivarName).then(function(images) {
@@ -2858,14 +2864,15 @@ updateCultivarDetail = function(cultivarName, rowEl) {
         if (!h1 || h1Key(h1) !== cultivarName) { if (standIn) standIn.remove(); return; }
         // photos already drawn here, by their address: a new item takes the drawn <img> instead of a new one
         var reuse = {};
-        var keep = function(el) { var u = el && el.getAttribute('src'); if (u && !reuse[u]) reuse[u] = el; };
+        // by the address it shows: the stub's moved <img> picks its copy from a srcset
+        var keep = function(el) { [el && el.currentSrc, el && el.getAttribute('src')].forEach(function(u) { if (u && !reuse[u]) reuse[u] = el; }); };
         if (samePlant) {
           gallery.querySelectorAll('.gallery__item[data-user-upload] img.gallery__img-full').forEach(keep);
           clearOld();
         }
         // the stand-in shows the first photo already: it hands its <img> over and leaves at once
         var standImg = standIn && standIn.querySelector('img.gallery__img-full');
-        if (standImg && images[0] && getPublicUrl(images[0].storage_path) === standImg.getAttribute('src')) {
+        if (standImg && images[0] && getPublicUrl(images[0].storage_path) === (standImg.currentSrc || standImg.getAttribute('src'))) {
           keep(standImg);
           standIn.remove();
           standIn = null;
