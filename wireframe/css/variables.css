@@ -47,12 +47,14 @@
   --badge-ai-fg: var(--color-ink);
 
   /* Typography */
+  /* Japanese text: the device's own gothic (Hiragino on Apple, Noto Sans CJK on Android, BIZ UDPGothic / Meiryo on Windows).
+     The Noto Sans JP web font was ~30 files and a 150 KB stylesheet on every first visit (PSI 11-26). */
   /* Display serif: Cormorant for Latin, Shippori for JP */
   --font-display: "Cormorant Garamond", "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
-  --font-heading: "Noto Sans JP", "BIZ UDPGothic", "Helvetica Neue", Arial, sans-serif;
+  --font-heading: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Noto Sans CJK JP", "BIZ UDPGothic", Meiryo, sans-serif;
   --font-heading-en: "Cormorant Garamond", Georgia, serif;
-  --font-primary: "Noto Sans JP", "BIZ UDPGothic", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "IBM Plex Mono", "Noto Sans JP", "BIZ UDPGothic", monospace; /* JP falls to the sans, never to a random face */
+  --font-primary: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Noto Sans CJK JP", "BIZ UDPGothic", Meiryo, sans-serif;
+  --font-mono: "IBM Plex Mono", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Noto Sans CJK JP", "BIZ UDPGothic", Meiryo, monospace; /* JP falls to the sans, never to a random face */
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
