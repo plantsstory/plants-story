@@ -2234,7 +2234,7 @@ paginateGenus = function(genusEl, page) {
     var scope = typeof getActiveView === 'function' ? getActiveView(genusEl) : genusEl;
     var isSeedling = scope.getAttribute('data-genus-view') === 'seedlings';
     var totalCount = allItems.filter(function(it) { return isSeedling ? it.meta.type === 'seedling' : it.meta.type !== 'seedling'; }).length;
-    var filtered = getFilteredItems(genusEl);
+    var filtered = typeof getFilteredItems === 'function' ? getFilteredItems(genusEl) : allItems;
     var input = scope.querySelector('.search-bar__input');
     if (input && input.value.trim()) {
       countEl.textContent = t('search_hit').replace('{n}', filtered.length).replace('{total}', totalCount);
