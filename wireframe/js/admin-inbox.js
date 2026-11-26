@@ -45,13 +45,15 @@
   async function draw() {
     var res = await Promise.all([
       sb.from('deletion_requests').select('id, target_type, target_name, reason', { count: 'exact' }).eq('status', 'pending').order('created_at', { ascending: false }).limit(3),
-      sb.from('contact_messages').select('id, name, category', { count: 'exact' }).or('status.is.null,status.neq.done').order('created_at', { ascending: false }).limit(3),
+      sb.rpc('admin_contact_messages', { p_limit: 500 }),
       sb.from('ai_suggestions').select('id, cultivar_name, field', { count: 'exact' }).eq('status', 'pending').order('created_at', { ascending: false }).limit(3),
       sb.from('research_requests').select('id, cultivar_name', { count: 'exact' }).in('status', ['pending', 'approved']).order('created_at', { ascending: false }).limit(3),
       sb.rpc('genus_request_summary')
     ]);
     function part(r) { return { n: r.error ? null : (r.count || 0), rows: r.error ? [] : (r.data || []), err: r.error }; }
-    var reports = part(res[0]), contact = part(res[1]), ais = part(res[2]), rr = part(res[3]);
+    var reports = part(res[0]), ais = part(res[2]), rr = part(res[3]);
+    var openMsgs = res[1].error ? [] : (res[1].data || []).filter(function (m) { return m.status !== 'done'; });
+    var contact = { n: res[1].error ? null : openMsgs.length, rows: openMsgs.slice(0, 3), err: res[1].error };
     var genusSeen = seen('genus');
     var gRows = res[4].error ? [] : (res[4].data || []);
     var gNew = gRows.filter(function (r) { return new Date(r.last_at) > genusSeen; });
