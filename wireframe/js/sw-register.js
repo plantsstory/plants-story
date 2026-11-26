@@ -4,8 +4,12 @@ if ('serviceWorker' in navigator) {
     var swRoot = location.hostname === 'plantsstory.github.io' ? '/plants-story/' : '/';
     navigator.serviceWorker.register(swRoot + 'sw.js').catch(function() {});
   });
+  // a first visit has no version to replace: the worker installing now sends SW_UPDATED too, and the page then
+  // reloaded at the reader's first tap (or at once in a background tab), loading everything twice (11-26)
+  var hadWorker = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('message', function(e) {
     if (e.data && e.data.type === 'SW_UPDATED') {
+      if (!hadWorker) return;
       // Never force-reload a visible tab — it destroys in-progress form input.
       if (document.hidden) {
         window.location.reload();

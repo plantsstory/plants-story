@@ -159,6 +159,10 @@ function originDescription(origins) {
 // Apply page-specific meta to the index.html template
 function buildStub(template, meta) {
   let html = template;
+  // the home page's jungle picture sits hidden on every other page: fetched at high priority it took the
+  // bandwidth the page's own photo needed (126 KB, 11-26). Lazy, it loads only when the home page is shown.
+  html = html.replace('<img src="images/bg/jungle-tambopata-800.webp" alt="" width="801" height="556" decoding="async" fetchpriority="high">',
+    '<img src="images/bg/jungle-tambopata-800.webp" alt="" width="801" height="556" decoding="async" loading="lazy">');
   html = html.replace(/<title>[^<]*<\/title>/, '<title>' + escAttr(meta.title) + '</title>');
   if (meta.noindex) html = html.replace('</head>', '<meta name="robots" content="noindex, follow">\n</head>');
   html = html.replace(/(<meta name="description" content=")[^"]*(">)/, '$1' + escAttr(meta.description) + '$2');
