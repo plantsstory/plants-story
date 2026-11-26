@@ -15,8 +15,8 @@ test('a plain species keeps its address', () => {
   for (const n of ['wendlingeri', 'crystallinum', 'warocqueanum']) assert.strictEqual(E.path('Anthurium ' + n), 'anthurium/' + n);
 });
 
-test('a name outside plain Latin keeps the old form', () => {
-  assert.strictEqual(E.slug('× hybrid'), null);
+test('the hybrid sign reads as x; a name outside plain Latin keeps the old form', () => {
+  assert.strictEqual(E.path("Anthurium carlablackiae 'HR1' × carlablackiae 'HR2'"), 'anthurium/carlablackiae-hr1-x-carlablackiae-hr2');
   assert.strictEqual(E.path('Anthurium ひなた'), E.legacyPath('Anthurium ひなた'));
   assert.strictEqual(E.path('Anthurium André'), 'anthurium/andre');
 });
