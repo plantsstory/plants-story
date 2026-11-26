@@ -15,7 +15,8 @@
 
   window.loadContactMessages = async function () {
     var root = document.getElementById('contact-root');
-    var r = await sb.from('contact_messages').select('id, name, email, category, message, status, notified_at, created_at').order('created_at', { ascending: false }).limit(200);
+    // read through an admin-only function: the table itself is closed to the API roles
+    var r = await sb.rpc('admin_contact_messages', { p_limit: 200 });
     if (r.error) { if (root) root.innerHTML = '<p style="color:#a8712e;">読み込みエラー: ' + esc(r.error.message) + '</p>'; return; }
     var rows = (r.data || []).map(function (m) { m.is_resolved = m.status === 'done'; return m; }).sort(function (a, b) { return (a.is_resolved ? 1 : 0) - (b.is_resolved ? 1 : 0); });
     var open = rows.filter(function (m) { return !m.is_resolved; }).length;
@@ -34,8 +35,8 @@
     root.innerHTML = html;
     root.querySelectorAll('[data-cm]').forEach(function (b) {
       b.addEventListener('click', async function () {
-        var u = await sb.from('contact_messages').update({ status: b.getAttribute('data-resolved') === '1' ? 'new' : 'done' }).eq('id', b.getAttribute('data-cm'));
-        if (u.error) { toast('更新エラー: ' + u.error.message); return; }
+        var u = await sb.rpc('admin_set_contact_status', { p_id: b.getAttribute('data-cm'), p_status: b.getAttribute('data-resolved') === '1' ? 'new' : 'done' });
+        if (u.error || !u.data || u.data.success === false) { toast('更新エラー: ' + ((u.error && u.error.message) || (u.data && u.data.error) || '')); return; }
         window.loadContactMessages();
         if (window.refreshInbox) window.refreshInbox();
       });
