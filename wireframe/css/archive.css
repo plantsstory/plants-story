@@ -2242,6 +2242,10 @@ html.pv-label #page-genus .genus-content .cultivar-row:has(.entry__sub) .entry__
 html.pv-label .gallery.gallery--b .gallery__item[data-user-upload]:not(.is-shown) { display: none !important; }
 html.pv-label .gallery.gallery--b .gallery__img { aspect-ratio: 3 / 4; background: #000; cursor: zoom-in; }
 html.pv-label .gallery.gallery--b .gallery__img-full { width: 100%; height: 100%; object-fit: contain; }
+/* the 3:4 frame and one photo from the first frame, before the script marks the gallery: no jump while photos arrive (CLS, 11-26) */
+html.pv-label #gallery-carousel .gallery__item[data-user-upload] ~ .gallery__item[data-user-upload]:not(.is-shown) { display: none !important; }
+html.pv-label #gallery-carousel .gallery__item[data-user-upload] .gallery__img { aspect-ratio: 3 / 4; }
+html.pv-label #gallery-carousel .gallery__item[data-user-upload] .gallery__img-full { width: 100%; height: 100%; object-fit: contain; }
 /* one row that slides sideways: 5 fit the width; with 6 or more the next one peeks out at the edge */
 .gallery-thumbs { display: flex; gap: 4px; margin-top: 4px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 .gallery-thumbs::-webkit-scrollbar { display: none; }
