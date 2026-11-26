@@ -114,10 +114,12 @@
   // The address of an entry (site check 2026-11-26, item 8): the part after the genus is the stored name in plain
   // lower-case words joined by hyphens, so it carries no quotes, spaces or dots:  'Ace of Spades' -> ace-of-spades,
   // sp. "Peru" -> sp-peru. A plain species name (wendlingeri) is already in that form and keeps its address.
-  // A name with letters outside plain Latin (×, kana, kanji) keeps the old form, the name itself, so no two
+  // A name with letters outside plain Latin (kana, kanji) keeps the old form, the name itself, so no two
   // entries can end up at one address by losing those letters.
   function slug(rest) {
     var s = String(rest == null ? '' : rest).trim();
+    // the hybrid sign reads as the letter x (carlablackiae 'HR1' × carlablackiae 'HR2' -> carlablackiae-hr1-x-...)
+    s = s.replace(/\s*\u00d7\s*/g, ' x ');
     if (s.normalize) s = s.normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
     if (!s || /[^\x20-\x7e]/.test(s)) return null;
     var out = s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
