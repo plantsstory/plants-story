@@ -2825,15 +2825,23 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       var stubImg = !samePlant && document.querySelector('#static-entry .static-entry__plate img');
       var standSrc = tp && window.galleryImg ? window.galleryImg(tp, 1200)
         : (stubImg && stubImg.getAttribute('alt') === cultivarName ? (stubImg.currentSrc || stubImg.src) : '');
-      if (standSrc) {
-        standIn = createGalleryItem(standSrc, { alt: cultivarName, eager: true });
+      var settled = false;
+      var addStandIn = function(src) {
+        if (settled || standIn || !src) return;
+        standIn = createGalleryItem(src, { alt: cultivarName, eager: true });
         standIn.classList.add('gallery__item--standin');
         gallery.insertBefore(standIn, galleryUpload);
         galleryCarouselIdx = 0;
         updateGalleryCarousel();
-      }
+      };
+      // the stub's photo still on its way: the stand-in waits for that same download, so the photo is not
+      // asked for a second time while the first is still coming (PSI 11-26: the stub photo was fetched twice)
+      if (standSrc && !tp && stubImg && !(stubImg.complete && stubImg.naturalWidth)) {
+        stubImg.addEventListener('load', function() { addStandIn(stubImg.currentSrc || stubImg.src); }, { once: true });
+      } else addStandIn(standSrc);
       // Fetch from Supabase
       fetchImagesFromSupabase(cultivarName).then(function(images) {
+        settled = true;
         // Check cultivar hasn't changed while loading
         var detailPage = document.getElementById('page-cultivar');
         var h1 = detailPage ? detailPage.querySelector('h1') : null;
@@ -2900,6 +2908,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
           setTimeout(swap, 4000);
         } else swap();
       }).catch(function(err) {
+        settled = true;
         if (standIn) standIn.remove();
         console.warn('Failed to load gallery from Supabase, falling back to localStorage:', err);
         renderLocalGallery(cultivarName, gallery, galleryUpload);
