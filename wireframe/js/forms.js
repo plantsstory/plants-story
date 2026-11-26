@@ -820,6 +820,10 @@ document.addEventListener('click', function(e) {
                 var imageId = this.getAttribute('data-image-id');
                 var field = this.getAttribute('data-field');
                 var val = this.value.trim();
+                if (field === 'link_url' && val && !(/^https?:\/\/[^\s<>"]+$/i.test(val) && val.length <= 500)) {
+                  showToast('リンクは http:// か https:// で始まるURLを入れてください', true);
+                  return;
+                }
                 var updates = {};
                 updates[field] = val || null;
                 _sbForGallery.from('cultivar_images').update(updates).eq('id', imageId).then(function(res) {
@@ -2413,7 +2417,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
           storage_path: (priv ? 'pv:' : '') + path
         };
         if (caption) row.caption = caption;
-        if (linkUrl) row.link_url = linkUrl;
+        if (linkUrl && /^https?:\/\/[^\s<>"]+$/i.test(linkUrl) && linkUrl.length <= 500) row.link_url = linkUrl;
         if (userIp) row.created_ip = userIp;
         if (window._currentUser) row.user_id = window._currentUser.id;
         if (typeof displayOrder === 'number') row.display_order = displayOrder;
@@ -2763,7 +2767,8 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     var realVotes = opts.realVotes || 0;
     var fakeVotes = opts.fakeVotes || 0;
     var votedAs = opts.imageId ? getVote(opts.imageId) : null;    var caption = opts.caption || '';
-    var linkUrl = opts.linkUrl || '';
+    // only a web address is shown as a link (an old row may hold anything)
+    var linkUrl = /^https?:\/\//i.test(opts.linkUrl || '') ? opts.linkUrl : '';
     var hasOverlay = caption || linkUrl;
     var overlayHtml = '';
     if (hasOverlay) {
