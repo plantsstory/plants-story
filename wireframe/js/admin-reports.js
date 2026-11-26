@@ -19,7 +19,9 @@
   // the photo rows and reporter names a list of requests needs
   async function annotate(reqs) {
     // photo ids are uuids, so keep them as text (Number() turned every one into NaN and the photo never showed)
-    var imgIds = reqs.filter(function (r) { return r.target_type === 'image' && r.target_id; }).map(function (r) { return String(r.target_id); });
+    // only well-formed uuids: one old report holds a cut id, and a single bad value fails the whole lookup
+    var UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    var imgIds = reqs.filter(function (r) { return r.target_type === 'image' && UUID.test(String(r.target_id || '')); }).map(function (r) { return String(r.target_id).toLowerCase(); });
     var imgs = {};
     if (imgIds.length) {
       var q = await sb.from('cultivar_images').select('*').in('id', imgIds);
@@ -27,7 +29,7 @@
     }
     await loadPeopleNames(reqs.map(function (r) { return r.user_id; }).concat(Object.keys(imgs).map(function (k) { return imgs[k].user_id; })));
     reqs.forEach(function (r) {
-      if (r.target_type === 'image') r._img = imgs[String(r.target_id)] || null;
+      if (r.target_type === 'image') r._img = imgs[String(r.target_id).toLowerCase()] || null;
       else r._entry = allCultivars.find(function (c) { return String(c.id) === String(r.target_id); }) || null;
     });
     return reqs;
