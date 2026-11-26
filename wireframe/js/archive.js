@@ -3647,7 +3647,11 @@
     }, 0);
   });
   var first = document.querySelector('.page.active');
-  if (first) { show(first.id.replace(/^page-/, '')); trail.push(here()); }
+  // a shared link still has the home page marked active in its HTML: marking it here hid the bar the first paint
+  // drew, and the router showed it again a moment later, so the page jumped up and back down (CLS, 11-26).
+  // While the start flag is up the router names the page itself.
+  var deep = document.documentElement.hasAttribute('data-boot');
+  if (first) { if (!deep) show(first.id.replace(/^page-/, '')); trail.push(here()); }
 })();
 
 /* ---------- the list (owner's choice 11-10, 案B): names with a photo come first, as two columns of pictures;
