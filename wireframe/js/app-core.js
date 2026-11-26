@@ -3239,6 +3239,24 @@ if (false) {
       });
   }
 
+  // Every row of a query, 1,000 at a time: the API answers at most 1,000 rows per request (supabase/config.toml
+  // max_rows), so a plain select stops at the 1,000th entry and the rest never reach the lists or search.
+  // makeQuery builds a fresh query sorted on a unique column; resolves { data, error } like a single select.
+  function fetchAllRows(makeQuery, pageSize) {
+    pageSize = pageSize || 1000;
+    var all = [];
+    function page(from) {
+      return makeQuery().range(from, from + pageSize - 1).then(function(res) {
+        if (res.error || !res.data) return { data: null, error: res.error || new Error('no data') };
+        for (var i = 0; i < res.data.length; i++) all.push(res.data[i]);
+        if (res.data.length < pageSize) return { data: all, error: null };
+        return page(from + pageSize);
+      });
+    }
+    return page(0);
+  }
+  window.fetchAllRows = fetchAllRows;
+
   // Restore cultivars from Supabase first, then localStorage as fallback
   function restoreUserCultivars() {
     // Always load localStorage first (instant)
@@ -3263,7 +3281,9 @@ if (false) {
     // Then load from Supabase (async, authoritative source)
     // Fetch only needed columns to reduce payload size
     if (supabase) {
-      supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, verified_at, verification_note, parent_a_text, parent_b_text, parent_a_id, parent_b_id, is_private, ai_status, selected_from_id, updated_at, formula_status').then(function(res) {
+      fetchAllRows(function() {
+        return supabase.from('cultivars').select('id, cultivar_name, genus, type, origins, created_at, user_id, species_qualifier, aliases, tags, name_status, locality, verified_at, verification_note, parent_a_text, parent_b_text, parent_a_id, parent_b_id, is_private, ai_status, selected_from_id, updated_at, formula_status').order('id');
+      }).then(function(res) {
         if (res.error || !res.data) {
           // the archive could not be read (no signal, a blip): say so instead of 「読み込み中…」 for ever (T127)
           showToast(navigator.onLine === false ? '電波がありません' : '読み込めませんでした', true, { sticky: true, action: { label: 'もう一度', fn: function() { location.reload(); } } });
@@ -3277,11 +3297,14 @@ if (false) {
         });
 
         // Fetch all profiles for poster names, then build rows
-        var profilePromise = userIds.length > 0
-          ? supabase.from('profiles').select('id, display_name').in('id', userIds).then(function(pRes) {
-              if (pRes.data) pRes.data.forEach(function(p) { _profileCache[p.id] = p.display_name || '名前未設定'; });
-            })
-          : Promise.resolve();
+        // 100 ids per request: one request with every poster's id would outgrow the URL as the archive grows
+        var profileBatches = [];
+        for (var pi = 0; pi < userIds.length; pi += 100) {
+          profileBatches.push(supabase.from('profiles').select('id, display_name').in('id', userIds.slice(pi, pi + 100)).then(function(pRes) {
+            if (pRes.data) pRes.data.forEach(function(p) { _profileCache[p.id] = p.display_name || '名前未設定'; });
+          }));
+        }
+        var profilePromise = Promise.all(profileBatches);
 
         profilePromise.then(function() {
         // Clear all in-memory data, then rebuild from DB

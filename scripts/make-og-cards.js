@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const { Resvg } = require('@resvg/resvg-js');
 const { ogSlug } = require('./lib/og-slug');
+const { getAll } = require('./lib/rest');
 const RecordGate = require('../wireframe/js/record-gate');
 const EntryMeta = require('../wireframe/js/entry-meta');
 
@@ -158,8 +159,8 @@ async function main() {
   let genera = await getJSON('/rest/v1/genera?select=slug,name&is_visible=eq.true&order=display_order');
   if (!Array.isArray(genera)) genera = await getJSON('/rest/v1/genera?select=slug,name&order=display_order');
   const visible = new Set(genera.map(g => g.name));
-  const rows = await getJSON('/rest/v1/cultivars?select=id,cultivar_name,genus,type,origins,updated_at,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=genus,cultivar_name');
-  const images = await getJSON('/rest/v1/cultivar_images?select=cultivar_name,storage_path,display_order&order=display_order');
+  const rows = await getAll('/rest/v1/cultivars?select=id,cultivar_name,genus,type,origins,updated_at,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=genus,cultivar_name,id');
+  const images = await getAll('/rest/v1/cultivar_images?select=cultivar_name,storage_path,display_order&order=display_order,id');
   const firstImage = {};
   for (const im of images) if (!firstImage[im.cultivar_name]) firstImage[im.cultivar_name] = im.storage_path;
 

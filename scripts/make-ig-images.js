@@ -9,6 +9,7 @@ const { ogSlug } = require('./lib/og-slug');
 const RecordGate = require('../wireframe/js/record-gate');
 const EntryMeta = require('../wireframe/js/entry-meta');
 const geo = require('./lib/geo');
+const { getAll } = require('./lib/rest');
 
 const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
@@ -150,8 +151,8 @@ async function photoDataUri(storagePath) {
 async function main() {
   const genera = await getJSON('/rest/v1/genera?select=name,is_visible');
   const visible = new Set(genera.filter(g => g.is_visible !== false).map(g => g.name));
-  const rows = await getJSON('/rest/v1/cultivars?select=id,cultivar_name,genus,type,origins,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status,updated_at&is_private=eq.false&order=genus,cultivar_name');
-  const images = await getJSON('/rest/v1/cultivar_images?select=cultivar_name,storage_path,display_order&order=display_order');
+  const rows = await getAll('/rest/v1/cultivars?select=id,cultivar_name,genus,type,origins,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status,updated_at&is_private=eq.false&order=genus,cultivar_name,id');
+  const images = await getAll('/rest/v1/cultivar_images?select=cultivar_name,storage_path,display_order&order=display_order,id');
   const firstImage = {};
   for (const im of images) if (!firstImage[im.cultivar_name]) firstImage[im.cultivar_name] = im.storage_path;
   fs.mkdirSync(OUT, { recursive: true });

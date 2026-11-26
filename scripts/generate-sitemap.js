@@ -10,6 +10,7 @@ const geo = require('./lib/geo');
 const RecordGate = require('../wireframe/js/record-gate');
 const EntryMeta = require('../wireframe/js/entry-meta');
 const Addresses = require('./lib/entry-addresses');
+const { getAll } = require('./lib/rest');
 
 const SUPABASE_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwZ2JlaHNyZ2xzaXdpamdsaGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMzQwNzAsImV4cCI6MjA4ODkxMDA3MH0.Up-z0b60_81GoLBpzoXZI01mPBSbvUS7t5MbrEWXkXA';
@@ -40,7 +41,7 @@ async function main() {
   }
   const visibleGenusNames = new Set(genera.map(g => g.name));
   // Fetch cultivars (non-seedling only for public sitemap)
-  const allCultivars = await fetchJSON('/rest/v1/cultivars?select=cultivar_name,genus,type,origins,updated_at,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=genus,cultivar_name');
+  const allCultivars = await getAll('/rest/v1/cultivars?select=cultivar_name,genus,type,origins,updated_at,parent_a_text,parent_b_text,formula_status,species_qualifier,selected_from_id,tags,locality,ai_status&is_private=eq.false&order=genus,cultivar_name,id');
   const cultivars = allCultivars.filter(c => visibleGenusNames.has(c.genus || 'Anthurium'));
 
   const SITE = 'https://aroidorigins.com';
