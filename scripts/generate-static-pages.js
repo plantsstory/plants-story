@@ -17,6 +17,8 @@ const geo = require('./lib/geo');
 const RecordGate = require('../wireframe/js/record-gate');
 const ToolGate = require('../wireframe/js/tool-gate');
 const EntryMeta = require('../wireframe/js/entry-meta');
+const Photos = require('./lib/photos');
+const photoManifest = Photos.loadManifest();   // written by scripts/build-photos.js earlier in the deploy
 const AUTHORITY = (() => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'wireframe', 'data', 'people-authority.json'), 'utf8')); } catch (e) { return {}; } })();
 const { ogSlug } = require('./lib/og-slug');
 
@@ -287,7 +289,7 @@ async function main() {
     const li = plates.map(({ c, p }) => {
       const g = c.genus || 'Anthurium';
       const href = entryHref(c.cultivar_name, g);
-      const src = p ? SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + p.split('/').map(encodeURIComponent).join('/') + '?width=360&height=720&resize=contain&quality=72' : '';
+      const src = p ? (Photos.localUrl(photoManifest, p, 360) || SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + p.split('/').map(encodeURIComponent).join('/') + '?width=360&height=720&resize=contain&quality=72') : '';
       return '<li id="p' + c.id + '"><a href="' + escAttr(href) + '"><span class="ig-grid__img">' + (src ? '<img src="' + escAttr(src) + '" alt="' + escAttr(EntryMeta.name(c)) + '" loading="lazy" decoding="async">' : '<span class="ig-grid__name">' + sciHtml(EntryMeta.name(c)) + '</span>') + '</span><span class="ig-grid__no num">図版 ' + c.id + '</span></a></li>';
     }).join('');
     const art = '<article id="static-entry" class="container container--narrow static-entry"><nav class="breadcrumb" aria-label="パンくずリスト"><a href="' + SITE + '/">トップ</a><span class="breadcrumb__sep">/</span><span>Instagram の図版</span></nav>'
@@ -432,11 +434,14 @@ async function main() {
 
     // first screen in plain HTML
     const photoPath = imageMap[c.cultivar_name];
-    const photoAt = w => SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + photoPath.split('/').map(encodeURIComponent).join('/') + '?width=' + w + '&height=' + (w * 2) + '&resize=contain&quality=72';
+    // the deploy-time copies (scripts/build-photos.js) when there are: the app asks for the same addresses
+    // (window.galleryImg), so the photo is fetched once. 720 maps to the 800 copy
+    const localAt = w => Photos.localUrl(photoManifest, photoPath, w);
+    const photoAt = w => localAt(w) || SUPABASE_URL + '/storage/v1/render/image/public/gallery-images/' + photoPath.split('/').map(encodeURIComponent).join('/') + '?width=' + w + '&height=' + (w * 2) + '&resize=contain&quality=72';
     const photo = photoPath ? photoAt(720) : '';
     // phones took the 720 copy here and then the plant page's own 1200 copy (window.galleryImg(path, 1200), the same
     // address byte for byte): a phone now picks the 1200 copy at once and the page reuses it (11-26)
-    const photoSet = photoPath ? photo + ' 720w, ' + photoAt(1200) + ' 1200w' : '';
+    const photoSet = photoPath ? photo + (localAt(720) ? ' 800w, ' : ' 720w, ') + photoAt(1200) + ' 1200w' : '';
     // people, place (same country rule as the site), neighbours in the genus-list order, the list
     const ctx = { photo, photoSet, people: [], place: null, prev: null, next: null, genusList: { name: (c.genus || 'Anthurium') + ' の一覧', url: SITE + '/' + (c.genus || 'Anthurium').toLowerCase() + '/' } };
     ctx.people = people.peopleOfRow(c).slice(0, 3).map(pp => ({ name: (AUTHORITY[pp.key] && AUTHORITY[pp.key].name) || pp.key, url: SITE + '/people/' + encodeURIComponent(people.personSlug(pp.key)) + '/' }));

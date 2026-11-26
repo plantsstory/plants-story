@@ -16,14 +16,17 @@ async function latest(table, col) {
   return (j[0] && j[0][col]) || '';
 }
 (async () => {
-  const [c, i, n] = await Promise.all([
+  const count = table => fetch(SUPABASE_URL + '/rest/v1/' + table + '?select=id', { method: 'HEAD', headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY, Prefer: 'count=exact' } })
+    .then(r => (r.headers.get('content-range') || '').split('/')[1] || '');
+  const [c, i, n, m] = await Promise.all([
     // changed_at moves on every edit (origins, votes, verification); updated_at until that column exists
     latest('cultivars', 'changed_at').catch(() => latest('cultivars', 'updated_at')),
     latest('cultivar_images', 'created_at'),
-    fetch(SUPABASE_URL + '/rest/v1/cultivars?select=id', { method: 'HEAD', headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY, Prefer: 'count=exact' } })
-      .then(r => (r.headers.get('content-range') || '').split('/')[1] || ''),
+    count('cultivars'),
+    // a removed photo changes no date, only the count: the next scheduled run then drops its copy from Pages
+    count('cultivar_images'),
   ]);
-  const stamp = [c, i, n].join('|');
+  const stamp = [c, i, n, m].join('|');
   if (process.argv.includes('--write')) fs.writeFileSync(path.join(__dirname, '..', 'wireframe', 'data', 'build-stamp.txt'), stamp + '\n');
   process.stdout.write(stamp);
 })().catch(e => { console.error(e.message); process.exit(1); });

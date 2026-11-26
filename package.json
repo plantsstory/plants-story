@@ -4,6 +4,7 @@
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
-    "@supabase/supabase-js": "^2.99.1"
+    "@supabase/supabase-js": "^2.99.1",
+    "sharp": "^0.33.5"
   }
 }
