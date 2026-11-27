@@ -2415,6 +2415,7 @@
       if (epithet) epithet.placeholder = spClone ? '例: papillilaminum' : '例: crystallinum';
       if (extraLabel) extraLabel.textContent = q === 'sp' ? T('nb_extra_sp') : (q === 'ssp' || q === 'var') ? T('nb_extra_sub') : T('nb_extra_locality');
       if (extra) extra.placeholder = (q === 'ssp' || q === 'var') ? '例: variegatum' : '例: Peru';
+      exShown = exMeaning(q);
       if (cultivarLabel) cultivarLabel.textContent = type === 'hybrid' ? T('nb_hybrid_name') : spClone ? T('nb_clone_name_species') : T('nb_clone_name');
       // the example matches the kind: 'Dark Mama' is a Hybrid, 'Fort Sherman' a numbered papillilaminum, 'King of Spades' a Clone
       if (cultivarName) cultivarName.placeholder = (type === 'hybrid' ? '例: Dark Mama' : spClone ? '例: Fort Sherman' : '例: King of Spades') + '（引用符は不要）';
@@ -2438,6 +2439,13 @@
       document.querySelectorAll('#species-subcategory .chip').forEach(function (c) { c.disabled = dis; });
     }
     function onUserInput() { seeded = false; compose(); }
+    // what the second field holds now: 'loc' (a locality) or 'sub' (a subspecies or variety epithet)
+    function exMeaning(q) { return q === 'ssp' || q === 'var' ? 'sub' : 'loc'; }
+    var exShown = 'loc', exKept = {};
+    function exSwap() {
+      var m = exMeaning(qualifier());
+      if (extra && m !== exShown) { exKept[exShown] = extra.value; extra.value = exKept[m] || ''; exShown = m; }
+    }
     // 「aff. besseae」 or 「sp.」 typed into the epithet: the qualifier moves to its chip (board 17 T213)
     if (epithet) epithet.addEventListener('input', function () {
       if (currentType() !== 'species') return;
@@ -2530,7 +2538,19 @@
     });
     // when the person leaves the epithet: author names, 「nov.」 and 「f. alba」 typed after it are read and set aside,
     // and a line says what was done with them, so nothing goes missing without a word (11-27)
-    var tidy = null, tidying = false;
+    var tidy = null, tidying = false, asClone = null;
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest || !e.target.closest('[data-nb-as-clone]') || !asClone) return;
+      var r = asClone, pg1 = $('page-contribute'); asClone = null;
+      function pick(sel) { var el = pg1 && pg1.querySelector(sel); if (el && !el.checked) { el.checked = true; el.dispatchEvent(new Event('change', { bubbles: true })); } }
+      pick('input[name="cultivar-parentage"][value="species"]');
+      pick('input[name="kind-clone-yn"][value="yes"]');
+      setTimeout(function () {
+        epithet.value = r.epithet; cultivarName.value = r.cultivar; tidyNote('');
+        epithet.dispatchEvent(new Event('input', { bubbles: true }));
+        cultivarName.dispatchEvent(new Event('input', { bubbles: true }));
+      }, 60);
+    });
     function tidyNote(html) {
       if (!tidy && epithet) { tidy = document.createElement('p'); tidy.id = 'nb-epithet-tidy'; tidy.className = 'nb-tidy'; var row0 = $('nb-epithet-row'); if (row0) row0.appendChild(tidy); }
       if (!tidy) return;
@@ -2550,10 +2570,31 @@
       var type = currentType(), par = (document.querySelector('#page-contribute input[name="cultivar-parentage"]:checked') || {}).value || 'species';
       if (type !== 'species' && !(type === 'clone' && par === 'species')) return;
       var r = window.aoReadName(v);
+      var en = lang() === 'en', said = [];
+      // 「papillilaminum 'Fort Sherman'」: a species and the name of one plant of it (11-27). For 原種 + Clone the name
+      // goes to its own field; for a plain species it is offered, since the person chose 「いいえ」 for Clone
+      if (r && r.clone && r.epithet && r.cultivar && cultivarName) {
+        if (type === 'clone') {
+          epithet.value = r.epithet;
+          if (!cultivarName.value.trim()) cultivarName.value = r.cultivar;
+          tidyNote(en ? "'" + esc(r.cultivar) + "' is the name of one plant, so it was moved to the name field below." : '「' + esc(r.cultivar) + '」は 1 株につけた名前なので、下の名前の欄に移しました。');
+          tidying = true; epithet.dispatchEvent(new Event('input', { bubbles: true })); tidying = false;
+          cultivarName.dispatchEvent(new Event('input', { bubbles: true }));
+          return;
+        }
+        asClone = r;
+        epithet.value = r.epithet;
+        tidying = true; epithet.dispatchEvent(new Event('input', { bubbles: true })); tidying = false;
+        tidyNote((en ? "'" + esc(r.cultivar) + "' is the name of one plant (a numbered individual), so it was taken out of the species epithet. "
+          : '「' + esc(r.cultivar) + '」は 1 株につけた名前（ナンバリング）なので、種小名から外しました。')
+          + '<button type="button" class="nf-link" data-nb-as-clone>' + (en ? 'Record it as a numbered individual' : '原種の 1 株の名前として登録する') + '</button>');
+        return;
+      }
       if (!r || !r.epithet || r.clone || r.other || (r.q && r.q !== 'var' && r.q !== 'ssp' && type === 'species')) return;
       if (type === 'clone' && (r.q || r.extra)) return;
-      var en = lang() === 'en', said = [];
       epithet.value = r.epithet;
+      // 「crystallinum "Peru"」: the locality goes to its field, which was losing it (11-27)
+      if (r.extra && !r.q && type === 'species' && extra) { if (!extra.value.trim()) extra.value = r.extra; said.push(en ? '"' + esc(r.extra) + '" is the locality, so it was moved to its field.' : '「' + esc(r.extra) + '」は産地なので、産地の欄に移しました。'); }
       if (r.unpub) { epithet.setAttribute('data-unpub', r.epithet); said.push(en ? '<i>' + esc(r.unpub) + '</i> means the name is not published yet. It is recorded as <i>' + esc(r.epithet) + '</i>.' : '「' + esc(r.unpub) + '」は発表前の名前という意味です。<i>' + esc(r.epithet) + '</i> として記録します。'); }
       if (r.forma) said.push(en ? 'A forma (f. ' + esc(r.forma) + ') is recorded as its species, so it is not part of the name.' : '品種（f. ' + esc(r.forma) + '）は種として記録するので、登録名には入りません。');
       if (r.authors) said.push(en ? esc(r.authors) + ' is who described the name (the author), so it is not part of the name.' : esc(r.authors) + ' は名前をつけた人（著者名）なので、登録名には入れません。');
@@ -2569,7 +2610,14 @@
     });
     [epithet, extra, cultivarName, seedLabel].forEach(function (i) { if (i) i.addEventListener('input', onUserInput); });
     document.addEventListener('click', function (e) {
-      if (e.target.closest && e.target.closest('#species-subcategory .chip')) setTimeout(function () { refreshVisibility(); onUserInput(); }, 0);
+      if (!(e.target.closest && e.target.closest('#species-subcategory .chip'))) return;
+      // the second field means a locality for 記載種 / sp. / aff. / cf. and the lower name for ssp. / var.: when the
+      // chip moves between the two, what was typed for the one is kept aside and the other comes back (11-27), so a
+      // variety is never left standing as a locality. Done at once, before the code that clicked the chip fills it
+      exSwap();
+      // the line about sp. nov. belongs to sp. only
+      if (qualifier() !== 'sp' && exTidy && !exTidy.hidden) exNote('');
+      setTimeout(function () { refreshVisibility(); onUserInput(); }, 0);
     });
     document.addEventListener('click', function (e) {
       if (!e.target.closest || !e.target.closest('#subcat-more')) return;
@@ -2580,12 +2628,14 @@
       sc.classList.toggle('is-open', open);
       e.target.closest('#subcat-more').setAttribute('aria-expanded', open ? 'true' : 'false');
     });
+    // leaving 原種 resets the chip to 記載種 without a click: a variety typed before is kept aside the same way
+    // (not right after an edit's prefill, whose chip and fields are set together)
     document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function (r) {
-      r.addEventListener('change', function () { setTimeout(function () { refreshVisibility(); if (!seeded) compose(); }, 0); });
+      r.addEventListener('change', function () { setTimeout(function () { if (!seeded && currentType() === 'species') exSwap(); refreshVisibility(); if (!seeded) compose(); }, 0); });
     });
     // 原種 ⇄ Hybrid / 不明 with Clone ticked keeps the type 'clone': the labels and the order follow the parentage too
     document.querySelectorAll('#page-contribute input[name="cultivar-parentage"]').forEach(function (r) {
-      r.addEventListener('change', function () { setTimeout(function () { refreshVisibility(); if (!seeded) compose(); }, 0); });
+      r.addEventListener('change', function () { setTimeout(function () { if (!seeded && currentType() === 'species') exSwap(); refreshVisibility(); if (!seeded) compose(); }, 0); });
     });
     var genusSel = $('contribute-genus-select');
     if (genusSel) genusSel.addEventListener('change', function () { if (!seeded) compose(); });
@@ -2619,7 +2669,7 @@
       seeded = false;
       [epithet, extra, cultivarName, seedLabel].forEach(function (i) { if (i) i.value = ''; });
       if (epithet) epithet.removeAttribute('data-unpub');
-      tidyNote(''); exNote(''); cvNote('');
+      tidyNote(''); exNote(''); cvNote(''); exKept = {};
       setTimeout(refreshVisibility, 0);
     };
     window.nameBuilderPrimaryField = function (type) {
@@ -2783,9 +2833,6 @@
       }
       var b = e.target.closest && e.target.closest('[data-epithet-fix]');
       if (!b) return;
-      // the label box at the top says the same name, so it follows (without being read again)
-      var nf = $('nf-input'), old = String(epithet.value || '').trim().toLowerCase();
-      if (nf && old && nf.value.trim().toLowerCase().split(/\s+/).pop() === old) nf.value = nf.value.replace(new RegExp(old.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*$', 'i'), b.getAttribute('data-epithet-fix'));
       epithet.value = b.getAttribute('data-epithet-fix');
       epithet.dispatchEvent(new Event('input', { bubbles: true }));
       clearTimeout(timer); check();
@@ -4236,179 +4283,25 @@
 })();
 
 /* ============================================================
-   名前から始める (11-27, proposal 4): the label's words first. Names already in the archive are offered as they are
-   typed (the photo or record goes on that page); a new name is read for its kind, and the person only confirms it.
-   写真と名前だけ (proposal 5): the kind questions and the origin fields step aside; the record is tagged quick_post and,
-   being short of a record, sits folded under 「記録が足りない名前」 until someone fills it in.
+   写真と名前だけ (proposal 5): with the name in the name fields, the origin fields step aside; the record is tagged
+   quick_post and, being short of a record, sits folded under 「記録が足りない名前」 until someone fills it in.
+   (The label box that stood above the kind questions was taken out on 11-27 at the owner's word: with the name
+   fields below it, there were two places to write the name. Its reading of the name lives in those fields.)
    ============================================================ */
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function pg() { return $('page-contribute'); }
-  function genus() { var s = $('contribute-genus-select'); return (s && s.value) || ((window._generaData && window._generaData[0]) ? window._generaData[0].name : 'Anthurium'); }
-  function plain(v) { v = String(v || ''); try { v = v.normalize('NFKC'); } catch (e) {} return v.replace(/[‘’`´]/g, "'").replace(/[“”]/g, '"').replace(/\s+/g, ' ').trim(); }
-  function stripGenus(v) {
-    var g = genus().toLowerCase(), l = v.toLowerCase();
-    if (l.indexOf(g + ' ') === 0) return v.slice(g.length + 1);
-    if (/^[a-z]\.\s/i.test(v) && l[0] === g[0]) return v.replace(/^[a-z]\.\s*/i, '');
-    return v;
-  }
-  function unq(v) { return String(v || '').replace(/^['"]+|['"]+$/g, '').trim(); }
-  var KIND = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: '実生' };
 
-  // what the words look like. Returns null for too little to read. The reading itself is shared with the name
-  // fields (aoReadName, above the name builder); this adds the kind and the words that explain it
-  function guess(raw) {
-    var r = window.aoReadName ? window.aoReadName(stripGenus(plain(raw))) : null;
-    if (!r) return null;
-    if (r.cross) return { cross: true };
-    if (r.spp) return { spp: true };
-    var g, au = r.authors ? '。' + r.authors + ' は名前をつけた人（著者名）なので、登録名には入れません' : '';
-    // what was set aside, said on its own too (for when the name is already in the archive and the guess steps aside)
-    var aside = [r.authors ? r.authors + ' は著者名なので外して探しました。' : '', r.forma ? 'f. ' + r.forma + '（品種）は種として探しました。' : '', r.unpub && r.q !== 'sp' ? '「' + r.unpub + '」は発表前の名前という意味です。' : ''].join('');
-    if (r.other) return { parentage: 'unknown', clone: false, cultivar: r.cultivar, label: '品種名', why: '大文字や引用符のある、品種名の書き方です', open: true };
-    if (r.clone) return { parentage: 'species', clone: true, epithet: r.epithet, cultivar: r.cultivar, label: '原種の 1 株につけた名前（ナンバリング）', why: '小文字の種小名のあとに、番号や名前が続いています' };
-    g = { tidy: !!(r.authors || r.forma || r.unpub), aside: aside, parentage: 'species', clone: false, q: r.q || '', epithet: r.epithet || '', extra: r.q === 'var' || r.q === 'ssp' ? r.infra : (r.extra || ''), unpub: r.unpub && r.q !== 'sp' ? r.unpub : '' };
-    if (r.q === 'sp') { g.label = '学名がまだない原種（sp.）'; g.why = r.unpub ? '「sp. ' + r.unpub + '」は、まだ名前が発表されていない種という意味です。産地や呼び名があれば足せます' : '「sp.」で始まっています'; }
-    else if (r.q === 'aff' || r.q === 'cf') { g.label = r.q === 'aff' ? 'ある種に近い別の原種（aff.）' : 'その種らしい原種（cf.）'; g.why = '「' + r.q + '.」で始まっています' + au; }
-    else if (r.q === 'var' || r.q === 'ssp') { g.label = r.q === 'var' ? '原種の変種（var.）' : '原種の亜種（ssp.）'; g.why = '「' + r.q + '.」が入っています' + au; }
-    else if (r.forma) { g.label = '原種（品種 f. ' + r.forma + ' つき）'; g.why = '「f.」は種の中の品種（forma）です。この図鑑では種として登録し、f. ' + r.forma + ' は登録名に入りません' + au; }
-    else if (g.unpub) { g.label = 'まだ発表されていない原種（' + g.unpub + '）'; g.why = '「' + g.unpub + '」は、発表前の名前という意味です。学名の一覧では確かめずに受け付けます' + au; }
-    else if (g.extra) { g.label = '原種（産地つき）'; g.why = '小文字の種小名に、" " で産地が続いています' + au; }
-    else { g.label = '原種（学名のある種）'; g.why = (r.authors ? '小文字の種小名のあとに、著者名が続いています' : '小文字 1 語の、学名の書き方です') + au; }
-    return g;
-  }
-
-  function preview(g) {
-    if (!g || g.cross || g.spp) return '';
-    var gen = genus(), name;
-    if (g.parentage === 'species' && !g.clone) {
-      if (g.q === 'sp') name = 'sp.' + (g.extra ? ' "' + g.extra + '"' : '');
-      else if (g.q === 'aff' || g.q === 'cf') name = g.q + '. ' + g.epithet + (g.extra ? ' "' + g.extra + '"' : '');
-      else if (g.q === 'var' || g.q === 'ssp') name = g.epithet + ' ' + g.q + '. ' + g.extra;
-      else name = g.epithet + (g.extra ? ' "' + g.extra + '"' : '');
-    } else name = (g.parentage === 'species' && g.epithet ? g.epithet + ' ' : '') + "'" + g.cultivar + "'";
-    return gen + ' ' + name;
-  }
-
-  function folded(s) { return plain(s).toLowerCase().replace(/['"]/g, '').replace(/\s+/g, ' '); }
-  // names in the archive that hold the typed words, or are one or two letters from them
-  function hits(raw) {
-    var data = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : null);
-    if (!data) return [];
-    var q = folded(stripGenus(plain(raw)));
-    if (q.length < 3) return [];
-    var g = genus().toLowerCase(), out = [], near = [];
-    var g0 = guess(raw), gs = preview(g0) || (g + ' ' + q);
-    // authors, f. or nov. typed after the name: look for the name itself
-    if (g0 && g0.tidy && preview(g0) && !(g0.q === 'sp' && !g0.extra)) q = folded(preview(g0)).replace(/^\S+\s+/, '');
-    Object.keys(data).forEach(function (name) {
-      var e = data[name] || {};
-      if (e._isPrivate) return;
-      var low = folded(name);
-      if (low.indexOf(g + ' ') !== 0) return;
-      var keys = [name].concat(e._aliases || []);
-      if (keys.some(function (k) { return folded(stripGenus(k)).indexOf(q) !== -1; })) out.push(name);
-      else if (window.nameNearly && keys.some(function (k) { try { return window.nameNearly({ fullName: k, entry: {} }, gs); } catch (x) { return false; } })) near.push(name);
-    });
-    out.sort(function (a, b) { return a.length - b.length; });
-    return out.concat(near).slice(0, 5);
-  }
-  function kindOf(name) {
-    var data = window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : {});
-    var e = data[name] || {};
-    return KIND[String(e._type || '').toLowerCase()] || '';
-  }
-
-  var last = null;
-  function draw() {
-    var input = $('nf-input'); if (!input) return;
-    var raw = input.value, hb = $('nf-hits'), gb = $('nf-guess');
-    var hs = hits(raw), g = guess(raw);
-    var gp = preview(g).toLowerCase();
-    var exact = !!gp && hs.some(function (n) { return folded(n) === folded(gp); });
-    if (hs.length) {
-      hb.innerHTML = '<p class="nf-hits__q">図鑑にある名前</p><ul>' + hs.map(function (n) {
-        var short = n.replace(/^\S+\s+/, '').replace(' [Seedling]', '');
-        return '<li><a href="#" data-nav="cultivar" data-key="' + esc(n) + '"><i>' + esc(short) + '</i><span class="nf-kind">' + esc(kindOf(n)) + '</span><span class="nf-go">写真や記録を足す →</span></a></li>';
-      }).join('') + '</ul>' + (exact && g && g.aside ? '<p class="nf-note">' + esc(g.aside) + '</p>' : '') + '<p class="nf-note">同じ植物なら、新しく登録せずに、その名前のページから写真や記録を足せます。</p>';
-      hb.hidden = false;
-    } else { hb.innerHTML = ''; hb.hidden = true; }
-    last = g;
-    if (!g || exact) { gb.innerHTML = ''; gb.hidden = true; return; }
-    if (g.spp) {
-      gb.innerHTML = '<p class="nf-guess__q">「spp.」は、いくつかの種をまとめて呼ぶ書き方です。</p><p class="nf-note">1 つの名前にはできないので、株ごとに、わかる種名か「sp.」で入れてください。</p>';
-      gb.hidden = false; return;
-    }
-    if (g.cross) {
-      gb.innerHTML = '<p class="nf-guess__q">親の組み合わせ（交配式）のようです。</p><p class="nf-note">名前がついていれば、その名前を入れてください。名前のない、自分で播いた株は<button type="button" class="nf-link" data-type-other="seedling">実生として記録</button>できます。</p>';
-      gb.hidden = false; return;
-    }
-    var h = '<p class="nf-guess__q">' + (hs.length ? 'ほかの名前なら、' : '') + '書き方から見ると<b>「' + esc(g.label) + '」</b>のようです</p>'
-      + '<p class="nf-guess__name">登録名: <i>' + esc(preview(g)) + '</i></p>'
-      + '<p class="nf-note">' + esc(g.why) + '。</p>';
-    if (g.open) {
-      h += '<p class="nf-guess__q2">野生か交配か、わかりますか？</p><div class="nf-actions">'
-        + '<button type="button" class="btn btn--primary btn--sm" data-nf-apply="unknown">わからない（不明で進む）</button>'
-        + '<button type="button" class="btn btn--secondary btn--sm" data-nf-apply="hybrid">交配でできた（Hybrid）</button>'
-        + '<button type="button" class="btn btn--secondary btn--sm" data-nf-apply="clone">1 株だけの名前（Clone）</button></div>';
-    } else {
-      h += '<div class="nf-actions"><button type="button" class="btn btn--primary btn--sm" data-nf-apply="as-is">この区分で進む</button>'
-        + '<button type="button" class="nf-link" data-nf-pick>違うので自分で選ぶ</button></div>';
-    }
-    gb.innerHTML = h; gb.hidden = false;
-  }
-
-  function click(el) { if (el && !el.checked) { el.checked = true; el.dispatchEvent(new Event('change', { bubbles: true })); } }
-  function setVal(id, v) { var el = $(id); if (el) el.value = v || ''; }
-  function apply(g, how) {
-    var p = pg(); if (!p || !g) return;
-    var parentage = g.parentage, clone = !!g.clone;
-    if (how === 'hybrid') { parentage = 'hybrid'; clone = false; }
-    if (how === 'clone') { parentage = 'unknown'; clone = true; }
-    if (how === 'unknown') { parentage = 'unknown'; clone = false; }
-    click(p.querySelector('input[name="cultivar-parentage"][value="' + parentage + '"]'));
-    click(p.querySelector('input[name="kind-clone-yn"][value="' + (clone ? 'yes' : 'no') + '"]'));
-    setTimeout(function () {
-      if (parentage === 'species' && !clone) {
-        var chip = document.querySelector('#species-subcategory .chip[data-subcategory="' + (g.q || 'species') + '"]');
-        if (chip && !chip.classList.contains('active')) chip.click();
-      }
-      setTimeout(function () {
-        setVal('nb-epithet', g.epithet); setVal('nb-extra', g.extra); setVal('nb-cultivar', g.cultivar);
-        // a name not published yet (nov. / ined.) is not looked up in the scientific-name list
-        var epEl = $('nb-epithet');
-        if (epEl) { if (g.unpub && g.epithet) epEl.setAttribute('data-unpub', g.epithet); else epEl.removeAttribute('data-unpub'); }
-        var f = (parentage === 'species' && !clone) ? ($('nb-epithet').value ? $('nb-epithet') : $('nb-extra')) : $('nb-cultivar');
-        if (f) f.dispatchEvent(new Event('input', { bubbles: true }));
-        var label = parentage === 'species' ? (clone ? '原種のナンバリング（Clone）' : '原種') : (parentage === 'hybrid' ? 'Hybrid' : '不明') + (clone ? '・Clone' : '');
-        p.classList.add('nf-applied');
-        var s = $('nf-summary');
-        if (s) {
-          var en = window.currentLang === 'en';
-          var labelEn = parentage === 'species' ? (clone ? 'Species, numbered plant (Clone)' : 'Species') : (parentage === 'hybrid' ? 'Hybrid' : 'Unknown') + (clone && parentage !== 'species' ? ', Clone' : '');
-          s.innerHTML = en ? 'Kind set to <b>' + esc(labelEn) + '</b>. <button type="button" class="nf-link" data-nf-pick>Choose again</button>'
-            : '区分は<b>「' + esc(label) + '」</b>にしました。 <button type="button" class="nf-link" data-nf-pick>選び直す</button>';
-          s.hidden = false;
-        }
-        $('nf-guess').hidden = true;
-        if (typeof gtag === 'function') gtag('event', 'name_first_apply', { kind: label });
-      }, 30);
-    }, 30);
-  }
-  function pick() {
-    var p = pg(); if (!p) return;
-    p.classList.remove('nf-applied');
-    var s = $('nf-summary'); if (s) s.hidden = true;
-    var q = p.querySelector('.kind-axis'); if (q && q.scrollIntoView) q.scrollIntoView({ block: 'center' });
-  }
-
-  // 写真と名前だけ: the kind as read (or 不明), the second step is the photos alone, and the record is tagged
+  // 写真と名前だけ: the name as written in the fields, the second step is the photos alone, and the record is tagged
   function quick() {
-    var p = pg(), input = $('nf-input'); if (!p || !input) return;
-    if (!input.value.trim()) { input.focus(); if (typeof showFieldError === 'function') showFieldError(input, 'まず名前を入れてください'); return; }
-    if (!p.classList.contains('nf-applied')) { var g = last || guess(input.value); if (g && !g.cross && !g.spp) apply(g, g.open ? 'unknown' : 'as-is'); }
+    var p = pg(); if (!p) return;
+    var nm = $('cultivar-name-input'), t = (p.querySelector('input[name="cultivar-type"]:checked') || {}).value || 'species';
+    if (!nm || !nm.value.trim()) {
+      var f = window.nameBuilderPrimaryField ? window.nameBuilderPrimaryField(t) : nm;
+      if (f) { f.focus(); if (typeof showFieldError === 'function') showFieldError(f, 'まず名前を入れてください'); }
+      return;
+    }
     p.classList.add('contribute--quick');
     if (typeof gtag === 'function') gtag('event', 'quick_post_start');
     setTimeout(function () { var n = $('cstep-next'); if (n) n.click(); }, 120);
@@ -4416,22 +4309,14 @@
   window.aoQuickPost = function () { var p = pg(); return !!(p && p.classList.contains('contribute--quick')); };
 
   function build(tries) {
-    var p = pg(); if (!p || $('name-first')) return;
+    var p = pg(); if (!p || $('nf-quick')) return;
     if (!p.classList.contains('contribute--stepped')) { if ((tries || 0) < 20) setTimeout(function () { build((tries || 0) + 1); }, 150); return; }
-    var r = p.querySelector('input[name="cultivar-type"]'), typeGroup = r && r.closest('.form-group');
-    if (!typeGroup) return;
-    typeGroup.classList.add('kind-group');
-    var box = document.createElement('div');
-    box.className = 'name-first'; box.id = 'name-first'; box.setAttribute('data-cstep', '1');
-    box.innerHTML = '<label class="form-label type-q" for="nf-input">ラベルや名札の名前を、そのまま入れてください</label>'
-      + '<input type="text" class="form-input" id="nf-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="例: crystallinum / papillilaminum \'Fort Sherman\' / King of Spades">'
-      + '<p class="type-def">図鑑にある名前なら候補が出ます。ない名前は、書き方から区分を読み取ります。</p>'
-      + '<div class="nf-hits" id="nf-hits" hidden></div><div class="nf-guess" id="nf-guess" hidden></div>'
-      + '<p class="nf-summary" id="nf-summary" hidden></p>'
-      + '<p class="nf-quick"><button type="button" class="nf-link" id="nf-quick">わからないことが多いときは、写真と名前だけで投稿する</button></p>';
-    typeGroup.parentNode.insertBefore(box, typeGroup);
-    // the login line stays in view when the questions step aside
-    var ln = $('cstep-login'); if (ln) box.insertBefore(ln, box.firstChild);
+    var nb = $('name-builder'); if (!nb) return;
+    // the way in sits under the name, which it needs first
+    var q = document.createElement('p');
+    q.className = 'nf-quick';
+    q.innerHTML = '<button type="button" class="nf-link" id="nf-quick">わからないことが多いときは、写真と名前だけで投稿する</button>';
+    nb.appendChild(q);
     // the second step in 写真と名前だけ: what happens to the record, said once above the photos
     var img = $('contribute-upload-area'), card = img && img.closest('.card');
     if (card && !$('quick-note')) {
@@ -4453,19 +4338,9 @@
         + '<p class="type-def">ラベルに「crystallinum × magnificum」のように親が書いてあれば、2 つとも入れてください。わからなければ空けたままで大丈夫です。</p>';
       back.insertAdjacentElement('afterend', qp);
     }
-    var t;
-    $('nf-input').addEventListener('input', function () {
-      clearTimeout(t); t = setTimeout(draw, 150);
-      if (typeof clearFieldError === 'function') clearFieldError(this);
-      // a changed name is read again: the kind chosen for the old one is not kept on screen as if it still fit
-      if (p.classList.contains('nf-applied')) { p.classList.remove('nf-applied'); var s = $('nf-summary'); if (s) s.hidden = true; }
-    });
   }
   document.addEventListener('click', function (e) {
     if (!e.target.closest) return;
-    var a = e.target.closest('[data-nf-apply]');
-    if (a) { e.preventDefault(); apply(last, a.getAttribute('data-nf-apply')); return; }
-    if (e.target.closest('[data-nf-pick]')) { e.preventDefault(); pick(); return; }
     if (e.target.closest('#nf-quick')) { e.preventDefault(); quick(); return; }
     if (e.target.closest('#quick-off')) { e.preventDefault(); var p = pg(); if (p) p.classList.remove('contribute--quick'); }
   });
@@ -4488,15 +4363,12 @@
   document.addEventListener('input', function (e) { if (e.target && (e.target.id === 'qp-a' || e.target.id === 'qp-b')) quickParents(); });
   // a fresh start empties them with the rest
   document.addEventListener('ao:page', function (e) { if (e.detail === 'contribute') { var a = $('qp-a'), b = $('qp-b'); if (a) a.value = ''; if (b) b.value = ''; } });
-  // a fresh visit starts with an empty box and the questions shown
+  // a fresh visit starts as a full post
   function reset() {
     var p = pg(); if (!p) return;
     build();
-    p.classList.remove('nf-applied', 'contribute--quick');
-    var i = $('nf-input'); if (i) i.value = '';
-    ['nf-hits', 'nf-guess', 'nf-summary'].forEach(function (id) { var el = $(id); if (el) { el.hidden = true; el.innerHTML = ''; } });
+    p.classList.remove('contribute--quick');
   }
   document.addEventListener('ao:page', function (e) { if (e.detail === 'contribute') setTimeout(reset, 60); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(build, 300); }); else setTimeout(build, 300);
-  window.aoNameGuess = guess; // for the tests
 })();

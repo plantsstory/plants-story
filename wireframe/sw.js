@@ -1,9 +1,11 @@
 // Service Worker for Aroid Origins PWA
-var CACHE_VERSION = 'aroid-origins-v207';
+var CACHE_VERSION = 'aroid-origins-v208';
 // Must match the ?v= cache buster in index.html — otherwise the precache
 // URLs never match real requests and every asset downloads twice.
-var ASSET_VERSION = '20261127j';
+var ASSET_VERSION = '20261127k';
 var OFFLINE_PAGE = './offline.html';
+// the site's top address ('/' on the custom domain), where index.html is the app shell
+var ROOT_PATH = new URL('./', self.location).pathname;
 var STATIC_ASSETS = [
   './',
   './index.html',
@@ -85,13 +87,19 @@ self.addEventListener('fetch', function(event) {
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).then(function(response) {
-        // If the server returns an HTML page (200 or 404 with SPA fallback),
-        // cache the root index.html and return it
+        // Only the top page itself is kept as the app shell (index.html). Every page used to be kept under that
+        // name, so after opening a plant's page, a page the server answers with 404 (such as /contribute) showed
+        // that plant for a moment before the app moved on (11-27). Other pages are kept under their own address,
+        // for offline use, and only when they are HTML.
         if (response.ok) {
-          var clone = response.clone();
-          caches.open(CACHE_VERSION).then(function(cache) {
-            cache.put(new Request('./index.html'), clone);
-          });
+          var type = response.headers.get('content-type') || '';
+          if (type.indexOf('text/html') !== -1) {
+            var clone = response.clone();
+            var isTop = url.pathname === ROOT_PATH || url.pathname === ROOT_PATH + 'index.html';
+            caches.open(CACHE_VERSION).then(function(cache) {
+              cache.put(isTop ? new Request('./index.html') : event.request, clone);
+            });
+          }
           return response;
         }
         // For 404s on navigation, serve cached index.html (SPA routing)
@@ -99,7 +107,8 @@ self.addEventListener('fetch', function(event) {
           return cached || response;
         });
       }).catch(function() {
-        return caches.match('./index.html').then(function(cached) {
+        // offline: the page itself if it was kept, otherwise the app shell
+        return caches.match(event.request).then(function(own) { return own || caches.match('./index.html'); }).then(function(cached) {
           return cached || caches.match(OFFLINE_PAGE);
         });
       })
