@@ -2267,9 +2267,9 @@ html.pv-label #gallery-carousel .gallery__item[data-user-upload] .gallery__img {
 html.pv-label #gallery-carousel .gallery__item[data-user-upload] .gallery__img-full { width: 100%; height: 100%; object-fit: contain; }
 /* the note under a photo (撮影日, 補足) lies over the photo's foot inside the 3:4 frame, shown on a tap as before.
    It sat beside the photo in the frame's row: hidden but taking room, it pushed the photo left and left a black
-   band on the right (owner, 11-27: 'Michelle' 「右側が黒くなった」) */
-html.pv-label .gallery.gallery--b .gallery__overlay, html.pv-label #gallery-carousel .gallery__item[data-user-upload] .gallery__overlay { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, .65); color: #fff; padding: var(--s2) var(--s3); }
-html.pv-label .gallery.gallery--b .gallery__overlay-caption, html.pv-label .gallery.gallery--b .gallery__overlay-link a, html.pv-label #gallery-carousel .gallery__item[data-user-upload] .gallery__overlay-caption, html.pv-label #gallery-carousel .gallery__item[data-user-upload] .gallery__overlay-link a { color: #fff; }
+   band on the right (owner, 11-27: 'Michelle' 「右側が黒くなった」). The same for the photo shown 送信中 while it is sent */
+html.pv-label .gallery.gallery--b .gallery__overlay, html.pv-label #gallery-carousel .gallery__img > .gallery__overlay { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, .65); color: #fff; padding: var(--s2) var(--s3); }
+html.pv-label .gallery.gallery--b .gallery__overlay-caption, html.pv-label .gallery.gallery--b .gallery__overlay-link a, html.pv-label #gallery-carousel .gallery__img > .gallery__overlay .gallery__overlay-caption, html.pv-label #gallery-carousel .gallery__img > .gallery__overlay .gallery__overlay-link a { color: #fff; }
 /* one row that slides sideways: 5 fit the width; with 6 or more the next one peeks out at the edge */
 .gallery-thumbs { display: flex; gap: 4px; margin-top: 4px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 .gallery-thumbs::-webkit-scrollbar { display: none; }
