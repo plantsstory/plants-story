@@ -2371,12 +2371,16 @@
     // 「aff. besseae」 or 「sp.」 typed into the epithet: the qualifier moves to its chip (board 17 T213)
     if (epithet) epithet.addEventListener('input', function () {
       if (currentType() !== 'species') return;
-      var m = /^\s*(sp|aff|cf|ssp|var)\.?(\s+|$)/i.exec(epithet.value);
+      // only once the word is closed by a dot or a space: 「sp」 alone is also how spectabile, splendidum, variabile
+      // and affine begin, and those were being turned into a qualifier at the second letter (11-27)
+      var m = /^\s*(sp|aff|cf|ssp|subsp|var)(?:\.\s*|\s+)/i.exec(epithet.value);
       if (!m) return;
-      var chip = document.querySelector('#species-subcategory .chip[data-subcategory="' + m[1].toLowerCase() + '"]');
+      var chip = document.querySelector('#species-subcategory .chip[data-subcategory="' + (m[1].toLowerCase() === 'subsp' ? 'ssp' : m[1].toLowerCase()) + '"]');
       if (!chip) return;
       epithet.value = epithet.value.slice(m[0].length);
       chip.click();
+      // sp. has no epithet: what comes next is the locality, so the typing goes on there
+      if (chip.getAttribute('data-subcategory') === 'sp' && extra) setTimeout(function () { extra.value = epithet.value.trim() || extra.value; epithet.value = ''; extra.focus(); onUserInput(); }, 0);
     });
     [epithet, extra, cultivarName, seedLabel].forEach(function (i) { if (i) i.addEventListener('input', onUserInput); });
     document.addEventListener('click', function (e) {
