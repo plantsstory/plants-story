@@ -2499,4 +2499,28 @@ html:not(.pv-reading) #page-reading .pr-line { display: none; } /* the note abou
   /* -- 6. tools: the departments are one list down the side (they were two cramped columns) -- */
   .shop-depts ul { grid-template-columns: 1fr; }
 }
+@media (min-width: 700px) {
+  /* -- 13. 産地索引: one list, so one column (it took the people index's two columns and filled only the left half) -- */
+  #locality-body .people__grid { grid-template-columns: 1fr; max-width: 720px; }
+}
+@media (min-width: 960px) {
+  /* -- 11. a name's page: the photo on the left, held in view; the name, the record and everything under it on the
+        right (it was one 1150px column with the photo in its left third and the right two-thirds empty).
+        Every child but the photo goes to the right column, so parts the scripts add later land there too. -- */
+  html.pv-label #page-cultivar:not(.is-unrecorded) > .container { display: grid; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); column-gap: var(--s5); row-gap: 0; align-items: start; align-content: start; }
+  html.pv-label #page-cultivar:not(.is-unrecorded) > .container > * { grid-column: 2; min-width: 0; }
+  html.pv-label #page-cultivar:not(.is-unrecorded) > .container > .detail-photo { grid-column: 1; grid-row: 1 / span 60; position: sticky; top: 80px; margin-bottom: 0; }
+  html.pv-label #page-cultivar .detail-photo .gallery.gallery--b, html.pv-label #page-cultivar .detail-photo .gallery-thumbs { max-width: none; }
+  html.pv-label #page-cultivar .detail-photo .gallery__img { max-height: calc(100vh - 160px); }
+}
 /* ==== PC LAYER END ==== */
+
+/* 今日の一葉: the whole photo, never cut (owner, 11-27: 「今日の一葉の画像の上下は見切れていることが多い」).
+   The photo filled its frame by cover: on a PC the frame was 4:3, so a portrait photo lost about 40% of its height;
+   on a phone the 4:5 frame cut a tall photo, and on a short screen the frame narrowed and left a gap on the right.
+   Now the frame stays 4:5 (its place is held before the photo arrives) up to a height limit, and the photo sits whole
+   inside it on the dark mat: a 3:4 phone photo shows thin bars at the sides, a taller one wider bars. */
+html.pv-label .story__figure { aspect-ratio: auto; max-height: none; }
+html.pv-label .story__figure a { height: auto; }
+html.pv-label .story__figure img { height: auto; aspect-ratio: 4 / 5; max-height: 72svh; object-fit: contain; }
+@media (min-width: 641px) { html.pv-label .story__figure img { max-height: 78vh; } }

@@ -3679,7 +3679,7 @@
       var path = th && nm && map[String(nm.getAttribute('data-key')).replace(' [Seedling]', '')];
       if (!path || !window.galleryImg) return;
       th.classList.remove('entry__thumb--empty');
-      th.innerHTML = '<img src="' + window.galleryImg(path, 160).replace(/"/g, '&quot;') + '" class="thumb-img" alt="" width="60" height="60" decoding="async">';
+      th.innerHTML = '<img src="' + window.galleryImg(path, 160).replace(/"/g, '&quot;') + '" class="thumb-img lazy-loaded" alt="" width="60" height="60" decoding="async">';   // shown at once: no lazy observer adds the class here
     });
   });
 })();
