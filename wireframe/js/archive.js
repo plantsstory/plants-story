@@ -2355,6 +2355,10 @@
         ssp: '亜種。種小名と亜種名を入れます。',
         'var': '変種。種小名と変種名を入れます。'
       }[q] || '';
+      // the five other qualifiers stay folded until asked for, and open by themselves when one of them is chosen (11-27)
+      var sc = $('species-subcategory'), more = $('subcat-more');
+      if (sc && q) sc.classList.add('is-open');
+      if (more && sc) more.setAttribute('aria-expanded', sc.classList.contains('is-open') ? 'true' : 'false');
       var dis = !!result.disabled;
       [epithet, extra, cultivarName, seedLabel].forEach(function (i) { if (i) i.disabled = dis; });
       document.querySelectorAll('#species-subcategory .chip').forEach(function (c) { c.disabled = dis; });
@@ -2373,6 +2377,15 @@
     [epithet, extra, cultivarName, seedLabel].forEach(function (i) { if (i) i.addEventListener('input', onUserInput); });
     document.addEventListener('click', function (e) {
       if (e.target.closest && e.target.closest('#species-subcategory .chip')) setTimeout(function () { refreshVisibility(); onUserInput(); }, 0);
+    });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest || !e.target.closest('#subcat-more')) return;
+      var sc = $('species-subcategory'); if (!sc) return;
+      var open = !sc.classList.contains('is-open');
+      // folding goes back to 記載種, so no hidden qualifier is left chosen
+      if (!open && qualifier()) { var sp = sc.querySelector('.chip[data-subcategory="species"]'); if (sp) sp.click(); }
+      sc.classList.toggle('is-open', open);
+      e.target.closest('#subcat-more').setAttribute('aria-expanded', open ? 'true' : 'false');
     });
     document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function (r) {
       r.addEventListener('change', function () { setTimeout(function () { refreshVisibility(); if (!seeded) compose(); }, 0); });
@@ -3028,7 +3041,8 @@
     var genus = ($('contribute-genus-select') || {}).value || 'Anthurium';
     var full = window.buildContributeFullName ? window.buildContributeFullName(genus, type, val('cultivar-name-input')) : val('cultivar-name-input');
     var sciHtml = function (t) { return typeof italicizeSciNames === 'function' ? italicizeSciNames(esc(t)) : esc(t); };
-    var sub = (document.querySelector('#species-subcategory input:checked') || {}).value || '';
+    var subChip = document.querySelector('#species-subcategory .chip.active');
+    var sub = subChip ? subChip.getAttribute('data-subcategory') || '' : '';
     var kinds = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: '実生' };
     var kindLine = (type !== 'seedling' && window.aoKindChoice ? window.aoKindChoice().label : kinds[type]) + (type === 'species' && sub && sub !== 'species' ? '（未記載 ' + esc(sub) + '.）' : '');
     var words = val('sf-notes');
@@ -3039,7 +3053,9 @@
     var aiFields = window._aiAutofillValues ? Object.keys(window._aiAutofillValues) : [];
     var FIELD = { author_name: '記載者', publication_year: '発表年', collector: '採集者', collection_year: '採集年', type_locality: 'タイプ産地', known_habitats: '分布' };
     // what the record gate will say about this draft
-    var draft = { _type: type, origins: [{ trust: 30, source_type: 'manual', body: words, structured: { origin_type: type, author_name: val('sf-author-name'), publication_year: val('sf-publication-year'), type_locality: val('sf-type-locality'), known_habitats: val('sf-known-habitats'), namer: val('sf-clone-namer'), breeder: val('sf-hybrid-breeder') || val('creator-name-input'), formula: (pp[0] && pp[1]) ? { parentA: pp[0], parentB: pp[1] } : null } }] };
+    var hfu = $('hybrid-formula-unknown'), hfc = $('hybrid-formula-complex');
+    var draftFs = type === 'hybrid' && !(pp[0] && pp[1]) ? (hfc && hfc.checked ? 'complex' : hfu && hfu.checked ? 'unknown' : null) : null;
+    var draft = { _type: type, _formulaStatus: draftFs, origins: [{ trust: 30, source_type: 'manual', body: words, structured: { origin_type: type, author_name: val('sf-author-name'), publication_year: val('sf-publication-year'), type_locality: val('sf-type-locality'), known_habitats: val('sf-known-habitats'), namer: val('sf-clone-namer'), breeder: val('sf-hybrid-breeder') || val('creator-name-input'), formula: (pp[0] && pp[1]) ? { parentA: pp[0], parentB: pp[1] } : null } }] };
     var gate = '';
     try { gate = typeof window.recordStateOf === 'function' ? window.recordStateOf(full, draft, { type: type }) : ''; } catch (e) { gate = ''; }
     var priv = $('seedling-private') && $('seedling-private').checked && type === 'seedling';
@@ -3063,6 +3079,15 @@
       return '<div class="specimen__cell"><span class="specimen__k">' + esc(r[0]) + '</span><span class="specimen__v"><span>' + r[1] + '</span> <a href="#" class="cstep-fix" data-goto="' + r[2] + '">直す</a></span></div>';
     }).join('') + '</div>';
     html += '<p class="cstep-review__scope">写真 ' + (photos ? photos + ' 枚' : 'なし（あとから足せます）') + '</p>';
+    // a name one or two letters from one already here: asked once more, here, before it is recorded (11-27)
+    var near = [];
+    try { near = window.findContributeDuplicate ? window.findContributeDuplicate(full, genus).near : []; } catch (e) { near = []; }
+    if (near.length) {
+      html += '<div class="cstep-near"><p class="cstep-near__q">似た名前がもうあります。打ち間違いではありませんか？</p><ul>' + near.map(function (n) {
+        var nm = n.replace(' [Seedling]', '');
+        return '<li>' + sciHtml(nm) + ' <a href="#" data-nav="cultivar" data-key="' + esc(n) + '">この名前のページを見る</a></li>';
+      }).join('') + '</ul><p class="cstep-note">同じ植物なら、そのページから写真や記録を足せます。別の植物なら、このまま記録して大丈夫です。<a href="#" class="cstep-fix" data-goto="1">名前を直す</a></p></div>';
+    }
     var sug = titleSuggestion();
     if (sug) html += '<p class="cstep-suggest">表記の確認: <b>\'' + esc(sug) + '\'</b> ではありませんか？ <button type="button" class="cstep-suggest__btn" data-title-fix="' + esc(sug) + '">こちらにする</button> <span class="cstep-note">作出者の書いたとおりなら、このままで大丈夫です</span></p>';
     $('cstep-review').innerHTML = html;
@@ -3758,4 +3783,80 @@
     zoom.showModal();
   });
   layout();
+})();
+
+// ---- 「？」 beside the words a newcomer may not know (owner, 11-27: 正しい知識がない人も投稿しやすく). A tap opens one
+//      short line under the word; a second tap closes it. The labels themselves are left as they are ----
+(function () {
+  var TERMS = {
+    species: ['原種', '自然の中に生えている野生の種そのものです。学名（例: Anthurium crystallinum）がついています。人が交配して作ったものではありません。'],
+    hybrid: ['Hybrid', '人が 2 つ以上の種や品種を交配して作った植物です。作った人やナーセリー（作出者）が説明していることが多いです。'],
+    unknown: ['不明', '野生の種なのか、交配で作られたのか、はっきり書いた情報が見つからない名前です。迷ったらこれで大丈夫です。'],
+    clone: ['Clone', '1 株と、その株から株分けや組織培養で増やした株だけが名乗る名前です。種から育てた兄弟の株は、同じ名前を名乗れません。'],
+    qualifier: ['分類', 'ほとんどの場合は「記載種」のままで大丈夫です。sp. などは、学名がまだ決まっていない株や、亜種・変種のときに使います。'],
+    author: ['記載者', 'その種の学名を、論文などで初めて発表した人です。Engl.（エングラー）のように略して書かれます。わからなければ空欄で大丈夫です。「AI自動記入」でも調べられます。'],
+    year: ['発表年', 'その学名が発表された年です。わからなければ空欄で大丈夫です。'],
+    collector: ['採集者', '学名のもとになった標本（タイプ標本）を野外で採った人です。お店や輸入した人ではありません。'],
+    locality: ['タイプ産地', '学名のもとになった標本が採られた場所です。買ったお店や、輸入元の国とは別のものです。'],
+    habitat: ['分布', 'その種が野生で生えている国や地域です。'],
+    cross: ['交配式', '母（種をつけた株）× 父（花粉を出した株）の組み合わせです。「A × B」のように書きます。わからなければ「親が不明」を選んでください。'],
+    namer: ['名付けた人', 'その名前や番号をつけた人やナーセリーです。ラベルや販売ページに書かれていることがあります。わからなければ空欄で大丈夫です。']
+  };
+  function button(key) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'term-help'; b.setAttribute('data-term', key);
+    b.setAttribute('aria-expanded', 'false'); b.setAttribute('aria-label', '「' + TERMS[key][0] + '」とは');
+    b.textContent = '?';
+    return b;
+  }
+  function add(el, key, where) {
+    if (!el || el.querySelector('.term-help[data-term="' + key + '"]')) return;
+    if (where === 'after') { if (el.nextElementSibling && el.nextElementSibling.matches && el.nextElementSibling.matches('.term-help[data-term="' + key + '"]')) return; el.insertAdjacentElement('afterend', button(key)); }
+    else el.appendChild(button(key));
+  }
+  // a label whose own words start with the given text (labels are matched by text: they carry no ids)
+  function labelIn(root, text) {
+    if (!root) return null;
+    var ls = root.querySelectorAll('label.form-label');
+    for (var i = 0; i < ls.length; i++) if (ls[i].textContent.trim().indexOf(text) === 0) return ls[i];
+    return null;
+  }
+  function wire() {
+    var p = document.getElementById('page-contribute');
+    if (!p) return;
+    ['species', 'hybrid', 'unknown'].forEach(function (v) {
+      var r = p.querySelector('input[name="cultivar-parentage"][value="' + v + '"]');
+      var term = r && r.closest('.form-radio') && r.closest('.form-radio').querySelector('.type-term');
+      add(term, v, 'after');
+    });
+    var q2 = p.querySelector('#kind-clone-q .type-q'); add(q2, 'clone');
+    var sub = p.querySelector('#species-subcategory > label'); add(sub, 'qualifier');
+    var sf = document.getElementById('species-fields');
+    add(labelIn(sf, '記載者'), 'author'); add(labelIn(sf, '発表年'), 'year'); add(labelIn(sf, '採集者'), 'collector');
+    add(labelIn(sf, 'タイプ産地'), 'locality'); add(labelIn(sf, '分布'), 'habitat');
+    add(labelIn(document.getElementById('clone-fields'), '名付けた人物'), 'namer');
+    add(labelIn(document.getElementById('hybrid-fields'), '作出者'), 'namer');
+    ['clone-fields', 'hybrid-fields', 'seedling-fields'].forEach(function (id) { add(labelIn(document.getElementById(id), '交配式'), 'cross'); });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.term-help');
+    if (!b) return;
+    // inside a radio's label: open the line, do not choose the radio
+    e.preventDefault(); e.stopPropagation();
+    var key = b.getAttribute('data-term'), t = TERMS[key];
+    if (!t) return;
+    var host = b.closest('.form-radio') || b.closest('label') || b.parentElement;
+    var tip = host.nextElementSibling && host.nextElementSibling.classList && host.nextElementSibling.classList.contains('term-tip') && host.nextElementSibling.getAttribute('data-term') === key ? host.nextElementSibling : null;
+    if (tip) { tip.remove(); b.setAttribute('aria-expanded', 'false'); return; }
+    tip = document.createElement('p');
+    tip.className = 'term-tip'; tip.setAttribute('data-term', key); tip.setAttribute('role', 'note');
+    tip.innerHTML = '<b></b>';
+    tip.firstChild.textContent = t[0];
+    tip.appendChild(document.createTextNode(' ' + t[1]));
+    host.insertAdjacentElement('afterend', tip);
+    b.setAttribute('aria-expanded', 'true');
+    if (typeof gtag === 'function') gtag('event', 'term_help', { term: key });
+  }, true);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
+  document.addEventListener('ao:page', function (e) { if (e.detail === 'contribute') setTimeout(wire, 0); });
 })();

@@ -65,9 +65,12 @@
 
       _optionsEl.addEventListener('change', function(e) {
         if (e.target.name === 'delete-reason') {
-          // the textarea starts with the d-none class; style.display alone could never show it
-          _detailEl.classList.toggle('d-none', e.target.value !== 'other');
-          if (e.target.value === 'other') _detailEl.focus();
+          // the textarea starts with the d-none class; style.display alone could never show it.
+          // 11-27: 誤った情報 and 重複 ask what is wrong too, or the report cannot be acted on
+          var ask = DETAIL_ASK[e.target.value];
+          _detailEl.classList.toggle('d-none', !ask);
+          if (_detailNote) _detailNote.classList.toggle('d-none', !ask);
+          if (ask) { _detailEl.placeholder = ask.ph; _detailEl.focus(); }
         }
       });
 
@@ -85,8 +88,9 @@
         var selected = _dialog.querySelector('input[name="delete-reason"]:checked');
         if (!selected) { showToast('理由を選択してください', true); return; }
         var reason = selected.value;
-        var reasonDetail = reason === 'other' ? _detailEl.value.trim() : null;
-        if (reason === 'other' && !reasonDetail) { showToast('詳細を入力してください', true); return; }
+        var ask = DETAIL_ASK[reason];
+        var reasonDetail = ask ? (_detailEl.value.trim() || null) : null;
+        if (ask && ask.required && !reasonDetail) { showToast(ask.need, true); _detailEl.focus(); return; }
 
         var sbClient = window._supabaseClient;
         if (!sbClient) { showToast('データベース接続エラー', true); return; }
@@ -116,6 +120,16 @@
         });
       });
     }
+
+    // reasons that open the box: what it asks, and whether it may be left empty
+    var DETAIL_ASK = {
+      wrong_info: { required: true, ph: 'どこが違いますか？（例: 交配式が逆。作出者の Instagram では A × B と書いています）。正しい情報や出典のリンクがあれば添えてください', need: 'どこが違うかを、ひとことでも書いてください' },
+      duplicate: { required: false, ph: 'どの名前と同じですか？（任意）', need: '' },
+      irrelevant: { required: false, ph: 'どこが違いますか？（任意）', need: '' },
+      copyright: { required: false, ph: 'もとの写真の場所（リンク）や、撮った人がわかれば書いてください（任意）', need: '' },
+      other: { required: true, ph: '詳細を入力...', need: '詳細を入力してください' }
+    };
+    var _detailNote = null;
 
     var cultivarReasons = [
       { value: 'duplicate', label: '重複している品種' },
@@ -157,6 +171,13 @@
       _detailEl.classList.add('d-none');
       _detailEl.style.display = '';
       _detailEl.value = '';
+      if (!_detailNote) {
+        _detailNote = document.createElement('p');
+        _detailNote.className = 'dialog-detail-note text-xs text-muted d-none';
+        _detailNote.textContent = '書いた内容は管理者だけが読みます。直すときの手がかりにします。';
+        _detailEl.insertAdjacentElement('afterend', _detailNote);
+      }
+      _detailNote.classList.add('d-none');
       _dialog.showModal();
     }
 

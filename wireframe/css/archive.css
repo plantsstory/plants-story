@@ -2525,3 +2525,20 @@ html.pv-label .story__figure { aspect-ratio: auto; max-height: none; }
 html.pv-label .story__figure a { height: auto; }
 html.pv-label .story__figure img { height: auto; aspect-ratio: 4 / 5; max-height: 72svh; object-fit: contain; }
 @media (min-width: 641px) { html.pv-label .story__figure img { max-height: 78vh; } }
+
+/* 11-27 posting help: 「？」 beside a word, its line under it; the rarer qualifiers folded; a near name asked again */
+.term-help { display: inline-flex; align-items: center; justify-content: center; width: 1.35em; height: 1.35em; margin-left: .35em; padding: 0; border: 1px solid var(--color-rule); border-radius: 50%; background: transparent; color: var(--color-mid); font: inherit; font-size: .78em; line-height: 1; vertical-align: .1em; cursor: pointer; }
+.term-help[aria-expanded="true"] { background: var(--color-ink, #1f2a26); border-color: var(--color-ink, #1f2a26); color: var(--color-paper, #fff); }
+.term-tip { margin: var(--s1) 0 var(--s2); padding: var(--s2) var(--s3); border-left: 2px solid var(--color-rule); background: rgba(0,0,0,.03); font-size: var(--fs-small); line-height: 1.6; }
+.term-tip b { margin-right: .3em; }
+.subcat-lead { font-weight: normal; color: var(--color-mid); font-size: var(--fs-label); margin-left: .4em; }
+#species-subcategory:not(.is-open) .chip:not([data-subcategory="species"]) { display: none; }
+.subcat-more { display: block; margin: var(--s2) 0 0; padding: 0; border: 0; background: none; color: var(--color-mid); font: inherit; font-size: var(--fs-small); text-decoration: underline; cursor: pointer; }
+.subcat-more::after { content: ' ▾'; }
+.subcat-more[aria-expanded="true"]::after { content: ' ▴'; }
+.cstep-near { margin: var(--s3) 0 0; padding: var(--s2) var(--s3); border: 1px solid var(--color-rule); border-left: 3px solid #b5651d; font-size: var(--fs-small); }
+.cstep-near__q { margin: 0 0 var(--s1); font-weight: bold; }
+.cstep-near ul { margin: 0; padding-left: 1.2em; }
+.cstep-near li a { margin-left: .4em; }
+.cstep-near a { text-decoration: underline; text-underline-offset: 3px; color: inherit; cursor: pointer; }
+.cstep-near .cstep-fix { display: inline-block; margin-top: var(--s1); font-weight: bold; }

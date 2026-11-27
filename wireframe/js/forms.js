@@ -1462,6 +1462,15 @@ document.addEventListener('click', function(e) {
       currentType = currentType ? currentType.value : 'species';
       var dup = window.findContributeDuplicate(window.buildContributeFullName(genus, currentType, this.value.trim()), genus);
       var msgEl = duplicateAlert.querySelector('.text-sm.text-muted');
+      // the heading and the link follow what was found: 「もう登録」 only for the same name, and the link opens that page
+      var headEl = duplicateAlert.querySelector('[data-i18n="duplicate_found"]');
+      var linkEl = duplicateAlert.querySelector('a[data-nav="cultivar"]');
+      if (headEl) headEl.textContent = dup.exact ? (t('duplicate_found') || 'この品種は既に登録されています') : '似た名前があります';
+      if (linkEl) {
+        var target = dup.exact || (dup.near && dup.near[0]) || '';
+        if (target) linkEl.setAttribute('data-key', target); else linkEl.removeAttribute('data-key');
+        linkEl.textContent = dup.exact ? (t('go_to_page') || '品種ページへ移動 →') : '「' + target.replace(' [Seedling]', '') + '」のページを見る →';
+      }
       if (dup.exact) {
         duplicateAlert.style.display = 'block';
         duplicateAlert.setAttribute('data-kind', 'exact');
@@ -1469,7 +1478,7 @@ document.addEventListener('click', function(e) {
       } else if (dup.near.length) {
         duplicateAlert.style.display = 'block';
         duplicateAlert.setAttribute('data-kind', 'near');
-        if (msgEl) msgEl.textContent = '似た名前があります: ' + dup.near.map(function(n) { return '「' + n.replace(' [Seedling]', '') + '」'; }).join('') + '。同じ植物ならそのページへ。別の品種ならこのまま続けられます。';
+        if (msgEl) msgEl.textContent = dup.near.map(function(n) { return '「' + n.replace(' [Seedling]', '') + '」'; }).join('') + ' が収録されています。打ち間違いでなければ、このまま続けられます。';
       } else {
         duplicateAlert.style.display = 'none';
         duplicateAlert.removeAttribute('data-kind');
@@ -1601,16 +1610,15 @@ document.addEventListener('click', function(e) {
         return parts.join('. ') || '';
       }
 
-      // Hybrid formula validation
-      if (type === 'hybrid') {
-        var hf = getActiveFormula('hybrid');
-        if (!hf.a || !hf.b || !hf.a.value.trim() || !hf.b.value.trim()) {
-          showToast('ハイブリッドには交配式が必須です', true);
-          return;
-        }
-      }
-
+      // Hybrid parents: both parents, or what the person knows about them (親が不明 / 複合交配). 不明 ticks 親が不明
+      // by itself, so it must pass here too (11-27: it stopped at this last button)
       var structured = buildStructuredFromForm(type);
+      if (type === 'hybrid' && !structured.formula && !structured.formula_status) {
+        var hf = getActiveFormula('hybrid');
+        showFieldError(hf.a, '親を 2 つ入れるか、「親が不明」「複合交配」のどちらかを選んでください');
+        if (hf.a) hf.a.focus();
+        return;
+      }
 
       // ---- EDIT MODE: update existing record ----
       if (editMode && editCultivarKey) {
@@ -1801,6 +1809,8 @@ document.addEventListener('click', function(e) {
       // 原種 / Hybrid / 不明 is kept as a tag on Hybrid and Clone rows (11-25)
       var kindTags = window.aoKindTags ? window.aoKindTags(type) : [];
       if (kindTags.length) newEntry._tags = kindTags;
+      // 親が不明 / 複合交配 is a fact about the row (the record gate reads formula_status), not only a word in the origin
+      if (type === 'hybrid' && structured.formula_status) newEntry._formulaStatus = structured.formula_status;
       var autoBody = generateBodyFromStructured(structured);
       // Check if structured has any meaningful content
       var hasStructuredContent = autoBody || structured.notes || (structured.formula && structured.formula.parentA);
@@ -2006,7 +2016,7 @@ document.addEventListener('click', function(e) {
       // After parent photos are ready, save to DB, upload gallery images, then update UI
       photoUploadPromise.then(function() {
         var _privEl = document.getElementById('seedling-private');
-        return addUserCultivar(fullName, newEntry, { genus: genus, type: type, is_private: type === 'seedling' && _privEl ? !!_privEl.checked : false, meta: newEntry._tags ? { tags: newEntry._tags } : null });
+        return addUserCultivar(fullName, newEntry, { genus: genus, type: type, is_private: type === 'seedling' && _privEl ? !!_privEl.checked : false, meta: (newEntry._tags || newEntry._formulaStatus) ? Object.assign({}, newEntry._tags ? { tags: newEntry._tags } : {}, newEntry._formulaStatus ? { formula_status: newEntry._formulaStatus } : {}) : null });
       }).then(function() {
         // Upload gallery images after DB record exists
         if (galleryFiles.length > 0 && typeof window.uploadGalleryImage === 'function') {
