@@ -2722,6 +2722,11 @@ if (false) {
         // researched later through an admin-approved request; seedlings never are.
         var isIndividual = !!(meta.meta && meta.meta.tags && meta.meta.tags.indexOf('individual') !== -1);
         var autoResearch = meta.type === 'clone' && !isIndividual;
+        // 写真と名前だけ (quick_post) of a Hybrid, 不明 or a species: researched too once AUTO_RESEARCH_QUICK_POSTS
+        // is turned on (prepared 2026-11-27, OFF until the owner decides; about ¥2–9 a post, inside the monthly
+        // budget and the daily caps the research function already keeps)
+        var isQuick = !!(meta.meta && meta.meta.tags && meta.meta.tags.indexOf('quick_post') !== -1);
+        if (AUTO_RESEARCH_QUICK_POSTS && isQuick && !isIndividual && (meta.type === 'hybrid' || meta.type === 'species')) autoResearch = true;
         if (autoResearch) {
           var insertedId = rpcResult && rpcResult.id;
           if (insertedId) {
@@ -2749,6 +2754,8 @@ if (false) {
   };
 
   // ========== AI Research Functions ==========
+  // OFF: the quick-post research above waits for the owner (2026-11-27). true turns it on, nothing else changes
+  var AUTO_RESEARCH_QUICK_POSTS = false;
   var EDGE_FUNCTION_URL = 'https://jpgbehsrglsiwijglhjo.supabase.co/functions/v1/research-origin';
   var aiPollingTimers = {};
 
