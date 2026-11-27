@@ -986,6 +986,9 @@ if ('scrollRestoration' in history) {
 // Handle browser back/forward
 window.addEventListener('popstate', function(e) {
   var state = e.state || parseRoute();
+  // a step of the posting form going back or forward is the same page: the form keeps what was typed and the
+  // photos (archive.js shows the step). Going through navigateTo would empty it (owner, 11-27)
+  if (state.page === 'contribute' && state.cstep && _currentPageId === 'contribute') return;
   if (state.page === 'search' && state.q) state._fromRoute = true;
   _isPopstate = true;
   navigateTo(state.page, state, false);

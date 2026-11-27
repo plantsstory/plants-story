@@ -3611,8 +3611,9 @@ document.addEventListener('click', function(e) {
   window.clearContributeDraft = function() { try { localStorage.removeItem(KEY); } catch (e) {} var n = document.getElementById('draft-note'); if (n) n.remove(); };
   window.restoreContributeDraft = function() {
     if (editing()) return false;
-    if (window._draftRestoredOnce) return false;   // once per page load: stepping back does not re-announce it (R4)
-    window._draftRestoredOnce = true;
+    // every fresh visit to the form brings the draft back (11-27: it used to be once per page load, so leaving the
+    // form and coming back left it empty). Stepping back no longer empties the form, and an empty form is the only
+    // one a draft is put into
     var data = null;
     try { data = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
     if (!data || !data.fields || Date.now() - (data.savedAt || 0) > 30 * 24 * 3600 * 1000) return false;

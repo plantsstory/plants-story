@@ -318,6 +318,7 @@
   "わからないことが多いときは、写真と名前だけで投稿する": "If you don't know much, post with just a photo and a name",
   "属": "Genus",
   "わからない所は空けたままで大丈夫です。区分や由来は、詳しい人や管理者があとで確かめて足します。写真があると確かめやすくなります。": "Leave blank whatever you don't know. Knowledgeable people or an administrator will check and add the kind and origin later. A photo makes checking easier.",
+  "わからない所は空けたままで大丈夫です。区分や由来は、詳しい人や管理者があとで確かめて足します。": "Leave blank whatever you don't know. Knowledgeable people or an administrator will check and add the kind and origin later.",
   "由来もわかるので、ふつうに書く": "I know the origin too, so fill it in normally",
   "写真を選ぶ・撮る · 3 枚まで（あとから足せます）": "Choose or take photos · up to 3 (more can be added later)",
   "🗑 この品種を削除": "🗑 Delete this plant",
@@ -355,6 +356,10 @@
   "交配親（わかれば）": "Parents (if known)",
   "ラベルに「crystallinum × magnificum」のように親が書いてあれば、2 つとも入れてください。わからなければ空けたままで大丈夫です。": "If the label gives the parents, like \"crystallinum × magnificum\", enter both. If you don't know them, leave this blank.",
   "由来と写真": "Origin and photos",
+  "名前と写真": "Name and photos",
+  "由来": "Origin",
+  "由来と交配親": "Origin and parents",
+  "株の写真": "Photos of the plant",
   "確認": "Review"
  },
  "rules": [

@@ -3296,9 +3296,10 @@
     l.style.display = 'none'; document.body.appendChild(l); l.click(); l.remove();
   });
 
-  // ---- posting in three steps (owner, 11-21; it was five): 名前（どんな名前か＋名前）→ 由来と写真 → 確認.
+  // ---- posting in three steps (owner, 11-21; it was five): 名前と写真 → 由来（と交配親）→ 確認.
+  //      The plant's own photos sit with its name (owner, 11-27: under the parents they read as the parents' photos).
   //      A seedling is chosen before the form opens, so it starts at the second step: 記録 → 確認 ----
-  var STEPS = ['名前', '由来と写真', '確認'];
+  var STEPS = ['名前と写真', '由来', '確認'];
   var LAST = 3;
   function isSeedling() { return ((document.querySelector('#page-contribute input[name="cultivar-type"]:checked') || {}).value) === 'seedling'; }
   var step = 1, built = false;
@@ -3326,10 +3327,12 @@
     genusGroup.setAttribute('data-cstep', '1'); nameGroup.setAttribute('data-cstep', '1');
     infoCard.setAttribute('data-cstep', '1');
     Array.prototype.forEach.call(infoCard.children, function (c) { if (!c.hasAttribute('data-cstep')) c.setAttribute('data-cstep', '1'); });
-    // the second step: what is known first (the words, the fields), then the photos
+    // the plant's photos come right after its name, on the first step; the second step is the origin and the parents
     originCard.setAttribute('data-cstep', '2');
-    originCard.insertAdjacentElement('afterend', imgCard);
-    imgCard.setAttribute('data-cstep', '2');
+    infoCard.insertAdjacentElement('afterend', imgCard);
+    imgCard.setAttribute('data-cstep', '1');
+    var imgHead = imgCard.querySelector('h2');
+    if (imgHead) { imgHead.removeAttribute('data-i18n'); imgHead.textContent = '株の写真'; }
     // the last step: a label of what will be recorded, then the existing submit button
     var review = document.createElement('div');
     review.className = 'cstep-review'; review.id = 'cstep-review'; review.setAttribute('data-cstep', '3');
@@ -3350,7 +3353,12 @@
     });
     $('cstep-next').addEventListener('click', function () {
       if (step === LAST) { var sbtn = $('contribute-submit-btn'); if (sbtn) sbtn.click(); return; }
-      if (check(step)) go(step + 1, true);
+      if (!check(step)) return;
+      // what is on screen is kept as a draft each time the person moves on (owner, 11-27)
+      if (typeof window.saveContributeDraft === 'function') window.saveContributeDraft();
+      // 写真と名前だけ for a wild species: nothing is asked on the second step, so it goes straight to the check
+      var skip = step === 1 && window.aoQuickPost && window.aoQuickPost() && ctype() === 'species';
+      go(skip ? LAST : step + 1, true);
     });
     // the kind and the name share the first step: choosing a kind only changes the name's fields below it.
     // A seedling has no first step (its name comes from the cross on the second)
@@ -3533,7 +3541,10 @@
       el.classList.toggle('cstep-off', !show);
     });
     $('cstep-count').textContent = (n - first + 1) + ' / ' + (LAST - first + 1);
-    $('cstep-name').textContent = seed && n === 2 ? '記録' : STEPS[n - 1];
+    $('cstep-name').textContent = seed && n === 2 ? '記録' : n === 2 && ctype() !== 'species' ? '由来と交配親' : STEPS[n - 1];
+    // a seedling's name comes from its cross, so its photos come after the cross; any other kind has them under the name
+    var ic = $('contribute-upload-area') && $('contribute-upload-area').closest('.card'), oc = $('origin-card');
+    if (ic && oc) { if (seed && oc.nextElementSibling !== ic) oc.insertAdjacentElement('afterend', ic); else if (!seed && ic.nextElementSibling !== oc) oc.insertAdjacentElement('beforebegin', ic); }
     Array.prototype.forEach.call($('cstep-head').querySelectorAll('li'), function (li, i) { li.classList.toggle('is-done', i < n); li.hidden = seed && i === 0; });
     $('cstep-back').textContent = n === first ? 'やめる' : '戻る';
     // the last step: the bar's main button records (the form's own submit button is hidden while stepped)
@@ -4311,19 +4322,22 @@
   function build(tries) {
     var p = pg(); if (!p || $('nf-quick')) return;
     if (!p.classList.contains('contribute--stepped')) { if ((tries || 0) < 20) setTimeout(function () { build((tries || 0) + 1); }, 150); return; }
-    var nb = $('name-builder'); if (!nb) return;
-    // the way in sits under the name, which it needs first
+    var img = $('contribute-upload-area'), card = img && img.closest('.card'), origin = $('origin-card');
+    if (!card || !origin) return;
+    // the way in comes after the name and the photos, the two things it records
     var q = document.createElement('p');
-    q.className = 'nf-quick';
+    q.className = 'nf-quick'; q.setAttribute('data-cstep', '1');
     q.innerHTML = '<button type="button" class="nf-link" id="nf-quick">わからないことが多いときは、写真と名前だけで投稿する</button>';
-    nb.appendChild(q);
-    // the second step in 写真と名前だけ: what happens to the record, said once above the photos
-    var img = $('contribute-upload-area'), card = img && img.closest('.card');
-    if (card && !$('quick-note')) {
+    card.appendChild(q);
+    // the second step in 写真と名前だけ (a Hybrid, Clone or 不明 name): what happens to the record, and the parents if known
+    if (!$('quick-note')) {
+      var box = document.createElement('div');
+      box.className = 'quick-box'; box.id = 'quick-box'; box.setAttribute('data-cstep', '2');
+      origin.insertAdjacentElement('beforebegin', box);
       var n = document.createElement('p');
       n.className = 'quick-note'; n.id = 'quick-note';
-      n.textContent = 'わからない所は空けたままで大丈夫です。区分や由来は、詳しい人や管理者があとで確かめて足します。写真があると確かめやすくなります。';
-      card.insertBefore(n, card.firstChild.nextSibling);
+      n.textContent = 'わからない所は空けたままで大丈夫です。区分や由来は、詳しい人や管理者があとで確かめて足します。';
+      box.appendChild(n);
       var back = document.createElement('p');
       back.className = 'quick-back'; back.id = 'quick-back';
       back.innerHTML = '<button type="button" class="nf-link" id="quick-off">由来もわかるので、ふつうに書く</button>';
