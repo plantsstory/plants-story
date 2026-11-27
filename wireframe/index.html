@@ -607,8 +607,9 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label type-q">どんな名前ですか</label>
-          <!-- 11-25 (owner): what the plant comes from, and Clone as a tick. The hidden radios below stay the form's state -->
+          <label class="form-label type-q">1. どんな名前ですか</label>
+          <!-- 11-25 (owner): what the plant comes from, and Clone as a second question (11-27: it read as a fourth choice
+               when it was a tick under the three). The hidden radios below stay the form's state -->
           <div class="form-radio-group kind-axis">
             <label class="form-radio">
               <input type="radio" name="cultivar-parentage" value="species" checked>
@@ -626,11 +627,16 @@
               <span class="type-def">どちらとも書いた出典がない名前。推測で Hybrid にはしません。例: 'Ace of Spades'</span>
             </label>
           </div>
-          <label class="form-radio kind-clone">
-            <input type="checkbox" id="kind-clone">
-            <span class="type-head"><span class="type-lead">1 株だけの名前</span><span class="type-term">Clone</span></span>
-            <span class="type-def">1 株と、その株分け・組織培養で増えた株だけが名乗る名前。原種・Hybrid・不明のどれにも付けられます。例: 'King of Spades'</span>
-          </label>
+          <!-- the yes / no below sets this box, which the rest of the form reads (forms.js kindAxes) -->
+          <div class="kind-clone" id="kind-clone-q">
+            <input type="checkbox" id="kind-clone" hidden>
+            <p class="form-label type-q">2. 1 株だけの名前（Clone）ですか</p>
+            <p class="type-def">1 株と、その株分け・組織培養で増えた株だけが名乗る名前なら「はい」。原種なら、番号や名前をつけた 1 株（ナンバリング個体）です。例: 'King of Spades'、papillilaminum 'Fort Sherman'</p>
+            <div class="form-radio-group kind-clone-yn">
+              <label class="form-radio"><input type="radio" name="kind-clone-yn" value="no" checked><span class="type-head"><span class="type-lead">いいえ</span></span></label>
+              <label class="form-radio"><input type="radio" name="kind-clone-yn" value="yes"><span class="type-head"><span class="type-lead">はい</span><span class="type-term">Clone</span></span></label>
+            </div>
+          </div>
           <div class="kind-legacy d-none" hidden>
           <div class="form-radio-group">
             <label class="form-radio">
@@ -655,7 +661,7 @@
             </label>
           </div>
           </div>
-          <p class="type-def type-def--hint">迷ったら「不明」を選んでください。名前はふつう、もとの 1 株を指します。作出者が「何株もの株の名前」と書いていなければ Clone にチェックを入れます。あとから直せます。</p>
+          <p class="type-def type-def--hint">迷ったら「不明」を選んでください。名前はふつう、もとの 1 株を指します。作出者が「何株もの株の名前」と書いていなければ、2 で「はい」を選びます。あとから直せます。</p>
           <p class="type-other" id="type-other">原種の 1 株に番号や名前をつけたときは<button type="button" data-type-other="individual">ナンバリング個体として記録</button>すると、その原種のページにもまとまります。自分で播いた株は<button type="button" data-type-other="seedling">実生として記録</button>します。</p>
         </div>
       </div>

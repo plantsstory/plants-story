@@ -2410,7 +2410,8 @@ html.pv-label.app-ui body.menu-open .appbar__item[aria-current="page"] { box-sha
 #page-contribute.contribute--stepped[data-ctype="seedling"] .type-other,
 #page-contribute.contribute--stepped[data-ctype="seedling"] .kind-clone { display: none !important; }
 /* 11-25: Clone is a tick under the three kinds, set apart by a rule */
-#page-contribute .kind-clone { margin-top: var(--s2); padding-top: var(--s3); border-top: 1px dashed var(--color-rule); }
+#page-contribute .kind-clone { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px dashed var(--color-rule); }  /* 11-27: question 2 */
+#page-contribute .kind-clone > .type-def { margin: 0 0 var(--s2); }
 #page-contribute .kind-legacy, #page-contribute .kind-legacy[hidden] { display: none !important; }
 /* the name sits right under the kind on the first step */
 #page-contribute.contribute--stepped #name-builder { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--color-rule); }

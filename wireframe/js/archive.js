@@ -2303,7 +2303,8 @@
         else if (q === 'ssp' || q === 'var') name = ep && ex ? ep + ' ' + q + '. ' + clean(ex).toLowerCase() : (ep || '');
         else name = joinParts2([ep, quoteD(ex)]);
       } else if (type === 'clone') {
-        var cn = quoteS(cultivarName.value), ep2 = clean(epithet.value).toLowerCase().replace(/\s+/g, '');
+        var par2 = (document.querySelector('#page-contribute input[name="cultivar-parentage"]:checked') || {}).value || 'species';
+        var cn = quoteS(cultivarName.value), ep2 = par2 === 'species' ? clean(epithet.value).toLowerCase().replace(/\s+/g, '') : '';   // the epithet field is hidden for a Hybrid / 不明 Clone
         name = cn ? joinParts2([ep2, cn]) : '';
       } else if (type === 'hybrid') {
         name = quoteS(cultivarName.value);
@@ -2324,15 +2325,17 @@
 
     function refreshVisibility() {
       var type = currentType(), q = qualifier();
+      var pg0 = $('page-contribute'), par = (document.querySelector('#page-contribute input[name="cultivar-parentage"]:checked') || {}).value || 'species';
+      if (pg0) pg0.setAttribute('data-parentage', par);
       document.querySelectorAll('#name-builder [data-for]').forEach(function (el) {
         var ok = el.getAttribute('data-for').split(' ').indexOf(type) !== -1;
         if (el.id === 'nb-epithet-row' && type === 'species' && q === 'sp') ok = false;
+        // a Hybrid or 不明 Clone has no species epithet (owner, 11-27): only 原種 + Clone asks it
+        if (el.id === 'nb-epithet-row' && type === 'clone' && par !== 'species') ok = false;
         el.hidden = !ok;
       });
       // 原種 + Clone (a numbered plant of a species): the epithet is asked first and may be left blank; the clone's
       // name or number comes second (owner, 11-27). Hybrid / 不明 + Clone keep the clone's name first (CSS).
-      var pg0 = $('page-contribute'), par = (document.querySelector('#page-contribute input[name="cultivar-parentage"]:checked') || {}).value || 'species';
-      if (pg0) pg0.setAttribute('data-parentage', par);
       var spClone = type === 'clone' && par === 'species';
       if (epithetLabel) epithetLabel.textContent = spClone ? T('nb_epithet_species_clone') : type === 'clone' ? T('nb_epithet_optional') : T('nb_epithet');
       if (epithet) epithet.placeholder = spClone ? '例: papillilaminum' : '例: crystallinum';
@@ -2376,7 +2379,7 @@
     });
     // 原種 ⇄ Hybrid / 不明 with Clone ticked keeps the type 'clone': the labels and the order follow the parentage too
     document.querySelectorAll('#page-contribute input[name="cultivar-parentage"]').forEach(function (r) {
-      r.addEventListener('change', function () { setTimeout(refreshVisibility, 0); });
+      r.addEventListener('change', function () { setTimeout(function () { refreshVisibility(); if (!seeded) compose(); }, 0); });
     });
     var genusSel = $('contribute-genus-select');
     if (genusSel) genusSel.addEventListener('change', function () { if (!seeded) compose(); });

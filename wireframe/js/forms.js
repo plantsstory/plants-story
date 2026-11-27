@@ -848,12 +848,12 @@ document.addEventListener('click', function(e) {
     if (contributeGenus) contributeGenus.disabled = true;
     if (contributeName) contributeName.disabled = true;
     // Disable type radios
-    document.querySelectorAll('#page-contribute input[name="cultivar-type"], #page-contribute input[name="cultivar-parentage"], #kind-clone').forEach(function(r) { r.disabled = true; });
+    document.querySelectorAll('#page-contribute input[name="cultivar-type"], #page-contribute input[name="cultivar-parentage"], #kind-clone, #page-contribute input[name="kind-clone-yn"]').forEach(function(r) { r.disabled = true; });
 
     // Unlock genus, name, type fields
     if (contributeGenus) contributeGenus.disabled = false;
     if (contributeName) contributeName.disabled = false;
-    document.querySelectorAll('#page-contribute input[name="cultivar-type"], #page-contribute input[name="cultivar-parentage"], #kind-clone').forEach(function(r) { r.disabled = false; });
+    document.querySelectorAll('#page-contribute input[name="cultivar-type"], #page-contribute input[name="cultivar-parentage"], #kind-clone, #page-contribute input[name="kind-clone-yn"]').forEach(function(r) { r.disabled = false; });
 
     // Show delete button in edit mode
     var editDeleteBtn = document.getElementById('edit-delete-btn');
@@ -874,7 +874,7 @@ document.addEventListener('click', function(e) {
     // Re-enable fields
     if (contributeGenus) contributeGenus.disabled = false;
     if (contributeName) contributeName.disabled = false;
-    document.querySelectorAll('#page-contribute input[name="cultivar-type"], #page-contribute input[name="cultivar-parentage"], #kind-clone').forEach(function(r) { r.disabled = false; });
+    document.querySelectorAll('#page-contribute input[name="cultivar-type"], #page-contribute input[name="cultivar-parentage"], #kind-clone, #page-contribute input[name="kind-clone-yn"]').forEach(function(r) { r.disabled = false; });
 
     // Reset form
     if (contributeName) contributeName.value = '';
@@ -1228,14 +1228,26 @@ document.addEventListener('click', function(e) {
       else if (hu && autoHu && (c.parentage !== 'unknown' || c.clone)) { hu.checked = false; autoHu = false; }
     }
     var autoHu = false;
+    // question 2 (はい / いいえ) is the box's face: a choice there sets the box; the box set from elsewhere shows there
+    var yn = page.querySelectorAll('input[name="kind-clone-yn"]');
+    function showYn() { yn.forEach(function (r) { r.checked = (r.value === 'yes') === !!cloneBox.checked; }); }
+    yn.forEach(function (r) {
+      r.addEventListener('change', function () {
+        if (!r.checked) return;
+        cloneBox.checked = r.value === 'yes';
+        cloneBox.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+    });
     page.querySelectorAll('input[name="cultivar-parentage"]').forEach(function (r) { r.addEventListener('change', apply); });
     cloneBox.addEventListener('change', apply);
+    cloneBox.addEventListener('change', showYn);
     page.querySelectorAll('input[name="cultivar-type"]').forEach(function (r) {
       r.addEventListener('change', function () {
         if (syncing || !r.checked) return;
         if (r.value === 'species') { setParentage('species'); cloneBox.checked = false; }
         else if (r.value === 'hybrid') { if (choice().parentage === 'species') setParentage('hybrid'); cloneBox.checked = false; }
         else if (r.value === 'clone') cloneBox.checked = true;
+        showYn();
       });
     });
     // what the review shows, and the tag the record keeps
@@ -1247,8 +1259,9 @@ document.addEventListener('click', function(e) {
     };
     window.aoKindTags = function (type) { return type === 'clone' || type === 'hybrid' ? ['parentage:' + choice().parentage] : []; };
     // an edit shows the stored kind (the controls are locked then, like the type radios)
-    window.aoSetKind = function (parentage, clone) { setParentage(parentage || 'species'); cloneBox.checked = !!clone; };
+    window.aoSetKind = function (parentage, clone) { setParentage(parentage || 'species'); cloneBox.checked = !!clone; showYn(); };
     setParentage(choice().parentage);
+    showYn();
   })();
 
   // Helper: get selected species subcategory
