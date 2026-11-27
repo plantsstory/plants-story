@@ -2566,3 +2566,11 @@ html.pv-label .story__figure img { height: auto; aspect-ratio: 4 / 5; max-height
 /* what was set aside from the epithet (author names, nov., f.) */
 .nb-tidy { margin: var(--s1) 0 0; font-size: var(--fs-small); line-height: 1.6; color: var(--color-mid); }
 .namecheck__btn { font: inherit; font-weight: bold; padding: 2px 10px; margin-left: .3em; border: 1px solid currentColor; background: transparent; color: inherit; cursor: pointer; border-radius: 2px; }
+/* names already in the archive, under the name field being typed (11-27) */
+.nb-hits { margin-top: var(--s2); padding: var(--s2) var(--s3); border: 1px solid var(--color-rule); font-size: var(--fs-small); }
+.nb-hits__q { margin: 0 0 var(--s1); font-weight: bold; }
+.nb-hits ul { list-style: none; margin: 0; padding: 0; }
+.nb-hits li a { display: flex; flex-wrap: wrap; gap: .2em .6em; align-items: baseline; justify-content: space-between; padding: .45em 0; border-bottom: 1px solid var(--color-rule); color: inherit; text-decoration: none; }
+.nb-hits__go { color: var(--color-text-muted); text-decoration: underline; text-underline-offset: 3px; }
+.nb-hits__note { margin: var(--s1) 0 0; color: var(--color-text-muted); }
+.nb-hits__kind { color: var(--color-text-muted); font-size: var(--fs-xs, .85em); }

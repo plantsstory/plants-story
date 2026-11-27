@@ -4372,3 +4372,78 @@
   document.addEventListener('ao:page', function (e) { if (e.detail === 'contribute') setTimeout(reset, 60); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(build, 300); }); else setTimeout(build, 300);
 })();
+
+/* ============================================================
+   Names already in the archive, under the name field being typed (owner, 11-27: kept from the label box that was
+   taken out). From three letters: names of the chosen genus that hold what is typed, or are a letter or two from it.
+   The same name is left to the duplicate note under the registered name; this list is for finding it before that.
+   ============================================================ */
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var FIELDS = ['nb-epithet', 'nb-cultivar'];
+  var KIND = { species: '原種', hybrid: 'Hybrid', clone: 'Clone', seedling: '実生' };
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function data() { return window.cultivarData || (typeof cultivarData !== 'undefined' ? cultivarData : null); }
+  function editing() { return typeof window.isContributeEditMode === 'function' && window.isContributeEditMode(); }
+  function hits(raw) {
+    var d = data(), fold = window.foldName;
+    if (!d || !fold || !window.nameMatches) return [];
+    var q = fold(raw);
+    if (q.length < 3) return [];
+    var G = ($('contribute-genus-select') || {}).value || '', g = G.toLowerCase(), reg = (($('cultivar-name-input') || {}).value || '').trim();
+    var type = (document.querySelector('#page-contribute input[name="cultivar-type"]:checked') || {}).value || 'species';
+    // what the duplicate note under the registered name already names (the same name, or a letter off) is not listed twice
+    var dup = reg && window.findContributeDuplicate && window.buildContributeFullName ? window.findContributeDuplicate(window.buildContributeFullName(G, type, reg), G) : null;
+    var shown = dup ? [dup.exact].concat(dup.near || []).filter(Boolean) : [];
+    var out = [], near = [];
+    Object.keys(d).forEach(function (name) {
+      var e = d[name] || {};
+      if (e._isPrivate || shown.indexOf(name) !== -1) return;
+      if (g && name.toLowerCase().indexOf(g + ' ') !== 0) return;
+      var item = { fullName: name, entry: e };
+      if (window.nameMatches(item, raw)) out.push(name);
+      else if (window.nameNearly && window.nameNearly(item, raw)) near.push(name);
+    });
+    out.sort(function (a, b) { return a.length - b.length || (a < b ? -1 : 1); });
+    return out.concat(near).slice(0, 5);
+  }
+  function box(field) {
+    var b = $('nb-hits');
+    if (!b) { b = document.createElement('div'); b.className = 'nb-hits'; b.id = 'nb-hits'; b.setAttribute('aria-live', 'polite'); }
+    if (b.previousElementSibling !== field) field.insertAdjacentElement('afterend', b);
+    return b;
+  }
+  function hide() { var b = $('nb-hits'); if (b) { b.hidden = true; b.innerHTML = ''; } }
+  function draw(field) {
+    if (editing()) { hide(); return; }
+    var hs = hits(field.value);
+    if (!hs.length) { hide(); return; }
+    var b = box(field);
+    b.innerHTML = '<p class="nb-hits__q">登録済みの名前</p><ul>' + hs.map(function (n) {
+      var short = n.replace(/^\S+\s+/, '').replace(' [Seedling]', '');
+      return '<li><a href="#" data-nav="cultivar" data-key="' + esc(n) + '"><span><i>' + esc(short) + '</i> <span class="nb-hits__kind">' + esc(KIND[String((data()[n] || {})._type || '').toLowerCase()] || '') + '</span></span><span class="nb-hits__go">写真や記録を足す →</span></a></li>';
+    }).join('') + '</ul><p class="nb-hits__note">同じ植物なら、新しく登録せずに、そのページから写真や記録を足せます。</p>';
+    b.hidden = false;
+  }
+  var timer = null;
+  document.addEventListener('input', function (e) {
+    var f = e.target;
+    if (!f || FIELDS.indexOf(f.id) === -1) return;
+    clearTimeout(timer);
+    timer = setTimeout(function () { draw(f); }, 150);
+  });
+  // another field, another kind or a fresh visit: the list goes
+  document.addEventListener('focusin', function (e) {
+    var f = e.target, b = $('nb-hits');
+    if (!b || b.hidden || !f || !f.id) return;
+    if (FIELDS.indexOf(f.id) !== -1) { if (b.previousElementSibling !== f) draw(f); return; }
+    if (b.contains(f)) return;
+    if (f.closest && f.closest('#page-contribute') && /^(INPUT|TEXTAREA|SELECT)$/.test(f.tagName) && f.type !== 'radio') hide();
+  });
+  document.addEventListener('change', function (e) {
+    var n = e.target && e.target.name;
+    if (n === 'cultivar-type' || n === 'cultivar-parentage' || (e.target && e.target.id === 'contribute-genus-select')) hide();
+  });
+  document.addEventListener('ao:page', function (e) { if (e.detail === 'contribute') hide(); });
+})();
