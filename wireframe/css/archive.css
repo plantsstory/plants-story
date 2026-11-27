@@ -2562,10 +2562,13 @@ html.pv-label .story__figure img { height: auto; aspect-ratio: 4 / 5; max-height
 .nf-summary { margin: var(--s2) 0 0; font-size: var(--fs-small); }
 .nf-quick { margin: var(--s3) 0 0; font-size: var(--fs-small); }
 #page-contribute.nf-applied .kind-group { display: none; }
-#quick-note, #quick-back { display: none; }
+#quick-note, #quick-back, #quick-parents { display: none; }
 #page-contribute.contribute--quick #quick-note { display: block; margin: 0 0 var(--s2); font-size: var(--fs-small); padding: var(--s2) var(--s3); border-left: 3px solid #b5651d; background: var(--surface-1, rgba(0,0,0,.03)); }
 #page-contribute.contribute--quick #quick-back { display: block; margin: 0 0 var(--s3); font-size: var(--fs-small); }
 #page-contribute.contribute--quick #origin-card { display: none; }
+/* the parents (optional) in 写真と名前だけ, for a name that is not a wild species (item 3, 11-27) */
+#page-contribute.contribute--quick:not([data-ctype="species"]) #quick-parents { display: block; margin: 0 0 var(--s3); }
+#quick-parents .formula-box { margin-top: var(--s1); }
 .cstep-quick { margin: var(--s3) 0 0; padding: var(--s2) var(--s3); border-left: 3px solid #b5651d; font-size: var(--fs-small); }
 
 /* scientific-name check under the epithet field (item 2, 11-27): a note, never a stop */

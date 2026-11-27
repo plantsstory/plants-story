@@ -337,7 +337,11 @@
   "由来の用語集 - Aroid Origins": "Glossary of origins - Aroid Origins",
   "料金とサービス内容 - Aroid Origins": "Pricing and services - Aroid Origins",
   "名前の違い — 似た名前の別の植物 | Aroid Origins": "Names that differ — different plants with similar names | Aroid Origins",
-  "何を記録しますか": "What would you like to record?"
+  "何を記録しますか": "What would you like to record?",
+  "交配親（わかれば）": "Parents (if known)",
+  "ラベルに「crystallinum × magnificum」のように親が書いてあれば、2 つとも入れてください。わからなければ空けたままで大丈夫です。": "If the label gives the parents, like \"crystallinum × magnificum\", enter both. If you don't know them, leave this blank.",
+  "由来と写真": "Origin and photos",
+  "確認": "Review"
  },
  "rules": [
   [

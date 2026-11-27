@@ -4130,7 +4130,7 @@
         p.classList.add('nf-applied');
         var s = $('nf-summary');
         if (s) {
-          var en = lang() === 'en';
+          var en = window.currentLang === 'en';
           var labelEn = parentage === 'species' ? (clone ? 'Species, numbered plant (Clone)' : 'Species') : (parentage === 'hybrid' ? 'Hybrid' : 'Unknown') + (clone && parentage !== 'species' ? ', Clone' : '');
           s.innerHTML = en ? 'Kind set to <b>' + esc(labelEn) + '</b>. <button type="button" class="nf-link" data-nf-pick>Choose again</button>'
             : '区分は<b>「' + esc(label) + '」</b>にしました。 <button type="button" class="nf-link" data-nf-pick>選び直す</button>';
@@ -4187,6 +4187,15 @@
       back.className = 'quick-back'; back.id = 'quick-back';
       back.innerHTML = '<button type="button" class="nf-link" id="quick-off">由来もわかるので、ふつうに書く</button>';
       n.insertAdjacentElement('afterend', back);
+      // the parents, when the label or the seller gives them (item 3, 11-27). Optional; written into the cross
+      // fields the full form uses, so they are saved the same way. A wild species has no parents: not asked then
+      var qp = document.createElement('div');
+      qp.className = 'quick-parents'; qp.id = 'quick-parents';
+      qp.innerHTML = '<label class="form-label" for="qp-a">交配親（わかれば）</label>'
+        + '<div class="formula-box"><input type="text" class="form-input flex-1" id="qp-a" placeholder="母（種子親）" autocomplete="off" autocapitalize="off" spellcheck="false">'
+        + '<span class="formula-operator">&times;</span><input type="text" class="form-input flex-1" id="qp-b" placeholder="父（花粉親）" autocomplete="off" autocapitalize="off" spellcheck="false"></div>'
+        + '<p class="type-def">ラベルに「crystallinum × magnificum」のように親が書いてあれば、2 つとも入れてください。わからなければ空けたままで大丈夫です。</p>';
+      back.insertAdjacentElement('afterend', qp);
     }
     var t;
     $('nf-input').addEventListener('input', function () {
@@ -4204,6 +4213,25 @@
     if (e.target.closest('#nf-quick')) { e.preventDefault(); quick(); return; }
     if (e.target.closest('#quick-off')) { e.preventDefault(); var p = pg(); if (p) p.classList.remove('contribute--quick'); }
   });
+  // the quick post's parents go into the cross fields of the kind as read: Clone → 交配式, Hybrid / 不明 → 交配式.
+  // Both given: the 'parents unknown' tick that 不明 sets by itself comes off. One or none: nothing is recorded as a cross
+  function quickParents() {
+    var a = $('qp-a'), b = $('qp-b'); if (!a || !b) return;
+    var t = (document.querySelector('#page-contribute input[name="cultivar-type"]:checked') || {}).value;
+    var box = t === 'clone' ? $('formula-inputs') : t === 'hybrid' ? $('hybrid-formula-inputs') : null;
+    var unk = t === 'clone' ? $('formula-unknown') : t === 'hybrid' ? $('hybrid-formula-unknown') : null;
+    if (!box) return;
+    var ins = box.querySelectorAll('input');
+    if (ins.length < 2) return;
+    var va = a.value.trim(), vb = b.value.trim();
+    ins[0].value = va; ins[1].value = vb;
+    if (va && vb && unk && unk.checked) { unk.checked = false; unk.dispatchEvent(new Event('change', { bubbles: true })); }
+    var cx = $('hybrid-formula-complex');
+    if (va && vb && t === 'hybrid' && cx && cx.checked) { cx.checked = false; cx.dispatchEvent(new Event('change', { bubbles: true })); }
+  }
+  document.addEventListener('input', function (e) { if (e.target && (e.target.id === 'qp-a' || e.target.id === 'qp-b')) quickParents(); });
+  // a fresh start empties them with the rest
+  document.addEventListener('ao:page', function (e) { if (e.detail === 'contribute') { var a = $('qp-a'), b = $('qp-b'); if (a) a.value = ''; if (b) b.value = ''; } });
   // a fresh visit starts with an empty box and the questions shown
   function reset() {
     var p = pg(); if (!p) return;
