@@ -2542,3 +2542,28 @@ html.pv-label .story__figure img { height: auto; aspect-ratio: 4 / 5; max-height
 .cstep-near li a { margin-left: .4em; }
 .cstep-near a { text-decoration: underline; text-underline-offset: 3px; color: inherit; cursor: pointer; }
 .cstep-near .cstep-fix { display: inline-block; margin-top: var(--s1); font-weight: bold; }
+
+/* 名前から始める / 写真と名前だけ (11-27) */
+#page-contribute:not(.contribute--stepped) #name-first { display: none; }
+.name-first { margin: 0 0 var(--s4); padding: 0 0 var(--s3); border-bottom: 1px dashed var(--color-rule); }
+.name-first .form-input { font-size: 1rem; }
+.nf-hits, .nf-guess { margin-top: var(--s2); padding: var(--s2) var(--s3); border: 1px solid var(--color-rule); font-size: var(--fs-small); }
+.nf-guess { border-left: 3px solid var(--color-ink, #1f2622); }
+.nf-hits__q, .nf-guess__q { margin: 0 0 var(--s1); font-weight: bold; }
+.nf-hits ul { list-style: none; margin: 0; padding: 0; }
+.nf-hits li a { display: flex; flex-wrap: wrap; gap: .2em .6em; align-items: baseline; padding: .45em 0; border-bottom: 1px solid var(--color-rule); color: inherit; text-decoration: none; }
+.nf-kind { font-size: .85em; color: var(--color-muted, #6b6b6b); }
+.nf-go { margin-left: auto; text-decoration: underline; text-underline-offset: 3px; }
+.nf-note { margin: var(--s1) 0 0; color: var(--color-muted, #6b6b6b); }
+.nf-guess__name { margin: 0; }
+.nf-guess__q2 { margin: var(--s2) 0 0; font-weight: bold; }
+.nf-actions { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s2); align-items: center; margin-top: var(--s2); }
+.nf-link { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.nf-summary { margin: var(--s2) 0 0; font-size: var(--fs-small); }
+.nf-quick { margin: var(--s3) 0 0; font-size: var(--fs-small); }
+#page-contribute.nf-applied .kind-group { display: none; }
+#quick-note, #quick-back { display: none; }
+#page-contribute.contribute--quick #quick-note { display: block; margin: 0 0 var(--s2); font-size: var(--fs-small); padding: var(--s2) var(--s3); border-left: 3px solid #b5651d; background: var(--surface-1, rgba(0,0,0,.03)); }
+#page-contribute.contribute--quick #quick-back { display: block; margin: 0 0 var(--s3); font-size: var(--fs-small); }
+#page-contribute.contribute--quick #origin-card { display: none; }
+.cstep-quick { margin: var(--s3) 0 0; padding: var(--s2) var(--s3); border-left: 3px solid #b5651d; font-size: var(--fs-small); }

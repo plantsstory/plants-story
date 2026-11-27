@@ -32,15 +32,18 @@
   function render() {
     var root = document.getElementById('verify-root');
     var queue = rows.filter(function (c) { return String(c.verification_note || '').indexOf('[要再確認]') === 0; });
+    // 写真と名前だけ (11-27): posts whose kind and origin are left for someone to check and fill in
+    var quick = rows.filter(function (c) { return (c.tags || []).indexOf('quick_post') !== -1; });
     var species = rows.filter(function (c) { return c.type === 'species' && !/\b(sp|aff|cf)\./.test(c.cultivar_name); });
     var vSpecies = species.filter(function (c) { return c.verified_at; }).length;
     var html = '<div class="stat-card" style="font-size:var(--font-size-sm);">記載種 ' + species.length + ' 件のうち検証済 <strong>' + vSpecies + '</strong>（告知の条件 M4 は 100%）· 全体 ' + rows.filter(function (c) { return c.verified_at; }).length + ' / ' + rows.length
       + '<br><span style="color:var(--color-gray);">検証済にするのは、出典を開いて記載と照合できた記録だけです。未記載名は A/B の出典が無ければ検証済にしません。</span></div>'
       + '<div class="toolbar" style="flex-wrap:wrap;gap:6px;margin-top:var(--space-sm);">'
-      + [['list', '一覧'], ['queue', '再確認キュー（' + queue.length + '）']].map(function (x) { return '<button class="btn btn-sm ' + (tab === x[0] ? 'btn-primary' : 'btn-outline') + '" data-vtab="' + x[0] + '">' + x[1] + '</button>'; }).join('')
+      + [['list', '一覧'], ['queue', '再確認キュー（' + queue.length + '）'], ['quick', '写真と名前だけの投稿（' + quick.length + '）']].map(function (x) { return '<button class="btn btn-sm ' + (tab === x[0] ? 'btn-primary' : 'btn-outline') + '" data-vtab="' + x[0] + '">' + x[1] + '</button>'; }).join('')
       + (tab === 'list' ? ' <span style="margin-left:8px;"></span>' + [['unverified', '未検証'], ['verified', '検証済'], ['all', 'すべて']].map(function (x) { return '<button class="btn btn-sm ' + (filter === x[0] ? 'btn-primary' : 'btn-outline') + '" data-vf="' + x[0] + '">' + x[1] + '</button>'; }).join('') : '')
       + '</div>';
-    var list = tab === 'queue' ? queue : rows.filter(function (c) { return filter === 'all' || (filter === 'verified' ? !!c.verified_at : !c.verified_at); });
+    if (tab === 'quick') html += '<p style="color:var(--color-gray);font-size:var(--font-size-sm);">名前と写真だけで投稿された名前です。区分（原種・Hybrid・不明・Clone）と由来を確かめて、名前のページから記録を足してください。</p>';
+    var list = tab === 'queue' ? queue : tab === 'quick' ? quick : rows.filter(function (c) { return filter === 'all' || (filter === 'verified' ? !!c.verified_at : !c.verified_at); });
     if (tab === 'list' && filter === 'unverified') {
       var ipni = list.filter(function (c) { var o = top(c.origins); return o && o.source_type === 'ipni_powo'; });
       if (ipni.length) html += '<div style="margin:var(--space-sm) 0;"><button class="btn btn-outline btn-sm" id="v-bulk">IPNI 照合済みの記載種 ' + ipni.length + ' 件を、出典を確認して検証済にする</button></div>';

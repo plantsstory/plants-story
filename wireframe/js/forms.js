@@ -1809,6 +1809,8 @@ document.addEventListener('click', function(e) {
       // 原種 / Hybrid / 不明 is kept as a tag on Hybrid and Clone rows (11-25)
       var kindTags = window.aoKindTags ? window.aoKindTags(type) : [];
       if (kindTags.length) newEntry._tags = kindTags;
+      // 写真と名前だけ (11-27): kept as a tag so the people who check new names can find it
+      if (window.aoQuickPost && window.aoQuickPost()) newEntry._tags = (newEntry._tags || []).concat(['quick_post']);
       // 親が不明 / 複合交配 is a fact about the row (the record gate reads formula_status), not only a word in the origin
       if (type === 'hybrid' && structured.formula_status) newEntry._formulaStatus = structured.formula_status;
       var autoBody = generateBodyFromStructured(structured);
