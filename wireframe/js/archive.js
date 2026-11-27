@@ -2451,7 +2451,7 @@
       chip.click();
       // sp. has no epithet: what comes next is the locality, so the typing goes on there
       // (at once, not after a pause, so a fast typist's next letters are not left behind in the epithet)
-      if (chip.getAttribute('data-subcategory') === 'sp' && extra) { extra.value = epithet.value.trim() || extra.value; epithet.value = ''; extra.focus(); onUserInput(); }
+      if (chip.getAttribute('data-subcategory') === 'sp' && extra) { extra.value = epithet.value.trim() || extra.value; epithet.value = ''; extra.focus(); onUserInput(); spUnpub(true); }
     });
     // 「crystallinum var.」 typed into the epithet: the rank moves to its chip, and the typing goes on in the next field (11-27)
     if (epithet) epithet.addEventListener('input', function () {
