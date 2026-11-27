@@ -357,7 +357,7 @@ function getSpeciesBadgeText(name) {
 
 function applyLanguage(lang) {
   currentLang = lang;
-  localStorage.setItem('plants-story-lang', lang);
+  try { localStorage.setItem('plants-story-lang', lang); } catch (e) {}
   document.documentElement.lang = (lang === 'en') ? 'en' : 'ja';
 
   // Static text elements
@@ -410,9 +410,15 @@ function applyLanguage(lang) {
     if (entry) el.placeholder = entry[lang] || entry.jp;
   });
 
-  // Update header toggle button
-  var langBtn = document.querySelector('.header__lang');
-  if (langBtn) langBtn.textContent = (lang === 'en') ? 'JP / EN' : 'EN / JP';
+  // Every language button (the header one is hidden; the footer one is the one people see) names the language it
+  // switches to
+  document.querySelectorAll('.header__lang').forEach(function(b) {
+    b.textContent = (lang === 'en') ? '日本語' : 'English';
+    b.setAttribute('lang', lang === 'en' ? 'ja' : 'en');
+  });
+
+  // Text without a data-i18n key (js/ui-en.js)
+  if (typeof window.aoUiLanguage === 'function') window.aoUiLanguage(lang);
 
   // Re-render dynamic content
   refreshDynamicText();
@@ -439,9 +445,17 @@ function refreshDynamicText() {
 
 // Wire up language toggle button
 var _mastLang = document.getElementById('masthead-lang');
-if (_mastLang) _mastLang.addEventListener('click', function(e) { e.preventDefault(); document.querySelector('.header__lang').click(); });
-document.querySelector('.header__lang').addEventListener('click', function() {
-  applyLanguage(currentLang === 'jp' ? 'en' : 'jp');
+// One listener for every language button: only the first (hidden) one had a listener, so the footer button
+// people press did nothing (site check 2026-11-26)
+function _toggleLanguage(e) {
+  if (e) e.preventDefault();
+  var go = function() { applyLanguage(currentLang === 'jp' ? 'en' : 'jp'); };
+  // before the word list arrives, wait for it so the switch shows at once
+  if (_translationsReady && !Object.keys(translations).length) _translationsReady.then(go); else go();
+}
+if (_mastLang) _mastLang.addEventListener('click', _toggleLanguage);
+document.addEventListener('click', function(e) {
+  if (e.target.closest && e.target.closest('.header__lang')) _toggleLanguage(e);
 });
 
 // Language is applied after translations load (see _translationsReady above)

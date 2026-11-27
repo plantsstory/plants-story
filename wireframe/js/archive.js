@@ -382,7 +382,7 @@
     else if (d.namingYear) parts.push('<span class="num">' + d.namingYear + '</span>');
     if (!opts.noCountry && species && d.country) parts.push(esc(countryLabel(d.country)) + (d.countryMore ? esc(T('country_more')) : ''));
     // each part kept whole on a line (no 'パ／ナマ'); the separators are where the line may break
-    return parts.map(function (x) { return '<span class="entry__seg">' + x + '</span>'; }).join(LABEL ? '、' : ' · ');
+    return parts.map(function (x) { return '<span class="entry__seg">' + x + '</span>'; }).join(LABEL ? (lang() === 'en' ? ', ' : '、') : ' · ');
   }
   function entryStateHtml(d) {
     if (d.type === 'seedling') return '';
@@ -398,7 +398,7 @@
   };
   // 「27、未記載 5」: the described species, and beside them the names still waiting for a description
   function speciesCountHtml(described, undescribed) {
-    return String(described) + (undescribed ? '<span class="n__sub">、' + esc(T('kind_undescribed')) + ' ' + undescribed + '</span>' : '');
+    return String(described) + (undescribed ? '<span class="n__sub">' + (lang() === 'en' ? ', ' : '、') + esc(T('kind_undescribed')) + ' ' + undescribed + '</span>' : '');
   }
   window.entryKind = function (fullName, entry, type) {
     try { return kindWord(describe(fullName, entry || {}, type)); } catch (e) { return ''; }
@@ -429,8 +429,9 @@
       if (e._verifiedAt && String(e._verifiedAt) > since) verified++;
     });
     var photos = (window._photoTimes || []).filter(function (t) { return t > since; }).length;
-    var parts = [names ? '名前 <span class="num">+' + names + '</span>' : '', photos ? '写真 <span class="num">+' + photos + '</span>' : '', verified ? '検証済 <span class="num">+' + verified + '</span>' : ''].filter(Boolean);
-    el.innerHTML = parts.length ? 'この 1 週間 — ' + parts.join('、') : '';
+    var en = lang() === 'en';
+    var parts = [names ? (en ? 'names' : '名前') + ' <span class="num">+' + names + '</span>' : '', photos ? (en ? 'photos' : '写真') + ' <span class="num">+' + photos + '</span>' : '', verified ? (en ? 'verified' : '検証済') + ' <span class="num">+' + verified + '</span>' : ''].filter(Boolean);
+    el.innerHTML = parts.length ? (en ? 'This week — ' + parts.join(', ') : 'この 1 週間 — ' + parts.join('、')) : '';
   }
   document.addEventListener('ao:thumbs', function () { setTimeout(weekLine, 60); });
   document.addEventListener('ao:page', function (e) { if (e.detail === 'top') setTimeout(weekLine, 300); });
@@ -509,7 +510,7 @@
     waitForData(function () {
       var list = wantedList();
       if (!list.length) { body.innerHTML = '<p class="people__intro">いまは写真のない名前はありません。</p>'; return; }
-      var html = '<p class="mypost-counts">写真を募集中 <span class="num">' + list.length + '</span> 件</p><ol class="entries">';
+      var html = '<p class="mypost-counts">' + (lang() === 'en' ? 'Photos wanted: <span class="num">' + list.length + '</span>' : '写真を募集中 <span class="num">' + list.length + '</span> 件') + '</p><ol class="entries">';
       list.forEach(function (d) {
         var line = window.entryLine(d, { noPerson: true });
         line = line.replace(/<\/li>$/, '<p class="mypost-acts"><button type="button" data-wanted-pick="' + esc(d.fullName) + '">写真を追加</button></p></li>');
@@ -865,7 +866,10 @@
       var e = key && store[key];
       if (!e) return;
       var d; try { d = describe(key, e, e._type); } catch (er) { return; }
-      var by = d.type === 'species'
+      var by = lang() === 'en' ? (d.type === 'species'
+        ? [d.author ? 'Described by ' + esc(d.author) : '', d.pubYear ? '<span class="year">' + d.pubYear + '</span>' : '', d.country ? esc(countryLabel(d.country)) : ''].filter(Boolean).join(', ')
+        : [esc(kindWord(d)), (d.breeder || d.namer || d.creator) ? 'bred by ' + esc(d.breeder || d.namer || d.creator) : ''].filter(Boolean).join('. '))
+        : d.type === 'species'
         ? [d.author ? esc(d.author) + ' が記載' : '', d.pubYear ? '<span class="year">' + d.pubYear + '</span>年' : '', d.country ? esc(countryLabel(d.country)) : ''].filter(Boolean).join('、').replace('年、', '年。')
         : [esc(kindWord(d)), (d.breeder || d.namer || d.creator) ? esc(d.breeder || d.namer || d.creator) + ' 作出' : ''].filter(Boolean).join('。');
       fig.insertAdjacentHTML('beforeend', '<figcaption class="plate-label"><span class="plate-label__name">' + sciNameHtml(d.shownName) + '</span><span class="plate-label__by">' + by + '</span></figcaption>');
@@ -894,12 +898,12 @@
       var early = all.filter(function (d) { return d.pubYear < 1900; }).length, late = all.filter(function (d) { return d.pubYear >= 2000; }).length;
       host.innerHTML = '<p class="lede">' + minY + '年から。原種が学名として発表された年。年表を押すと、その年代の名前が並びます。</p>' + svg
         + '<div class="tl__step"><button type="button" data-tl="-1" aria-label="前の年代">‹</button><p class="tl__cur"></p><button type="button" data-tl="1" aria-label="次の年代">›</button></div>'
-        + '<ol class="entries tl__list"></ol><p class="tl__note">19世紀に <b>' + early + '</b>、2000年以降に <b>' + late + '</b> の名前。</p>';
+        + '<ol class="entries tl__list"></ol><p class="tl__note">' + (lang() === 'en' ? '<b>' + early + '</b> names from the 19th century, <b>' + late + '</b> since 2000.' : '19世紀に <b>' + early + '</b>、2000年以降に <b>' + late + '</b> の名前。') + '</p>';
       // the fullest decade opens first (the earliest on a tie)
       var sel = keys.reduce(function (best, k) { return decs[k].length > decs[best].length ? k : best; }, keys[0]);
       function draw() {
         host.querySelectorAll('.dot').forEach(function (c) { c.classList.toggle('is-on', +c.getAttribute('data-dec') === sel); });
-        host.querySelector('.tl__cur').innerHTML = '<b>' + sel + '年代</b><span>' + decs[sel].length + ' つの名前</span>';
+        host.querySelector('.tl__cur').innerHTML = (lang() === 'en' ? '<b>' + sel + 's</b><span>' + decs[sel].length + ' names</span>' : '<b>' + sel + '年代</b><span>' + decs[sel].length + ' つの名前</span>');
         host.querySelector('.tl__list').innerHTML = decs[sel].map(function (d) { return window.entryLine(d, { thumb: thumbUrl(d.displayName, 160) }); }).join('');
         host.querySelector('[data-tl="-1"]').disabled = keys.indexOf(sel) === 0;
         host.querySelector('[data-tl="1"]').disabled = keys.indexOf(sel) === keys.length - 1;
@@ -1096,7 +1100,7 @@
     sbc.from('nurseries').select('id, name, url, country, instagram, note').order('sort_order').order('name').limit(500).then(function (r) {
       var rows = r && !r.error ? r.data || [] : [];
       if (!rows.length) { body.innerHTML = soon; return; }
-      var html = '<p class="mypost-counts">ナーセリー <span class="num">' + rows.length + '</span> 件</p><ol class="entries nursery-list">';
+      var html = '<p class="mypost-counts">' + (lang() === 'en' ? 'Nurseries: <span class="num">' + rows.length + '</span>' : 'ナーセリー <span class="num">' + rows.length + '</span> 件') + '</p><ol class="entries nursery-list">';
       rows.forEach(function (a) {
         var sub = [esc(a.country), a.instagram ? '<a href="' + esc(a.instagram) + '" target="_blank" rel="noopener noreferrer">Instagram</a>' : ''].filter(Boolean).join(' · ');
         html += '<li class="entry"><div class="entry__main">' + extLink(a, esc(a.name), 'entry__name') + '<span class="entry__sub">' + sub + '</span>'
@@ -1116,7 +1120,7 @@
       if (!mine.length || !h1 || h1Key(h1) !== d.fullName) return;
       var li = function (a) { return '<li>' + extLink(a, esc(a.title)) + ' <span class="num">' + [esc(a.site), esc(yearOfDate(a.published_on))].filter(Boolean).join(' · ') + '</span></li>'; };
       var html = '<div class="related__group"><ul>' + mine.slice(0, 3).map(li).join('') + '</ul>';
-      if (mine.length > 3) html += '<details class="timeline__fold"><summary>ほか ' + (mine.length - 3) + ' 件</summary><ul>' + mine.slice(3).map(li).join('') + '</ul></details>';
+      if (mine.length > 3) html += '<details class="timeline__fold"><summary>' + (lang() === 'en' ? (mine.length - 3) + ' more' : 'ほか ' + (mine.length - 3) + ' 件') + '</summary><ul>' + mine.slice(3).map(li).join('') + '</ul></details>';
       html += '</div><p class="related__exit"><a href="' + esc(base + 'reading/') + '" data-nav="reading">読みもの一覧へ →</a></p>';
       box.innerHTML = html;
       sec.classList.remove('d-none');
@@ -1823,7 +1827,7 @@
     var img = t ? '<img src="' + esc(t) + '" alt="" width="48" height="48" loading="lazy" decoding="async">' : '';
     var place = x.originRegion ? (countryLabel(countryOf(x.originRegion) || '') || x.originRegion) : '';
     var sub = [x.namingYear ? '<span class="num">' + x.namingYear + '</span>' : '', x.acquisition && x.acquisition !== 'unsure' ? esc(T('acq_' + x.acquisition)) : '', esc(place)]
-      .filter(Boolean).map(function (s) { return '<span class="entry__seg">' + s + '</span>'; }).join(LABEL ? '、' : ' · ');
+      .filter(Boolean).map(function (s) { return '<span class="entry__seg">' + s + '</span>'; }).join(LABEL ? (lang() === 'en' ? ', ' : '、') : ' · ');
     return '<li class="entry"><a class="entry__link" href="' + esc(x.href) + '" data-nav="cultivar" data-key="' + esc(x.fullName) + '">'
       + '<span class="entry__thumb' + (img ? '' : ' entry__thumb--empty') + '" aria-hidden="true">' + img + '</span>'
       + '<span class="entry__main"><span class="entry__name individuals__code">&#39;' + esc(individualCode(x, d)) + '&#39;</span>'
@@ -2038,7 +2042,7 @@
     var facts = '<dl class="ledger people__facts">';
     facts += '<div><dt>' + esc(T('people_entries')) + '</dt><dd>' + p.entries.length + '</dd></div>';
     if (years.length) facts += '<div><dt>' + esc(T('people_years')) + '</dt><dd>' + Math.min.apply(null, years) + (years.length > 1 ? '–' + Math.max.apply(null, years) : '') + '</dd></div>';
-    if (countries.length) facts += '<div><dt>' + esc(T('people_localities')) + '</dt><dd class="people__facts-small">' + esc(countries.map(function (c) { return window.countryLabel ? window.countryLabel(c) : c; }).join('、')) + '</dd></div>';
+    if (countries.length) facts += '<div><dt>' + esc(T('people_localities')) + '</dt><dd class="people__facts-small">' + esc(countries.map(function (c) { return window.countryLabel ? window.countryLabel(c) : c; }).join(lang() === 'en' ? ', ' : '、')) + '</dd></div>';
     facts += '</dl>';
     var authLine = auth ? [auth.name && auth.name !== p.key ? p.key : '', auth.years, auth.ipni && auth.ipni !== p.key ? 'IPNI: ' + auth.ipni : ''].filter(Boolean).join(' · ') : '';
     var html = '<p class="people__roles mono">' + rolesLine(p) + (authLine ? ' · ' + esc(authLine) : '') + '</p>' + (auth && auth.note ? '<p class="people__note">' + esc(auth.note) + '</p>' : '') + facts + '<h2 class="section-title"><span>' + esc(T('people_entries')) + '</span></h2><div id="people-ledger"></div>';

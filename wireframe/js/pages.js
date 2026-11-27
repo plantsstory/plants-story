@@ -1666,7 +1666,7 @@ function globalSearch(query) {
       if (globalSearch._shown !== query) return;
       extrasEl.innerHTML = window.aoExtrasHtml(r);
       var more = r.people.length + r.places.length;
-      if (summaryEl && more) summaryEl.textContent += '・人物と産地 ' + more + '件';
+      if (summaryEl && more) summaryEl.textContent += (window.currentLang === 'en' ? ' · people and places: ' + more : '・人物と産地 ' + more + '件');
       // no plant by that name, but a person or a place: the empty sheet should not read as 「nothing」
       var emptyTitle = cultivarList && !cultivarResults.length && cultivarList.querySelector('.sheet__title');
       if (emptyTitle && more) emptyTitle.textContent = '品種の名前では見つかりませんでした。下の人物・産地をご覧ください。';
