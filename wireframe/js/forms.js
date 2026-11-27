@@ -3601,6 +3601,11 @@ document.addEventListener('click', function(e) {
     fields().forEach(function(el) { if (el.value && el.tagName !== 'SELECT') any = true; data.fields[keyOf(el)] = el.value; });
     page.querySelectorAll('input[type="radio"]:checked').forEach(function(r) { if (r.name) data.radios[r.name] = r.value; });
     page.querySelectorAll('input[type="checkbox"][id]').forEach(function(c) { data.fields[c.id] = c.checked ? '1' : ''; });
+    // the rank chip (aff. / cf. / sp. / var. / ssp.) is a button, not a field: kept on its own so it comes back too (11-27)
+    var chip = page.querySelector('#species-subcategory .chip.active');
+    if (chip && chip.getAttribute('data-subcategory') !== 'species') data.subcat = chip.getAttribute('data-subcategory');
+    var ep = document.getElementById('nb-epithet');
+    if (ep && ep.getAttribute('data-unpub')) data.unpub = ep.getAttribute('data-unpub');
     try { if (any) localStorage.setItem(KEY, JSON.stringify(data)); else if (force !== true) localStorage.removeItem(KEY); } catch (e) {}
   };
   window.clearContributeDraft = function() { try { localStorage.removeItem(KEY); } catch (e) {} var n = document.getElementById('draft-note'); if (n) n.remove(); };
@@ -3617,6 +3622,12 @@ document.addEventListener('click', function(e) {
       var r = page.querySelector('input[type="radio"][name="' + name + '"][value="' + String(data.radios[name]).replace(/"/g, '') + '"]');
       if (r && !r.checked) { r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); }
     });
+    if (data.subcat) {
+      var chip = page.querySelector('#species-subcategory .chip[data-subcategory="' + String(data.subcat).replace(/"/g, '') + '"]');
+      if (chip && !chip.classList.contains('active')) chip.click();
+    }
+    var epu = document.getElementById('nb-epithet');
+    if (epu && data.unpub) epu.setAttribute('data-unpub', data.unpub);
     Object.keys(data.fields).forEach(function(id) {
       var el = byKey(id);
       if (!el || !page.contains(el)) return;
@@ -3646,5 +3657,6 @@ document.addEventListener('click', function(e) {
   var timer = null;
   page.addEventListener('input', function() { clearTimeout(timer); timer = setTimeout(window.saveContributeDraft, 400); });
   page.addEventListener('change', function() { clearTimeout(timer); timer = setTimeout(window.saveContributeDraft, 400); });
+  page.addEventListener('click', function(e) { if (e.target.closest && e.target.closest('#species-subcategory .chip')) { clearTimeout(timer); timer = setTimeout(window.saveContributeDraft, 400); } });
   window.addEventListener('pagehide', function() { if (page.style.display !== 'none') window.saveContributeDraft(); });
 })();
