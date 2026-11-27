@@ -1240,8 +1240,8 @@ async function loadAiUsage() {
     document.getElementById('stat-ai-tokens').textContent =
       (inTok + outTok) >= 1e6 ? ((inTok + outTok) / 1e6).toFixed(2) + 'M' : Math.round((inTok + outTok) / 1000) + 'K';
     document.getElementById('stat-ai-searches').textContent = searches;
-    // the same estimate the Edge Functions stop at (Secret AI_MONTHLY_BUDGET_YEN = 12,000 yen, inside the $100/month Claude credit; Japan-time month)
-    document.getElementById('stat-ai-cost').textContent = '$' + cost.toFixed(2) + '（約 ' + Math.round(cost * 155).toLocaleString('ja-JP') + ' 円 / 上限 12,000 円）';
+    // the same estimate the Edge Functions stop at (Secret AI_MONTHLY_BUDGET_YEN = 13,000 yen since 11-27, inside the $100/month Claude credit; the daily mail warns above AI_WARN_YEN = 10,000)
+    document.getElementById('stat-ai-cost').textContent = '$' + cost.toFixed(2) + '（約 ' + Math.round(cost * 155).toLocaleString('ja-JP') + ' 円 / 上限 13,000 円）';
 
     // Per-model breakdown table
     var bd = document.getElementById('ai-usage-breakdown');

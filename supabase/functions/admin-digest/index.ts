@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { budgetYen, monthSpendYen, periodLabel, warnYen } from "../_shared/ai-budget.ts";
 
 /**
  * admin-digest (admin reorganisation 2026-11-26)
@@ -10,6 +11,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
  * Counted: open reports, unhandled contact messages, pending AI suggestions, open re-research requests, listing
  * requests from the last day, entries whose check must be redone, and entries and photos that other people added in
  * the last day (the owner's own posts are left out), and translations waiting for approval (翻訳の確認, 11-27).
+ * AI spend (11-27): a warning line once this period's spend passes AI_WARN_YEN (default 10,000 yen), and another
+ * once it reaches the cap AI_MONTHLY_BUDGET_YEN; either alone is enough to send the mail.
  */
 
 const OWNER_ID = "629508da-9fdd-4d3a-9ec6-22fd3bdb7346";
@@ -45,9 +48,17 @@ serve(async (req: Request) => {
   const failed = [reports, contact, ais, rr, genus, verify, entries, photos].find((r) => r.error);
   if (failed) return json({ ok: false, error: "db", detail: failed.error?.message }, 500);
 
+  // AI spend this period (from the 12th, as the budget): a warning line once it passes AI_WARN_YEN (default 10,000)
+  let spent = -1;
+  try { spent = await monthSpendYen(db); } catch (_e) { spent = -1; }
+  const budget = budgetYen(), warn = warnYen();
+  const yen = (v: number) => v.toLocaleString("ja-JP");
+
   const n = (r: { count: number | null }) => r.count || 0;
   const newEntries = (entries.data || []) as { cultivar_name: string }[];
   const lines: string[] = [];
+  if (spent >= budget) lines.push(`⚠ AI の利用額: ${periodLabel()}からの分が約 ${yen(spent)} 円で、上限 ${yen(budget)} 円に達しました。次の12日まで AI（調査・翻訳・点検）は止まっています`);
+  else if (spent >= warn) lines.push(`⚠ AI の利用額: ${periodLabel()}からの分が約 ${yen(spent)} 円です（知らせる目安 ${yen(warn)} 円 / 上限 ${yen(budget)} 円）`);
   if (n(reports)) lines.push(`報告: ${n(reports)} 件（記録の誤り・写真）`);
   if (n(contact)) lines.push(`お問い合わせ: 未対応 ${n(contact)} 件`);
   if (n(ais)) lines.push(`AI の提案: 確認待ち ${n(ais)} 件`);

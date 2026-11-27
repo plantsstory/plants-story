@@ -55,8 +55,25 @@ export async function monthSpendYen(db: any): Promise<number> {
 
 // ok=false also when the spend cannot be read: money is not spent on a guess
 // deno-lint-ignore no-explicit-any
+export function budgetYen() {
+  return parseInt(Deno.env.get("AI_MONTHLY_BUDGET_YEN") || "1200", 10);
+}
+
+// The daily admin mail warns once the period's spend passes this (owner 2026-11-27: cap 13,000 yen, warn above
+// 10,000). Change it with the Secret AI_WARN_YEN; no code change needed.
+export function warnYen() {
+  return parseInt(Deno.env.get("AI_WARN_YEN") || "10000", 10);
+}
+
+// first day of the current period, for messages (e.g. "11月12日")
+export function periodLabel() {
+  const d = new Date(monthStartJst());
+  return `${d.getUTCMonth() + 1}月${d.getUTCDate()}日`;
+}
+
+// deno-lint-ignore no-explicit-any
 export async function budgetGate(db: any): Promise<{ ok: boolean; spent: number; budget: number }> {
-  const budget = parseInt(Deno.env.get("AI_MONTHLY_BUDGET_YEN") || "1200", 10);
+  const budget = budgetYen();
   try {
     const spent = await monthSpendYen(db);
     return { ok: spent < budget, spent, budget };
