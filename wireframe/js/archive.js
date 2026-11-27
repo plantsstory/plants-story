@@ -4177,14 +4177,15 @@
       cb(lines);
     }, function () { cb([]); });
   }
-  function markBar(n) {
+  // its own name: a second "markBar" here replaced the bottom bar's one in this whole block (tabs never marked, and the bar stayed hidden after leaving the post form, 11-27)
+  function markMineDot(n) {
     var a = document.querySelector('.appbar [data-appbar="mypost"]');
     if (a) a.classList.toggle('has-dot', n > 0);
   }
   function mineLine() {
     var page = document.getElementById('page-top');
     var old = document.getElementById('mine-line');
-    if (!window._currentUser || !window._supabaseClient || !page) { if (old) old.remove(); markBar(0); return; }
+    if (!window._currentUser || !window._supabaseClient || !page) { if (old) old.remove(); markMineDot(0); return; }
     var sbc = window._supabaseClient, me = window._currentUser.id;
     Promise.all([
       sbc.from('cultivars').select('id', { count: 'exact', head: true }).eq('user_id', me),
@@ -4192,7 +4193,7 @@
     ]).then(function (r) {
       var n = (r[0] && r[0].count) || 0, last = r[1] && r[1].data && r[1].data[0];
       peekUpdates(function (lines) {
-        markBar(lines.length);
+        markMineDot(lines.length);
         var el = document.getElementById('mine-line');
         if (!el) { el = document.createElement('div'); el.id = 'mine-line'; el.className = 'mine-line'; var c = page.querySelector('.container'); if (!c) return; var sl = document.getElementById('since-line'); if (sl && sl.parentNode === c) sl.insertAdjacentElement('afterend', el); else c.insertBefore(el, c.firstChild); }
         var day = function (t) { return t ? String(t).slice(0, 10).replace(/-/g, '.') : ''; };
@@ -4204,7 +4205,7 @@
     });
   }
   document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('[data-mine-photo]')) { if (window.aoStartPick) window.aoStartPick('photo'); } });
-  document.addEventListener('ao:page', function (e) { if (e.detail === 'top') setTimeout(mineLine, 200); if (e.detail === 'mypost') markBar(0); });
+  document.addEventListener('ao:page', function (e) { if (e.detail === 'top') setTimeout(mineLine, 200); if (e.detail === 'mypost') markMineDot(0); });
   document.addEventListener('ao:auth', function () { setTimeout(mineLine, 200); });
   setTimeout(function () { if (window._currentUser) { mineLine(); } }, 2500);
   // 記録: what happened to my entries since I last looked (my_updates), at most five lines (T124)
