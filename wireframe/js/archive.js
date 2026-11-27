@@ -2520,7 +2520,9 @@
     var cvTidy = null, cvRead = null;
     function cvNote(html) {
       if (!cvTidy && cultivarName) { cvTidy = document.createElement('div'); cvTidy.id = 'nb-cultivar-tidy'; cvTidy.className = 'nb-tidy'; cultivarName.parentNode.appendChild(cvTidy); }
-      if (cvTidy) { cvTidy.innerHTML = html || ''; cvTidy.hidden = !html; }
+      // the same line is not drawn again: leaving the field (on the press of its button) runs the check once more,
+      // and a redrawn button would lose that press (11-27)
+      if (cvTidy && cvTidy._html !== (html || '')) { cvTidy._html = html || ''; cvTidy.innerHTML = html || ''; cvTidy.hidden = !html; }
     }
     function cvCheck() {
       cvRead = null;
