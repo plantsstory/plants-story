@@ -2474,7 +2474,7 @@
       var spClone = type === 'clone' && par === 'species';
       var near = type === 'species' && q === 'aff';
       if (epithetLabel) epithetLabel.textContent = spClone ? T('nb_epithet_species_clone') : type === 'clone' ? T('nb_epithet_optional') : near ? T('nb_epithet_near') : T('nb_epithet');
-      if (epithet) epithet.placeholder = spClone ? '例: papillilaminum' : q === 'cf' ? '例: regale' : q === 'aff' ? '例: besseae' : '例: crystallinum';
+      if (epithet) epithet.placeholder = spClone ? '例: papillilaminum' : q === 'cf' ? '例: luxurians' : q === 'aff' ? '例: besseae' : '例: crystallinum';
       // the second field is always the locality now; the lower name has its own field (11-27)
       if (extraLabel) extraLabel.textContent = q === 'sp' ? T('nb_extra_sp') : T('nb_extra_locality');
       if (extra) extra.placeholder = '例: Peru';
@@ -2519,7 +2519,7 @@
       var q = qualifier() || 'species';
       if (fits(curTile, q)) return curTile;
       var t = q === 'var' || q === 'ssp' ? 'var' : q !== 'species' ? q
-        : clean(extra.value) ? 'loc' : (curTile || clean(epithet.value)) ? 'species' : null;
+        : (curTile || clean(epithet.value) || clean(extra.value)) ? 'species' : null;
       if (t) curTile = t;
       return t;
     }
