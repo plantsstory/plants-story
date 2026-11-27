@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/utilities.css">
-  <link rel="stylesheet" href="css/admin.css?v=20261127d">
+  <link rel="stylesheet" href="css/admin.css?v=20261127q">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/record-gate.js?v=20261127b"></script>
   <script src="js/entry-meta.js?v=20261127b"></script>
@@ -24,6 +24,7 @@
   <script src="js/admin-checks.js?v=20261127b"></script>
   <script src="js/admin-suggest.js?v=20261127b"></script>
   <script src="js/admin-translations.js?v=20261127d"></script>
+  <script src="js/admin-postcheck.js?v=20261127p"></script>
   <script src="js/admin-shops.js?v=20261127c"></script>
   <script src="js/admin-articles.js?v=20261127b"></script>
   <script src="js/admin-nurseries.js?v=20261127b"></script>
@@ -76,6 +77,7 @@
       <a href="#" data-section="research-requests">再調査の依頼 <span class="nav-badge d-none" id="rr-badge"></span></a>
       <a href="#" data-section="genus-requests">収録の依頼 <span class="nav-badge d-none" id="gr-badge"></span></a>
       <a href="#" data-section="new-posts">新しい投稿 <span class="nav-badge d-none" id="new-badge"></span></a>
+      <a href="#" data-section="post-checks">投稿の点検 <span class="nav-badge d-none" id="pc-badge"></span></a>
       <div class="nav-group">記録</div>
       <a href="#" data-section="cultivars">記録の一覧</a>
       <a href="#" data-section="gate">未収録</a>
@@ -137,6 +139,13 @@
           <button class="btn btn-outline btn-sm" id="btn-refresh-new-posts">更新</button>
         </div>
         <div id="new-posts-list" class="d-grid gap-md"></div>
+      </section>
+
+      <!-- ---- POST CHECKS (11-27) ---- -->
+      <section id="sec-post-checks" class="hidden">
+        <h2 class="section-title">投稿の点検</h2>
+        <p class="desc-text">新しい投稿を、投稿の直後に1回だけ点検した結果です。区分（原種・sp. など / Hybrid / Clone / 実生）の間違いと名前の綴りを、サイトの決まり・登録済みの一覧・GBIF で確かめ、そのあと AI が1回だけ見ます。あとで記録を直しても点検し直しはしません。記録は書き換えないので、直すときは「記録を開いて直す」から。</p>
+        <div id="post-checks-root"></div>
       </section>
 
       <!-- ---- NAME CHECKS ---- -->
@@ -995,6 +1004,7 @@ var SECTION_LOADERS = {
   'research-requests': function() { loadResearchRequests(); },
   'genus-requests': function() { loadGenusRequests().then(function() { if (window.markInboxSeen) window.markInboxSeen('genus'); }); },
   'new-posts': function() { if (window.loadNewPosts) window.loadNewPosts(); },
+  'post-checks': function() { if (window.loadPostChecks) window.loadPostChecks(); },
   'cultivars': function() { renderCultivarTable(); },
   'gate': function() { loadGateList(); },
   'verify': function() { if (window.loadVerify) window.loadVerify(); },
@@ -3428,6 +3438,6 @@ document.getElementById('btn-kr-reject').addEventListener('click', function() {
 </script>
 <script src="js/admin-entry.js?v=20261127b"></script>
 <script src="js/admin-reports.js?v=20261127e"></script>
-<script src="js/admin-inbox.js?v=20261127d"></script>
+<script src="js/admin-inbox.js?v=20261127q"></script>
 </body>
 </html>

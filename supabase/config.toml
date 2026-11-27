@@ -26,6 +26,10 @@ verify_jwt = false
 [functions.translate-origin]
 verify_jwt = false
 
+# Post check (once per new post): called by the insert trigger and the sweep (x-cron-token), or by the owner
+[functions.post-check]
+verify_jwt = false
+
 [api]
 enabled = true
 # Port to use for the API URL.

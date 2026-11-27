@@ -497,3 +497,15 @@ body {
 .tr-flag--warn { color: #9a5b00; }
 .tr-flag--info { color: var(--color-gray); }
 .tr-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: var(--space-sm); }
+
+/* 投稿の点検 (11-27): one check per new post */
+.pc-row { border-top: 1px solid var(--color-light, #ddd); padding: 10px 0; }
+.pc-row--marked .pc-head { font-weight: 600; }
+.pc-kind { font-size: var(--font-size-xs); color: var(--color-gray); font-weight: 400; margin-left: 4px; }
+.pc-flags { margin: 6px 0; padding-left: 1.1em; font-size: var(--font-size-sm); }
+.pc-flag { margin: 3px 0; }
+.pc-flag--warn { color: #8a4b00; }
+.pc-area { font-weight: 600; }
+.pc-sug { font-weight: 600; color: var(--color-text, #222); }
+.pc-src { font-size: var(--font-size-xs); color: var(--color-gray); border: 1px solid var(--color-light, #ddd); border-radius: 8px; padding: 0 6px; margin-left: 2px; white-space: nowrap; }
+.pc-actions { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }

@@ -49,10 +49,13 @@
       sb.from('ai_suggestions').select('id, cultivar_name, field', { count: 'exact' }).eq('status', 'pending').order('created_at', { ascending: false }).limit(3),
       sb.from('research_requests').select('id, cultivar_name', { count: 'exact' }).in('status', ['pending', 'approved']).order('created_at', { ascending: false }).limit(3),
       sb.rpc('genus_request_summary'),
-      sb.from('origin_translations').select('id, cultivar_name, src_lang', { count: 'exact' }).eq('status', 'drafted').order('created_at').limit(3)
+      sb.from('origin_translations').select('id, cultivar_name, src_lang', { count: 'exact' }).eq('status', 'drafted').order('created_at').limit(3),
+      sb.from('post_checks').select('id, cultivar_name', { count: 'exact' }).or('marked.eq.true,status.eq.failed').is('reviewed_at', null).order('created_at', { ascending: false }).limit(3)
     ]);
     function part(r) { return { n: r.error ? null : (r.count || 0), rows: r.error ? [] : (r.data || []), err: r.error }; }
     var reports = part(res[0]), ais = part(res[2]), rr = part(res[3]), trs = part(res[5]);
+    // 投稿の点検 (11-27): before its migration the table is missing, which is 0 here, not a failure
+    var pcs = res[6].error && /post_checks/.test(res[6].error.message || '') ? { n: 0, rows: [] } : part(res[6]);
     var openMsgs = res[1].error ? [] : (res[1].data || []).filter(function (m) { return m.status !== 'done'; });
     var contact = { n: res[1].error ? null : openMsgs.length, rows: openMsgs.slice(0, 3), err: res[1].error };
     var genusSeen = seen('genus');
@@ -86,7 +89,9 @@
         items: verifyQ.slice(0, 3).map(function (c) { return c.cultivar_name; }) },
       { key: 'new-posts', badge: 'new-badge', title: '新しい投稿', p: { n: newEntries.length + newPhotos.length, rows: [] },
         sub: '前に開いてから、ほかの人が足した記録 ' + newEntries.length + ' 件・写真 ' + newPhotos.length + ' 枚',
-        items: newEntries.slice(0, 2).map(function (c) { return '記録 · ' + c.cultivar_name; }).concat(newPhotos.slice(0, 1).map(function (r) { return '写真 · ' + (r.cultivar_name || ''); })) }
+        items: newEntries.slice(0, 2).map(function (c) { return '記録 · ' + c.cultivar_name; }).concat(newPhotos.slice(0, 1).map(function (r) { return '写真 · ' + (r.cultivar_name || ''); })) },
+      { key: 'post-checks', badge: 'pc-badge', title: '投稿の点検', p: pcs, sub: '区分や綴りに印のついた新しい投稿',
+        items: pcs.rows.map(function (r) { return r.cultivar_name; }) }
     ];
 
     var total = 0;

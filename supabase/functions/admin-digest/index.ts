@@ -13,6 +13,7 @@ import { budgetYen, monthSpendYen, periodLabel, warnYen } from "../_shared/ai-bu
  * the last day (the owner's own posts are left out), and translations waiting for approval (翻訳の確認, 11-27).
  * AI spend (11-27): a warning line once this period's spend passes AI_WARN_YEN (default 10,000 yen), and another
  * once it reaches the cap AI_MONTHLY_BUDGET_YEN; either alone is enough to send the mail.
+ * New posts the post check marked (投稿の点検, 11-27).
  */
 
 const OWNER_ID = "629508da-9fdd-4d3a-9ec6-22fd3bdb7346";
@@ -45,6 +46,9 @@ serve(async (req: Request) => {
   ]);
   // before the translation migration is applied the table is missing: count it as 0, not as a failed digest
   if (trs.error) (trs as { count: number | null }).count = 0;
+  // posts the once-per-post check marked and the owner has not looked at (0 before the post_checks migration)
+  const pcs = await db.from("post_checks").select("id", head).or("marked.eq.true,status.eq.failed").is("reviewed_at", null);
+  if (pcs.error) (pcs as { count: number | null }).count = 0;
   const failed = [reports, contact, ais, rr, genus, verify, entries, photos].find((r) => r.error);
   if (failed) return json({ ok: false, error: "db", detail: failed.error?.message }, 500);
 
@@ -63,6 +67,7 @@ serve(async (req: Request) => {
   if (n(contact)) lines.push(`お問い合わせ: 未対応 ${n(contact)} 件`);
   if (n(ais)) lines.push(`AI の提案: 確認待ち ${n(ais)} 件`);
   if (n(trs)) lines.push(`翻訳の確認: 反映待ち ${n(trs)} 件（英訳・和訳の下書き）`);
+  if (n(pcs)) lines.push(`投稿の点検: 区分・綴りに印のついた投稿 ${n(pcs)} 件`);
   if (n(rr)) lines.push(`再調査の依頼: ${n(rr)} 件`);
   if (n(genus)) lines.push(`収録の依頼: この1日で ${n(genus)} 件`);
   if (n(verify)) lines.push(`検証のやり直し: ${n(verify)} 件`);
