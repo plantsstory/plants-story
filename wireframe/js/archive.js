@@ -2329,10 +2329,18 @@
         if (el.id === 'nb-epithet-row' && type === 'species' && q === 'sp') ok = false;
         el.hidden = !ok;
       });
-      if (epithetLabel) epithetLabel.textContent = type === 'clone' ? T('nb_epithet_optional') : T('nb_epithet');
+      // 原種 + Clone (a numbered plant of a species): the epithet is asked first and may be left blank; the clone's
+      // name or number comes second (owner, 11-27). Hybrid / 不明 + Clone keep the clone's name first (CSS).
+      var pg0 = $('page-contribute'), par = (document.querySelector('#page-contribute input[name="cultivar-parentage"]:checked') || {}).value || 'species';
+      if (pg0) pg0.setAttribute('data-parentage', par);
+      var spClone = type === 'clone' && par === 'species';
+      if (epithetLabel) epithetLabel.textContent = spClone ? T('nb_epithet_species_clone') : type === 'clone' ? T('nb_epithet_optional') : T('nb_epithet');
+      if (epithet) epithet.placeholder = spClone ? '例: papillilaminum' : '例: crystallinum';
       if (extraLabel) extraLabel.textContent = q === 'sp' ? T('nb_extra_sp') : (q === 'ssp' || q === 'var') ? T('nb_extra_sub') : T('nb_extra_locality');
       if (extra) extra.placeholder = (q === 'ssp' || q === 'var') ? '例: variegatum' : '例: Peru';
-      if (cultivarLabel) cultivarLabel.textContent = type === 'hybrid' ? T('nb_hybrid_name') : T('nb_clone_name');
+      if (cultivarLabel) cultivarLabel.textContent = type === 'hybrid' ? T('nb_hybrid_name') : spClone ? T('nb_clone_name_species') : T('nb_clone_name');
+      // the example matches the kind: 'Dark Mama' is a Hybrid, 'Fort Sherman' a numbered papillilaminum, 'King of Spades' a Clone
+      if (cultivarName) cultivarName.placeholder = (type === 'hybrid' ? '例: Dark Mama' : spClone ? '例: Fort Sherman' : '例: King of Spades') + '（引用符は不要）';
       // the kind decides which field comes first (CSS), and what the chosen chip means is said under the chips
       var pg = $('page-contribute'); if (pg) pg.setAttribute('data-ctype', type);
       var help = $('subcat-help');
@@ -2365,6 +2373,10 @@
     });
     document.querySelectorAll('#page-contribute input[name="cultivar-type"]').forEach(function (r) {
       r.addEventListener('change', function () { setTimeout(function () { refreshVisibility(); if (!seeded) compose(); }, 0); });
+    });
+    // 原種 ⇄ Hybrid / 不明 with Clone ticked keeps the type 'clone': the labels and the order follow the parentage too
+    document.querySelectorAll('#page-contribute input[name="cultivar-parentage"]').forEach(function (r) {
+      r.addEventListener('change', function () { setTimeout(refreshVisibility, 0); });
     });
     var genusSel = $('contribute-genus-select');
     if (genusSel) genusSel.addEventListener('change', function () { if (!seeded) compose(); });

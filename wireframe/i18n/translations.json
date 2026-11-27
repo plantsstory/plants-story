@@ -1476,6 +1476,14 @@
     "jp": "クローン名",
     "en": "Clone name"
   },
+  "nb_epithet_species_clone": {
+    "jp": "種小名（わからない場合は空欄で構いません）",
+    "en": "Species epithet (leave blank if unknown)"
+  },
+  "nb_clone_name_species": {
+    "jp": "クローン名・番号（ナンバリング）",
+    "en": "Clone name or number"
+  },
   "nb_hybrid_name": {
     "jp": "ハイブリッド名",
     "en": "Hybrid name"

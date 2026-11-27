@@ -2337,7 +2337,7 @@ html.pv-label #gallery-carousel .gallery__item[data-user-upload] .gallery__img-f
 /* ---- board 17 (11-19), first batch ---- */
 /* T213: the clone's / hybrid's own name comes first; the epithet is the optional one below it */
 #page-contribute .name-builder__grid { display: flex; flex-direction: column; gap: var(--s3); }
-#page-contribute[data-ctype="clone"] #nb-cultivar-row { order: -1; }
+#page-contribute[data-ctype="clone"]:not([data-parentage="species"]) #nb-cultivar-row { order: -1; }  /* 原種 + Clone: the epithet first (owner, 11-27) */
 #page-contribute .field-error { color: var(--color-danger, #9b2c2c); font-size: var(--fs-small); margin-top: 4px; display: none; }
 #page-contribute .field-error.visible { display: block; }
 /* T218: what the chosen chip means */
