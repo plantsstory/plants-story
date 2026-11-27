@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/utilities.css">
-  <link rel="stylesheet" href="css/admin.css?v=20261127q">
+  <link rel="stylesheet" href="css/admin.css?v=20261127t">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/record-gate.js?v=20261127b"></script>
   <script src="js/entry-meta.js?v=20261127b"></script>
@@ -60,10 +60,10 @@
       <button class="hamburger-btn" id="hamburger-btn" aria-label="メニュー">☰</button>
       <h1>Aroid Origins Admin</h1>
     </div>
-    <div class="flex-center-md">
+    <div class="flex-center-md header-actions">
       <span class="user-info" id="admin-email"></span>
       <button id="btn-logout">ログアウト</button>
-      <a href="index.html" style="color:#fff;font-size:var(--font-size-sm);text-decoration:none;opacity:0.7;">サイトへ</a>
+      <a href="index.html" class="header-site-link">サイトへ</a>
     </div>
   </header>
   <div class="admin-body">
@@ -100,6 +100,10 @@
       <a href="#" data-section="error-logs">エラー</a>
       <a href="#" data-section="external">リンク集</a>
       <a href="#" data-section="bulk">書き出し</a>
+      <div class="nav-account">
+        <span class="nav-account-email" id="nav-email"></span>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-logout-nav">ログアウト</button>
+      </div>
     </nav>
     <div class="nav-overlay" id="nav-overlay"></div>
     <main class="admin-content">
@@ -976,6 +980,8 @@ function enterAdmin(user) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-app').classList.remove('hidden');
   document.getElementById('admin-email').textContent = user.email;
+  var navEmail = document.getElementById('nav-email');
+  if (navEmail) navEmail.textContent = user.email;
   window._adminUser = user;
   // the records first (the inbox and the lists read them), then what waits for the owner
   loadAllCultivars().then(function() { if (window.refreshInbox) window.refreshInbox(); });
@@ -3439,5 +3445,6 @@ document.getElementById('btn-kr-reject').addEventListener('click', function() {
 <script src="js/admin-entry.js?v=20261127b"></script>
 <script src="js/admin-reports.js?v=20261127e"></script>
 <script src="js/admin-inbox.js?v=20261127q"></script>
+<script src="js/admin-mobile.js?v=20261127t"></script>
 </body>
 </html>
