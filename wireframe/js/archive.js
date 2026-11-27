@@ -2440,6 +2440,124 @@
   })();
 
   /* ============================================================
+     CONTRIBUTION FORM: scientific-name check (owner's list 2026-11-27, item 2)
+     When a species epithet is typed, the name is looked up in the archive first, then in GBIF's name
+     list (the world list that includes Kew's plant names; free, no key). A name it does not know gets a
+     note under the field and on the review step. The note never stops the post: newly described species
+     can be missing from the list for a while. If the list cannot be reached, nothing is said.
+     ============================================================ */
+  (function nameCheck() {
+    var $ = function (id) { return document.getElementById(id); };
+    var epithet = $('nb-epithet'), row = $('nb-epithet-row');
+    if (!epithet || !row) return;
+    var cache = {}, timer = null, seq = 0;
+    var state = { name: '', result: '' };   // result: '', 'known', 'missing', 'near'
+    var box = document.createElement('div');
+    box.id = 'nb-namecheck';
+    box.className = 'namecheck';
+    box.setAttribute('role', 'status');
+    box.hidden = true;
+    row.appendChild(box);
+
+    function binomial() {
+      var type = (document.querySelector('#page-contribute input[name="cultivar-type"]:checked') || {}).value || 'species';
+      var par = (document.querySelector('#page-contribute input[name="cultivar-parentage"]:checked') || {}).value || 'species';
+      var chip = document.querySelector('#species-subcategory .chip.active');
+      var q = chip ? chip.getAttribute('data-subcategory') : 'species';
+      if (type !== 'species' && !(type === 'clone' && par === 'species')) return '';
+      if (type === 'species' && q === 'sp') return '';
+      var g = (($('contribute-genus-select') || {}).value || '').trim();
+      var ep = String(epithet.value || '').normalize('NFKC').trim().toLowerCase().replace(/\s+/g, '');
+      if (!g || !/^[a-z][a-z-]{2,}$/.test(ep)) return '';
+      return g + ' ' + ep;
+    }
+    function inArchive(name) {
+      var data = (typeof cultivarData !== 'undefined' && cultivarData) ? cultivarData : (window.cultivarData || {});
+      var k = name.toLowerCase();
+      return Object.keys(data).some(function (n) {
+        var e = data[n] || {}, keys = [n].concat(e._aliases || []);
+        return keys.some(function (x) { x = String(x).toLowerCase(); return x === k || x.indexOf(k + ' ') === 0; });
+      });
+    }
+    function lookup(name) {
+      if (cache[name]) return cache[name];
+      var ctl = window.AbortController ? new AbortController() : null;
+      var to = setTimeout(function () { if (ctl) ctl.abort(); }, 6000);
+      cache[name] = fetch('https://api.gbif.org/v1/species/match?kingdom=Plantae&name=' + encodeURIComponent(name), ctl ? { signal: ctl.signal } : {})
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          clearTimeout(to);
+          if (!d) return '';
+          var g = name.split(' ')[0];
+          var sp = d.rank === 'SPECIES' || d.rank === 'SUBSPECIES' || d.rank === 'VARIETY' || d.rank === 'FORM';
+          if (d.matchType === 'EXACT' && sp) return { result: 'known' };
+          if (d.matchType === 'FUZZY' && sp && d.genus === g && d.canonicalName) {
+            var cn = d.canonicalName.split(' ').slice(0, 2).join(' ');
+            if (cn.toLowerCase() === name.toLowerCase()) return { result: 'known' };
+            return { result: 'near', suggest: cn.split(' ')[1] };
+          }
+          return { result: 'missing' };
+        })
+        .catch(function () { clearTimeout(to); delete cache[name]; return ''; });
+      return cache[name];
+    }
+    // the note's words, in the page's language
+    function words(name, r) {
+      var en = lang() === 'en', g = name.split(' ')[0];
+      return {
+        q: en ? '<i>' + esc(name) + '</i> was not found in the GBIF list of scientific names.' : '<i>' + esc(name) + '</i> は、学名の一覧（GBIF）で見つかりませんでした。',
+        s: r.result !== 'near' ? '' : (en ? 'Did you mean <i>' + esc(g + ' ' + r.suggest) + '</i>?' : 'もしかして <i>' + esc(g + ' ' + r.suggest) + '</i> ですか？')
+          + ' <button type="button" class="namecheck__btn" data-epithet-fix="' + esc(r.suggest) + '">' + (en ? 'Use this' : 'こちらにする') + '</button>',
+        note: en ? 'Please check the spelling. Newly described species can be missing from the list for a while. You can still post as it is.'
+          : '綴りを確かめてください。新しく発表された種は、一覧にまだ載っていないことがあります。このまま投稿もできます。',
+        review: en ? 'If it is a newly described species, you can record it as it is.' : '新しく発表された種なら、このまま記録して大丈夫です。',
+        fix: en ? 'Fix the name' : '名前を直す'
+      };
+    }
+    function show(name, r) {
+      state = { name: name, result: r ? r.result : '', suggest: r && r.suggest };
+      if (!r || r.result === 'known') { box.hidden = true; box.innerHTML = ''; return; }
+      var w = words(name, r);
+      box.innerHTML = '<p class="namecheck__q">' + w.q + '</p>' + (w.s.indexOf('<i>') !== -1 ? '<p class="namecheck__s">' + w.s + '</p>' : '') + '<p class="namecheck__note">' + w.note + '</p>';
+      box.hidden = false;
+    }
+    function check() {
+      var name = binomial(), my = ++seq;
+      if (!name) { show('', null); return; }
+      if (inArchive(name)) { show(name, { result: 'known' }); return; }
+      lookup(name).then(function (r) { if (my === seq) show(name, r); });
+    }
+    function later() { clearTimeout(timer); timer = setTimeout(check, 700); }
+    epithet.addEventListener('input', function () { box.hidden = true; later(); });
+    epithet.addEventListener('blur', function () { clearTimeout(timer); check(); });
+    var gs = $('contribute-genus-select'); if (gs) gs.addEventListener('change', later);
+    document.addEventListener('change', function (e) { if (e.target && /^(cultivar-type|cultivar-parentage)$/.test(e.target.name || '')) later(); });
+    document.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('#species-subcategory .chip')) later();
+      var b = e.target.closest && e.target.closest('[data-epithet-fix]');
+      if (!b) return;
+      // the label box at the top says the same name, so it follows (without being read again)
+      var nf = $('nf-input'), old = String(epithet.value || '').trim().toLowerCase();
+      if (nf && old && nf.value.trim().toLowerCase().split(/\s+/).pop() === old) nf.value = nf.value.replace(new RegExp(old.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*$', 'i'), b.getAttribute('data-epithet-fix'));
+      epithet.value = b.getAttribute('data-epithet-fix');
+      epithet.dispatchEvent(new Event('input', { bubbles: true }));
+      clearTimeout(timer); check();
+      if (window.aoContributeReview) setTimeout(window.aoContributeReview, 50);
+    });
+    // the review step asks this; the answer is only for the name now in the field
+    window.aoNameCheck = function () {
+      var n = binomial();
+      if (!n || n !== state.name || (state.result !== 'missing' && state.result !== 'near')) return null;
+      var w = words(n, state);
+      return '<div class="cstep-near namecheck-review"><p class="cstep-near__q">' + w.q + '</p>' + (state.result === 'near' ? '<p>' + w.s + '</p>' : '')
+        + '<p class="cstep-note">' + w.review + ' <a href="#" class="cstep-fix" data-goto="1">' + w.fix + '</a></p></div>';
+    };
+    // a language switch while the note is up: say it again in the new language
+    var _al = window.applyLanguage;
+    if (typeof _al === 'function') window.applyLanguage = function () { var r = _al.apply(this, arguments); if (!box.hidden) show(state.name, state); return r; };
+  })();
+
+  /* ============================================================
      GLOSSARY: link the first mention of each term inside origin text
      ============================================================ */
   var GLOSSARY_TERMS = [
@@ -3093,6 +3211,9 @@
         return '<li>' + sciHtml(nm) + ' <a href="#" data-nav="cultivar" data-key="' + esc(n) + '">この名前のページを見る</a></li>';
       }).join('') + '</ul><p class="cstep-note">同じ植物なら、そのページから写真や記録を足せます。別の植物なら、このまま記録して大丈夫です。<a href="#" class="cstep-fix" data-goto="1">名前を直す</a></p></div>';
     }
+    // the scientific-name check's note, said once more before recording (item 2, 11-27)
+    var nc = window.aoNameCheck ? window.aoNameCheck() : null;
+    if (nc) html += nc;
     var sug = titleSuggestion();
     if (sug) html += '<p class="cstep-suggest">表記の確認: <b>\'' + esc(sug) + '\'</b> ではありませんか？ <button type="button" class="cstep-suggest__btn" data-title-fix="' + esc(sug) + '">こちらにする</button> <span class="cstep-note">作出者の書いたとおりなら、このままで大丈夫です</span></p>';
     $('cstep-review').innerHTML = html;
@@ -3105,6 +3226,7 @@
     cn.dispatchEvent(new Event('input', { bubbles: true }));
     setTimeout(review, 50);
   });
+  window.aoContributeReview = function () { if ($('cstep-review') && step === LAST) review(); };
   function go(n, push) {
     var seed = isSeedling(), first = seed ? 2 : 1;
     n = Math.max(first, Math.min(LAST, n));
@@ -4007,7 +4129,13 @@
         var label = parentage === 'species' ? (clone ? '原種のナンバリング（Clone）' : '原種') : (parentage === 'hybrid' ? 'Hybrid' : '不明') + (clone ? '・Clone' : '');
         p.classList.add('nf-applied');
         var s = $('nf-summary');
-        if (s) { s.innerHTML = '区分は<b>「' + esc(label) + '」</b>にしました。 <button type="button" class="nf-link" data-nf-pick>選び直す</button>'; s.hidden = false; }
+        if (s) {
+          var en = lang() === 'en';
+          var labelEn = parentage === 'species' ? (clone ? 'Species, numbered plant (Clone)' : 'Species') : (parentage === 'hybrid' ? 'Hybrid' : 'Unknown') + (clone && parentage !== 'species' ? ', Clone' : '');
+          s.innerHTML = en ? 'Kind set to <b>' + esc(labelEn) + '</b>. <button type="button" class="nf-link" data-nf-pick>Choose again</button>'
+            : '区分は<b>「' + esc(label) + '」</b>にしました。 <button type="button" class="nf-link" data-nf-pick>選び直す</button>';
+          s.hidden = false;
+        }
         $('nf-guess').hidden = true;
         if (typeof gtag === 'function') gtag('event', 'name_first_apply', { kind: label });
       }, 30);

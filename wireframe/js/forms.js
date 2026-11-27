@@ -337,6 +337,8 @@ var _translationsReady = fetch('i18n/translations.json')
     translations = data;
     // Apply language once translations are loaded
     applyLanguage(currentLang);
+    // the word list can arrive before the end of the page is read (dialogs sit after the scripts): once more then
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function() { applyLanguage(currentLang); });
   })
   .catch(function() {});
 

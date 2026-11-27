@@ -2567,3 +2567,11 @@ html.pv-label .story__figure img { height: auto; aspect-ratio: 4 / 5; max-height
 #page-contribute.contribute--quick #quick-back { display: block; margin: 0 0 var(--s3); font-size: var(--fs-small); }
 #page-contribute.contribute--quick #origin-card { display: none; }
 .cstep-quick { margin: var(--s3) 0 0; padding: var(--s2) var(--s3); border-left: 3px solid #b5651d; font-size: var(--fs-small); }
+
+/* scientific-name check under the epithet field (item 2, 11-27): a note, never a stop */
+.namecheck { margin: var(--s1) 0 0; padding: var(--s2) var(--s3); border: 1px solid var(--color-rule); border-left: 3px solid #b5651d; font-size: var(--fs-small); line-height: 1.6; }
+.namecheck p { margin: 0; }
+.namecheck__q { font-weight: bold; }
+.namecheck__s { margin-top: var(--s1) !important; }
+.namecheck__note { margin-top: var(--s1) !important; color: var(--color-mid); }
+.namecheck__btn { font: inherit; font-weight: bold; padding: 2px 10px; margin-left: .3em; border: 1px solid currentColor; background: transparent; color: inherit; cursor: pointer; border-radius: 2px; }
