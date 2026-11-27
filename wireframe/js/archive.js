@@ -2360,6 +2360,28 @@
     var nbBox = $('name-builder'), pickBox = $('nb-pick'), chosenBox = $('nb-chosen'), chosenName = $('nb-chosen-name');
     var curTile = null, pickOpen = false, locAdded = false;
     var seeded = false; // true right after edit-mode prefill: keep the stored name until the user edits
+    // a blank that takes the focus by itself stays on screen (owner, 11-27: on a phone the page sometimes jumped
+    // past the field when the keyboard came up). The picker folds away above the field, the top bar steps aside
+    // and the keyboard takes half the screen, each at its own moment, so the field is put back in the visible
+    // part of the screen until they have all happened
+    function nbFocus(el) {
+      if (!el) return;
+      try { el.focus({ preventScroll: true }); } catch (x) { el.focus(); }
+      var vv = window.visualViewport, t0 = Date.now(), raf = 0;
+      function place() {
+        raf = 0;
+        if (document.activeElement !== el) return done();
+        var box = (el.closest && el.closest('.nb-slot')) || el, r = box.getBoundingClientRect();
+        if (!r.height) return;
+        var top = vv ? vv.offsetTop : 0, h = vv ? vv.height : window.innerHeight;
+        if (r.top < top + 8 || r.bottom > top + h - 8) window.scrollBy(0, r.top - (top + Math.max(8, h * 0.25)));
+      }
+      function soon() { if (!raf) raf = requestAnimationFrame(place); if (Date.now() - t0 > 1200) done(); }
+      function done() { if (vv) { vv.removeEventListener('resize', soon); vv.removeEventListener('scroll', soon); } clearInterval(iv); }
+      if (vv) { vv.addEventListener('resize', soon); vv.addEventListener('scroll', soon); }
+      var iv = setInterval(soon, 150);
+      soon();
+    }
 
     function currentType() {
       var r = document.querySelector('#page-contribute input[name="cultivar-type"]:checked');
@@ -2560,7 +2582,7 @@
         refreshVisibility(); onUserInput();
         // the typing starts in the first blank still empty
         var first = t === 'sp' ? extra : t === 'var' && clean(epithet.value) ? infra : t === 'loc' && clean(epithet.value) ? extra : epithet;
-        if (first) first.focus();
+        nbFocus(first);
       } else if (e.target.closest('#nb-repick')) {
         pickOpen = true; refreshVisibility();
         var on1 = document.querySelector('#nb-tiles .nb-tile.is-on') || document.querySelector('#nb-tiles .nb-tile'); if (on1) on1.focus();
@@ -2568,7 +2590,7 @@
         var nn = $('nb-none'), bt = e.target.closest('#nb-none-open');
         if (nn) { nn.hidden = !nn.hidden; bt.setAttribute('aria-expanded', nn.hidden ? 'false' : 'true'); }
       } else if (e.target.closest('#nb-add-loc')) {
-        locAdded = true; refreshVisibility(); if (extra) extra.focus();
+        locAdded = true; refreshVisibility(); nbFocus(extra);
       } else if (e.target.closest('#nb-rank-swap')) {
         chipTo(qualifier() === 'ssp' ? 'var' : 'ssp'); refreshVisibility(); onUserInput();
       }
@@ -2586,7 +2608,7 @@
       chip.click();
       // sp. has no epithet: what comes next is the locality, so the typing goes on there
       // (at once, not after a pause, so a fast typist's next letters are not left behind in the epithet)
-      if (chip.getAttribute('data-subcategory') === 'sp' && extra) { extra.value = epithet.value.trim() || extra.value; epithet.value = ''; refreshVisibility(); extra.focus(); onUserInput(); spUnpub(true); }
+      if (chip.getAttribute('data-subcategory') === 'sp' && extra) { extra.value = epithet.value.trim() || extra.value; epithet.value = ''; refreshVisibility(); nbFocus(extra); onUserInput(); spUnpub(true); }
     });
     // 「crystallinum var.」 typed into the epithet: the rank moves to its chip, and the typing goes on in the next field (11-27)
     if (epithet) epithet.addEventListener('input', function () {
@@ -2599,7 +2621,7 @@
       if (!chip.classList.contains('active')) chip.click();
       refreshVisibility();   // the lower-name field is shown now, so it can take the focus
       // the focus moves at once, so the next letter typed lands in the lower-name field
-      if (infra) { infra.value = m[3].trim() || infra.value; infra.focus(); }
+      if (infra) { infra.value = m[3].trim() || infra.value; nbFocus(infra); }
       onUserInput();
     });
     // the space typed after 「var.」 or 「sp.」 lands in the next field: it is not part of the name
@@ -2715,7 +2737,7 @@
       // 「sp」 alone (no dot) is not an epithet: it is the sp. chip
       if (/^sp$/i.test(v) && currentType() === 'species' && !qualifier()) {
         var spc = document.querySelector('#species-subcategory .chip[data-subcategory="sp"]');
-        if (spc) { epithet.value = ''; spc.click(); setTimeout(function () { if (extra) extra.focus(); onUserInput(); }, 0); }
+        if (spc) { epithet.value = ''; spc.click(); setTimeout(function () { nbFocus(extra); onUserInput(); }, 0); }
         return;
       }
       if (v.indexOf(' ') === -1 || !window.aoReadName) return;
