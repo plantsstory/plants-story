@@ -2580,3 +2580,35 @@ html.pv-label .story__figure img { height: auto; aspect-ratio: 4 / 5; max-height
 .nb-hits__go { color: var(--color-text-muted); text-decoration: underline; text-underline-offset: 3px; }
 .nb-hits__note { margin: var(--s1) 0 0; color: var(--color-text-muted); }
 .nb-hits__kind { color: var(--color-text-muted); font-size: var(--fs-xs, .85em); }
+
+/* 名前の書き方 (11-27): how sure the species is, as four plain answers with the way each is written beside it;
+   the lower name in its own field; the registered name drawn part by part */
+.nb-sure { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s1); margin: 0; }
+.nb-sure__opt { position: relative; display: flex; flex-direction: column; gap: 2px; min-height: var(--tap); padding: var(--s2) var(--s2) var(--s2) calc(var(--s2) + 1.4em); border: 1px solid var(--color-rule); background: var(--color-paper-2); cursor: pointer; line-height: 1.35; }
+.nb-sure__opt input { position: absolute; left: var(--s2); top: calc(var(--s2) + .2em); margin: 0; accent-color: var(--color-ink); }
+.nb-sure__opt:has(input:checked) { border-color: var(--color-ink); box-shadow: inset 0 0 0 1px var(--color-ink); }
+.nb-sure__lead { font-weight: bold; font-size: var(--fs-small); }
+.nb-sure__ex { font-family: var(--font-display); font-style: italic; font-size: 1rem; color: var(--color-mid); }
+#page-contribute .nb-sure__opt { display: flex !important; align-items: flex-start; justify-content: flex-start; min-height: var(--tap); }
+.nb-infra-open, .nb-infra-close { padding: 0; border: 0; background: none; color: var(--color-mid); font: inherit; font-size: var(--fs-small); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.nb-infra-open { margin: var(--s1) 0 0; }
+.nb-infra__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s3); margin: 0 0 var(--s1); }
+.nb-infra__head .form-label { margin: 0; }
+.nb-infra__ranks { display: inline-flex; gap: var(--s1); }
+#page-contribute .nb-infra__rank { display: inline-flex !important; align-items: center; gap: .35em; min-height: 36px; padding: 0 var(--s2); border: 1px solid var(--color-rule); background: var(--color-paper-2); font-size: var(--fs-small); cursor: pointer; }
+#page-contribute .nb-infra__rank:has(input:checked) { border-color: var(--color-ink); box-shadow: inset 0 0 0 1px var(--color-ink); background: var(--color-paper-2); padding-left: var(--s2); }
+.nb-infra__rank input { margin: 0; accent-color: var(--color-ink); }
+.nb-infra-close { margin-left: auto; }
+.nb-parts { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--s1) .55em; min-height: 3.2em; padding: var(--s2) var(--s3); border: 1px solid var(--color-rule); background: var(--color-paper); }
+.nb-parts:empty { display: none; }
+.nb-part { display: inline-flex; flex-direction: column; align-items: flex-start; }
+.nb-part__t { font-family: var(--font-display); font-weight: 600; font-size: 1.2rem; line-height: 1.2; color: var(--color-ink); padding-bottom: 2px; border-bottom: 2px solid var(--color-rule-strong); }
+.nb-part__t--it { font-style: italic; }
+.nb-part--genus .nb-part__t { color: var(--color-mid); font-weight: 500; border-bottom-color: var(--color-rule); }
+.nb-part--sure .nb-part__t, .nb-part--rank .nb-part__t { color: var(--color-accent-warm); border-bottom-color: var(--color-accent-warm); }
+.nb-part--loc .nb-part__t { border-bottom-style: dashed; }
+.nb-part--cross .nb-part__t { border-bottom-color: transparent; }
+.nb-part__w { margin-top: 3px; font-size: 11px; line-height: 1.2; color: var(--color-mid); white-space: nowrap; }
+.nb-parts:not(:empty) + .name-builder__result { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); border: 0; }
+#species-subcategory .chips { display: none !important; }
+#page-contribute .nb-sure__opt { text-align: left; align-items: flex-start !important; }

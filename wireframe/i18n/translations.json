@@ -1461,12 +1461,16 @@
     "en": "Species epithet (if derived from one species)"
   },
   "nb_extra_locality": {
-    "jp": "産地・入手元（任意）",
-    "en": "Locality / source (optional)"
+    "jp": "産地・呼び名（任意）",
+    "en": "Locality / label (optional)"
   },
   "nb_extra_sp": {
-    "jp": "産地・入手元（sp. には必須）",
-    "en": "Locality / source (required for sp.)"
+    "jp": "産地・呼び名（必須）",
+    "en": "Locality / label (required)"
+  },
+  "nb_epithet_near": {
+    "jp": "近い種の種小名",
+    "en": "Epithet of the nearest species"
   },
   "nb_extra_sub": {
     "jp": "亜種・変種名",
