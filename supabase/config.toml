@@ -22,6 +22,10 @@ verify_jwt = false
 [functions.admin-digest]
 verify_jwt = false
 
+# Translation drafts: called by pg_cron (x-cron-token) or by the owner from the admin (checked inside)
+[functions.translate-origin]
+verify_jwt = false
+
 [api]
 enabled = true
 # Port to use for the API URL.

@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/utilities.css">
-  <link rel="stylesheet" href="css/admin.css?v=20261127b">
+  <link rel="stylesheet" href="css/admin.css?v=20261127d">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/record-gate.js?v=20261127b"></script>
   <script src="js/entry-meta.js?v=20261127b"></script>
@@ -23,6 +23,7 @@
   <script src="js/admin-contact.js?v=20261127c"></script>
   <script src="js/admin-checks.js?v=20261127b"></script>
   <script src="js/admin-suggest.js?v=20261127b"></script>
+  <script src="js/admin-translations.js?v=20261127d"></script>
   <script src="js/admin-shops.js?v=20261127c"></script>
   <script src="js/admin-articles.js?v=20261127b"></script>
   <script src="js/admin-nurseries.js?v=20261127b"></script>
@@ -71,6 +72,7 @@
       <a href="#" data-section="delete-requests">報告 <span class="nav-badge d-none" id="dr-badge"></span></a>
       <a href="#" data-section="contact">お問い合わせ <span class="nav-badge d-none" id="contact-badge"></span></a>
       <a href="#" data-section="ai-suggest">AI の提案 <span class="nav-badge d-none" id="ais-badge"></span></a>
+      <a href="#" data-section="translations">翻訳の確認 <span class="nav-badge d-none" id="tr-badge"></span></a>
       <a href="#" data-section="research-requests">再調査の依頼 <span class="nav-badge d-none" id="rr-badge"></span></a>
       <a href="#" data-section="genus-requests">収録の依頼 <span class="nav-badge d-none" id="gr-badge"></span></a>
       <a href="#" data-section="new-posts">新しい投稿 <span class="nav-badge d-none" id="new-badge"></span></a>
@@ -113,6 +115,13 @@
         <h2 class="section-title">AI の提案</h2>
         <p class="desc-text">AI が出典つきで調べた値です。「採用」でその記録に入り、「見送る」で消えます。出典のない提案は採用しないでください。</p>
         <div id="ai-suggest-root"></div>
+      </section>
+
+      <!-- ---- TRANSLATIONS (11-27) ---- -->
+      <section id="sec-translations" class="hidden">
+        <h2 class="section-title">翻訳の確認</h2>
+        <p class="desc-text">投稿された由来の文章を、AI が反対の言語に訳した下書きです。ここで反映するまで、サイトの反対の言語の画面には「翻訳を反映中」と出ます。学名・品種名・人名・ナーセリー名・地名はアルファベットのままが正しい形です。⚠ の付いた所を確かめてから反映してください。</p>
+        <div id="translations-root"></div>
       </section>
 
       <!-- ---- NEW POSTS ---- -->
@@ -982,6 +991,7 @@ var SECTION_LOADERS = {
   'delete-requests': function() { loadDeletionRequests(); },
   'contact': function() { if (window.loadContactMessages) window.loadContactMessages(); },
   'ai-suggest': function() { if (window.loadAiSuggestions) window.loadAiSuggestions(); },
+  'translations': function() { if (window.loadTranslations) window.loadTranslations(); },
   'research-requests': function() { loadResearchRequests(); },
   'genus-requests': function() { loadGenusRequests().then(function() { if (window.markInboxSeen) window.markInboxSeen('genus'); }); },
   'new-posts': function() { if (window.loadNewPosts) window.loadNewPosts(); },
@@ -3418,6 +3428,6 @@ document.getElementById('btn-kr-reject').addEventListener('click', function() {
 </script>
 <script src="js/admin-entry.js?v=20261127b"></script>
 <script src="js/admin-reports.js?v=20261127e"></script>
-<script src="js/admin-inbox.js?v=20261127c"></script>
+<script src="js/admin-inbox.js?v=20261127d"></script>
 </body>
 </html>

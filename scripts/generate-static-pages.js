@@ -115,7 +115,9 @@ function staticEntryHtml(c, ctx) {
   if (type !== 'seedling') cells += '<div class="specimen__cell specimen__cell--wide specimen__cell--verify"><span class="specimen__k">検証</span><span class="specimen__v">' + (c.verified_at ? '<span class="verified-mark">✓</span> 検証済 <span class="num">' + new Date(c.verified_at).toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' }).replace(/-/g, '.') + '</span>' : '未検証') + '</span></div>';
   const aliases = (c.aliases || []).filter(a => /[A-Za-z]/.test(a) && !/[゠-ヿ]/.test(a)).slice(0, 3);
   const rest = name.startsWith(genus + ' ') ? name.slice(genus.length + 1) : name;
-  let text = String(o.body || s.notes || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  // the stub is the Japanese page: an English record with an approved Japanese translation shows the translation (11-27)
+  const trJa = o.tr && o.tr.ja && o.tr.ja.from === o.body && !o.tr.ja.keep ? String(o.tr.ja.text || '') : '';
+  let text = String(trJa || o.body || s.notes || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
   if (text.length > 260) text = text.slice(0, 259) + '…';
   let h = '<article id="static-entry" class="container static-entry">';
   h += '<nav class="breadcrumb" aria-label="パンくずリスト"><a href="' + SITE + '/">トップ</a><span class="breadcrumb__sep">/</span><a href="' + SITE + '/' + genus.toLowerCase() + '/">' + escAttr(genus) + '</a><span class="breadcrumb__sep">/</span><span>' + escAttr(rest) + '</span></nav>';

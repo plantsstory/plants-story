@@ -135,6 +135,13 @@
     // a % is shown only for a record that cites something (same rule as the record head)
     d.hasSources = !!o && (o.source_type === 'ipni_powo' || (o.sources || []).some(function (x) { return x && clean(x.url); }) || !!clean(o.source_url));
     d.textEn = clean(o && o.body_en) || d.text;
+    // a person's words in each language: the body where it is written in that language, an approved translation,
+    // or nothing while the translation waits for the owner (11-27); the story then picks another entry
+    if (byPerson && clean(o.body) && window.RecordText) {
+      var rtJ = window.RecordText.recordText(o, 'jp'), rtE = window.RecordText.recordText(o, 'en');
+      d.text = rtJ.state === 'pending' ? '' : rtJ.text;
+      d.textEn = rtE.state === 'pending' ? '' : rtE.text;
+    }
     var sf = (s.formula && typeof s.formula === 'object') ? s.formula : {};
     var dbp = entry._parents || [];
     d.parentA = clean(dbp[0]) || clean((d.formula && d.formula.parentA) || sf.parentA || s.parentA || s.parent_a);
@@ -1229,9 +1236,10 @@
     // Candidates in order of preference; within each tier, entries with a photo come first
     // (the front page is a plate, so a story without an image is the last resort).
     var hasThumb = function (d) { return !!thumbUrl(d.displayName); };
+    var said = function (d) { return (lang() === 'en' ? d.textEn : d.text) || ''; };
     var tiers = [
-      all.filter(function (d) { return d.type === 'species' && d.trust >= 70 && d.text.length >= 60; }),
-      all.filter(function (d) { return d.text.length >= 60; })
+      all.filter(function (d) { return d.type === 'species' && d.trust >= 70 && said(d).length >= 60; }),
+      all.filter(function (d) { return said(d).length >= 60; })
     ];
     var pool = [];
     for (var ti = 0; ti < tiers.length && !pool.length; ti++) pool = tiers[ti].filter(hasThumb);

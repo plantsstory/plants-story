@@ -483,3 +483,17 @@ body {
 .adm-text-center-gray { text-align: center; color: var(--color-gray); }
 .adm-bg-light { background: #f5f5f5; }
 .adm-stat-value { font-size: var(--font-size-lg); font-weight: 700; }
+
+/* ---- 翻訳の確認 (11-27) ---- */
+.tr-row { background: var(--color-white); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); padding: var(--space-md); margin-bottom: var(--space-md); }
+.tr-head { margin-bottom: var(--space-sm); }
+.tr-dir, .tr-model { font-size: var(--font-size-xs); color: var(--color-gray); margin-left: 6px; }
+.tr-cols { display: grid; grid-template-columns: 1fr; gap: var(--space-md); }
+@media (min-width: 900px) { .tr-cols { grid-template-columns: 1fr 1fr; } }
+.tr-label { font-size: var(--font-size-xs); color: var(--color-gray); margin-bottom: 4px; }
+.tr-src { white-space: pre-wrap; font-size: var(--font-size-sm); line-height: 1.8; background: var(--color-bg, #f6f6f4); border-radius: var(--radius-sm, 4px); padding: var(--space-sm); }
+.tr-text { width: 100%; box-sizing: border-box; font: inherit; font-size: var(--font-size-sm); line-height: 1.8; padding: var(--space-sm); border: 1px solid var(--color-light, #ddd); border-radius: var(--radius-sm, 4px); }
+.tr-flag { font-size: var(--font-size-xs); margin-top: 6px; line-height: 1.6; }
+.tr-flag--warn { color: #9a5b00; }
+.tr-flag--info { color: var(--color-gray); }
+.tr-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: var(--space-sm); }

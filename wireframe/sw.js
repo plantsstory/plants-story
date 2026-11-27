@@ -1,8 +1,8 @@
 // Service Worker for Aroid Origins PWA
-var CACHE_VERSION = 'aroid-origins-v211';
+var CACHE_VERSION = 'aroid-origins-v212';
 // Must match the ?v= cache buster in index.html — otherwise the precache
 // URLs never match real requests and every asset downloads twice.
-var ASSET_VERSION = '20261127n';
+var ASSET_VERSION = '20261127o';
 var OFFLINE_PAGE = './offline.html';
 // the site's top address ('/' on the custom domain), where index.html is the app shell
 var ROOT_PATH = new URL('./', self.location).pathname;
@@ -15,6 +15,7 @@ var STATIC_ASSETS = [
   './js/entry-meta.js?v=' + ASSET_VERSION,
   './js/tools.js?v=' + ASSET_VERSION,
   './js/record-gate.js?v=' + ASSET_VERSION,
+  './js/record-text.js?v=' + ASSET_VERSION,
   './js/app-core.js?v=' + ASSET_VERSION,
   './js/pages.js?v=' + ASSET_VERSION,
   './js/forms.js?v=' + ASSET_VERSION,

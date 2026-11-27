@@ -959,9 +959,15 @@ function renderOriginsInner(cultivarName, container) {
       rh += '</header>';
     }
     // body: the prose is the record; the field table only stands in when there is no prose
-    var bodyText = (currentLang === 'en' && origin.body_en) ? origin.body_en : origin.body;
-    if (bodyText && String(bodyText).trim()) {
-      rh += '<div class="record__body">' + recordParagraphs(bodyText) + '</div>';
+    // a person's words in the other language wait for the owner's approval of the translation (11-27): until then
+    // the record says so, and the original is one tap away; no half-translated text is drawn
+    var rt = window.RecordText ? window.RecordText.recordText(origin, currentLang) : { text: (currentLang === 'en' && origin.body_en) ? origin.body_en : origin.body, state: 'ok' };
+    var bodyText = rt.text;
+    if (rt.state === 'pending') {
+      rh += '<div class="record__body record__body--pending"><p class="record__pending">' + escHtml(t('translation_pending')) + '</p>'
+        + '<details class="record__original"><summary>' + escHtml(t('translation_show_original')) + '</summary>' + recordParagraphs(rt.original) + '</details></div>';
+    } else if (bodyText && String(bodyText).trim()) {
+      rh += '<div class="record__body">' + (rt.state === 'original' ? '<p class="record__orig-label mono">' + escHtml(t('translation_original_label')) + '</p>' : '') + recordParagraphs(bodyText) + '</div>';
     } else if (origin.structured) {
       rh += '<div class="record__body record__body--fields">' + renderStructuredOrigin(origin.structured) + '</div>';
     }

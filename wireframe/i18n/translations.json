@@ -1624,6 +1624,18 @@
     "jp": "出典なし",
     "en": "no sources"
   },
+  "translation_pending": {
+    "jp": "この記録は英語で書かれています。日本語訳を反映中です。",
+    "en": "This record was written in Japanese. The English translation is being reviewed."
+  },
+  "translation_show_original": {
+    "jp": "原文（英語）を見る",
+    "en": "Show the original (Japanese)"
+  },
+  "translation_original_label": {
+    "jp": "原文のまま",
+    "en": "As written (original language)"
+  },
   "individuals_title": {
     "jp": "個体（番号・名前のついた株）",
     "en": "Individuals (numbered or named plants)"

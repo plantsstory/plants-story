@@ -1156,7 +1156,9 @@ document.addEventListener('click', function(e) {
       var today = new Date().toISOString().split('T')[0];
       // a number is given, not bred or published: 「〜がつけた番号・名前」 (board 15 T1)
       var bodyJp = "'" + code + "' は、" + namer + ' が' + (year ? ' ' + year + ' 年に' : '') + ' ' + target.name + ' の 1 株につけた番号・名前。' + (note ? note : '');
-      var bodyEn = "'" + code + "' is the number or name " + namer + ' gave to one plant of ' + target.name + (year ? ' in ' + year : '') + '.' + (note ? ' ' + note : '');
+      // the site's own sentence has an English twin; a note is the person's words and is translated with the owner's
+      // approval like any other record (11-27), so the English twin is kept only when there is no note
+      var bodyEn = note ? '' : "'" + code + "' is the number or name " + namer + ' gave to one plant of ' + target.name + (year ? ' in ' + year : '') + '.';
       var origin = { body: bodyJp, body_en: bodyEn, trust: 30, trustClass: 'trust--low', source_type: 'manual', source_tier: null, source_name: '', source_url: '', source_language: 'ja',
         parentage: null, discovery_year: year, discoverer_or_breeder: null, native_region: null, first_description: null,
         structured: { origin_type: 'clone', namer: namer || null, naming_year: year, notes: note || '', citation_links: [],

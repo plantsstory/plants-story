@@ -74,7 +74,9 @@
   function description(rec) {
     var name = displayName(rec);
     var o = records(rec)[0] || {}, s = o.structured || {};
-    var text = clean(o.body) || clean(s.notes);
+    // an English record with an approved Japanese translation is described in Japanese (11-27)
+    var trJa = o.tr && o.tr.ja && o.tr.ja.from === o.body && !o.tr.ja.keep ? clean(o.tr.ja.text) : '';
+    var text = trJa || clean(o.body) || clean(s.notes);
     if (text.length > DESC_LEN) text = cutText(text, DESC_LEN);
     if (!text) {
       var type = rec && rec.type && rec.type !== 'species' ? kind(rec) : (TYPE_JP[(rec && rec.type) || s.origin_type] || '');

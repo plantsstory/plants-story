@@ -9,7 +9,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
  * (ALERT_EMAIL, else the published contact address). It never mails anyone else and changes no data.
  * Counted: open reports, unhandled contact messages, pending AI suggestions, open re-research requests, listing
  * requests from the last day, entries whose check must be redone, and entries and photos that other people added in
- * the last day (the owner's own posts are left out).
+ * the last day (the owner's own posts are left out), and translations waiting for approval (翻訳の確認, 11-27).
  */
 
 const OWNER_ID = "629508da-9fdd-4d3a-9ec6-22fd3bdb7346";
@@ -29,7 +29,7 @@ serve(async (req: Request) => {
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
   const head = { count: "exact" as const, head: true };
 
-  const [reports, contact, ais, rr, genus, verify, entries, photos] = await Promise.all([
+  const [reports, contact, ais, rr, genus, verify, entries, photos, trs] = await Promise.all([
     db.from("deletion_requests").select("id", head).eq("status", "pending"),
     db.from("contact_messages").select("id", head).or("status.is.null,status.neq.done"),
     db.from("ai_suggestions").select("id", head).eq("status", "pending"),
@@ -38,7 +38,10 @@ serve(async (req: Request) => {
     db.from("cultivars").select("id", head).like("verification_note", "[要再確認]%"),
     db.from("cultivars").select("cultivar_name").not("user_id", "is", null).neq("user_id", OWNER_ID).gte("created_at", since).limit(10),
     db.from("cultivar_images").select("id", head).not("user_id", "is", null).neq("user_id", OWNER_ID).gte("created_at", since),
+    db.from("origin_translations").select("id", head).eq("status", "drafted"),
   ]);
+  // before the translation migration is applied the table is missing: count it as 0, not as a failed digest
+  if (trs.error) (trs as { count: number | null }).count = 0;
   const failed = [reports, contact, ais, rr, genus, verify, entries, photos].find((r) => r.error);
   if (failed) return json({ ok: false, error: "db", detail: failed.error?.message }, 500);
 
@@ -48,6 +51,7 @@ serve(async (req: Request) => {
   if (n(reports)) lines.push(`報告: ${n(reports)} 件（記録の誤り・写真）`);
   if (n(contact)) lines.push(`お問い合わせ: 未対応 ${n(contact)} 件`);
   if (n(ais)) lines.push(`AI の提案: 確認待ち ${n(ais)} 件`);
+  if (n(trs)) lines.push(`翻訳の確認: 反映待ち ${n(trs)} 件（英訳・和訳の下書き）`);
   if (n(rr)) lines.push(`再調査の依頼: ${n(rr)} 件`);
   if (n(genus)) lines.push(`収録の依頼: この1日で ${n(genus)} 件`);
   if (n(verify)) lines.push(`検証のやり直し: ${n(verify)} 件`);

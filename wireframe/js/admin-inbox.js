@@ -48,10 +48,11 @@
       sb.rpc('admin_contact_messages', { p_limit: 500 }),
       sb.from('ai_suggestions').select('id, cultivar_name, field', { count: 'exact' }).eq('status', 'pending').order('created_at', { ascending: false }).limit(3),
       sb.from('research_requests').select('id, cultivar_name', { count: 'exact' }).in('status', ['pending', 'approved']).order('created_at', { ascending: false }).limit(3),
-      sb.rpc('genus_request_summary')
+      sb.rpc('genus_request_summary'),
+      sb.from('origin_translations').select('id, cultivar_name, src_lang', { count: 'exact' }).eq('status', 'drafted').order('created_at').limit(3)
     ]);
     function part(r) { return { n: r.error ? null : (r.count || 0), rows: r.error ? [] : (r.data || []), err: r.error }; }
-    var reports = part(res[0]), ais = part(res[2]), rr = part(res[3]);
+    var reports = part(res[0]), ais = part(res[2]), rr = part(res[3]), trs = part(res[5]);
     var openMsgs = res[1].error ? [] : (res[1].data || []).filter(function (m) { return m.status !== 'done'; });
     var contact = { n: res[1].error ? null : openMsgs.length, rows: openMsgs.slice(0, 3), err: res[1].error };
     var genusSeen = seen('genus');
@@ -75,6 +76,8 @@
         items: contact.rows.map(function (r) { return (CAT[r.category] || r.category) + ' · ' + r.name; }) },
       { key: 'ai-suggest', badge: 'ais-badge', title: 'AI の提案', p: ais, sub: '採用か見送りを待っている値',
         items: ais.rows.map(function (r) { return r.cultivar_name + ' · ' + (FIELD[r.field] || r.field); }) },
+      { key: 'translations', badge: 'tr-badge', title: '翻訳の確認', p: trs, sub: '反映を待っている英訳・和訳の下書き',
+        items: trs.rows.map(function (r) { return r.cultivar_name + (r.src_lang === 'en' ? ' · 英語 → 日本語' : ' · 日本語 → 英語'); }) },
       { key: 'research-requests', badge: 'rr-badge', title: '再調査の依頼', p: rr, sub: '利用者からの AI 再調査の依頼',
         items: rr.rows.map(function (r) { return r.cultivar_name; }) },
       { key: 'genus-requests', badge: 'gr-badge', title: '収録の依頼', p: genus, sub: '前に開いてから新しく届いた属・名前の依頼',
