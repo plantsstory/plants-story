@@ -69,6 +69,14 @@ jobs:
       - name: Generate static SEO stub pages
         if: steps.changed.outputs.run == 'true'
         run: node scripts/generate-static-pages.js
+      # 11-27: shrink the scripts and styles that phones download (about 30% less, gzip 341 KB -> 239 KB).
+      # Runs last, after every step that reads wireframe/js, so the checks and generators see the source.
+      # JS keeps its syntax as written: full --minify (syntax rewrite) broke the plant page in app-core.js.
+      - name: Shrink scripts and styles for the live site
+        if: steps.changed.outputs.run == 'true'
+        run: |
+          npx --yes esbuild@0.24.0 wireframe/js/*.js --minify-whitespace --minify-identifiers --log-level=warning --outdir=wireframe/js --allow-overwrite
+          npx --yes esbuild@0.24.0 wireframe/css/*.css --minify --log-level=warning --outdir=wireframe/css --allow-overwrite
       - uses: actions/configure-pages@v5
         if: steps.changed.outputs.run == 'true'
       - uses: actions/upload-pages-artifact@v3
