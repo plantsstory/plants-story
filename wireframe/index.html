@@ -566,16 +566,27 @@
           <label class="form-label" data-i18n="label_name">名前</label>
           <!-- Species qualifier chips (ids kept: forms.js reads them). Shown only for species -->
           <div id="species-subcategory" class="species-subcategory d-none">
-            <!-- 11-27 (owner: 記載種 / sp. … should read at a glance): how sure the species is, asked in plain words with the
-                 way each is written beside it. The chips below stay as the form's state (forms.js, drafts) and are hidden -->
-            <p class="form-label text-sm mb-xs" id="nb-sure-q">種はわかっていますか</p>
-            <div class="nb-sure" role="radiogroup" aria-labelledby="nb-sure-q">
-              <label class="nb-sure__opt"><input type="radio" name="nb-sure" value="species" checked><span class="nb-sure__lead">わかる</span><span class="nb-sure__ex">crystallinum</span></label>
-              <label class="nb-sure__opt"><input type="radio" name="nb-sure" value="cf"><span class="nb-sure__lead">たぶんこの種</span><span class="nb-sure__ex">cf. regale</span></label>
-              <label class="nb-sure__opt"><input type="radio" name="nb-sure" value="aff"><span class="nb-sure__lead">この種に近い別の種</span><span class="nb-sure__ex">aff. besseae</span></label>
-              <label class="nb-sure__opt"><input type="radio" name="nb-sure" value="sp"><span class="nb-sure__lead">わからない・名前がまだない</span><span class="nb-sure__ex">sp. "Peru"</span></label>
+            <!-- 11-27 (owner: 記載種 / sp. … should read at a glance; he chose 「見本から選ぶ」): the person picks the example
+                 nearest the label, and the name is filled in as a form with blanks. The chips below stay as the form's state
+                 (forms.js, drafts) and are hidden -->
+            <div class="nb-pick" id="nb-pick">
+              <p class="nb-pick__q" id="nb-pick-q">名札に近い書き方を選んでください</p>
+              <p class="nb-pick__sub">選ぶと、空欄つきの形が出ます</p>
+              <div class="nb-tiles" id="nb-tiles" role="group" aria-labelledby="nb-pick-q" tabindex="-1">
+                <button type="button" class="nb-tile" data-tile="species"><span class="nb-tile__ex">crystallinum</span><span class="nb-tile__w">学名がわかる種</span></button>
+                <button type="button" class="nb-tile" data-tile="loc"><span class="nb-tile__ex">crystallinum <span class="nb-tile__u">"Peru"</span></span><span class="nb-tile__w">学名と産地</span></button>
+                <button type="button" class="nb-tile" data-tile="cf"><span class="nb-tile__ex"><span class="nb-tile__u">cf.</span> regale</span><span class="nb-tile__w">たぶんこの種</span></button>
+                <button type="button" class="nb-tile" data-tile="aff"><span class="nb-tile__ex"><span class="nb-tile__u">aff.</span> besseae</span><span class="nb-tile__w">似ているが別の種</span></button>
+                <button type="button" class="nb-tile" data-tile="sp"><span class="nb-tile__ex"><span class="nb-tile__u">sp.</span> "Peru"</span><span class="nb-tile__w">学名がまだない</span></button>
+                <button type="button" class="nb-tile" data-tile="var"><span class="nb-tile__ex">crystallinum <span class="nb-tile__u">var.</span> …</span><span class="nb-tile__w">変種・亜種</span></button>
+              </div>
+              <button type="button" class="nb-link" id="nb-none-open" aria-expanded="false">どれにも当てはまらないとき</button>
+              <p class="nb-none" id="nb-none" hidden>交配でできた名前なら「1. どんな名前ですか」で Hybrid か 不明 を、1 株だけの名前なら「2. 1 株だけの名前（Clone）ですか」で「はい」を選ぶと、合う欄が出ます。</p>
             </div>
-            <p class="subcat-help" id="subcat-help"></p>
+            <div class="nb-chosen" id="nb-chosen" hidden>
+              <p class="nb-chosen__name" id="nb-chosen-name"></p>
+              <button type="button" class="nb-link" id="nb-repick">書き方を選び直す</button>
+            </div>
             <div class="chips" hidden>
               <button type="button" class="chip active" aria-pressed="true" data-subcategory="species">記載種</button>
               <button type="button" class="chip" aria-pressed="false" data-subcategory="sp">sp.（種が未確定）</button>
@@ -585,30 +596,37 @@
               <button type="button" class="chip" aria-pressed="false" data-subcategory="var">var.（変種）</button>
             </div>
           </div>
-          <div class="name-builder__grid">
+          <!-- for a species the fields below are laid out as the name itself, with the fixed words (the genus, cf., var.,
+               the quotes) between them and what each blank is under it (CSS .nb-tpl-on). The spans are shown only then -->
+          <div class="name-builder__grid" id="nb-grid">
+            <span class="nb-tok nb-tok--genus" id="nb-tok-genus"><span class="nb-tok__t" id="nb-tok-genus-t"></span><span class="nb-tok__w">属</span></span>
+            <span class="nb-tok nb-tok--q" id="nb-tok-q"><span class="nb-tok__t" id="nb-tok-q-t"></span><span class="nb-tok__w" id="nb-tok-q-w"></span></span>
             <div class="name-builder__field" data-for="species clone" id="nb-epithet-row">
-              <label class="form-label text-sm" for="nb-epithet" id="nb-epithet-label">種小名</label>
-              <input type="text" class="form-input" id="nb-epithet" placeholder="例: crystallinum" autocapitalize="off" autocomplete="off" spellcheck="false">
-            </div>
-            <!-- a subspecies or variety has its own field, so the locality field always means the locality (11-27) -->
-            <div class="name-builder__field" data-for="species" id="nb-infra-row">
-              <button type="button" class="nb-infra-open" id="nb-infra-open" aria-expanded="false">＋ 亜種・変種がある</button>
-              <div class="nb-infra" id="nb-infra-box" hidden>
-                <div class="nb-infra__head">
-                  <span class="form-label text-sm" id="nb-infra-q">亜種・変種</span>
-                  <span class="nb-infra__ranks" role="radiogroup" aria-labelledby="nb-infra-q">
-                    <label class="nb-infra__rank"><input type="radio" name="nb-rank" value="var" checked><span>変種 var.</span></label>
-                    <label class="nb-infra__rank"><input type="radio" name="nb-rank" value="ssp"><span>亜種 ssp.</span></label>
-                  </span>
-                  <button type="button" class="nb-infra-close" id="nb-infra-close">やめる</button>
-                </div>
-                <input type="text" class="form-input" id="nb-infra" placeholder="例: variegatum" autocapitalize="off" autocomplete="off" spellcheck="false" aria-labelledby="nb-infra-q">
+              <div class="nb-slot">
+                <label class="form-label text-sm" for="nb-epithet" id="nb-epithet-label">種小名</label>
+                <input type="text" class="form-input" id="nb-epithet" placeholder="例: crystallinum" autocapitalize="off" autocomplete="off" spellcheck="false">
               </div>
             </div>
-            <div class="name-builder__field" data-for="species" id="nb-extra-row">
-              <label class="form-label text-sm" for="nb-extra" id="nb-extra-label">産地・呼び名（任意）</label>
-              <input type="text" class="form-input" id="nb-extra" placeholder="例: Peru" autocomplete="off">
+            <span class="nb-tok nb-tok--rank" id="nb-tok-rank"><span class="nb-tok__t" id="nb-tok-rank-t"></span><span class="nb-tok__w" id="nb-tok-rank-w"></span></span>
+            <!-- a subspecies or variety has its own blank, so the locality blank always means the locality (11-27) -->
+            <div class="name-builder__field" data-for="species" id="nb-infra-row">
+              <div class="nb-slot">
+                <label class="form-label text-sm" for="nb-infra" id="nb-infra-label">変種名</label>
+                <input type="text" class="form-input" id="nb-infra" placeholder="例: variegatum" autocapitalize="off" autocomplete="off" spellcheck="false">
+              </div>
             </div>
+            <span class="nb-tok nb-tok--quote" id="nb-tok-qo"><span class="nb-tok__t">"</span></span>
+            <div class="name-builder__field" data-for="species" id="nb-extra-row">
+              <div class="nb-slot">
+                <label class="form-label text-sm" for="nb-extra" id="nb-extra-label">産地・呼び名（任意）</label>
+                <input type="text" class="form-input" id="nb-extra" placeholder="例: Peru" autocomplete="off">
+              </div>
+            </div>
+            <span class="nb-tok nb-tok--quote" id="nb-tok-qc"><span class="nb-tok__t">"</span></span>
+            <span class="nb-tpl-more" id="nb-tpl-more">
+              <button type="button" class="nb-link" id="nb-add-loc">＋ 産地・呼び名をつける</button>
+              <button type="button" class="nb-link" id="nb-rank-swap"></button>
+            </span>
             <div class="name-builder__field" data-for="clone hybrid" id="nb-cultivar-row">
               <label class="form-label text-sm" for="nb-cultivar" id="nb-cultivar-label">クローン名</label>
               <input type="text" class="form-input" id="nb-cultivar" placeholder="例: Dark Mama（引用符は不要）" autocomplete="off">
@@ -618,6 +636,7 @@
               <input type="text" class="form-input" id="nb-seedlabel" placeholder="例: HR1、#3" autocomplete="off">
             </div>
           </div>
+          <p class="subcat-help" id="subcat-help"></p>
           <p class="text-xs text-muted mt-xs" id="nb-hint" data-for="seedling">実生の登録名は下の「交配式」から自動で作られます（母 × 父）。</p>
           <label class="form-label text-sm mt-sm" for="cultivar-name-input">登録名（自動生成）</label>
           <!-- the name, part by part, with what each part is under it (11-27); the box under it stays the form's value -->

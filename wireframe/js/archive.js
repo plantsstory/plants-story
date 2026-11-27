@@ -2354,8 +2354,11 @@
     if (!result || !$('name-builder')) return;
     var epithet = $('nb-epithet'), extra = $('nb-extra'), cultivarName = $('nb-cultivar'), seedLabel = $('nb-seedlabel');
     var epithetLabel = $('nb-epithet-label'), extraLabel = $('nb-extra-label'), cultivarLabel = $('nb-cultivar-label');
-    // the lower name (subspecies / variety) has its own field and its own small switch (11-27)
-    var infra = $('nb-infra'), infraBox = $('nb-infra-box'), infraOpen = $('nb-infra-open'), partsBox = $('nb-parts');
+    // the lower name (subspecies / variety) has its own field (11-27)
+    var infra = $('nb-infra'), partsBox = $('nb-parts'), infraLabel = $('nb-infra-label');
+    // 見本から選ぶ (owner, 11-27): the example nearest the label is picked, and the fields are laid out as that name
+    var nbBox = $('name-builder'), pickBox = $('nb-pick'), chosenBox = $('nb-chosen'), chosenName = $('nb-chosen-name');
+    var curTile = null, pickOpen = false, locAdded = false;
     var seeded = false; // true right after edit-mode prefill: keep the stored name until the user edits
 
     function currentType() {
@@ -2424,6 +2427,7 @@
       }
       result.value = name;
       drawParts(name ? parts : null);
+      syncTpl();
       result.dispatchEvent(new Event('input', { bubbles: true }));
     }
     // the registered name drawn part by part, each with a word under it saying what it is (11-27): 「cf.」 reads as
@@ -2439,7 +2443,8 @@
     function drawParts(parts) {
       if (!partsBox) return;
       var type = currentType();
-      if (!parts || type === 'seedling') { partsBox.innerHTML = ''; return; }
+      // a species is written in the laid-out form itself, so the box under it only holds the name
+      if (!parts || type === 'seedling' || type === 'species') { partsBox.innerHTML = ''; return; }
       var en = lang() === 'en', g = (($('contribute-genus-select') || {}).value || '').trim();
       var list = (g ? [[g, 'genus']] : []).concat(parts).filter(function (p) { return p[0]; });
       partsBox.innerHTML = list.map(function (p) {
@@ -2457,8 +2462,9 @@
       document.querySelectorAll('#name-builder [data-for]').forEach(function (el) {
         var ok = el.getAttribute('data-for').split(' ').indexOf(type) !== -1;
         if (el.id === 'nb-epithet-row' && type === 'species' && q === 'sp') ok = false;
-        // a subspecies or variety is written only under a species that is known (not sp. / aff. / cf.)
-        if (el.id === 'nb-infra-row' && type === 'species' && (q === 'sp' || q === 'aff' || q === 'cf')) ok = false;
+        // the lower name is asked only for a variety or subspecies, and the locality only once it is part of the form
+        if (el.id === 'nb-infra-row' && type === 'species' && q !== 'var' && q !== 'ssp') ok = false;
+        if (el.id === 'nb-extra-row' && type === 'species' && !locOpen(tileNow())) ok = false;
         // a Hybrid or 不明 Clone has no species epithet (owner, 11-27): only 原種 + Clone asks it
         if (el.id === 'nb-epithet-row' && type === 'clone' && par !== 'species') ok = false;
         el.hidden = !ok;
@@ -2472,7 +2478,8 @@
       // the second field is always the locality now; the lower name has its own field (11-27)
       if (extraLabel) extraLabel.textContent = q === 'sp' ? T('nb_extra_sp') : T('nb_extra_locality');
       if (extra) extra.placeholder = '例: Peru';
-      syncSure(q);
+      if (infraLabel) infraLabel.textContent = q === 'ssp' ? (lang() === 'en' ? 'Subspecies name' : '亜種名') : (lang() === 'en' ? 'Variety name' : '変種名');
+      syncTpl();
       if (cultivarLabel) cultivarLabel.textContent = type === 'hybrid' ? T('nb_hybrid_name') : spClone ? T('nb_clone_name_species') : T('nb_clone_name');
       // the example matches the kind: 'Dark Mama' is a Hybrid, 'Fort Sherman' a numbered papillilaminum, 'King of Spades' a Clone
       if (cultivarName) cultivarName.placeholder = (type === 'hybrid' ? '例: Dark Mama' : spClone ? '例: Fort Sherman' : '例: King of Spades') + '（引用符は不要）';
@@ -2491,37 +2498,80 @@
       })[q] || '';
       var dis = !!result.disabled;
       [epithet, extra, cultivarName, seedLabel, infra].forEach(function (i) { if (i) i.disabled = dis; });
-      document.querySelectorAll('#species-subcategory .chip, #species-subcategory input, #nb-infra-row input, #nb-infra-row button').forEach(function (c) { c.disabled = dis; });
+      document.querySelectorAll('#species-subcategory .chip, #species-subcategory button, #nb-tpl-more button').forEach(function (c) { c.disabled = dis; });
     }
     function onUserInput() { seeded = false; compose(); }
-    // the answers on screen follow the hidden chip, which drafts, edits and typed 「sp.」 / 「var.」 also set
+    // the form on screen follows the hidden chip, which drafts, edits and typed 「sp.」 / 「var.」 also set
     function chipTo(q) {
       var c = document.querySelector('#species-subcategory .chip[data-subcategory="' + (q || 'species') + '"]');
       if (c && !c.classList.contains('active')) c.click();
     }
-    function syncSure(q) {
-      var sure = q === 'sp' || q === 'aff' || q === 'cf' ? q : 'species';
-      var r = document.querySelector('#species-subcategory input[name="nb-sure"][value="' + sure + '"]');
-      if (r && !r.checked) r.checked = true;
-      var open = q === 'var' || q === 'ssp';
-      if (open) { var rr = document.querySelector('#nb-infra-row input[name="nb-rank"][value="' + q + '"]'); if (rr && !rr.checked) rr.checked = true; }
-      if (infraBox) infraBox.hidden = !open;
-      if (infraOpen) { infraOpen.hidden = open; infraOpen.setAttribute('aria-expanded', open ? 'true' : 'false'); }
+    var TILE_Q = { species: 'species', loc: 'species', cf: 'cf', aff: 'aff', sp: 'sp', 'var': 'var' };
+    var TILE_WORD = {
+      species: ['学名がわかる種', 'Species with a name'], loc: ['学名と産地', 'Species and locality'],
+      cf: ['たぶんこの種', 'Probably this species'], aff: ['似ているが別の種', 'Like a species, but another'],
+      sp: ['学名がまだない', 'No species name yet'], 'var': ['変種・亜種', 'Variety / subspecies']
+    };
+    function fits(t, q) { return !!t && (TILE_Q[t] === q || (t === 'var' && q === 'ssp')); }
+    // which example the form is laid out as: the one picked, or, when the chip was set another way (a draft, an edit,
+    // 「sp.」 typed), the one that matches it. Nothing picked and nothing written yet: the examples are shown
+    function tileNow() {
+      var q = qualifier() || 'species';
+      if (fits(curTile, q)) return curTile;
+      var t = q === 'var' || q === 'ssp' ? 'var' : q !== 'species' ? q
+        : clean(extra.value) ? 'loc' : (curTile || clean(epithet.value)) ? 'species' : null;
+      if (t) curTile = t;
+      return t;
     }
-    function rankChosen() { var r = document.querySelector('#nb-infra-row input[name="nb-rank"]:checked'); return r ? r.value : 'var'; }
-    document.addEventListener('change', function (e) {
-      var t = e.target;
-      if (!t || !t.name) return;
-      if (t.name === 'nb-sure' && t.closest('#species-subcategory')) {
-        // 「わかる」 keeps a variety already written; the others have no lower name
-        var open0 = (infraBox && !infraBox.hidden) || (infra && infra.value.trim());
-        chipTo(t.value === 'species' ? (open0 ? rankChosen() : 'species') : t.value);
-      } else if (t.name === 'nb-rank' && infraBox && !infraBox.hidden) chipTo(t.value);
-    });
+    function locOpen(t) {
+      if (clean(extra.value)) locAdded = true;   // a locality once written keeps its blank while it is changed
+      return t === 'loc' || t === 'sp' || locAdded;
+    }
+    function syncTpl() {
+      if (!nbBox) return;
+      var type = currentType(), t = type === 'species' ? tileNow() : null, q = qualifier();
+      var picking = type === 'species' && (pickOpen || !t), on = type === 'species' && !picking, en = lang() === 'en';
+      nbBox.classList.toggle('nb-picking', picking);
+      nbBox.classList.toggle('nb-tpl-on', on);
+      if (pickBox) pickBox.hidden = !picking;
+      if (chosenBox) chosenBox.hidden = !on;
+      document.querySelectorAll('#nb-tiles .nb-tile').forEach(function (b) { var is = b.getAttribute('data-tile') === t; b.classList.toggle('is-on', is); b.setAttribute('aria-pressed', is ? 'true' : 'false'); });
+      if (!on) return;
+      if (chosenName) chosenName.textContent = (TILE_WORD[t] || ['', ''])[en ? 1 : 0];
+      var g = (($('contribute-genus-select') || {}).value || '').trim();
+      var tg = $('nb-tok-genus'); if (tg) { tg.hidden = !g; $('nb-tok-genus-t').textContent = g; }
+      var QW = { cf: ['たぶんこの種', 'probably'], aff: ['近い別の種', 'near, another'], sp: ['学名がまだない', 'no name yet'] };
+      var tq = $('nb-tok-q'); if (tq) { tq.hidden = !QW[q]; if (QW[q]) { $('nb-tok-q-t').textContent = q + '.'; $('nb-tok-q-w').textContent = QW[q][en ? 1 : 0]; } }
+      var rk = q === 'var' || q === 'ssp';
+      var tr = $('nb-tok-rank'); if (tr) { tr.hidden = !rk; if (rk) { $('nb-tok-rank-t').textContent = q + '.'; $('nb-tok-rank-w').textContent = q === 'var' ? (en ? 'variety' : '変種') : (en ? 'subspecies' : '亜種'); } }
+      var lo = locOpen(t);
+      ['nb-tok-qo', 'nb-tok-qc'].forEach(function (id) { var el = $(id); if (el) el.hidden = !lo; });
+      var al = $('nb-add-loc'); if (al) al.hidden = lo;
+      var sw = $('nb-rank-swap'); if (sw) { sw.hidden = !rk; if (rk) sw.textContent = q === 'var' ? (en ? 'A subspecies? Write ssp.' : '亜種なら ssp. にする') : (en ? 'A variety? Write var.' : '変種なら var. にする'); }
+    }
     document.addEventListener('click', function (e) {
       if (!e.target.closest) return;
-      if (e.target.closest('#nb-infra-open')) { chipTo(rankChosen()); setTimeout(function () { if (infra) infra.focus(); }, 0); }
-      else if (e.target.closest('#nb-infra-close')) { if (infra) infra.value = ''; chipTo('species'); setTimeout(function () { if (epithet) epithet.focus(); }, 0); }
+      var tl = e.target.closest('#nb-tiles .nb-tile');
+      if (tl) {
+        var t = tl.getAttribute('data-tile'), q0 = qualifier();
+        curTile = t; pickOpen = false; locAdded = t === 'loc';
+        chipTo(t === 'var' ? (q0 === 'ssp' ? 'ssp' : 'var') : TILE_Q[t]);
+        var tiles = $('nb-tiles'); if (tiles && typeof clearFieldError === 'function') clearFieldError(tiles);
+        refreshVisibility(); onUserInput();
+        // the typing starts in the first blank still empty
+        var first = t === 'sp' ? extra : t === 'var' && clean(epithet.value) ? infra : t === 'loc' && clean(epithet.value) ? extra : epithet;
+        if (first) first.focus();
+      } else if (e.target.closest('#nb-repick')) {
+        pickOpen = true; refreshVisibility();
+        var on1 = document.querySelector('#nb-tiles .nb-tile.is-on') || document.querySelector('#nb-tiles .nb-tile'); if (on1) on1.focus();
+      } else if (e.target.closest('#nb-none-open')) {
+        var nn = $('nb-none'), bt = e.target.closest('#nb-none-open');
+        if (nn) { nn.hidden = !nn.hidden; bt.setAttribute('aria-expanded', nn.hidden ? 'false' : 'true'); }
+      } else if (e.target.closest('#nb-add-loc')) {
+        locAdded = true; refreshVisibility(); if (extra) extra.focus();
+      } else if (e.target.closest('#nb-rank-swap')) {
+        chipTo(qualifier() === 'ssp' ? 'var' : 'ssp'); refreshVisibility(); onUserInput();
+      }
     });
     // 「aff. besseae」 or 「sp.」 typed into the epithet: the qualifier moves to its chip (board 17 T213)
     if (epithet) epithet.addEventListener('input', function () {
@@ -2536,7 +2586,7 @@
       chip.click();
       // sp. has no epithet: what comes next is the locality, so the typing goes on there
       // (at once, not after a pause, so a fast typist's next letters are not left behind in the epithet)
-      if (chip.getAttribute('data-subcategory') === 'sp' && extra) { extra.value = epithet.value.trim() || extra.value; epithet.value = ''; extra.focus(); onUserInput(); spUnpub(true); }
+      if (chip.getAttribute('data-subcategory') === 'sp' && extra) { extra.value = epithet.value.trim() || extra.value; epithet.value = ''; refreshVisibility(); extra.focus(); onUserInput(); spUnpub(true); }
     });
     // 「crystallinum var.」 typed into the epithet: the rank moves to its chip, and the typing goes on in the next field (11-27)
     if (epithet) epithet.addEventListener('input', function () {
@@ -2547,7 +2597,7 @@
       if (!chip) return;
       epithet.value = m[1].toLowerCase();
       if (!chip.classList.contains('active')) chip.click();
-      syncSure(chip.getAttribute('data-subcategory'));   // the lower-name field is opened now, so it can take the focus
+      refreshVisibility();   // the lower-name field is shown now, so it can take the focus
       // the focus moves at once, so the next letter typed lands in the lower-name field
       if (infra) { infra.value = m[3].trim() || infra.value; infra.focus(); }
       onUserInput();
@@ -2558,7 +2608,7 @@
     // It means the species is not named yet, which sp. already says, so it is taken off with a line (11-27)
     var exTidy = null;
     function exNote(html) {
-      if (!exTidy && extra) { exTidy = document.createElement('p'); exTidy.id = 'nb-extra-tidy'; exTidy.className = 'nb-tidy'; extra.parentNode.appendChild(exTidy); }
+      if (!exTidy && extra) { exTidy = document.createElement('p'); exTidy.id = 'nb-extra-tidy'; exTidy.className = 'nb-tidy'; ($('nb-extra-row') || extra.parentNode).appendChild(exTidy); }
       if (exTidy) { exTidy.innerHTML = html || ''; exTidy.hidden = !html; }
     }
     function spUnpub(closedOnly) {
@@ -2745,7 +2795,7 @@
 
     // Edit mode: fill the parts from the stored short name (without recomposing)
     window.nameBuilderParse = function (shortName, type) {
-      seeded = true;
+      seeded = true; curTile = null; pickOpen = false; locAdded = false;
       var s = clean(shortName);
       [epithet, extra, cultivarName, seedLabel, infra].forEach(function (i) { if (i) i.value = ''; });
       var m;
@@ -2765,13 +2815,15 @@
       setTimeout(refreshVisibility, 0);
     };
     window.nameBuilderReset = function () {
-      seeded = false;
+      seeded = false; curTile = null; pickOpen = false; locAdded = false;
       [epithet, extra, cultivarName, seedLabel, infra].forEach(function (i) { if (i) i.value = ''; });
       if (epithet) epithet.removeAttribute('data-unpub');
       tidyNote(''); exNote(''); cvNote('');
       setTimeout(refreshVisibility, 0);
     };
     window.nameBuilderPrimaryField = function (type) {
+      // nothing picked yet: the line goes under the examples
+      if (type === 'species' && nbBox && nbBox.classList.contains('nb-picking')) return $('nb-tiles') || epithet;
       if (type === 'species') return qualifier() === 'sp' ? extra : epithet;
       if (type === 'seedling') { var box = $('seedling-formula-inputs'); return box ? box.querySelector('input') : result; }
       return cultivarName;
@@ -3513,6 +3565,7 @@
       var nm = $('cultivar-name-input');
       if (nm && !nm.value.trim()) {
         var f = window.nameBuilderPrimaryField ? window.nameBuilderPrimaryField(type) : null;
+        if (f && f.id === 'nb-tiles') return fieldError(f, '名札に近い書き方を選んで、名前を入れてください');
         return fieldError(f || document.querySelector('#name-builder input:not([readonly])'), type === 'clone' || type === 'hybrid' ? 'この欄に名前を入れてください（引用符は要りません）' : type === 'seedling' ? '母と父を入れるか、「交配式が不明」を選んでください' : 'この欄に種小名を入れてください');
       }
       var dup = $('duplicate-alert');
@@ -4529,7 +4582,8 @@
   function box(field) {
     var b = $('nb-hits');
     if (!b) { b = document.createElement('div'); b.className = 'nb-hits'; b.id = 'nb-hits'; b.setAttribute('aria-live', 'polite'); }
-    if (b.previousElementSibling !== field) field.insertAdjacentElement('afterend', b);
+    var at = (field.closest && field.closest('.nb-slot')) || field;   // under the field and its caption
+    if (b.previousElementSibling !== at) at.insertAdjacentElement('afterend', b);
     return b;
   }
   function hide() { var b = $('nb-hits'); if (b) { b.hidden = true; b.innerHTML = ''; } }
@@ -4555,7 +4609,7 @@
   document.addEventListener('focusin', function (e) {
     var f = e.target, b = $('nb-hits');
     if (!b || b.hidden || !f || !f.id) return;
-    if (FIELDS.indexOf(f.id) !== -1) { if (b.previousElementSibling !== f) draw(f); return; }
+    if (FIELDS.indexOf(f.id) !== -1) { if (b.previousElementSibling !== ((f.closest && f.closest('.nb-slot')) || f)) draw(f); return; }
     if (b.contains(f)) return;
     if (f.closest && f.closest('#page-contribute') && /^(INPUT|TEXTAREA|SELECT)$/.test(f.tagName) && f.type !== 'radio') hide();
   });
