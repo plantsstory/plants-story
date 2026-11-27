@@ -1442,6 +1442,7 @@ document.addEventListener('click', function(e) {
     name = String(name || '').replace(/[‘’]/g, "'").replace(/\s+/g, ' ').trim();
     if (type === 'species') return genus + ' ' + name.replace(/^'+|'+$/g, '');
     if (type === 'seedling') return genus + ' ' + name.replace(/^'+|'+$/g, '').replace(/\s*[x×X]\s*(?=[A-Za-z'"])/g, ' × ').replace(/\s+/g, ' ').trim() + ' [Seedling]';
+    if (type === 'hybrid' && / × /.test(name)) return genus + ' ' + name;   // a cross written as the name (11-27): crystallinum × magnificum
     if (/'[^']+'/.test(name)) return genus + ' ' + name;            // epithet + 'Cultivar' as built by the name fields
     return genus + " '" + name.replace(/^'+|'+$/g, '') + "'";
   };
@@ -1629,7 +1630,7 @@ document.addEventListener('click', function(e) {
       // Hybrid parents: both parents, or what the person knows about them (親が不明 / 複合交配). 不明 ticks 親が不明
       // by itself, so it must pass here too (11-27: it stopped at this last button)
       var structured = buildStructuredFromForm(type);
-      if (type === 'hybrid' && !structured.formula && !structured.formula_status) {
+      if (type === 'hybrid' && !structured.formula && !structured.formula_status && !(window.aoQuickPost && window.aoQuickPost())) {
         var hf = getActiveFormula('hybrid');
         showFieldError(hf.a, '親を 2 つ入れるか、「親が不明」「複合交配」のどちらかを選んでください');
         if (hf.a) hf.a.focus();

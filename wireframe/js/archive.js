@@ -2367,6 +2367,22 @@
       if (g && v.toLowerCase().indexOf(g.toLowerCase() + ' ') === 0) v = v.slice(g.length + 1);
       return v;
     }
+    // 「A × B」 written in the Hybrid / 不明 name field (owner, 11-27: with or without quotes, and x / X with a space
+    // on each side). The name stays the cross; each parent takes quotes only when it is a cultivar's name, not a species'
+    function crossParent(v) {
+      v = stripGenus(plain(v)).replace(/^[A-Z]\.\s+(?=[a-z])/, '');
+      if (!v) return '';
+      if (/['"]/.test(v)) return v;
+      if (/^[a-z][a-z-]*$/.test(v) || /^(sp|aff|cf)\.(\s|$)/.test(v) || /^[a-z][a-z-]*\s+(aff|cf)\.\s/.test(v) || /^[a-z][a-z-]*\s+(var|ssp|subsp|f)\.\s+[a-z][a-z-]*$/.test(v)) return v;
+      return quoteS(v);
+    }
+    function crossParts(v) {
+      var parts = plain(v).split(/\s*[×✕✖]\s*|\s+[xX]\s+/);
+      if (parts.length !== 2) return null;
+      var a = crossParent(parts[0]), b = crossParent(parts[1]);
+      return a && b ? [a, b] : null;
+    }
+    window.aoCrossParts = crossParts;
     function compose() {
       var type = currentType();
       var name = '';
@@ -2381,7 +2397,8 @@
         var cn = quoteS(cultivarName.value), ep2 = par2 === 'species' ? clean(epithet.value).toLowerCase().replace(/\s+/g, '') : '';   // the epithet field is hidden for a Hybrid / 不明 Clone
         name = cn ? joinParts2([ep2, cn]) : '';
       } else if (type === 'hybrid') {
-        name = quoteS(cultivarName.value);
+        var cx = crossParts(cultivarName.value);   // a cross written as the name stays the cross (11-27)
+        name = cx ? cx[0] + ' × ' + cx[1] : quoteS(cultivarName.value);
       } else if (type === 'seedling') {
         var box = $('seedling-formula-inputs');
         var inputs = box ? box.querySelectorAll('input') : [];
@@ -2509,6 +2526,16 @@
       cvRead = null;
       var type = currentType(), par = (document.querySelector('#page-contribute input[name="cultivar-parentage"]:checked') || {}).value || 'species';
       if (!(type === 'hybrid' || (type === 'clone' && par !== 'species')) || !window.aoReadName) { cvNote(''); return; }
+      var cx = type === 'hybrid' ? crossParts(cultivarName.value) : null;
+      if (cx) {
+        var hb0 = document.querySelectorAll('#hybrid-formula-inputs input');
+        var same = hb0.length >= 2 && hb0[0].value.trim() === cx[0] && hb0[1].value.trim() === cx[1];
+        var en0 = lang() === 'en';
+        cvNote(same ? (en0 ? 'The parents are in the parents fields too (seed parent ' + esc(cx[0]) + ', pollen parent ' + esc(cx[1]) + ').' : '交配親の欄にも入っています（母 ' + esc(cx[0]) + '、父 ' + esc(cx[1]) + '）。')
+          : (en0 ? 'This looks like a cross. The name stays ' + esc(cx[0] + ' × ' + cx[1]) + '. <button type="button" class="namecheck__btn" data-cv-cross>Put them in the parents fields too</button>'
+            : '交配式のようです。登録名はこのまま「' + esc(cx[0] + ' × ' + cx[1]) + '」になります。 <button type="button" class="namecheck__btn" data-cv-cross>交配親の欄にも入れる（母 ' + esc(cx[0]) + '、父 ' + esc(cx[1]) + '）</button>'));
+        return;
+      }
       var r = window.aoReadName(stripGenus(plain(cultivarName.value).replace(/^['‘’]+|['‘’]+$/g, '')));
       if (!r || !r.q || ['sp', 'aff', 'cf', 'var', 'ssp'].indexOf(r.q) === -1) { cvNote(''); return; }
       cvRead = r;
@@ -2518,6 +2545,17 @@
     }
     if (cultivarName) { cultivarName.addEventListener('input', function () { clearTimeout(cultivarName._t); cultivarName._t = setTimeout(cvCheck, 500); }); cultivarName.addEventListener('change', cvCheck); }
     document.addEventListener('change', function (e) { if (e.target && /^(cultivar-type|cultivar-parentage|kind-clone-yn)$/.test(e.target.name || '')) setTimeout(cvCheck, 50); });
+    // the cross's two names go into the parents fields (and the 写真と名前だけ ones); 親が不明 / 複合交配 come off
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest || !e.target.closest('[data-cv-cross]')) return;
+      var cx = crossParts(cultivarName.value); if (!cx) return;
+      var hb = document.querySelectorAll('#hybrid-formula-inputs input');
+      ['hybrid-formula-unknown', 'hybrid-formula-complex'].forEach(function (id) { var c = $(id); if (c && c.checked) { c.checked = false; c.dispatchEvent(new Event('change', { bubbles: true })); } });
+      if (hb.length >= 2) { [0, 1].forEach(function (i) { hb[i].disabled = false; hb[i].value = cx[i]; hb[i].dispatchEvent(new Event('input', { bubbles: true })); }); }
+      var qa = $('qp-a'), qb = $('qp-b'); if (qa && qb) { qa.value = cx[0]; qb.value = cx[1]; }
+      cvCheck();
+      if (typeof window.saveContributeDraft === 'function') window.saveContributeDraft();
+    });
     document.addEventListener('click', function (e) {
       if (!e.target.closest || !e.target.closest('[data-cv-species]') || !cvRead) return;
       var r = cvRead, pg1 = $('page-contribute');
@@ -2659,7 +2697,7 @@
         if ((m = s.match(/^(?:(\S+)\s+)?'(.+)'$/))) { epithet.value = m[1] || ''; cultivarName.value = m[2]; }
         else cultivarName.value = s.replace(/^'+|'+$/g, '');
       } else if (type === 'hybrid') {
-        cultivarName.value = s.replace(/^'+|'+$/g, '');
+        cultivarName.value = /[×✕]/.test(s) ? s : s.replace(/^'+|'+$/g, '');
       } else if (type === 'seedling') {
         if ((m = s.match(/"([^"]*)"\s*$/))) seedLabel.value = m[1];
       }
@@ -3416,7 +3454,8 @@
       var dup = $('duplicate-alert');
       if (dup && dup.getAttribute('data-kind') === 'exact' && dup.offsetParent) return fieldError(nm, 'この名前はもう収録されています。写真や記録はその名前のページから足せます');
     }
-    if (n === 2 && ctype() === 'hybrid') {
+    // 写真と名前だけ: the parents are asked only if known, so an empty pair goes on (11-27)
+    if (n === 2 && ctype() === 'hybrid' && !(window.aoQuickPost && window.aoQuickPost())) {
       var hb = document.querySelectorAll('#hybrid-formula-inputs input');
       var known = hb.length >= 2 && hb[0].value.trim() && hb[1].value.trim();
       var fu = $('hybrid-formula-unknown'), fc = $('hybrid-formula-complex');
@@ -3452,6 +3491,7 @@
     if (t !== 'clone' && t !== 'hybrid') return '';
     var cn = $('nb-cultivar'); if (!cn) return '';
     var v = cn.value.trim(); if (!v) return '';
+    if (t === 'hybrid' && window.aoCrossParts && window.aoCrossParts(v)) return '';   // a cross: species names stay lower case
     var SMALL = ['of', 'de', 'la', 'del', 'van', 'von', 'x', 'and', 'the', 'y', 'e'];
     var out = v.split(/(\s+)/).map(function (w, i) {
       if (/^\s+$/.test(w) || !/^[a-z]/.test(w) || (i > 0 && SMALL.indexOf(w) !== -1)) return w;
