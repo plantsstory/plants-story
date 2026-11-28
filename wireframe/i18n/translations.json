@@ -2496,6 +2496,10 @@
     "jp": "投稿・写真・記録の追加には Google のログインが要ります。ログインのあと、この続きから始められます。",
     "en": "Posting, photos and records need a Google login. After logging in you continue from here."
   },
+  "login_sheet_again": {
+    "jp": "さっきのログインが、このブラウザに残っていません。Instagram などのアプリの中から開いた場合は、リンクをコピーして Safari で開き、そこでログインしてください。プライベートブラウズのタブを閉じた場合も、もう一度ログインが要ります。",
+    "en": "Your last login did not stay in this browser. If you opened this page inside an app such as Instagram, copy the link, open it in Safari and log in there. Closing a private tab also needs a new login."
+  },
   "login_sheet_inapp": {
     "jp": "このアプリの中のブラウザでは Google のログインが使えません。右上の「…」から「ブラウザで開く」を選んでください。",
     "en": "Google login does not work inside this app’s browser. Choose “Open in browser” from the … menu."

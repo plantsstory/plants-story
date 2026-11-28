@@ -1939,6 +1939,7 @@ if (false) {
       // a return from Google: #access_token (implicit flow, already cleared from the URL here) or ?code= (old PKCE)
       if (event === 'SIGNED_IN' && (window._aoAuthReturn || window.location.search.indexOf('code=') !== -1)) {
         window._aoAuthReturn = false;   // once: the library may say SIGNED_IN again for the same login
+        try { localStorage.removeItem('login_started_at'); } catch (e) {}
         // GA: distinguish a first login (account created just now) from a returning one
         if (typeof gtag === 'function') {
           var _createdAt = session && session.user && session.user.created_at ? new Date(session.user.created_at).getTime() : 0;
@@ -2502,15 +2503,29 @@ if (false) {
 
   // Ask for the login before anything is typed; remember what the person was about to do (2026-10-08 app-ux).
   // intent = { a: 'photo'|'record'|'individual'|'contribute', k: entry name, path, type, parent, target }
-  var IN_APP_UA = /Instagram|FBAN|FBAV|FB_IAB|Line\/|MicroMessenger|; wv\)/i;
+  // Barcelona = Threads' own browser (11-28: not caught, so it showed the Google button)
+  var IN_APP_UA = /Instagram|Barcelona|FBAN|FBAV|FB_IAB|Line\/|MicroMessenger|; wv\)/i;
   function startLoginWithIntent(intent) {
     intent = intent || {};
     try { localStorage.setItem('login_return_intent', JSON.stringify(Object.assign({ t: Date.now() }, intent))); } catch (e) {}
+    // cleared when the login comes back here: if it is still set at the next gate, the login ended somewhere else
+    try { localStorage.setItem('login_started_at', String(Date.now())); } catch (e) {}
     if (typeof window.saveContributeDraft === 'function') window.saveContributeDraft(true);
     startGoogleLogin(intent.path || window.location.pathname, intent.a || 'gate');
   }
+  // the session the library saved, read directly: right after a page load (or a version reload) the library can
+  // take a moment to report it, and a tap in that moment showed the login sheet to someone already logged in (11-28)
+  function storedUser() {
+    try {
+      var s = JSON.parse(localStorage.getItem('sb-jpgbehsrglsiwijglhjo-auth-token') || 'null');
+      if (s && s.user && s.user.id && (s.expires_at || 0) * 1000 > Date.now() + 30000) return s.user;
+    } catch (e) {}
+    return null;
+  }
   window.requireLogin = function(intent) {
     if (window._currentUser) return true;
+    var su = storedUser();
+    if (su) { window._currentUser = su; if (typeof updateLoginUI === 'function') updateLoginUI(); return true; }
     var dlg = document.getElementById('login-sheet');
     if (!dlg || typeof dlg.showModal !== 'function') { startLoginWithIntent(intent); return false; }
     if (!dlg._wired) {
@@ -2525,8 +2540,18 @@ if (false) {
     }
     var inApp = IN_APP_UA.test(navigator.userAgent || '');
     var android = /Android/i.test(navigator.userAgent || '');
+    // a login started here in the last 15 minutes that never came back: it finished in another browser (an app's
+    // browser handing Google to Safari) or this one could not keep it (a closed private tab). Say so instead of
+    // sending the person round the same loop (11-28, iPhone)
+    var started = 0;
+    try { started = +localStorage.getItem('login_started_at') || 0; } catch (e) {}
+    var again = started && Date.now() - started < 15 * 60000;
+    var againEl = document.getElementById('login-sheet-again');
+    if (againEl) againEl.classList.toggle('d-none', !again || inApp);
+    document.getElementById('login-sheet-text').classList.toggle('d-none', !!again && !inApp);
+    if (again && typeof gtag === 'function') gtag('event', 'login_gate_again', { in_app: inApp ? 1 : 0 });
     document.getElementById('login-sheet-inapp').classList.toggle('d-none', !inApp);
-    document.getElementById('login-sheet-copy').classList.toggle('d-none', !inApp);
+    document.getElementById('login-sheet-copy').classList.toggle('d-none', !inApp && !again);
     document.getElementById('login-sheet-go').classList.toggle('d-none', inApp);
     // Android: open the same action in Chrome directly (intent://); iPhone: copy the link and open it in Safari
     var chromeBtn = document.getElementById('login-sheet-chrome');
@@ -2563,6 +2588,14 @@ if (false) {
       tries++;
       if (ri.a === 'mypost') {
         if (typeof navigateTo === 'function') navigateTo('mypost', {}, true);
+        return;
+      }
+      var wantedBtn = ri.a === 'photo' && ri.k && /\/wanted\/?$/.test(location.pathname)
+        ? [].filter.call(document.querySelectorAll('[data-wanted-pick]'), function(b) { return b.getAttribute('data-wanted-pick') === ri.k; })[0] : null;
+      if (ri.a === 'photo' && /\/wanted\/?$/.test(location.pathname)) {
+        // the 写真を募集中 list: it waited for a plant page that never came, so nothing said the login worked (11-28)
+        if (!wantedBtn) { if (tries < 40) setTimeout(step, 250); return; }
+        showToast('ログインしました', false, { sticky: true, action: { label: '写真を選ぶ', fn: function() { wantedBtn.click(); } } });
         return;
       }
       if (ri.a === 'record' || ri.a === 'photo') {
