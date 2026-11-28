@@ -333,7 +333,7 @@ var _isCrawler = /bot|crawl|spider|slurp|Google-InspectionTool|Lighthouse/i.test
 var currentLang = (function() { try { return localStorage.getItem('plants-story-lang'); } catch (e) { return null; } })() || (_isCrawler || String(navigator.language || '').toLowerCase().indexOf('ja') === 0 ? 'jp' : 'en');
 
 // Load translations asynchronously (non-blocking)
-var _translationsReady = fetch('i18n/translations.json?v=20261128o')
+var _translationsReady = fetch('i18n/translations.json?v=20261128p')
   .then(function(res) { return res.json(); })
   .then(function(data) {
     translations = data;

@@ -10,7 +10,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '20261128o';
+  var VERSION = '20261128p';
   // text written by people, never swapped
   var KEEP = '.record__body, .record__note, .person span, .story__copy, .profile__bio, [data-ui-keep], script, style, textarea, svg, code, pre';
   var ATTRS = ['placeholder', 'aria-label', 'title', 'alt'];
