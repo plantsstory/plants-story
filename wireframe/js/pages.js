@@ -156,7 +156,7 @@
     var isOwn = window._currentUser && window._currentUser.id === userId;
     var editLink = document.getElementById('profile-edit-link');
     if (editLink) {
-      editLink.style.display = isOwn ? '' : 'none';
+      editLink.classList.toggle('d-none', !isOwn); // the class, not the style: d-none kept it hidden even on one's own page
     }
     var logoutBtn = document.getElementById('profile-logout-btn');
     if (logoutBtn) {

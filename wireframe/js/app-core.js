@@ -1907,7 +1907,7 @@ if (false) {
         var profLogoutBtn = document.getElementById('profile-logout-btn');
         if (profLogoutBtn) profLogoutBtn.style.display = isOwn ? '' : 'none';
         var editLink = document.getElementById('profile-edit-link');
-        if (editLink) editLink.style.display = isOwn ? '' : 'none';
+        if (editLink) editLink.classList.toggle('d-none', !isOwn); // the class, not the style: d-none kept it hidden even on one's own page
       }
       if (event === 'SIGNED_IN' && window.location.search.indexOf('code=') !== -1) {
         // GA: distinguish a first login (account created just now) from a returning one
