@@ -17,7 +17,7 @@
 </head>
 <body>
 <h1>ログインの点検</h1>
-<p>このページは、今のブラウザがログイン情報を持っているかを表示するだけです。Google から戻ったときに、そのログインが有効かを Supabase に一度確かめる以外、何も送信しません。結果に鍵の中身やメールアドレスは出ません。</p>
+<p>このページは、今のブラウザがログイン情報を持っているかを表示するだけです。Google から戻ったときに、そのログインが有効かを Supabase に確かめ、受け取れていなければこのページで受け取り直してみる以外、何も送信しません。結果に鍵の中身やメールアドレスは出ません。</p>
 <pre id="out">調べています…</pre>
 <button id="login" type="button">ここから Google でログイン</button>
 <button id="copy" type="button" class="alt">結果をコピー</button>
@@ -61,9 +61,37 @@
       });
     }, function (e) { add('Supabase への確認', '届きませんでした: ' + (e && e.message)); });
   }
-  var sb = window.supabase.createClient(URL_, KEY, { auth: { flowType: 'implicit' } });
+  // what the library itself sees and does, as step names only (never the values it logs) (11-28)
+  var t0 = Date.now(), steps = [];
+  var keep = { refresh_token: hp.get('refresh_token'), access_token: tok };
+  var sb = window.supabase.createClient(URL_, KEY, { auth: {
+    flowType: 'implicit',
+    detectSessionInUrl: function (u, params) {
+      var seen = Object.keys(params || {});
+      add('ライブラリが見た項目', (seen.length ? seen.join(', ') : '(なし)') + '（' + (Date.now() - t0) + 'ms、# は ' + (u && u.hash ? u.hash.length + ' 文字' : 'なし') + '）');
+      return Boolean(params && (params.access_token || params.error_description));
+    },
+    debug: function () {
+      var a = Array.prototype.slice.call(arguments, 1).filter(function (x) { return typeof x === 'string' && x.length < 80 && !/^ey/.test(x); });
+      if (a.length) steps.push(a.join(' '));
+    }
+  } });
   sb.auth.initialize().then(function (r) {
-    add('ライブラリの受け取り', r && r.error ? 'エラー: ' + (r.error.name || '') + ' ' + (r.error.code || '') + ' ' + (r.error.status || '') + ' ' + String(r.error.message || '').slice(0, 80) : 'ok');
+    add('ライブラリの受け取り', (r && r.error ? 'エラー: ' + (r.error.name || '') + ' ' + (r.error.code || '') + ' ' + (r.error.status || '') + ' ' + String(r.error.message || '').slice(0, 80) : 'ok') + '（' + (Date.now() - t0) + 'ms）');
+    var seenSteps = steps.filter(function (x, i) { return /_initialize|_getSessionFromURL|_saveSession|_recoverAndRefresh|_acquireLock|lock/.test(x) && steps.indexOf(x) === i; });
+    add('ライブラリの手順', seenSteps.slice(0, 14).join(' / ') || '(記録なし)');
+    var after = []; try { after = Object.keys(localStorage).filter(function (k) { return /^sb-/.test(k); }); } catch (e) {}
+    add('受け取り後の鍵', after.length ? after.join(', ') : '(なし)');
+    return sb.auth.getSession().then(function (g) {
+      if (g.data && g.data.session) return;
+      if (!keep.access_token || !keep.refresh_token) { add('このページでの受け取り直し', '戻ってきた鍵が足りないため試せません'); return; }
+      // the same rescue the site would use: hand the tokens that came back to the library ourselves
+      return sb.auth.setSession(keep).then(function (s) {
+        add('このページでの受け取り直し', s.error ? 'エラー: ' + (s.error.name || '') + ' ' + (s.error.code || '') + ' ' + (s.error.status || '') + ' ' + String(s.error.message || '').slice(0, 80) : (s.data && s.data.session ? 'ok（ログインできました）' : 'セッションなし'));
+        var k2 = []; try { k2 = Object.keys(localStorage).filter(function (k) { return /^sb-/.test(k); }); } catch (e) {}
+        add('受け取り直し後の鍵', k2.length ? k2.join(', ') : '(なし)');
+      }, function (e) { add('このページでの受け取り直し', '例外: ' + (e && e.message)); });
+    });
   }, function (e) { add('ライブラリの受け取り', '例外: ' + (e && e.message)); });
   add('navigator.locks', typeof navigator.locks === 'object' && navigator.locks ? 'あり' : 'なし');
   sb.auth.onAuthStateChange(function (ev, s) { add('イベント ' + ev, s ? 'セッションあり（' + (s.user && s.user.email ? s.user.email.replace(/^(..).*(@.*)$/, '$1***$2') : 'user') + '）' : 'セッションなし'); });
