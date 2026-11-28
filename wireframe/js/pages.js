@@ -897,6 +897,44 @@ function buildFormulaHtml(data, isSeedling, _sb) {
   return fHtml;
 }
 
+// Who wrote a person's record (11-28): the writer's current profile name, linked to their profile page.
+// 記録を追加 keeps author.user_id; the registrant's own words saved with a new page carry author 'User' and no id,
+// so those fall back to the page's poster (cultivars.user_id). AI and database records name no person.
+function recordWriter(origin, data) {
+  var a = origin && origin.author;
+  if (!origin || origin.source_type === 'ipni_powo' || (a && a.isAI)) return null;
+  var saved = a && a.name && a.name !== 'User' ? String(a.name) : '';
+  var uid = (a && a.user_id) || (!saved && data && data._userId) || null;
+  var cache = window._profileCache || {};
+  var name = (uid && cache[uid]) || saved;
+  return { uid: uid, name: name };
+}
+function recordWriterHtml(w) {
+  if (!w || !w.name) return escHtml(t('record_by_user'));
+  var label = escHtml(t('record_by_name_label')) + ' ';
+  if (!w.uid) return label + escHtml(w.name);
+  return label + '<a class="record__by" href="' + _basePath + 'profile/' + encodeURIComponent(w.uid) + '" data-nav="profile" data-userid="' + escHtml(w.uid) + '">' + escHtml(w.name) + '</a>';
+}
+// writers whose names are not loaded yet (someone who added a record to another person's page): fetched once, then the records are drawn again
+var _writerLookups = {};
+function loadRecordWriters(origins, data, redraw) {
+  var sb = window._supabaseClient;
+  if (!sb) return;
+  var cache = window._profileCache || (window._profileCache = {});
+  var ids = [];
+  (origins || []).forEach(function(o) {
+    var w = recordWriter(o, data);
+    if (w && w.uid && !cache[w.uid] && !_writerLookups[w.uid] && ids.indexOf(w.uid) === -1) ids.push(w.uid);
+  });
+  if (!ids.length) return;
+  ids.forEach(function(id) { _writerLookups[id] = true; });
+  sb.from('profiles').select('id, display_name').in('id', ids).then(function(res) {
+    var got = false;
+    ((res && res.data) || []).forEach(function(p) { if (p && p.id) { cache[p.id] = p.display_name || '名前未設定'; got = true; } });
+    if (got) redraw();
+  }, function() {});
+}
+
 function renderOriginsInner(cultivarName, container) {
   var data = cultivarData[cultivarName];
   var isSeedling = data && data._type === 'seedling';
@@ -947,15 +985,19 @@ function renderOriginsInner(cultivarName, container) {
       // 記録 N only when there is more than one record
       var meta = [];
       if (hasSources && origin.source_tier) meta.push((currentLang === 'en' ? 'Source ' : '出典 ') + origin.source_tier);
+      var metaHtml = [];
       if (!isDb) {
         if (origin.author && origin.author.isAI) meta.push('AI');
-        else meta.push(origin.author && origin.author.name && origin.author.name !== 'User' ? origin.author.name : t('record_by_user'));
+        else metaHtml.push(recordWriterHtml(recordWriter(origin, data)));
       }
       if (!hasSources) meta.push(t('record_no_sources'));
       var recDate = origin.author && origin.author.date ? String(origin.author.date).slice(0, 10).replace(/-/g, '.') : '';
       rh += '<header class="record__head">';
       if (origins.length > 1) rh += '<span class="record__rank">' + (currentLang === 'en' ? 'Record ' : '記録 ') + (i + 1) + '</span>';
-      rh += '<span class="record__meta">' + meta.map(escHtml).join(' · ') + '</span>';
+      // the writer's name is a link, so it is built as HTML; the rest of the line is text
+      var metaParts = meta.map(escHtml);
+      if (metaHtml.length) metaParts.splice(meta[0] && /^(出典|Source) /.test(meta[0]) ? 1 : 0, 0, metaHtml[0]);
+      rh += '<span class="record__meta">' + metaParts.join(' · ') + '</span>';
       if (hasSources) rh += '<span class="record__trust ' + getTrustClass(trustNum) + '" data-trust-idx="' + i + '">' + trustNum + '%</span>';
       if (recDate) rh += '<span class="record__date num">' + escHtml(recDate) + '</span>';
       rh += '</header>';
@@ -1012,8 +1054,8 @@ function renderOriginsInner(cultivarName, container) {
     }
     if (srcHtml) rh += '<div class="record__sources"><span class="record__label mono">' + t('source_label') + '</span>' + srcHtml + '</div>';
     // Footer: who recorded it and when · votes (正確 / 疑問)
-    var who = isDb ? 'IPNI / Kew' : (origin.author && origin.author.isAI ? (origin.author.name || 'AI') : (origin.author && origin.author.name && origin.author.name !== 'User' ? origin.author.name : t('record_by_user')));
-    rh += '<footer class="record__foot mono"><span>' + (isSeedling ? escHtml(who) + (origin.author && origin.author.date ? ' · ' + escHtml(String(origin.author.date).slice(0, 10).replace(/-/g, '.')) : '') : '') + '</span>';
+    var whoHtml = isDb ? 'IPNI / Kew' : (origin.author && origin.author.isAI ? escHtml(origin.author.name || 'AI') : recordWriterHtml(recordWriter(origin, data)));
+    rh += '<footer class="record__foot mono"><span>' + (isSeedling ? whoHtml + (origin.author && origin.author.date ? ' · ' + escHtml(String(origin.author.date).slice(0, 10).replace(/-/g, '.')) : '') : '') + '</span>';
     rh += '<span class="vote-group">' + renderVoteButtons(i, origin.votes) + '</span></footer>';
     rh += '</article>';
     // AI text without a citable source and low trust is a draft: folded, not a record
@@ -1027,7 +1069,12 @@ function renderOriginsInner(cultivarName, container) {
   });
 
   container.innerHTML = html;
+  container.setAttribute('data-records-for', cultivarName);
   if (window.linkGlossaryTerms) window.linkGlossaryTerms(container);
+  loadRecordWriters(origins, data, function() {
+    // still the same page: draw the records again with the names
+    if (container.getAttribute('data-records-for') === cultivarName && cultivarData[cultivarName] === data) renderOriginsInner(cultivarName, container);
+  });
 }
 
 // ---- Update cultivar detail page dynamically ----

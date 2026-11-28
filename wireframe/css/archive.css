@@ -1332,6 +1332,8 @@ h2.section-title, .legal-page h2, .section-heading, h2.text-lg.font-bold {
 .record__head { font-family: var(--font-primary); font-size: var(--fs-small); color: var(--color-mid); letter-spacing: 0.02em; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px var(--s2); }
 .record__head .record__trust { color: var(--color-ink); font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
 .record__head .record__rank { color: var(--color-ink); font-weight: 600; }
+.record__by { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-rule-strong); text-underline-offset: 3px; text-transform: none; letter-spacing: normal; }
+.record__by:hover { text-decoration-color: currentColor; }
 .detail-standard { font-family: var(--font-primary); font-size: var(--fs-small); color: var(--color-mid); letter-spacing: 0.02em; margin-bottom: var(--s1); }
 .specimen__cell--verify .verified-mark { color: var(--color-primary); }
 .specimen__note { font-size: var(--fs-small); margin-top: var(--s2); }

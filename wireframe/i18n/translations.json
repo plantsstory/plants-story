@@ -1624,6 +1624,10 @@
     "jp": "投稿者の記録",
     "en": "Contributor record"
   },
+  "record_by_name_label": {
+    "jp": "投稿",
+    "en": "Posted by"
+  },
   "record_no_sources": {
     "jp": "出典なし",
     "en": "no sources"
