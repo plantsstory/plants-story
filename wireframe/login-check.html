@@ -17,7 +17,7 @@
 </head>
 <body>
 <h1>ログインの点検</h1>
-<p>このページは、今のブラウザがログイン情報を持っているかを表示するだけです。何も送信しません。</p>
+<p>このページは、今のブラウザがログイン情報を持っているかを表示するだけです。Google から戻ったときに、そのログインが有効かを Supabase に一度確かめる以外、何も送信しません。結果に鍵の中身やメールアドレスは出ません。</p>
 <pre id="out">調べています…</pre>
 <button id="login" type="button">ここから Google でログイン</button>
 <button id="copy" type="button" class="alt">結果をコピー</button>
@@ -33,6 +33,17 @@
   add('ブラウザ', navigator.userAgent.replace(/Mozilla\/5\.0 /, ''));
   add('アドレス', location.origin + location.pathname);
   add('URL の # 部分', location.hash ? location.hash.slice(0, 60) + '…' : '(なし)');
+  // what came back from Google, by name only (no values), and how far the phone's clock is from the token's (11-28)
+  var hp = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+  var names = []; hp.forEach(function (v, k) { names.push(k + (v ? '' : '(空)')); });
+  if (names.length) add('戻ってきた項目', names.join(', '));
+  var tok = hp.get('access_token');
+  if (tok) {
+    try {
+      var pl = JSON.parse(atob(tok.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      add('時計のずれ（端末−発行）', Math.round(Date.now() / 1000 - pl.iat) + ' 秒');
+    } catch (e) { add('鍵の読み取り', 'できませんでした: ' + e.message); }
+  }
   var ls = 'ng';
   try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); ls = 'ok'; } catch (e) { ls = 'ng: ' + e.message; }
   add('localStorage 書き込み', ls);
@@ -41,7 +52,20 @@
   add('保存されたログイン情報の鍵', keys.length ? keys.join(', ') : '(なし)');
   add('standalone（ホーム画面から起動）', String(window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches));
   if (!window.supabase) { add('supabase ライブラリ', '読み込めませんでした（CSP や回線）'); return; }
+  // ask Supabase directly whether the returned login is valid, before the library does (status and message only)
+  if (tok) {
+    fetch(URL_ + '/auth/v1/user', { headers: { apikey: KEY, Authorization: 'Bearer ' + tok } }).then(function (r) {
+      return r.text().then(function (t) {
+        var m = ''; try { var j = JSON.parse(t); m = j.error_code || j.code || j.msg || j.message || (j.id ? '利用者あり' : ''); } catch (e) { m = t.slice(0, 60); }
+        add('Supabase への確認', 'HTTP ' + r.status + ' ' + m);
+      });
+    }, function (e) { add('Supabase への確認', '届きませんでした: ' + (e && e.message)); });
+  }
   var sb = window.supabase.createClient(URL_, KEY, { auth: { flowType: 'implicit' } });
+  sb.auth.initialize().then(function (r) {
+    add('ライブラリの受け取り', r && r.error ? 'エラー: ' + (r.error.name || '') + ' ' + (r.error.code || '') + ' ' + (r.error.status || '') + ' ' + String(r.error.message || '').slice(0, 80) : 'ok');
+  }, function (e) { add('ライブラリの受け取り', '例外: ' + (e && e.message)); });
+  add('navigator.locks', typeof navigator.locks === 'object' && navigator.locks ? 'あり' : 'なし');
   sb.auth.onAuthStateChange(function (ev, s) { add('イベント ' + ev, s ? 'セッションあり（' + (s.user && s.user.email ? s.user.email.replace(/^(..).*(@.*)$/, '$1***$2') : 'user') + '）' : 'セッションなし'); });
   sb.auth.getSession().then(function (r) {
     if (r.error) { add('getSession', 'エラー: ' + r.error.message); return; }
