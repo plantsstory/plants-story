@@ -1571,13 +1571,54 @@ if (false) {
   window.localPhotoUrl = localPhotoUrl;
   window.localPhotoSource = localPhotoSource;
 
+  // Where the login is kept (11-28, a private Safari tab that came back from Google still logged out): the library
+  // used localStorage alone, and in a browser that refuses it the login was lost with no word. One place is picked
+  // when the page opens: localStorage, else this tab's sessionStorage, else this page's memory (lost on reload).
+  // Only one, so a logout or a token refresh in another tab is never shadowed by an old copy. Nothing leaves the
+  // browser that did not before.
+  var _aoMem = {};
+  function _aoTry(fn) { try { return fn(); } catch (e) { return null; } }
+  function _aoWorks(name) {
+    return _aoTry(function () { var st = window[name], k = '__ao_t'; st.setItem(k, '1'); var ok = st.getItem(k) === '1'; st.removeItem(k); return ok; }) === true;
+  }
+  window._aoStorageMode = _aoWorks('localStorage') ? 'local' : _aoWorks('sessionStorage') ? 'session' : 'memory';
+  var _aoBack = window._aoStorageMode === 'local' ? function () { return localStorage; }
+    : window._aoStorageMode === 'session' ? function () { return sessionStorage; } : null;
+  var aoStore = {
+    getItem: function (k) {
+      if (!_aoBack) return Object.prototype.hasOwnProperty.call(_aoMem, k) ? _aoMem[k] : null;
+      var v = _aoTry(function () { return _aoBack().getItem(k); });
+      if ((v === null || v === undefined) && Object.prototype.hasOwnProperty.call(_aoMem, k)) return _aoMem[k];
+      return v === undefined ? null : v;
+    },
+    setItem: function (k, v) {
+      v = String(v);
+      if (!_aoBack) { _aoMem[k] = v; return; }
+      // a write the browser refused (full, or private-mode limits) is kept for this page instead of lost
+      if (_aoTry(function () { _aoBack().setItem(k, v); return true; })) delete _aoMem[k];
+      else _aoMem[k] = v;
+    },
+    removeItem: function (k) {
+      delete _aoMem[k];
+      if (_aoBack) _aoTry(function () { _aoBack().removeItem(k); });
+    }
+  };
+  window.aoStore = aoStore;
+  // the tokens Google sent back, read before the library clears them: if the library fails to take them in, they
+  // are handed to it once more below (kept in this closure only, never written anywhere)
+  var _aoHashTokens = null;
+  if (window._aoAuthReturn) {
+    var _hp = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+    if (_hp.get('access_token') && _hp.get('refresh_token')) _aoHashTokens = { access_token: _hp.get('access_token'), refresh_token: _hp.get('refresh_token') };
+  }
+
   var supabase = null;
   try {
     if (window.supabase && window.supabase.createClient) {
       supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         // implicit flow (2026-10-30): the session rides in the return URL, so a login that starts in an in-app
         // browser and ends in Safari/Chrome still completes; PKCE needed the same browser on both ends
-        auth: { flowType: 'implicit' }
+        auth: { flowType: 'implicit', storage: aoStore }
       });
       window._supabaseClient = supabase;
       window._SUPABASE_URL = SUPABASE_URL;
@@ -1939,17 +1980,19 @@ if (false) {
       // a return from Google: #access_token (implicit flow, already cleared from the URL here) or ?code= (old PKCE)
       if (event === 'SIGNED_IN' && (window._aoAuthReturn || window.location.search.indexOf('code=') !== -1)) {
         window._aoAuthReturn = false;   // once: the library may say SIGNED_IN again for the same login
-        try { localStorage.removeItem('login_started_at'); } catch (e) {}
+        _aoHashTokens = null;
+        aoStore.removeItem('login_started_at');
+        if (window._aoStorageMode === 'memory') setTimeout(function () { showToast('このブラウザはログインを保存できないため、ページを読み直すとログアウトします', false, { sticky: true }); }, 1500);
         // GA: distinguish a first login (account created just now) from a returning one
         if (typeof gtag === 'function') {
           var _createdAt = session && session.user && session.user.created_at ? new Date(session.user.created_at).getTime() : 0;
           var _isNewUser = _createdAt > 0 && (Date.now() - _createdAt) < 120000;
           var _loginSource = 'header';
-          try { _loginSource = localStorage.getItem('login_source') || 'header'; localStorage.removeItem('login_source'); } catch (e) {}
-          gtag('event', _isNewUser ? 'sign_up' : 'login', { method: 'google', source: _loginSource });
+          _loginSource = aoStore.getItem('login_source') || 'header'; aoStore.removeItem('login_source');
+          gtag('event', _isNewUser ? 'sign_up' : 'login', { method: 'google', source: _loginSource, storage: window._aoStorageMode });
         }
-        var returnPath = localStorage.getItem('login_return_path');
-        localStorage.removeItem('login_return_path');
+        var returnPath = aoStore.getItem('login_return_path');
+        aoStore.removeItem('login_return_path');
         if (returnPath) {
           window.history.replaceState({}, '', returnPath);
           var state = parseRoute();
@@ -1960,12 +2003,13 @@ if (false) {
         }
         // Resume the action that asked for the login (photo / record / individual / contribute)
         var _ri = null;
-        try { _ri = JSON.parse(localStorage.getItem('login_return_intent') || 'null'); localStorage.removeItem('login_return_intent'); } catch (e) {}
+        try { _ri = JSON.parse(aoStore.getItem('login_return_intent') || 'null'); } catch (e) {}
+        aoStore.removeItem('login_return_intent');
         if (_ri && Date.now() - (_ri.t || 0) < 15 * 60 * 1000) setTimeout(function() { resumeLoginIntent(_ri); }, 300);
         // Resume checkout selected before login (paywall -> OAuth -> card form)
-        var pendingPlan = localStorage.getItem('pending_checkout_plan');
+        var pendingPlan = aoStore.getItem('pending_checkout_plan');
         if (pendingPlan) {
-          localStorage.removeItem('pending_checkout_plan');
+          aoStore.removeItem('pending_checkout_plan');
           showToast('カード情報を入力してください');
           setTimeout(function() {
             showPaywallModal('seedling_quota');
@@ -1980,7 +2024,27 @@ if (false) {
         updateLoginUI();
         checkSubscription();
         if (typeof syncFavoritesFromServer === 'function') syncFavoritesFromServer();
+        return;
       }
+      // came back from Google with the tokens, yet no login: hand them to the library once more, then say so if
+      // that fails too (11-28: the implicit return had no such check, so the person just saw the login sheet again)
+      if (!window._aoAuthReturn) return;
+      var tk = _aoHashTokens; _aoHashTokens = null;
+      var failed = function (why) {
+        window._aoAuthReturn = false;
+        if (/access_token|refresh_token/.test(location.hash)) _aoTry(function () { history.replaceState(null, '', location.pathname + location.search); });
+        showToast('ログインを完了できませんでした。もう一度お試しください', true, { sticky: true, action: { label: 'ログイン', fn: function () { startGoogleLogin(aoStore.getItem('login_return_path') || location.pathname, 'retry'); } } });
+        if (typeof gtag === 'function') gtag('event', 'login_failed', { reason: why, storage: window._aoStorageMode });
+      };
+      if (!tk) { if (/error/.test(location.hash)) failed('implicit_error'); return; }
+      supabase.auth.setSession(tk).then(function (r) {
+        if (r && r.data && r.data.session) {
+          if (/access_token|refresh_token/.test(location.hash)) _aoTry(function () { history.replaceState(null, '', location.pathname + location.search); });
+          if (typeof gtag === 'function') gtag('event', 'login_rescued', { storage: window._aoStorageMode });
+          return;   // SIGNED_IN follows and the handler above takes the person back
+        }
+        failed('implicit_lost');
+      }, function () { failed('implicit_lost'); });
     });
   }
 
@@ -1988,7 +2052,7 @@ if (false) {
   var googleLoginBtn = document.getElementById('google-login-btn');
   if (googleLoginBtn && supabase) {
     googleLoginBtn.addEventListener('click', function() {
-      localStorage.setItem('login_return_path', window.location.pathname || _basePath);
+      aoStore.setItem('login_return_path', window.location.pathname || _basePath);
       supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -2069,8 +2133,8 @@ if (false) {
       // Not logged in: remember the selected plan, send to Google OAuth,
       // and resume checkout automatically on return (SIGNED_IN handler)
       if (supabase) {
-        localStorage.setItem('pending_checkout_plan', plan === 'annual' ? 'annual' : 'monthly');
-        localStorage.setItem('login_return_path', window.location.pathname || _basePath);
+        aoStore.setItem('pending_checkout_plan', plan === 'annual' ? 'annual' : 'monthly');
+        aoStore.setItem('login_return_path', window.location.pathname || _basePath);
         showToast('ログイン後、そのままカード入力へ進みます');
         supabase.auth.signInWithOAuth({
           provider: 'google',
@@ -2490,8 +2554,8 @@ if (false) {
   psExport('startGoogleLogin', startGoogleLogin);
   function startGoogleLogin(returnPath, source) {
     if (!supabase) { showToast('ログインが必要です', true); return; }
-    localStorage.setItem('login_return_path', returnPath || window.location.pathname || _basePath);
-    try { localStorage.setItem('login_source', source || 'header'); } catch (e) {}
+    aoStore.setItem('login_return_path', returnPath || window.location.pathname || _basePath);
+    aoStore.setItem('login_source', source || 'header');
     supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -2507,9 +2571,9 @@ if (false) {
   var IN_APP_UA = /Instagram|Barcelona|FBAN|FBAV|FB_IAB|Line\/|MicroMessenger|; wv\)/i;
   function startLoginWithIntent(intent) {
     intent = intent || {};
-    try { localStorage.setItem('login_return_intent', JSON.stringify(Object.assign({ t: Date.now() }, intent))); } catch (e) {}
+    aoStore.setItem('login_return_intent', JSON.stringify(Object.assign({ t: Date.now() }, intent)));
     // cleared when the login comes back here: if it is still set at the next gate, the login ended somewhere else
-    try { localStorage.setItem('login_started_at', String(Date.now())); } catch (e) {}
+    aoStore.setItem('login_started_at', String(Date.now()));
     if (typeof window.saveContributeDraft === 'function') window.saveContributeDraft(true);
     startGoogleLogin(intent.path || window.location.pathname, intent.a || 'gate');
   }
@@ -2517,7 +2581,7 @@ if (false) {
   // take a moment to report it, and a tap in that moment showed the login sheet to someone already logged in (11-28)
   function storedUser() {
     try {
-      var s = JSON.parse(localStorage.getItem('sb-jpgbehsrglsiwijglhjo-auth-token') || 'null');
+      var s = JSON.parse(aoStore.getItem('sb-jpgbehsrglsiwijglhjo-auth-token') || 'null');
       if (s && s.user && s.user.id && (s.expires_at || 0) * 1000 > Date.now() + 30000) return s.user;
     } catch (e) {}
     return null;
@@ -2544,7 +2608,7 @@ if (false) {
     // browser handing Google to Safari) or this one could not keep it (a closed private tab). Say so instead of
     // sending the person round the same loop (11-28, iPhone)
     var started = 0;
-    try { started = +localStorage.getItem('login_started_at') || 0; } catch (e) {}
+    started = +aoStore.getItem('login_started_at') || 0;
     var again = started && Date.now() - started < 15 * 60000;
     var againEl = document.getElementById('login-sheet-again');
     if (againEl) againEl.classList.toggle('d-none', !again || inApp);
