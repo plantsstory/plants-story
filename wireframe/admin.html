@@ -500,9 +500,13 @@
 
       <section id="sec-users" class="hidden">
         <h2 class="section-title">ユーザー</h2>
-        <p class="desc-text">登録している人の一覧です。会員の受付は止めているため、プランの操作はありません。</p>
+        <p class="desc-text">登録している人を探せます。表示名・ユーザー名・Instagram・X・メールアドレス・Google の氏名のどれでも、一部だけでも探せます。メールアドレスと Google の氏名は管理者だけが見られ、サイトには出ません。</p>
         <div class="toolbar">
-          <input type="text" class="form-input" id="user-search" placeholder="ユーザー名・表示名で検索..." style="flex:1;max-width:300px;">
+          <input type="text" class="form-input" id="user-search" inputmode="search" autocomplete="off" placeholder="名前・@ユーザー名・メールなど" style="flex:1;max-width:340px;">
+          <select class="form-input" id="user-filter" style="max-width:160px;">
+            <option value="">すべて</option>
+            <option value="no_name">表示名なし</option>
+          </select>
           <button class="btn btn-outline btn-sm" id="btn-refresh-users">更新</button>
         </div>
         <div id="users-table-wrap" class="mt-md">
@@ -510,10 +514,12 @@
             <thead>
               <tr>
                 <th>ユーザー</th>
-                <th>ユーザー名</th>
-                <th>登録日</th>
+                <th>SNS など</th>
+                <th>メール</th>
+                <th>登録・ログイン</th>
                 <th>記録</th>
                 <th>写真</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="users-tbody"></tbody>
@@ -2484,23 +2490,37 @@ async function adminUid() { try { var s = (await sb.auth.getSession()).data.sess
 var usersPage = 0;
 var usersPerPage = 30;
 
+var USER_MATCH_LABEL = { display_name: '表示名', username: 'ユーザー名', instagram: 'Instagram', x: 'X', email: 'メール', google_name: 'Google の氏名', id: 'ID' };
+
+// a profile's SNS field holds a handle or a link; show it as @handle
+function userSnsHandle(v) {
+  v = String(v || '').trim();
+  if (!v) return '';
+  v = v.replace(/^https?:\/\/(www\.)?(instagram\.com|x\.com|twitter\.com)\//i, '').replace(/^@/, '').replace(/[\/?#].*$/, '');
+  return v ? '@' + v : '';
+}
+
 function loadUsers() {
   var search = document.getElementById('user-search').value.trim();
+  var filter = document.getElementById('user-filter').value;
   var tbody = document.getElementById('users-tbody');
-  tbody.innerHTML = '<tr><td colspan="5" class="adm-text-center-gray">読み込み中...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="7" class="adm-text-center-gray">読み込み中...</td></tr>';
+  var asked = search + '|' + filter + '|' + usersPage;
+  loadUsers._asked = asked;
   sb.rpc('admin_list_users', {
     p_search: search || null,
-    p_filter_status: null,
+    p_filter_status: filter || null,
     p_limit: usersPerPage,
     p_offset: usersPage * usersPerPage
   }).then(function(res) {
-    if (res.error) { tbody.innerHTML = '<tr><td colspan="5" style="color:red;">' + escapeHtml(res.error.message) + '</td></tr>'; return; }
+    if (loadUsers._asked !== asked) return; // a newer search is on its way
+    if (res.error) { tbody.innerHTML = '<tr><td colspan="7" style="color:red;">' + escapeHtml(res.error.message) + '</td></tr>'; return; }
     var data = res.data || {};
-    if (!data.success) { tbody.innerHTML = '<tr><td colspan="5" style="color:red;">' + escapeHtml(data.error || 'Error') + '</td></tr>'; return; }
+    if (!data.success) { tbody.innerHTML = '<tr><td colspan="7" style="color:red;">' + escapeHtml(data.error || 'Error') + '</td></tr>'; return; }
     var users = data.users || [];
     var total = data.total || 0;
     if (!users.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="adm-text-center-gray">ユーザーが見つかりません</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="adm-text-center-gray">ユーザーが見つかりません</td></tr>';
       renderUsersPagination(total);
       return;
     }
@@ -2508,18 +2528,44 @@ function loadUsers() {
       var recs = allCultivars.filter(function(c) { return c.user_id === u.id; }).length;
       var pics = allImageRows.filter(function(r) { return r.user_id === u.id; }).length;
       var avatar = /^https:\/\//.test(u.avatar_url || '')
-        ? '<img src="' + escapeHtml(u.avatar_url) + '" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">'
-        : '<span style="width:28px;height:28px;border-radius:50%;background:var(--color-light);display:inline-block;"></span>';
+        ? '<img src="' + escapeHtml(u.avatar_url) + '" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex:none;">'
+        : '<span style="width:28px;height:28px;border-radius:50%;background:var(--color-light);display:inline-block;flex:none;"></span>';
+      var name = String(u.display_name || '').trim();
+      var sns = [];
+      if (u.username) sns.push('@' + escapeHtml(u.username));
+      var ig = userSnsHandle(u.sns_instagram), xh = userSnsHandle(u.sns_twitter);
+      if (ig) sns.push('Instagram ' + escapeHtml(ig));
+      if (xh) sns.push('X ' + escapeHtml(xh));
+      var matched = (search && u.matched && u.matched.length)
+        ? '<div class="text-muted" style="font-size:var(--font-size-xs);">一致: ' + escapeHtml(u.matched.map(function(m) { return USER_MATCH_LABEL[m] || m; }).join('・')) + '</div>' : '';
       return '<tr>'
-        + '<td><div style="display:flex;align-items:center;gap:8px;">' + avatar + '<span>' + escapeHtml(u.display_name || '(未設定)') + (u.id === OWNER_ID ? ' <span class="text-muted">（運営）</span>' : '') + '</span></div></td>'
-        + '<td>' + (u.username ? '@' + escapeHtml(u.username) : '<span class="text-muted">-</span>') + '</td>'
-        + '<td style="font-size:var(--font-size-xs);">' + escapeHtml(fmtDate(u.created_at)) + '</td>'
+        + '<td><div style="display:flex;align-items:center;gap:8px;">' + avatar + '<div>'
+        + '<div>' + (name ? escapeHtml(name) : '<span style="color:var(--color-danger,#c0392b);">（表示名なし）</span>') + (u.id === OWNER_ID ? ' <span class="text-muted">（運営）</span>' : '') + '</div>'
+        + (u.google_name ? '<div class="text-muted" style="font-size:var(--font-size-xs);">Google: ' + escapeHtml(u.google_name) + '</div>' : '')
+        + matched + '</div></div></td>'
+        + '<td style="font-size:var(--font-size-sm);">' + (sns.length ? sns.join('<br>') : '<span class="text-muted">-</span>') + '</td>'
+        + '<td style="font-size:var(--font-size-sm);word-break:break-all;">' + escapeHtml(u.email || '') + '</td>'
+        + '<td style="font-size:var(--font-size-xs);">' + escapeHtml(fmtDate(u.created_at)) + '<br><span class="text-muted">' + (u.last_sign_in_at ? escapeHtml(fmtDate(u.last_sign_in_at)) : '-') + '</span></td>'
         + '<td>' + recs + '</td>'
         + '<td>' + pics + '</td>'
+        + '<td><button class="btn btn-outline btn-sm" data-user-lookup="' + escapeHtml(u.id) + '">投稿を調べる</button></td>'
         + '</tr>';
     }).join('');
+    tbody.querySelectorAll('[data-user-lookup]').forEach(function(btn) {
+      btn.addEventListener('click', function() { openPosterLookup(btn.getAttribute('data-user-lookup')); });
+    });
     renderUsersPagination(total);
   });
+}
+
+// open 投稿者を調べる with this account already looked up
+function openPosterLookup(q) {
+  showSection('poster');
+  var input = document.getElementById('ap-q'), form = document.getElementById('ap-form');
+  if (!input || !form) return;
+  input.value = q;
+  form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
+  window.scrollTo(0, 0);
 }
 
 function renderUsersPagination(total) {
@@ -2536,6 +2582,10 @@ document.getElementById('user-search').addEventListener('input', function() {
   usersPage = 0;
   clearTimeout(this._timer);
   this._timer = setTimeout(loadUsers, 300);
+});
+document.getElementById('user-filter').addEventListener('change', function() {
+  usersPage = 0;
+  loadUsers();
 });
 document.getElementById('btn-refresh-users').addEventListener('click', function() {
   usersPage = 0;
