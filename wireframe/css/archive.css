@@ -2681,3 +2681,6 @@ html.photo-notes-off .gallery__img > .photo-note__open { display: inline-flex; a
 .profile-sns__share { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; margin: -11px -11px -11px -11px; padding: 0; border: 0; background: none; color: var(--color-gray); cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .profile-sns__share:hover { color: var(--color-dark); }
 .profile-sns__share:focus-visible { outline: 2px solid var(--color-ink); outline-offset: -6px; }
+/* 「プロフィールを編集」 under the counts, the card's full width, drawn like ログアウト (owner, 11-28: 案B) */
+#profile-edit-link { margin-top: var(--s3); }
+#profile-edit-link .btn { display: flex; width: 100%; min-height: 44px; align-items: center; justify-content: center; }
