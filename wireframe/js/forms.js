@@ -260,6 +260,8 @@ function openRecordSheet() {
   dlg.showModal();
   var desc = document.getElementById('ao-description'); if (desc) setTimeout(function() { desc.focus(); }, 60);
 }
+// 「続ける」 after Back closed the sheet: the form was moved back with what was typed in it
+window.aoReopenRecordSheet = function() { openRecordSheet(); };
 window.closeRecordSheet = function() {
   var dlg = document.getElementById('record-sheet');
   if (!dlg || !_recordFormHome) return;
@@ -2648,6 +2650,8 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     }
     if (typeof gtag === 'function') gtag('event', 'photo_sheet_open', { count: files.length });
     dlg.showModal();
+    // 「続ける」 after Back closed the sheet: the same photos, frames and words, as they were left
+    window.aoReopenPhotoSheet = function() { if (!dlg.open && _sheetFiles && _sheetFiles.length) dlg.showModal(); };
   };
   var _sheetDates = [], _sheetFrames = [];
   // the example in the 一言 box follows the kind of plant chosen
@@ -3679,6 +3683,9 @@ document.addEventListener('click', function(e) {
     var data = { v: 1, savedAt: Date.now(), fields: {}, radios: {} };
     var any = false;
     fields().forEach(function(el) { if (el.value && el.tagName !== 'SELECT') any = true; data.fields[keyOf(el)] = el.value; });
+    // photos cannot be kept across a reload; their number is, so the form can ask for them again (11-28)
+    data.photos = typeof window.getContributeFiles === 'function' ? window.getContributeFiles().length : 0;
+    if (data.photos) any = true;
     page.querySelectorAll('input[type="radio"]:checked').forEach(function(r) { if (r.name) data.radios[r.name] = r.value; });
     page.querySelectorAll('input[type="checkbox"][id]').forEach(function(c) { data.fields[c.id] = c.checked ? '1' : ''; });
     // the rank chip (aff. / cf. / sp. / var. / ssp.) is a button, not a field: kept on its own so it comes back too (11-27)
@@ -3726,6 +3733,13 @@ document.addEventListener('click', function(e) {
     }
     note.innerHTML = '';
     note.appendChild(document.createTextNode('下書きを戻しました · ' + d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' · '));
+    var nowPhotos = typeof window.getContributeFiles === 'function' ? window.getContributeFiles().length : 0;
+    if (data.photos && !nowPhotos) {
+      var ph = document.createElement('strong');
+      ph.className = 'draft-note__photos';
+      ph.textContent = '写真' + (data.photos > 1 ? ' ' + data.photos + ' 枚' : '') + 'はもう一度選んでください · ';
+      note.appendChild(ph);
+    }
     var clr = document.createElement('button');
     clr.type = 'button'; clr.className = 'draft-note__clear'; clr.textContent = '消す';
     clr.addEventListener('click', function() {

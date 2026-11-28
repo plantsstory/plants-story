@@ -307,6 +307,9 @@
   "追加する": "Add",
   "写真を選ぶ": "Choose a photo",
   "このページに写真を載せます": "Add your photo to this page",
+  "写真の追加を閉じました": "Photo form closed",
+  "記録の追加を閉じました": "Record form closed",
+  "続ける": "Continue",
   "写真を撮る": "Take a photo",
   "親株写真": "Parent plant photo",
   "ログインしてから始めます": "Sign in to start",
@@ -396,6 +399,7 @@
   "このページのリンクをコピーしました": "Link to this page copied"
  },
  "rules": [
+    ["^写真(?: (\\d+) 枚)?はもう一度選んでください ·$", "Please choose the photos again ·"],
   [
    "^\"(.+)\" の検索結果$",
    "Results for \"$1\""

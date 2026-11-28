@@ -3770,9 +3770,13 @@
         if (grp) grp.classList.add('cstep-one-genus');
       }
     }
-    var st = history.state && history.state.cstep;
+    // this runs inside navigateTo, before the form's own history entry is made: marking the entry now marked the page
+    // the person came from as step 1, so Back stayed on the form with the old address (11-28). Mark it once it exists.
+    var st = history.state && history.state.page === 'contribute' && history.state.cstep;
     go(st || 1, false);
-    if (!st) history.replaceState(Object.assign({}, history.state || {}, { page: 'contribute', cstep: 1 }), '', location.href);
+    if (!st) setTimeout(function () {
+      if (currentPage() === 'contribute' && !(history.state && history.state.cstep)) history.replaceState(Object.assign({}, history.state || {}, { page: 'contribute', cstep: 1 }), '', location.href);
+    }, 0);
   }
   // editing an entry or adding an individual uses the one-page form
   ['enterEditMode', 'exitEditMode', 'setIndividualMode'].forEach(function (fn) {

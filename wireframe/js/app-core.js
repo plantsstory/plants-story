@@ -809,7 +809,10 @@ function navigateTo(page, options, pushHistory) {
   window._lastNavKey = null;
   showPage(page);
   // Reset edit mode when navigating to contribute page via hash (not from detail page edit flow)
-  if (page === 'contribute' && !options._editFlow && typeof window.exitEditMode === 'function') {
+  // only when an edit was open: going back to an unfinished post keeps what was typed and the photos chosen, as long
+  // as the page was not reloaded (11-28: every return emptied the form, and the photos were lost)
+  if (page === 'contribute' && !options._editFlow && typeof window.exitEditMode === 'function' &&
+      !(typeof window.isContributeEditMode === 'function' && !window.isContributeEditMode())) {
     window.exitEditMode();
   }
   // The compact 'add an individual' form only stays when a species page linked here; any other entry resets it
@@ -986,8 +989,29 @@ if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
 }
 
+// Back with a sheet open (写真を追加, 記録を追加, ＋投稿, ログイン…) closes the sheet and stays on the page. It used to
+// change the page underneath while the sheet stayed on top (11-28). The step back is undone with one step forward.
+var _aoUndoBack = false;
+function aoCloseSheetOnBack() {
+  var open = document.querySelector('dialog[open]');
+  if (!open) return false;
+  _aoUndoBack = true;
+  setTimeout(function() { _aoUndoBack = false; }, 1500);
+  history.forward();
+  if (open.id === 'record-sheet' && typeof window.closeRecordSheet === 'function') window.closeRecordSheet();
+  else open.close();
+  var again = open.id === 'photo-sheet' ? window.aoReopenPhotoSheet : open.id === 'record-sheet' ? window.aoReopenRecordSheet : null;
+  if (typeof again === 'function' && typeof showToast === 'function') {
+    showToast(open.id === 'photo-sheet' ? '写真の追加を閉じました' : '記録の追加を閉じました', false, { action: { label: '続ける', fn: again } });
+  }
+  if (typeof gtag === 'function') gtag('event', 'sheet_closed_by_back', { sheet: open.id });
+  return true;
+}
+
 // Handle browser back/forward
 window.addEventListener('popstate', function(e) {
+  if (_aoUndoBack) { _aoUndoBack = false; return; }
+  if (aoCloseSheetOnBack()) return;
   var state = e.state || parseRoute();
   // a step of the posting form going back or forward is the same page: the form keeps what was typed and the
   // photos (archive.js shows the step). Going through navigateTo would empty it (owner, 11-27)
