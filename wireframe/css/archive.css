@@ -2646,3 +2646,29 @@ html.pv-label .story__figure img { height: auto; aspect-ratio: 4 / 5; max-height
 .nb-part__w { margin-top: 3px; font-size: 11px; line-height: 1.2; color: var(--color-mid); white-space: nowrap; }
 .nb-parts:not(:empty) + .name-builder__result { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); border: 0; }
 #species-subcategory .chips { display: none !important; }
+/* ---- the poster's word on a photo (owner, 11-28): over the photo's foot from the start, two lines at most and a tap
+   for the rest; × puts every photo's word away (remembered), 「メモ」 brings them back. The plant kind is a small mark ---- */
+.gallery__img > .photo-badge { position: absolute; left: 8px; top: 8px; z-index: 2; padding: 2px 8px; background: rgba(0, 0, 0, .62); color: #fff; font-family: var(--font-primary); font-size: var(--fs-label); line-height: 1.6; border-radius: 999px; pointer-events: none; }
+.gallery__overlay.photo-note { opacity: 1; visibility: visible; pointer-events: auto; z-index: 2; padding-right: 48px !important; cursor: pointer; text-align: left; }
+.photo-note .gallery__overlay-caption { margin: 0; font-family: var(--font-primary); font-size: var(--fs-small); line-height: 1.5; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
+.photo-note.is-open .gallery__overlay-caption { display: block; -webkit-line-clamp: unset; line-clamp: none; }
+.photo-note.is-open { max-height: 70%; overflow-y: auto; }
+.photo-note .gallery__overlay-link { margin-top: 2px; font-size: var(--fs-label); }
+.photo-note__close { position: absolute; right: 0; top: 0; width: 44px; height: 44px; padding: 0; border: 0; background: none; color: #fff; font: inherit; font-size: 1.25rem; line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.gallery__img > .photo-note__open { display: none; position: absolute; right: 8px; bottom: 8px; z-index: 2; min-height: 32px; padding: 0 12px; background: rgba(0, 0, 0, .62); color: #fff; border: 1px solid rgba(255, 255, 255, .5); border-radius: 999px; font-family: var(--font-primary); font-size: var(--fs-label); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.gallery__img > .photo-note__open::before { content: ""; position: absolute; inset: -8px; } /* a 48px target */
+html.photo-notes-off .gallery__overlay.photo-note { display: none; }
+html.photo-notes-off .gallery__img > .photo-note__open { display: inline-flex; align-items: center; }
+/* the line under the photo: 写真: name (their page) and @instagram */
+.gallery__credit a { color: inherit; text-decoration: underline; text-decoration-color: var(--color-rule); text-underline-offset: 3px; }
+.gallery__credit .gallery__ig { display: inline-flex; align-items: center; gap: 3px; margin-left: var(--s2); text-decoration: none; white-space: nowrap; }
+.gallery__ig svg { width: 13px; height: 13px; flex: none; }
+/* the photo sheet: which plant as three chips, the Instagram name after an @ */
+.photo-sheet__chips { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s1); }
+.photo-sheet__chip { position: relative; display: inline-flex; align-items: center; min-height: 40px; padding: 0 var(--s3); border: 1px solid var(--color-rule-strong, var(--color-rule)); border-radius: 999px; font-family: var(--font-primary); font-size: var(--fs-small); color: var(--color-ink); background: var(--color-paper); cursor: pointer; }
+.photo-sheet__chip input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+.photo-sheet__chip:has(input:checked) { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-paper); }
+.photo-sheet__chip:has(input:focus-visible) { outline: 2px solid var(--color-ink); outline-offset: 2px; }
+.photo-sheet__ig { display: flex; align-items: center; gap: var(--s1); }
+.photo-sheet__ig > span { font-family: var(--font-primary); color: var(--color-mid); }
+.photo-sheet__ig input { flex: 1; min-width: 0; }

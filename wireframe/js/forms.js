@@ -2559,7 +2559,20 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     var dateEl = document.getElementById('photo-sheet-date'), hint = document.getElementById('photo-sheet-date-hint');
     dateEl.value = ''; hint.textContent = '';
     document.getElementById('photo-sheet-caption').value = '';
-    document.getElementById('photo-sheet-link').value = '';
+    // Instagram, asked once (owner, 11-28): only when the profile has none and it was not asked before. It goes to
+    // the profile and shows beside the name under each of their photos
+    var igRow = document.getElementById('photo-sheet-ig-row'), igIn = document.getElementById('photo-sheet-ig');
+    if (igRow) {
+      igRow.classList.add('d-none'); igIn.value = '';
+      var asked = false;
+      try { asked = localStorage.getItem('ao-ig-asked') === '1'; } catch (er) {}
+      var meIg = window._currentUser;
+      if (!asked && meIg && typeof getSupabase === 'function' && getSupabase()) {
+        getSupabase().from('profiles').select('sns_instagram').eq('id', meIg.id).maybeSingle().then(function(r) {
+          if (r && !r.error && !(r.data && igHandle(r.data.sns_instagram))) igRow.classList.remove('d-none');
+        });
+      }
+    }
     // each photo its own date, from its own EXIF; a photo without one has none (never the date of another)
     files.forEach(function(f, i) {
       exifDate(f).then(function(d) {
@@ -2580,6 +2593,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       kindBox.classList.toggle('d-none', !(e._type === 'clone' || e._type === 'hybrid'));
       var def = kindBox.querySelector('input[value="unknown"]'); if (def) def.checked = true;
     }
+    notePlaceholder();
     // the first photo from this account: confirm it is their own; their profile name is shown as the photographer
     var ownBox = document.getElementById('photo-sheet-own-row'), own = document.getElementById('photo-sheet-own');
     var confirmed = false;
@@ -2593,6 +2607,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     }
     if (!dlg._wired) {
       dlg._wired = true;
+      if (kindBox) kindBox.addEventListener('change', notePlaceholder);
       document.getElementById('photo-sheet-cancel').addEventListener('click', function() { dlg.close(); });
       dlg.addEventListener('click', function(ev) { if (ev.target === dlg) dlg.close(); });
       document.getElementById('photo-sheet-send').addEventListener('click', function() {
@@ -2600,8 +2615,21 @@ updateCultivarDetail = function(cultivarName, rowEl) {
         if (ownRow && !ownRow.classList.contains('d-none') && ownChk && !ownChk.checked) { showToast('自分で撮った写真かどうか、確かめてください', true); return; }
         if (ownRow && !ownRow.classList.contains('d-none')) { try { localStorage.setItem('ao-photo-own-ok', '1'); } catch (er) {} }
         var note = document.getElementById('photo-sheet-caption').value.trim();
-        var link = document.getElementById('photo-sheet-link').value.trim();
-        if (link && !/^https?:\/\//i.test(link)) { showToast('リンクは https:// から始めてください', true); return; }
+        var link = '';   // a free link per photo is no longer asked: the poster's Instagram comes from their profile
+        var igRowS = document.getElementById('photo-sheet-ig-row');
+        var igVal = '';
+        if (igRowS && !igRowS.classList.contains('d-none')) {
+          var igRaw = document.getElementById('photo-sheet-ig').value.trim();
+          igVal = igHandle(igRaw);
+          if (igRaw && !igVal) { showToast('Instagram のユーザー名を確かめてください（英数字・ . ・ _ ）', true); return; }
+          try { localStorage.setItem('ao-ig-asked', '1'); } catch (er) {}
+        }
+        if (igVal && typeof getSupabase === 'function' && getSupabase()) {
+          // p_username null: the profile's own name is kept as it is
+          getSupabase().rpc('upsert_profile', { p_sns_instagram: igVal, p_username: null }).then(function(r) {
+            if (r.error || (r.data && r.data.success === false)) showToast('Instagram をプロフィールに保存できませんでした。プロフィールの編集から入れられます', true);
+          });
+        }
         var dates = _sheetFiles.length === 1 ? [document.getElementById('photo-sheet-date').value] : _sheetDates.slice();
         var captions = dates.map(function(d) { return [d ? '撮影 ' + d.replace(/-/g, '.') : '', note].filter(Boolean).join(' · '); });
         var kindIn = document.querySelector('#photo-sheet-kind:not(.d-none) input:checked');
@@ -2622,6 +2650,15 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     dlg.showModal();
   };
   var _sheetDates = [], _sheetFrames = [];
+  // the example in the 一言 box follows the kind of plant chosen
+  function notePlaceholder() {
+    var inp = document.getElementById('photo-sheet-caption'); if (!inp) return;
+    var k = document.querySelector('#photo-sheet-kind:not(.d-none) input:checked');
+    var v = k ? k.value : '';
+    inp.placeholder = v === 'f_seedling' ? '例: F2。親は自家の株。葉の筋が太め'
+      : v === 'original' ? '例: 正規タグつきで入手した組織培養の株'
+      : '例: 温室で 2 年目。新しい葉が開いたところ';
+  }
   /* ---- the frame (owner, 11-13): every photo is shown 3 wide to 4 tall. In the sheet the photo sits in that
      frame; a finger moves it, two fingers or the slider change its size. Where the photo does not reach, the
      frame is black, and that is what is uploaded. ---- */
@@ -2726,7 +2763,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     var gal = document.getElementById('gallery-upload'), pending = [];
     var onPage = (function() { var h = document.querySelector('#page-cultivar h1'); return h && h1Key(h).replace(' [Seedling]', '') === String(cultivarName).replace(' [Seedling]', ''); })();
     if (gal && onPage) files.forEach(function(f) {
-      var it = createGalleryItem(URL.createObjectURL(f), { caption: '送信中…' });
+      var it = createGalleryItem(URL.createObjectURL(f), { caption: '送信中…', status: true });
       it.classList.add('gallery__item--sending'); it.removeAttribute('data-user-upload');
       gal.parentNode.insertBefore(it, gal); pending.push(it);
     });
@@ -2817,32 +2854,43 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     if (opts.isLocal) item.setAttribute('data-gallery-idx', opts.localIdx);
     var realVotes = opts.realVotes || 0;
     var fakeVotes = opts.fakeVotes || 0;
-    var votedAs = opts.imageId ? getVote(opts.imageId) : null;    var caption = opts.caption || '';
+    var votedAs = opts.imageId ? getVote(opts.imageId) : null;
+    var caption = opts.caption || '';
     // only a web address is shown as a link (an old row may hold anything)
     var linkUrl = /^https?:\/\//i.test(opts.linkUrl || '') ? opts.linkUrl : '';
     var hasOverlay = caption || linkUrl;
     var overlayHtml = '';
-    if (hasOverlay) {
-      overlayHtml = '<div class="gallery__overlay">';
-      if (caption) overlayHtml += '<div class="gallery__overlay-caption">' + escHtml(caption) + '</div>';
+    if (hasOverlay && opts.status) {
+      // a state, not a note (送信中…): always shown, nothing to put away
+      overlayHtml = '<div class="gallery__overlay gallery__overlay--visible"><div class="gallery__overlay-caption">' + escHtml(caption) + '</div></div>';
+    } else if (hasOverlay) {
+      // the poster's word on this photo (owner, 11-28): shown over the photo's foot from the start; × puts every
+      // photo's word away at once (and the browser remembers), 「メモ」 brings them back
+      overlayHtml = '<div class="gallery__overlay photo-note">';
+      if (caption) overlayHtml += '<div class="gallery__overlay-caption" data-ui-keep>' + escHtml(caption) + '</div>';
       if (linkUrl) {
         var displayLink = linkUrl.replace(/^https?:\/\//, '').substring(0, 40);
-        overlayHtml += '<div class="gallery__overlay-link"><a href="' + escHtml(linkUrl) + '" target="_blank" rel="noopener">' + escHtml(displayLink) + '</a></div>';
+        overlayHtml += '<div class="gallery__overlay-link"><a href="' + escHtml(linkUrl) + '" target="_blank" rel="noopener nofollow ugc">' + escHtml(displayLink) + '</a></div>';
       }
-      overlayHtml += '</div>';
+      overlayHtml += '<button type="button" class="photo-note__close" aria-label="メモを隠す">×</button></div>'
+        + '<button type="button" class="photo-note__open">メモ</button>';
     }
-    // who put the photo here and when (board 16 G2): a photo without a name gets no line
+    // which plant the photo shows, when the poster said (board 9): a small mark on the photo, always in sight
+    var kindLabel = opts.specimenKind === 'original' ? 'オリジナル由来' : opts.specimenKind === 'f_seedling' ? '実生' : '';
+    var badgeHtml = kindLabel ? '<span class="photo-badge">' + kindLabel + '</span>' : '';
+    // who put the photo here and when (board 16 G2): a photo without a name gets no line. The name opens their
+    // page; their Instagram (from their profile) follows it, filled in below
     var creditHtml = '';
     if (opts.creditName || opts.ownerId) {
       creditHtml = '<p class="gallery__credit" data-uid="' + escHtml(opts.ownerId || '') + '" data-ym="' + escHtml(opts.creditYm || '') + '"' + (opts.creditName ? '' : ' hidden') + '>'
-        + (opts.creditName ? '写真: ' + escHtml(opts.creditName) + (opts.creditYm ? '、' + escHtml(opts.creditYm) : '') : '') + '</p>';
+        + (opts.creditName ? creditLine(opts.creditName, opts.ownerId, opts.creditYm) : '') + '</p>';
     }
     // the plant's name as the alt text, and the first photo loads at once: it is the page's largest picture
     // (site check 2026-11-25: no alt, and loading=lazy on the LCP image)
     var _gu = document.getElementById('gallery-upload');
     var altText = opts.alt || (_gu && _gu.parentNode && _gu.parentNode.getAttribute('data-for')) || '';
     item.innerHTML =
-      '<div class="gallery__img"><img' + (opts.reuseImg ? ' data-reuse-slot' : ' src="' + src + '"') + ' class="gallery__img-full" alt="' + escHtml(altText) + '"' + (opts.eager ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"') + ' decoding="async" sizes="(max-width: 768px) 100vw, 600px">' + overlayHtml + '</div>' + creditHtml +
+      '<div class="gallery__img"><img' + (opts.reuseImg ? ' data-reuse-slot' : ' src="' + src + '"') + ' class="gallery__img-full" alt="' + escHtml(altText) + '"' + (opts.eager ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"') + ' decoding="async" sizes="(max-width: 768px) 100vw, 600px">' + badgeHtml + overlayHtml + '</div>' + creditHtml +
       '<div class="gallery__actions">' +
         imageReportLink(opts) +
       '</div>';
@@ -2856,17 +2904,43 @@ updateCultivarDetail = function(cultivarName, rowEl) {
       });
       slot.parentNode.replaceChild(r, slot);
     }
-    // Tap to toggle overlay
-    if (hasOverlay) {
-      var imgDiv = item.querySelector('.gallery__img');
-      var overlay = item.querySelector('.gallery__overlay');
-      imgDiv.addEventListener('click', function(e) {
-        // Don't toggle if clicking on the link itself
-        if (e.target.closest('.gallery__overlay-link a')) return;
-        overlay.classList.toggle('gallery__overlay--visible');
+    // × and 「メモ」: one switch for every photo on the page; a tap on the words opens a long one in full
+    var note = item.querySelector('.photo-note');
+    if (note) {
+      note.querySelector('.photo-note__close').addEventListener('click', function(e) { e.stopPropagation(); setPhotoNotes(false); });
+      item.querySelector('.photo-note__open').addEventListener('click', function(e) { e.stopPropagation(); setPhotoNotes(true); });
+      note.addEventListener('click', function(e) {
+        if (e.target.closest('a, button')) return;
+        e.stopPropagation();
+        note.classList.toggle('is-open');
       });
     }
     return item;
+  }
+  function setPhotoNotes(show) {
+    document.documentElement.classList.toggle('photo-notes-off', !show);
+    try { if (show) localStorage.removeItem('ao-photo-notes-off'); else localStorage.setItem('ao-photo-notes-off', '1'); } catch (er) {}
+    if (typeof gtag === 'function') gtag('event', show ? 'photo_note_show' : 'photo_note_hide', {});
+  }
+  try { if (localStorage.getItem('ao-photo-notes-off') === '1') document.documentElement.classList.add('photo-notes-off'); } catch (er) {}
+  // an Instagram name as written in a profile (name, @name or an instagram.com address) → the bare name, or ''
+  function igHandle(v) {
+    v = String(v || '').trim();
+    var m = v.match(/^https?:\/\/(?:www\.)?instagram\.com\/([A-Za-z0-9._]{1,30})\/?(?:[?#].*)?$/i);
+    if (m) v = m[1];
+    v = v.replace(/^@/, '');
+    return /^[A-Za-z0-9._]{1,30}$/.test(v) ? v : '';
+  }
+  window.igHandle = igHandle;
+  function creditLine(name, uid, ym, ig) {
+    var base = (typeof _basePath !== 'undefined' ? _basePath : '/');
+    var who = uid
+      ? '<a href="' + escHtml(base + 'profile/' + uid) + '" class="gallery__credit-name" data-nav="profile" data-userid="' + escHtml(uid) + '" data-ui-keep>' + escHtml(name) + '</a>'
+      : '<span data-ui-keep>' + escHtml(name) + '</span>';
+    var h = igHandle(ig);
+    return '<span>写真:</span> ' + who + (ym ? '<span data-ui-keep>、' + escHtml(ym) + '</span>' : '')
+      + (h ? ' <a class="gallery__ig" href="https://www.instagram.com/' + escHtml(h) + '/" target="_blank" rel="noopener noreferrer nofollow" data-ui-keep>'
+        + '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>@' + escHtml(h) + '</a>' : '');
   }
 
   // --- Render gallery for a specific cultivar ---
@@ -2940,8 +3014,10 @@ updateCultivarDetail = function(cultivarName, rowEl) {
             storagePath: img.storage_path,
             realVotes: img.real_votes,
             fakeVotes: img.fake_votes,
-            // who took it and which plant it shows (board 9): only what the uploader confirmed is shown
-            caption: [img.caption, img.specimen_kind === 'original' ? 'オリジナル由来' : img.specimen_kind === 'f_seedling' ? '実生（F 個体）' : ''].filter(Boolean).join(' · '),
+            // who took it and which plant it shows (board 9): only what the uploader confirmed is shown. The date
+            // is in the line under the photo, so the band carries the poster's own words only
+            caption: String(img.caption || '').replace(/^撮影 \d{4}\.\d{2}\.\d{2}(\s*·\s*)?/, '').trim(),
+            specimenKind: img.specimen_kind,
             linkUrl: img.link_url,
             ownerId: img.user_id,
             // the photographer the uploader named, else the uploader's display name (filled in below)
@@ -2959,17 +3035,18 @@ updateCultivarDetail = function(cultivarName, rowEl) {
             });
           }
         });
-        // the uploaders' display names, for the photos whose line has no name yet
-        var uids = images.filter(function(i) { return !i.credit && i.user_id; }).map(function(i) { return i.user_id; })
+        // the uploaders' display names (for the photos whose line has no name yet) and their Instagram
+        var uids = images.filter(function(i) { return i.user_id; }).map(function(i) { return i.user_id; })
           .filter(function(u, k, a) { return a.indexOf(u) === k; });
         if (uids.length) {
-          getSupabase().from('profiles').select('id, display_name').in('id', uids).then(function(pr) {
+          getSupabase().from('profiles').select('id, display_name, sns_instagram').in('id', uids).then(function(pr) {
             ((pr && pr.data) || []).forEach(function(p) {
-              if (!p.display_name) return;
               gallery.querySelectorAll('.gallery__credit[data-uid="' + p.id + '"]').forEach(function(el) {
-                if (!el.hidden) return;
                 var ym = el.getAttribute('data-ym');
-                el.textContent = '写真: ' + p.display_name + (ym ? '、' + ym : '');
+                var nameEl = el.querySelector('.gallery__credit-name');
+                var name = el.hidden ? p.display_name : (nameEl ? nameEl.textContent : '');
+                if (!name) return;
+                if (el.hidden || igHandle(p.sns_instagram)) el.innerHTML = creditLine(name, p.id, ym, p.sns_instagram);
                 el.hidden = false;
               });
             });

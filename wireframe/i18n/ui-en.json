@@ -374,7 +374,23 @@
   "由来": "Origin",
   "由来と交配親": "Origin and parents",
   "株の写真": "Photos of the plant",
-  "確認": "Review"
+  "確認": "Review",
+  "写真:": "Photo:",
+  "メモ": "Note",
+  "メモを隠す": "Hide note",
+  "オリジナル由来": "From the original",
+  "実生（F）": "Seedling (F)",
+  "株分け・組織培養で増えた株は「オリジナル由来」、種から育てた株は「実生」です。": "A plant grown on by division or tissue culture is \"From the original\"; one grown from seed is a \"Seedling\".",
+  "この写真について一言（任意）": "A word about this photo (optional)",
+  "品種そのものの由来は、ページの「由来の記録」に書かれます。ここにはこの株のことを。": "The cultivar's own origin goes in the page's origin record. Write here about this plant.",
+  "例: 温室で 2 年目。新しい葉が開いたところ": "e.g. Second year in the greenhouse; a new leaf just opened",
+  "例: F2。親は自家の株。葉の筋が太め": "e.g. F2 from my own plants; thicker veins",
+  "例: 正規タグつきで入手した組織培養の株": "e.g. A tissue-culture plant bought with its original tag",
+  "Instagram（任意・最初の 1 回だけ）": "Instagram (optional, asked once)",
+  "ユーザー名": "Username",
+  "プロフィールに保存され、写真の名前の横に出ます。": "Saved to your profile and shown next to your name on your photos.",
+  "Instagram のユーザー名を確かめてください（英数字・ . ・ _ ）": "Please check the Instagram username (letters, numbers, . and _).",
+  "Instagram をプロフィールに保存できませんでした。プロフィールの編集から入れられます": "Couldn't save Instagram to your profile. You can add it from Edit profile."
  },
  "rules": [
   [

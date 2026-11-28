@@ -21,27 +21,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Stylesheets before the script preloads: they hold the first paint, the scripts run only at the end of the body (11-03) -->
-  <link rel="stylesheet" href="css/variables.css?v=20261128b">
-  <link rel="stylesheet" href="css/reset.css?v=20261128b">
-  <link rel="stylesheet" href="css/layout.css?v=20261128b">
-  <link rel="stylesheet" href="css/components.css?v=20261128b">
-  <link rel="stylesheet" href="css/pages.css?v=20261128b">
-  <link rel="stylesheet" href="css/utilities.css?v=20261128b">
-  <link rel="stylesheet" href="css/archive.css?v=20261128b">
+  <link rel="stylesheet" href="css/variables.css?v=20261128c">
+  <link rel="stylesheet" href="css/reset.css?v=20261128c">
+  <link rel="stylesheet" href="css/layout.css?v=20261128c">
+  <link rel="stylesheet" href="css/components.css?v=20261128c">
+  <link rel="stylesheet" href="css/pages.css?v=20261128c">
+  <link rel="stylesheet" href="css/utilities.css?v=20261128c">
+  <link rel="stylesheet" href="css/archive.css?v=20261128c">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Shippori+Mincho:wght@600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1">
   <!-- Own scripts fetched in parallel (the meta CSP stops the browser's own look-ahead); they still run in order at
        the end of the body. gtag.js is loaded by gtag-init.js once the page is parsed (board 11 T156). -->
-  <link rel="preload" as="script" href="js/record-gate.js?v=20261128b">
-  <link rel="preload" as="script" href="js/app-core.js?v=20261128b">
-  <link rel="preload" as="script" href="js/pages.js?v=20261128b">
-  <link rel="preload" as="script" href="js/forms.js?v=20261128b">
-  <link rel="preload" as="script" href="js/entry-meta.js?v=20261128b">
-  <link rel="preload" as="script" href="js/archive.js?v=20261128b">
-  <link rel="preload" as="script" href="js/tool-gate.js?v=20261128b">
-  <link rel="preload" as="script" href="js/tools.js?v=20261128b">
-  <link rel="preload" as="script" href="js/dialogs.js?v=20261128b">
-  <script src="js/textsize.js?v=20261128b"></script>
+  <link rel="preload" as="script" href="js/record-gate.js?v=20261128c">
+  <link rel="preload" as="script" href="js/app-core.js?v=20261128c">
+  <link rel="preload" as="script" href="js/pages.js?v=20261128c">
+  <link rel="preload" as="script" href="js/forms.js?v=20261128c">
+  <link rel="preload" as="script" href="js/entry-meta.js?v=20261128c">
+  <link rel="preload" as="script" href="js/archive.js?v=20261128c">
+  <link rel="preload" as="script" href="js/tool-gate.js?v=20261128c">
+  <link rel="preload" as="script" href="js/tools.js?v=20261128c">
+  <link rel="preload" as="script" href="js/dialogs.js?v=20261128c">
+  <script src="js/textsize.js?v=20261128c"></script>
   <title>Aroid Origins | アンスリウムなどアロイド品種の由来・歴史図鑑</title>
   <meta name="description" content="誰が、いつ、どこで名付けたか — アロイドの由来を出典つきで記録する図鑑。 アンスリウムなどアロイド品種の記載者・発表年・タイプ産地・交配式を、学名データベースと一次資料から集めています。">
   <meta property="og:title" content="Aroid Origins">
@@ -1802,24 +1802,30 @@
     <p class="sheet-dialog__kind" id="photo-sheet-name"></p>
     <p class="photo-sheet__frame-hint">写真は縦 4：横 3 の枠で載ります。指で動かして位置を、2 本の指か「大きさ」で大きさを合わせられます。写真が届かない部分は黒になります。</p>
     <div class="photo-sheet__plates" id="photo-sheet-plates"></div>
+    <fieldset class="form-group d-none photo-sheet__kind" id="photo-sheet-kind">
+      <legend class="form-label">写っている株</legend>
+      <div class="photo-sheet__chips">
+        <label class="photo-sheet__chip"><input type="radio" name="photo-sheet-kind" value="original"> <span>オリジナル由来</span></label>
+        <label class="photo-sheet__chip"><input type="radio" name="photo-sheet-kind" value="f_seedling"> <span>実生（F）</span></label>
+        <label class="photo-sheet__chip"><input type="radio" name="photo-sheet-kind" value="unknown" checked> <span>わからない</span></label>
+      </div>
+      <p class="form-hint">株分け・組織培養で増えた株は「オリジナル由来」、種から育てた株は「実生」です。</p>
+    </fieldset>
+    <div class="form-group">
+      <label class="form-label" for="photo-sheet-caption">この写真について一言（任意）</label>
+      <input type="text" id="photo-sheet-caption" class="form-input" maxlength="120" placeholder="例: 温室で 2 年目。新しい葉が開いたところ">
+      <p class="form-hint">品種そのものの由来は、ページの「由来の記録」に書かれます。ここにはこの株のことを。</p>
+    </div>
     <div class="form-group">
       <label class="form-label" for="photo-sheet-date">撮影日</label>
       <input type="date" id="photo-sheet-date" class="form-input">
       <p class="form-hint" id="photo-sheet-date-hint"></p>
     </div>
-    <div class="form-group">
-      <label class="form-label" for="photo-sheet-caption">補足（任意）</label>
-      <input type="text" id="photo-sheet-caption" class="form-input" maxlength="120" placeholder="例: 栽培株 · 温室で 2 年目">
+    <div class="form-group d-none" id="photo-sheet-ig-row">
+      <label class="form-label" for="photo-sheet-ig">Instagram（任意・最初の 1 回だけ）</label>
+      <div class="photo-sheet__ig"><span aria-hidden="true">@</span><input type="text" id="photo-sheet-ig" class="form-input" maxlength="60" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ユーザー名"></div>
+      <p class="form-hint">プロフィールに保存され、写真の名前の横に出ます。</p>
     </div>
-    <details class="contribute-fold"><summary>リンクを付ける（Instagram など）</summary>
-      <div class="form-group"><input type="url" id="photo-sheet-link" class="form-input" placeholder="https://" aria-label="リンク"></div>
-    </details>
-    <fieldset class="form-group d-none photo-sheet__kind" id="photo-sheet-kind">
-      <legend class="form-label">写っている株</legend>
-      <label class="form-radio"><input type="radio" name="photo-sheet-kind" value="original"> <span>オリジナル由来（株分け・組織培養）</span></label>
-      <label class="form-radio"><input type="radio" name="photo-sheet-kind" value="f_seedling"> <span>実生（F 個体）</span></label>
-      <label class="form-radio"><input type="radio" name="photo-sheet-kind" value="unknown" checked> <span>わからない</span></label>
-    </fieldset>
     <label class="photo-sheet__own d-none" id="photo-sheet-own-row"><input type="checkbox" id="photo-sheet-own"> <span>自分で撮った写真です。撮影者として「<span id="photo-sheet-own-name"></span>」が載ります（この確認は最初の 1 回だけ）</span></label>
     <p class="photo-sheet__note">自分で撮った写真だけを載せてください。載せた写真はあとから自分で消せます。</p>
     <div class="dialog-actions">
@@ -1865,20 +1871,20 @@
        ======================================== -->
   <!-- analytics set-up: here rather than in the head, so it never holds up the first view (PSI 11-26); it still runs
        before the scripts that send events -->
-  <script src="js/gtag-init.js?v=20261128b"></script>
+  <script src="js/gtag-init.js?v=20261128c"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1"></script>
-  <script src="js/record-gate.js?v=20261128b"></script>
-  <script src="js/record-text.js?v=20261128b"></script>
+  <script src="js/record-gate.js?v=20261128c"></script>
+  <script src="js/record-text.js?v=20261128c"></script>
   <!-- deploy-time photo copies on Pages (scripts/build-photos.js); missing → photos come from Supabase -->
   <script src="data/photos.js"></script>
-  <script src="js/app-core.js?v=20261128b"></script>
-  <script src="js/pages.js?v=20261128b"></script>
-  <script src="js/forms.js?v=20261128b"></script>
-  <script src="js/ui-en.js?v=20261128b"></script>
-  <script src="js/entry-meta.js?v=20261128b"></script>
-  <script src="js/archive.js?v=20261128b"></script>
-  <script src="js/tool-gate.js?v=20261128b"></script>
-  <script src="js/tools.js?v=20261128b"></script>
+  <script src="js/app-core.js?v=20261128c"></script>
+  <script src="js/pages.js?v=20261128c"></script>
+  <script src="js/forms.js?v=20261128c"></script>
+  <script src="js/ui-en.js?v=20261128c"></script>
+  <script src="js/entry-meta.js?v=20261128c"></script>
+  <script src="js/archive.js?v=20261128c"></script>
+  <script src="js/tool-gate.js?v=20261128c"></script>
+  <script src="js/tools.js?v=20261128c"></script>
 
   <!-- Parent photo dialog lightbox -->
   <dialog class="parent-photo-dialog" id="parentPhotoDialog" aria-label="親株写真">
@@ -1888,7 +1894,7 @@
       <div class="dialog-label"></div>
     </div>
   </dialog>
-  <script src="js/dialogs.js?v=20261128b"></script>
+  <script src="js/dialogs.js?v=20261128c"></script>
 
   <!-- AI re-research request dialog -->
   <!-- Asked before anything is typed: posting, photos and records need a login (2026-10-08 app-ux) -->
@@ -1940,6 +1946,6 @@
     </div>
   </dialog>
 
-<script src="js/sw-register.js?v=20261128b"></script>
+<script src="js/sw-register.js?v=20261128c"></script>
 </body>
 </html>
