@@ -70,6 +70,7 @@
           var ask = DETAIL_ASK[e.target.value];
           _detailEl.classList.toggle('d-none', !ask);
           if (_detailNote) _detailNote.classList.toggle('d-none', !ask);
+          if (_rightsNote) _rightsNote.classList.toggle('d-none', e.target.value !== 'rights');
           if (ask) { _detailEl.placeholder = ask.ph; _detailEl.focus(); }
         }
       });
@@ -127,15 +128,19 @@
       duplicate: { required: false, ph: 'どの名前と同じですか？（任意）', need: '' },
       irrelevant: { required: false, ph: 'どこが違いますか？（任意）', need: '' },
       copyright: { required: false, ph: 'もとの写真の場所（リンク）や、撮った人がわかれば書いてください（任意）', need: '' },
+      // 11-28: 名誉・プライバシー・著作権など. A formal 削除の申出 from the person or rights holder goes through お問い合わせ
+      rights: { required: true, ph: 'どの部分が、どの権利（名誉・プライバシー・著作権・肖像など）を侵害していますか？', need: 'どの部分が、どう侵害しているかを書いてください' },
+      impersonation: { required: false, ph: '本来の人やお店の名前、その方のページのリンクなど（任意）', need: '' },
       other: { required: true, ph: '詳細を入力...', need: '詳細を入力してください' }
     };
-    var _detailNote = null;
+    var _detailNote = null, _rightsNote = null;
 
     var cultivarReasons = [
       { value: 'duplicate', label: '重複している品種' },
       { value: 'wrong_info', label: '誤った情報' },
       { value: 'created_by_mistake', label: '間違えて作成した' },
       { value: 'spam', label: 'スパム・不適切な内容' },
+      { value: 'rights', label: '権利の侵害（名誉・プライバシー・著作権など）' },
       { value: 'other', label: 'その他' }
     ];
 
@@ -143,7 +148,16 @@
       { value: 'irrelevant', label: '無関係な画像' },
       { value: 'inappropriate', label: '不適切な画像' },
       { value: 'copyright', label: '著作権侵害の可能性' },
+      { value: 'rights', label: 'ほかの権利の侵害（肖像・プライバシーなど）' },
       { value: 'uploaded_by_mistake', label: '間違えてアップロードした' },
+      { value: 'other', label: 'その他' }
+    ];
+
+    var profileReasons = [
+      { value: 'impersonation', label: 'なりすまし' },
+      { value: 'spam', label: 'スパム・宣伝' },
+      { value: 'inappropriate', label: '不適切な内容' },
+      { value: 'rights', label: '権利の侵害（名誉・プライバシー・著作権など）' },
       { value: 'other', label: 'その他' }
     ];
 
@@ -153,8 +167,8 @@
       bindOnce();
       currentRequest = { targetType: targetType, targetId: targetId, targetName: targetName, mine: !!mine };
       _targetEl.textContent = targetName || '';
-      if (_titleEl) _titleEl.textContent = targetType === 'cultivar' ? '誤りを報告' : (mine ? '写真の削除依頼' : '写真を報告');
-      var reasons = targetType === 'cultivar' ? cultivarReasons
+      if (_titleEl) _titleEl.textContent = targetType === 'cultivar' ? '誤りを報告' : targetType === 'profile' ? 'プロフィールを報告' : (mine ? '写真の削除依頼' : '写真を報告');
+      var reasons = targetType === 'cultivar' ? cultivarReasons : targetType === 'profile' ? profileReasons
         : imageReasons.filter(function(r) { return mine || r.value !== 'uploaded_by_mistake'; });
       _optionsEl.innerHTML = '';
       reasons.forEach(function(r) {
@@ -178,8 +192,34 @@
         _detailEl.insertAdjacentElement('afterend', _detailNote);
       }
       _detailNote.classList.add('d-none');
+      if (!_rightsNote) {
+        _rightsNote = document.createElement('p');
+        _rightsNote.className = 'dialog-detail-note text-xs text-muted d-none';
+        _rightsNote.appendChild(document.createTextNode('ご本人や権利をお持ちの方は、'));
+        var cl = document.createElement('a');
+        cl.href = '/contact/';
+        cl.setAttribute('data-nav', 'contact');
+        cl.textContent = 'お問い合わせ';
+        cl.addEventListener('click', function () { _dialog.close(); currentRequest = null; });
+        _rightsNote.appendChild(cl);
+        _rightsNote.appendChild(document.createTextNode('（区分「コンテンツ削除要請」）から、お名前と連絡先をそえて正式に削除を申し出ることもできます。'));
+        _detailNote.insertAdjacentElement('afterend', _rightsNote);
+      }
+      _rightsNote.classList.add('d-none');
       _dialog.showModal();
     }
+
+    // 11-28: report someone else's profile (the button shows on profiles that are not one's own, js/pages.js)
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('#profile-report-btn');
+      if (!btn) return;
+      e.preventDefault();
+      var page = document.getElementById('page-profile');
+      var uid = page && page.getAttribute('data-profile-uid');
+      if (!uid) return;
+      var nameEl = document.getElementById('profile-display-name');
+      openDialog('profile', uid, nameEl ? nameEl.textContent.trim() : '', false);
+    });
 
     // Cultivar delete request button (event delegation)
     document.addEventListener('click', function(e) {

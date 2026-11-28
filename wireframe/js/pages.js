@@ -164,6 +164,8 @@
     if (logoutBtn) {
       logoutBtn.style.display = isOwn ? '' : 'none';
     }
+    var reportLink = document.getElementById('profile-report-link');
+    if (reportLink) reportLink.classList.toggle('d-none', !!isOwn);
 
     // Fetch subscription status for the profile
     var subBadge = document.getElementById('profile-sub-badge');

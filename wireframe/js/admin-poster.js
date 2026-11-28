@@ -140,7 +140,11 @@
       h += '<div class="ap-sub">ログイン中の端末（ログアウトすると消えます）</div>';
       ss.forEach(function (s) { h += '<div class="ap-sess"><span class="ap-mono">' + esc(s.ip || '') + '</span> · ' + esc(device(s.user_agent)) + ' · ' + esc(jst(s.updated_at || s.created_at)) + '</div>'; });
     }
-    h += '<div class="ap-actions"><button class="btn btn-outline btn-sm" data-ap-user="' + esc(a.id) + '">この人の投稿の記録をすべて見る</button></div>';
+    if (a.suspension) h += '<p class="ap-held">利用停止中（' + esc(jst(a.suspension.since)) + '〜' + (a.suspension.until ? esc(jst(a.suspension.until)) : '解除するまで') + '）' + (a.suspension.reason ? ' — ' + esc(a.suspension.reason) : '') + '</p>';
+    h += '<div class="ap-actions"><button class="btn btn-outline btn-sm" data-ap-user="' + esc(a.id) + '">この人の投稿の記録をすべて見る</button>'
+      + (a.suspension ? '<button class="btn btn-outline btn-sm" data-suspend="off" data-user="' + esc(a.id) + '">停止を解く</button>'
+                      : '<button class="btn btn-danger btn-sm" data-suspend="on" data-user="' + esc(a.id) + '" data-name="' + esc(a.display_name || a.email || '') + '">利用を停止</button>')
+      + '</div>';
     return h + '</div>';
   }
 
@@ -157,7 +161,8 @@
     if (!hold) h += '<button class="btn btn-primary btn-sm" data-ap-hold="on">保全する</button>';
     else h += '<button class="btn btn-outline btn-sm" data-ap-hold="off">保全をやめる</button>';
     if (item.row && item.type !== 'profile') h += '<button class="btn btn-danger btn-sm" data-ap-takedown="1">保全して削除</button>';
-    h += '<button class="btn btn-outline btn-sm" data-ap-copy="1">記録を文字で写す</button></div>';
+    h += '<button class="btn btn-outline btn-sm" data-ap-copy="1">記録を文字で写す</button>'
+      + '<button class="btn btn-outline btn-sm" data-case-from="item" data-item-type="' + esc(item.type) + '" data-item-id="' + esc(item.id) + '" data-item-label="' + esc(item.label || '') + '">受付簿に入れる</button></div>';
     return h + '</div>';
   }
 
@@ -313,6 +318,12 @@
       a.addEventListener('click', function (e) { e.preventDefault(); document.getElementById('ap-q').value = a.getAttribute('data-ap-open'); show(a.getAttribute('data-ap-open')); window.scrollTo(0, 0); });
     });
   }
+
+  // for the 受付簿 (js/admin-cases.js): what a pasted address points at, and the post log as text
+  window.posterResolve = resolve;
+  window.posterRefresh = function () { var q = document.getElementById('ap-q'); if (q && q.value && document.getElementById('ap-result')) show(q.value); };
+  window.posterJst = jst;
+  window.posterDevice = device;
 
   window.loadPosterLookup = function () {
     var root = document.getElementById('poster-root');

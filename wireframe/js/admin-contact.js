@@ -20,6 +20,8 @@
     if (r.error) { if (root) root.innerHTML = '<p style="color:#a8712e;">読み込みエラー: ' + esc(r.error.message) + '</p>'; return; }
     var rows = (r.data || []).map(function (m) { m.is_resolved = m.status === 'done'; return m; }).sort(function (a, b) { return (a.is_resolved ? 1 : 0) - (b.is_resolved ? 1 : 0); });
     var open = rows.filter(function (m) { return !m.is_resolved; }).length;
+    window._contactCache = {};
+    rows.forEach(function (m) { window._contactCache[String(m.id)] = m; });
     badge(open);
     if (!root) return;
     var html = '<div class="stat-card" style="font-size:var(--font-size-sm);">未対応 ' + open + ' 件 · 全 ' + rows.length + ' 件'
@@ -30,7 +32,10 @@
         + '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;"><strong>' + esc(CAT[m.category] || m.category) + ' — ' + esc(m.name) + '</strong><span style="font-size:var(--font-size-xs);color:var(--color-gray);">' + esc(fmt(m.created_at)) + (m.notified_at ? ' · 通知済み' : '') + '</span></div>'
         + '<div style="font-size:var(--font-size-xs);margin:4px 0;"><a href="mailto:' + esc(m.email) + '">' + esc(m.email) + '</a></div>'
         + '<div style="white-space:pre-wrap;font-size:var(--font-size-sm);">' + esc(m.message) + '</div>'
-        + '<div style="margin-top:8px;"><button class="btn btn-outline btn-sm" data-cm="' + esc(m.id) + '" data-resolved="' + (m.is_resolved ? '1' : '0') + '">' + (m.is_resolved ? '未対応に戻す' : '対応済みにする') + '</button></div></div>';
+        + '<div style="margin-top:8px;"><button class="btn btn-outline btn-sm" data-cm="' + esc(m.id) + '" data-resolved="' + (m.is_resolved ? '1' : '0') + '">' + (m.is_resolved ? '未対応に戻す' : '対応済みにする') + '</button>'
+        + (m.category === 'copyright' || m.category === 'deletion' || m.category === 'general'
+          ? ' <button class="btn btn-outline btn-sm" data-case-from="contact" data-case-src="' + esc(m.id) + '">受付簿に入れる</button>' : '')
+        + '</div></div>';
     });
     root.innerHTML = html;
     root.querySelectorAll('[data-cm]').forEach(function (b) {

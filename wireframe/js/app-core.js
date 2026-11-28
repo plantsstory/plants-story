@@ -1966,6 +1966,15 @@ if (false) {
       }
       updateLoginUI();
       checkSubscription();
+      // 11-28: a stopped account hears it once per visit, not only as a failed save
+      if (session && !window._aoSuspensionChecked) {
+        window._aoSuspensionChecked = true;
+        supabase.rpc('my_suspension').then(function (r) {
+          if (r && !r.error && r.data && r.data.suspended) {
+            showToast('このアカウントは利用を停止しているため、投稿や編集はできません。お問い合わせは送れます。', true, { sticky: true });
+          }
+        }, function () {});
+      }
       if (session && typeof syncFavoritesFromServer === 'function') syncFavoritesFromServer();
       // Update profile logout button visibility if profile page is showing
       var profilePage = document.getElementById('page-profile');
@@ -1976,6 +1985,8 @@ if (false) {
         if (profLogoutBtn) profLogoutBtn.style.display = isOwn ? '' : 'none';
         var editLink = document.getElementById('profile-edit-link');
         if (editLink) editLink.classList.toggle('d-none', !isOwn); // the class, not the style: d-none kept it hidden even on one's own page
+        var reportLink = document.getElementById('profile-report-link');
+        if (reportLink) reportLink.classList.toggle('d-none', !!isOwn);
       }
       // a return from Google: #access_token (implicit flow, already cleared from the URL here) or ?code= (old PKCE)
       if (event === 'SIGNED_IN' && (window._aoAuthReturn || window.location.search.indexOf('code=') !== -1)) {

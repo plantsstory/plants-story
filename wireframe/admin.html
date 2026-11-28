@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/utilities.css">
-  <link rel="stylesheet" href="css/admin.css?v=20261128a">
+  <link rel="stylesheet" href="css/admin.css?v=20261128b">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/record-gate.js?v=20261127b"></script>
   <script src="js/entry-meta.js?v=20261127b"></script>
@@ -20,7 +20,7 @@
   <script src="js/admin-tools-research.js?v=20261127b"></script>
   <script src="js/admin-tool-candidates.js?v=20261127b"></script>
   <script src="js/admin-verify.js?v=20261127c"></script>
-  <script src="js/admin-contact.js?v=20261127c"></script>
+  <script src="js/admin-contact.js?v=20261128a"></script>
   <script src="js/admin-checks.js?v=20261127b"></script>
   <script src="js/admin-suggest.js?v=20261127b"></script>
   <script src="js/admin-translations.js?v=20261127d"></script>
@@ -70,37 +70,31 @@
     <nav class="admin-nav">
       <div class="nav-group">要対応</div>
       <a href="#" data-section="inbox" class="active">まとめ <span class="nav-badge d-none" id="inbox-badge"></span></a>
-      <a href="#" data-section="delete-requests">報告 <span class="nav-badge d-none" id="dr-badge"></span></a>
-      <a href="#" data-section="contact">お問い合わせ <span class="nav-badge d-none" id="contact-badge"></span></a>
-      <a href="#" data-section="ai-suggest">AI の提案 <span class="nav-badge d-none" id="ais-badge"></span></a>
-      <a href="#" data-section="translations">翻訳の確認 <span class="nav-badge d-none" id="tr-badge"></span></a>
-      <a href="#" data-section="research-requests">再調査の依頼 <span class="nav-badge d-none" id="rr-badge"></span></a>
-      <a href="#" data-section="genus-requests">収録の依頼 <span class="nav-badge d-none" id="gr-badge"></span></a>
-      <a href="#" data-section="new-posts">新しい投稿 <span class="nav-badge d-none" id="new-badge"></span></a>
-      <a href="#" data-section="post-checks">投稿の点検 <span class="nav-badge d-none" id="pc-badge"></span></a>
-      <div class="nav-group">記録</div>
+      <a href="#" data-section="delete-requests" data-group="incoming">報告とお問い合わせ <span class="nav-badge d-none" id="grp-badge-incoming"></span></a>
+      <a href="#" data-section="new-posts" data-group="posts">新しい投稿と点検 <span class="nav-badge d-none" id="grp-badge-posts"></span></a>
+      <a href="#" data-section="ai-suggest" data-group="ai">AI の提案と翻訳 <span class="nav-badge d-none" id="grp-badge-ai"></span></a>
+      <a href="#" data-section="research-requests" data-group="requests">再調査と収録の依頼 <span class="nav-badge d-none" id="grp-badge-requests"></span></a>
+      <div class="nav-group">権利と安全</div>
+      <a href="#" data-section="cases" data-group="cases">受付簿 <span class="nav-badge d-none" id="grp-badge-cases"></span></a>
+      <a href="#" data-section="users" data-group="people">ユーザーと投稿者</a>
+      <a href="#" data-section="actions">操作記録</a>
+      <div class="nav-group">記録と写真</div>
       <a href="#" data-section="cultivars">記録の一覧</a>
-      <a href="#" data-section="gate">未収録</a>
-      <a href="#" data-section="verify">検証 <span class="nav-badge d-none" id="vq-badge"></span></a>
-      <a href="#" data-section="name-checks">データ点検</a>
-      <div class="nav-group">写真</div>
       <a href="#" data-section="images">写真</a>
-      <div class="nav-group">AI</div>
-      <a href="#" data-section="ai-usage">AI の利用と費用</a>
-      <a href="#" data-section="keyword-research">キーワードリサーチ</a>
+      <a href="#" data-section="gate">未収録</a>
+      <a href="#" data-section="verify" data-group="checks">検証とデータ点検 <span class="nav-badge d-none" id="grp-badge-checks"></span></a>
       <div class="nav-group">掲載</div>
       <a href="#" data-section="genera">属</a>
       <a href="#" data-section="articles">読みもの</a>
-      <a href="#" data-section="nurseries">ナーセリー</a>
-      <a href="#" data-section="shops">取扱店</a>
+      <a href="#" data-section="nurseries" data-group="stores">ナーセリーと取扱店</a>
       <a href="#" data-section="affiliates">道具</a>
+      <a href="#" data-section="keyword-research">キーワードリサーチ</a>
       <div class="nav-group">運営</div>
       <a href="#" data-section="dashboard">サイトの状況</a>
-      <a href="#" data-section="users">ユーザー</a>
-      <a href="#" data-section="poster">投稿者を調べる</a>
+      <a href="#" data-section="ai-usage">AI の利用と費用</a>
       <a href="#" data-section="error-logs">エラー</a>
-      <a href="#" data-section="external">リンク集</a>
       <a href="#" data-section="bulk">書き出し</a>
+      <a href="#" data-section="external">リンク集</a>
       <div class="nav-account">
         <span class="nav-account-email" id="nav-email"></span>
         <button type="button" class="btn btn-outline btn-sm" id="btn-logout-nav">ログアウト</button>
@@ -258,7 +252,7 @@
 
       <!-- ---- GENERA ---- -->
       <section id="sec-genera" class="hidden">
-        <h2 class="section-title">属管理</h2>
+        <h2 class="section-title">属</h2>
         <div class="toolbar">
           <button class="btn btn-primary btn-sm" id="btn-add-genus">＋ 新しい属を追加</button>
           <button class="btn btn-outline btn-sm" id="btn-refresh-genera">更新</button>
@@ -403,10 +397,11 @@
       <!-- ---- DELETION REQUESTS ---- -->
       <section id="sec-delete-requests" class="hidden">
         <h2 class="section-title">報告</h2>
-        <p class="desc-text">サイトの「誤りを報告」と写真の「報告」「削除依頼」から届いたものです。直したら「直した」、消すなら削除、問題がなければ「却下」を押してください。</p>
+        <p class="desc-text">サイトの「誤りを報告」、写真とプロフィールの「報告」「削除依頼」から届いたものです。権利の侵害など正式な申出として扱うものは「受付簿に入れる」で受付簿に移せます。直したら「直した」、消すなら削除、問題がなければ「却下」を押してください。</p>
         <div class="tab-bar">
           <button class="btn btn-sm dr-tab tab-btn active" data-dr-tab="cultivar">記録 <span id="dr-n-cultivar"></span></button>
           <button class="btn btn-sm dr-tab tab-btn" data-dr-tab="image">写真 <span id="dr-n-image"></span></button>
+          <button class="btn btn-sm dr-tab tab-btn" data-dr-tab="profile">プロフィール <span id="dr-n-profile"></span></button>
           <button class="btn btn-sm dr-tab tab-btn" data-dr-tab="done">処理済み</button>
         </div>
         <div id="dr-cultivar-content">
@@ -417,6 +412,10 @@
           <div id="dr-image-list" class="d-grid gap-md"></div>
           <p id="dr-image-empty" class="desc-text">写真への報告はありません</p>
         </div>
+        <div id="dr-profile-content" class="d-none">
+          <div id="dr-profile-list" class="d-grid gap-md"></div>
+          <p id="dr-profile-empty" class="desc-text">プロフィールへの報告はありません</p>
+        </div>
         <div id="dr-done-content" class="d-none">
           <div id="dr-done-list" class="d-grid gap-md"></div>
           <p id="dr-done-empty" class="desc-text">処理済みのものはまだありません</p>
@@ -425,7 +424,7 @@
 
       <!-- ---- AI RE-RESEARCH REQUESTS ---- -->
       <section id="sec-research-requests" class="hidden">
-        <h2 class="section-title">AI再調査リクエスト</h2>
+        <h2 class="section-title">再調査の依頼</h2>
         <p class="desc-text">ユーザーからの再調査リクエストです。承認すると Web検索つきの AI 調査がその場で実行されます（1回 約15円・30〜90秒）。</p>
         <div id="rr-list" class="d-grid gap-md"></div>
         <p id="rr-empty" class="desc-text">受付中のリクエストはありません</p>
@@ -435,7 +434,7 @@
 
       <!-- ---- GENUS REQUESTS ---- -->
       <section id="sec-genus-requests" class="hidden">
-        <h2 class="section-title">属・名前の収録依頼</h2>
+        <h2 class="section-title">収録の依頼</h2>
         <p class="desc-text">来訪者からの「この属も収録してほしい」「この名前を収録してほしい（検索0件）」の依頼です。次に登録する品種の順番はこの一覧で決めます。件数が集まった属から、genera テーブルの is_visible を立てて公開します（非表示の Monstera / Philodendron / Platycerium はデータ修正を済ませてから）。</p>
         <div id="gr-list" class="d-grid gap-md"></div>
         <p id="gr-empty" class="desc-text">依頼はまだありません</p>
@@ -493,6 +492,24 @@
 
       <!-- ---- USER MANAGEMENT ---- -->
       <!-- ---- POSTER LOOKUP (投稿者を調べる, 2026-11-28): takedown / 開示請求 ---- -->
+      <section id="sec-cases" class="hidden">
+        <h2 class="section-title">受付簿</h2>
+        <p class="desc-text">削除の申出・発信者情報開示請求など、正式な申出を 1 件ずつ記録します。期限、対象の投稿と投稿者、投稿者への照会、判断と理由を残し、回答書にして書き出せます。ここでの操作はすべて操作記録に残ります。</p>
+        <div id="cases-root"></div>
+      </section>
+
+      <section id="sec-suspensions" class="hidden">
+        <h2 class="section-title">利用停止</h2>
+        <p class="desc-text">停止中のアカウントです。停止中は投稿・編集・写真の追加・プロフィールの変更ができません。読むこと、自分の投稿の削除、お問い合わせはできます。</p>
+        <div id="suspensions-root"></div>
+      </section>
+
+      <section id="sec-actions" class="hidden">
+        <h2 class="section-title">操作記録</h2>
+        <p class="desc-text">管理者が行った操作の記録です。受付簿、利用停止、保全、報告やお問い合わせの処理、管理者による削除、投稿者を調べたことが自動で残ります。IP アドレスは入りません。</p>
+        <div id="actions-root"></div>
+      </section>
+
       <section id="sec-poster" class="hidden">
         <h2 class="section-title">投稿者を調べる</h2>
         <div id="poster-root"></div>
@@ -1039,7 +1056,10 @@ var SECTION_LOADERS = {
   'dashboard': function() { loadDashboard(); if (window.loadMemberInterestCount) window.loadMemberInterestCount(); },
   'users': function() { usersPage = 0; loadUsers(); },
   'poster': function() { if (window.loadPosterLookup) window.loadPosterLookup(); },
-  'error-logs': function() { loadErrorLogs(); }
+  'error-logs': function() { loadErrorLogs(); },
+  'cases': function() { if (window.loadCases) window.loadCases(); },
+  'suspensions': function() { if (window.loadSuspensions) window.loadSuspensions(); },
+  'actions': function() { if (window.loadActions) window.loadActions(); }
 };
 
 // open one page; navKey is the menu item to mark (an entry's page keeps 記録の一覧 marked)
@@ -2507,18 +2527,25 @@ function loadUsers() {
   tbody.innerHTML = '<tr><td colspan="7" class="adm-text-center-gray">読み込み中...</td></tr>';
   var asked = search + '|' + filter + '|' + usersPage;
   loadUsers._asked = asked;
-  sb.rpc('admin_list_users', {
+  // which accounts are stopped (before the 利用停止 migration this answers an error, which is none)
+  var stops = sb.rpc('admin_suspensions').then(function(r) {
+    var m = {};
+    ((r && !r.error && r.data) || []).forEach(function(x) { if (x.active) m[x.user_id] = x; });
+    window._suspendedUsers = m;
+  }, function() {});
+  stops.then(function() { return sb.rpc('admin_list_users', {
     p_search: search || null,
     p_filter_status: filter || null,
     p_limit: usersPerPage,
     p_offset: usersPage * usersPerPage
-  }).then(function(res) {
+  }); }).then(function(res) {
     if (loadUsers._asked !== asked) return; // a newer search is on its way
     if (res.error) { tbody.innerHTML = '<tr><td colspan="7" style="color:red;">' + escapeHtml(res.error.message) + '</td></tr>'; return; }
     var data = res.data || {};
     if (!data.success) { tbody.innerHTML = '<tr><td colspan="7" style="color:red;">' + escapeHtml(data.error || 'Error') + '</td></tr>'; return; }
     var users = data.users || [];
     var total = data.total || 0;
+    var stopped = window._suspendedUsers || {};
     if (!users.length) {
       tbody.innerHTML = '<tr><td colspan="7" class="adm-text-center-gray">ユーザーが見つかりません</td></tr>';
       renderUsersPagination(total);
@@ -2540,7 +2567,7 @@ function loadUsers() {
         ? '<div class="text-muted" style="font-size:var(--font-size-xs);">一致: ' + escapeHtml(u.matched.map(function(m) { return USER_MATCH_LABEL[m] || m; }).join('・')) + '</div>' : '';
       return '<tr>'
         + '<td><div style="display:flex;align-items:center;gap:8px;">' + avatar + '<div>'
-        + '<div>' + (name ? escapeHtml(name) : '<span style="color:var(--color-danger,#c0392b);">（表示名なし）</span>') + (u.id === OWNER_ID ? ' <span class="text-muted">（運営）</span>' : '') + '</div>'
+        + '<div>' + (name ? escapeHtml(name) : '<span style="color:var(--color-danger,#c0392b);">（表示名なし）</span>') + (u.id === OWNER_ID ? ' <span class="text-muted">（運営）</span>' : '') + (stopped[u.id] ? ' <span class="nav-badge">停止中</span>' : '') + '</div>'
         + (u.google_name ? '<div class="text-muted" style="font-size:var(--font-size-xs);">Google: ' + escapeHtml(u.google_name) + '</div>' : '')
         + matched + '</div></div></td>'
         + '<td style="font-size:var(--font-size-sm);">' + (sns.length ? sns.join('<br>') : '<span class="text-muted">-</span>') + '</td>'
@@ -2548,7 +2575,10 @@ function loadUsers() {
         + '<td style="font-size:var(--font-size-xs);">' + escapeHtml(fmtDate(u.created_at)) + '<br><span class="text-muted">' + (u.last_sign_in_at ? escapeHtml(fmtDate(u.last_sign_in_at)) : '-') + '</span></td>'
         + '<td>' + recs + '</td>'
         + '<td>' + pics + '</td>'
-        + '<td><button class="btn btn-outline btn-sm" data-user-lookup="' + escapeHtml(u.id) + '">投稿を調べる</button></td>'
+        + '<td><div style="display:flex;flex-direction:column;gap:4px;"><button class="btn btn-outline btn-sm" data-user-lookup="' + escapeHtml(u.id) + '">投稿を調べる</button>'
+        + (u.id === OWNER_ID ? '' : stopped[u.id] ? '<button class="btn btn-outline btn-sm" data-suspend="off" data-user="' + escapeHtml(u.id) + '">停止を解く</button>'
+          : '<button class="btn btn-outline btn-sm" data-suspend="on" data-user="' + escapeHtml(u.id) + '" data-name="' + escapeHtml(name || u.email || '') + '">利用を停止</button>')
+        + '</div></td>'
         + '</tr>';
     }).join('');
     tbody.querySelectorAll('[data-user-lookup]').forEach(function(btn) {
@@ -3501,9 +3531,11 @@ document.getElementById('btn-kr-reject').addEventListener('click', function() {
 });
 </script>
 <script src="js/admin-entry.js?v=20261127b"></script>
-<script src="js/admin-reports.js?v=20261127e"></script>
-<script src="js/admin-inbox.js?v=20261127q"></script>
+<script src="js/admin-reports.js?v=20261128a"></script>
+<script src="js/admin-inbox.js?v=20261128a"></script>
 <script src="js/admin-mobile.js?v=20261127t"></script>
-<script src="js/admin-poster.js?v=20261128a"></script>
+<script src="js/admin-poster.js?v=20261128b"></script>
+<script src="js/admin-cases.js?v=20261128a"></script>
+<script src="js/admin-groups.js?v=20261128a"></script>
 </body>
 </html>

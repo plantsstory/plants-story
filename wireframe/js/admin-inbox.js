@@ -50,12 +50,19 @@
       sb.from('research_requests').select('id, cultivar_name', { count: 'exact' }).in('status', ['pending', 'approved']).order('created_at', { ascending: false }).limit(3),
       sb.rpc('genus_request_summary'),
       sb.from('origin_translations').select('id, cultivar_name, src_lang', { count: 'exact' }).eq('status', 'drafted').order('created_at').limit(3),
-      sb.from('post_checks').select('id, cultivar_name', { count: 'exact' }).or('marked.eq.true,status.eq.failed').is('reviewed_at', null).order('created_at', { ascending: false }).limit(3)
+      sb.from('post_checks').select('id, cultivar_name', { count: 'exact' }).or('marked.eq.true,status.eq.failed').is('reviewed_at', null).order('created_at', { ascending: false }).limit(3),
+      sb.rpc('admin_cases_list', { p_include_closed: false })
     ]);
     function part(r) { return { n: r.error ? null : (r.count || 0), rows: r.error ? [] : (r.data || []), err: r.error }; }
     var reports = part(res[0]), ais = part(res[2]), rr = part(res[3]), trs = part(res[5]);
     // 投稿の点検 (11-27): before its migration the table is missing, which is 0 here, not a failure
     var pcs = res[6].error && /post_checks/.test(res[6].error.message || '') ? { n: 0, rows: [] } : part(res[6]);
+    // 受付簿 (11-28): before its migration the function is missing, which is 0 here, not a failure
+    var caseRows = res[7].error ? [] : (res[7].data || []);
+    var soon = Date.now() + 3 * 24 * 3600 * 1000;
+    function nextDue(c) { var d = [c.due_at, c.status === 'asked' && !c.ask_replied_at ? c.ask_due_at : null].filter(Boolean).map(Date.parse); return d.length ? Math.min.apply(null, d) : null; }
+    var caseDue = caseRows.filter(function (c) { var d = nextDue(c); return d != null && d < soon; });
+    var cases = { n: res[7].error && !/admin_cases_list/.test(res[7].error.message || '') ? null : caseRows.length, rows: caseDue, err: res[7].error && !/admin_cases_list/.test(res[7].error.message || '') ? res[7].error : null };
     var openMsgs = res[1].error ? [] : (res[1].data || []).filter(function (m) { return m.status !== 'done'; });
     var contact = { n: res[1].error ? null : openMsgs.length, rows: openMsgs.slice(0, 3), err: res[1].error };
     var genusSeen = seen('genus');
@@ -68,13 +75,15 @@
     var newEntries = allCultivars.filter(function (c) { return others(c) && new Date(c.created_at) > postSeen; });
     var newPhotos = allImageRows.filter(function (r) { return others(r) && new Date(r.created_at) > postSeen; });
 
-    var REASON = { wrong_info: '誤った情報', duplicate: '重複', spam: 'スパム', irrelevant: '無関係な写真', inappropriate: '不適切な写真', copyright: '著作権', created_by_mistake: '作成ミス', uploaded_by_mistake: '投稿ミス', other: 'その他' };
+    var REASON = { wrong_info: '誤った情報', duplicate: '重複', spam: 'スパム', irrelevant: '無関係な写真', inappropriate: '不適切な写真', copyright: '著作権', created_by_mistake: '作成ミス', uploaded_by_mistake: '投稿ミス', rights: '権利の侵害', impersonation: 'なりすまし', other: 'その他' };
     var CAT = { general: '一般', copyright: '著作権', deletion: '削除要請', bug: '不具合', shop: '取扱店の掲載' };
     var FIELD = { type_locality: 'タイプ産地', collector: '採集者', collection_year: '採集年', known_habitats: '分布', author_name: '記載者', publication_year: '発表年' };
 
     var cards = [
-      { key: 'delete-requests', badge: 'dr-badge', title: '報告', p: reports, sub: '記録の誤りや写真についての報告',
-        items: reports.rows.map(function (r) { return (r.target_type === 'image' ? '写真 · ' : '記録 · ') + (r.target_name || '') + '（' + (REASON[r.reason] || r.reason) + '）'; }) },
+      { key: 'cases', badge: 'cases-badge', title: '受付簿', p: cases, sub: '対応中の申出' + (caseDue.length ? '・3日以内に期限 ' + caseDue.length + ' 件' : ''),
+        items: caseDue.slice(0, 3).map(function (c) { return '#' + c.id + ' ' + (c.item_label || c.requester || '') + ' · 期限 ' + new Date(nextDue(c)).toLocaleDateString('ja-JP'); }) },
+      { key: 'delete-requests', badge: 'dr-badge', title: '報告', p: reports, sub: '記録・写真・プロフィールについての報告',
+        items: reports.rows.map(function (r) { return (r.target_type === 'image' ? '写真 · ' : r.target_type === 'profile' ? 'プロフィール · ' : '記録 · ') + (r.target_name || '') + '（' + (REASON[r.reason] || r.reason) + '）'; }) },
       { key: 'contact', badge: 'contact-badge', title: 'お問い合わせ', p: contact, sub: '未対応のお問い合わせ',
         items: contact.rows.map(function (r) { return (CAT[r.category] || r.category) + ' · ' + r.name; }) },
       { key: 'ai-suggest', badge: 'ais-badge', title: 'AI の提案', p: ais, sub: '採用か見送りを待っている値',

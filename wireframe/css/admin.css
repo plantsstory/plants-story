@@ -672,3 +672,35 @@ body {
 .ap-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85em; word-break: break-all; }
 .ap-sub { font-size: var(--font-size-xs); color: var(--color-gray); margin-top: 8px; }
 .ap-sess { font-size: var(--font-size-xs); }
+
+/* ---- menu groups: tabs across the top of pages that share one menu item (2026-11-28) ---- */
+.group-tabs { display: flex; gap: 4px; margin: 0 0 var(--space-md); border-bottom: 1px solid var(--color-border, #ddd); flex-wrap: wrap; }
+.group-tab { appearance: none; background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 12px; font: inherit; font-size: var(--font-size-sm); color: var(--color-gray, #666); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; min-height: 40px; }
+.group-tab.active { color: var(--color-text, #222); border-bottom-color: var(--color-primary, #2f5d3a); font-weight: 600; }
+.group-tab .nav-badge { margin-left: 2px; }
+
+/* ---- 受付簿 ---- */
+.case-row { cursor: pointer; display: grid; gap: 2px; }
+.case-row__head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.case-status { font-size: var(--font-size-xs); padding: 1px 8px; border-radius: 999px; background: var(--color-light, #f1f1ee); white-space: nowrap; }
+.case-status--asked { background: #fdf0d8; color: #8a5a12; }
+.case-status--done, .case-status--declined { color: var(--color-gray, #666); }
+.case-chip { display: inline-block; font-size: var(--font-size-xs); padding: 1px 8px; border-radius: 999px; background: var(--color-light, #f1f1ee); }
+.case-chip--soon { background: #fdf0d8; color: #8a5a12; }
+.case-chip--late { background: #fbe3e0; color: #a3291c; font-weight: 600; }
+.case-card { margin-top: var(--space-sm); display: grid; gap: 8px; }
+.case-card__title { font-weight: 600; }
+.case-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+.case-grid label, .case-wide { display: grid; gap: 2px; font-size: var(--font-size-xs); color: var(--color-gray, #666); }
+.case-grid .form-input, .case-wide .form-input { font-size: var(--font-size-sm); color: var(--color-text, #222); width: 100%; box-sizing: border-box; }
+.case-find { display: flex; gap: 8px; align-items: flex-start; }
+.case-find .form-input { flex: 1; min-width: 0; }
+.case-poster { padding: 8px; background: var(--color-light, #f6f6f3); border-radius: 6px; }
+.case-check { display: flex; gap: 8px; align-items: center; font-size: var(--font-size-sm); }
+.case-events { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: var(--font-size-sm); }
+.case-events li { overflow-wrap: anywhere; }
+.case-events__at { font-size: var(--font-size-xs); color: var(--color-gray, #666); margin-right: 4px; white-space: nowrap; }
+@media (max-width: 768px) {
+  .group-tab { flex: 1 1 auto; justify-content: center; }
+  .case-find { flex-direction: column; align-items: stretch; }
+}

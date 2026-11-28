@@ -11,7 +11,7 @@
   var REASON = {
     duplicate: '重複している', wrong_info: '誤った情報', created_by_mistake: '間違えて作成した', spam: 'スパム・不適切な内容',
     irrelevant: '無関係な写真', inappropriate: '不適切な写真', copyright: '著作権侵害の可能性', uploaded_by_mistake: '間違えてアップロードした',
-    other: 'その他'
+    rights: '権利の侵害', impersonation: 'なりすまし', other: 'その他'
   };
   var STATUS = { pending: '未対応', fixed: '直した', approved: '削除した', rejected: '却下' };
   var tab = 'cultivar';
@@ -27,9 +27,11 @@
       var q = await sb.from('cultivar_images').select('*').in('id', imgIds);
       ((q && q.data) || []).forEach(function (x) { imgs[x.id] = x; });
     }
-    await loadPeopleNames(reqs.map(function (r) { return r.user_id; }).concat(Object.keys(imgs).map(function (k) { return imgs[k].user_id; })));
+    await loadPeopleNames(reqs.map(function (r) { return r.user_id; }).concat(Object.keys(imgs).map(function (k) { return imgs[k].user_id; }))
+      .concat(reqs.filter(function (r) { return r.target_type === 'profile' && UUID.test(String(r.target_id || '')); }).map(function (r) { return r.target_id; })));
     reqs.forEach(function (r) {
       if (r.target_type === 'image') r._img = imgs[String(r.target_id).toLowerCase()] || null;
+      else if (r.target_type === 'profile') r._profile = UUID.test(String(r.target_id || '')) ? String(r.target_id) : null;
       else r._entry = allCultivars.find(function (c) { return String(c.id) === String(r.target_id); }) || null;
     });
     return reqs;
@@ -44,7 +46,9 @@
     }
     h += '<div style="flex:1;min-width:220px;">';
     var entry = r._entry || (r._img && allCultivars.find(function (c) { return (r._img.cultivar_id && c.id === r._img.cultivar_id) || c.cultivar_name === r._img.cultivar_name; }));
-    h += '<div style="font-weight:600;margin-bottom:4px;">' + (r.target_type === 'image' ? '写真 · ' : '記録 · ')
+    if (r.target_type === 'profile') {
+      h += '<div style="font-weight:600;margin-bottom:4px;">プロフィール · ' + esc(r._profile ? personName(r._profile) : (r.target_name || '')) + '</div>';
+    } else h += '<div style="font-weight:600;margin-bottom:4px;">' + (r.target_type === 'image' ? '写真 · ' : '記録 · ')
       + (entry ? '<a href="#" data-open-entry="' + entry.id + '">' + esc(entry.cultivar_name) + '</a>' : esc(r.target_name || ('ID ' + r.target_id)) + (r.target_type === 'cultivar' ? ' <span class="text-muted">（記録はもうありません）</span>' : '')) + '</div>';
     h += '<div style="font-size:var(--font-size-sm);">理由: <strong>' + esc(reason) + '</strong></div>';
     if (r.reason_detail) h += '<div style="font-size:var(--font-size-sm);white-space:pre-wrap;margin-top:2px;">「' + esc(r.reason_detail) + '」</div>';
@@ -53,19 +57,25 @@
     if (!pending) h += '<div class="item-meta">' + esc(STATUS[r.status] || r.status) + (r.resolved_at ? ' · ' + esc(fmtDate(r.resolved_at)) : '') + '</div>';
     if (pending) {
       h += '<div class="item-actions">';
-      if (r.target_type === 'cultivar') {
+      if (r.target_type === 'profile') {
+        if (r._profile) h += '<button class="btn btn-outline btn-sm" data-poster-open="' + esc(r._profile) + '">投稿者を調べる</button>';
+        h += '<button class="btn btn-primary btn-sm" data-report-act="fixed">対応した</button>';
+      } else if (r.target_type === 'cultivar') {
         if (r._entry) h += '<button class="btn btn-outline btn-sm" data-open-entry="' + r._entry.id + '">記録を開いて直す</button>';
         h += '<button class="btn btn-primary btn-sm" data-report-act="fixed">直した</button>';
         if (r._entry) h += '<button class="btn btn-danger btn-sm" data-report-act="delete-entry">記録ごと削除</button>';
       } else {
         h += r._img ? '<button class="btn btn-danger btn-sm" data-report-act="delete-photo">写真を削除</button>' : '<button class="btn btn-primary btn-sm" data-report-act="fixed">片付ける</button>';
       }
-      h += '<button class="btn btn-outline btn-sm" data-report-act="rejected">却下（問題なし）</button></div>';
+      h += '<button class="btn btn-outline btn-sm" data-report-act="rejected">却下（問題なし）</button>'
+        + '<button class="btn btn-outline btn-sm" data-case-from="report" data-case-src="' + r.id + '">受付簿に入れる</button></div>';
     }
     return h + '</div></div></div>';
   };
 
   var cache = {};
+  window.reportById = function (id) { return cache[Number(id)] || null; };
+  window.reportReasonLabel = function (k) { return REASON[k] || k || ''; };
   window.loadDeletionRequests = async function () {
     var open = await sb.from('deletion_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false });
     if (open.error) { toast('報告の取得エラー: ' + open.error.message); return; }
@@ -76,14 +86,16 @@
     var lists = {
       cultivar: pend.filter(function (r) { return r.target_type === 'cultivar'; }),
       image: pend.filter(function (r) { return r.target_type === 'image'; }),
+      profile: pend.filter(function (r) { return r.target_type === 'profile'; }),
       done: all.filter(function (r) { return r.status !== 'pending'; })
     };
-    ['cultivar', 'image', 'done'].forEach(function (k) {
+    ['cultivar', 'image', 'profile', 'done'].forEach(function (k) {
       document.getElementById('dr-' + k + '-list').innerHTML = lists[k].map(window.reportCardHtml).join('');
       document.getElementById('dr-' + k + '-empty').style.display = lists[k].length ? 'none' : '';
     });
     document.getElementById('dr-n-cultivar').textContent = lists.cultivar.length ? '(' + lists.cultivar.length + ')' : '';
     document.getElementById('dr-n-image').textContent = lists.image.length ? '(' + lists.image.length + ')' : '';
+    document.getElementById('dr-n-profile').textContent = lists.profile.length ? '(' + lists.profile.length + ')' : '';
     fillPrivateImages(document.getElementById('sec-delete-requests'));
   };
 
@@ -101,7 +113,7 @@
     t.addEventListener('click', function () {
       tab = t.getAttribute('data-dr-tab');
       document.querySelectorAll('.dr-tab').forEach(function (x) { x.classList.toggle('active', x === t); });
-      ['cultivar', 'image', 'done'].forEach(function (k) { document.getElementById('dr-' + k + '-content').classList.toggle('d-none', k !== tab); });
+      ['cultivar', 'image', 'profile', 'done'].forEach(function (k) { document.getElementById('dr-' + k + '-content').classList.toggle('d-none', k !== tab); });
     });
   });
 
@@ -119,6 +131,12 @@
     if (ent && !ent.classList.contains('hidden') && window.renderEntry) window.renderEntry();
     if (window.refreshInbox) window.refreshInbox();
   }
+
+  // a profile report: open the poster lookup for that account
+  document.addEventListener('click', function (e) {
+    var p = e.target.closest && e.target.closest('[data-poster-open]');
+    if (p) { e.preventDefault(); openPosterLookup(p.getAttribute('data-poster-open')); }
+  });
 
   document.addEventListener('click', async function (e) {
     var b = e.target.closest && e.target.closest('[data-report-act]');
