@@ -2676,3 +2676,8 @@ html.photo-notes-off .gallery__img > .photo-note__open { display: inline-flex; a
 .photo-sheet__ig { display: flex; align-items: center; gap: var(--s1); }
 .photo-sheet__ig > span { font-family: var(--font-primary); color: var(--color-mid); }
 .photo-sheet__ig input { flex: 1; min-width: 0; }
+/* the profile's own link, beside its Instagram and X (owner, 11-28): the same quiet mark, a 44px target */
+.profile-sns { align-items: center; }
+.profile-sns__share { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; margin: -11px -11px -11px -11px; padding: 0; border: 0; background: none; color: var(--color-gray); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.profile-sns__share:hover { color: var(--color-dark); }
+.profile-sns__share:focus-visible { outline: 2px solid var(--color-ink); outline-offset: -6px; }

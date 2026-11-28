@@ -29,6 +29,8 @@
         'https://x.com/' + profile.sns_twitter.replace(/^@/, '');
       html += '<a href="' + escHtml(twUrl) + '" target="_blank" rel="noopener" class="profile-sns__x" title="X"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>';
     }
+    // the page's own link, beside the SNS marks (owner, 11-28): a tap copies it and says so for a moment
+    html += '<button type="button" class="profile-sns__share" id="profile-copy-link" title="このページのリンクをコピー" aria-label="このページのリンクをコピー"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>';
     el.innerHTML = html;
   }
 
@@ -134,7 +136,7 @@
           document.getElementById('profile-display-name').textContent = '名前未設定';
           document.getElementById('profile-username').textContent = '';
           document.getElementById('profile-bio').textContent = '';
-          document.getElementById('profile-sns-links').innerHTML = '';
+          renderSnsLinks(document.getElementById('profile-sns-links'), {});
           renderAvatar(document.getElementById('profile-avatar'), null);
         } else {
           var p = res.data;
@@ -276,7 +278,7 @@
     var b = e.target.closest && e.target.closest('#profile-copy-link');
     if (!b) return;
     var url = 'https://aroidorigins.com' + location.pathname;
-    var done = function() { showToast('リンクをコピーしました'); };
+    var done = function() { showToast('このページのリンクをコピーしました'); };
     var fallback = function() {
       var ta = document.createElement('textarea'); ta.value = url; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
       document.body.appendChild(ta); ta.select();

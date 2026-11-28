@@ -390,7 +390,9 @@
   "ユーザー名": "Username",
   "プロフィールに保存され、写真の名前の横に出ます。": "Saved to your profile and shown next to your name on your photos.",
   "Instagram のユーザー名を確かめてください（英数字・ . ・ _ ）": "Please check the Instagram username (letters, numbers, . and _).",
-  "Instagram をプロフィールに保存できませんでした。プロフィールの編集から入れられます": "Couldn't save Instagram to your profile. You can add it from Edit profile."
+  "Instagram をプロフィールに保存できませんでした。プロフィールの編集から入れられます": "Couldn't save Instagram to your profile. You can add it from Edit profile.",
+  "このページのリンクをコピー": "Copy the link to this page",
+  "このページのリンクをコピーしました": "Link to this page copied"
  },
  "rules": [
   [
