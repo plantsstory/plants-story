@@ -4314,8 +4314,9 @@
     if (!container || !document.documentElement.classList.contains('pv-label') || !container.closest('#page-genus')) return;
     var old = container.querySelector('.list-split');
     if (old) old.remove();
-    var rows = container.querySelectorAll('.cultivar-row').length;
-    var none = container.querySelectorAll('.cultivar-row .entry__thumb--empty').length;
+    // the names folded under 「記録が足りない名前」 have their own place at the end and are not counted here
+    var rows = container.querySelectorAll('.cultivar-row:not(.genus-short .cultivar-row)').length;
+    var none = container.querySelectorAll('.cultivar-row:not(.genus-short .cultivar-row) .entry__thumb--empty').length;
     if (!none || none === rows) return;   // all with a photo, or none: nothing to divide
     var p = document.createElement('p');
     p.className = 'list-split';

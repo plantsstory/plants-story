@@ -1398,6 +1398,10 @@ h2.section-title, .legal-page h2, .section-heading, h2.text-lg.font-bold {
 .genus-short > summary { list-style: none; cursor: pointer; display: flex; align-items: center; min-height: var(--tap); font-size: 0.9375rem; font-weight: 500; color: var(--color-ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
 .genus-short > summary::-webkit-details-marker { display: none; }
 .genus-short[open] > summary { text-decoration: none; color: var(--color-mid); }
+.genus-short__note { margin: 0 0 var(--s2); font-size: var(--fs-label); line-height: 1.6; color: var(--color-mid); }
+/* the fold under the tiles (owner, 11-28): the whole width, last, and its names as the same tiles inside it */
+html.pv-label #page-genus .genus-content .card--no-pad > .genus-short { order: 3; grid-column: 1 / -1; min-width: 0; }
+html.pv-label #page-genus .genus-content .genus-short__list:has(.entry__sub) { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--s4) 10px; padding-top: var(--s1); }
 
 /* -- T73: aliases under the name -- */
 .detail-aliases { margin: var(--s1) 0 var(--s3); font-size: var(--fs-small); color: var(--color-mid); }

@@ -2348,6 +2348,10 @@
     "jp": "記録が足りない名前（{n}）",
     "en": "Names short of a record ({n})"
   },
+  "genus_short_note": {
+    "jp": "区分（原種・Hybrid・不明）とは別に、由来の記録がまだ少ない名前です。記録がそろうと上に並びます。",
+    "en": "Not a kind of its own: these names, of any kind, have little recorded about their origin yet. They move up once the record is filled in."
+  },
   "absent_none": {
     "jp": "記録なし",
     "en": "Not recorded"

@@ -1503,7 +1503,10 @@ function paginateGenusFromMemory(genusEl, page) {
     for (var i = start; i < end; i++) {
       if (firstShort !== -1 && i >= firstShort && !folded) {
         folded = true;
-        html += '<details class="genus-short"' + (searching || firstShort === 0 ? ' open' : '') + '><summary>' + escHtml(t('genus_short').replace('{n}', shortTotal)) + '</summary>';
+        // the fold spans the whole width under the list, with its own tiles inside (owner, 11-28: it sat as a
+        // second column beside the first tile). The kind chips filter it too: it is not a kind of its own.
+        html += '<details class="genus-short"' + (searching || firstShort === 0 ? ' open' : '') + '><summary>' + escHtml(t('genus_short').replace('{n}', shortTotal)) + '</summary>'
+          + '<p class="genus-short__note">' + escHtml(t('genus_short_note')) + '</p><div class="genus-short__list">';
       }
       if (isSeedlingView && window.entryLine && window._describeEntry) {
         // the same two-line rows as every other list (board 17 T223)
@@ -1515,7 +1518,7 @@ function paginateGenusFromMemory(genusEl, page) {
       html += buildRowHtml(filtered[i].fullName, filtered[i].entry, filtered[i].meta);
     }
     if (isSeedlingView && window.entryLine && end > start) html = '<ol class="entries">' + html + '</ol>';
-    if (folded) html += '</details>';
+    if (folded) html += '</div></details>';
     if (filtered.length === 0) {
       html = '<div class="text-muted empty-state">' + t('no_results') + '</div>';
     }
