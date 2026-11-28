@@ -645,3 +645,30 @@ body {
 @media (max-width: 480px) {
   .adm-grid-2col, .adm-grid-2col-var, .adm-grid-3col, .adm-grid-formula { grid-template-columns: 1fr; }
 }
+
+/* 投稿者を調べる (admin-poster.js, 2026-11-28) */
+.ap-card { margin-top: var(--space-sm); }
+.ap-card__title { font-size: var(--font-size-xs); color: var(--color-gray); margin-bottom: 4px; }
+.ap-lead { margin: 0 0 var(--space-sm); font-size: var(--font-size-sm); }
+.ap-form { display: flex; gap: 8px; }
+.ap-form input { flex: 1 1 auto; min-width: 0; font-size: 16px; }
+.ap-note { font-size: var(--font-size-xs); color: var(--color-gray); margin: 6px 0; }
+.ap-err { color: #a8712e; }
+.ap-empty { font-size: var(--font-size-sm); color: var(--color-gray); padding: var(--space-md) 0; }
+.ap-item-name { font-weight: 600; word-break: break-all; }
+.ap-thumb { width: 120px; margin-top: 6px; }
+.ap-thumb img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 6px; }
+.ap-held { font-size: var(--font-size-sm); background: #eef5ee; border-radius: 6px; padding: 6px 8px; margin: 8px 0; }
+.ap-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.ap-h3 { font-size: var(--font-size-base); margin: var(--space-lg) 0 var(--space-xs); }
+.ap-log { display: flex; flex-direction: column; gap: 8px; }
+.ap-row { background: var(--color-white); border: 1px solid var(--color-lighter); border-radius: 8px; padding: 8px 10px; }
+.ap-row__head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: var(--font-size-sm); }
+.ap-row__head span { color: var(--color-gray); font-size: var(--font-size-xs); }
+.ap-row__item { font-size: var(--font-size-xs); color: var(--color-gray); word-break: break-all; }
+.ap-dl { display: grid; grid-template-columns: 6.5em 1fr; gap: 2px 8px; margin: 4px 0 0; font-size: var(--font-size-sm); }
+.ap-dl dt { color: var(--color-gray); font-size: var(--font-size-xs); padding-top: 2px; }
+.ap-dl dd { margin: 0; word-break: break-all; }
+.ap-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85em; word-break: break-all; }
+.ap-sub { font-size: var(--font-size-xs); color: var(--color-gray); margin-top: 8px; }
+.ap-sess { font-size: var(--font-size-xs); }

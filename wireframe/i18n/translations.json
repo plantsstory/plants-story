@@ -657,8 +657,8 @@
     "en": "Privacy Policy"
   },
   "privacy_updated": {
-    "jp": "最終更新 2026.11.24",
-    "en": "Last updated 2026.11.24"
+    "jp": "最終更新 2026.11.28",
+    "en": "Last updated 2026.11.28"
   },
   "privacy_1_title": {
     "jp": "1. はじめに",
@@ -677,8 +677,8 @@
     "en": "The Service may collect the following information:"
   },
   "privacy_2_list": {
-    "jp": "ユーザーが投稿する情報: 名前（品種名・個体の番号）、由来の説明、交配式、情報元URL、写真と撮影日、入手先や採集地などの任意の項目\nGoogleアカウント情報（ログイン時）: メールアドレス、表示名、プロフィール画像URL\nプロフィール情報（任意）: 表示名、ユーザー名、アイコン画像、自己紹介、Instagram・X のリンク\nお問い合わせフォームの内容: お名前、メールアドレス、メッセージ\n自動的に記録される情報: ブラウザの種類、言語設定、アクセスしたページ、IPアドレス（サーバーログ、および投稿・お問い合わせ時の記録。不正投稿防止のため最大180日間保存し、その後は自動で消去します）\n不具合の記録: 画面でエラーが起きたとき、エラーの内容、発生したページ、ブラウザの種類、ログイン中はアカウントの識別子を記録します（最大90日間保存し、その後は自動で消去します）\nブラウザに保存されるデータ: 言語・文字サイズなどの設定、投稿の下書き、最近見た名前、ログインの状態（localStorage を使用）",
-    "en": "What you contribute: names (cultivar names, individuals' numbers), origin text, crosses, source URLs, photos and their dates, and optional details such as where a plant was obtained or collected\nGoogle account information (on login): e-mail address, display name, profile image URL\nProfile information (optional): display name, user name, avatar image, a short introduction, Instagram and X links\nContact form: your name, e-mail address and message\nRecorded automatically: browser type, language setting, pages visited, IP address (server logs, and with each contribution or contact message; kept for at most 180 days against abuse, then erased automatically)\nError records: when a screen fails, the error, the page, the browser type and, if you are logged in, your account identifier (kept for at most 90 days, then erased automatically)\nStored in your browser: settings such as language and text size, drafts, recently viewed names, your login state (localStorage)"
+    "jp": "ユーザーが投稿する情報: 名前（品種名・個体の番号）、由来の説明、交配式、情報元URL、写真と撮影日、入手先や採集地などの任意の項目\nGoogleアカウント情報（ログイン時）: メールアドレス、表示名、プロフィール画像URL\nプロフィール情報（任意）: 表示名、ユーザー名、アイコン画像、自己紹介、Instagram・X のリンク\nお問い合わせフォームの内容: お名前、メールアドレス、メッセージ\n自動的に記録される情報: ブラウザの種類、言語設定、アクセスしたページ、IPアドレス（サーバーログ、および投稿・お問い合わせ時の記録。不正投稿防止のため最大180日間保存し、その後は自動で消去します）\n投稿の記録: 記録・写真・プロフィールを投稿・編集・削除したとき、アカウント（メールアドレス）、日時、IPアドレス、ブラウザの種類を記録します。削除した投稿は、削除した時点の内容の写しも残します。運営者だけが見られ、サイトには表示しません。最大180日間保存し、その後は自動で消去します。ただし、削除の依頼や発信者情報の開示請求などで対応が必要になった投稿の記録は、対応が終わるまで保存します\n不具合の記録: 画面でエラーが起きたとき、エラーの内容、発生したページ、ブラウザの種類、ログイン中はアカウントの識別子を記録します（最大90日間保存し、その後は自動で消去します）\nブラウザに保存されるデータ: 言語・文字サイズなどの設定、投稿の下書き、最近見た名前、ログインの状態（localStorage を使用）",
+    "en": "What you contribute: names (cultivar names, individuals' numbers), origin text, crosses, source URLs, photos and their dates, and optional details such as where a plant was obtained or collected\nGoogle account information (on login): e-mail address, display name, profile image URL\nProfile information (optional): display name, user name, avatar image, a short introduction, Instagram and X links\nContact form: your name, e-mail address and message\nRecorded automatically: browser type, language setting, pages visited, IP address (server logs, and with each contribution or contact message; kept for at most 180 days against abuse, then erased automatically)\nPost records: when you post, edit or delete a record, photo or profile, we record the account (e-mail address), the time, the IP address and the browser type. For a deleted post we also keep a copy of what it said when it was deleted. Only the operator can see these records; they are not shown on the site. They are kept for at most 180 days, then erased automatically, except that the records of a post that a takedown request or a request to disclose the poster's identity concerns are kept until the matter is settled\nError records: when a screen fails, the error, the page, the browser type and, if you are logged in, your account identifier (kept for at most 90 days, then erased automatically)\nStored in your browser: settings such as language and text size, drafts, recently viewed names, your login state (localStorage)"
   },
   "privacy_3_title": {
     "jp": "3. ブラウザへの保存（localStorage）",
@@ -709,16 +709,16 @@
     "en": "Collected information is used for the following purposes:"
   },
   "privacy_5_list": {
-    "jp": "品種由来情報の表示と維持管理\n記録の正確性の評価（「正確／疑問」の投票）\n不正投稿・荒らし行為の防止および対応（IPアドレスの一時的な記録）\n不具合の調査と修正\nお問い合わせへの返信\nサービスおよびコンテンツの改善\nアフィリエイトリンクを通じた収益化",
-    "en": "Showing and maintaining origin records\nAssessing the accuracy of records (the accurate / doubtful votes)\nPreventing and responding to abuse (temporary IP records)\nFinding and fixing faults\nReplying to contact messages\nImproving the service and its content\nEarning through affiliate links"
+    "jp": "品種由来情報の表示と維持管理\n記録の正確性の評価（「正確／疑問」の投票）\n不正投稿・荒らし行為の防止および対応（IPアドレスの一時的な記録）\n権利侵害の申し立て（削除の依頼・発信者情報の開示請求）への対応\n不具合の調査と修正\nお問い合わせへの返信\nサービスおよびコンテンツの改善\nアフィリエイトリンクを通じた収益化",
+    "en": "Showing and maintaining origin records\nAssessing the accuracy of records (the accurate / doubtful votes)\nPreventing and responding to abuse (temporary IP records)\nHandling claims of infringed rights (takedown requests and requests to disclose a poster's identity)\nFinding and fixing faults\nReplying to contact messages\nImproving the service and its content\nEarning through affiliate links"
   },
   "privacy_6_title": {
     "jp": "6. 情報の共有",
     "en": "6. Information Sharing"
   },
   "privacy_6_body": {
-    "jp": "ユーザーが投稿した品種情報・写真・ニックネームは本サービス上で公開されます（非公開にした実生の記録を除く）。運営者は個人情報を第三者に販売しません。上記「4」の外部サービスへの送信を除き、法律に基づく要請（法執行機関からの開示要求等）があった場合にのみ、情報を開示する場合があります。",
-    "en": "The records, photos and nickname you contribute are public on the service (seedling records you set to private excepted). The operator does not sell personal information. Apart from the outside services listed under 4, information is disclosed only when the law requires it."
+    "jp": "ユーザーが投稿した品種情報・写真・ニックネームは本サービス上で公開されます（非公開にした実生の記録を除く）。運営者は個人情報を第三者に販売しません。上記「4」の外部サービスへの送信を除き、法律に基づく要請（法執行機関からの開示要求、情報流通プラットフォーム対処法に基づく発信者情報の開示請求等）があった場合にのみ、情報を開示する場合があります。",
+    "en": "The records, photos and nickname you contribute are public on the service (seedling records you set to private excepted). The operator does not sell personal information. Apart from the outside services listed under 4, information is disclosed only when the law requires it (for example a request from law enforcement, or a request to disclose a poster's identity under Japan's Information Distribution Platform Act)."
   },
   "privacy_7_title": {
     "jp": "7. 画像に関する注意",

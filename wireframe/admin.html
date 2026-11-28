@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/utilities.css">
-  <link rel="stylesheet" href="css/admin.css?v=20261127t">
+  <link rel="stylesheet" href="css/admin.css?v=20261128a">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/record-gate.js?v=20261127b"></script>
   <script src="js/entry-meta.js?v=20261127b"></script>
@@ -97,6 +97,7 @@
       <div class="nav-group">運営</div>
       <a href="#" data-section="dashboard">サイトの状況</a>
       <a href="#" data-section="users">ユーザー</a>
+      <a href="#" data-section="poster">投稿者を調べる</a>
       <a href="#" data-section="error-logs">エラー</a>
       <a href="#" data-section="external">リンク集</a>
       <a href="#" data-section="bulk">書き出し</a>
@@ -491,6 +492,12 @@
       </section>
 
       <!-- ---- USER MANAGEMENT ---- -->
+      <!-- ---- POSTER LOOKUP (投稿者を調べる, 2026-11-28): takedown / 開示請求 ---- -->
+      <section id="sec-poster" class="hidden">
+        <h2 class="section-title">投稿者を調べる</h2>
+        <div id="poster-root"></div>
+      </section>
+
       <section id="sec-users" class="hidden">
         <h2 class="section-title">ユーザー</h2>
         <p class="desc-text">登録している人の一覧です。会員の受付は止めているため、プランの操作はありません。</p>
@@ -1025,6 +1032,7 @@ var SECTION_LOADERS = {
   'affiliates': function() { loadAffiliates(); },
   'dashboard': function() { loadDashboard(); if (window.loadMemberInterestCount) window.loadMemberInterestCount(); },
   'users': function() { usersPage = 0; loadUsers(); },
+  'poster': function() { if (window.loadPosterLookup) window.loadPosterLookup(); },
   'error-logs': function() { loadErrorLogs(); }
 };
 
@@ -3446,5 +3454,6 @@ document.getElementById('btn-kr-reject').addEventListener('click', function() {
 <script src="js/admin-reports.js?v=20261127e"></script>
 <script src="js/admin-inbox.js?v=20261127q"></script>
 <script src="js/admin-mobile.js?v=20261127t"></script>
+<script src="js/admin-poster.js?v=20261128a"></script>
 </body>
 </html>
