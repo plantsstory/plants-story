@@ -398,6 +398,9 @@ psExport('guardSubmit', guardSubmit);
   // spa_redirect_path (set by 404.html when 記録 or a profile was opened) used to do exactly that and the login
   // was lost every time (2026-10-30).
   var _authReturn = /(^|[#&?])(access_token|refresh_token|code|error|error_description)=/.test(location.hash + location.search);
+  // remembered for the SIGNED_IN handler: the library clears #access_token before it says SIGNED_IN, so the
+  // handler cannot read the return from the URL (implicit flow since 10-30; it only looked for ?code=)
+  window._aoAuthReturn = _authReturn;
   if (_authReturn) { sessionStorage.removeItem('spa_redirect_path'); return; }
   // Check URL parameter first (more reliable on hard refresh), then sessionStorage
   var params = new URLSearchParams(location.search);
@@ -1909,7 +1912,9 @@ if (false) {
         var editLink = document.getElementById('profile-edit-link');
         if (editLink) editLink.classList.toggle('d-none', !isOwn); // the class, not the style: d-none kept it hidden even on one's own page
       }
-      if (event === 'SIGNED_IN' && window.location.search.indexOf('code=') !== -1) {
+      // a return from Google: #access_token (implicit flow, already cleared from the URL here) or ?code= (old PKCE)
+      if (event === 'SIGNED_IN' && (window._aoAuthReturn || window.location.search.indexOf('code=') !== -1)) {
+        window._aoAuthReturn = false;   // once: the library may say SIGNED_IN again for the same login
         // GA: distinguish a first login (account created just now) from a returning one
         if (typeof gtag === 'function') {
           var _createdAt = session && session.user && session.user.created_at ? new Date(session.user.created_at).getTime() : 0;
