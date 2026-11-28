@@ -521,8 +521,8 @@
     "en": "Terms of Service"
   },
   "terms_updated": {
-    "jp": "最終更新 2026.11.25",
-    "en": "Last updated 2026.11.25"
+    "jp": "最終更新 2026.11.28",
+    "en": "Last updated 2026.11.28"
   },
   "terms_1_title": {
     "jp": "第1条 適用範囲",
@@ -553,8 +553,8 @@
     "en": "After signing in with a Google account, users may submit cultivar origin information, breeding formulas, and source URLs (a nickname can be used as the display name). By submitting content, you agree to the following:"
   },
   "terms_3_list": {
-    "jp": "投稿内容の正確性について、投稿者自身が責任を負います\n投稿内容について、Aroid Origins（運営者）に対し非独占的かつ無償の利用許諾を付与します\n運営者は、投稿内容を事前通知なく編集・削除する権利を有します\n第三者の知的財産権を侵害する内容、または虚偽の情報を投稿してはなりません",
-    "en": "You are responsible for the accuracy of your submissions\nYou grant the Aroid Origins team a non-exclusive, royalty-free license to use your content\nThe team reserves the right to edit or remove submissions without prior notice\nYou must not submit content that infringes third-party intellectual property or contains false information"
+    "jp": "投稿内容の正確性について、投稿者自身が責任を負います\n投稿内容（写真を除きます。写真は第5条のとおりです）について、Aroid Origins（運営者）に対し非独占的かつ無償の利用許諾を付与します\n運営者は、投稿内容を事前通知なく編集・削除する権利を有します\n第三者の知的財産権を侵害する内容、または虚偽の情報を投稿してはなりません",
+    "en": "You are responsible for the accuracy of your submissions\nYou grant the Aroid Origins team a non-exclusive, royalty-free license to use your content (photos are covered by Article 5)\nThe team reserves the right to edit or remove submissions without prior notice\nYou must not submit content that infringes third-party intellectual property or contains false information"
   },
   "terms_4_title": {
     "jp": "第4条 AI生成コンテンツ",
@@ -569,12 +569,12 @@
     "en": "Article 5: Image Uploads and Copyright"
   },
   "terms_5_body": {
-    "jp": "画像のアップロードに関して、以下のルールを遵守してください：",
-    "en": "Please observe the following rules regarding image uploads:"
+    "jp": "画像の投稿と、本サービスに載っている写真の扱いは、以下のとおりです：",
+    "en": "Image uploads and the photos shown on this service are handled as follows:"
   },
   "terms_5_list": {
-    "jp": "自身が権利を有する画像のみアップロードできます\n他者の著作権を侵害する画像のアップロードは禁止します\n著作権者からの削除要請があった場合、運営者は速やかに対応します\n運営者はいかなる画像も事前通知なく削除する権利を有します",
-    "en": "You may only upload images you have the right to use\nUploading images that infringe others' copyrights is prohibited\nThe team will promptly respond to copyright holder takedown requests\nThe team reserves the right to remove any image without prior notice"
+    "jp": "自身が権利を有する画像のみアップロードできます\n他者の著作権を侵害する画像のアップロードは禁止します\n投稿された写真の著作権は、撮影した人（投稿者）に残ります。運営者が著作権を譲り受けることはありません\n写真を投稿した人は、運営者に対し、その写真を本サービスで表示するための非独占的かつ無償の許可を与えます。表示に合わせた大きさや縦横の調整、ページのリンクを共有したときに出る画像、本サービスを紹介する運営者のSNS投稿、写真に添えた説明文の翻訳も、この許可に含みます\n本サービスの写真を、投稿者の許可なく転載・再利用すること（他のサイトやSNS、販売ページ、印刷物などへの掲載）を禁止します。法律で認められた引用は除きます。ページのリンクの共有は自由です\n無断転載を見つけた場合は、お問い合わせページの「著作権に関するお問い合わせ」からお知らせください。運営者から投稿者にお伝えします\n著作権者からの削除要請があった場合、運営者は速やかに対応します\n運営者はいかなる画像も事前通知なく削除する権利を有します",
+    "en": "You may only upload images you have the right to use\nUploading images that infringe others' copyrights is prohibited\nCopyright in a posted photo stays with the person who took it (the poster). The team does not acquire the copyright\nBy posting a photo, you give the Aroid Origins team a non-exclusive, royalty-free permission to show it on this service. This includes resizing and reframing it for display, the image shown when a page link is shared, the team's own social media posts introducing this service, and translating the photo's caption\nPhotos on this service must not be reposted or reused (on other websites, social media, sales listings, print and so on) without the poster's permission, except for quotation allowed by law. Sharing page links is fine\nIf you find a photo reposted without permission, please tell us through \"Copyright Inquiry\" on the contact page. The team will pass it on to the poster\nThe team will promptly respond to copyright holder takedown requests\nThe team reserves the right to remove any image without prior notice"
   },
   "terms_6_title": {
     "jp": "第6条 投票システム",
@@ -617,8 +617,8 @@
     "en": "The following activities are prohibited:"
   },
   "terms_10_list": {
-    "jp": "虚偽または誤解を招く植物情報の投稿\n他者の著作権を侵害する画像のアップロード\n投票の不正操作\n許可のないスクレイピングや自動アクセス\n本サービスの正常な運営を妨害する行為\n他のユーザーや組織のなりすまし",
-    "en": "Submitting false or misleading plant information\nUploading copyrighted images without permission\nVote manipulation\nUnauthorized scraping or automated access\nActivities that disrupt normal service operation\nImpersonating other users or organizations"
+    "jp": "虚偽または誤解を招く植物情報の投稿\n他者の著作権を侵害する画像のアップロード\n投稿者の許可のない写真の転載・再利用\n投票の不正操作\n許可のないスクレイピングや自動アクセス\n本サービスの正常な運営を妨害する行為\n他のユーザーや組織のなりすまし",
+    "en": "Submitting false or misleading plant information\nUploading copyrighted images without permission\nReposting or reusing photos without the poster's permission\nVote manipulation\nUnauthorized scraping or automated access\nActivities that disrupt normal service operation\nImpersonating other users or organizations"
   },
   "terms_11_title": {
     "jp": "第11条 サービスの変更・停止",
@@ -2643,5 +2643,9 @@
   "front_wanted_row": {
     "jp": "写真を募集中",
     "en": "Photos wanted"
+  },
+  "footer_copy": {
+    "jp": "© 2026 Aroid Origins. 写真の著作権は撮影した各投稿者にあります。無断転載禁止。",
+    "en": "© 2026 Aroid Origins. Photos © their respective posters. Do not repost without permission."
   }
 }
