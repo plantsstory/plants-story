@@ -2227,7 +2227,12 @@
       window._postIntent = null;
       window._aoHoldReload = Date.now() + 3000; // no version reload until the sheet below has opened (sw-register.js)
       setTimeout(function () {
-        if (pi.act === 'photo') { var pb = document.getElementById('detail-add-photo-btn'); if (pb && pb.style.display !== 'none') pb.click(); }
+        // the file picker only opens from a tap: iPhone Safari ignored this click 700ms after the name was chosen,
+        // so nothing opened (11-28). The notice carries the button, as after a login (resumeLoginIntent)
+        if (pi.act === 'photo') {
+          var pb = document.getElementById('detail-add-photo-btn');
+          if (pb && pb.style.display !== 'none') showToast('このページに写真を載せます', false, { sticky: true, action: { label: '写真を選ぶ', fn: function () { pb.click(); } } });
+        }
         else if (d.type === 'species' && !d.isIndividual) { var ib = document.getElementById('detail-add-individual'); if (ib) ib.click(); }
         else showToast(T('post_intent_species_only'), true);
       }, 700);
