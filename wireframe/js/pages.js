@@ -325,7 +325,7 @@
         } else {
           // No profile yet - use Google defaults
           var meta = window._currentUser.user_metadata || {};
-          document.getElementById('edit-display-name').value = meta.full_name || '';
+          document.getElementById('edit-display-name').value = '';   // not the Google account name: the person chooses (11-28)
           renderAvatar(document.getElementById('edit-avatar-preview'), meta.avatar_url || null);
           window._editAvatarUrl = meta.avatar_url || '';
           window._editOriginalUsername = '';
@@ -476,6 +476,8 @@
           showToast(res.data.error || '保存に失敗しました', true);
         } else {
           showToast(t('toast_profile_saved'));
+          // a name saved here is a name chosen here: not asked again (11-28)
+          if (window.aoNameChosen) window.aoNameChosen(document.getElementById('edit-display-name').value.trim());
           // Use @username URL if available
           if (usernameVal) {
             navigateTo('profile', { username: usernameVal });

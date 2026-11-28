@@ -1116,7 +1116,7 @@ document.addEventListener('click', function(e) {
         $('ind-species').textContent = tgt.name;
         $('ind-code').value = ''; $('ind-year').value = ''; $('ind-note').value = ''; $('ind-acq').value = ''; $('ind-from').value = ''; $('ind-region').value = '';
         $('ind-region-group').classList.add('d-none');
-        $('ind-namer').value = (window._currentUser && ((window._profileCache && window._profileCache[window._currentUser.id]) || (window._currentUser.user_metadata && window._currentUser.user_metadata.full_name))) || '';
+        $('ind-namer').value = (window._currentUser && window._profileCache && window._profileCache[window._currentUser.id]) || '';
         if (title) title.textContent = t('individual_form_title');
         if (desc) desc.textContent = t('individual_form_desc');
         setTimeout(function() { $('ind-code').focus(); }, 60);
@@ -1139,6 +1139,7 @@ document.addEventListener('click', function(e) {
       e.preventDefault();
       if (!target) return;
       if (!window._currentUser) { if (window.requireLogin) window.requireLogin({ a: 'individual', target: target, path: (typeof _basePath !== 'undefined' ? _basePath : '/') + 'contribute' }); else showToast(t('individual_login'), true); return; }
+      if (window.aoNameGate && window.aoNameGate()) return;
       var code = $('ind-code').value.replace(/^['‘’"“”]+|['‘’"“”]+$/g, '').trim();
       if (!code) { showToast(t('individual_code_required'), true); $('ind-code').focus(); return; }
       var namer = $('ind-namer').value.trim(), year = parseInt($('ind-year').value, 10) || null, note = $('ind-note').value.trim();
@@ -1538,6 +1539,7 @@ document.addEventListener('click', function(e) {
         else showToast('投稿するにはログインが必要です', true);
         return;
       }
+      if (window.aoNameGate && window.aoNameGate()) return;   // the name the site shows, chosen first (11-28)
 
       // Build the full name with the shared builder (the review step shows exactly this)
       var fullName = window.buildContributeFullName(genus, type, name);
@@ -1918,7 +1920,7 @@ document.addEventListener('click', function(e) {
         // Store user info for poster name display
         if (window._currentUser) {
           newEntry._userId = window._currentUser.id;
-          newEntry._posterName = (window._profileCache && window._profileCache[window._currentUser.id]) || window._currentUser.user_metadata && window._currentUser.user_metadata.full_name || window._currentUser.email || '名前未設定';
+          newEntry._posterName = (window._profileCache && window._profileCache[window._currentUser.id]) || '名前未設定';
           newEntry._type = type;
         }
         cultivarData[fullName] = newEntry;
@@ -2193,6 +2195,7 @@ document.addEventListener('click', function(e) {
       var pB = aoStructured.formula ? aoStructured.formula.parentB : '';
 
       if (!window._currentUser) { if (window.requireLogin) window.requireLogin({ a: 'record', k: cultivarName }); return; }
+      if (window.aoNameGate && window.aoNameGate()) return;
       var _sb = window._supabaseClient;
       if (!_sb) { showToast(t('toast_db_save_failed'), true); return; }
       var _me = window._currentUser;
@@ -2601,7 +2604,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
     var confirmed = false;
     try { confirmed = localStorage.getItem('ao-photo-own-ok') === '1'; } catch (er) {}
     var me = window._currentUser || {};
-    var myName = (window._profileCache && window._profileCache[me.id]) || (me.user_metadata && me.user_metadata.full_name) || '';
+    var myName = (window._profileCache && window._profileCache[me.id]) || '';   // never the Google account name (11-28)
     if (ownBox) {
       ownBox.classList.toggle('d-none', confirmed);
       var nm = document.getElementById('photo-sheet-own-name'); if (nm) nm.textContent = myName || 'プロフィールの名前';
@@ -2637,7 +2640,7 @@ updateCultivarDetail = function(cultivarName, rowEl) {
         var kindIn = document.querySelector('#photo-sheet-kind:not(.d-none) input:checked');
         var u = window._currentUser || {};
         var extra = {
-          credit: (window._profileCache && window._profileCache[u.id]) || (u.user_metadata && u.user_metadata.full_name) || '',
+          credit: (window._profileCache && window._profileCache[u.id]) || '',
           specimen_kind: kindIn ? kindIn.value : 'unknown'
         };
         dlg.close();

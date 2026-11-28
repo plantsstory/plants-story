@@ -2005,7 +2005,9 @@ if (false) {
         var _ri = null;
         try { _ri = JSON.parse(aoStore.getItem('login_return_intent') || 'null'); } catch (e) {}
         aoStore.removeItem('login_return_intent');
-        if (_ri && Date.now() - (_ri.t || 0) < 15 * 60 * 1000) setTimeout(function() { resumeLoginIntent(_ri); }, 300);
+        var _resume = (_ri && Date.now() - (_ri.t || 0) < 15 * 60 * 1000) ? function() { resumeLoginIntent(_ri); } : null;
+        // the name the site shows is chosen before the first post (a new account starts with the Google name)
+        setTimeout(function() { window.aoAskNameIfNeeded(_resume); }, 300);
         // Resume checkout selected before login (paywall -> OAuth -> card form)
         var pendingPlan = aoStore.getItem('pending_checkout_plan');
         if (pendingPlan) {
@@ -2021,6 +2023,8 @@ if (false) {
     supabase.auth.getSession().then(function(res) {
       if (res.data && res.data.session) {
         window._currentUser = res.data.session.user;
+        // logged in before but no name chosen yet: the same question as after a first login, once per visit
+        if (!window._aoAuthReturn) setTimeout(function() { window.aoAskNameIfNeeded(); }, 1500);
         updateLoginUI();
         checkSubscription();
         if (typeof syncFavoritesFromServer === 'function') syncFavoritesFromServer();
@@ -2586,8 +2590,120 @@ if (false) {
     } catch (e) {}
     return null;
   }
+  /* ---- display name before the first post (11-28, Yuta) ----
+     A new account's profile starts with the Google account's name, which is often the person's real name. Before
+     anything they post shows a name, they choose the name the site shows (the one field required). The same goes
+     for an account with no name yet, and for an account whose name is still exactly the Google name and was never
+     chosen here: asked once. Choosing (or keeping the present name) is remembered in the account (ao_name_set). */
+  var _aoName = { checked: null, needed: false, current: '', google: '' };
+  function aoNameNeeded(user, profileName) {
+    var meta = (user && user.user_metadata) || {};
+    var name = String(profileName || '').trim();
+    var google = String(meta.full_name || meta.name || '').trim();
+    if (!name) return true;
+    return !!google && name === google && meta.ao_name_set !== true;
+  }
+  function aoCheckName(then) {
+    var u = window._currentUser, sb = window._supabaseClient;
+    if (!u || !sb) return;
+    if (_aoName.checked === u.id) { if (then) then(_aoName.needed); return; }
+    sb.from('profiles').select('display_name').eq('id', u.id).maybeSingle().then(function (res) {
+      if (res && res.error) return;   // could not read: ask nothing rather than ask wrongly
+      var cur = (res && res.data && res.data.display_name) || '';
+      var meta = u.user_metadata || {};
+      if (String(cur).trim() && !aoNameNeeded(u, cur)) { window._profileCache = window._profileCache || {}; window._profileCache[u.id] = String(cur).trim(); }
+      _aoName = { checked: u.id, needed: aoNameNeeded(u, cur), current: String(cur).trim(), google: String(meta.full_name || meta.name || '').trim() };
+      if (then) then(_aoName.needed);
+    }, function () {});
+  }
+  function aoNameSheet(after) {
+    var en = window.currentLang === 'en';
+    var dlg = document.getElementById('name-sheet');
+    if (dlg && dlg.open) return;
+    if (!dlg) {
+      dlg = document.createElement('dialog');
+      dlg.id = 'name-sheet';
+      dlg.className = 'dialog-clean sheet-dialog login-sheet name-sheet';
+      dlg.setAttribute('aria-labelledby', 'name-sheet-title');
+      dlg.setAttribute('data-ui-keep', '');
+      document.body.appendChild(dlg);
+      dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+    }
+    var keep = _aoName.current;
+    dlg.innerHTML = '<h3 class="dialog-title" id="name-sheet-title">' + (en ? 'Choose the name shown on the site' : 'サイトに出す名前を決めてください') + '</h3>'
+      + '<p class="text-sm">' + (en ? 'This name appears next to the photos and records you post. It does not have to be your real name.' : '投稿した写真や記録に、この名前が出ます。本名でなくて構いません。') + '</p>'
+      + '<div class="form-group mb-md"><label class="form-label" for="name-sheet-input">' + (en ? 'Display name' : '表示名') + '</label>'
+      + '<input type="text" class="form-input" id="name-sheet-input" maxlength="50" autocomplete="nickname" placeholder="' + (en ? 'A nickname' : 'ニックネーム') + '">'
+      + '<p class="text-xs text-muted mt-xs" id="name-sheet-error" role="alert"></p></div>'
+      + (keep ? '<p class="text-xs"><button type="button" class="btn-link name-sheet__keep" id="name-sheet-keep">' + escHtml(keep === _aoName.google
+          ? (en ? 'Keep your Google account name "' + keep + '" (shown publicly)' : 'Google アカウントの名前「' + keep + '」のままにする（サイトに公開されます）')
+          : (en ? 'Keep the present name "' + keep + '"' : '今の名前「' + keep + '」のままにする')) + '</button></p>' : '')
+      + '<p class="text-xs text-muted">' + (en ? 'You can change it later in your profile.' : 'あとからプロフィールで変えられます。') + '</p>'
+      + '<div class="dialog-actions"><button type="button" class="btn btn--secondary btn--sm" id="name-sheet-later">' + (en ? 'Later' : 'あとで') + '</button>'
+      + '<button type="button" class="btn btn--primary btn--sm" id="name-sheet-save">' + (en ? 'Save' : '保存') + '</button></div>';
+    var input = dlg.querySelector('#name-sheet-input'), err = dlg.querySelector('#name-sheet-error'), saveBtn = dlg.querySelector('#name-sheet-save');
+    function done(name) {
+      var u = window._currentUser;
+      _aoName.needed = false; _aoName.current = name;
+      if (u) { window._profileCache = window._profileCache || {}; window._profileCache[u.id] = name; }
+      dlg.close();
+      showToast(en ? 'Saved your display name' : '表示名を保存しました');
+      // a plant page on screen: its records are drawn again with the chosen name
+      var oc = document.querySelector('#origins-container[data-records-for]');
+      if (oc && typeof renderOrigins === 'function') renderOrigins(oc.getAttribute('data-records-for'));
+      if (after) setTimeout(after, 200);
+    }
+    function markChosen() {
+      var sb = window._supabaseClient;
+      return sb && sb.auth && sb.auth.updateUser ? sb.auth.updateUser({ data: { ao_name_set: true } }).then(function (r) {
+        if (r && r.data && r.data.user) window._currentUser = r.data.user;
+      }, function () {}) : Promise.resolve();
+    }
+    saveBtn.addEventListener('click', function () {
+      var name = input.value.replace(/\s+/g, ' ').trim();
+      if (!name) { err.textContent = en ? 'Enter a name.' : '名前を入れてください。'; input.focus(); return; }
+      var sb = window._supabaseClient;
+      if (!sb) return;
+      saveBtn.disabled = true;
+      // every field but the name is sent empty (null keeps what the profile has)
+      sb.rpc('upsert_profile', { p_display_name: name, p_bio: null, p_sns_instagram: null, p_sns_twitter: null, p_avatar_url: null, p_username: null }).then(function (res) {
+        if (res.error || (res.data && res.data.success === false)) {
+          saveBtn.disabled = false;
+          err.textContent = en ? 'Could not save. Please try again.' : '保存できませんでした。もう一度お試しください。';
+          return;
+        }
+        markChosen().then(function () { done(name); });
+      }, function () { saveBtn.disabled = false; err.textContent = en ? 'Could not save. Please try again.' : '保存できませんでした。もう一度お試しください。'; });
+    });
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); saveBtn.click(); } });
+    var keepBtn = dlg.querySelector('#name-sheet-keep');
+    if (keepBtn) keepBtn.addEventListener('click', function () { keepBtn.disabled = true; markChosen().then(function () { done(keep); }); });
+    dlg.querySelector('#name-sheet-later').addEventListener('click', function () { try { sessionStorage.setItem('ao_name_later', '1'); } catch (e) {} dlg.close(); });
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    setTimeout(function () { input.focus(); }, 50);
+  }
+  window.aoNameChosen = function (name) {
+    var u = window._currentUser, sb = window._supabaseClient;
+    if (!u || !name) return;
+    _aoName = { checked: u.id, needed: false, current: name, google: _aoName.google };
+    window._profileCache = window._profileCache || {}; window._profileCache[u.id] = name;
+    if (sb && sb.auth && sb.auth.updateUser) sb.auth.updateUser({ data: { ao_name_set: true } }).then(function (r) { if (r && r.data && r.data.user) window._currentUser = r.data.user; }, function () {});
+  };
+  // after a login, and once per visit for someone already logged in
+  window.aoAskNameIfNeeded = function (after) {
+    var later = false;
+    try { later = !after && sessionStorage.getItem('ao_name_later') === '1'; } catch (e) {}
+    aoCheckName(function (needed) { if (needed && !later) aoNameSheet(after); else if (after) after(); });
+  };
+  // a post about to be sent: true when the name has to be chosen first (the sheet is then open)
+  window.aoNameGate = function (after) {
+    if (!window._currentUser || !_aoName.needed || _aoName.checked !== window._currentUser.id) return false;
+    aoNameSheet(after || function () { showToast(window.currentLang === 'en' ? 'Now send it again.' : 'もう一度「送信」を押してください'); });
+    return true;
+  };
+
   window.requireLogin = function(intent) {
-    if (window._currentUser) return true;
+    if (window._currentUser) { if (window.aoNameGate(function () { if (intent) resumeLoginIntent(Object.assign({ t: Date.now() }, intent)); })) return false; return true; }
     var su = storedUser();
     if (su) { window._currentUser = su; if (typeof updateLoginUI === 'function') updateLoginUI(); return true; }
     var dlg = document.getElementById('login-sheet');
