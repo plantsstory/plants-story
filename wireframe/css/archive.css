@@ -1949,6 +1949,7 @@ html.pv-label .story__cite { font-family: var(--font-primary); }
   html.pv-label .header { display: none; }
 }
 html.pv-label .hero { display: block; position: relative; margin: 0 -16px; background: var(--color-ink); overflow: hidden; }
+html.pv-label .hero picture { display: block; }
 html.pv-label .hero img { display: block; width: 100%; height: 62svh; min-height: 400px; max-height: 640px; object-fit: cover; object-position: center 45%; filter: blur(3px) saturate(.9); transform: scale(1.04); }
 html.pv-label .hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 58%; background: linear-gradient(180deg, rgba(30,38,34,0) 0%, rgba(30,38,34,.55) 55%, rgba(30,38,34,.88) 100%); pointer-events: none; }
 html.pv-label .hero__text { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; padding: 0 16px calc(var(--s4) + 28px); }
