@@ -549,12 +549,12 @@
     "en": "Article 3: User-Generated Content"
   },
   "terms_3_body": {
-    "jp": "ユーザーはGoogleアカウントでログインの上、品種の由来情報、交配式、情報元URLなどを投稿できます（表示名はニックネームを利用できます）。投稿にあたり、以下の事項に同意するものとします：",
-    "en": "After signing in with a Google account, users may submit cultivar origin information, breeding formulas, and source URLs (a nickname can be used as the display name). By submitting content, you agree to the following:"
+    "jp": "ユーザーはGoogleアカウントでログインの上、品種の由来情報、交配式、情報元URLなどを投稿できます。投稿には表示名の設定が必要です（ニックネームで構いません。表示名は投稿とともに公開されます）。投稿にあたり、以下の事項に同意するものとします：",
+    "en": "After signing in with a Google account, users may submit cultivar origin information, breeding formulas, and source URLs. Posting requires setting a display name (a nickname is fine; it is shown publicly with your posts). By submitting content, you agree to the following:"
   },
   "terms_3_list": {
-    "jp": "投稿内容の正確性について、投稿者自身が責任を負います\n投稿内容（写真を除きます。写真は第5条のとおりです）について、Aroid Origins（運営者）に対し非独占的かつ無償の利用許諾を付与します\n運営者は、投稿内容を事前通知なく編集・削除する権利を有します\n第三者の知的財産権を侵害する内容、または虚偽の情報を投稿してはなりません",
-    "en": "You are responsible for the accuracy of your submissions\nYou grant the Aroid Origins team a non-exclusive, royalty-free license to use your content (photos are covered by Article 5)\nThe team reserves the right to edit or remove submissions without prior notice\nYou must not submit content that infringes third-party intellectual property or contains false information"
+    "jp": "投稿内容の正確性について、投稿者自身が責任を負います\n投稿内容（写真を除きます。写真は第5条のとおりです）について、Aroid Origins（運営者）に対し非独占的かつ無償の利用許諾を付与します\n運営者は、投稿内容を事前通知なく編集・削除する権利を有します\n第三者の知的財産権を侵害する内容、または虚偽の情報を投稿してはなりません\n削除の依頼や発信者情報の開示請求など、投稿について権利侵害の申し立てがあった場合、運営者は法令に従い、投稿の削除・非表示、投稿者への意見の照会、投稿の記録（アカウント・日時・IPアドレスなど）の保存と開示を行うことがあります。投稿の記録の扱いはプライバシーポリシーのとおりです",
+    "en": "You are responsible for the accuracy of your submissions\nYou grant the Aroid Origins team a non-exclusive, royalty-free license to use your content (photos are covered by Article 5)\nThe team reserves the right to edit or remove submissions without prior notice\nYou must not submit content that infringes third-party intellectual property or contains false information\nIf a post is the subject of a rights claim, such as a takedown request or a request to disclose the poster's identity, the team may, as the law provides, remove or hide the post, ask the poster for their view, and keep and disclose the post's record (account, time, IP address and so on). Post records are handled as the Privacy Policy describes"
   },
   "terms_4_title": {
     "jp": "第4条 AI生成コンテンツ",
@@ -613,8 +613,8 @@
     "en": "Article 10: Prohibited Activities"
   },
   "terms_10_body": {
-    "jp": "以下の行為を禁止します：",
-    "en": "The following activities are prohibited:"
+    "jp": "以下の行為を禁止します。違反があった場合、運営者は投稿の削除や、アカウントの利用の停止を行うことがあります：",
+    "en": "The following activities are prohibited. If they occur, the team may remove posts or suspend the account:"
   },
   "terms_10_list": {
     "jp": "虚偽または誤解を招く植物情報の投稿\n他者の著作権を侵害する画像のアップロード\n投稿者の許可のない写真の転載・再利用\n投票の不正操作\n許可のないスクレイピングや自動アクセス\n本サービスの正常な運営を妨害する行為\n他のユーザーや組織のなりすまし",
